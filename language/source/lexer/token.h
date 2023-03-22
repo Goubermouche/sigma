@@ -2,17 +2,22 @@
 
 namespace language {
 	enum class token {
-		end_of_file = -1,
+		end_of_file,
 
-		l_brace = -2,     // token identifier for the '{' character
-		r_brace = -3,     // token identifier for the '}' character
+		l_parenthesis, // token identifier for the '(' character
+		r_parenthesis, // token identifier for the ')' character
+		l_brace,       // token identifier for the '{' character
+		r_brace,       // token identifier for the '}' character
 
-		keyword_i8 = -4,
-		keyword_i16 = -5,
-		keyword_i32 = -6,
-		keyword_i64 = -7,
+		// keywords
+		keyword_i8,    // i8
+		keyword_i16,   // i16
+		keyword_i32,   // i32
+		keyword_i64,   // i64
 
-		identifier = -8,
+		definition,
+		identifier,
+		unknown
 	};
 
 	inline std::string token_to_string(const token& token) {
@@ -23,6 +28,10 @@ namespace language {
 			return "l_brace";
 		case token::r_brace:
 			return "r_brace";
+		case token::l_parenthesis:
+			return "l_parenthesis";
+		case token::r_parenthesis:
+			return "r_parenthesis";
 		case token::keyword_i8:
 			return "keyword_i8";
 		case token::keyword_i16:
@@ -33,9 +42,12 @@ namespace language {
 			return "keyword_i64";
 		case token::identifier:
 			return "identifier";
+		case token::definition:
+			return "definition";
+		case token::unknown:
+			return "unknown";
 		}
 
-		const char c = static_cast<char>(token);
-		return std::string (&c, 1);
+		return "";
 	}
 }

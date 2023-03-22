@@ -1,1 +1,3 @@
-i32 main() {}keyword_i32
+void main() {
+    // comment
+}

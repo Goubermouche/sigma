@@ -4,30 +4,38 @@ namespace language {
 	enum class token {
 		end_of_file = -1,
 
-		function = -2,
+		l_brace = -2,     // token identifier for the '{' character
+		r_brace = -3,     // token identifier for the '}' character
 
-		// types
-		// signed
-		var_i8 = -3,
-		var_i16 = -4,
-		var_i32 = -5,
-		var_i64 = -6,
+		keyword_i8 = -4,
+		keyword_i16 = -5,
+		keyword_i32 = -6,
+		keyword_i64 = -7,
 
-		// unsigned
-		var_u8 = -7,
-		var_u16 = -8,
-		var_u32 = -9,
-		var_u64 = -10,
-
-		// floating point
-		var_f32 = -11,
-		var_f64 = -12,
-
-		// char
-		var_char = -13,  // signed char
-		var_uchar = -14, // unsigned char
-
-		// expressions
-		// etc
+		identifier = -8,
 	};
+
+	inline std::string token_to_string(const token& token) {
+		switch (token) {
+		case token::end_of_file:
+			return "end_of_file";
+		case token::l_brace:
+			return "l_brace";
+		case token::r_brace:
+			return "r_brace";
+		case token::keyword_i8:
+			return "keyword_i8";
+		case token::keyword_i16:
+			return "keyword_i16";
+		case token::keyword_i32:
+			return "keyword_i32";
+		case token::keyword_i64:
+			return "keyword_i64";
+		case token::identifier:
+			return "identifier";
+		}
+
+		const char c = static_cast<char>(token);
+		return std::string (&c, 1);
+	}
 }

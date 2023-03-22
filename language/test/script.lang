@@ -1,4 +1,1 @@
-i32 main() {
-    f64 value = 100.0; // This is a comment
-    return 0;
-}
+i32 main() {}keyword_i32

@@ -1,0 +1,159 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <VCProjectVersion>16.0</VCProjectVersion>
+    <Keyword>Win32Proj</Keyword>
+    <ProjectGuid>{50d7fd45-ba9a-4ae8-aec7-a8d509aadc2c}</ProjectGuid>
+    <RootNamespace>language</RootNamespace>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v143</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v143</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v143</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v143</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="Shared">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <SDLCheck>false</SDLCheck>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <AdditionalOptions>-IC:\dev\thirdparty\llvm-16.0.0\llvm-project\llvm\include -IC:\dev\thirdparty\llvm-16.0.0\llvm-project\llvm\build\include -std:c++17   /EHs-c- /GR- -D_CRT_SECURE_NO_DEPRECATE -D_CRT_SECURE_NO_WARNINGS -D_CRT_NONSTDC_NO_DEPRECATE -D_CRT_NONSTDC_NO_WARNINGS -D_SCL_SECURE_NO_DEPRECATE -D_SCL_SECURE_NO_WARNINGS -DUNICODE -D_UNICODE -D__STDC_CONSTANT_MACROS -D__STDC_FORMAT_MACROS -D__STDC_LIMIT_MACROS %(AdditionalOptions)</AdditionalOptions>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>LLVMWindowsManifest.lib;LLVMXRay.lib;LLVMLibDriver.lib;LLVMDlltoolDriver.lib;LLVMCoverage.lib;LLVMLineEditor.lib;LLVMX86TargetMCA.lib;LLVMX86Disassembler.lib;LLVMX86AsmParser.lib;LLVMX86CodeGen.lib;LLVMX86Desc.lib;LLVMX86Info.lib;LLVMOrcJIT.lib;LLVMWindowsDriver.lib;LLVMMCJIT.lib;LLVMJITLink.lib;LLVMInterpreter.lib;LLVMExecutionEngine.lib;LLVMRuntimeDyld.lib;LLVMOrcTargetProcess.lib;LLVMOrcShared.lib;LLVMDWP.lib;LLVMDebugInfoLogicalView.lib;LLVMDebugInfoGSYM.lib;LLVMOption.lib;LLVMObjectYAML.lib;LLVMObjCopy.lib;LLVMMCA.lib;LLVMMCDisassembler.lib;LLVMLTO.lib;LLVMPasses.lib;LLVMCFGuard.lib;LLVMCoroutines.lib;LLVMipo.lib;LLVMVectorize.lib;LLVMLinker.lib;LLVMInstrumentation.lib;LLVMFrontendOpenMP.lib;LLVMFrontendOpenACC.lib;LLVMFrontendHLSL.lib;LLVMExtensions.lib;LLVMDWARFLinkerParallel.lib;LLVMDWARFLinker.lib;LLVMGlobalISel.lib;LLVMMIRParser.lib;LLVMAsmPrinter.lib;LLVMSelectionDAG.lib;LLVMCodeGen.lib;LLVMObjCARCOpts.lib;LLVMIRPrinter.lib;LLVMInterfaceStub.lib;LLVMFileCheck.lib;LLVMFuzzMutate.lib;LLVMTarget.lib;LLVMScalarOpts.lib;LLVMInstCombine.lib;LLVMAggressiveInstCombine.lib;LLVMTransformUtils.lib;LLVMBitWriter.lib;LLVMAnalysis.lib;LLVMProfileData.lib;LLVMSymbolize.lib;LLVMDebugInfoPDB.lib;LLVMDebugInfoMSF.lib;LLVMDebugInfoDWARF.lib;LLVMObject.lib;LLVMTextAPI.lib;LLVMMCParser.lib;LLVMIRReader.lib;LLVMAsmParser.lib;LLVMMC.lib;LLVMDebugInfoCodeView.lib;LLVMBitReader.lib;LLVMFuzzerCLI.lib;LLVMCore.lib;LLVMRemarks.lib;LLVMBitstreamReader.lib;LLVMBinaryFormat.lib;LLVMTargetParser.lib;LLVMTableGen.lib;LLVMSupport.lib;LLVMDemangle.lib;psapi.lib;shell32.lib;ole32.lib;uuid.lib;advapi32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>C:\dev\thirdparty\llvm-16.0.0\llvm-project\llvm\build\Release\lib</AdditionalLibraryDirectories>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>false</SDLCheck>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <AdditionalOptions>-IC:\dev\thirdparty\llvm-16.0.0\llvm-project\llvm\include -IC:\dev\thirdparty\llvm-16.0.0\llvm-project\llvm\build\include -std:c++17   /EHs-c- /GR- -D_CRT_SECURE_NO_DEPRECATE -D_CRT_SECURE_NO_WARNINGS -D_CRT_NONSTDC_NO_DEPRECATE -D_CRT_NONSTDC_NO_WARNINGS -D_SCL_SECURE_NO_DEPRECATE -D_SCL_SECURE_NO_WARNINGS -DUNICODE -D_UNICODE -D__STDC_CONSTANT_MACROS -D__STDC_FORMAT_MACROS -D__STDC_LIMIT_MACROS %(AdditionalOptions)</AdditionalOptions>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>LLVMWindowsManifest.lib;LLVMXRay.lib;LLVMLibDriver.lib;LLVMDlltoolDriver.lib;LLVMCoverage.lib;LLVMLineEditor.lib;LLVMX86TargetMCA.lib;LLVMX86Disassembler.lib;LLVMX86AsmParser.lib;LLVMX86CodeGen.lib;LLVMX86Desc.lib;LLVMX86Info.lib;LLVMOrcJIT.lib;LLVMWindowsDriver.lib;LLVMMCJIT.lib;LLVMJITLink.lib;LLVMInterpreter.lib;LLVMExecutionEngine.lib;LLVMRuntimeDyld.lib;LLVMOrcTargetProcess.lib;LLVMOrcShared.lib;LLVMDWP.lib;LLVMDebugInfoLogicalView.lib;LLVMDebugInfoGSYM.lib;LLVMOption.lib;LLVMObjectYAML.lib;LLVMObjCopy.lib;LLVMMCA.lib;LLVMMCDisassembler.lib;LLVMLTO.lib;LLVMPasses.lib;LLVMCFGuard.lib;LLVMCoroutines.lib;LLVMipo.lib;LLVMVectorize.lib;LLVMLinker.lib;LLVMInstrumentation.lib;LLVMFrontendOpenMP.lib;LLVMFrontendOpenACC.lib;LLVMFrontendHLSL.lib;LLVMExtensions.lib;LLVMDWARFLinkerParallel.lib;LLVMDWARFLinker.lib;LLVMGlobalISel.lib;LLVMMIRParser.lib;LLVMAsmPrinter.lib;LLVMSelectionDAG.lib;LLVMCodeGen.lib;LLVMObjCARCOpts.lib;LLVMIRPrinter.lib;LLVMInterfaceStub.lib;LLVMFileCheck.lib;LLVMFuzzMutate.lib;LLVMTarget.lib;LLVMScalarOpts.lib;LLVMInstCombine.lib;LLVMAggressiveInstCombine.lib;LLVMTransformUtils.lib;LLVMBitWriter.lib;LLVMAnalysis.lib;LLVMProfileData.lib;LLVMSymbolize.lib;LLVMDebugInfoPDB.lib;LLVMDebugInfoMSF.lib;LLVMDebugInfoDWARF.lib;LLVMObject.lib;LLVMTextAPI.lib;LLVMMCParser.lib;LLVMIRReader.lib;LLVMAsmParser.lib;LLVMMC.lib;LLVMDebugInfoCodeView.lib;LLVMBitReader.lib;LLVMFuzzerCLI.lib;LLVMCore.lib;LLVMRemarks.lib;LLVMBitstreamReader.lib;LLVMBinaryFormat.lib;LLVMTargetParser.lib;LLVMTableGen.lib;LLVMSupport.lib;LLVMDemangle.lib;psapi.lib;shell32.lib;ole32.lib;uuid.lib;advapi32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>C:\dev\thirdparty\llvm-16.0.0\llvm-project\llvm\build\Release\lib</AdditionalLibraryDirectories>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <SDLCheck>false</SDLCheck>
+      <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <AdditionalOptions>-IC:\dev\thirdparty\llvm-16.0.0\llvm-project\llvm\include -IC:\dev\thirdparty\llvm-16.0.0\llvm-project\llvm\build\include -std:c++17   /EHs-c- /GR- -D_CRT_SECURE_NO_DEPRECATE -D_CRT_SECURE_NO_WARNINGS -D_CRT_NONSTDC_NO_DEPRECATE -D_CRT_NONSTDC_NO_WARNINGS -D_SCL_SECURE_NO_DEPRECATE -D_SCL_SECURE_NO_WARNINGS -DUNICODE -D_UNICODE -D__STDC_CONSTANT_MACROS -D__STDC_FORMAT_MACROS -D__STDC_LIMIT_MACROS %(AdditionalOptions)</AdditionalOptions>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>LLVMWindowsManifest.lib;LLVMXRay.lib;LLVMLibDriver.lib;LLVMDlltoolDriver.lib;LLVMCoverage.lib;LLVMLineEditor.lib;LLVMX86TargetMCA.lib;LLVMX86Disassembler.lib;LLVMX86AsmParser.lib;LLVMX86CodeGen.lib;LLVMX86Desc.lib;LLVMX86Info.lib;LLVMOrcJIT.lib;LLVMWindowsDriver.lib;LLVMMCJIT.lib;LLVMJITLink.lib;LLVMInterpreter.lib;LLVMExecutionEngine.lib;LLVMRuntimeDyld.lib;LLVMOrcTargetProcess.lib;LLVMOrcShared.lib;LLVMDWP.lib;LLVMDebugInfoLogicalView.lib;LLVMDebugInfoGSYM.lib;LLVMOption.lib;LLVMObjectYAML.lib;LLVMObjCopy.lib;LLVMMCA.lib;LLVMMCDisassembler.lib;LLVMLTO.lib;LLVMPasses.lib;LLVMCFGuard.lib;LLVMCoroutines.lib;LLVMipo.lib;LLVMVectorize.lib;LLVMLinker.lib;LLVMInstrumentation.lib;LLVMFrontendOpenMP.lib;LLVMFrontendOpenACC.lib;LLVMFrontendHLSL.lib;LLVMExtensions.lib;LLVMDWARFLinkerParallel.lib;LLVMDWARFLinker.lib;LLVMGlobalISel.lib;LLVMMIRParser.lib;LLVMAsmPrinter.lib;LLVMSelectionDAG.lib;LLVMCodeGen.lib;LLVMObjCARCOpts.lib;LLVMIRPrinter.lib;LLVMInterfaceStub.lib;LLVMFileCheck.lib;LLVMFuzzMutate.lib;LLVMTarget.lib;LLVMScalarOpts.lib;LLVMInstCombine.lib;LLVMAggressiveInstCombine.lib;LLVMTransformUtils.lib;LLVMBitWriter.lib;LLVMAnalysis.lib;LLVMProfileData.lib;LLVMSymbolize.lib;LLVMDebugInfoPDB.lib;LLVMDebugInfoMSF.lib;LLVMDebugInfoDWARF.lib;LLVMObject.lib;LLVMTextAPI.lib;LLVMMCParser.lib;LLVMIRReader.lib;LLVMAsmParser.lib;LLVMMC.lib;LLVMDebugInfoCodeView.lib;LLVMBitReader.lib;LLVMFuzzerCLI.lib;LLVMCore.lib;LLVMRemarks.lib;LLVMBitstreamReader.lib;LLVMBinaryFormat.lib;LLVMTargetParser.lib;LLVMTableGen.lib;LLVMSupport.lib;LLVMDemangle.lib;psapi.lib;shell32.lib;ole32.lib;uuid.lib;advapi32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>C:\dev\thirdparty\llvm-16.0.0\llvm-project\llvm\build\Release\lib</AdditionalLibraryDirectories>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>false</SDLCheck>
+      <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <AdditionalOptions>-IC:\dev\thirdparty\llvm-16.0.0\llvm-project\llvm\include -IC:\dev\thirdparty\llvm-16.0.0\llvm-project\llvm\build\include -std:c++17   /EHs-c- /GR- -D_CRT_SECURE_NO_DEPRECATE -D_CRT_SECURE_NO_WARNINGS -D_CRT_NONSTDC_NO_DEPRECATE -D_CRT_NONSTDC_NO_WARNINGS -D_SCL_SECURE_NO_DEPRECATE -D_SCL_SECURE_NO_WARNINGS -DUNICODE -D_UNICODE -D__STDC_CONSTANT_MACROS -D__STDC_FORMAT_MACROS -D__STDC_LIMIT_MACROS %(AdditionalOptions)</AdditionalOptions>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>LLVMWindowsManifest.lib;LLVMXRay.lib;LLVMLibDriver.lib;LLVMDlltoolDriver.lib;LLVMCoverage.lib;LLVMLineEditor.lib;LLVMX86TargetMCA.lib;LLVMX86Disassembler.lib;LLVMX86AsmParser.lib;LLVMX86CodeGen.lib;LLVMX86Desc.lib;LLVMX86Info.lib;LLVMOrcJIT.lib;LLVMWindowsDriver.lib;LLVMMCJIT.lib;LLVMJITLink.lib;LLVMInterpreter.lib;LLVMExecutionEngine.lib;LLVMRuntimeDyld.lib;LLVMOrcTargetProcess.lib;LLVMOrcShared.lib;LLVMDWP.lib;LLVMDebugInfoLogicalView.lib;LLVMDebugInfoGSYM.lib;LLVMOption.lib;LLVMObjectYAML.lib;LLVMObjCopy.lib;LLVMMCA.lib;LLVMMCDisassembler.lib;LLVMLTO.lib;LLVMPasses.lib;LLVMCFGuard.lib;LLVMCoroutines.lib;LLVMipo.lib;LLVMVectorize.lib;LLVMLinker.lib;LLVMInstrumentation.lib;LLVMFrontendOpenMP.lib;LLVMFrontendOpenACC.lib;LLVMFrontendHLSL.lib;LLVMExtensions.lib;LLVMDWARFLinkerParallel.lib;LLVMDWARFLinker.lib;LLVMGlobalISel.lib;LLVMMIRParser.lib;LLVMAsmPrinter.lib;LLVMSelectionDAG.lib;LLVMCodeGen.lib;LLVMObjCARCOpts.lib;LLVMIRPrinter.lib;LLVMInterfaceStub.lib;LLVMFileCheck.lib;LLVMFuzzMutate.lib;LLVMTarget.lib;LLVMScalarOpts.lib;LLVMInstCombine.lib;LLVMAggressiveInstCombine.lib;LLVMTransformUtils.lib;LLVMBitWriter.lib;LLVMAnalysis.lib;LLVMProfileData.lib;LLVMSymbolize.lib;LLVMDebugInfoPDB.lib;LLVMDebugInfoMSF.lib;LLVMDebugInfoDWARF.lib;LLVMObject.lib;LLVMTextAPI.lib;LLVMMCParser.lib;LLVMIRReader.lib;LLVMAsmParser.lib;LLVMMC.lib;LLVMDebugInfoCodeView.lib;LLVMBitReader.lib;LLVMFuzzerCLI.lib;LLVMCore.lib;LLVMRemarks.lib;LLVMBitstreamReader.lib;LLVMBinaryFormat.lib;LLVMTargetParser.lib;LLVMTableGen.lib;LLVMSupport.lib;LLVMDemangle.lib;psapi.lib;shell32.lib;ole32.lib;uuid.lib;advapi32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>C:\dev\thirdparty\llvm-16.0.0\llvm-project\llvm\build\Release\lib</AdditionalLibraryDirectories>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClCompile Include="main.cpp" />
+    <ClCompile Include="source\lexer\lexer.cpp" />
+    <ClCompile Include="source\utility\filesystem.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="source\lexer\lexer.h" />
+    <ClInclude Include="source\lexer\token.h" />
+    <ClInclude Include="source\utility\filesystem.h" />
+    <ClInclude Include="source\utility\macros.h" />
+    <ClInclude Include="source\utility\types.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="test\script.lang" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

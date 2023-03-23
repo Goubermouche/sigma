@@ -1,3 +1,4 @@
 void main() {
     // comment
+    i32 value;
 }

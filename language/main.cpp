@@ -7,7 +7,13 @@ int main() {
 	language::token token;
 
 	while ((token = lexer.get_token()) != language::token::end_of_file) {
-		std::cout << token_to_string(token) << std::endl;
+		std::cout << token_to_string(token);
+
+		if (token == language::token::identifier) {
+			std::cout << "       [" << lexer.get_identifier() << ']';
+		}
+
+		std::cout << '\n';
 	}
 
 	return 0;

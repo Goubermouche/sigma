@@ -20,9 +20,15 @@ namespace language {
 	//                 l_brace/r_brace into the parser main loop, and manage
 	//                 the scope stack over there.
 
+	// todo:           implement a get function that checks if EOF has been 
+	//                 found.
+
+	// todo:           implement a class for containing the source string
+	//                 and necessary caret operations.
+
 	token lexer::get_token() {
 		// ignore spaces between tokens 
-		while(isspace(m_last_character)) {
+		while(isspace(m_last_character) && !m_source.eof()) {
 			m_source.get(m_last_character);
 		}
 
@@ -39,8 +45,8 @@ namespace language {
 			}
 
 			// check if the current identifier is a keyword
-			const auto token = m_token_map.find(m_identifier_string);
-			if(token != m_token_map.end()) {
+			const auto token = m_keyword_tokens.find(m_identifier_string);
+			if(token != m_keyword_tokens.end()) {
 				// return the appropriate token
 				return token->second;
 			}
@@ -52,28 +58,6 @@ namespace language {
 		// check for EOF so we don't have to do it in the individual brace checks 
 		if(m_source.eof()) {
 			return token::end_of_file;
-		}
-
-		// arguments
-		if(m_last_character == '(') {
-			m_source.get(m_last_character);
-			return token::l_parenthesis;
-		}
-
-		if(m_last_character == ')') {
-			m_source.get(m_last_character);
-			return token::r_parenthesis;
-		}
-
-		// scopes
-		if(m_last_character == '{') {
-			m_source.get(m_last_character);
-			return token::l_brace;
-		}
-
-		if(m_last_character == '}') {
-			m_source.get(m_last_character);
-			return token::r_brace;
 		}
 
 		// comments
@@ -91,9 +75,22 @@ namespace language {
 			// if it's not a slash we have to handle it as a division operation
 			else {
 				// probably a division operation
+				m_source.get(m_last_character);	
+				return token::symbol_slash;
 			}
 		}
 
-        return token::unknown;
+		// char tokens ('{', '}', etc.)
+		const auto char_token = m_single_tokens.find(m_last_character);
+		if (char_token != m_single_tokens.end()) {
+			m_source.get(m_last_character);
+
+			// return the appropriate token
+			return char_token->second;
+		}
+
+		// not a token, return an identifier
+		m_identifier_string = m_last_character;
+		return token::identifier;
     }
 }

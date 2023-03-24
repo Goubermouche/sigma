@@ -23,12 +23,6 @@ namespace language {
 	//                 l_brace/r_brace into the parser main loop, and manage
 	//                 the scope stack over there.
 
-	// todo:           implement a get function that checks if EOF has been 
-	//                 found.
-
-	// todo:           implement a class for containing the source string
-	//                 and necessary caret operations.
-
 	token lexer::get_token() {
 		// ignore spaces between tokens 
 		while(isspace(m_last_character) && !m_accessor.end()) {
@@ -75,12 +69,10 @@ namespace language {
 				} while (!m_accessor.end() && m_last_character != '\n' && m_last_character != '\r');
 				return get_token(); // return the following token
 			}
+
 			// if it's not a slash we have to handle it as a division operation
-			else {
-				// probably a division operation
-				read_char();
-				return token::symbol_slash;
-			}
+			// read_char();
+			return token::symbol_slash;
 		}
 
 		// char tokens ('{', '}', etc.)
@@ -98,7 +90,6 @@ namespace language {
     }
 
 	void lexer::read_char() {
-		m_accessor.get(m_last_character);
-		m_accessor.advance();
+		m_last_character = m_accessor.get_advance();
 	}
 }

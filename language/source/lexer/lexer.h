@@ -1,6 +1,5 @@
 #pragma once
 
-#include "../utility/filesystem.h"
 #include "token.h"
 #include "string_accessor.h"
 
@@ -20,8 +19,11 @@ namespace language {
 		 *  one, an empty string is returned.
 		 * \return Extracted identifier
 		 */
-		const inline std::string& get_identifier() const { return m_identifier_string; }
+		const std::string& get_identifier() const { return m_identifier_string; }
 	private:
+		/**
+		 * \brief Helper function that reads the next char in the provided source file and advances the accessor caret.
+		 */
 		void read_char();
 	private:
 		std::string m_identifier_string; // current identifier
@@ -48,6 +50,7 @@ namespace language {
 			{ '+', token::symbol_plus        },
 			{ '-', token::symbol_minus       },
 			{ '*', token::symbol_asterisk    },
+			{ '=', token::symbol_equals      },
 			{ '!', token::symbol_exclamation },
 			{ ';', token::symbol_semicolon   },
 		};

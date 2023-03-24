@@ -1,4 +1,5 @@
 #pragma once
+#include "../utility/macros.h"
 
 namespace language {
 	enum class token {
@@ -20,6 +21,7 @@ namespace language {
 		symbol_minus,       // -
 		symbol_asterisk,    // *
 		symbol_slash,       // /
+		symbol_equals,      // =
 		symbol_exclamation, // !
 		symbol_semicolon,   // ;
 
@@ -60,6 +62,8 @@ namespace language {
 			return "symbol_asterisk";
 		case token::symbol_slash:
 			return "symbol_slash";
+		case token::symbol_equals:
+			return "symbol_equals";
 		case token::symbol_exclamation:
 			return "symbol_exclamation";
 		case token::symbol_semicolon:

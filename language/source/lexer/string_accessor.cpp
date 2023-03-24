@@ -12,16 +12,23 @@ namespace language::detail {
 		m_position--;
 	}
 
-	bool string_accessor::get(char& out) {
-		if (m_position < m_string.size()) {
-			out = m_string[m_position];
-			return true;
+	char string_accessor::get() const {
+		// check if we are inside of our strings' bounds
+		if (m_position <= m_string.size()) {
+			return m_string[m_position];
 		}
 
-		return false;
+		ASSERT(false, "accessor out of range!");
+		return ' ';
 	}
 
-	bool string_accessor::end() {
+	char string_accessor::get_advance() {
+		const char temp = get();
+		advance();
+		return temp;
+	}
+
+	bool string_accessor::end() const {
 		return m_position > m_string.size();
 	}
 }

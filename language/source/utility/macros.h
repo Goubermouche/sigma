@@ -27,9 +27,18 @@ do {                                              \
         _Analysis_assume_(cond);                                    \
     } while (false)
 
+#ifdef _DEBUG
 /**
  * \brief Basic assertion macro, asserts whenever \a cond evaluates to false and prints \a message.
  * \param cond Condition to evaluate
  * \param mesg Assertion notification message
  */
 #define ASSERT(cond, mesg) LANG_VERIFY(cond, mesg)
+#else
+/**
+ * \brief Basic assertion macro, asserts whenever \a cond evaluates to false and prints \a message.
+ * \param cond Condition to evaluate
+ * \param mesg Assertion notification message
+ */
+#define ASSERT(cond, mesg)
+#endif

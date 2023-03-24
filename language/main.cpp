@@ -12,6 +12,14 @@ int main() {
 		if (token == language::token::identifier) {
 			std::cout << "       [" << lexer.get_identifier() << ']';
 		}
+		else if(
+			token == language::token::number_signed ||
+			token == language::token::number_unsigned ||
+			token == language::token::number_f32 ||
+			token == language::token::number_f64
+			) {
+			std::cout << "       [" << lexer.get_value() << ']';
+		}
 
 		std::cout << '\n';
 	}

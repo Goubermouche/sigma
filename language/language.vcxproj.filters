@@ -24,6 +24,9 @@
     <ClCompile Include="source\utility\filesystem.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="source\lexer\string_accessor.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="source\lexer\lexer.h">
@@ -39,6 +42,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="source\lexer\token.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="source\lexer\string_accessor.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

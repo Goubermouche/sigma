@@ -2,6 +2,7 @@
 
 #include "../utility/filesystem.h"
 #include "token.h"
+#include "string_accessor.h"
 
 namespace language {
 	class lexer {
@@ -21,8 +22,10 @@ namespace language {
 		 */
 		const inline std::string& get_identifier() const { return m_identifier_string; }
 	private:
-		std::ifstream m_source; // source file
+		void read_char();
+	private:
 		std::string m_identifier_string; // current identifier
+		detail::string_accessor m_accessor;
 		char m_last_character = ' ';
 
 		// tokens that are longer than one character 

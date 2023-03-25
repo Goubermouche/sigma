@@ -3,46 +3,55 @@
 
 namespace language {
 	enum class token {
-
-		l_parenthesis,      // token identifier for the '(' character
-		r_parenthesis,      // token identifier for the ')' character
-		l_brace,            // token identifier for the '{' character
-		r_brace,            // token identifier for the '}' character
-					        
-		// keywords
-		// signed integers
-		keyword_i8,         // i8  0
-		keyword_i16,        // i16 0
-		keyword_i32,        // i32 0
-		keyword_i64,        // i64 0
-
-		// unsigned integers
-		keyword_u8,         // u8  0u
-		keyword_u16,        // u16 0u
-		keyword_u32,        // u32 0u
-		keyword_u64,        // u64 0u
-
-		// floating point
-		keyword_f32,        // f32 0.0f
-		keyword_f64,        // f64 0.0
-
-		// symbols
-		symbol_plus,        // +
-		symbol_minus,       // -
-		symbol_asterisk,    // *
-		symbol_slash,       // /
-		symbol_equals,      // =
-		symbol_exclamation, // !
-		symbol_semicolon,   // ;
+		l_parenthesis,                      // token identifier for the '(' character
+		r_parenthesis,                      // token identifier for the ')' character
+		l_brace,                            // token identifier for the '{' character
+		r_brace,                            // token identifier for the '}' character
+					                        
+		// keywords			                
+		// signed integers	                
+		keyword_i8,                         // i8  0
+		keyword_i16,                        // i16 0
+		keyword_i32,                        // i32 0
+		keyword_i64,                        // i64 0
+							                
+		// unsigned integers                
+		keyword_u8,                         // u8  0u
+		keyword_u16,                        // u16 0u
+		keyword_u32,                        // u32 0u
+		keyword_u64,                        // u64 0u
+							                
+		// floating point	                
+		keyword_f32,                        // f32 0.0f
+		keyword_f64,                        // f64 0.0
+								        
+		// operators
+		operator_addition,                  // +
+		operator_addition_assignment,       // +=
+		operator_subtraction,               // -
+		operator_subtraction_assignment,    // -=
+		operator_multiplication,            // *
+		operator_multiplication_assignment, // *=
+		operator_division,                  // /
+		operator_division_assignment,       // /=
+		operator_assignment,                // =
+		operator_equals,                    // ==
+		operator_greater_than,              // >
+		operator_greater_than_equal_to,     // >=
+		operator_less_than,                 // <
+		operator_less_than_equal_to,        // <=
+		operator_not,                       // !
+		operator_not_equals,                // !=
 
 		// numbers
-		number_signed,
-		number_unsigned,
-		number_f32,
-		number_f64,
+		number_signed,                      // 0
+		number_unsigned,                    // 0u
+		number_f32,                         // 0.0f
+		number_f64,                         // 0.0
 
-		definition,
+		definition,                         // currently only "void"
 		identifier,
+		symbol_semicolon,                   // ;
 
 		end_of_file,
 		unknown
@@ -86,21 +95,39 @@ namespace language {
 		case token::keyword_f64:
 			return "keyword_f64";
 
-		// symbols
-		case token::symbol_plus:
-			return "symbol_plus";
-		case token::symbol_minus:
-			return "symbol_minus";
-		case token::symbol_asterisk:
-			return "symbol_asterisk";
-		case token::symbol_slash:
-			return "symbol_slash";
-		case token::symbol_equals:
-			return "symbol_equals";
-		case token::symbol_exclamation:
-			return "symbol_exclamation";
-		case token::symbol_semicolon:
-			return "symbol_semicolon";
+		// operators
+		case token::operator_addition:
+			return "operator_add";
+		case token::operator_addition_assignment:
+			return "operator_addition_assignment";
+		case token::operator_subtraction:
+			return "operator_subtraction";
+		case token::operator_subtraction_assignment:
+			return "operator_subtraction_assignment";
+		case token::operator_multiplication:
+			return "operator_multiplication";
+		case token::operator_multiplication_assignment:
+			return "operator_multiplication_assignment";
+		case token::operator_division:
+			return "operator_division";
+		case token::operator_division_assignment:
+			return "operator_division_assignment";
+		case token::operator_assignment:
+			return "operator_assignment";
+		case token::operator_equals:
+			return "operator_equals";
+		case token::operator_greater_than:
+			return "operator_greater_than";
+		case token::operator_greater_than_equal_to:
+			return "operator_greater_than_equal_to";
+		case token::operator_less_than:
+			return "operator_less_than";
+		case token::operator_less_than_equal_to:
+			return "operator_less_than_equal_to";
+		case token::operator_not:
+			return "operator_not";
+		case token::operator_not_equals:
+			return "operator_not_equals";
 
 		// numbers
 		case token::number_signed:
@@ -113,10 +140,13 @@ namespace language {
 			return "number_f64";
 
 		// other
-		case token::identifier:
-			return "identifier";
 		case token::definition:
 			return "definition";
+		case token::identifier:
+			return "identifier";
+		case token::symbol_semicolon:
+			return "symbol_semicolon";
+	
 		case token::end_of_file:
 			return "end_of_file";
 		case token::unknown:

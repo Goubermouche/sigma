@@ -40,7 +40,9 @@ namespace language {
 		token get_number_token();
 	private:
 		std::string m_identifier_string; // current identifier
-		std::string m_value_string; // current value
+		std::string m_value_string;      // current value
+		std::string m_operator_string;   // current operator string
+
 		detail::string_accessor m_accessor;
 		char m_last_character = ' ';
 
@@ -65,20 +67,33 @@ namespace language {
 			{ "f64" , token::keyword_f64 }
 		};
 
-		// tokens that are exactly 1 char long
-		// note that the '/' token is not included here as it is considered a special
-		// token since we also need to check for a comment whenever we see it
-		const std::unordered_map<char, token> m_single_tokens = {
-			{ '(', token::l_parenthesis      },
-			{ ')', token::r_parenthesis      },
-			{ '{', token::l_brace            },
-			{ '}', token::r_brace            },
-			{ '+', token::symbol_plus        },
-			{ '-', token::symbol_minus       },
-			{ '*', token::symbol_asterisk    },
-			{ '=', token::symbol_equals      },
-			{ '!', token::symbol_exclamation },
-			{ ';', token::symbol_semicolon   },
+		// tokens that consist of special chars (non-alphabetical and non-digit chars), note that the "//"
+		// combination is not included here because it is being handled as a comment and thus needs different
+		// logic.
+		const std::unordered_map<std::string, token> m_special_tokens = {
+			{ ";" , token::symbol_semicolon                   },
+			{ "(" , token::l_parenthesis                      },
+			{ ")" , token::r_parenthesis                      },
+			{ "{" , token::l_brace                            },
+			{ "}" , token::r_brace                            },
+														      
+			// operators								      
+			{ "+" , token::operator_addition                  },
+			{ "+=", token::operator_addition_assignment       },
+			{ "-" , token::operator_subtraction               },
+			{ "-=", token::operator_subtraction_assignment    },
+			{ "*" , token::operator_multiplication            },
+			{ "*=", token::operator_multiplication_assignment },
+			{ "/",  token::operator_division                  },
+			{ "/=", token::operator_division_assignment       },
+			{ "=" , token::operator_assignment                },
+			{ "==", token::operator_equals                    },
+			{ ">" , token::operator_greater_than              },
+			{ ">=", token::operator_greater_than_equal_to     },
+			{ "<" , token::operator_less_than                 },
+			{ "<=", token::operator_less_than_equal_to        },
+			{ "!" , token::operator_not                       },
+			{ "!=", token::operator_not_equals                },
 		};
 	};
 }

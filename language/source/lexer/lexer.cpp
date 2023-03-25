@@ -17,15 +17,10 @@ namespace language {
 		m_last_character = m_accessor.get_advance();
 	}
 
-	// considerations: handle nested scopes using a stack (when we encounter
-	//                 a new l_brace we push a new scope to the stack, then
-	//                 we add variables to that scope, once we encounter an
-	//                 r_brace we pop the stack.
-
-	// implications:   add a scope class which will contain all variables in
-	//                 the given scope. note that we need to add a check for
-	//                 l_brace/r_brace into the parser main loop, and manage
-	//                 the scope stack over there.
+	// considerations: handle nested scopes using a stack (when we encounter a new l_brace we push a new scope to the
+	//                 stack, then we add variables to that scope, once we encounter an r_brace we pop the stack.
+	// implications:   add a scope class which will contain all variables in the given scope. note that we need to add
+	//                 a check for l_brace/r_brace into the parser main loop, and manage the scope stack over there.
 
 	token lexer::get_token() {
 		// ignore spaces between tokens 
@@ -49,37 +44,47 @@ namespace language {
 			return token::end_of_file;
 		}
 
-		// comments
-		if(m_last_character == '/') {
+		// extract special tokens
+		m_operator_string = m_last_character;
+		const auto operator_token_short = m_special_tokens.find(m_operator_string);
+
+		// todo: check for longer tokens using a while loop.
+		// todo: check for longer tokens in case a short token does not exist.
+
+		// first check if we have a special token
+		if(operator_token_short != m_special_tokens.end()) {
 			read_char();
 
-			// check if the second character is also a slash
-			if (m_last_character == '/') {
-				// ignore all remaining data on the current line
-				do {
+			// we have a special token consisting of 1 character, check if we can find a longer one using that character 
+			if(!isspace(m_last_character) && !isalnum(m_last_character)) {
+				m_operator_string += m_last_character;
+
+				const auto operator_token_long = m_special_tokens.find(m_operator_string);
+				// we've found a longer token, return it
+				if(operator_token_long != m_special_tokens.end()) {
 					read_char();
-				} while (!m_accessor.end() && m_last_character != '\n' && m_last_character != '\r');
-				return get_token(); // return the following token
+					return operator_token_long->second;
+				}
+
+				// since we don't have the "//" token in our token table we check for it separately, and if we find
+				// it we consider it to be a comment, in this case we ignore all the characters on the same line and
+				// return the following token.
+				if(m_last_character == '/') {
+					// ignore all remaining data on the current line
+					do {
+						read_char();
+					} while (!m_accessor.end() && m_last_character != '\n' && m_last_character != '\r');
+
+					return get_token(); // return the following token
+				}
 			}
 
-			// if it's not a slash we have to handle it as a division operation
-			// read_char();
-			return token::symbol_slash;
-		}
-
-		// char tokens ('{', '}', etc.)
-		const auto char_token = m_single_tokens.find(m_last_character);
-		if (char_token != m_single_tokens.end()) {
-			read_char();
-
-			// return the appropriate token
-			return char_token->second;
+			return operator_token_short->second;
 		}
 
 		// not a token, return an identifier
 		m_identifier_string = m_last_character;
 		return token::identifier;
-
     }
 
 	token lexer::get_identifier_token()	{

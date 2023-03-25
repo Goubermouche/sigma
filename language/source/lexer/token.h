@@ -51,7 +51,7 @@ namespace language {
 
 		definition,                         // currently only "void"
 		identifier,
-		symbol_semicolon,                   // ;
+		semicolon,                          // ;
 
 		end_of_file,
 		unknown
@@ -144,8 +144,8 @@ namespace language {
 			return "definition";
 		case token::identifier:
 			return "identifier";
-		case token::symbol_semicolon:
-			return "symbol_semicolon";
+		case token::semicolon:
+			return "semicolon";
 	
 		case token::end_of_file:
 			return "end_of_file";

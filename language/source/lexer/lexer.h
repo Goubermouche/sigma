@@ -20,7 +20,20 @@ namespace language {
 		 * \return Extracted identifier
 		 */
 		const std::string& get_identifier() const { return m_identifier_string; }
+
+		/**
+		 * \brief Returns the last known value from the lexing process. If there isn't
+		 * one, an empty string is returned.
+		 * \return Extracted value
+		 */
 		const std::string& get_value() const { return m_value_string; }
+
+		/**
+		 * \brief Returns the last known operator from the lexing process. If there isn't
+		 * one, an empty string is returned.
+		 * \return Extracted operator
+		 */
+		const std::string& get_operator() const { return m_operator_string; }
 	private:
 		/**
 		 * \brief Helper function that reads the next char in the provided source file and advances the accessor caret.
@@ -71,7 +84,7 @@ namespace language {
 		// combination is not included here because it is being handled as a comment and thus needs different
 		// logic.
 		const std::unordered_map<std::string, token> m_special_tokens = {
-			{ ";" , token::symbol_semicolon                   },
+			{ ";" , token::semicolon                          },
 			{ "(" , token::l_parenthesis                      },
 			{ ")" , token::r_parenthesis                      },
 			{ "{" , token::l_brace                            },

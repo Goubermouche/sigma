@@ -32,16 +32,26 @@ namespace language {
 		operator_subtraction_assignment,    // -=
 		operator_multiplication,            // *
 		operator_multiplication_assignment, // *=
+		operator_modulo,                    // %
+		operator_modulo_assignment,         // %=
 		operator_division,                  // /
 		operator_division_assignment,       // /=
 		operator_assignment,                // =
 		operator_equals,                    // ==
 		operator_greater_than,              // >
+		operator_bitwise_right_shift,       // >>
 		operator_greater_than_equal_to,     // >=
 		operator_less_than,                 // <
+		operator_bitwise_left_shift,        // <<
 		operator_less_than_equal_to,        // <=
 		operator_not,                       // !
 		operator_not_equals,                // !=
+		operator_bitwise_and,               // &
+		operator_logical_conjunction,       // &&
+		operator_bitwise_or,                // |
+		operator_logical_disjunction,       // ||
+		operator_bitwise_not,               // ~
+		operator_bitwise_xor,               // ^
 
 		// numbers
 		number_signed,                      // 0
@@ -108,6 +118,10 @@ namespace language {
 			return "operator_multiplication";
 		case token::operator_multiplication_assignment:
 			return "operator_multiplication_assignment";
+		case token::operator_modulo:
+			return "operator_modulo";
+		case token::operator_modulo_assignment:
+			return "operator_modulo_assignment";
 		case token::operator_division:
 			return "operator_division";
 		case token::operator_division_assignment:
@@ -118,16 +132,32 @@ namespace language {
 			return "operator_equals";
 		case token::operator_greater_than:
 			return "operator_greater_than";
+		case token::operator_bitwise_right_shift:
+			return "operator_bitwise_right_shift";
 		case token::operator_greater_than_equal_to:
 			return "operator_greater_than_equal_to";
 		case token::operator_less_than:
 			return "operator_less_than";
+		case token::operator_bitwise_left_shift:
+			return "operator_bitwise_left_shift";
 		case token::operator_less_than_equal_to:
 			return "operator_less_than_equal_to";
 		case token::operator_not:
 			return "operator_not";
 		case token::operator_not_equals:
 			return "operator_not_equals";
+		case token::operator_bitwise_and:
+			return "operator_bitwise_and";
+		case token::operator_logical_conjunction:
+			return "operator_logical_conjunction";
+		case token::operator_bitwise_or:
+			return "operator_bitwise_or";
+		case token::operator_logical_disjunction:
+			return "operator_logical_disjunction";
+		case token::operator_bitwise_not:
+			return "operator_bitwise_not";
+		case token::operator_bitwise_xor:
+			return "operator_bitwise_xor";
 
 		// numbers
 		case token::number_signed:

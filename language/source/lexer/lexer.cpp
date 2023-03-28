@@ -29,7 +29,7 @@ namespace language {
 		}
 
 		// identifiers
-		// extract identifier, and identifier has to begin with a letter
+		// extract identifiers
 		if(isalpha(m_last_character) && !m_accessor.end()) {
 			return get_identifier_token();
 		}

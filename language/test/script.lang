@@ -1,4 +1,4 @@
 void main() {
     // comment
-    i32 value /*= 10.0f;
+    i32 value *= 10.0f;
 }

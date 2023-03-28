@@ -62,22 +62,22 @@ namespace language {
 		// tokens that are longer than one character 
 		const std::unordered_map<std::string, token> m_keyword_tokens = {
 			{ "void", token::definition  },
-
-			// signed integers
+										
+			// signed integers			
 			{ "i8"  , token::keyword_i8  },
 			{ "i16" , token::keyword_i16 },
 			{ "i32" , token::keyword_i32 },
 			{ "i64" , token::keyword_i64 },
-
-			// unsigned integers
+										 
+			// unsigned integers		 
 			{ "u8"  , token::keyword_u8  },
 			{ "u16" , token::keyword_u16 },
 			{ "u32" , token::keyword_u32 },
 			{ "u64" , token::keyword_u64 },
-
-			// floating point
+										 
+			// floating point			 
 			{ "f32" , token::keyword_f32 },
-			{ "f64" , token::keyword_f64 }
+			{ "f64" , token::keyword_f64 },
 		};
 
 		// tokens that consist of special chars (non-alphabetical and non-digit chars), note that the "//"
@@ -97,16 +97,26 @@ namespace language {
 			{ "-=", token::operator_subtraction_assignment    },
 			{ "*" , token::operator_multiplication            },
 			{ "*=", token::operator_multiplication_assignment },
+			{ "%" , token::operator_modulo                    },
+			{ "%=", token::operator_modulo_assignment         },
 			{ "/",  token::operator_division                  },
 			{ "/=", token::operator_division_assignment       },
 			{ "=" , token::operator_assignment                },
 			{ "==", token::operator_equals                    },
 			{ ">" , token::operator_greater_than              },
+			{ ">>", token::operator_bitwise_right_shift       },
 			{ ">=", token::operator_greater_than_equal_to     },
 			{ "<" , token::operator_less_than                 },
+			{ "<<", token::operator_bitwise_left_shift        },
 			{ "<=", token::operator_less_than_equal_to        },
 			{ "!" , token::operator_not                       },
 			{ "!=", token::operator_not_equals                },
+			{ "&" , token::operator_bitwise_and               },
+			{ "&&", token::operator_logical_conjunction       },
+			{ "|" , token::operator_bitwise_or                },
+			{ "||", token::operator_logical_disjunction       },
+			{ "~" , token::operator_bitwise_not               },
+			{ "^" , token::operator_bitwise_xor               },
 		};
 	};
 }

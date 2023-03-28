@@ -83,6 +83,9 @@ namespace language {
 		// tokens that consist of special chars (non-alphabetical and non-digit chars), note that the "//"
 		// combination is not included here because it is being handled as a comment and thus needs different
 		// logic.
+
+		// note: 2-letter tokens need their first token to exist, otherwise the longer version doesn't get
+		//       selected and an identifier is returned.
 		const std::unordered_map<std::string, token> m_special_tokens = {
 			{ ";" , token::semicolon                          },
 			{ "(" , token::l_parenthesis                      },

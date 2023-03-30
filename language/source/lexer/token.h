@@ -8,22 +8,38 @@ namespace language {
 		l_brace,                            // token identifier for the '{' character
 		r_brace,                            // token identifier for the '}' character
 					                        
-		// keywords			                
+		// keywords
+		keyword_type_void,                  // void nullptr
+
 		// signed integers	                
-		keyword_i8,                         // i8  0
-		keyword_i16,                        // i16 0
-		keyword_i32,                        // i32 0
-		keyword_i64,                        // i64 0
+		keyword_type_i8,                    // i8  0
+		keyword_type_i16,                   // i16 0
+		keyword_type_i32,                   // i32 0
+		keyword_type_i64,                   // i64 0
 							                
 		// unsigned integers                
-		keyword_u8,                         // u8  0u
-		keyword_u16,                        // u16 0u
-		keyword_u32,                        // u32 0u
-		keyword_u64,                        // u64 0u
+		keyword_type_u8,                    // u8  0u
+		keyword_type_u16,                   // u16 0u
+		keyword_type_u32,                   // u32 0u
+		keyword_type_u64,                   // u64 0u
 							                
 		// floating point	                
-		keyword_f32,                        // f32 0.0f
-		keyword_f64,                        // f64 0.0
+		keyword_type_f32,                   // f32 0.0f
+		keyword_type_f64,                   // f64 0.0
+
+		// math
+		// vectors
+		// vec2<T>
+		// vec3<T> 
+		// vec4<T>
+		// matrices
+		// tensors (?)
+
+		// containers
+		// T[n]
+		// array<T>
+		// list<T>
+		// map<K, V>
 								        
 		// operators
 		operator_addition,                  // +
@@ -59,7 +75,6 @@ namespace language {
 		number_f32,                         // 0.0f
 		number_f64,                         // 0.0
 
-		definition,                         // currently only "void"
 		identifier,
 		semicolon,                          // ;
 
@@ -79,31 +94,34 @@ namespace language {
 			return "r_parenthesis";
 
 		// keywords
+		case token::keyword_type_void:
+			return "keyword_type_void";
+
 		// signed integers
-		case token::keyword_i8:
-			return "keyword_i8";
-		case token::keyword_i16:
-			return "keyword_i16";
-		case token::keyword_i32:
-			return "keyword_i32";
-		case token::keyword_i64:
-			return "keyword_i64";
+		case token::keyword_type_i8:
+			return "keyword_type_i8";
+		case token::keyword_type_i16:
+			return "keyword_type_i16";
+		case token::keyword_type_i32:
+			return "keyword_type_i32";
+		case token::keyword_type_i64:
+			return "keyword_type_i64";
 
 		// unsigned integers
-		case token::keyword_u8:
-			return "keyword_u8";
-		case token::keyword_u16:
-			return "keyword_u16";
-		case token::keyword_u32:
-			return "keyword_u32";
-		case token::keyword_u64:
-			return "keyword_u64";
+		case token::keyword_type_u8:
+			return "keyword_type_u8";
+		case token::keyword_type_u16:
+			return "keyword_type_u16";
+		case token::keyword_type_u32:
+			return "keyword_type_u32";
+		case token::keyword_type_u64:
+			return "keyword_type_u64";
 
 		// floating point
-		case token::keyword_f32:
-			return "keyword_f32";
-		case token::keyword_f64:
-			return "keyword_f64";
+		case token::keyword_type_f32:
+			return "keyword_type_f32";
+		case token::keyword_type_f64:
+			return "keyword_type_f64";
 
 		// operators
 		case token::operator_addition:
@@ -170,8 +188,6 @@ namespace language {
 			return "number_f64";
 
 		// other
-		case token::definition:
-			return "definition";
 		case token::identifier:
 			return "identifier";
 		case token::semicolon:

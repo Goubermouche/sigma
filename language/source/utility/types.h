@@ -5,9 +5,8 @@
 #include <filesystem>
 #include <iostream>
 #include <unordered_map>
-#include <map>
 
-namespace language::types {
+namespace channel::types {
 	// signed
 	using i8  = int8_t;
 	using i16 = int16_t;
@@ -23,5 +22,4 @@ namespace language::types {
 	// floating point
 	using f32  = float;
 	using f64  = double;
-	using f128 = long double;
 }

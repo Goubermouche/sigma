@@ -146,14 +146,28 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="source\codegen\evaluator.cpp" />
+    <ClCompile Include="source\codegen\abstract_syntax_tree\operators\operator_binary.cpp" />
+    <ClCompile Include="source\codegen\abstract_syntax_tree\operators\operator_addition_node.cpp" />
+    <ClCompile Include="source\codegen\abstract_syntax_tree\keywords\types\keyword_i32_node.cpp" />
+    <ClCompile Include="source\codegen\abstract_syntax_tree\node.cpp" />
+    <ClCompile Include="source\codegen\visitor.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="source\parser\parser.cpp" />
     <ClCompile Include="source\lexer\lexer.cpp" />
-    <ClCompile Include="source\lexer\string_accessor.cpp" />
+    <ClCompile Include="source\utility\string_accessor.cpp" />
     <ClCompile Include="source\utility\filesystem.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="source\codegen\evaluator.h" />
+    <ClInclude Include="source\codegen\abstract_syntax_tree\operators\operator_binary.h" />
+    <ClInclude Include="source\codegen\abstract_syntax_tree\operators\operator_addition_node.h" />
+    <ClInclude Include="source\codegen\abstract_syntax_tree\keywords\types\keyword_i32_node.h" />
+    <ClInclude Include="source\codegen\abstract_syntax_tree\node.h" />
+    <ClInclude Include="source\codegen\visitor.h" />
+    <ClInclude Include="source\parser\parser.h" />
     <ClInclude Include="source\lexer\lexer.h" />
-    <ClInclude Include="source\lexer\string_accessor.h" />
+    <ClInclude Include="source\utility\string_accessor.h" />
     <ClInclude Include="source\lexer\token.h" />
     <ClInclude Include="source\utility\filesystem.h" />
     <ClInclude Include="source\utility\macros.h" />

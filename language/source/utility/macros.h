@@ -2,7 +2,7 @@
 
 #include "types.h"
 
-namespace language {
+namespace channel {
 	using namespace types;
 }
 

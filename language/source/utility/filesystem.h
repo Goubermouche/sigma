@@ -1,7 +1,7 @@
 #pragma once
 #include "macros.h"
 
-namespace language::detail {
+namespace channel::detail {
 	/**
 	 * \brief Reads the contents of the specified \a source \a file and, if everything is correct, returns them in the \a out parameter. If there has been an issue when reading the file nothing is read and the function outputs False.
 	 * \param source_file Source file path

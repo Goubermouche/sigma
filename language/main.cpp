@@ -1,23 +1,21 @@
-#include "source/lexer/lexer.h"
+#include "source/parser/parser.h"
 
-using namespace language::types;
+using namespace channel::types;
 
 int main() {
-	language::lexer lexer("test/script.lang");
-	language::token token;
+	channel::lexer lexer("test/script.lang");
+	channel::token token;
 
-	while ((token = lexer.get_token()) != language::token::end_of_file) {
+	while ((token = lexer.get_token()) != channel::token::end_of_file) {
 		std::cout << token_to_string(token);
 
-		if (token == language::token::identifier) {
+		if (token == channel::token::identifier) {
 			std::cout << "       [" << lexer.get_identifier() << ']';
 		}
-		else if(
-			token == language::token::number_signed ||
-			token == language::token::number_unsigned ||
-			token == language::token::number_f32 ||
-			token == language::token::number_f64
-			) {
+		else if(token == channel::token::number_signed ||
+			token == channel::token::number_unsigned ||
+			token == channel::token::number_f32 ||
+			token == channel::token::number_f64) {
 			std::cout << "       [" << lexer.get_value() << ']';
 		}
 

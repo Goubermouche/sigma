@@ -24,7 +24,28 @@
     <ClCompile Include="source\utility\filesystem.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="source\lexer\string_accessor.cpp">
+    <ClCompile Include="source\utility\string_accessor.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="source\parser\parser.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="source\codegen\visitor.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="source\codegen\abstract_syntax_tree\node.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="source\codegen\abstract_syntax_tree\keywords\types\keyword_i32_node.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="source\codegen\abstract_syntax_tree\operators\operator_addition_node.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="source\codegen\abstract_syntax_tree\operators\operator_binary.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="source\codegen\evaluator.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -44,7 +65,28 @@
     <ClInclude Include="source\lexer\token.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="source\lexer\string_accessor.h">
+    <ClInclude Include="source\utility\string_accessor.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="source\parser\parser.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="source\codegen\visitor.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="source\codegen\abstract_syntax_tree\node.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="source\codegen\abstract_syntax_tree\keywords\types\keyword_i32_node.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="source\codegen\abstract_syntax_tree\operators\operator_addition_node.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="source\codegen\abstract_syntax_tree\operators\operator_binary.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="source\codegen\evaluator.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

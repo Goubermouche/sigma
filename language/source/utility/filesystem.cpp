@@ -1,6 +1,6 @@
 #include "filesystem.h"
 
-namespace language::detail {
+namespace channel::detail {
 	bool read_file(const std::string& source_file, std::string& out) {
 		std::ifstream file(source_file);
 

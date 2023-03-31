@@ -1,5 +1,3 @@
 #include "visitor.h"
 
-namespace channel {
-
-}
+namespace channel {}

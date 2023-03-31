@@ -18,24 +18,6 @@
     <ClCompile Include="main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="source\lexer\lexer.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="source\utility\filesystem.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="source\utility\string_accessor.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="source\parser\parser.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="source\codegen\visitor.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="source\codegen\abstract_syntax_tree\node.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="source\codegen\abstract_syntax_tree\keywords\types\keyword_i32_node.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -45,38 +27,32 @@
     <ClCompile Include="source\codegen\abstract_syntax_tree\operators\operator_binary.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="source\codegen\evaluator.cpp">
+    <ClCompile Include="source\codegen\abstract_syntax_tree\node.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="source\codegen\codegen_visitor.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="source\codegen\visitor.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="source\lexer\lexer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="source\parser\parser.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="source\utility\filesystem.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="source\utility\string_accessor.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="source\lexer\lexer.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="source\utility\filesystem.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="source\utility\macros.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="source\utility\types.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="source\lexer\token.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="source\utility\string_accessor.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="source\parser\parser.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="source\codegen\visitor.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="source\codegen\abstract_syntax_tree\node.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
+    <None Include="test\main.ch" />
+  </ItemGroup>
+  <ItemGroup>
     <ClInclude Include="source\codegen\abstract_syntax_tree\keywords\types\keyword_i32_node.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -86,11 +62,35 @@
     <ClInclude Include="source\codegen\abstract_syntax_tree\operators\operator_binary.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="source\codegen\evaluator.h">
+    <ClInclude Include="source\codegen\abstract_syntax_tree\node.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="test\main.ch" />
+    <ClInclude Include="source\codegen\codegen_visitor.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="source\codegen\visitor.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="source\lexer\lexer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="source\lexer\token.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="source\parser\parser.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="source\utility\filesystem.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="source\utility\macros.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="source\utility\string_accessor.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="source\utility\types.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

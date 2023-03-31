@@ -83,7 +83,7 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>LLVMWindowsManifest.lib;LLVMXRay.lib;LLVMLibDriver.lib;LLVMDlltoolDriver.lib;LLVMCoverage.lib;LLVMLineEditor.lib;LLVMX86TargetMCA.lib;LLVMX86Disassembler.lib;LLVMX86AsmParser.lib;LLVMX86CodeGen.lib;LLVMX86Desc.lib;LLVMX86Info.lib;LLVMOrcJIT.lib;LLVMWindowsDriver.lib;LLVMMCJIT.lib;LLVMJITLink.lib;LLVMInterpreter.lib;LLVMExecutionEngine.lib;LLVMRuntimeDyld.lib;LLVMOrcTargetProcess.lib;LLVMOrcShared.lib;LLVMDWP.lib;LLVMDebugInfoLogicalView.lib;LLVMDebugInfoGSYM.lib;LLVMOption.lib;LLVMObjectYAML.lib;LLVMObjCopy.lib;LLVMMCA.lib;LLVMMCDisassembler.lib;LLVMLTO.lib;LLVMPasses.lib;LLVMCFGuard.lib;LLVMCoroutines.lib;LLVMipo.lib;LLVMVectorize.lib;LLVMLinker.lib;LLVMInstrumentation.lib;LLVMFrontendOpenMP.lib;LLVMFrontendOpenACC.lib;LLVMFrontendHLSL.lib;LLVMExtensions.lib;LLVMDWARFLinkerParallel.lib;LLVMDWARFLinker.lib;LLVMGlobalISel.lib;LLVMMIRParser.lib;LLVMAsmPrinter.lib;LLVMSelectionDAG.lib;LLVMCodeGen.lib;LLVMObjCARCOpts.lib;LLVMIRPrinter.lib;LLVMInterfaceStub.lib;LLVMFileCheck.lib;LLVMFuzzMutate.lib;LLVMTarget.lib;LLVMScalarOpts.lib;LLVMInstCombine.lib;LLVMAggressiveInstCombine.lib;LLVMTransformUtils.lib;LLVMBitWriter.lib;LLVMAnalysis.lib;LLVMProfileData.lib;LLVMSymbolize.lib;LLVMDebugInfoPDB.lib;LLVMDebugInfoMSF.lib;LLVMDebugInfoDWARF.lib;LLVMObject.lib;LLVMTextAPI.lib;LLVMMCParser.lib;LLVMIRReader.lib;LLVMAsmParser.lib;LLVMMC.lib;LLVMDebugInfoCodeView.lib;LLVMBitReader.lib;LLVMFuzzerCLI.lib;LLVMCore.lib;LLVMRemarks.lib;LLVMBitstreamReader.lib;LLVMBinaryFormat.lib;LLVMTargetParser.lib;LLVMTableGen.lib;LLVMSupport.lib;LLVMDemangle.lib;psapi.lib;shell32.lib;ole32.lib;uuid.lib;advapi32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>LLVMWindowsManifest.lib;LLVMXRay.lib;LLVMLibDriver.lib;LLVMDlltoolDriver.lib;LLVMCoverage.lib;LLVMLineEditor.lib;LLVMX86TargetMCA.lib;LLVMX86Disassembler.lib;LLVMX86AsmParser.lib;LLVMX86CodeGen.lib;LLVMX86Desc.lib;LLVMX86Info.lib;LLVMOrcJIT.lib;LLVMWindowsDriver.lib;LLVMMCJIT.lib;LLVMJITLink.lib;LLVMInterpreter.lib;LLVMExecutionEngine.lib;LLVMRuntimeDyld.lib;LLVMOrcTargetProcess.lib;LLVMOrcShared.lib;LLVMDWP.lib;LLVMDebugInfoLogicalView.lib;LLVMDebugInfoGSYM.lib;LLVMOption.lib;LLVMObjectYAML.lib;LLVMObjCopy.lib;LLVMMCA.lib;LLVMMCDisassembler.lib;LLVMLTO.lib;LLVMPasses.lib;LLVMCFGuard.lib;LLVMCoroutines.lib;LLVMipo.lib;LLVMVectorize.lib;LLVMLinker.lib;LLVMInstrumentation.lib;LLVMFrontendOpenMP.lib;LLVMFrontendOpenACC.lib;LLVMFrontendHLSL.lib;LLVMExtensions.lib;LLVMDWARFLinkerParallel.lib;LLVMDWARFLinker.lib;LLVMGlobalISel.lib;LLVMMIRParser.lib;LLVMAsmPrinter.lib;LLVMSelectionDAG.lib;LLVMCodeGen.lib;LLVMObjCARCOpts.lib;LLVMIRPrinter.lib;LLVMInterfaceStub.lib;LLVMFileCheck.lib;LLVMFuzzMutate.lib;LLVMTarget.lib;LLVMScalarOpts.lib;LLVMInstCombine.lib;LLVMAggressiveInstCombine.lib;LLVMTransformUtils.lib;LLVMBitWriter.lib;LLVMAnalysis.lib;LLVMProfileData.lib;LLVMSymbolize.lib;LLVMDebugInfoPDB.lib;LLVMDebugInfoMSF.lib;LLVMDebugInfoDWARF.lib;LLVMObject.lib;LLVMTextAPI.lib;LLVMMCParser.lib;LLVMIRReader.lib;LLVMAsmParser.lib;LLVMMC.lib;LLVMDebugInfoCodeView.lib;LLVMBitReader.lib;LLVMFuzzerCLI.lib;LLVMCore.lib;LLVMRemarks.lib;LLVMBitstreamReader.lib;LLVMBinaryFormat.lib;LLVMTargetParser.lib;LLVMTableGen.lib;LLVMSupport.lib;LLVMDemangle.lib;psapi.lib;shell32.lib;ole32.lib;uuid.lib;advapi32.lib</AdditionalDependencies>
       <AdditionalLibraryDirectories>C:\dev\thirdparty\llvm-16.0.0\llvm-project\llvm\build\Release\lib</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
@@ -103,7 +103,7 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>LLVMWindowsManifest.lib;LLVMXRay.lib;LLVMLibDriver.lib;LLVMDlltoolDriver.lib;LLVMCoverage.lib;LLVMLineEditor.lib;LLVMX86TargetMCA.lib;LLVMX86Disassembler.lib;LLVMX86AsmParser.lib;LLVMX86CodeGen.lib;LLVMX86Desc.lib;LLVMX86Info.lib;LLVMOrcJIT.lib;LLVMWindowsDriver.lib;LLVMMCJIT.lib;LLVMJITLink.lib;LLVMInterpreter.lib;LLVMExecutionEngine.lib;LLVMRuntimeDyld.lib;LLVMOrcTargetProcess.lib;LLVMOrcShared.lib;LLVMDWP.lib;LLVMDebugInfoLogicalView.lib;LLVMDebugInfoGSYM.lib;LLVMOption.lib;LLVMObjectYAML.lib;LLVMObjCopy.lib;LLVMMCA.lib;LLVMMCDisassembler.lib;LLVMLTO.lib;LLVMPasses.lib;LLVMCFGuard.lib;LLVMCoroutines.lib;LLVMipo.lib;LLVMVectorize.lib;LLVMLinker.lib;LLVMInstrumentation.lib;LLVMFrontendOpenMP.lib;LLVMFrontendOpenACC.lib;LLVMFrontendHLSL.lib;LLVMExtensions.lib;LLVMDWARFLinkerParallel.lib;LLVMDWARFLinker.lib;LLVMGlobalISel.lib;LLVMMIRParser.lib;LLVMAsmPrinter.lib;LLVMSelectionDAG.lib;LLVMCodeGen.lib;LLVMObjCARCOpts.lib;LLVMIRPrinter.lib;LLVMInterfaceStub.lib;LLVMFileCheck.lib;LLVMFuzzMutate.lib;LLVMTarget.lib;LLVMScalarOpts.lib;LLVMInstCombine.lib;LLVMAggressiveInstCombine.lib;LLVMTransformUtils.lib;LLVMBitWriter.lib;LLVMAnalysis.lib;LLVMProfileData.lib;LLVMSymbolize.lib;LLVMDebugInfoPDB.lib;LLVMDebugInfoMSF.lib;LLVMDebugInfoDWARF.lib;LLVMObject.lib;LLVMTextAPI.lib;LLVMMCParser.lib;LLVMIRReader.lib;LLVMAsmParser.lib;LLVMMC.lib;LLVMDebugInfoCodeView.lib;LLVMBitReader.lib;LLVMFuzzerCLI.lib;LLVMCore.lib;LLVMRemarks.lib;LLVMBitstreamReader.lib;LLVMBinaryFormat.lib;LLVMTargetParser.lib;LLVMTableGen.lib;LLVMSupport.lib;LLVMDemangle.lib;psapi.lib;shell32.lib;ole32.lib;uuid.lib;advapi32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>LLVMWindowsManifest.lib;LLVMXRay.lib;LLVMLibDriver.lib;LLVMDlltoolDriver.lib;LLVMCoverage.lib;LLVMLineEditor.lib;LLVMX86TargetMCA.lib;LLVMX86Disassembler.lib;LLVMX86AsmParser.lib;LLVMX86CodeGen.lib;LLVMX86Desc.lib;LLVMX86Info.lib;LLVMOrcJIT.lib;LLVMWindowsDriver.lib;LLVMMCJIT.lib;LLVMJITLink.lib;LLVMInterpreter.lib;LLVMExecutionEngine.lib;LLVMRuntimeDyld.lib;LLVMOrcTargetProcess.lib;LLVMOrcShared.lib;LLVMDWP.lib;LLVMDebugInfoLogicalView.lib;LLVMDebugInfoGSYM.lib;LLVMOption.lib;LLVMObjectYAML.lib;LLVMObjCopy.lib;LLVMMCA.lib;LLVMMCDisassembler.lib;LLVMLTO.lib;LLVMPasses.lib;LLVMCFGuard.lib;LLVMCoroutines.lib;LLVMipo.lib;LLVMVectorize.lib;LLVMLinker.lib;LLVMInstrumentation.lib;LLVMFrontendOpenMP.lib;LLVMFrontendOpenACC.lib;LLVMFrontendHLSL.lib;LLVMExtensions.lib;LLVMDWARFLinkerParallel.lib;LLVMDWARFLinker.lib;LLVMGlobalISel.lib;LLVMMIRParser.lib;LLVMAsmPrinter.lib;LLVMSelectionDAG.lib;LLVMCodeGen.lib;LLVMObjCARCOpts.lib;LLVMIRPrinter.lib;LLVMInterfaceStub.lib;LLVMFileCheck.lib;LLVMFuzzMutate.lib;LLVMTarget.lib;LLVMScalarOpts.lib;LLVMInstCombine.lib;LLVMAggressiveInstCombine.lib;LLVMTransformUtils.lib;LLVMBitWriter.lib;LLVMAnalysis.lib;LLVMProfileData.lib;LLVMSymbolize.lib;LLVMDebugInfoPDB.lib;LLVMDebugInfoMSF.lib;LLVMDebugInfoDWARF.lib;LLVMObject.lib;LLVMTextAPI.lib;LLVMMCParser.lib;LLVMIRReader.lib;LLVMAsmParser.lib;LLVMMC.lib;LLVMDebugInfoCodeView.lib;LLVMBitReader.lib;LLVMFuzzerCLI.lib;LLVMCore.lib;LLVMRemarks.lib;LLVMBitstreamReader.lib;LLVMBinaryFormat.lib;LLVMTargetParser.lib;LLVMTableGen.lib;LLVMSupport.lib;LLVMDemangle.lib;psapi.lib;shell32.lib;ole32.lib;uuid.lib;advapi32.lib</AdditionalDependencies>
       <AdditionalLibraryDirectories>C:\dev\thirdparty\llvm-16.0.0\llvm-project\llvm\build\Release\lib</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
@@ -119,8 +119,7 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>
-      </AdditionalDependencies>
+      <AdditionalDependencies>LLVMWindowsManifest.lib;LLVMXRay.lib;LLVMLibDriver.lib;LLVMDlltoolDriver.lib;LLVMCoverage.lib;LLVMLineEditor.lib;LLVMX86TargetMCA.lib;LLVMX86Disassembler.lib;LLVMX86AsmParser.lib;LLVMX86CodeGen.lib;LLVMX86Desc.lib;LLVMX86Info.lib;LLVMOrcJIT.lib;LLVMWindowsDriver.lib;LLVMMCJIT.lib;LLVMJITLink.lib;LLVMInterpreter.lib;LLVMExecutionEngine.lib;LLVMRuntimeDyld.lib;LLVMOrcTargetProcess.lib;LLVMOrcShared.lib;LLVMDWP.lib;LLVMDebugInfoLogicalView.lib;LLVMDebugInfoGSYM.lib;LLVMOption.lib;LLVMObjectYAML.lib;LLVMObjCopy.lib;LLVMMCA.lib;LLVMMCDisassembler.lib;LLVMLTO.lib;LLVMPasses.lib;LLVMCFGuard.lib;LLVMCoroutines.lib;LLVMipo.lib;LLVMVectorize.lib;LLVMLinker.lib;LLVMInstrumentation.lib;LLVMFrontendOpenMP.lib;LLVMFrontendOpenACC.lib;LLVMFrontendHLSL.lib;LLVMExtensions.lib;LLVMDWARFLinkerParallel.lib;LLVMDWARFLinker.lib;LLVMGlobalISel.lib;LLVMMIRParser.lib;LLVMAsmPrinter.lib;LLVMSelectionDAG.lib;LLVMCodeGen.lib;LLVMObjCARCOpts.lib;LLVMIRPrinter.lib;LLVMInterfaceStub.lib;LLVMFileCheck.lib;LLVMFuzzMutate.lib;LLVMTarget.lib;LLVMScalarOpts.lib;LLVMInstCombine.lib;LLVMAggressiveInstCombine.lib;LLVMTransformUtils.lib;LLVMBitWriter.lib;LLVMAnalysis.lib;LLVMProfileData.lib;LLVMSymbolize.lib;LLVMDebugInfoPDB.lib;LLVMDebugInfoMSF.lib;LLVMDebugInfoDWARF.lib;LLVMObject.lib;LLVMTextAPI.lib;LLVMMCParser.lib;LLVMIRReader.lib;LLVMAsmParser.lib;LLVMMC.lib;LLVMDebugInfoCodeView.lib;LLVMBitReader.lib;LLVMFuzzerCLI.lib;LLVMCore.lib;LLVMRemarks.lib;LLVMBitstreamReader.lib;LLVMBinaryFormat.lib;LLVMTargetParser.lib;LLVMTableGen.lib;LLVMSupport.lib;LLVMDemangle.lib;psapi.lib;shell32.lib;ole32.lib;uuid.lib;advapi32.lib</AdditionalDependencies>
       <AdditionalLibraryDirectories>C:\dev\thirdparty\llvm-16.0.0\llvm-project\llvm\build\Release\lib</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
@@ -140,41 +139,40 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>
-      </AdditionalDependencies>
+      <AdditionalDependencies>LLVMWindowsManifest.lib;LLVMXRay.lib;LLVMLibDriver.lib;LLVMDlltoolDriver.lib;LLVMCoverage.lib;LLVMLineEditor.lib;LLVMX86TargetMCA.lib;LLVMX86Disassembler.lib;LLVMX86AsmParser.lib;LLVMX86CodeGen.lib;LLVMX86Desc.lib;LLVMX86Info.lib;LLVMOrcJIT.lib;LLVMWindowsDriver.lib;LLVMMCJIT.lib;LLVMJITLink.lib;LLVMInterpreter.lib;LLVMExecutionEngine.lib;LLVMRuntimeDyld.lib;LLVMOrcTargetProcess.lib;LLVMOrcShared.lib;LLVMDWP.lib;LLVMDebugInfoLogicalView.lib;LLVMDebugInfoGSYM.lib;LLVMOption.lib;LLVMObjectYAML.lib;LLVMObjCopy.lib;LLVMMCA.lib;LLVMMCDisassembler.lib;LLVMLTO.lib;LLVMPasses.lib;LLVMCFGuard.lib;LLVMCoroutines.lib;LLVMipo.lib;LLVMVectorize.lib;LLVMLinker.lib;LLVMInstrumentation.lib;LLVMFrontendOpenMP.lib;LLVMFrontendOpenACC.lib;LLVMFrontendHLSL.lib;LLVMExtensions.lib;LLVMDWARFLinkerParallel.lib;LLVMDWARFLinker.lib;LLVMGlobalISel.lib;LLVMMIRParser.lib;LLVMAsmPrinter.lib;LLVMSelectionDAG.lib;LLVMCodeGen.lib;LLVMObjCARCOpts.lib;LLVMIRPrinter.lib;LLVMInterfaceStub.lib;LLVMFileCheck.lib;LLVMFuzzMutate.lib;LLVMTarget.lib;LLVMScalarOpts.lib;LLVMInstCombine.lib;LLVMAggressiveInstCombine.lib;LLVMTransformUtils.lib;LLVMBitWriter.lib;LLVMAnalysis.lib;LLVMProfileData.lib;LLVMSymbolize.lib;LLVMDebugInfoPDB.lib;LLVMDebugInfoMSF.lib;LLVMDebugInfoDWARF.lib;LLVMObject.lib;LLVMTextAPI.lib;LLVMMCParser.lib;LLVMIRReader.lib;LLVMAsmParser.lib;LLVMMC.lib;LLVMDebugInfoCodeView.lib;LLVMBitReader.lib;LLVMFuzzerCLI.lib;LLVMCore.lib;LLVMRemarks.lib;LLVMBitstreamReader.lib;LLVMBinaryFormat.lib;LLVMTargetParser.lib;LLVMTableGen.lib;LLVMSupport.lib;LLVMDemangle.lib;psapi.lib;shell32.lib;ole32.lib;uuid.lib;advapi32.lib</AdditionalDependencies>
       <AdditionalLibraryDirectories>C:\dev\thirdparty\llvm-16.0.0\llvm-project\llvm\build\Release\lib</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="source\codegen\evaluator.cpp" />
-    <ClCompile Include="source\codegen\abstract_syntax_tree\operators\operator_binary.cpp" />
-    <ClCompile Include="source\codegen\abstract_syntax_tree\operators\operator_addition_node.cpp" />
+    <ClCompile Include="main.cpp" />
     <ClCompile Include="source\codegen\abstract_syntax_tree\keywords\types\keyword_i32_node.cpp" />
     <ClCompile Include="source\codegen\abstract_syntax_tree\node.cpp" />
+    <ClCompile Include="source\codegen\abstract_syntax_tree\operators\operator_addition_node.cpp" />
+    <ClCompile Include="source\codegen\abstract_syntax_tree\operators\operator_binary.cpp" />
+    <ClCompile Include="source\codegen\codegen_visitor.cpp" />
     <ClCompile Include="source\codegen\visitor.cpp" />
-    <ClCompile Include="main.cpp" />
-    <ClCompile Include="source\parser\parser.cpp" />
     <ClCompile Include="source\lexer\lexer.cpp" />
-    <ClCompile Include="source\utility\string_accessor.cpp" />
+    <ClCompile Include="source\parser\parser.cpp" />
     <ClCompile Include="source\utility\filesystem.cpp" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="source\codegen\evaluator.h" />
-    <ClInclude Include="source\codegen\abstract_syntax_tree\operators\operator_binary.h" />
-    <ClInclude Include="source\codegen\abstract_syntax_tree\operators\operator_addition_node.h" />
-    <ClInclude Include="source\codegen\abstract_syntax_tree\keywords\types\keyword_i32_node.h" />
-    <ClInclude Include="source\codegen\abstract_syntax_tree\node.h" />
-    <ClInclude Include="source\codegen\visitor.h" />
-    <ClInclude Include="source\parser\parser.h" />
-    <ClInclude Include="source\lexer\lexer.h" />
-    <ClInclude Include="source\utility\string_accessor.h" />
-    <ClInclude Include="source\lexer\token.h" />
-    <ClInclude Include="source\utility\filesystem.h" />
-    <ClInclude Include="source\utility\macros.h" />
-    <ClInclude Include="source\utility\types.h" />
+    <ClCompile Include="source\utility\string_accessor.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="test\main.ch" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="source\codegen\abstract_syntax_tree\keywords\types\keyword_i32_node.h" />
+    <ClInclude Include="source\codegen\abstract_syntax_tree\node.h" />
+    <ClInclude Include="source\codegen\abstract_syntax_tree\operators\operator_addition_node.h" />
+    <ClInclude Include="source\codegen\abstract_syntax_tree\operators\operator_binary.h" />
+    <ClInclude Include="source\codegen\codegen_visitor.h" />
+    <ClInclude Include="source\codegen\visitor.h" />
+    <ClInclude Include="source\lexer\lexer.h" />
+    <ClInclude Include="source\lexer\token.h" />
+    <ClInclude Include="source\parser\parser.h" />
+    <ClInclude Include="source\utility\filesystem.h" />
+    <ClInclude Include="source\utility\macros.h" />
+    <ClInclude Include="source\utility\string_accessor.h" />
+    <ClInclude Include="source\utility\types.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

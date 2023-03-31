@@ -1,10 +1,11 @@
 #include "operator_addition_node.h"
+#include "../../visitor.h"
 
 namespace channel {
 	operator_addition_node::operator_addition_node(node* left, node* right)
 		: operator_binary(left, right) {}
 
-	void operator_addition_node::accept(visitor& visitor) {
-		visitor.visit_operator_addition_node(*this);
+	llvm::Value* operator_addition_node::accept(visitor& visitor) {
+		return visitor.visit_operator_addition_node(*this);
 	}
 }

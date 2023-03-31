@@ -1,7 +1,8 @@
 #include "keyword_i32_node.h"
+#include "../../../visitor.h"
 
 namespace channel {
-	void keyword_i32_node::accept(visitor& visitor)	{
-		visitor.visit_keyword_i32_node(*this);
+	llvm::Value* keyword_i32_node::accept(visitor& visitor)	{
+		return visitor.visit_keyword_i32_node(*this);
 	}
 }

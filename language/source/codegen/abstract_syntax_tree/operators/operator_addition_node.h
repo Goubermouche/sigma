@@ -8,6 +8,6 @@ namespace channel {
 	class operator_addition_node : public operator_binary {
 	public:
 		operator_addition_node(node* left, node* right);
-		void accept(visitor& visitor) override;
+		llvm::Value* accept(visitor& visitor) override;
 	};
 }

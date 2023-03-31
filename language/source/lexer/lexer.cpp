@@ -39,6 +39,13 @@ namespace channel {
 			return get_number_token();
 		}
 
+		// prevent '.' characters from being located at the beginning of a token
+		// note: we may want to allow this in some cases (ie. when calling member functions)
+		if (m_last_character == '.') {
+			ASSERT(false, "[lexer]: invalid '.' character at token start");
+			return token::unknown;
+		}
+
 		// check for EOF so we don't have to do it in the individual brace checks 
 		if(m_accessor.end()) {
 			return token::end_of_file;
@@ -139,7 +146,7 @@ namespace channel {
 					// 0.0f format
 					return token::number_f32;
 				}
-				ASSERT(false, "[lexer]: invalid number_f32 token");
+				ASSERT(false, "[lexer]: invalid number_f32 token (missing '.' character)");
 			}
 			// break early if we have a non-special and non-digit character
 			else if (!isdigit(m_last_character)) {

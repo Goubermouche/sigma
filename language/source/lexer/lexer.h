@@ -6,6 +6,10 @@
 namespace channel {
 	class lexer {
 	public:
+		/**
+		 * \brief Constructs the lexer for the given \source_file. 
+		 * \param source_file Source file to analyze
+		 */
 		lexer(const std::string& source_file);
 
 		/**

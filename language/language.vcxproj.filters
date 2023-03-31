@@ -91,6 +91,6 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <None Include="test\script.lang" />
+    <None Include="test\main.ch" />
   </ItemGroup>
 </Project>

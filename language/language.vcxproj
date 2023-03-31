@@ -174,7 +174,7 @@
     <ClInclude Include="source\utility\types.h" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="test\script.lang" />
+    <None Include="test\main.ch" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

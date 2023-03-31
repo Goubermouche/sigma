@@ -14,4 +14,3 @@ namespace channel {
         node* right;
 	};
 }
-

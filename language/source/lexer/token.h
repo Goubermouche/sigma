@@ -1,7 +1,7 @@
 #pragma once
 #include "../utility/macros.h"
 
-namespace language {
+namespace channel {
 	enum class token {
 		l_parenthesis,                      // token identifier for the '(' character
 		r_parenthesis,                      // token identifier for the ')' character
@@ -14,7 +14,7 @@ namespace language {
 		// signed integers	                
 		keyword_type_i8,                    // i8  0
 		keyword_type_i16,                   // i16 0
-		keyword_type_i32,                   // i32 0
+		keyword_type_i32,                   // i32 0 keyword_i32_node
 		keyword_type_i64,                   // i64 0
 							                
 		// unsigned integers                
@@ -42,7 +42,7 @@ namespace language {
 		// map<K, V>
 								        
 		// operators
-		operator_addition,                  // +
+		operator_addition,                  // +  operator_addition_node
 		operator_addition_assignment,       // +=
 		operator_subtraction,               // -
 		operator_subtraction_assignment,    // -=

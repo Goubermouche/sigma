@@ -1,6 +1,6 @@
 #include "lexer.h"
 
-namespace language {
+namespace channel {
 	lexer::lexer(const std::string& source_file) {
 		std::string source;
 

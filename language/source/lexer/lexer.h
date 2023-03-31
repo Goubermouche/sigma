@@ -1,9 +1,9 @@
 #pragma once
 
 #include "token.h"
-#include "string_accessor.h"
+#include "../utility/string_accessor.h"
 
-namespace language {
+namespace channel {
 	class lexer {
 	public:
 		lexer(const std::string& source_file);

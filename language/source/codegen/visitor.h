@@ -9,6 +9,9 @@ namespace channel {
 	// operators
 	class operator_addition_node;
 
+	/**
+	 * \brief Codegen visitor that walks the AST and generates LLVM IR.
+	 */
 	class visitor {
 	public:
 		virtual ~visitor() = default;

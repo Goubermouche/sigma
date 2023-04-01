@@ -7,4 +7,8 @@ namespace channel {
 	llvm::Value* operator_division_node::accept(visitor& visitor) {
 		return visitor.visit_operator_division_node(*this);
 	}
+
+	std::string operator_division_node::get_node_name() const {
+		return "operator_division_node";
+	}
 }

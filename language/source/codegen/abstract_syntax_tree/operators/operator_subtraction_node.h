@@ -9,5 +9,6 @@ namespace channel {
 	public:
 		operator_subtraction_node(node* left, node* right);
 		llvm::Value* accept(visitor& visitor) override;
+		std::string get_node_name() const override;
 	};
 }

@@ -17,6 +17,7 @@ namespace channel {
 		 * \param visitor Visitor to accept
 		 */
 		virtual llvm::Value* accept(visitor& visitor) = 0;
+		virtual std::string get_node_name() const = 0;
 	};
 }
 

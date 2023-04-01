@@ -8,6 +8,10 @@ namespace channel {
 		return visitor.visit_function_call_node(*this);
 	}
 
+	std::string function_call_node::get_node_name() const {
+		return "function_call_node";
+	}
+
 	const std::string& function_call_node::get_name() const	{
 		return m_name;
 	}

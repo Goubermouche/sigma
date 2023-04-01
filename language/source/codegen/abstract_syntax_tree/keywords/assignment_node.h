@@ -9,6 +9,7 @@ namespace channel {
 	public:
 		assignment_node(const std::string& name, node* expression);
 		llvm::Value* accept(visitor& visitor) override;
+		std::string get_node_name() const override;
 
 		const std::string& get_name() const;
 		node* get_expression() const;

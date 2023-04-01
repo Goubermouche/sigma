@@ -8,6 +8,10 @@ namespace channel {
 		return visitor.visit_declaration_node(*this);
 	}
 
+	std::string declaration_node::get_node_name() const {
+		return "declaration_node";
+	}
+
 	const std::string& declaration_node::get_name() const {
 		return m_name;
 	}

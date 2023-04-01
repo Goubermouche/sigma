@@ -7,8 +7,11 @@ namespace channel {
 	 */
 	class keyword_i32_node : public node {
 	public:
+		keyword_i32_node(i32 value);
 		llvm::Value* accept(visitor& visitor) override;
 
-		i32 value;
+		i32 get_value() const;
+	private:
+		i32 m_value;
 	};
 }

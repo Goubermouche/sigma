@@ -1,5 +1,4 @@
 #include "operator_addition_node.h"
-#include "../../visitor.h"
 
 namespace channel {
 	operator_addition_node::operator_addition_node(node* left, node* right)

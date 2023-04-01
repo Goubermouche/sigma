@@ -1,0 +1,19 @@
+#pragma once
+#include "../node.h"
+
+namespace channel {
+	/**
+	 * \brief AST node, represents the i8 type keyword.
+	 */
+	class assignment_node : public node {
+	public:
+		assignment_node(const std::string& name, node* expression);
+		llvm::Value* accept(visitor& visitor) override;
+
+		const std::string& get_name() const;
+		node* get_expression() const;
+	private:
+		std::string m_name;
+		node* m_expression;
+	};
+}

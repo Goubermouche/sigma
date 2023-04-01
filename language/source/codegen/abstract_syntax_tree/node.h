@@ -4,6 +4,7 @@
 
 namespace channel {
 	class visitor;
+
 	/**
 	 * \brief base AST node.
 	 */
@@ -18,3 +19,5 @@ namespace channel {
 		virtual llvm::Value* accept(visitor& visitor) = 0;
 	};
 }
+
+#include "../visitor.h"

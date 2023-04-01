@@ -7,7 +7,8 @@ namespace channel {
 		r_parenthesis,                      // token identifier for the ')' character
 		l_brace,                            // token identifier for the '{' character
 		r_brace,                            // token identifier for the '}' character
-					                        
+		comma,                              // ,
+
 		// keywords
 		keyword_type_void,                  // void nullptr
 
@@ -92,6 +93,8 @@ namespace channel {
 			return "l_parenthesis";
 		case token::r_parenthesis:
 			return "r_parenthesis";
+		case token::comma:
+			return "comma";
 
 		// keywords
 		case token::keyword_type_void:

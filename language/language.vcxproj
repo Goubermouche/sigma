@@ -144,6 +144,15 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="source\codegen\abstract_syntax_tree\keywords\assignment_node.cpp" />
+    <ClCompile Include="source\codegen\abstract_syntax_tree\keywords\declaration_node.cpp" />
+    <ClCompile Include="source\codegen\abstract_syntax_tree\keywords\function_call_node.cpp" />
+    <ClCompile Include="source\codegen\abstract_syntax_tree\operators\operator_division_node.cpp" />
+    <ClCompile Include="source\codegen\abstract_syntax_tree\operators\operator_multiplication_node.cpp" />
+    <ClCompile Include="source\codegen\abstract_syntax_tree\operators\operator_subtraction_node.cpp" />
+    <ClCompile Include="source\codegen\abstract_syntax_tree\keywords\types\keyword_i64_node.cpp" />
+    <ClCompile Include="source\codegen\abstract_syntax_tree\keywords\types\keyword_i16_node.cpp" />
+    <ClCompile Include="source\codegen\abstract_syntax_tree\keywords\types\keyword_i8_node.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="source\codegen\abstract_syntax_tree\keywords\types\keyword_i32_node.cpp" />
     <ClCompile Include="source\codegen\abstract_syntax_tree\node.cpp" />
@@ -155,11 +164,21 @@
     <ClCompile Include="source\parser\parser.cpp" />
     <ClCompile Include="source\utility\filesystem.cpp" />
     <ClCompile Include="source\utility\string_accessor.cpp" />
+    <ClCompile Include="source\codegen\abstract_syntax_tree\keywords\variable_node.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="test\main.ch" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="source\codegen\abstract_syntax_tree\keywords\assignment_node.h" />
+    <ClInclude Include="source\codegen\abstract_syntax_tree\keywords\declaration_node.h" />
+    <ClInclude Include="source\codegen\abstract_syntax_tree\keywords\function_call_node.h" />
+    <ClInclude Include="source\codegen\abstract_syntax_tree\operators\operator_division_node.h" />
+    <ClInclude Include="source\codegen\abstract_syntax_tree\operators\operator_multiplication_node.h" />
+    <ClInclude Include="source\codegen\abstract_syntax_tree\operators\operator_subtraction_node.h" />
+    <ClInclude Include="source\codegen\abstract_syntax_tree\keywords\types\keyword_i64_node.h" />
+    <ClInclude Include="source\codegen\abstract_syntax_tree\keywords\types\keyword_i16_node.h" />
+    <ClInclude Include="source\codegen\abstract_syntax_tree\keywords\types\keyword_i8_node.h" />
     <ClInclude Include="source\codegen\abstract_syntax_tree\keywords\types\keyword_i32_node.h" />
     <ClInclude Include="source\codegen\abstract_syntax_tree\node.h" />
     <ClInclude Include="source\codegen\abstract_syntax_tree\operators\operator_addition_node.h" />
@@ -173,6 +192,7 @@
     <ClInclude Include="source\utility\macros.h" />
     <ClInclude Include="source\utility\string_accessor.h" />
     <ClInclude Include="source\utility\types.h" />
+    <ClInclude Include="source\codegen\abstract_syntax_tree\keywords\variable_node.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

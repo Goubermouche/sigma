@@ -48,6 +48,36 @@
     <ClCompile Include="source\utility\string_accessor.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="source\codegen\abstract_syntax_tree\keywords\types\keyword_i8_node.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="source\codegen\abstract_syntax_tree\keywords\types\keyword_i16_node.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="source\codegen\abstract_syntax_tree\keywords\types\keyword_i64_node.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="source\codegen\abstract_syntax_tree\operators\operator_subtraction_node.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="source\codegen\abstract_syntax_tree\operators\operator_division_node.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="source\codegen\abstract_syntax_tree\operators\operator_multiplication_node.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="source\codegen\abstract_syntax_tree\keywords\function_call_node.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="source\codegen\abstract_syntax_tree\keywords\variable_node.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="source\codegen\abstract_syntax_tree\keywords\declaration_node.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="source\codegen\abstract_syntax_tree\keywords\assignment_node.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="test\main.ch" />
@@ -90,6 +120,36 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="source\utility\types.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="source\codegen\abstract_syntax_tree\keywords\types\keyword_i8_node.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="source\codegen\abstract_syntax_tree\keywords\types\keyword_i16_node.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="source\codegen\abstract_syntax_tree\keywords\types\keyword_i64_node.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="source\codegen\abstract_syntax_tree\operators\operator_subtraction_node.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="source\codegen\abstract_syntax_tree\operators\operator_division_node.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="source\codegen\abstract_syntax_tree\operators\operator_multiplication_node.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="source\codegen\abstract_syntax_tree\keywords\function_call_node.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="source\codegen\abstract_syntax_tree\keywords\variable_node.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="source\codegen\abstract_syntax_tree\keywords\declaration_node.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="source\codegen\abstract_syntax_tree\keywords\assignment_node.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

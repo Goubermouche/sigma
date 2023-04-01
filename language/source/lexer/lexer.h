@@ -96,6 +96,7 @@ namespace channel {
 			{ ")" , token::r_parenthesis                      },
 			{ "{" , token::l_brace                            },
 			{ "}" , token::r_brace                            },
+			{ "," , token::comma                              },
 														      
 			// operators								      
 			{ "+" , token::operator_addition                  },

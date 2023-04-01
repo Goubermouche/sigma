@@ -21,6 +21,9 @@ namespace channel {
 		node* parse_factor();
 		node* parse_number();
 		node* parse_function_call(const std::string& function_name);
+		node* parse_function_definition();
+
+		static bool is_token_return_type(token token);
 	private:
 		lexer m_lexer;
 		token m_current_token = token::end_of_file;

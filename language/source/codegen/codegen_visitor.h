@@ -15,11 +15,13 @@ namespace channel {
 		codegen_visitor();
 
 		llvm::Value* get_variable_value(const std::string& name);
+		std::unique_ptr<llvm::Module> get_module();
 
 		llvm::Value* visit_assignment_node(assignment_node& node) override;
 		llvm::Value* visit_declaration_node(declaration_node& node) override;
 		llvm::Value* visit_function_call_node(function_call_node& node) override;
 		llvm::Value* visit_variable_node(variable_node& node) override;
+		llvm::Value* visit_function_node(function_node& node) override;
 
 		// keywords
 		llvm::Value* visit_keyword_i8_node(keyword_i8_node& node) override;
@@ -35,7 +37,8 @@ namespace channel {
 	private:
 		llvm::LLVMContext m_context;
 		llvm::IRBuilder<> m_builder;
-		std::unique_ptr<llvm::Module> m_module;
 		std::map<std::string, llvm::Value*> m_named_values;
+	public:
+		std::unique_ptr<llvm::Module> m_module;
 	};
 }

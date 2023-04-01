@@ -5,6 +5,8 @@
 #include "../codegen/abstract_syntax_tree/keywords/function_call_node.h"
 #include "../codegen/abstract_syntax_tree/keywords/variable_node.h"
 #include "../codegen/abstract_syntax_tree/keywords/types/keyword_i32_node.h"
+#include "../codegen/abstract_syntax_tree/keywords/function_node.h"
+
 #include "../codegen/abstract_syntax_tree/operators/operator_addition_node.h"
 #include "../codegen/abstract_syntax_tree/operators/operator_division_node.h"
 #include "../codegen/abstract_syntax_tree/operators/operator_multiplication_node.h"
@@ -13,33 +15,36 @@
 namespace channel {
 	parser::parser(const std::string& source_file)
 		: m_lexer(source_file) {
-		token token;
+		//token token;
 
-		while ((token = m_lexer.get_token()) != token::end_of_file) {
-			std::cout << token_to_string(token);
+		//while ((token = m_lexer.get_token()) != token::end_of_file) {
+		//	std::cout << token_to_string(token);
 
-			if (token == token::identifier) {
-				std::cout << " (" << m_lexer.get_identifier() << ')';
-			}
-			else if (token == token::number_signed ||
-				token == token::number_unsigned ||
-				token == token::number_f32 ||
-				token == token::number_f64) {
-				std::cout << " (" << m_lexer.get_value() << ')';
-			}
+		//	if (token == token::identifier) {
+		//		std::cout << " (" << m_lexer.get_identifier() << ')';
+		//	}
+		//	else if (token == token::number_signed ||
+		//		token == token::number_unsigned ||
+		//		token == token::number_f32 ||
+		//		token == token::number_f64) {
+		//		std::cout << " (" << m_lexer.get_value() << ')';
+		//	}
 
-			std::cout << '\n';
-		}
+		//	std::cout << '\n';
+		//}
 	}
 
 	std::vector<node*> parser::parse() {
 		std::vector<node*> program;
 
+		std::cout << "-----------------------------\n";
 		consume_next_token();
 		while (m_current_token != token::end_of_file) {
-			node* statement = parse_statement();
-			if (statement != nullptr) {
-				program.push_back(statement);
+			if(is_token_return_type(m_current_token)) {
+				program.push_back(parse_function_definition());
+			}
+			else {
+				program.push_back(parse_statement());
 			}
 		}
 
@@ -47,13 +52,20 @@ namespace channel {
 	}
 
 	node* parser::parse_statement() {
+		node* statement;
+
 		switch (m_current_token) {
 		case token::keyword_type_i32:
-			return parse_declaration_or_assignment();
+			statement = parse_declaration_or_assignment();
+			break;
 		default:
 			std::cout << "unhandled token (" << token_to_string(m_current_token) << ") \n";
 			break;
 		}
+
+		expect_next_token(token::semicolon);
+
+		return statement;
 	}
 
 	void parser::consume_next_token() {
@@ -196,5 +208,43 @@ namespace channel {
 
 		consume_next_token(); // consume the right parenthesis
 		return new function_call_node(function_name, arguments);
+	}
+
+	node* parser::parse_function_definition() {
+		// parse the return type (e.g., int)
+		std::string return_type = "int";
+		consume_next_token();
+
+		// parse the function name (e.g., main, other_function)
+		std::string name = m_lexer.get_identifier();
+		consume_next_token();
+
+		// parse the parameter list (assume no parameters for now)
+		expect_next_token(token::l_parenthesis);
+		expect_next_token(token::r_parenthesis);
+
+		// parse the opening curly brace '{'
+		expect_next_token(token::l_brace);
+
+
+		// Parse statements inside the function
+		std::vector<node*> statements;
+		while (m_current_token != token::r_brace) {
+			statements.push_back(parse_statement());
+		}
+
+		// consume the closing curly brace '}'
+		consume_next_token();
+
+		return new function_node(return_type, name, std::move(statements));
+	}
+
+	bool parser::is_token_return_type(token token) {
+		switch (token) {
+		case token::keyword_type_i32:
+			return true;
+		default:
+			return false;
+		}
 	}
 }

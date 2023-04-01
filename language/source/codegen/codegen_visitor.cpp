@@ -4,6 +4,7 @@
 #include "abstract_syntax_tree/keywords/declaration_node.h"
 #include "abstract_syntax_tree/keywords/function_call_node.h"
 #include "abstract_syntax_tree/keywords/variable_node.h"
+#include "abstract_syntax_tree/keywords/function_node.h"
 
 // keywords
 #include "abstract_syntax_tree/keywords/types/keyword_i8_node.h"
@@ -17,6 +18,8 @@
 #include "abstract_syntax_tree/operators/operator_subtraction_node.h"
 #include "abstract_syntax_tree/operators/operator_multiplication_node.h"
 #include "abstract_syntax_tree/operators/operator_division_node.h"
+
+#include <llvm/IR/Verifier.h>
 
 namespace channel {
 	codegen_visitor::codegen_visitor() : m_builder(m_context) {
@@ -45,19 +48,30 @@ namespace channel {
 		return new_value;
 	}
 
+	// todo: optimize this function so that we don't use a ptr to value in the generated IR.
 	llvm::Value* codegen_visitor::visit_declaration_node(declaration_node& node) {
-		// evaluate the expression to get the initial value
-		node.get_expression()->accept(*this);
-		llvm::Value* initial_value = m_builder.GetInsertBlock()->getParent()->back().getTerminator()->getOperand(0);
+		// Evaluate the expression to get the initial value
+		llvm::Value* initial_value = node.get_expression()->accept(*this);
 
-		// allocate memory for the new variable
-		llvm::Function* current_function = m_builder.GetInsertBlock()->getParent();
-		llvm::AllocaInst* alloca = m_builder.CreateAlloca(initial_value->getType(), 0, node.get_name().c_str());
+		if (m_builder.GetInsertBlock() == nullptr) {
+			ASSERT(false, "[codegen]: invalid insert block");
+			return nullptr;
+		}
 
-		// store the initial value in the memory
+		// Allocate memory for the new variable
+		const llvm::Function* current_function = m_builder.GetInsertBlock()->getParent();
+
+		if (current_function == nullptr) {
+			ASSERT(false, "[codegen]: invalid function");
+			return nullptr;
+		}
+
+		llvm::AllocaInst* alloca = m_builder.CreateAlloca(initial_value->getType(), nullptr, node.get_name());
+
+		// Store the initial value in the memory
 		m_builder.CreateStore(initial_value, alloca);
 
-		// add the variable to the namedValues map
+		// Add the variable to the namedValues map
 		m_named_values[node.get_name()] = alloca;
 
 		return initial_value;
@@ -88,6 +102,33 @@ namespace channel {
 		}
 
 		return m_builder.CreateRet(variable_value);
+	}
+
+	llvm::Value* codegen_visitor::visit_function_node(function_node& node) {
+		llvm::Type* return_type = llvm::Type::getInt32Ty(m_context); // Assuming 'int' return type for simplicity
+		llvm::FunctionType* function_type = llvm::FunctionType::get(return_type, false);
+		llvm::Function* function = llvm::Function::Create(function_type, llvm::Function::ExternalLinkage, node.get_name(), m_module.get());
+
+		llvm::BasicBlock* entryBlock = llvm::BasicBlock::Create(m_context, "entry", function);
+		m_builder.SetInsertPoint(entryBlock);
+
+		for (const auto& statement : node.get_statements()) {
+			statement->accept(*this);
+		}
+
+		// add a return statement if the function does not have one
+		if (!entryBlock->getTerminator()) {
+			if (return_type->isVoidTy()) {
+				m_builder.CreateRetVoid();
+			}
+			else {
+				m_builder.CreateRet(llvm::ConstantInt::get(m_context, llvm::APInt(32, 0))); // Assuming 'int' return type
+			}
+		}
+
+		llvm::verifyFunction(*function);
+
+		return function;
 	}
 
 	llvm::Value* codegen_visitor::visit_keyword_i8_node(keyword_i8_node& node) {

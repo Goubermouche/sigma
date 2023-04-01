@@ -13,6 +13,7 @@ namespace channel {
     class variable_node;
     class declaration_node;
     class assignment_node;
+    class function_node;
 }
 
 #include <llvm/IR/Value.h>
@@ -29,6 +30,8 @@ namespace channel {
         virtual llvm::Value* visit_declaration_node(declaration_node& node) = 0;
         virtual llvm::Value* visit_function_call_node(function_call_node& node) = 0;
         virtual llvm::Value* visit_variable_node(variable_node& node) = 0;
+        virtual llvm::Value* visit_function_node(function_node& node) = 0;
+
         // keywords
         virtual llvm::Value* visit_keyword_i8_node(keyword_i8_node& node) = 0;
         virtual llvm::Value* visit_keyword_i16_node(keyword_i16_node& node) = 0;

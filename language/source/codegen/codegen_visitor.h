@@ -32,6 +32,7 @@ namespace channel {
 		llvm::Value* visit_operator_subtraction_node(operator_subtraction_node& node) override;
 		llvm::Value* visit_operator_multiplication_node(operator_multiplication_node& node) override;
 		llvm::Value* visit_operator_division_node(operator_division_node& node) override;
+		llvm::Value* visit_operator_modulo_node(operator_modulo_node& node) override;
 	private:
 		llvm::LLVMContext m_context;
 		llvm::IRBuilder<> m_builder;

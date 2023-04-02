@@ -11,6 +11,7 @@
 #include "../codegen/abstract_syntax_tree/operators/operator_division_node.h"
 #include "../codegen/abstract_syntax_tree/operators/operator_multiplication_node.h"
 #include "../codegen/abstract_syntax_tree/operators/operator_subtraction_node.h"
+#include "../codegen/abstract_syntax_tree/operators/operator_modulo_node.h"
 
 namespace channel {
 	parser::parser(const std::string& source_file)
@@ -129,17 +130,19 @@ namespace channel {
 	node* parser::parse_term() {
 		node* factor = parse_factor();
 
-		while (m_current_token == token::operator_multiplication || m_current_token == token::operator_division) {
+		while (m_current_token == token::operator_multiplication || m_current_token == token::operator_division || m_current_token == token::operator_modulo) {
 			const token op = m_current_token;
 			consume_next_token();
-
 			node* right = parse_factor();
 
-			if (op == token::operator_multiplication) {
+			if(op == token::operator_multiplication) {
 				factor = new operator_multiplication_node(factor, right);
 			}
-			else {
+			else if(op == token::operator_division) {
 				factor = new operator_division_node(factor, right);
+			}
+			else if(op == token::operator_modulo) {
+				factor = new operator_modulo_node(factor, right);
 			}
 		}
 

@@ -5,10 +5,13 @@ namespace channel {
     class keyword_i16_node;
     class keyword_i32_node;
     class keyword_i64_node;
+
     class operator_addition_node;
     class operator_subtraction_node;
     class operator_multiplication_node;
     class operator_division_node;
+    class operator_modulo_node;
+
     class function_call_node;
     class variable_node;
     class declaration_node;
@@ -43,5 +46,6 @@ namespace channel {
         virtual llvm::Value* visit_operator_subtraction_node(operator_subtraction_node& node) = 0;
         virtual llvm::Value* visit_operator_multiplication_node(operator_multiplication_node& node) = 0;
         virtual llvm::Value* visit_operator_division_node(operator_division_node& node) = 0;
+        virtual llvm::Value* visit_operator_modulo_node(operator_modulo_node& node) = 0;
     };
 }

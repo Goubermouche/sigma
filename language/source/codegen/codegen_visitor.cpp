@@ -18,6 +18,7 @@
 #include "abstract_syntax_tree/operators/operator_subtraction_node.h"
 #include "abstract_syntax_tree/operators/operator_multiplication_node.h"
 #include "abstract_syntax_tree/operators/operator_division_node.h"
+#include "abstract_syntax_tree/operators/operator_modulo_node.h"
 
 #include <llvm/IR/Verifier.h>
 
@@ -144,7 +145,7 @@ namespace channel {
 	llvm::Value* codegen_visitor::visit_operator_addition_node(operator_addition_node& node) {
 		llvm::Value* left = node.left->accept(*this);
 		llvm::Value* right = node.right->accept(*this);
-		return m_builder.CreateAdd(left, right, "add"); // addtmp
+		return m_builder.CreateAdd(left, right, "add");
 	}
 
 	llvm::Value* codegen_visitor::visit_operator_subtraction_node(operator_subtraction_node& node) {
@@ -163,5 +164,11 @@ namespace channel {
 		llvm::Value* left = node.left->accept(*this);
 		llvm::Value* right = node.right->accept(*this);
 		return m_builder.CreateSDiv(left, right, "div");
+	}
+
+	llvm::Value* codegen_visitor::visit_operator_modulo_node(operator_modulo_node& node) {
+		llvm::Value* left = node.left->accept(*this);
+		llvm::Value* right = node.right->accept(*this);
+		return m_builder.CreateSRem(left, right, "mod");
 	}
 }

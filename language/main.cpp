@@ -7,7 +7,6 @@ int main() {
 	channel::parser parser("test/main.ch");
 	const std::vector<channel::node*> program = parser.parse();
 	channel::codegen_visitor visitor;
-
 	std::cout << "node count: " << program.size() << '\n';
 
 	for (channel::node* node : program) {
@@ -15,6 +14,5 @@ int main() {
 	}
 
 	visitor.print_code();
-
 	return 0;
 }

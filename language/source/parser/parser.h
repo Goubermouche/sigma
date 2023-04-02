@@ -4,6 +4,8 @@
 #include "../codegen/abstract_syntax_tree/node.h"
 
 namespace channel {
+	// todo: fix a bug that's causes an error to be thrown when two semicolons
+	//       are used right one after another 
 	class parser {
 	public: 
 		parser(const std::string& source_file);

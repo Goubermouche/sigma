@@ -57,6 +57,7 @@ namespace channel {
 
 		switch (m_current_token) {
 		// todo: generalize
+		case token::identifier:
 		case token::keyword_type_i32:
 			statement = parse_declaration_or_assignment();
 			break;
@@ -88,21 +89,27 @@ namespace channel {
 		const bool is_declaration = m_current_token == token::keyword_type_i32;
 		consume_next_token();
 
-		ASSERT(m_current_token == token::identifier, "[parser]: expected an identifier, but received '" + token_to_string(m_current_token) + "' instead");
+		// parse declaration
+		if(is_declaration) {
+			ASSERT(m_current_token == token::identifier, "[parser]: expected an identifier, but received '" + token_to_string(m_current_token) + "' instead");
+			const std::string name = m_lexer.get_identifier();
+			consume_next_token(); // consume identifier token
 
-		const std::string name = m_lexer.get_identifier();
-		consume_next_token(); // consume identifier token
+			node* value = nullptr;
 
-		// todo: this should parse as a declaration, but it throws an error right now
-		//       i32 value; // error
-		ASSERT(m_current_token == token::operator_assignment, "[parser]: expected an assignment operator, but received '" + token_to_string(m_current_token) + "' instead");
+			if (m_current_token == token::operator_assignment) {
+				consume_next_token();
+				value = parse_expression();
+			}
 
-		consume_next_token();
-		node* value = parse_expression();
-
-		if (is_declaration) {
 			return new declaration_node(name, value);
 		}
+
+		// parse assignment
+		const std::string name = m_lexer.get_identifier();
+		ASSERT(m_current_token == token::operator_assignment, "[parser]: expected an assignment operator, but received '" + token_to_string(m_current_token) + "' instead");
+		consume_next_token();
+		node* value = parse_expression();
 
 		return new assignment_node(name, value);
 	}
@@ -180,7 +187,8 @@ namespace channel {
 	}
 
 	node* parser::parse_number() {
-		const i32 value = std::stoi(m_lexer.get_value()); // todo: implement a specific get_number_value() lexer function
+		// todo: generalize
+		const i32 value = std::stoi(m_lexer.get_value());
 		consume_next_token(); // consume the number token
 		return new keyword_i32_node(value);
 	}

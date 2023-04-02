@@ -12,7 +12,6 @@ namespace channel {
 	public:
 		codegen_visitor();
 
-		llvm::Value* get_variable_value(const std::string& name);
 		void print_code() const;
 
 		llvm::Value* visit_assignment_node(assignment_node& node) override;

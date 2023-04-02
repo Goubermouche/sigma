@@ -27,43 +27,45 @@ namespace channel {
 		m_module = std::make_unique<llvm::Module>("channel", m_context);
 	}
 
-	llvm::Value* codegen_visitor::get_variable_value(const std::string& name) {
-		return m_named_values[name];
-	}
-
 	void codegen_visitor::print_code() const {
 		std::cout << "-----------------------------\n";
 		m_module->print(llvm::outs(), nullptr);
 	}
 
 	llvm::Value* codegen_visitor::visit_assignment_node(assignment_node& node) {
-		// evaluate the expression to get the new value
-		node.get_expression()->accept(*this);
-		llvm::Value* new_value = m_builder.GetInsertBlock()->getParent()->back().getTerminator()->getOperand(0);
-		llvm::Value* variable_value = get_variable_value(node.get_name());
+		// look up the variable in the namedValues map
+		llvm::Value* variable = m_named_values[node.get_name()];
+		ASSERT(variable, "[codegen]: variable not found (" + node.get_name() + ")");
 
-		ASSERT(variable_value, "[codegen]: variable not found (" + node.get_name() + ")");
-
-		// update the value of the variable
-		m_builder.CreateStore(new_value, variable_value);
-
+		// evaluate the expression on the right-hand side of the assignment
+		llvm::Value* new_value = node.get_expression()->accept(*this);
+		// store the value in the memory location of the variable
+		m_builder.CreateStore(new_value, variable);
 		return new_value;
 	}
 
-	// todo: optimize this function so that we don't use a ptr to value in the generated IR.
 	llvm::Value* codegen_visitor::visit_declaration_node(declaration_node& node) {
 		// evaluate the expression to get the initial value
-		llvm::Value* initial_value = node.get_expression()->accept(*this);
+		llvm::Value* initial_value;
+		// assume i32 type for now
+		// todo: generalize
+		llvm::Type* var_type = llvm::Type::getInt32Ty(m_context);
+
+		if (node.get_expression()) {
+			// evaluate the expression to get the initial value
+			initial_value = node.get_expression()->accept(*this);
+		}
+		else {
+			// use a default value for unassigned variables
+			initial_value = llvm::ConstantInt::get(var_type, 0);
+		}
 
 		ASSERT(m_builder.GetInsertBlock(), "[codegen]: invalid insert block");
-
-		// allocate memory for the new variable
 		const llvm::Function* current_function = m_builder.GetInsertBlock()->getParent();
-
 		ASSERT(current_function, "[codegen]: invalid function");
 
 		// store the initial value in the memory
-		llvm::AllocaInst* alloca = m_builder.CreateAlloca(initial_value->getType(), nullptr, node.get_name());
+		llvm::AllocaInst* alloca = m_builder.CreateAlloca(var_type, nullptr, node.get_name());
 		m_builder.CreateStore(initial_value, alloca);
 		m_named_values[node.get_name()] = alloca;
 
@@ -72,7 +74,6 @@ namespace channel {
 
 	llvm::Value* codegen_visitor::visit_function_call_node(function_call_node& node) {
 		llvm::Function* function = m_module->getFunction(node.get_name());
-
 		ASSERT(function, "[codegen]: function not found (" + node.get_name() + ")");
 
 		// generate code for each argument expression
@@ -86,8 +87,8 @@ namespace channel {
 	}
 
 	llvm::Value* codegen_visitor::visit_variable_node(variable_node& node) {
-		// look up tge variable in the named value map
-		llvm::Value* variable_value = get_variable_value(node.get_name());
+		// look up the variable in the named value map
+		llvm::Value* variable_value = m_named_values[node.get_name()];
 
 		ASSERT(variable_value, "[codegen]: variable not found (" + node.get_name() + ")");
 

@@ -7,7 +7,7 @@ namespace channel {
 	 */
 	class declaration_node : public node {
 	public:
-		declaration_node(const std::string& name, node* expression);
+		declaration_node(const std::string& name, node* expression = nullptr);
 		llvm::Value* accept(visitor& visitor) override;
 		std::string get_node_name() const override;
 

@@ -3,7 +3,7 @@
 
 namespace channel {
 	/**
-	 * \brief AST node, represents the i8 type keyword.
+	 * \brief AST node, represents a call to a given function. 
 	 */
 	class function_call_node : public node {
 	public:

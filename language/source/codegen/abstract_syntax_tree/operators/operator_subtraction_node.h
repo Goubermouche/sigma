@@ -3,7 +3,7 @@
 
 namespace channel {
 	/**
-	 * \brief AST node, represents the binary addition operator.
+	 * \brief AST node, represents the binary subtraction operator.
 	 */
 	class operator_subtraction_node : public operator_binary {
 	public:

@@ -3,7 +3,7 @@
 
 namespace channel {
 	/**
-	 * \brief AST node, represents the i8 type keyword.
+	 * \brief AST node, represents the declaration of a variable. 
 	 */
 	class declaration_node : public node {
 	public:

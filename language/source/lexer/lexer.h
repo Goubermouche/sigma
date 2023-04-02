@@ -38,6 +38,9 @@ namespace channel {
 		 * \return Extracted operator
 		 */
 		const std::string& get_operator() const { return m_operator_string; }
+
+		u64 get_position() const;
+		void set_position(u64 position);
 	private:
 		/**
 		 * \brief Helper function that reads the next char in the provided source file and advances the accessor caret.

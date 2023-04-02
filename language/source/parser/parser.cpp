@@ -41,25 +41,27 @@ namespace channel {
 		std::cout << "-----------------------------\n";
 		consume_next_token();
 		while (m_current_token != token::end_of_file) {
-			if(is_token_return_type(m_current_token)) {
+			if(is_token_return_type(m_current_token) && peek_is_function_definition()) {
+				// parse a top-level function definition
 				program.push_back(parse_function_definition());
 			}
 			else {
-				program.push_back(parse_statement());
+				// parse a top-level statement
+				program.push_back(parse_statement(true));
 			}
 		}
 
 		return program;
 	}
 
-	node* parser::parse_statement() {
+	node* parser::parse_statement(bool is_global) {
 		node* statement;
 
 		switch (m_current_token) {
 		// todo: generalize
 		case token::identifier:
 		case token::keyword_type_i32:
-			statement = parse_declaration_or_assignment();
+			statement = parse_declaration_or_assignment(is_global);
 			break;
 		default:
 			std::cout << "unhandled token (" << token_to_string(m_current_token) << ") \n";
@@ -67,7 +69,6 @@ namespace channel {
 		}
 
 		expect_next_token(token::semicolon);
-
 		return statement;
 	}
 
@@ -84,7 +85,7 @@ namespace channel {
 		}
 	}
 
-	node* parser::parse_declaration_or_assignment() {
+	node* parser::parse_declaration_or_assignment(bool is_global) {
 		// todo: generalize
 		const bool is_declaration = m_current_token == token::keyword_type_i32;
 		consume_next_token();
@@ -102,7 +103,7 @@ namespace channel {
 				value = parse_expression();
 			}
 
-			return new declaration_node(name, value);
+			return new declaration_node(name, is_global, value);
 		}
 
 		// parse assignment
@@ -225,7 +226,6 @@ namespace channel {
 		// todo: generalize
 		const std::string return_type = "int";
 		consume_next_token();
-
 		// parse the function name (e.g., main, other_function)
 		const std::string name = m_lexer.get_identifier();
 		consume_next_token();
@@ -241,7 +241,7 @@ namespace channel {
 		// parse statements inside the function
 		std::vector<node*> statements;
 		while (m_current_token != token::r_brace) {
-			statements.push_back(parse_statement());
+			statements.push_back(parse_statement(false));
 		}
 
 		// consume the closing curly brace '}'
@@ -270,5 +270,24 @@ namespace channel {
 			default:
 				return false;
 		}
+	}
+
+	bool parser::peek_is_function_definition() {
+		// save the current state
+		const token saved_token = m_current_token;
+		const u64 saved_position = m_lexer.get_position();
+
+		// peek the next tokens
+		consume_next_token();
+		consume_next_token();
+
+		// check if the current token is an opening parenthesis
+		const bool is_function_definition = (m_current_token == token::l_parenthesis);
+
+		// restore the saved state
+		m_current_token = saved_token;
+		m_lexer.set_position(saved_position);
+
+		return is_function_definition;
 	}
 }

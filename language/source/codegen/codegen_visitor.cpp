@@ -60,6 +60,22 @@ namespace channel {
 			initial_value = llvm::ConstantInt::get(var_type, 0);
 		}
 
+		// create a global variable
+		if(node.is_global()) {
+			llvm::GlobalVariable* global_variable = new llvm::GlobalVariable(*m_module,
+				var_type,
+				false,
+				llvm::GlobalValue::CommonLinkage,
+				nullptr,
+				node.get_name());
+
+			global_variable->setAlignment(llvm::MaybeAlign(4));
+			global_variable->setInitializer(llvm::cast<llvm::Constant>(initial_value));
+			m_named_values[node.get_name()] = global_variable;
+			return global_variable;
+		}
+
+		// create a local variable
 		ASSERT(m_builder.GetInsertBlock(), "[codegen]: invalid insert block");
 		const llvm::Function* current_function = m_builder.GetInsertBlock()->getParent();
 		ASSERT(current_function, "[codegen]: invalid function");

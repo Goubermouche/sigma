@@ -31,4 +31,12 @@ namespace channel::detail {
 	bool string_accessor::end() const {
 		return m_position > m_string.size();
 	}
+
+	u64 string_accessor::get_position() const {
+		return m_position;
+	}
+
+	void string_accessor::set_position(u64 position) {
+		m_position = position;
+	}
 }

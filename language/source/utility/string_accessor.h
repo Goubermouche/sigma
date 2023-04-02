@@ -42,6 +42,9 @@ namespace channel::detail {
 		 * \return True if the caret is out of bounds, otherwise False
 		 */
 		bool end() const;
+
+		u64 get_position() const;
+		void set_position(u64 position);
 	private:
 		std::string m_string; // contained string
 		u64 m_position = 0;   // current caret position

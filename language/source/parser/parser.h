@@ -12,12 +12,12 @@ namespace channel {
 
 		std::vector<node*> parse();
 	private:
-		node* parse_statement();
+		node* parse_statement(bool is_global);
 
 		void consume_next_token();
 		void expect_next_token(token token);
 
-		node* parse_declaration_or_assignment();
+		node* parse_declaration_or_assignment(bool is_global);
 		node* parse_expression();
 		node* parse_term();
 		node* parse_factor();
@@ -26,6 +26,7 @@ namespace channel {
 		node* parse_function_definition();
 
 		static bool is_token_return_type(token token);
+		bool peek_is_function_definition();
 	private:
 		lexer m_lexer;
 		token m_current_token = token::end_of_file;

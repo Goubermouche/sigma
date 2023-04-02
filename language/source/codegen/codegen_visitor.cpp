@@ -32,6 +32,11 @@ namespace channel {
 		m_module->print(llvm::outs(), nullptr);
 	}
 
+	void codegen_visitor::verify() const {
+		std::cout << "-----------------------------\n";
+		llvm::verifyModule(*m_module, &llvm::outs());
+	}
+
 	llvm::Value* codegen_visitor::visit_assignment_node(assignment_node& node) {
 		// look up the variable in the namedValues map
 		llvm::Value* variable = m_named_values[node.get_name()];
@@ -62,16 +67,31 @@ namespace channel {
 
 		// create a global variable
 		if(node.is_global()) {
-			llvm::GlobalVariable* global_variable = new llvm::GlobalVariable(*m_module,
-				var_type,
-				false,
-				llvm::GlobalValue::CommonLinkage,
-				nullptr,
-				node.get_name());
+			llvm::GlobalVariable* global_variable;
+			if (llvm::Constant* const_init_value = llvm::dyn_cast<llvm::Constant>(initial_value)) {
+				global_variable = new llvm::GlobalVariable(*m_module,
+					initial_value->getType(),
+					false, // is not constant
+					llvm::GlobalValue::PrivateLinkage,
+					const_init_value,
+					node.get_name()
+				);
+			}
+			else {
+				global_variable = new llvm::GlobalVariable(*m_module,
+					initial_value->getType(),
+					false, // is not constant
+					llvm::GlobalValue::PrivateLinkage,
+					llvm::Constant::getNullValue(initial_value->getType()), // default initializer
+					node.get_name()
+				);
 
-			global_variable->setAlignment(llvm::MaybeAlign(4));
-			global_variable->setInitializer(llvm::cast<llvm::Constant>(initial_value));
-			m_named_values[node.get_name()] = global_variable;
+				// store the non-constant initial value in the global variable
+				m_builder.CreateStore(initial_value, global_variable);
+			}
+
+			// add the variable to the m_named_global_values map
+			m_named_global_values[node.get_name()] = global_variable;
 			return global_variable;
 		}
 
@@ -103,13 +123,18 @@ namespace channel {
 	}
 
 	llvm::Value* codegen_visitor::visit_variable_node(variable_node& node) {
-		// look up the variable in the named value map
-		llvm::Value* variable_value = m_named_values[node.get_name()];
+		// local variable
+		if(llvm::Value* variable_value = m_named_values[node.get_name()]) {
+			// load the value from the memory location
+			return m_builder.CreateLoad(variable_value->getType(), variable_value, node.get_name());
+		}
 
-		ASSERT(variable_value, "[codegen]: variable not found (" + node.get_name() + ")");
+		// global variable
+		llvm::Value* global_variable_value = m_named_global_values[node.get_name()];
+		ASSERT(global_variable_value, "[codegen]: variable not found (" + node.get_name() + ")");
 
-		// load the value from the memory location
-		return m_builder.CreateLoad(variable_value->getType(), variable_value, node.get_name().c_str());
+		// doesn't work :/
+		return m_builder.CreateLoad(global_variable_value->getType(), global_variable_value, node.get_name());
 	}
 
 	llvm::Value* codegen_visitor::visit_function_node(function_node& node) {
@@ -137,8 +162,6 @@ namespace channel {
 				m_builder.CreateRet(llvm::ConstantInt::get(m_context, llvm::APInt(32, 0)));
 			}
 		}
-
-		llvm::verifyFunction(*function);
 
 		return function;
 	}

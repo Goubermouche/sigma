@@ -13,6 +13,7 @@ int main() {
 		node->accept(visitor);
 	}
 
+	visitor.verify();
 	visitor.print_code();
 	return 0;
 }

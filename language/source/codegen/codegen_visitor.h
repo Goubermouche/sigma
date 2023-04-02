@@ -1,7 +1,5 @@
 #pragma once
 
-#include <map>
-
 #include "visitor.h"
 #include <llvm/IR/LLVMContext.h>
 #include <llvm/IR/IRBuilder.h>
@@ -15,7 +13,7 @@ namespace channel {
 		codegen_visitor();
 
 		llvm::Value* get_variable_value(const std::string& name);
-		std::unique_ptr<llvm::Module> get_module();
+		void print_code() const;
 
 		llvm::Value* visit_assignment_node(assignment_node& node) override;
 		llvm::Value* visit_declaration_node(declaration_node& node) override;
@@ -37,7 +35,7 @@ namespace channel {
 	private:
 		llvm::LLVMContext m_context;
 		llvm::IRBuilder<> m_builder;
-		std::map<std::string, llvm::Value*> m_named_values;
+		std::unordered_map<std::string, llvm::Value*> m_named_values;
 	public:
 		std::unique_ptr<llvm::Module> m_module;
 	};

@@ -55,6 +55,7 @@ namespace channel {
 		node* statement;
 
 		switch (m_current_token) {
+		// todo: generalize
 		case token::keyword_type_i32:
 			statement = parse_declaration_or_assignment();
 			break;
@@ -77,26 +78,23 @@ namespace channel {
 			consume_next_token();
 		}
 		else {
-			ASSERT(false, "unexpected token");
+			ASSERT(false, "[parser]: unexpected token received (expected '" + token_to_string(token) + "', but received '" + token_to_string(m_current_token) + "' instead)");
 		}
 	}
 
 	node* parser::parse_declaration_or_assignment() {
-		bool is_declaration = m_current_token == token::keyword_type_i32;
+		// todo: generalize
+		const bool is_declaration = m_current_token == token::keyword_type_i32;
 		consume_next_token();
 
-		if (m_current_token != token::identifier) {
-			ASSERT(false, std::string("[parser]: expected identifier (got " + token_to_string(m_current_token) + " instead)").c_str());
-			return nullptr;
-		}
+		ASSERT(m_current_token == token::identifier, "[parser]: expected an identifier, but received '" + token_to_string(m_current_token) + "' instead");
 
-		std::string name = m_lexer.get_identifier(); // Assuming a getIdentifier() method in the lexer that returns the current identifier
+		const std::string name = m_lexer.get_identifier();
 		consume_next_token(); // consume identifier token
 
-		if (m_current_token != token::operator_assignment) {
-			ASSERT(false, std::string("[parser]: expected assignment operator (got " + token_to_string(m_current_token) + " instead)").c_str());
-			return nullptr;
-		}
+		// todo: this should parse as a declaration, but it throws an error right now
+		//       i32 value; // error
+		ASSERT(m_current_token == token::operator_assignment, "[parser]: expected an assignment operator, but received '" + token_to_string(m_current_token) + "' instead");
 
 		consume_next_token();
 		node* value = parse_expression();
@@ -112,7 +110,7 @@ namespace channel {
 		node* term = parse_term();
 
 		while (m_current_token == token::operator_addition || m_current_token == token::operator_subtraction) {
-			token op = m_current_token;
+			const token op = m_current_token;
 			consume_next_token();
 
 			node* right = parse_term();
@@ -132,7 +130,7 @@ namespace channel {
 		node* factor = parse_factor();
 
 		while (m_current_token == token::operator_multiplication || m_current_token == token::operator_division) {
-			token op = m_current_token;
+			const token op = m_current_token;
 			consume_next_token();
 
 			node* right = parse_factor();
@@ -152,10 +150,11 @@ namespace channel {
 		node* root = nullptr;
 
 		if (m_current_token == token::number_signed) {
+			// todo: generalize
 			root = parse_number();
 		}
 		else if (m_current_token == token::identifier) {
-			std::string name = m_lexer.get_identifier(); // assuming a getIdentifier() method in the lexer that returns the current identifier
+			const std::string name = m_lexer.get_identifier();
 			consume_next_token(); // consume the identifier token
 
 			if (m_current_token == token::l_parenthesis) {
@@ -171,7 +170,7 @@ namespace channel {
 			expect_next_token(token::r_parenthesis); // consume the right parenthesis
 		}
 		else {
-			ASSERT(false, std::string("[parser]: unexpected token received (" + token_to_string(m_current_token) + ")").c_str());
+			ASSERT(false, "[parser]: received an unexpected token '" + token_to_string(m_current_token) + "'");
 		}
 
 		return root;
@@ -195,13 +194,13 @@ namespace channel {
 				arguments.push_back(argument);
 
 				if (m_current_token == token::comma) {
-					consume_next_token(); // Consume the comma
+					consume_next_token(); // consume the comma
 				}
 				else if (m_current_token == token::r_parenthesis) {
 					break;
 				}
 				else {
-					ASSERT(false, std::string("[parser]: unexpected token received (" + token_to_string(m_current_token) + ")").c_str());
+					ASSERT(false, "[parser]: received an unexpected token '" + token_to_string(m_current_token) + "'");
 				}
 			}
 		}
@@ -212,22 +211,23 @@ namespace channel {
 
 	node* parser::parse_function_definition() {
 		// parse the return type (e.g., int)
-		std::string return_type = "int";
+		// todo: generalize
+		const std::string return_type = "int";
 		consume_next_token();
 
 		// parse the function name (e.g., main, other_function)
-		std::string name = m_lexer.get_identifier();
+		const std::string name = m_lexer.get_identifier();
 		consume_next_token();
 
 		// parse the parameter list (assume no parameters for now)
+		// todo: add support for parameters
 		expect_next_token(token::l_parenthesis);
 		expect_next_token(token::r_parenthesis);
 
 		// parse the opening curly brace '{'
 		expect_next_token(token::l_brace);
 
-
-		// Parse statements inside the function
+		// parse statements inside the function
 		std::vector<node*> statements;
 		while (m_current_token != token::r_brace) {
 			statements.push_back(parse_statement());
@@ -241,10 +241,23 @@ namespace channel {
 
 	bool parser::is_token_return_type(token token) {
 		switch (token) {
-		case token::keyword_type_i32:
-			return true;
-		default:
-			return false;
+			case token::keyword_type_void:
+			// signed integers
+			case token::keyword_type_i8:
+			case token::keyword_type_i16:
+			case token::keyword_type_i32:
+			case token::keyword_type_i64:
+			// unsigned integers          
+			case token::keyword_type_u8:
+			case token::keyword_type_u16:
+			case token::keyword_type_u32:
+			case token::keyword_type_u64:
+			// floating point
+			case token::keyword_type_f32:
+			case token::keyword_type_f64:
+				return true;
+			default:
+				return false;
 		}
 	}
 }

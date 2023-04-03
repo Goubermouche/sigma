@@ -5,6 +5,7 @@ namespace channel {
 	    : m_name(name){}
 
     llvm::Value* variable_node::accept(visitor& visitor) {
+        std::cout << "accepting variable_node\n";
         return visitor.visit_variable_node(*this);
     }
 

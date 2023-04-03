@@ -5,6 +5,7 @@ namespace channel {
 		: m_value(value) {}
 
 	llvm::Value* keyword_i32_node::accept(visitor& visitor)	{
+		std::cout << "accepting keyword_i32_node\n";
 		return visitor.visit_keyword_i32_node(*this);
 	}
 

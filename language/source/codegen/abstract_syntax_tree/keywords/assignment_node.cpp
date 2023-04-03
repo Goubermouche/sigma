@@ -5,6 +5,7 @@ namespace channel {
 		: m_name(name), m_expression(expression) {}
 
 	llvm::Value* assignment_node::accept(visitor& visitor) {
+		std::cout << "accepting assignment_node\n";
 		return visitor.visit_assignment_node(*this);
 	}
 

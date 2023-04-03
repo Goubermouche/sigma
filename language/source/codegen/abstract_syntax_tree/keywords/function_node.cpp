@@ -5,6 +5,7 @@ namespace channel {
 		: m_return_type(return_type), m_name(name), m_statements(std::move(statements)) {}
 
 	llvm::Value* function_node::accept(visitor& visitor) {
+		std::cout << "accepting function_node\n";
 		return visitor.visit_function_node(*this);
 	}
 

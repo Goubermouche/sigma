@@ -3,7 +3,7 @@
 #include "abstract_syntax_tree/keywords/assignment_node.h"
 #include "abstract_syntax_tree/keywords/declaration_node.h"
 #include "abstract_syntax_tree/keywords/function_call_node.h"
-#include "abstract_syntax_tree/keywords/variable_node.h"
+#include "abstract_syntax_tree/variables/variable_node.h"
 #include "abstract_syntax_tree/keywords/function_node.h"
 
 // keywords
@@ -34,19 +34,30 @@ namespace channel {
 
 	void codegen_visitor::verify() const {
 		std::cout << "-----------------------------\n";
-		llvm::verifyModule(*m_module, &llvm::outs());
+		if(!llvm::verifyModule(*m_module, &llvm::outs())) {
+			std::cout << "all checks passed\n";
+		}
 	}
 
 	llvm::Value* codegen_visitor::visit_assignment_node(assignment_node& node) {
-		// look up the variable in the namedValues map
-		llvm::Value* variable = m_named_values[node.get_name()];
-		ASSERT(variable, "[codegen]: variable not found (" + node.get_name() + ")");
+		// local variable
+		if(llvm::Value* local_variable = m_named_values[node.get_name()]) {
+			// evaluate the expression on the right-hand side of the assignment
+			llvm::Value* new_value = node.get_expression()->accept(*this);
+			// store the value in the memory location of the variable
+			m_builder.CreateStore(new_value, local_variable);
+		}
+
+		// global variable
+		// look up the global variable in the namedGlobalValues map
+		llvm::Value* pointer_to_global_variable = m_named_global_values[node.get_name()];
+		ASSERT(pointer_to_global_variable, "[codegen]: variable not found (" + node.get_name() + ")");
 
 		// evaluate the expression on the right-hand side of the assignment
 		llvm::Value* new_value = node.get_expression()->accept(*this);
-		// store the value in the memory location of the variable
-		m_builder.CreateStore(new_value, variable);
-		return new_value;
+
+		// store the new value in the memory location of the global variable
+		return m_builder.CreateStore(new_value, pointer_to_global_variable);
 	}
 
 	llvm::Value* codegen_visitor::visit_declaration_node(declaration_node& node) {
@@ -130,11 +141,11 @@ namespace channel {
 		}
 
 		// global variable
-		llvm::Value* global_variable_value = m_named_global_values[node.get_name()];
-		ASSERT(global_variable_value, "[codegen]: variable not found (" + node.get_name() + ")");
+		llvm::Value* pointer_to_global_variable = m_named_global_values[node.get_name()];
+		ASSERT(pointer_to_global_variable, "[codegen]: variable not found (" + node.get_name() + ")");
+		const llvm::GlobalValue* global_variable_value = llvm::dyn_cast<llvm::GlobalValue>(pointer_to_global_variable);
 
-		// doesn't work :/
-		return m_builder.CreateLoad(global_variable_value->getType(), global_variable_value, node.get_name());
+		return m_builder.CreateLoad(global_variable_value->getValueType(), pointer_to_global_variable, node.get_name());
 	}
 
 	llvm::Value* codegen_visitor::visit_function_node(function_node& node) {

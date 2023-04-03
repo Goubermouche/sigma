@@ -3,7 +3,7 @@
 #include "../codegen/abstract_syntax_tree/keywords/assignment_node.h"
 #include "../codegen/abstract_syntax_tree/keywords/declaration_node.h"
 #include "../codegen/abstract_syntax_tree/keywords/function_call_node.h"
-#include "../codegen/abstract_syntax_tree/keywords/variable_node.h"
+#include "../codegen/abstract_syntax_tree/variables/variable_node.h"
 #include "../codegen/abstract_syntax_tree/keywords/types/keyword_i32_node.h"
 #include "../codegen/abstract_syntax_tree/keywords/function_node.h"
 

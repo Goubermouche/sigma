@@ -2,7 +2,7 @@
 
 namespace channel {
 	llvm::Value* keyword_i8_node::accept(visitor& visitor) {
-		std::cout << "accepting keyword_i8_node\n";
+		LOG_NODE_NAME(keyword_i8_node);
 		return visitor.visit_keyword_i8_node(*this);
 	}
 }

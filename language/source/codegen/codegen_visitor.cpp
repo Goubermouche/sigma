@@ -34,6 +34,12 @@ namespace channel {
 
 	void codegen_visitor::verify() const {
 		std::cout << "-----------------------------\n";
+		// check if we have a 'main' function
+		if(!has_main_entry_point()) {
+			ASSERT(false, "[codegen]: cannot find main entrypoint");
+		}
+
+		// check for IR errors
 		if(!llvm::verifyModule(*m_module, &llvm::outs())) {
 			std::cout << "all checks passed\n";
 		}
@@ -75,39 +81,38 @@ namespace channel {
 		}
 		else {
 			// use a default value for unassigned variables
+			// todo: generalize
 			initial_value = llvm::ConstantInt::get(var_type, 0);
 		}
 
 		// create a global variable
-		if(node.is_global()) {
-			// linkage: https://stackoverflow.com/questions/28610783/are-global-variables-extern-by-default-or-is-it-equivalent-to-declaring-variable
-			llvm::GlobalVariable* global_variable;
-			if (auto* const_init_value = llvm::dyn_cast<llvm::Constant>(initial_value)) {
-				// constant
-				global_variable = new llvm::GlobalVariable(*m_module,
-					initial_value->getType(),
-					false,
-					llvm::GlobalValue::InternalLinkage,
-					const_init_value,
-					node.get_name()
-				);
-			}
-			else {
-				// not constant
-				global_variable = new llvm::GlobalVariable(*m_module,
-					initial_value->getType(),
-					false,
-					llvm::GlobalValue::ExternalLinkage,
-					llvm::Constant::getNullValue(initial_value->getType()), // default initializer
-					node.get_name()
-				);
+		if (node.is_global()) {
+			auto* global_variable = new llvm::GlobalVariable(*m_module,
+				var_type,
+				false,
+				llvm::GlobalValue::ExternalLinkage,
+				llvm::Constant::getNullValue(var_type), // default initializer
+				node.get_name()
+			);
+			// add the variable to the m_global_named_values map
+			m_named_global_values[node.get_name()] = global_variable;
 
-				// store the non-constant initial value in the global variable
+			// create a special global initialization function if it doesn't exist
+			llvm::Function* global_init_func = m_module->getFunction("_global_init");
+			if (!global_init_func) {
+				llvm::FunctionType* func_type = llvm::FunctionType::get(llvm::Type::getVoidTy(m_context), false);
+				global_init_func = llvm::Function::Create(func_type, llvm::Function::InternalLinkage, "_global_init", m_module.get());
+				llvm::BasicBlock* entry_block = llvm::BasicBlock::Create(m_context, "entry", global_init_func);
+				m_builder.SetInsertPoint(entry_block); // Set the insert point for the builder
+			}
+
+			// store the non-constant initial value in the global variable
+			llvm::BasicBlock* init_block = &global_init_func->getEntryBlock();
+			if (!init_block->getTerminator()) {
+				m_builder.SetInsertPoint(init_block); // Set the insert point for the builder
 				m_builder.CreateStore(initial_value, global_variable);
 			}
 
-			// add the variable to the m_named_global_values map
-			m_named_global_values[node.get_name()] = global_variable;
 			return global_variable;
 		}
 
@@ -161,7 +166,16 @@ namespace channel {
 		llvm::Function* function = llvm::Function::Create(function_type, llvm::Function::ExternalLinkage, node.get_name(), m_module.get());
 		llvm::BasicBlock* entryBlock = llvm::BasicBlock::Create(m_context, "entry", function);
 
-		m_builder.SetInsertPoint(entryBlock);
+		// if the function is 'main', call the _global_init function
+		if (node.get_name() == "main") {
+			if(llvm::Function* global_init_func = m_module->getFunction("_global_init")) {
+				llvm::BasicBlock* init_block = &global_init_func->getEntryBlock();
+				m_builder.SetInsertPoint(init_block);
+				m_builder.CreateRetVoid();
+				m_builder.SetInsertPoint(entryBlock);
+				m_builder.CreateCall(global_init_func, {});
+			}
+		}
 
 		for (const auto& statement : node.get_statements()) {
 			statement->accept(*this);
@@ -226,5 +240,9 @@ namespace channel {
 		llvm::Value* left = node.left->accept(*this);
 		llvm::Value* right = node.right->accept(*this);
 		return m_builder.CreateSRem(left, right, "mod");
+	}
+
+	bool codegen_visitor::has_main_entry_point() const {
+		return m_module->getFunction("main") != nullptr;
 	}
 }

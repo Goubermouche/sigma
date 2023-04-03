@@ -5,7 +5,7 @@ namespace channel {
 		: operator_binary(left, right) {}
 
 	llvm::Value* operator_modulo_node::accept(visitor& visitor) {
-		std::cout << "accepting operator_modulo_node\n";
+		LOG_NODE_NAME(operator_modulo_node);
 		return visitor.visit_operator_modulo_node(*this);
 	}
 

@@ -12,10 +12,9 @@ int main() {
 	const std::vector<channel::node*> program = parser.parse();
 	channel::codegen_visitor visitor;
 	std::cout << "node count: " << program.size() << '\n';
-	std::cout << "-----------------------------\n";
 
 	for (channel::node* node : program) {
-		std::cout << "**accepting top level node:\n";
+		// std::cout << "**accepting top level node:\n";
 		node->accept(visitor);
 	}
 

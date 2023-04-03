@@ -5,7 +5,7 @@ namespace channel {
 		: m_name(name), m_arguments(arguments) {}
 
 	llvm::Value* function_call_node::accept(visitor& visitor) {
-		std::cout << "accepting function_call_node\n";
+		LOG_NODE_NAME(function_call_node);
 		return visitor.visit_function_call_node(*this);
 	}
 

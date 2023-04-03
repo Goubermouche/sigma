@@ -5,7 +5,7 @@ namespace channel {
 		: m_name(name), m_is_global(is_global), m_expression(expression) {}
 
 	llvm::Value* declaration_node::accept(visitor& visitor) {
-		std::cout << "accepting declaration_node\n";
+		LOG_NODE_NAME(declaration_node);
 		return visitor.visit_declaration_node(*this);
 	}
 

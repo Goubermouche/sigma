@@ -40,12 +40,15 @@ namespace channel {
 	}
 
 	llvm::Value* codegen_visitor::visit_assignment_node(assignment_node& node) {
+		std::cout << "assign: " << node.get_name() << '\n';
+
 		// local variable
 		if(llvm::Value* local_variable = m_named_values[node.get_name()]) {
 			// evaluate the expression on the right-hand side of the assignment
 			llvm::Value* new_value = node.get_expression()->accept(*this);
 			// store the value in the memory location of the variable
 			m_builder.CreateStore(new_value, local_variable);
+			return new_value;
 		}
 
 		// global variable
@@ -57,7 +60,8 @@ namespace channel {
 		llvm::Value* new_value = node.get_expression()->accept(*this);
 
 		// store the new value in the memory location of the global variable
-		return m_builder.CreateStore(new_value, pointer_to_global_variable);
+		m_builder.CreateStore(new_value, pointer_to_global_variable);
+		return new_value;
 	}
 
 	llvm::Value* codegen_visitor::visit_declaration_node(declaration_node& node) {
@@ -78,21 +82,24 @@ namespace channel {
 
 		// create a global variable
 		if(node.is_global()) {
+			// linkage: https://stackoverflow.com/questions/28610783/are-global-variables-extern-by-default-or-is-it-equivalent-to-declaring-variable
 			llvm::GlobalVariable* global_variable;
-			if (llvm::Constant* const_init_value = llvm::dyn_cast<llvm::Constant>(initial_value)) {
+			if (auto* const_init_value = llvm::dyn_cast<llvm::Constant>(initial_value)) {
+				// constant
 				global_variable = new llvm::GlobalVariable(*m_module,
 					initial_value->getType(),
-					false, // is not constant
-					llvm::GlobalValue::PrivateLinkage,
+					false,
+					llvm::GlobalValue::InternalLinkage,
 					const_init_value,
 					node.get_name()
 				);
 			}
 			else {
+				// not constant
 				global_variable = new llvm::GlobalVariable(*m_module,
 					initial_value->getType(),
-					false, // is not constant
-					llvm::GlobalValue::PrivateLinkage,
+					false,
+					llvm::GlobalValue::ExternalLinkage,
 					llvm::Constant::getNullValue(initial_value->getType()), // default initializer
 					node.get_name()
 				);
@@ -134,17 +141,19 @@ namespace channel {
 	}
 
 	llvm::Value* codegen_visitor::visit_variable_node(variable_node& node) {
+		std::cout << "visit: " << node.get_name() << '\n';
+
 		// local variable
-		if(llvm::Value* variable_value = m_named_values[node.get_name()]) {
+		if (llvm::Value* variable_value = m_named_values[node.get_name()]) {
 			// load the value from the memory location
-			return m_builder.CreateLoad(variable_value->getType(), variable_value, node.get_name());
+			const llvm::AllocaInst* alloca = llvm::dyn_cast<llvm::AllocaInst>(variable_value);
+			return m_builder.CreateLoad(alloca->getAllocatedType(), variable_value, node.get_name());
 		}
 
 		// global variable
 		llvm::Value* pointer_to_global_variable = m_named_global_values[node.get_name()];
 		ASSERT(pointer_to_global_variable, "[codegen]: variable not found (" + node.get_name() + ")");
 		const llvm::GlobalValue* global_variable_value = llvm::dyn_cast<llvm::GlobalValue>(pointer_to_global_variable);
-
 		return m_builder.CreateLoad(global_variable_value->getValueType(), pointer_to_global_variable, node.get_name());
 	}
 
@@ -208,6 +217,21 @@ namespace channel {
 	llvm::Value* codegen_visitor::visit_operator_multiplication_node(operator_multiplication_node& node) {
 		llvm::Value* left = node.left->accept(*this);
 		llvm::Value* right = node.right->accept(*this);
+
+		//// Check if the left operand is a pointer to a global variable
+		//if (left->getType()->isPointerTy()) {
+		//	if (llvm::GlobalVariable* left_global_var = llvm::dyn_cast<llvm::GlobalVariable>(left)) {
+		//		left = m_builder.CreateLoad(left_global_var->getValueType(), left, "load_left");
+		//	}
+		//}
+
+		//// Check if the right operand is a pointer to a global variable
+		//if (right->getType()->isPointerTy()) {
+		//	if (llvm::GlobalVariable* right_global_var = llvm::dyn_cast<llvm::GlobalVariable>(right)) {
+		//		right = m_builder.CreateLoad(right_global_var->getValueType(), right, "load_right");
+		//	}
+		//}
+
 		return m_builder.CreateMul(left, right, "mul");
 	}
 

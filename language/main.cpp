@@ -15,5 +15,6 @@ int main() {
 
 	visitor.verify();
 	visitor.print_code();
+
 	return 0;
 }

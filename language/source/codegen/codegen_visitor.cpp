@@ -213,21 +213,6 @@ namespace channel {
 	llvm::Value* codegen_visitor::visit_operator_multiplication_node(operator_multiplication_node& node) {
 		llvm::Value* left = node.left->accept(*this);
 		llvm::Value* right = node.right->accept(*this);
-
-		//// Check if the left operand is a pointer to a global variable
-		//if (left->getType()->isPointerTy()) {
-		//	if (llvm::GlobalVariable* left_global_var = llvm::dyn_cast<llvm::GlobalVariable>(left)) {
-		//		left = m_builder.CreateLoad(left_global_var->getValueType(), left, "load_left");
-		//	}
-		//}
-
-		//// Check if the right operand is a pointer to a global variable
-		//if (right->getType()->isPointerTy()) {
-		//	if (llvm::GlobalVariable* right_global_var = llvm::dyn_cast<llvm::GlobalVariable>(right)) {
-		//		right = m_builder.CreateLoad(right_global_var->getValueType(), right, "load_right");
-		//	}
-		//}
-
 		return m_builder.CreateMul(left, right, "mul");
 	}
 

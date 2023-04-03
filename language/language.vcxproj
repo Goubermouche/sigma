@@ -168,6 +168,7 @@
     <ClCompile Include="source\utility\filesystem.cpp" />
     <ClCompile Include="source\utility\string_accessor.cpp" />
     <ClCompile Include="source\codegen\abstract_syntax_tree\variables\variable_node.cpp" />
+    <ClCompile Include="source\utility\timer.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="test\main.ch" />
@@ -199,6 +200,7 @@
     <ClInclude Include="source\utility\string_accessor.h" />
     <ClInclude Include="source\utility\types.h" />
     <ClInclude Include="source\codegen\abstract_syntax_tree\variables\variable_node.h" />
+    <ClInclude Include="source\utility\timer.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

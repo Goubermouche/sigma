@@ -40,8 +40,6 @@ namespace channel {
 	}
 
 	llvm::Value* codegen_visitor::visit_assignment_node(assignment_node& node) {
-		std::cout << "assign: " << node.get_name() << '\n';
-
 		// local variable
 		if(llvm::Value* local_variable = m_named_values[node.get_name()]) {
 			// evaluate the expression on the right-hand side of the assignment
@@ -141,8 +139,6 @@ namespace channel {
 	}
 
 	llvm::Value* codegen_visitor::visit_variable_node(variable_node& node) {
-		std::cout << "visit: " << node.get_name() << '\n';
-
 		// local variable
 		if (llvm::Value* variable_value = m_named_values[node.get_name()]) {
 			// load the value from the memory location

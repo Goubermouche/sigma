@@ -72,7 +72,7 @@
     <ClCompile Include="source\codegen\abstract_syntax_tree\variables\variable_node.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="source\codegen\abstract_syntax_tree\keywords\declaration_node.cpp">
+    <ClCompile Include="source\codegen\abstract_syntax_tree\variables\declaration_node.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="source\codegen\abstract_syntax_tree\keywords\assignment_node.cpp">
@@ -82,9 +82,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="source\codegen\abstract_syntax_tree\operators\operator_modulo_node.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="source\codegen\abstract_syntax_tree\variables\global_variable_node.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="source\utility\timer.cpp">
@@ -158,7 +155,7 @@
     <ClInclude Include="source\codegen\abstract_syntax_tree\variables\variable_node.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="source\codegen\abstract_syntax_tree\keywords\declaration_node.h">
+    <ClInclude Include="source\codegen\abstract_syntax_tree\variables\declaration_node.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="source\codegen\abstract_syntax_tree\keywords\assignment_node.h">
@@ -168,9 +165,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="source\codegen\abstract_syntax_tree\operators\operator_modulo_node.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="source\codegen\abstract_syntax_tree\variables\global_variable_node.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="source\utility\timer.h">

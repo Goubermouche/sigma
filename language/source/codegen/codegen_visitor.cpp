@@ -1,10 +1,11 @@
 #include "codegen_visitor.h"
 
 #include "abstract_syntax_tree/keywords/assignment_node.h"
-#include "abstract_syntax_tree/keywords/declaration_node.h"
 #include "abstract_syntax_tree/keywords/function_call_node.h"
-#include "abstract_syntax_tree/variables/variable_node.h"
 #include "abstract_syntax_tree/keywords/function_node.h"
+
+#include "abstract_syntax_tree/variables/variable_node.h"
+#include "abstract_syntax_tree/variables/declaration_node.h"
 
 // keywords
 #include "abstract_syntax_tree/keywords/types/keyword_i8_node.h"

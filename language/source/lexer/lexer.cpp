@@ -104,11 +104,21 @@ namespace channel {
     }
 
 	token lexer::get_identifier_token()	{
+		bool last_char_was_underscore = false;
 		m_identifier_string = m_last_character;
 
 		// read until we reach the end of our identifier, or the end of the file
+		// note that identifiers can contains '_' underscore characters with regular alnum chars between them 
 		read_char();
-		while (isalnum(m_last_character) && !m_accessor.end()) {
+		while ((isalnum(m_last_character) || m_last_character == '_') && !m_accessor.end()) {
+			// prevent two underscore characters from being right next to each other
+			if (m_last_character == '_' && last_char_was_underscore) {
+				ASSERT(false, "[lexer]: two underscore characters immediately one after another are not allowed");
+			}
+			else {
+				last_char_was_underscore = (m_last_character == '_');
+			}
+
 			m_identifier_string += m_last_character;
 			read_char();
 		}

@@ -1,17 +1,20 @@
 #pragma once
 
 namespace channel {
+    // keywords
     class keyword_i8_node;
     class keyword_i16_node;
     class keyword_i32_node;
     class keyword_i64_node;
 
+    // operators
     class operator_addition_node;
     class operator_subtraction_node;
     class operator_multiplication_node;
     class operator_division_node;
     class operator_modulo_node;
 
+    // variables
     class function_call_node;
     class variable_node;
     class declaration_node;

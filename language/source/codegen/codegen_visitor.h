@@ -14,7 +14,8 @@ namespace channel {
 
 		void print_code() const;
 		void verify() const;
-
+	private:
+		// variables
 		llvm::Value* visit_assignment_node(assignment_node& node) override;
 		llvm::Value* visit_declaration_node(declaration_node& node) override;
 		llvm::Value* visit_function_call_node(function_call_node& node) override;
@@ -39,7 +40,7 @@ namespace channel {
 		llvm::LLVMContext m_context;
 		llvm::IRBuilder<> m_builder;
 		std::unordered_map<std::string, llvm::Value*> m_named_values;
-		std::unordered_map<std::string, llvm::Value*> m_named_global_values;
+		std::unordered_map<std::string, llvm::Value*> m_global_named_values;
 	public:
 		std::unique_ptr<llvm::Module> m_module;
 	};

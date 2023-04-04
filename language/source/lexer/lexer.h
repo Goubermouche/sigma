@@ -39,7 +39,16 @@ namespace channel {
 		 */
 		const std::string& get_operator() const { return m_operator_string; }
 
+		/**
+		 * \brief Returns the current caret position.
+		 * \return Current caret position
+		 */
 		u64 get_position() const;
+
+		/**
+		 * \brief Updates the caret position and clears the last character.
+		 * \param position Position to use as the new caret position
+		 */
 		void set_position(u64 position);
 	private:
 		/**

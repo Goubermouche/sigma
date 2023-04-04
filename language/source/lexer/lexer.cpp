@@ -113,7 +113,7 @@ namespace channel {
 		while ((isalnum(m_last_character) || m_last_character == '_') && !m_accessor.end()) {
 			// prevent two underscore characters from being right next to each other
 			if (m_last_character == '_' && last_char_was_underscore) {
-				ASSERT(false, "[lexer]: two underscore characters immediately one after another are not allowed");
+				ASSERT(false, "[lexer]: two '_' characters immediately one after another are not allowed");
 			}
 			else {
 				last_char_was_underscore = (m_last_character == '_');

@@ -6,7 +6,8 @@
 #include "../codegen/abstract_syntax_tree/keywords/function_node.h"
 
 #include "../codegen/abstract_syntax_tree/variables/variable_node.h"
-#include "../codegen/abstract_syntax_tree/variables/declaration_node.h"
+#include "../codegen/abstract_syntax_tree/variables/declaration/local_declaration_node.h"
+#include "../codegen/abstract_syntax_tree/variables/declaration/global_declaration_node.h"
 
 #include "../codegen/abstract_syntax_tree/operators/operator_addition_node.h"
 #include "../codegen/abstract_syntax_tree/operators/operator_division_node.h"
@@ -87,7 +88,11 @@ namespace channel {
 				value = parse_expression();
 			}
 
-			return new declaration_node(name, is_global, value);
+			if(is_global) {
+				return new global_declaration_node(name, value);
+			}
+
+			return new local_declaration_node(name, value);
 		}
 
 		// parse assignment

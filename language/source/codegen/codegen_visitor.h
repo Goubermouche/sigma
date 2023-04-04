@@ -1,5 +1,6 @@
 #pragma once
 
+#include "../utility/macros.h"
 #include "visitor.h"
 #include <llvm/IR/LLVMContext.h>
 #include <llvm/IR/IRBuilder.h>
@@ -12,15 +13,18 @@ namespace channel {
 	public:
 		codegen_visitor();
 
-		void print_code() const;
-		void verify() const;
+		void print_intermediate_representation() const;
+		void verify_intermediate_representation() const;
 	private:
 		// variables
 		llvm::Value* visit_assignment_node(assignment_node& node) override;
-		llvm::Value* visit_declaration_node(declaration_node& node) override;
+		// llvm::Value* visit_declaration_node(declaration_node& node) override;
 		llvm::Value* visit_function_call_node(function_call_node& node) override;
 		llvm::Value* visit_variable_node(variable_node& node) override;
 		llvm::Value* visit_function_node(function_node& node) override;
+
+		llvm::Value* visit_local_declaration_node(local_declaration_node& node) override;
+		llvm::Value* visit_global_declaration_node(global_declaration_node& node) override;
 
 		// keywords
 		llvm::Value* visit_keyword_i8_node(keyword_i8_node& node) override;
@@ -36,12 +40,16 @@ namespace channel {
 		llvm::Value* visit_operator_modulo_node(operator_modulo_node& node) override;
 
 		bool has_main_entry_point() const;
+		llvm::Value* find_variable(const std::string& name);
 	private:
+		// stack holding all variables of each respective scope
+		std::vector<std::unordered_map<std::string, llvm::Value*>> m_scope_stack;
+
+		// map of all global variables
+		std::unordered_map<std::string, llvm::Value*> m_global_named_values;
+
 		llvm::LLVMContext m_context;
 		llvm::IRBuilder<> m_builder;
-		std::unordered_map<std::string, llvm::Value*> m_named_values;
-		std::unordered_map<std::string, llvm::Value*> m_global_named_values;
-	public:
 		std::unique_ptr<llvm::Module> m_module;
 	};
 }

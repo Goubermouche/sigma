@@ -18,8 +18,8 @@ int main() {
 		node->accept(visitor);
 	}
 
-	visitor.verify();
-	visitor.print_code();
+	visitor.verify_intermediate_representation();
+	visitor.print_intermediate_representation();
 
 	std::cout << "-----------------------------\n";
 	std::cout << "[channel]: took " << timer.elapsed() << "ms\n";

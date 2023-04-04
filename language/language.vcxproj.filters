@@ -72,9 +72,6 @@
     <ClCompile Include="source\codegen\abstract_syntax_tree\variables\variable_node.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="source\codegen\abstract_syntax_tree\variables\declaration_node.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="source\codegen\abstract_syntax_tree\keywords\assignment_node.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -85,6 +82,15 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="source\utility\timer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="source\codegen\abstract_syntax_tree\variables\declaration\local_declaration_node.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="source\codegen\abstract_syntax_tree\variables\declaration\global_declaration_node.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="source\codegen\abstract_syntax_tree\variables\declaration\declaration_node.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -155,9 +161,6 @@
     <ClInclude Include="source\codegen\abstract_syntax_tree\variables\variable_node.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="source\codegen\abstract_syntax_tree\variables\declaration_node.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="source\codegen\abstract_syntax_tree\keywords\assignment_node.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -168,6 +171,15 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="source\utility\timer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="source\codegen\abstract_syntax_tree\variables\declaration\local_declaration_node.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="source\codegen\abstract_syntax_tree\variables\declaration\global_declaration_node.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="source\codegen\abstract_syntax_tree\variables\declaration\declaration_node.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

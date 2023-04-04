@@ -3,11 +3,12 @@
 // todo: add support for operator-assignment.
 
 // priority todo list: 
-// - separate the variable class into local and global variable nodes
+// - add support for multiple scopes in every function
 
 i32 a = 1;
-i32 b = a * a;
+i32 b = a;
 
 i32 main() {
-    i32 value = a - (b % 3);
+    i32 c = a * (b / 3);
+    i32 kys = 68;
 }

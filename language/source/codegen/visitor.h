@@ -17,9 +17,11 @@ namespace channel {
     // variables
     class function_call_node;
     class variable_node;
-    class declaration_node;
     class assignment_node;
     class function_node;
+
+    class local_declaration_node;
+    class global_declaration_node;
 }
 
 #include <llvm/IR/Value.h>
@@ -32,8 +34,10 @@ namespace channel {
     public:
         virtual ~visitor() = default;
 
+        virtual llvm::Value* visit_local_declaration_node(local_declaration_node& node) = 0;
+        virtual llvm::Value* visit_global_declaration_node(global_declaration_node& node) = 0;
+
 		virtual llvm::Value* visit_assignment_node(assignment_node& node) = 0;
-        virtual llvm::Value* visit_declaration_node(declaration_node& node) = 0;
         virtual llvm::Value* visit_function_call_node(function_call_node& node) = 0;
         virtual llvm::Value* visit_variable_node(variable_node& node) = 0;
         virtual llvm::Value* visit_function_node(function_node& node) = 0;

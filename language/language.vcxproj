@@ -144,6 +144,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="source\compiler\compiler.cpp" />
     <ClCompile Include="source\codegen\abstract_syntax_tree\variables\declaration\declaration_node.cpp" />
     <ClCompile Include="source\codegen\abstract_syntax_tree\variables\declaration\global_declaration_node.cpp" />
     <ClCompile Include="source\codegen\abstract_syntax_tree\variables\declaration\local_declaration_node.cpp" />
@@ -175,6 +176,7 @@
     <None Include="test\main.ch" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="source\compiler\compiler.h" />
     <ClInclude Include="source\codegen\abstract_syntax_tree\variables\declaration\declaration_node.h" />
     <ClInclude Include="source\codegen\abstract_syntax_tree\variables\declaration\global_declaration_node.h" />
     <ClInclude Include="source\codegen\abstract_syntax_tree\variables\declaration\local_declaration_node.h" />

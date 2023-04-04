@@ -6,6 +6,8 @@
 #include <llvm/IR/IRBuilder.h>
 
 namespace channel {
+	class declaration_node;
+
 	/**
 	 * \brief Evaluator that implements the codegen visitor to generate LLVM IR.
 	 */
@@ -18,7 +20,6 @@ namespace channel {
 	private:
 		// variables
 		llvm::Value* visit_assignment_node(assignment_node& node) override;
-		// llvm::Value* visit_declaration_node(declaration_node& node) override;
 		llvm::Value* visit_function_call_node(function_call_node& node) override;
 		llvm::Value* visit_variable_node(variable_node& node) override;
 		llvm::Value* visit_function_node(function_node& node) override;
@@ -41,6 +42,7 @@ namespace channel {
 
 		bool has_main_entry_point() const;
 		llvm::Value* find_variable(const std::string& name);
+		llvm::Value* get_declaration_value(const declaration_node& node);
 	private:
 		// stack holding all variables of each respective scope
 		std::vector<std::unordered_map<std::string, llvm::Value*>> m_scope_stack;

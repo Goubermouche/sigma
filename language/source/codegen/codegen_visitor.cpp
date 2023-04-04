@@ -5,6 +5,7 @@
 #include "abstract_syntax_tree/keywords/function_node.h"
 
 #include "abstract_syntax_tree/variables/variable_node.h"
+#include "abstract_syntax_tree/variables/declaration/declaration_node.h"
 #include "abstract_syntax_tree/variables/declaration/local_declaration_node.h"
 #include "abstract_syntax_tree/variables/declaration/global_declaration_node.h"
 
@@ -31,12 +32,10 @@ namespace channel {
 	}
 
 	void codegen_visitor::print_intermediate_representation() const {
-		std::cout << "-----------------------------\n";
 		m_module->print(llvm::outs(), nullptr);
 	}
 
 	void codegen_visitor::verify_intermediate_representation() const {
-		std::cout << "-----------------------------\n";
 		// check if we have a 'main' function
 		if(!has_main_entry_point()) {
 			ASSERT(false, "[codegen]: cannot find main entrypoint");
@@ -44,7 +43,7 @@ namespace channel {
 
 		// check for IR errors
 		if(!llvm::verifyModule(*m_module, &llvm::outs())) {
-			std::cout << "all checks passed\n";
+			std::cout << "[codegen]: all checks passed\n";
 		}
 	}
 
@@ -70,71 +69,6 @@ namespace channel {
 		m_builder.CreateStore(new_value, pointer_to_global_variable);
 		return new_value;
 	}
-
-	//llvm::Value* codegen_visitor::visit_declaration_node(declaration_node& node) {
-	//	// evaluate the expression to get the initial value
-	//	llvm::Value* initial_value;
-	//	// assume i32 type for now
-	//	// todo: generalize
-	//	llvm::Type* var_type = llvm::Type::getInt32Ty(m_context);
-
-	//	if (node.get_expression()) {
-	//		// evaluate the expression to get the initial value
-	//		initial_value = node.get_expression()->accept(*this);
-	//	}
-	//	else {
-	//		// use a default value for unassigned variables
-	//		// todo: generalize
-	//		initial_value = llvm::ConstantInt::get(var_type, 0, true);
-	//	}
-
-	//	// create a global variable
-	//	if (node.is_global()) {
-	//		auto* global_variable = new llvm::GlobalVariable(*m_module,
-	//			var_type,
-	//			false,
-	//			llvm::GlobalValue::ExternalLinkage,
-	//			llvm::Constant::getNullValue(var_type), // default initializer
-	//			node.get_name()
-	//		);
-
-	//		// add the variable to the m_global_named_values map
-	//		const auto insertion_result = m_global_named_values.insert({ node.get_name(), global_variable });
-	//		ASSERT(insertion_result.second, "[codegen]: global variable '" + node.get_name() + "' has already been defined before");
-
-	//		// create a special global initialization function if it doesn't exist
-	//		llvm::Function* global_init_func = m_module->getFunction("_global_init");
-	//		if (!global_init_func) {
-	//			llvm::FunctionType* func_type = llvm::FunctionType::get(llvm::Type::getVoidTy(m_context), false);
-	//			global_init_func = llvm::Function::Create(func_type, llvm::Function::InternalLinkage, "_global_init", m_module.get());
-	//			llvm::BasicBlock* entry_block = llvm::BasicBlock::Create(m_context, "entry", global_init_func);
-	//			m_builder.SetInsertPoint(entry_block); // set the insert point for the builder
-	//		}
-
-	//		// store the non-constant initial value in the global variable
-	//		llvm::BasicBlock* init_block = &global_init_func->getEntryBlock();
-	//		if (!init_block->getTerminator()) {
-	//			m_builder.SetInsertPoint(init_block); // Set the insert point for the builder
-	//			m_builder.CreateStore(initial_value, global_variable);
-	//		}
-
-	//		return global_variable;
-	//	}
-
-	//	// create a local variable
-	//	ASSERT(m_builder.GetInsertBlock(), "[codegen]: invalid insert block");
-	//	const llvm::Function* current_function = m_builder.GetInsertBlock()->getParent();
-	//	ASSERT(current_function, "[codegen]: invalid function");
-
-	//	// store the initial value in the memory
-	//	llvm::AllocaInst* alloca = m_builder.CreateAlloca(var_type, nullptr, node.get_name());
-	//	m_builder.CreateStore(initial_value, alloca);
-
-	//	// add the variable to the m_named_values map
-	//	const auto insertion_result = m_scope_stack.back().insert({ node.get_name(), alloca });
-	//	ASSERT(insertion_result.second, "[codegen]: local variable '" + node.get_name() + "' has already been defined before");
-	//	return initial_value;
-	//}
 
 	llvm::Value* codegen_visitor::visit_function_call_node(function_call_node& node) {
 		llvm::Function* function = m_module->getFunction(node.get_name());
@@ -206,21 +140,8 @@ namespace channel {
 	}
 
 	llvm::Value* codegen_visitor::visit_local_declaration_node(local_declaration_node& node) {
-		// evaluate the expression to get the initial value
-		llvm::Value* initial_value;
-		// assume i32 type for now
-		// todo: generalize
-		llvm::Type* var_type = llvm::Type::getInt32Ty(m_context);
-
-		if (node.get_expression()) {
-			// evaluate the expression to get the initial value
-			initial_value = node.get_expression()->accept(*this);
-		}
-		else {
-			// use a default value for unassigned variables
-			// todo: generalize
-			initial_value = llvm::ConstantInt::get(var_type, 0, true);
-		}
+		// evaluate the assigned value, if there is one
+		llvm::Value* initial_value = get_declaration_value(node);
 
 		// create a local variable
 		ASSERT(m_builder.GetInsertBlock(), "[codegen]: invalid insert block");
@@ -228,7 +149,7 @@ namespace channel {
 		ASSERT(current_function, "[codegen]: invalid function");
 
 		// store the initial value in the memory
-		llvm::AllocaInst* alloca = m_builder.CreateAlloca(var_type, nullptr, node.get_name());
+		llvm::AllocaInst* alloca = m_builder.CreateAlloca(initial_value->getType(), nullptr, node.get_name());
 		m_builder.CreateStore(initial_value, alloca);
 
 		// add the variable to the m_named_values map
@@ -238,28 +159,16 @@ namespace channel {
 	}
 
 	llvm::Value* codegen_visitor::visit_global_declaration_node(global_declaration_node& node) {
-		// evaluate the expression to get the initial value
-		llvm::Value* initial_value;
-		// assume i32 type for now
-		// todo: generalize
-		llvm::Type* var_type = llvm::Type::getInt32Ty(m_context);
-
-		if (node.get_expression()) {
-			// evaluate the expression to get the initial value
-			initial_value = node.get_expression()->accept(*this);
-		}
-		else {
-			// use a default value for unassigned variables
-			// todo: generalize
-			initial_value = llvm::ConstantInt::get(var_type, 0, true);
-		}
+		// evaluate the assigned value, if there is one
+		llvm::Value* initial_value = get_declaration_value(node);
+		llvm::Type* value_type = initial_value->getType();
 
 		// create a global variable
 		auto* global_variable = new llvm::GlobalVariable(*m_module,
-			var_type,
+			value_type,
 			false,
 			llvm::GlobalValue::ExternalLinkage,
-			llvm::Constant::getNullValue(var_type), // default initializer
+			llvm::Constant::getNullValue(value_type), // default initializer
 			node.get_name()
 		);
 
@@ -349,5 +258,25 @@ namespace channel {
 		}
 
 		return nullptr; // variable not found
+	}
+
+	llvm::Value* codegen_visitor::get_declaration_value(const declaration_node& node)	{
+		// evaluate the expression to get the initial value
+		llvm::Value* initial_value;
+		// assume i32 type for now
+		// todo: generalize
+		llvm::Type* var_type = llvm::Type::getInt32Ty(m_context);
+
+		if (node.get_expression()) {
+			// evaluate the expression to get the initial value
+			initial_value = node.get_expression()->accept(*this);
+		}
+		else {
+			// use a default value for unassigned variables
+			// todo: generalize
+			initial_value = llvm::ConstantInt::get(var_type, 0, true);
+		}
+
+		return initial_value;
 	}
 }

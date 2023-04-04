@@ -23,7 +23,6 @@ namespace channel {
 	std::vector<node*> parser::parse() {
 		std::vector<node*> program;
 
-		std::cout << "-----------------------------\n";
 		consume_next_token();
 		while (m_current_token != token::end_of_file) {
 			if(is_token_return_type(m_current_token) && peek_is_function_definition()) {

@@ -105,18 +105,30 @@ namespace channel {
 		llvm::Type* return_type = llvm::Type::getInt32Ty(m_context);
 		llvm::FunctionType* function_type = llvm::FunctionType::get(return_type, false);
 		llvm::Function* function = llvm::Function::Create(function_type, llvm::Function::ExternalLinkage, node.get_name(), m_module.get());
-		llvm::BasicBlock* entryBlock = llvm::BasicBlock::Create(m_context, "entry", function);
+		llvm::BasicBlock* entry_block = llvm::BasicBlock::Create(m_context, "entry", function);
 
 		// if the function is 'main', call the '_global_init' function
 		if (node.get_name() == "main") {
 			// call the '_global_init' function and init global variables
 			if(llvm::Function* global_init_func = m_module->getFunction("_global_init")) {
 				llvm::BasicBlock* init_block = &global_init_func->getEntryBlock();
+
+				// _global_init return void;
 				m_builder.SetInsertPoint(init_block);
 				m_builder.CreateRetVoid();
-				m_builder.SetInsertPoint(entryBlock);
+
+				// go back to the main function and call the _global_init function
+				m_builder.SetInsertPoint(entry_block);
 				m_builder.CreateCall(global_init_func, {});
 			}
+			else {
+				// use main as the insertion point
+				m_builder.SetInsertPoint(entry_block);
+			}
+		}
+		else {
+			// just set the current function as the entry block
+			m_builder.SetInsertPoint(entry_block);
 		}
 
 		// accept all statements inside the function
@@ -125,7 +137,7 @@ namespace channel {
 		}
 
 		// add a return statement if the function does not have one
-		if (!entryBlock->getTerminator()) {
+		if (!entry_block->getTerminator()) {
 			if (return_type->isVoidTy()) {
 				m_builder.CreateRetVoid();
 			}

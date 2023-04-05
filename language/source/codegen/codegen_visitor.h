@@ -8,6 +8,16 @@
 namespace channel {
 	class declaration_node;
 
+	class scope {
+	public:
+		std::vector<scope*>& get_inner_scopes() {
+			return m_scopes;
+		}
+	private:
+		std::unordered_map<std::string, llvm::Value*> m_named_values; // values in this scope
+		std::vector<scope*> m_scopes; // inner scopes
+	};
+
 	/**
 	 * \brief Evaluator that implements the codegen visitor to generate LLVM IR.
 	 */
@@ -46,6 +56,8 @@ namespace channel {
 	private:
 		// stack holding all variables of each respective scope
 		std::vector<std::unordered_map<std::string, llvm::Value*>> m_scope_stack;
+
+		std::vector<scope*> m_scopes;
 
 		// map of all global variables
 		std::unordered_map<std::string, llvm::Value*> m_global_named_values;

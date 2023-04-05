@@ -10,12 +10,41 @@ namespace channel {
 
 	class scope {
 	public:
-		std::vector<scope*>& get_inner_scopes() {
-			return m_scopes;
+		explicit scope(scope* parent = nullptr)
+			: m_parent(parent) {}
+
+		void insert(const std::string& name, llvm::Value* value) {
+			m_named_values[name] = value;
+		}
+
+		llvm::Value* get_value(const std::string& name) {
+			const auto it = m_named_values.find(name); // try to find an llvm::value in this scope
+
+			// if we've found a value in this scope, return it
+			if (it != m_named_values.end()) {
+				return it->second;
+			}
+
+			// if we haven't found a value, but we have a parent scope, search it as well 
+			if (m_parent != nullptr) {
+				return m_parent->get_value(name);
+			}
+
+			// value does not exist in current scope
+			return nullptr;
+		}
+
+		std::pair<std::unordered_map<std::string, llvm::Value*>::iterator, bool> add_variable(const std::string& name, llvm::Value* value) {
+			return m_named_values.insert({ name, value });
+		}
+
+		std::unique_ptr<scope> create_nested_scope(const std::string& name) {
+			std::cout << "creating nested scope\n";
+			return std::make_unique<scope>(this);
 		}
 	private:
-		std::unordered_map<std::string, llvm::Value*> m_named_values; // values in this scope
-		std::vector<scope*> m_scopes; // inner scopes
+		scope* m_parent = nullptr;
+		std::unordered_map<std::string, llvm::Value*> m_named_values;
 	};
 
 	/**
@@ -51,13 +80,10 @@ namespace channel {
 		llvm::Value* visit_operator_modulo_node(operator_modulo_node& node) override;
 
 		bool has_main_entry_point() const;
-		llvm::Value* find_variable(const std::string& name);
 		llvm::Value* get_declaration_value(const declaration_node& node);
 	private:
-		// stack holding all variables of each respective scope
-		std::vector<std::unordered_map<std::string, llvm::Value*>> m_scope_stack;
-
-		std::vector<scope*> m_scopes;
+		// scope tree hierarchy
+		scope* m_scope;
 
 		// map of all global variables
 		std::unordered_map<std::string, llvm::Value*> m_global_named_values;

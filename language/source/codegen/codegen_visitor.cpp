@@ -26,9 +26,9 @@
 #include <llvm/IR/Verifier.h>
 
 namespace channel {
-	codegen_visitor::codegen_visitor() : m_builder(m_context) {
+	codegen_visitor::codegen_visitor()
+	: m_scope(new scope(nullptr)), m_builder(m_context) {
 		m_module = std::make_unique<llvm::Module>("channel", m_context);
-		m_scope_stack.push_back({});
 	}
 
 	void codegen_visitor::print_intermediate_representation() const {
@@ -49,7 +49,7 @@ namespace channel {
 
 	llvm::Value* codegen_visitor::visit_assignment_node(assignment_node& node) {
 		// local variable
-		if (llvm::Value* local_variable = find_variable(node.get_name())) {
+		if (llvm::Value* local_variable = m_scope->get_value(node.get_name())) {
 			// evaluate the expression on the right-hand side of the assignment
 			llvm::Value* new_value = node.get_expression()->accept(*this);
 			// store the value in the memory location of the variable
@@ -86,7 +86,7 @@ namespace channel {
 
 	llvm::Value* codegen_visitor::visit_variable_node(variable_node& node) {
 		// local variable
-		if (llvm::Value* variable_value = find_variable(node.get_name())) {
+		if (llvm::Value* variable_value = m_scope->get_value(node.get_name())) {
 			// load the value from the memory location
 			const llvm::AllocaInst* alloca = llvm::dyn_cast<llvm::AllocaInst>(variable_value);
 			return m_builder.CreateLoad(alloca->getAllocatedType(), variable_value, node.get_name());
@@ -106,6 +106,10 @@ namespace channel {
 		llvm::FunctionType* function_type = llvm::FunctionType::get(return_type, false);
 		llvm::Function* function = llvm::Function::Create(function_type, llvm::Function::ExternalLinkage, node.get_name(), m_module.get());
 		llvm::BasicBlock* entry_block = llvm::BasicBlock::Create(m_context, "entry", function);
+
+		// create a new nested scope for the function body
+		scope* prev_scope = m_scope;
+		m_scope = new scope(prev_scope);
 
 		// if the function is 'main', call the '_global_init' function
 		if (node.get_name() == "main") {
@@ -136,6 +140,9 @@ namespace channel {
 			statement->accept(*this);
 		}
 
+		// restore the previous scope
+		m_scope = prev_scope;
+
 		// add a return statement if the function does not have one
 		if (!entry_block->getTerminator()) {
 			if (return_type->isVoidTy()) {
@@ -164,8 +171,8 @@ namespace channel {
 		llvm::AllocaInst* alloca = m_builder.CreateAlloca(initial_value->getType(), nullptr, node.get_name());
 		m_builder.CreateStore(initial_value, alloca);
 
-		// add the variable to the m_named_values map
-		const auto insertion_result = m_scope_stack.back().insert({ node.get_name(), alloca });
+		// add the variable to the current scope
+		const auto insertion_result = m_scope->add_variable(node.get_name(), alloca);
 		ASSERT(insertion_result.second, "[codegen]: local variable '" + node.get_name() + "' has already been defined before");
 		return initial_value;
 	}
@@ -255,21 +262,6 @@ namespace channel {
 
 	bool codegen_visitor::has_main_entry_point() const {
 		return m_module->getFunction("main") != nullptr;
-	}
-
-	// todo: this function should take in the current stack level and search 'upwards'
-	//       (not through the entire stack)
-	llvm::Value* codegen_visitor::find_variable(const std::string& name) {
-		// search for the variable in the current scope and parent scopes
-		for (auto it = m_scope_stack.rbegin(); it != m_scope_stack.rend(); ++it) {
-			const auto& scope = *it;
-			auto var_iterator = scope.find(name);
-			if (var_iterator != scope.end()) {
-				return var_iterator->second;
-			}
-		}
-
-		return nullptr; // variable not found
 	}
 
 	llvm::Value* codegen_visitor::get_declaration_value(const declaration_node& node)	{

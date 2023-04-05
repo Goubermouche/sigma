@@ -5,10 +5,10 @@
 // priority todo list: 
 // - add support for multiple scopes in every function
 
-i32 func() {
-    i32 a = 10;
-}
+i32 a = 1;
+i32 b = a;
 
 i32 main() {
-    // i32 a = 20;
+    i32 c = a;
+    c = 2 * b + a;
 }

@@ -14,7 +14,7 @@ namespace channel::detail {
 
 	char string_accessor::get() const {
 		// check if we are inside of our strings' bounds
-		ASSERT(m_position <= m_string.size(), "accessor out of range!");
+		ASSERT(m_position <= m_string.size(), "accessor out of range! (get)");
 		return m_string[m_position];
 	}
 
@@ -34,7 +34,7 @@ namespace channel::detail {
 
 	void string_accessor::set_position(u64 position) {
 		// check if we are inside of our strings' bounds
-		ASSERT(m_position <= m_string.size(), "accessor out of range!");
+		ASSERT(position <= m_string.size(), "accessor out of range! (set)");
 		m_position = position;
 	}
 }

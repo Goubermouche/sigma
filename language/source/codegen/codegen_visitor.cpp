@@ -37,9 +37,7 @@ namespace channel {
 
 	void codegen_visitor::verify_intermediate_representation() const {
 		// check if we have a 'main' function
-		if(!has_main_entry_point()) {
-			ASSERT(false, "[codegen]: cannot find main entrypoint");
-		}
+		ASSERT(has_main_entry_point(), "[codegen]: cannot find main entrypoint");
 
 		// check for IR errors
 		if(!llvm::verifyModule(*m_module, &llvm::outs())) {
@@ -113,6 +111,8 @@ namespace channel {
 
 		// if the function is 'main', call the '_global_init' function
 		if (node.get_name() == "main") {
+			m_main_entry_point = function;
+
 			// call the '_global_init' function and init global variables
 			if(llvm::Function* global_init_func = m_module->getFunction("_global_init")) {
 				llvm::BasicBlock* init_block = &global_init_func->getEntryBlock();
@@ -172,12 +172,19 @@ namespace channel {
 		m_builder.CreateStore(initial_value, alloca);
 
 		// add the variable to the current scope
-		const auto insertion_result = m_scope->add_variable(node.get_name(), alloca);
+		ASSERT(!m_global_named_values[node.get_name()], "[codegen]: local variable '" + node.get_name() + "' has alredy been defined in the global scope");
+		const auto insertion_result = m_scope->add_named_value(node.get_name(), alloca);
 		ASSERT(insertion_result.second, "[codegen]: local variable '" + node.get_name() + "' has already been defined before");
 		return initial_value;
 	}
 
 	llvm::Value* codegen_visitor::visit_global_declaration_node(global_declaration_node& node) {
+		// only generate the global variable if the main entry point hasn't been
+		// declared yet
+		if(m_main_entry_point) {
+			return nullptr;
+		}
+
 		// evaluate the assigned value, if there is one
 		llvm::Value* initial_value = get_declaration_value(node);
 		llvm::Type* value_type = initial_value->getType();

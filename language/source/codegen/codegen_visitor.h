@@ -18,14 +18,14 @@ namespace channel {
 		}
 
 		llvm::Value* get_value(const std::string& name) {
-			const auto it = m_named_values.find(name); // try to find an llvm::value in this scope
+			const auto it = m_named_values.find(name); // try to find an llvm::Value in this scope
 
 			// if we've found a value in this scope, return it
 			if (it != m_named_values.end()) {
 				return it->second;
 			}
 
-			// if we haven't found a value, but we have a parent scope, search it as well 
+			// if we haven't found a value, but we have a parent scope we need to search it as well 
 			if (m_parent != nullptr) {
 				return m_parent->get_value(name);
 			}
@@ -34,7 +34,7 @@ namespace channel {
 			return nullptr;
 		}
 
-		std::pair<std::unordered_map<std::string, llvm::Value*>::iterator, bool> add_variable(const std::string& name, llvm::Value* value) {
+		std::pair<std::unordered_map<std::string, llvm::Value*>::iterator, bool> add_named_value(const std::string& name, llvm::Value* value) {
 			return m_named_values.insert({ name, value });
 		}
 
@@ -90,6 +90,7 @@ namespace channel {
 
 		llvm::LLVMContext m_context;
 		llvm::IRBuilder<> m_builder;
+		llvm::Function* m_main_entry_point;
 		std::unique_ptr<llvm::Module> m_module;
 	};
 }

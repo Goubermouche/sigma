@@ -1,10 +1,9 @@
 #pragma once
 
 #include "scope.h"
+#include "visitor.h"
 #include "../parser/parser.h"
 
-#include "visitor.h"
-#include <llvm/IR/LLVMContext.h>
 #include <llvm/IR/IRBuilder.h>
 
 #define GLOBAL_INITIALIZATION_FUNCTION "__global_init_function"
@@ -54,6 +53,7 @@ namespace channel {
 
 		bool has_main_entry_point() const;
 		void initialize_global_variables();
+		llvm::Type* type_to_llvm_type(type type);
 		llvm::Value* get_declaration_value(const declaration_node& node);
 	private:
 		// scope tree hierarchy

@@ -1,8 +1,8 @@
 #include "global_declaration_node.h"
 
 namespace channel {
-	global_declaration_node::global_declaration_node(const std::string& name, node* expression)
-		: declaration_node(name, expression) {}
+	global_declaration_node::global_declaration_node(type declaration_type, const std::string& name, node* expression)
+		: declaration_node(declaration_type, name, expression) {}
 
 	llvm::Value* global_declaration_node::accept(visitor& visitor)	{
 		LOG_NODE_NAME(global_declaration_node);

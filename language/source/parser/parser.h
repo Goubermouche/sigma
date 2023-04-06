@@ -2,6 +2,7 @@
 
 #include "../lexer/lexer.h"
 #include "../codegen/abstract_syntax_tree/node.h"
+#include "../type.h"
 
 namespace channel {
 	// todo: fix a bug that's causes an error to be thrown when two semicolons
@@ -17,11 +18,12 @@ namespace channel {
 		void consume_next_token();
 		void expect_next_token(token token);
 
-		node* parse_declaration_or_assignment(bool is_global);
-		node* parse_expression();
-		node* parse_term();
-		node* parse_factor();
-		node* parse_number();
+		node* parse_declaration(bool is_global, token type_token);
+		node* parse_assignment(bool is_global);
+		node* parse_expression(token type_token = token::unknown);
+		node* parse_term(token type_token = token::unknown);
+		node* parse_factor(token type_token = token::unknown);
+		node* parse_number(token type_token = token::unknown);
 		node* parse_function_call(const std::string& function_name);
 		node* parse_function_definition();
 		node* parse_return_statement();

@@ -200,5 +200,8 @@
     <ClInclude Include="source\codegen\scope.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="source\type.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

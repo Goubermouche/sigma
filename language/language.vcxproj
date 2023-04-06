@@ -203,6 +203,7 @@
     <ClInclude Include="source\lexer\lexer.h" />
     <ClInclude Include="source\lexer\token.h" />
     <ClInclude Include="source\parser\parser.h" />
+    <ClInclude Include="source\type.h" />
     <ClInclude Include="source\utility\filesystem.h" />
     <ClInclude Include="source\utility\macros.h" />
     <ClInclude Include="source\utility\string_accessor.h" />

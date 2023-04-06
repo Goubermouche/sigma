@@ -1,8 +1,8 @@
 #include "local_declaration_node.h"
 
 namespace channel {
-	local_declaration_node::local_declaration_node(const std::string& name, node* expression)
-		: declaration_node(name, expression) {}
+	local_declaration_node::local_declaration_node(type declaration_type, const std::string& name, node* expression)
+		: declaration_node(declaration_type, name, expression) {}
 
 	llvm::Value* local_declaration_node::accept(visitor& visitor) {
 		LOG_NODE_NAME(local_declaration_node);

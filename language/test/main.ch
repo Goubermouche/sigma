@@ -1,11 +1,8 @@
-i32 value = -100;
-
-i32 func() { 
-    return value; 
-}
-
-i32 x = value;
+i8  value8  = 1;
+i16 value16 = 2;
+i32 value32 = 3;
+i64 value64 = 4;
 
 i32 main() {
-    return 1 / 2 / 3;
+    i32 a = 2 / 2;
 }

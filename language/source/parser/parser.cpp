@@ -2,9 +2,14 @@
 
 #include "../codegen/abstract_syntax_tree/keywords/assignment_node.h"
 #include "../codegen/abstract_syntax_tree/keywords/function_call_node.h"
-#include "../codegen/abstract_syntax_tree/keywords/types/keyword_i32_node.h"
 #include "../codegen/abstract_syntax_tree/keywords/function_node.h"
 #include "../codegen/abstract_syntax_tree/keywords/return_node.h"
+
+#include "../codegen/abstract_syntax_tree/keywords/types/keyword_i8_node.h"
+#include "../codegen/abstract_syntax_tree/keywords/types/keyword_i16_node.h"
+#include "../codegen/abstract_syntax_tree/keywords/types/keyword_i32_node.h"
+#include "../codegen/abstract_syntax_tree/keywords/types/keyword_i64_node.h"
+
 
 #include "../codegen/abstract_syntax_tree/variables/variable_node.h"
 #include "../codegen/abstract_syntax_tree/variables/declaration/local_declaration_node.h"
@@ -46,8 +51,13 @@ namespace channel {
 			switch (m_current_token) {
 				// todo: generalize
 			case token::identifier:
+				statement = parse_assignment(is_global);
+				break;
+			case token::keyword_type_i8:
+			case token::keyword_type_i16:
 			case token::keyword_type_i32:
-				statement = parse_declaration_or_assignment(is_global);
+			case token::keyword_type_i64:
+				statement = parse_declaration(is_global, m_current_token);
 				break;
 			default:
 				std::cout << "unhandled token (" << token_to_string(m_current_token) << ") \n";
@@ -60,10 +70,17 @@ namespace channel {
 			case token::identifier:
 				if(peek_is_function_call()) {
 					statement = parse_function_call(m_lexer.get_identifier());
-					break;
 				}
+				else {
+					statement = parse_assignment(is_global);
+				}
+
+				break;
+			case token::keyword_type_i8:
+			case token::keyword_type_i16:
 			case token::keyword_type_i32:
-				statement = parse_declaration_or_assignment(is_global);
+			case token::keyword_type_i64:
+				statement = parse_declaration(is_global, m_current_token);
 				break;
 			case token::keyword_return:
 				statement = parse_return_statement();
@@ -91,38 +108,37 @@ namespace channel {
 		}
 	}
 
-	node* parser::parse_declaration_or_assignment(bool is_global) {
-		// todo: generalize
-		const bool is_declaration = m_current_token == token::keyword_type_i32;
+	node* parser::parse_declaration(bool is_global, token type_token) {
 		consume_next_token();
 
-		// parse declaration
-		if(is_declaration) {
-			ASSERT(m_current_token == token::identifier, "[parser]: expected an identifier, but received '" + token_to_string(m_current_token) + "' instead");
-			const std::string name = m_lexer.get_identifier();
-			consume_next_token(); // consume identifier token
+		ASSERT(m_current_token == token::identifier, "[parser]: expected an identifier, but received '" + token_to_string(m_current_token) + "' instead");
+		const std::string name = m_lexer.get_identifier();
+		consume_next_token(); // consume identifier token
 
-			node* value = nullptr;
+		node* value = nullptr;
 
-			if (m_current_token == token::operator_assignment) {
-				consume_next_token();
-				value = parse_expression();
-			}
-
-			if(is_global) {
-				return new global_declaration_node(name, value);
-			}
-
-			return new local_declaration_node(name, value);
+		if (m_current_token == token::operator_assignment) {
+			consume_next_token();
+			value = parse_expression(type_token);
 		}
-		
+
+		if (is_global) {
+			return new global_declaration_node(token_to_type(type_token), name, value);
+		}
+
+		return new local_declaration_node(token_to_type(type_token), name, value);
+	}
+
+	node* parser::parse_assignment(bool is_global) {
+		consume_next_token();
+
 		// parse access-assignment 
 		const std::string name = m_lexer.get_identifier();
 		ASSERT(m_current_token == token::operator_assignment, "[parser]: expected an assignment operator, but received '" + token_to_string(m_current_token) + "' instead");
 		consume_next_token();
-		node* value = nullptr;
-
+		node* value;
 		consume_next_token();
+
 		if (peek_is_function_call()) {
 			// parse function call and assign the result to the variable
 			const std::string function_name = m_lexer.get_identifier();
@@ -135,14 +151,14 @@ namespace channel {
 		return new assignment_node(name, value);
 	}
 
-	node* parser::parse_expression() {
-		node* term = parse_term();
+	node* parser::parse_expression(token type_token) {
+		node* term = parse_term(type_token);
 
 		while (m_current_token == token::operator_addition || m_current_token == token::operator_subtraction) {
 			const token op = m_current_token;
 			consume_next_token();
 
-			node* right = parse_term();
+			node* right = parse_term(type_token);
 
 			if (op == token::operator_addition) {
 				term = new operator_addition_node(term, right);
@@ -155,13 +171,13 @@ namespace channel {
 		return term;
 	}
 
-	node* parser::parse_term() {
-		node* factor = parse_factor();
+	node* parser::parse_term(token type_token) {
+		node* factor = parse_factor(type_token);
 
 		while (m_current_token == token::operator_multiplication || m_current_token == token::operator_division || m_current_token == token::operator_modulo) {
 			const token op = m_current_token;
 			consume_next_token();
-			node* right = parse_factor();
+			node* right = parse_factor(type_token);
 
 			if(op == token::operator_multiplication) {
 				factor = new operator_multiplication_node(factor, right);
@@ -177,12 +193,12 @@ namespace channel {
 		return factor;
 	}
 
-	node* parser::parse_factor() {
+	node* parser::parse_factor(token type_token) {
 		node* root = nullptr;
 
 		if (m_current_token == token::number_signed) {
 			// todo: generalize
-			root = parse_number();
+			root = parse_number(type_token);
 		}
 		else if (m_current_token == token::operator_subtraction) {
 			consume_next_token(); // consume the subtraction token
@@ -201,7 +217,7 @@ namespace channel {
 		}
 		else if (m_current_token == token::l_parenthesis) {
 			consume_next_token(); // consume the left parenthesis
-			root = parse_expression();
+			root = parse_expression(type_token);
 			expect_next_token(token::r_parenthesis); // consume the right parenthesis
 		}
 		else {
@@ -211,11 +227,33 @@ namespace channel {
 		return root;
 	}
 
-	node* parser::parse_number() {
-		// todo: generalize
-		const i32 value = std::stoi(m_lexer.get_value());
-		consume_next_token(); // consume the number token
-		return new keyword_i32_node(value);
+	node* parser::parse_number(token type_token) {
+		const std::string str_value = m_lexer.get_value();
+
+		token type = m_current_token;
+		if(type_token != token::unknown) {
+			type = type_token;
+		}
+
+		consume_next_token();
+
+		switch (type) {
+		// signed
+		case token::keyword_type_i8:
+			return new keyword_i8_node(static_cast<i8>(std::stoi(str_value)));
+		case token::keyword_type_i16:
+			return new keyword_i16_node(static_cast<i16>(std::stoi(str_value)));
+		case token::number_signed:
+		case token::keyword_type_i32:
+			return new keyword_i32_node(std::stoi(str_value));
+		case token::keyword_type_i64:
+			return new keyword_i64_node(std::stoi(str_value));
+		// unsigned
+		// floating point
+		default:
+			ASSERT(false, "[parser]: unhandled number format '" + token_to_string(type) + "' encountered");
+			return nullptr;
+		}
 	}
 
 	node* parser::parse_function_call(const std::string& function_name)	{
@@ -248,7 +286,23 @@ namespace channel {
 	node* parser::parse_function_definition() {
 		// parse the return type (e.g., int)
 		// todo: generalize
-		const std::string return_type = "int";
+		type return_type{};
+
+		switch (m_current_token) {
+		case token::keyword_type_i8:
+			return_type = type::i8;
+			break;
+		case token::keyword_type_i16:
+			return_type = type::i16;
+			break;
+		case token::keyword_type_i32:
+			return_type = type::i32;
+			break;
+		case token::keyword_type_i64:
+			return_type = type::i64;
+			break;
+		}
+
 		consume_next_token();
 		// parse the function name (e.g., main, other_function)
 		const std::string name = m_lexer.get_identifier();
@@ -270,7 +324,6 @@ namespace channel {
 
 		// consume the closing curly brace '}'
 		consume_next_token();
-
 		return new function_node(return_type, name, std::move(statements));
 	}
 

@@ -1,5 +1,6 @@
 #pragma once
 #include "../node.h"
+#include "../../../type.h"
 
 namespace channel {
 	/**
@@ -7,18 +8,16 @@ namespace channel {
 	 */
 	class function_node : public node {
 	public:
-		function_node(const std::string& return_type, const std::string& name, std::vector<node*> statements);
+		function_node(type type, const std::string& name, std::vector<node*> statements);
 		llvm::Value* accept(visitor& visitor) override;
 		std::string get_node_name() const override;
 
-		const std::string& get_return_type() const;
+		type get_return_type() const;
 		const std::string& get_name() const;
 		const std::vector<node*>& get_statements() const;
 	private:
-		std::string m_return_type;
+		type m_return_type;
 		std::string m_name;
 		std::vector<node*> m_statements;
 	};
 }
-
-

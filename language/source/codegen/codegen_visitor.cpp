@@ -48,6 +48,21 @@ namespace channel {
 		new llvm::GlobalVariable(*m_module, updated_ctor_array_type, false, llvm::GlobalValue::AppendingLinkage, updated_ctors, "llvm.global_ctors");
 	}
 
+	llvm::Type* codegen_visitor::type_to_llvm_type(type type) {
+		switch (type) {
+		case type::i8:
+			return llvm::Type::getInt8Ty(m_context);
+		case type::i16:
+			return llvm::Type::getInt16Ty(m_context);
+		case type::i32:
+			return llvm::Type::getInt32Ty(m_context);
+		case type::i64:
+			return llvm::Type::getInt64Ty(m_context);
+		default:
+			return nullptr;
+		}
+	}
+
 	void codegen_visitor::print_intermediate_representation() const {
 		m_module->print(llvm::outs(), nullptr);
 	}
@@ -115,9 +130,7 @@ namespace channel {
 	}
 
 	llvm::Value* codegen_visitor::visit_function_node(function_node& node) {
-		// assume 'int' return type for the sake of simplicity
-		// todo: generalize
-		llvm::Type* return_type = llvm::Type::getInt32Ty(m_context);
+		llvm::Type* return_type = type_to_llvm_type(node.get_return_type());
 		llvm::FunctionType* function_type = llvm::FunctionType::get(return_type, false);
 		llvm::Function* function = llvm::Function::Create(function_type, llvm::Function::ExternalLinkage, node.get_name(), m_module.get());
 
@@ -140,14 +153,12 @@ namespace channel {
 		m_scope = prev_scope;
 
 		// add a return statement if the function does not have one
-		if (!entry_block->getTerminator()) {
+		if (entry_block->getTerminator() == nullptr) {
 			if (return_type->isVoidTy()) {
 				m_builder.CreateRetVoid();
 			}
 			else {
-				// assume 'int' return type
-				// todo: generalize
-				m_builder.CreateRet(llvm::ConstantInt::get(m_context, llvm::APInt(32, 0, true)));
+				m_builder.CreateRet(llvm::Constant::getNullValue(return_type));
 			}
 		}
 
@@ -267,34 +278,36 @@ namespace channel {
 		llvm::Value* right = node.right->accept(*this);
 
 		// check for division by 0 
-		if(right->getType()->isIntegerTy()) {
-			llvm::Function* current_block = m_builder.GetInsertBlock()->getParent();
+		//if (right->getType()->isIntegerTy()) {
+		//	llvm::Function* current_function = m_builder.GetInsertBlock()->getParent();
 
-			// create blocks for conditional execution
-			llvm::BasicBlock* check_divisor_block = llvm::BasicBlock::Create(m_context, "__check_divisor", current_block);
-			llvm::BasicBlock* division_block = llvm::BasicBlock::Create(m_context, "__division", current_block);
-			llvm::BasicBlock* continue_block = llvm::BasicBlock::Create(m_context, "__continue", current_block);
+		//	// create blocks for conditional execution
+		//	llvm::BasicBlock* check_divisor_block = llvm::BasicBlock::Create(m_context, "__check_divisor", current_function);
+		//	llvm::BasicBlock* division_block = llvm::BasicBlock::Create(m_context, "__division", current_function);
+		//	llvm::BasicBlock* continue_block = llvm::BasicBlock::Create(m_context, "__continue", current_function);
 
-			// check if the divisor is zero
-			m_builder.CreateBr(check_divisor_block);
-			m_builder.SetInsertPoint(check_divisor_block);
-			llvm::Value* is_divisor_non_zero = m_builder.CreateICmpNE(right, llvm::ConstantInt::get(m_context, llvm::APInt(32, 0)), "isDivisorNonZero");
-			m_builder.CreateCondBr(is_divisor_non_zero, division_block, continue_block);
+		//	// check if the divisor is zero
+		//	m_builder.CreateBr(check_divisor_block);
+		//	m_builder.SetInsertPoint(check_divisor_block);
+		//	llvm::Value* is_divisor_non_zero = m_builder.CreateICmpNE(right, llvm::ConstantInt::get(m_context, llvm::APInt(32, 0)), "isDivisorNonZero");
+		//	m_builder.CreateCondBr(is_divisor_non_zero, division_block, continue_block);
 
-			// perform division
-			m_builder.SetInsertPoint(division_block);
-			llvm::Value* value = m_builder.CreateSDiv(left, right, "div");
-			m_builder.CreateBr(continue_block);
+		//	// perform division
+		//	m_builder.SetInsertPoint(division_block);
+		//	llvm::Value* value = m_builder.CreateSDiv(left, right, "div");
+		//	m_builder.CreateBr(continue_block);
 
-			// merge the result
-			m_builder.SetInsertPoint(continue_block);
-			llvm::PHINode* phi = m_builder.CreatePHI(llvm::Type::getInt32Ty(m_context), 2, "result");
+		//	// merge the result
+		//	m_builder.SetInsertPoint(continue_block);
+		//	llvm::PHINode* phi = m_builder.CreatePHI(llvm::Type::getInt32Ty(m_context), 2, "result");
 
-			// if the divisor was zero, return a default value (e.g., zero)
-			phi->addIncoming(llvm::ConstantInt::get(m_context, llvm::APInt(32, 0)), check_divisor_block);
-			phi->addIncoming(value, division_block);
-			return phi;
-		}
+		//	// if the divisor was zero, return a default value (e.g., zero)
+		//	llvm::Type* right_type = right->getType();
+		//	phi->addIncoming(llvm::Constant::getNullValue(right_type), check_divisor_block);
+		//	phi->addIncoming(value, division_block);
+
+		//	return phi;
+		//}
 
 		return m_builder.CreateSDiv(left, right, "div");
 	}
@@ -312,18 +325,14 @@ namespace channel {
 	llvm::Value* codegen_visitor::get_declaration_value(const declaration_node& node) {
 		// evaluate the expression to get the initial value
 		llvm::Value* initial_value;
-		// assume i32 type for now
-		// todo: generalize
-		llvm::Type* var_type = llvm::Type::getInt32Ty(m_context);
+		llvm::Type* var_type = type_to_llvm_type(node.get_declaration_type());
 
 		if (node.get_expression()) {
 			// evaluate the expression to get the initial value
 			initial_value = node.get_expression()->accept(*this);
 		}
 		else {
-			// use a default value for unassigned variables
-			// todo: generalize
-			initial_value = llvm::ConstantInt::get(var_type, 0, true);
+			initial_value = llvm::Constant::getNullValue(var_type);
 		}
 
 		return initial_value;

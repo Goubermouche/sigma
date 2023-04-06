@@ -27,8 +27,15 @@
 
 namespace channel {
 	codegen_visitor::codegen_visitor()
-	: m_scope(new scope(nullptr)), m_builder(m_context) {
+		: m_scope(new scope(nullptr)), m_builder(m_context) {
 		m_module = std::make_unique<llvm::Module>("channel", m_context);
+	}
+
+	void codegen_visitor::initialize_global_variables() {
+		// create the global ctors array
+		llvm::ArrayType* updated_ctor_array_type = llvm::ArrayType::get(CTOR_STRUCT_TYPE, m_ctors.size());
+		llvm::Constant* updated_ctors = llvm::ConstantArray::get(updated_ctor_array_type, m_ctors);
+		new llvm::GlobalVariable(*m_module, updated_ctor_array_type, false, llvm::GlobalValue::AppendingLinkage, updated_ctors, "llvm.global_ctors");
 	}
 
 	void codegen_visitor::print_intermediate_representation() const {
@@ -37,10 +44,10 @@ namespace channel {
 
 	void codegen_visitor::verify_intermediate_representation() const {
 		// check if we have a 'main' function
-		ASSERT(m_main_entry_point, "[codegen]: cannot find main entrypoint");
+		ASSERT(has_main_entry_point(), "[codegen]: cannot find main entrypoint");
 
 		// check for IR errors
-		if(!llvm::verifyModule(*m_module, &llvm::outs())) {
+		if (!llvm::verifyModule(*m_module, &llvm::outs())) {
 			std::cout << "[codegen]: all checks passed\n";
 		}
 	}
@@ -104,6 +111,7 @@ namespace channel {
 		llvm::FunctionType* function_type = llvm::FunctionType::get(return_type, false);
 		llvm::Function* function = llvm::Function::Create(function_type, llvm::Function::ExternalLinkage, node.get_name(), m_module.get());
 		llvm::BasicBlock* entry_block = llvm::BasicBlock::Create(m_context, "entry", function);
+		m_builder.SetInsertPoint(entry_block);
 
 		// create a new nested scope for the function body
 		scope* prev_scope = m_scope;
@@ -113,8 +121,6 @@ namespace channel {
 		if (node.get_name() == "main") {
 			m_main_entry_point = function;
 		}
-
-		m_builder.SetInsertPoint(entry_block);
 
 		// accept all statements inside the function
 		for (const auto& statement : node.get_statements()) {
@@ -159,48 +165,54 @@ namespace channel {
 		return initial_value;
 	}
 
-llvm::Value* codegen_visitor::visit_global_declaration_node(global_declaration_node& node) {
-	// only generate the global variable if the main entry point hasn't been
-	// declared yet
-	if (m_main_entry_point) {
-		return nullptr;
-	}
+	llvm::Value* codegen_visitor::visit_global_declaration_node(global_declaration_node& node) {
+		// only generate the global variable if the main entry point hasn't been
+		// declared yet
+		if (m_main_entry_point) {
+			return nullptr;
+		}
 
-	// evaluate the assigned value, if there is one
-	llvm::Value* initial_value = get_declaration_value(node);
-	llvm::Type* value_type = initial_value->getType();
+		// start creating the init function
+		const std::string init_func_name = "__global_init_" + node.get_name();
+		llvm::FunctionType* init_func_type = llvm::FunctionType::get(llvm::Type::getVoidTy(m_context), false);
+		llvm::Function* init_func = llvm::Function::Create(init_func_type, llvm::Function::InternalLinkage, init_func_name, m_module.get());
+		llvm::BasicBlock* init_func_entry = llvm::BasicBlock::Create(m_context, "entry", init_func);
+		m_builder.SetInsertPoint(init_func_entry); // write to the init function
 
-	// create a global variable
-	auto* global_variable = new llvm::GlobalVariable(*m_module,
-		value_type,
-		false,
-		llvm::GlobalValue::ExternalLinkage,
-		llvm::Constant::getNullValue(value_type), // default initializer
-		node.get_name()
-	);
+		// evaluate the assigned value, if there is one
+		llvm::Value* initial_value = get_declaration_value(node);
+		llvm::Type* value_type = initial_value->getType();
 
-	// add the variable to the m_global_named_values map
-	const auto insertion_result = m_global_named_values.insert({ node.get_name(), global_variable });
-	ASSERT(insertion_result.second, "[codegen]: global variable '" + node.get_name() + "' has already been defined before");
+		// create a global variable
+		auto* global_variable = new llvm::GlobalVariable(*m_module,
+			value_type,
+			false,
+			llvm::GlobalValue::ExternalLinkage,
+			llvm::Constant::getNullValue(value_type), // default initializer
+			node.get_name()
+		);
 
-	// create a special global initialization function for each global variable
-	std::string init_func_name = "_global_init_" + node.get_name();
-	llvm::FunctionType* init_func_type = llvm::FunctionType::get(llvm::Type::getVoidTy(m_context), false);
-	llvm::Function* init_func = llvm::Function::Create(init_func_type, llvm::Function::InternalLinkage, init_func_name, m_module.get());
-	llvm::BasicBlock* init_func_entry = llvm::BasicBlock::Create(m_context, "entry", init_func);
+		// add the variable to the m_global_named_values map
+		const auto insertion_result = m_global_named_values.insert({ node.get_name(), global_variable });
+		ASSERT(insertion_result.second, "[codegen]: global variable '" + node.get_name() + "' has already been defined before");
 
-	m_builder.SetInsertPoint(init_func_entry);
-
-	if (initial_value) {
 		m_builder.CreateStore(initial_value, global_variable);
+		m_builder.CreateRetVoid();
+
+
+
+		// create a new constructor with the given priority
+		llvm::ConstantInt* priority = llvm::ConstantInt::get(llvm::Type::getInt32Ty(m_context), m_global_initialization_priority++);
+		llvm::Constant* initializer_cast = llvm::ConstantExpr::getBitCast(init_func, llvm::Type::getInt8PtrTy(m_context));
+		llvm::Constant* new_ctor = llvm::ConstantStruct::get(CTOR_STRUCT_TYPE, {
+			priority,
+			initializer_cast,
+			llvm::Constant::getNullValue(llvm::Type::getInt8PtrTy(m_context))
+			});
+
+		m_ctors.push_back(new_ctor);
+		return global_variable;
 	}
-
-	m_builder.CreateRetVoid();
-	// register the global initializer function
-	register_global_initializer(init_func);
-
-	return global_variable;
-}
 
 	llvm::Value* codegen_visitor::visit_keyword_i8_node(keyword_i8_node& node) {
 		return llvm::ConstantInt::get(m_context, llvm::APInt(8, node.value, true));
@@ -248,40 +260,11 @@ llvm::Value* codegen_visitor::visit_global_declaration_node(global_declaration_n
 		return m_builder.CreateSRem(left, right, "mod");
 	}
 
-	void codegen_visitor::register_global_initializer(llvm::Function* initializer) {
-		// get the llvm.global_ctors array if it exists
-		llvm::GlobalVariable* global_ctors = m_module->getGlobalVariable("llvm.global_ctors");
-		std::vector<llvm::Constant*> ctors;
-		llvm::StructType* ctor_struct_type = llvm::StructType::get(m_context, { llvm::Type::getInt32Ty(m_context), llvm::Type::getInt8PtrTy(m_context), llvm::Type::getInt8PtrTy(m_context) });
-
-		// if the global_ctors array exists, collect existing ctors
-		if (global_ctors) {
-			const llvm::ArrayType* current_array_type = llvm::cast<llvm::ArrayType>(global_ctors->getValueType());
-			llvm::ConstantArray* current_ctors = llvm::cast<llvm::ConstantArray>(global_ctors->getInitializer());
-
-			for (unsigned i = 0; i < current_array_type->getNumElements(); ++i) {
-				ctors.push_back(current_ctors->getOperand(i));
-			}
-
-			// remove the old global_ctors variable
-			global_ctors->eraseFromParent();
-		}
-
-		//create a new constructor with priority 65535 (lower priority numbers run first)
-		llvm::ConstantInt* priority = llvm::ConstantInt::get(llvm::Type::getInt32Ty(m_context), 65535);
-		llvm::Constant* initializer_cast = llvm::ConstantExpr::getBitCast(initializer, llvm::Type::getInt8PtrTy(m_context));
-		llvm::Constant* new_ctor = llvm::ConstantStruct::get(ctor_struct_type, { priority, initializer_cast, llvm::Constant::getNullValue(llvm::Type::getInt8PtrTy(m_context)) });
-
-		// add the new constructor to the ctors list
-		ctors.push_back(new_ctor);
-
-		// create a new llvm.global_ctors array with the updated ctors list
-		llvm::ArrayType* updated_ctor_array_type = llvm::ArrayType::get(ctor_struct_type, ctors.size());
-		llvm::Constant* updated_ctors = llvm::ConstantArray::get(updated_ctor_array_type, ctors);
-		global_ctors = new llvm::GlobalVariable(*m_module, updated_ctor_array_type, false, llvm::GlobalValue::AppendingLinkage, updated_ctors, "llvm.global_ctors");
+	bool codegen_visitor::has_main_entry_point() const {
+		return m_module->getFunction("main") != nullptr;
 	}
 
-	llvm::Value* codegen_visitor::get_declaration_value(const declaration_node& node)	{
+	llvm::Value* codegen_visitor::get_declaration_value(const declaration_node& node) {
 		// evaluate the expression to get the initial value
 		llvm::Value* initial_value;
 		// assume i32 type for now

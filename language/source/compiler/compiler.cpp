@@ -11,8 +11,9 @@ namespace channel {
 			node->accept(visitor);
 		}
 
+		visitor.initialize_global_variables();
 		visitor.verify_intermediate_representation();
-		std::cout << "\n[compiler]: compiled " << abstract_syntax_tree.size() << " nodes in " << timer.elapsed() << "ms\n\n";
+		std::cout << "[compiler]: compiled " << abstract_syntax_tree.size() << " nodes in " << timer.elapsed() << "ms\n\n";
 		visitor.print_intermediate_representation();
 	}
 }

@@ -5,6 +5,15 @@
 #include <llvm/IR/LLVMContext.h>
 #include <llvm/IR/IRBuilder.h>
 
+#define GLOBAL_INITIALIZATION_FUNCTION "__global_init_function"
+
+#define CTOR_STRUCT_TYPE                 \
+llvm::StructType::get(m_context, {       \
+	llvm::Type::getInt32Ty(m_context),   \
+	llvm::Type::getInt8PtrTy(m_context), \
+	llvm::Type::getInt8PtrTy(m_context)  \
+})                                      
+
 namespace channel {
 	class declaration_node;
 
@@ -54,6 +63,7 @@ namespace channel {
 	public:
 		codegen_visitor();
 
+		void initialize_global_variables();
 		void print_intermediate_representation() const;
 		void verify_intermediate_representation() const;
 	private:
@@ -79,7 +89,7 @@ namespace channel {
 		llvm::Value* visit_operator_division_node(operator_division_node& node) override;
 		llvm::Value* visit_operator_modulo_node(operator_modulo_node& node) override;
 
-		void register_global_initializer(llvm::Function* initializer);
+		bool has_main_entry_point() const;
 		llvm::Value* get_declaration_value(const declaration_node& node);
 	private:
 		// scope tree hierarchy
@@ -87,10 +97,14 @@ namespace channel {
 
 		// map of all global variables
 		std::unordered_map<std::string, llvm::Value*> m_global_named_values;
+		std::vector<llvm::Constant*> m_ctors;
+		i32 m_global_initialization_priority = 0;
+
+		// special functions
+		llvm::Function* m_main_entry_point = nullptr;
 
 		llvm::LLVMContext m_context;
 		llvm::IRBuilder<> m_builder;
-		llvm::Function* m_main_entry_point = nullptr;
 		std::unique_ptr<llvm::Module> m_module;
 	};
 }

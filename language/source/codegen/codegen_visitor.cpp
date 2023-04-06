@@ -64,7 +64,7 @@ namespace channel {
 
 	llvm::Value* codegen_visitor::visit_assignment_node(assignment_node& node) {
 		// local variable
-		if (llvm::Value* local_variable = m_scope->get_value(node.get_name())) {
+		if (llvm::Value* local_variable = m_scope->get_named_value(node.get_name())) {
 			// evaluate the expression on the right-hand side of the assignment
 			llvm::Value* new_value = node.get_expression()->accept(*this);
 			// store the value in the memory location of the variable
@@ -86,8 +86,8 @@ namespace channel {
 	}
 
 	llvm::Value* codegen_visitor::visit_function_call_node(function_call_node& node) {
-		llvm::Function* function = m_module->getFunction(node.get_name());
-		ASSERT(function, "[codegen]: function '" + node.get_name() + ")");
+		llvm::Function* function = m_functions[node.get_name()];
+		ASSERT(function, "[codegen]: function '" + node.get_name() + "' cannot be found");
 
 		// generate code for each argument expression
 		std::vector<llvm::Value*> argument_values;
@@ -101,7 +101,7 @@ namespace channel {
 
 	llvm::Value* codegen_visitor::visit_variable_node(variable_node& node) {
 		// local variable
-		if (llvm::Value* variable_value = m_scope->get_value(node.get_name())) {
+		if (llvm::Value* variable_value = m_scope->get_named_value(node.get_name())) {
 			// load the value from the memory location
 			const llvm::AllocaInst* alloca = llvm::dyn_cast<llvm::AllocaInst>(variable_value);
 			return m_builder.CreateLoad(alloca->getAllocatedType(), variable_value, node.get_name());
@@ -120,17 +120,16 @@ namespace channel {
 		llvm::Type* return_type = llvm::Type::getInt32Ty(m_context);
 		llvm::FunctionType* function_type = llvm::FunctionType::get(return_type, false);
 		llvm::Function* function = llvm::Function::Create(function_type, llvm::Function::ExternalLinkage, node.get_name(), m_module.get());
+
+		const auto insertion_result = m_functions.insert({ node.get_name(), function });
+		ASSERT(insertion_result.second, "[codegen]: function '" + node.get_name() + "' has already been defined");
+
 		llvm::BasicBlock* entry_block = llvm::BasicBlock::Create(m_context, "entry", function);
 		m_builder.SetInsertPoint(entry_block);
 
 		// create a new nested scope for the function body
 		scope* prev_scope = m_scope;
 		m_scope = new scope(prev_scope);
-
-		// if the function is 'main', call the '_global_init' function
-		if (node.get_name() == "main") {
-			m_main_entry_point = function;
-		}
 
 		// accept all statements inside the function
 		for (const auto& statement : node.get_statements()) {
@@ -168,11 +167,6 @@ namespace channel {
 		// evaluate the assigned value, if there is one
 		llvm::Value* initial_value = get_declaration_value(node);
 
-		// create a local variable
-		ASSERT(m_builder.GetInsertBlock(), "[codegen]: invalid insert block");
-		const llvm::Function* current_function = m_builder.GetInsertBlock()->getParent();
-		ASSERT(current_function, "[codegen]: invalid function");
-
 		// store the initial value in the memory
 		llvm::AllocaInst* alloca = m_builder.CreateAlloca(initial_value->getType(), nullptr, node.get_name());
 		m_builder.CreateStore(initial_value, alloca);
@@ -185,12 +179,6 @@ namespace channel {
 	}
 
 	llvm::Value* codegen_visitor::visit_global_declaration_node(global_declaration_node& node) {
-		// only generate the global variable if the main entry point hasn't been
-		// declared yet
-		if (m_main_entry_point) {
-			return nullptr;
-		}
-
 		// start creating the init function
 		const std::string init_func_name = "__global_init_" + node.get_name();
 		llvm::FunctionType* init_func_type = llvm::FunctionType::get(llvm::Type::getVoidTy(m_context), false);
@@ -241,11 +229,11 @@ namespace channel {
 	}
 
 	llvm::Value* codegen_visitor::visit_keyword_i8_node(keyword_i8_node& node) {
-		return llvm::ConstantInt::get(m_context, llvm::APInt(8, node.value, true));
+		return llvm::ConstantInt::get(m_context, llvm::APInt(8, node.get_value(), true));
 	}
 
 	llvm::Value* codegen_visitor::visit_keyword_i16_node(keyword_i16_node& node) {
-		return llvm::ConstantInt::get(m_context, llvm::APInt(16, node.value, true));
+		return llvm::ConstantInt::get(m_context, llvm::APInt(16, node.get_value(), true));
 	}
 
 	llvm::Value* codegen_visitor::visit_keyword_i32_node(keyword_i32_node& node) {
@@ -253,7 +241,7 @@ namespace channel {
 	}
 
 	llvm::Value* codegen_visitor::visit_keyword_i64_node(keyword_i64_node& node) {
-		return llvm::ConstantInt::get(m_context, llvm::APInt(64, node.value, true));
+		return llvm::ConstantInt::get(m_context, llvm::APInt(64, node.get_value(), true));
 	}
 
 	llvm::Value* codegen_visitor::visit_operator_addition_node(operator_addition_node& node) {

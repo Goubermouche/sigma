@@ -1,4 +1,4 @@
-i32 value = -100;
+i32 value = -100 - 20;
 
 i32 func() { return value; }
 

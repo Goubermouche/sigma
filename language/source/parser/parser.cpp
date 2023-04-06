@@ -184,6 +184,10 @@ namespace channel {
 			// todo: generalize
 			root = parse_number();
 		}
+		else if (m_current_token == token::operator_subtraction) {
+			consume_next_token(); // consume the subtraction token
+			root = new operator_subtraction_node(new keyword_i32_node(0), parse_number()); // negate the number by subtracting it from 0
+		}
 		else if (m_current_token == token::identifier) {
 			const std::string name = m_lexer.get_identifier();
 			consume_next_token(); // consume the identifier token
@@ -321,7 +325,6 @@ namespace channel {
 		// save the current state
 		const token saved_token = m_current_token;
 		const u64 saved_position = m_lexer.get_position();
-
 
 		consume_next_token(); // (
 		consume_next_token(); // )

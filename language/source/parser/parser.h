@@ -24,6 +24,7 @@ namespace channel {
 		node* parse_number();
 		node* parse_function_call(const std::string& function_name);
 		node* parse_function_definition();
+		node* parse_return_statement();
 
 		static bool is_token_return_type(token token);
 		bool peek_is_function_definition();

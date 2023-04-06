@@ -25,6 +25,8 @@
 
 #include <llvm/IR/Verifier.h>
 
+#include "abstract_syntax_tree/keywords/return_node.h"
+
 namespace channel {
 	codegen_visitor::codegen_visitor(parser& parser)
 		: m_scope(new scope(nullptr)), m_builder(m_context) {
@@ -151,6 +153,15 @@ namespace channel {
 		}
 
 		return function;
+	}
+
+	llvm::Value* codegen_visitor::visit_return_node(return_node& node) {
+		// evaluate the expression of the return statement
+		llvm::Value* return_value = node.get_expression()->accept(*this);
+		// generate the LLVM return instruction with the evaluated expression
+		m_builder.CreateRet(return_value);
+		// return the value of the expression
+		return return_value;
 	}
 
 	llvm::Value* codegen_visitor::visit_local_declaration_node(local_declaration_node& node) {

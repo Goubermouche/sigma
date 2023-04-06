@@ -4,6 +4,7 @@
 #include "../codegen/abstract_syntax_tree/keywords/function_call_node.h"
 #include "../codegen/abstract_syntax_tree/keywords/types/keyword_i32_node.h"
 #include "../codegen/abstract_syntax_tree/keywords/function_node.h"
+#include "../codegen/abstract_syntax_tree/keywords/return_node.h"
 
 #include "../codegen/abstract_syntax_tree/variables/variable_node.h"
 #include "../codegen/abstract_syntax_tree/variables/declaration/local_declaration_node.h"
@@ -63,6 +64,9 @@ namespace channel {
 				}
 			case token::keyword_type_i32:
 				statement = parse_declaration_or_assignment(is_global);
+				break;
+			case token::keyword_return:
+				statement = parse_return_statement();
 				break;
 			default:
 				std::cout << "unhandled token (" << token_to_string(m_current_token) << ") \n";
@@ -264,6 +268,12 @@ namespace channel {
 		consume_next_token();
 
 		return new function_node(return_type, name, std::move(statements));
+	}
+
+	node* parser::parse_return_statement() {
+		consume_next_token();
+		node* expression = parse_expression();
+		return new return_node(expression);
 	}
 
 	bool parser::is_token_return_type(token token) {

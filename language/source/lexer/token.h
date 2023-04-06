@@ -28,6 +28,8 @@ namespace channel {
 		keyword_type_f32,                   // f32 0.0f
 		keyword_type_f64,                   // f64 0.0
 
+		keyword_return,                     // return
+
 		// math
 		// vectors
 		// vec2<T>
@@ -125,6 +127,9 @@ namespace channel {
 			return "keyword_type_f32";
 		case token::keyword_type_f64:
 			return "keyword_type_f64";
+
+		case token::keyword_return:
+			return "keyword_return";
 
 		// operators
 		case token::operator_addition:

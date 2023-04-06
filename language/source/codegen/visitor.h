@@ -13,6 +13,7 @@ namespace channel {
     class operator_multiplication_node;
     class operator_division_node;
     class operator_modulo_node;
+    class return_node;
 
     // variables
     class function_call_node;
@@ -41,6 +42,7 @@ namespace channel {
         virtual llvm::Value* visit_function_call_node(function_call_node& node) = 0;
         virtual llvm::Value* visit_variable_node(variable_node& node) = 0;
         virtual llvm::Value* visit_function_node(function_node& node) = 0;
+        virtual llvm::Value* visit_return_node(return_node& node) = 0;
 
         // keywords
         virtual llvm::Value* visit_keyword_i8_node(keyword_i8_node& node) = 0;

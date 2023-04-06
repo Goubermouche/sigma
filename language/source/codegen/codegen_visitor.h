@@ -73,6 +73,7 @@ namespace channel {
 		llvm::Value* visit_function_call_node(function_call_node& node) override;
 		llvm::Value* visit_variable_node(variable_node& node) override;
 		llvm::Value* visit_function_node(function_node& node) override;
+		llvm::Value* visit_return_node(return_node& node) override;
 
 		llvm::Value* visit_local_declaration_node(local_declaration_node& node) override;
 		llvm::Value* visit_global_declaration_node(global_declaration_node& node) override;

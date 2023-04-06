@@ -1,6 +1,8 @@
 #pragma once
 
 #include "../utility/macros.h"
+#include "../parser/parser.h"
+
 #include "visitor.h"
 #include <llvm/IR/LLVMContext.h>
 #include <llvm/IR/IRBuilder.h>
@@ -61,9 +63,8 @@ namespace channel {
 	 */
 	class codegen_visitor : public visitor {
 	public:
-		codegen_visitor();
+		codegen_visitor(parser& parser);
 
-		void initialize_global_variables();
 		void print_intermediate_representation() const;
 		void verify_intermediate_representation() const;
 	private:
@@ -90,6 +91,7 @@ namespace channel {
 		llvm::Value* visit_operator_modulo_node(operator_modulo_node& node) override;
 
 		bool has_main_entry_point() const;
+		void initialize_global_variables();
 		llvm::Value* get_declaration_value(const declaration_node& node);
 	private:
 		// scope tree hierarchy

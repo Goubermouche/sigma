@@ -16,7 +16,7 @@
 #include "abstract_syntax_tree/keywords/types/keyword_i64_node.h"
 
 // operators
-// #include "abstract_syntax_tree/keywords/function_call_node.h"
+#include "abstract_syntax_tree/keywords/function_call_node.h"
 #include "abstract_syntax_tree/operators/operator_addition_node.h"
 #include "abstract_syntax_tree/operators/operator_subtraction_node.h"
 #include "abstract_syntax_tree/operators/operator_multiplication_node.h"
@@ -26,9 +26,17 @@
 #include <llvm/IR/Verifier.h>
 
 namespace channel {
-	codegen_visitor::codegen_visitor()
+	codegen_visitor::codegen_visitor(parser& parser)
 		: m_scope(new scope(nullptr)), m_builder(m_context) {
 		m_module = std::make_unique<llvm::Module>("channel", m_context);
+
+		// walk the abstract syntax tree
+		const std::vector<node*> abstract_syntax_tree = parser.parse();
+		for (node* node : abstract_syntax_tree) {
+			node->accept(*this);
+		}
+
+		initialize_global_variables();
 	}
 
 	void codegen_visitor::initialize_global_variables() {
@@ -86,7 +94,7 @@ namespace channel {
 			argument_values.push_back(m_builder.GetInsertBlock()->getParent()->back().getTerminator()->getOperand(0));
 		}
 
-		return m_builder.CreateRet(m_builder.CreateCall(function, argument_values, "call"));
+		return m_builder.CreateCall(function, argument_values, "call");
 	}
 
 	llvm::Value* codegen_visitor::visit_variable_node(variable_node& node) {
@@ -183,6 +191,15 @@ namespace channel {
 		llvm::Value* initial_value = get_declaration_value(node);
 		llvm::Type* value_type = initial_value->getType();
 
+		// todo: const evaluation of global variables
+		// constant-evaluated
+		//if(auto* constant_initial_value = llvm::dyn_cast<llvm::Constant>(initial_value)) {
+		//	
+		//}
+		//else {
+		//	
+		//}
+
 		// create a global variable
 		auto* global_variable = new llvm::GlobalVariable(*m_module,
 			value_type,
@@ -199,8 +216,6 @@ namespace channel {
 		m_builder.CreateStore(initial_value, global_variable);
 		m_builder.CreateRetVoid();
 
-
-
 		// create a new constructor with the given priority
 		llvm::ConstantInt* priority = llvm::ConstantInt::get(llvm::Type::getInt32Ty(m_context), m_global_initialization_priority++);
 		llvm::Constant* initializer_cast = llvm::ConstantExpr::getBitCast(init_func, llvm::Type::getInt8PtrTy(m_context));
@@ -208,7 +223,7 @@ namespace channel {
 			priority,
 			initializer_cast,
 			llvm::Constant::getNullValue(llvm::Type::getInt8PtrTy(m_context))
-			});
+		});
 
 		m_ctors.push_back(new_ctor);
 		return global_variable;

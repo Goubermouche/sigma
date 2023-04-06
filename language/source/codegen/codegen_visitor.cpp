@@ -37,7 +37,7 @@ namespace channel {
 
 	void codegen_visitor::verify_intermediate_representation() const {
 		// check if we have a 'main' function
-		ASSERT(has_main_entry_point(), "[codegen]: cannot find main entrypoint");
+		ASSERT(m_main_entry_point, "[codegen]: cannot find main entrypoint");
 
 		// check for IR errors
 		if(!llvm::verifyModule(*m_module, &llvm::outs())) {
@@ -112,28 +112,9 @@ namespace channel {
 		// if the function is 'main', call the '_global_init' function
 		if (node.get_name() == "main") {
 			m_main_entry_point = function;
-
-			// call the '_global_init' function and init global variables
-			if(llvm::Function* global_init_func = m_module->getFunction("_global_init")) {
-				llvm::BasicBlock* init_block = &global_init_func->getEntryBlock();
-
-				// _global_init return void;
-				m_builder.SetInsertPoint(init_block);
-				m_builder.CreateRetVoid();
-
-				// go back to the main function and call the _global_init function
-				m_builder.SetInsertPoint(entry_block);
-				m_builder.CreateCall(global_init_func, {});
-			}
-			else {
-				// use main as the insertion point
-				m_builder.SetInsertPoint(entry_block);
-			}
 		}
-		else {
-			// just set the current function as the entry block
-			m_builder.SetInsertPoint(entry_block);
-		}
+
+		m_builder.SetInsertPoint(entry_block);
 
 		// accept all statements inside the function
 		for (const auto& statement : node.get_statements()) {
@@ -178,48 +159,48 @@ namespace channel {
 		return initial_value;
 	}
 
-	llvm::Value* codegen_visitor::visit_global_declaration_node(global_declaration_node& node) {
-		// only generate the global variable if the main entry point hasn't been
-		// declared yet
-		if(m_main_entry_point) {
-			return nullptr;
-		}
-
-		// evaluate the assigned value, if there is one
-		llvm::Value* initial_value = get_declaration_value(node);
-		llvm::Type* value_type = initial_value->getType();
-
-		// create a global variable
-		auto* global_variable = new llvm::GlobalVariable(*m_module,
-			value_type,
-			false,
-			llvm::GlobalValue::ExternalLinkage,
-			llvm::Constant::getNullValue(value_type), // default initializer
-			node.get_name()
-		);
-
-		// add the variable to the m_global_named_values map
-		const auto insertion_result = m_global_named_values.insert({ node.get_name(), global_variable });
-		ASSERT(insertion_result.second, "[codegen]: global variable '" + node.get_name() + "' has already been defined before");
-
-		// create a special global initialization function if it doesn't exist
-		llvm::Function* global_init_func = m_module->getFunction("_global_init");
-		if (!global_init_func) {
-			llvm::FunctionType* func_type = llvm::FunctionType::get(llvm::Type::getVoidTy(m_context), false);
-			global_init_func = llvm::Function::Create(func_type, llvm::Function::InternalLinkage, "_global_init", m_module.get());
-			llvm::BasicBlock* entry_block = llvm::BasicBlock::Create(m_context, "entry", global_init_func);
-			m_builder.SetInsertPoint(entry_block); // set the insert point for the builder
-		}
-
-		// store the non-constant initial value in the global variable
-		llvm::BasicBlock* init_block = &global_init_func->getEntryBlock();
-		if (!init_block->getTerminator()) {
-			m_builder.SetInsertPoint(init_block); // Set the insert point for the builder
-			m_builder.CreateStore(initial_value, global_variable);
-		}
-
-		return global_variable;
+llvm::Value* codegen_visitor::visit_global_declaration_node(global_declaration_node& node) {
+	// only generate the global variable if the main entry point hasn't been
+	// declared yet
+	if (m_main_entry_point) {
+		return nullptr;
 	}
+
+	// evaluate the assigned value, if there is one
+	llvm::Value* initial_value = get_declaration_value(node);
+	llvm::Type* value_type = initial_value->getType();
+
+	// create a global variable
+	auto* global_variable = new llvm::GlobalVariable(*m_module,
+		value_type,
+		false,
+		llvm::GlobalValue::ExternalLinkage,
+		llvm::Constant::getNullValue(value_type), // default initializer
+		node.get_name()
+	);
+
+	// add the variable to the m_global_named_values map
+	const auto insertion_result = m_global_named_values.insert({ node.get_name(), global_variable });
+	ASSERT(insertion_result.second, "[codegen]: global variable '" + node.get_name() + "' has already been defined before");
+
+	// create a special global initialization function for each global variable
+	std::string init_func_name = "_global_init_" + node.get_name();
+	llvm::FunctionType* init_func_type = llvm::FunctionType::get(llvm::Type::getVoidTy(m_context), false);
+	llvm::Function* init_func = llvm::Function::Create(init_func_type, llvm::Function::InternalLinkage, init_func_name, m_module.get());
+	llvm::BasicBlock* init_func_entry = llvm::BasicBlock::Create(m_context, "entry", init_func);
+
+	m_builder.SetInsertPoint(init_func_entry);
+
+	if (initial_value) {
+		m_builder.CreateStore(initial_value, global_variable);
+	}
+
+	m_builder.CreateRetVoid();
+	// register the global initializer function
+	register_global_initializer(init_func);
+
+	return global_variable;
+}
 
 	llvm::Value* codegen_visitor::visit_keyword_i8_node(keyword_i8_node& node) {
 		return llvm::ConstantInt::get(m_context, llvm::APInt(8, node.value, true));
@@ -267,8 +248,37 @@ namespace channel {
 		return m_builder.CreateSRem(left, right, "mod");
 	}
 
-	bool codegen_visitor::has_main_entry_point() const {
-		return m_module->getFunction("main") != nullptr;
+	void codegen_visitor::register_global_initializer(llvm::Function* initializer) {
+		// get the llvm.global_ctors array if it exists
+		llvm::GlobalVariable* global_ctors = m_module->getGlobalVariable("llvm.global_ctors");
+		std::vector<llvm::Constant*> ctors;
+		llvm::StructType* ctor_struct_type = llvm::StructType::get(m_context, { llvm::Type::getInt32Ty(m_context), llvm::Type::getInt8PtrTy(m_context), llvm::Type::getInt8PtrTy(m_context) });
+
+		// if the global_ctors array exists, collect existing ctors
+		if (global_ctors) {
+			const llvm::ArrayType* current_array_type = llvm::cast<llvm::ArrayType>(global_ctors->getValueType());
+			llvm::ConstantArray* current_ctors = llvm::cast<llvm::ConstantArray>(global_ctors->getInitializer());
+
+			for (unsigned i = 0; i < current_array_type->getNumElements(); ++i) {
+				ctors.push_back(current_ctors->getOperand(i));
+			}
+
+			// remove the old global_ctors variable
+			global_ctors->eraseFromParent();
+		}
+
+		//create a new constructor with priority 65535 (lower priority numbers run first)
+		llvm::ConstantInt* priority = llvm::ConstantInt::get(llvm::Type::getInt32Ty(m_context), 65535);
+		llvm::Constant* initializer_cast = llvm::ConstantExpr::getBitCast(initializer, llvm::Type::getInt8PtrTy(m_context));
+		llvm::Constant* new_ctor = llvm::ConstantStruct::get(ctor_struct_type, { priority, initializer_cast, llvm::Constant::getNullValue(llvm::Type::getInt8PtrTy(m_context)) });
+
+		// add the new constructor to the ctors list
+		ctors.push_back(new_ctor);
+
+		// create a new llvm.global_ctors array with the updated ctors list
+		llvm::ArrayType* updated_ctor_array_type = llvm::ArrayType::get(ctor_struct_type, ctors.size());
+		llvm::Constant* updated_ctors = llvm::ConstantArray::get(updated_ctor_array_type, ctors);
+		global_ctors = new llvm::GlobalVariable(*m_module, updated_ctor_array_type, false, llvm::GlobalValue::AppendingLinkage, updated_ctors, "llvm.global_ctors");
 	}
 
 	llvm::Value* codegen_visitor::get_declaration_value(const declaration_node& node)	{

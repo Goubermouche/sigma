@@ -79,7 +79,7 @@ namespace channel {
 		llvm::Value* visit_operator_division_node(operator_division_node& node) override;
 		llvm::Value* visit_operator_modulo_node(operator_modulo_node& node) override;
 
-		bool has_main_entry_point() const;
+		void register_global_initializer(llvm::Function* initializer);
 		llvm::Value* get_declaration_value(const declaration_node& node);
 	private:
 		// scope tree hierarchy
@@ -90,7 +90,7 @@ namespace channel {
 
 		llvm::LLVMContext m_context;
 		llvm::IRBuilder<> m_builder;
-		llvm::Function* m_main_entry_point;
+		llvm::Function* m_main_entry_point = nullptr;
 		std::unique_ptr<llvm::Module> m_module;
 	};
 }

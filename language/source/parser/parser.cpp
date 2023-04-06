@@ -47,7 +47,6 @@ namespace channel {
 				// todo: generalize
 			case token::identifier:
 			case token::keyword_type_i32:
-				std::cout << "parsing decl or assign\n";
 				statement = parse_declaration_or_assignment(is_global);
 				break;
 			default:

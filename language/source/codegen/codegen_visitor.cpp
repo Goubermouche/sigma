@@ -265,6 +265,37 @@ namespace channel {
 	llvm::Value* codegen_visitor::visit_operator_division_node(operator_division_node& node) {
 		llvm::Value* left = node.left->accept(*this);
 		llvm::Value* right = node.right->accept(*this);
+
+		// check for division by 0 
+		if(right->getType()->isIntegerTy()) {
+			llvm::Function* current_block = m_builder.GetInsertBlock()->getParent();
+
+			// create blocks for conditional execution
+			llvm::BasicBlock* check_divisor_block = llvm::BasicBlock::Create(m_context, "__check_divisor", current_block);
+			llvm::BasicBlock* division_block = llvm::BasicBlock::Create(m_context, "__division", current_block);
+			llvm::BasicBlock* continue_block = llvm::BasicBlock::Create(m_context, "__continue", current_block);
+
+			// check if the divisor is zero
+			m_builder.CreateBr(check_divisor_block);
+			m_builder.SetInsertPoint(check_divisor_block);
+			llvm::Value* is_divisor_non_zero = m_builder.CreateICmpNE(right, llvm::ConstantInt::get(m_context, llvm::APInt(32, 0)), "isDivisorNonZero");
+			m_builder.CreateCondBr(is_divisor_non_zero, division_block, continue_block);
+
+			// perform division
+			m_builder.SetInsertPoint(division_block);
+			llvm::Value* value = m_builder.CreateSDiv(left, right, "div");
+			m_builder.CreateBr(continue_block);
+
+			// merge the result
+			m_builder.SetInsertPoint(continue_block);
+			llvm::PHINode* phi = m_builder.CreatePHI(llvm::Type::getInt32Ty(m_context), 2, "result");
+
+			// if the divisor was zero, return a default value (e.g., zero)
+			phi->addIncoming(llvm::ConstantInt::get(m_context, llvm::APInt(32, 0)), check_divisor_block);
+			phi->addIncoming(value, division_block);
+			return phi;
+		}
+
 		return m_builder.CreateSDiv(left, right, "div");
 	}
 

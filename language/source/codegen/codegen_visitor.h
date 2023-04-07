@@ -59,6 +59,7 @@ namespace channel {
 		bool has_main_entry_point() const;
 		void initialize_global_variables();
 		value* get_declaration_value(const declaration_node& node);
+		llvm::Value* upcast_value(const value* val, type result_type, llvm::IRBuilder<>& builder);
 	private:
 		// scope tree hierarchy
 		scope* m_scope;
@@ -69,7 +70,7 @@ namespace channel {
 		// ctor initialization priority 
 		i32 m_global_initialization_priority = 0;
 		// list of all existing functions
-		std::unordered_map<std::string, llvm::Function*> m_functions;
+		std::unordered_map<std::string, function*> m_functions;
 		// llvm boilerplate
 		llvm::LLVMContext m_context;
 		llvm::IRBuilder<> m_builder;

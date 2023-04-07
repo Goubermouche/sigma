@@ -18,6 +18,8 @@ namespace channel {
 		function_call
 	};
 
+	type get_highest_precision_type(type left_type, type right_type);
+
 	bool is_type_signed(type ty);
 	bool is_type_unsigned(type ty);
 	bool is_type_floating_point(type ty);

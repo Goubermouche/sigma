@@ -1,6 +1,25 @@
 #include "type.h"
 
 namespace channel {
+	type get_highest_precision_type(type left_type, type right_type) {
+		assert(left_type != type::function && left_type != type::function_call &&
+			right_type != type::function && right_type != type::function_call &&
+			"Invalid types for get_highest_precision_type");
+
+		if (is_type_floating_point(left_type) || is_type_floating_point(right_type)) {
+			return (left_type == type::f64 || right_type == type::f64) ? type::f64 : type::f32;
+		}
+
+		static std::unordered_map<type, int> type_priority = {
+			{ type::i8 , 1}, {type::u8 , 1 },
+			{ type::i16, 2}, {type::u16, 2 },
+			{ type::i32, 3}, {type::u32, 3 },
+			{ type::i64, 4}, {type::u64, 4 }
+		};
+
+		return type_priority[left_type] > type_priority[right_type] ? left_type : right_type;
+	}
+
 	bool is_type_signed(type ty) {
 		return ty == type::i8 ||
 			ty == type::i16 ||

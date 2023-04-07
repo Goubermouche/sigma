@@ -47,6 +47,8 @@ namespace channel {
 		}
 
 		initialize_global_variables();
+
+		std::cout << "----------------------------\n";
 	}
 
 	void codegen_visitor::initialize_global_variables() {
@@ -75,6 +77,10 @@ namespace channel {
 		if (const value* local_variable = m_scope->get_named_value(node.get_name())) {
 			// evaluate the expression on the right-hand side of the assignment
 			value* new_value = node.get_expression()->accept(*this);
+
+			// upcast the new_value if necessary
+			new_value->set_value(upcast_value(new_value, local_variable->get_type(), m_builder));
+
 			// store the value in the memory location of the variable
 			m_builder.CreateStore(new_value->get_value(), local_variable->get_value());
 			return new_value;
@@ -88,13 +94,17 @@ namespace channel {
 		// evaluate the expression on the right-hand side of the assignment
 		value* new_value = node.get_expression()->accept(*this);
 
+		// upcast the new_value if necessary
+		new_value->set_value(upcast_value(new_value, pointer_to_global_variable->get_type(), m_builder));
+
 		// store the new value in the memory location of the global variable
 		m_builder.CreateStore(new_value->get_value(), pointer_to_global_variable->get_value());
 		return new_value;
 	}
 
+	// todo: cast to the return type
 	value* codegen_visitor::visit_function_call_node(function_call_node& node) {
-		llvm::Function* function = m_functions[node.get_name()];
+		llvm::Function* function = m_functions[node.get_name()]->get_function();
 		ASSERT(function, "[codegen]: function '" + node.get_name() + "' cannot be found");
 
 		// generate code for each argument expression
@@ -135,12 +145,16 @@ namespace channel {
 	value* codegen_visitor::visit_function_node(function_node& node) {
 		llvm::Type* return_type = type_to_llvm_type(node.get_return_type(), m_context);
 		llvm::FunctionType* function_type = llvm::FunctionType::get(return_type, false);
-		llvm::Function* function = llvm::Function::Create(function_type, llvm::Function::ExternalLinkage, node.get_name(), m_module.get());
+		llvm::Function* func = llvm::Function::Create(function_type, llvm::Function::ExternalLinkage, node.get_name(), m_module.get());
 
-		const auto insertion_result = m_functions.insert({ node.get_name(), function });
+		const auto insertion_result = m_functions.insert({
+			node.get_name(),
+			new function(node.get_return_type(), func)
+		});
+
 		ASSERT(insertion_result.second, "[codegen]: function '" + node.get_name() + "' has already been defined");
 
-		llvm::BasicBlock* entry_block = llvm::BasicBlock::Create(m_context, "entry", function);
+		llvm::BasicBlock* entry_block = llvm::BasicBlock::Create(m_context, "entry", func);
 		m_builder.SetInsertPoint(entry_block);
 
 		// create a new nested scope for the function body
@@ -165,31 +179,47 @@ namespace channel {
 			}
 		}
 
-		return new value(type::function, function);
+		return new value(type::function, func);
 	}
 
 	value* codegen_visitor::visit_return_node(return_node& node) {
 		// evaluate the expression of the return statement
-		value* return_value = node.get_expression()->accept(*this);
-		// generate the LLVM return instruction with the evaluated expression
-		m_builder.CreateRet(return_value->get_value());
-		// return the value of the expression
-		return return_value;
+		const value* return_value = node.get_expression()->accept(*this);
+
+		// get the return type of the current function
+		const type function_return_type = m_functions[m_builder.GetInsertBlock()->getParent()->getName().str()]->get_return_type();
+
+		// upcast the return value to match the function's return type
+		llvm::Value* upcasted_return_value = upcast_value(return_value, function_return_type, m_builder);
+
+		// generate the LLVM return instruction with the upcasted value
+		m_builder.CreateRet(upcasted_return_value);
+
+		// return the value of the expression (use upcasted value's type)
+		return new value(function_return_type, upcasted_return_value);
 	}
 
 	value* codegen_visitor::visit_local_declaration_node(local_declaration_node& node) {
 		// evaluate the assigned value, if there is one
-		value* initial_value = get_declaration_value(node);
+		value* assigned_value = get_declaration_value(node);
+
+		const type highest_precision = get_highest_precision_type(node.get_declaration_type(), assigned_value->get_type());
+		llvm::Value* upcasted_assigned_value = upcast_value(assigned_value, highest_precision, m_builder);
 
 		// store the initial value in the memory
-		llvm::AllocaInst* alloca = m_builder.CreateAlloca(initial_value->get_value()->getType(), nullptr, node.get_name());
-		m_builder.CreateStore(initial_value->get_value(), alloca);
+		llvm::AllocaInst* alloca = m_builder.CreateAlloca(
+			type_to_llvm_type(highest_precision, m_context),
+			nullptr,
+			node.get_name()
+		);
+
+		m_builder.CreateStore(upcasted_assigned_value, alloca);
 
 		// add the variable to the current scope
 		ASSERT(!m_global_named_values[node.get_name()], "[codegen]: local variable '" + node.get_name() + "' has alredy been defined in the global scope");
-		const auto insertion_result = m_scope->add_named_value(node.get_name(), new value(initial_value->get_type(), alloca));
+		const auto insertion_result = m_scope->add_named_value(node.get_name(), new value(highest_precision, alloca));
 		ASSERT(insertion_result.second, "[codegen]: local variable '" + node.get_name() + "' has already been defined before");
-		return initial_value;
+		return assigned_value;
 	}
 
 	value* codegen_visitor::visit_global_declaration_node(global_declaration_node& node) {
@@ -202,25 +232,18 @@ namespace channel {
 
 		// evaluate the assigned value, if there is one
 		const value* initial_value = get_declaration_value(node);
-		llvm::Type* value_type = initial_value->get_value()->getType();
 
-		// todo: const evaluation of global variables
-		// constant-evaluated
-		//if(auto* constant_initial_value = llvm::dyn_cast<llvm::Constant>(initial_value)) {
-		//	
-		//}
-		//else {
-		//	
-		//}
+		const type highest_precision = get_highest_precision_type(node.get_declaration_type(), initial_value->get_type());
+		llvm::Value* upcasted_initial_value = upcast_value(initial_value, highest_precision, m_builder);
 
 		// create a global variable
 		value* global_variable = new value(
-			initial_value->get_type(),
+			highest_precision,
 			new llvm::GlobalVariable(*m_module,
-				value_type,
+				type_to_llvm_type(highest_precision, m_context),
 				false,
 				llvm::GlobalValue::ExternalLinkage,
-				llvm::Constant::getNullValue(value_type), // default initializer
+				llvm::Constant::getNullValue(type_to_llvm_type(highest_precision, m_context)), // default initializer
 				node.get_name()
 			)
 		);
@@ -229,7 +252,7 @@ namespace channel {
 		const auto insertion_result = m_global_named_values.insert({ node.get_name(),  global_variable });
 		ASSERT(insertion_result.second, "[codegen]: global variable '" + node.get_name() + "' has already been defined before");
 
-		m_builder.CreateStore(initial_value->get_value(), global_variable->get_value());
+		m_builder.CreateStore(upcasted_initial_value, global_variable->get_value());
 		m_builder.CreateRetVoid();
 
 		// create a new constructor with the given priority
@@ -288,145 +311,99 @@ namespace channel {
 	// todo: maybe we should check the type of left and right operands and upcast them
 	//       when the operands are not of the same type.
 
-	// upcast to larger types to prevent loss of data [emit warning]
-	// f64
-	// f32
-	// u64
-	// 
-	// 
-	// 
-	// 
-
 	value* codegen_visitor::visit_operator_addition_node(operator_addition_node& node) {
 		const value* left = node.left->accept(*this);
 		const value* right = node.right->accept(*this);
 
-		// check if both operands are floating-point types
-		if(is_type_floating_point(left->get_type()) && is_type_floating_point(right->get_type())) {
-			// todo: use return higher precision
-			return new value(type::f32, m_builder.CreateFAdd(left->get_value(), right->get_value(), "fadd"));
+		const type highest_precision = get_highest_precision_type(left->get_type(), right->get_type());
+		llvm::Value* left_value_upcasted = upcast_value(left, highest_precision, m_builder);
+		llvm::Value* right_value_upcasted = upcast_value(right, highest_precision, m_builder);
+
+		if (is_type_floating_point(highest_precision)) {
+			return new value(highest_precision, m_builder.CreateFAdd(left_value_upcasted, right_value_upcasted, "fadd"));
 		}
 
-		// check if both operands are unsigned 
-		if (is_type_unsigned(left->get_type()) && is_type_unsigned(left->get_type())) {
-			// todo: use return higher precision
-			return new value(left->get_type(), m_builder.CreateAdd(left->get_value(), right->get_value(), "uadd", true));
+		if (is_type_unsigned(highest_precision)) {
+			return new value(highest_precision, m_builder.CreateAdd(left_value_upcasted, right_value_upcasted, "uadd", true));
 		}
 
-		// fallback
-		return new value(left->get_type(), m_builder.CreateAdd(left->get_value(), right->get_value(), "add"));
+		return new value(highest_precision, m_builder.CreateAdd(left_value_upcasted, right_value_upcasted, "add"));
 	}
 
 	value* codegen_visitor::visit_operator_subtraction_node(operator_subtraction_node& node) {
 		const value* left = node.left->accept(*this);
 		const value* right = node.right->accept(*this);
 
-		// check if both operands are floating-point types
-		if (is_type_floating_point(left->get_type()) && is_type_floating_point(right->get_type())) {
-			// todo: use return higher precision
-			return new value(type::f32, m_builder.CreateFSub(left->get_value(), right->get_value(), "fsub"));
+		const type highest_precision = get_highest_precision_type(left->get_type(), right->get_type());
+		llvm::Value* left_value_upcasted = upcast_value(left, highest_precision, m_builder);
+		llvm::Value* right_value_upcasted = upcast_value(right, highest_precision, m_builder);
+
+		if (is_type_floating_point(highest_precision)) {
+			return new value(highest_precision, m_builder.CreateFSub(left_value_upcasted, right_value_upcasted, "fsub"));
 		}
 
-		// check if both operands are unsigned 
-		if (is_type_unsigned(left->get_type()) && is_type_unsigned(left->get_type())) {
-			// todo: use return higher precision
-			return new value(left->get_type(), m_builder.CreateSub(left->get_value(), right->get_value(), "usub", true));
+		if (is_type_unsigned(highest_precision)) {
+			return new value(highest_precision, m_builder.CreateSub(left_value_upcasted, right_value_upcasted, "usub", true));
 		}
 
-		// fallback
-		return new value(left->get_type(), m_builder.CreateSub(left->get_value(), right->get_value(), "sub"));
+		return new value(highest_precision, m_builder.CreateSub(left_value_upcasted, right_value_upcasted, "sub"));
 	}
 
 	value* codegen_visitor::visit_operator_multiplication_node(operator_multiplication_node& node) {
 		const value* left = node.left->accept(*this);
 		const value* right = node.right->accept(*this);
 
-		// check if both operands are floating-point types
-		if (is_type_floating_point(left->get_type()) && is_type_floating_point(right->get_type())) {
-			// todo: use return higher precision
-			return new value(type::f32, m_builder.CreateFMul(left->get_value(), right->get_value(), "fmul"));
+		const type highest_precision = get_highest_precision_type(left->get_type(), right->get_type());
+		llvm::Value* left_value_upcasted = upcast_value(left, highest_precision, m_builder);
+		llvm::Value* right_value_upcasted = upcast_value(right, highest_precision, m_builder);
+
+		if (is_type_floating_point(highest_precision)) {
+			return new value(highest_precision, m_builder.CreateFMul(left_value_upcasted, right_value_upcasted, "fmul"));
 		}
 
-		// check if both operands are unsigned 
-		if (is_type_unsigned(left->get_type()) && is_type_unsigned(left->get_type())) {
-			// todo: use return higher precision
-			return new value(left->get_type(), m_builder.CreateMul(left->get_value(), right->get_value(), "umul", true));
+		if (is_type_unsigned(highest_precision)) {
+			return new value(highest_precision, m_builder.CreateMul(left_value_upcasted, right_value_upcasted, "umul", true));
 		}
 
-		// fallback
-		return new value(left->get_type(), m_builder.CreateMul(left->get_value(), right->get_value(), "mul"));
+		return new value(highest_precision, m_builder.CreateMul(left_value_upcasted, right_value_upcasted, "mul"));
 	}
 
 	value* codegen_visitor::visit_operator_division_node(operator_division_node& node) {
 		const value* left = node.left->accept(*this);
 		const value* right = node.right->accept(*this);
 
-		// check if both operands are floating-point types
-		if (is_type_floating_point(left->get_type()) && is_type_floating_point(right->get_type())) {
-			// todo: use return higher precision
-			return new value(type::f32, m_builder.CreateFDiv(left->get_value(), right->get_value(), "fdiv"));
+		const type highest_precision = get_highest_precision_type(left->get_type(), right->get_type());
+		llvm::Value* left_value_upcasted = upcast_value(left, highest_precision, m_builder);
+		llvm::Value* right_value_upcasted = upcast_value(right, highest_precision, m_builder);
+
+		if (is_type_floating_point(highest_precision)) {
+			return new value(highest_precision, m_builder.CreateFDiv(left_value_upcasted, right_value_upcasted, "fdiv"));
 		}
 
-		// check if both operands are unsigned 
-		if (is_type_unsigned(left->get_type()) && is_type_unsigned(left->get_type())) {
-			// todo: use return higher precision
-			return new value(left->get_type(), m_builder.CreateUDiv(left->get_value(), right->get_value(), "udiv"));
+		if (is_type_unsigned(highest_precision)) {
+			return new value(highest_precision, m_builder.CreateUDiv(left_value_upcasted, right_value_upcasted, "udiv"));
 		}
 
-		// fallback
-		return new value(left->get_type(), m_builder.CreateSDiv(left->get_value(), right->get_value(), "div"));
-
-		// todo: check for division by 0 
-		//if (right->getType()->isIntegerTy()) {
-		//	llvm::Function* current_function = m_builder.GetInsertBlock()->getParent();
-
-		//	// create blocks for conditional execution
-		//	llvm::BasicBlock* check_divisor_block = llvm::BasicBlock::Create(m_context, "__check_divisor", current_function);
-		//	llvm::BasicBlock* division_block = llvm::BasicBlock::Create(m_context, "__division", current_function);
-		//	llvm::BasicBlock* continue_block = llvm::BasicBlock::Create(m_context, "__continue", current_function);
-
-		//	// check if the divisor is zero
-		//	m_builder.CreateBr(check_divisor_block);
-		//	m_builder.SetInsertPoint(check_divisor_block);
-		//	llvm::Value* is_divisor_non_zero = m_builder.CreateICmpNE(right, llvm::ConstantInt::get(m_context, llvm::APInt(32, 0)), "isDivisorNonZero");
-		//	m_builder.CreateCondBr(is_divisor_non_zero, division_block, continue_block);
-
-		//	// perform division
-		//	m_builder.SetInsertPoint(division_block);
-		//	llvm::Value* value = m_builder.CreateSDiv(left, right, "div");
-		//	m_builder.CreateBr(continue_block);
-
-		//	// merge the result
-		//	m_builder.SetInsertPoint(continue_block);
-		//	llvm::PHINode* phi = m_builder.CreatePHI(llvm::Type::getInt32Ty(m_context), 2, "result");
-
-		//	// if the divisor was zero, return a default value (e.g., zero)
-		//	llvm::Type* right_type = right->getType();
-		//	phi->addIncoming(llvm::Constant::getNullValue(right_type), check_divisor_block);
-		//	phi->addIncoming(value, division_block);
-
-		//	return phi;
-		//}
+		return new value(highest_precision, m_builder.CreateSDiv(left_value_upcasted, right_value_upcasted, "div"));
 	}
 
 	value* codegen_visitor::visit_operator_modulo_node(operator_modulo_node& node) {
 		const value* left = node.left->accept(*this);
 		const value* right = node.right->accept(*this);
 
-		// check if both operands are floating-point types
-		if (is_type_floating_point(left->get_type()) && is_type_floating_point(right->get_type())) {
-			// todo: use return higher precision
-			return new value(type::f32, m_builder.CreateFRem(left->get_value(), right->get_value(), "fmod"));
+		const type highest_precision = get_highest_precision_type(left->get_type(), right->get_type());
+		llvm::Value* left_value_upcasted = upcast_value(left, highest_precision, m_builder);
+		llvm::Value* right_value_upcasted = upcast_value(right, highest_precision, m_builder);
+
+		if (is_type_floating_point(highest_precision)) {
+			return new value(highest_precision, m_builder.CreateFRem(left_value_upcasted, right_value_upcasted, "frem"));
 		}
 
-		// check if both operands are unsigned 
-		if (is_type_unsigned(left->get_type()) && is_type_unsigned(left->get_type())) {
-			// todo: use return higher precision
-			return new value(left->get_type(), m_builder.CreateURem(left->get_value(), right->get_value(), "umod"));
+		if (is_type_unsigned(highest_precision)) {
+			return new value(highest_precision, m_builder.CreateURem(left_value_upcasted, right_value_upcasted, "urem"));
 		}
 
-		// fallback
-		return new value(left->get_type(), m_builder.CreateSRem(left->get_value(), right->get_value(), "mod"));
+		return new value(highest_precision, m_builder.CreateSRem(left_value_upcasted, right_value_upcasted, "rem"));
 	}
 
 	bool codegen_visitor::has_main_entry_point() const {
@@ -440,6 +417,7 @@ namespace channel {
 		if (node.get_expression()) {
 			// evaluate the expression to get the initial value
 			initial_value = node.get_expression()->accept(*this);
+			// initial_value->set_type(node.get_declaration_type());
 		}
 		else {
 			// declared without an expression, set to 0
@@ -448,5 +426,27 @@ namespace channel {
 		}
 
 		return initial_value;
+	}
+
+	llvm::Value* codegen_visitor::upcast_value(const value* val, type result_type, llvm::IRBuilder<>& builder) {
+		const type val_type = val->get_type();
+		llvm::Value* val_value = val->get_value();
+
+		if (val_type == result_type) {
+			return val_value;
+		}
+
+		// floating-point types
+		if (is_type_floating_point(result_type)) {
+			if (is_type_floating_point(val_type)) {
+				// float to double
+				return builder.CreateFPExt(val_value, type_to_llvm_type(result_type, m_context));
+			}
+			// integer to float or double
+			return builder.CreateSIToFP(val_value, type_to_llvm_type(result_type, m_context));
+		}
+
+		// integer types
+		return builder.CreateIntCast(val_value, type_to_llvm_type(result_type, m_context), is_type_signed(val_type));
 	}
 }

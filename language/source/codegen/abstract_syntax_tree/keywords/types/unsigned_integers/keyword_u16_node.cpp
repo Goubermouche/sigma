@@ -1,7 +1,7 @@
 #include "keyword_u16_node.h"
 
 namespace channel {
-	keyword_u16_node::keyword_u16_node(u16 value)
+	keyword_u16_node::keyword_u16_node(u64 value)
 		: m_value(value) {}
 
 	value* keyword_u16_node::accept(visitor& visitor) {
@@ -13,7 +13,7 @@ namespace channel {
 		return "keyword_u16_node";
 	}
 
-	u16 keyword_u16_node::get_value() const {
+	u64 keyword_u16_node::get_value() const {
 		return m_value;
 	}
 }

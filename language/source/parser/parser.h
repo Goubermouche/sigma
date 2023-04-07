@@ -29,8 +29,8 @@ namespace channel {
 		node* parse_return_statement();
 
 		static bool is_token_return_type(token token);
-		bool peek_is_function_definition();
-		bool peek_is_function_call();
+		bool peek_is_function_definition() const;
+		bool peek_is_function_call() const;
 	private:
 		lexer m_lexer;
 		token m_current_token = token::end_of_file;

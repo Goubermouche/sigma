@@ -148,7 +148,6 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="source\codegen\abstract_syntax_tree\keywords\types\integer_base_node.cpp" />
     <ClCompile Include="source\codegen\abstract_syntax_tree\keywords\types\unsigned_integers\keyword_u16_node.cpp" />
     <ClCompile Include="source\codegen\abstract_syntax_tree\keywords\types\unsigned_integers\keyword_u32_node.cpp" />
     <ClCompile Include="source\codegen\abstract_syntax_tree\keywords\types\unsigned_integers\keyword_u64_node.cpp" />
@@ -189,7 +188,6 @@
     <None Include="test\main.ch" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="source\codegen\abstract_syntax_tree\keywords\types\integer_base_node.h" />
     <ClInclude Include="source\codegen\abstract_syntax_tree\keywords\types\unsigned_integers\keyword_u16_node.h" />
     <ClInclude Include="source\codegen\abstract_syntax_tree\keywords\types\unsigned_integers\keyword_u32_node.h" />
     <ClInclude Include="source\codegen\abstract_syntax_tree\keywords\types\unsigned_integers\keyword_u64_node.h" />

@@ -1,7 +1,7 @@
 #include "keyword_i16_node.h"
 
 namespace channel {
-	keyword_i16_node::keyword_i16_node(i16 value)
+	keyword_i16_node::keyword_i16_node(u64 value)
 		: m_value(value) {}
 
 	value* keyword_i16_node::accept(visitor& visitor) {
@@ -13,11 +13,7 @@ namespace channel {
 		return "keyword_i16_node";
 	}
 
-	bool keyword_i16_node::is_signed() const {
-		return true;
-	}
-
-	i16 keyword_i16_node::get_value() const {
+	u64 keyword_i16_node::get_value() const {
 		return m_value;
 	}
 }

@@ -85,7 +85,7 @@ namespace channel {
 		unknown
 	};
 
-	inline std::string token_to_string(const token& token) {
+	inline std::string token_to_string(token token) {
 		switch (token) {
 		case token::l_brace:
 			return "l_brace";
@@ -208,5 +208,12 @@ namespace channel {
 		}
 
 		return "";
+	}
+
+	inline bool is_token_numerical(token token) {
+		return token == token::number_f32    ||
+			   token == token::number_f64    ||
+			   token == token::number_signed ||
+			   token == token::number_unsigned;
 	}
 }

@@ -7,12 +7,12 @@ namespace channel {
 	 */
 	class keyword_u32_node : public node {
 	public:
-		keyword_u32_node(u32 value);
+		keyword_u32_node(u64 value);
 		value* accept(visitor& visitor) override;
 		std::string get_node_name() const override;
 
-		u32 get_value() const;
+		u64 get_value() const;
 	private:
-		u32 m_value;
+		u64 m_value;
 	};
 }

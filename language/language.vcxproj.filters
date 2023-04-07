@@ -114,9 +114,6 @@
     <ClCompile Include="source\codegen\abstract_syntax_tree\keywords\types\unsigned_integers\keyword_u64_node.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="source\codegen\abstract_syntax_tree\keywords\types\integer_base_node.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="source\codegen\abstract_syntax_tree\value.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -234,9 +231,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="source\codegen\abstract_syntax_tree\keywords\types\unsigned_integers\keyword_u32_node.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="source\codegen\abstract_syntax_tree\keywords\types\integer_base_node.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="source\codegen\abstract_syntax_tree\value.h">

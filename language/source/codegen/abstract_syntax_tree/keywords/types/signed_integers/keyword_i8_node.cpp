@@ -1,7 +1,7 @@
 #include "keyword_i8_node.h"
 
 namespace channel {
-	keyword_i8_node::keyword_i8_node(i8 value)
+	keyword_i8_node::keyword_i8_node(u64 value)
 		: m_value(value) {}
 
 	value* keyword_i8_node::accept(visitor& visitor) {
@@ -13,11 +13,7 @@ namespace channel {
 		return "keyword_i8_node";
 	}
 
-	bool keyword_i8_node::is_signed() const {
-		return true;
-	}
-
-	i8 keyword_i8_node::get_value() const {
+	u64 keyword_i8_node::get_value() const {
 		return m_value;
 	}
 }

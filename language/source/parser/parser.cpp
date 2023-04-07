@@ -204,7 +204,7 @@ namespace channel {
 	node* parser::parse_factor(token type_token) {
 		node* root = nullptr;
 
-		if (m_current_token == token::number_signed) {
+		if (is_token_numerical(m_current_token)) {
 			// todo: generalize
 			root = parse_number(type_token);
 		}
@@ -237,36 +237,22 @@ namespace channel {
 
 	node* parser::parse_number(token type_token) {
 		const std::string str_value = m_lexer.get_value();
-
-		token type = m_current_token;
-		if(type_token != token::unknown) {
-			type = type_token;
-		}
-
+		const token type = (type_token != token::unknown) ? type_token : m_current_token;
 		consume_next_token();
 
 		switch (type) {
-		// signed
-		case token::keyword_type_i8:
-			return new keyword_i8_node(static_cast<i8>(std::stoi(str_value)));
-		case token::keyword_type_i16:
-			return new keyword_i16_node(static_cast<i16>(std::stoi(str_value)));
-		case token::number_signed:
-		case token::keyword_type_i32:
-			return new keyword_i32_node(std::stoi(str_value));
-		case token::keyword_type_i64:
-			return new keyword_i64_node(std::stoll(str_value));
-		// unsigned
-		case token::keyword_type_u8:
-			return new keyword_u8_node(static_cast<u8>(std::stoul(str_value)));
-		case token::keyword_type_u16:
-			return new keyword_u16_node(static_cast<u16>(std::stoul(str_value)));
-		case token::number_unsigned:
-		case token::keyword_type_u32:
-			return new keyword_u32_node(std::stoul(str_value));
-		case token::keyword_type_u64:
-			return new keyword_u64_node(std::stoull(str_value));
-		// floating point
+			// signed
+			case token::keyword_type_i8:  return new keyword_i8_node(std::stoull(str_value));
+			case token::keyword_type_i16: return new keyword_i16_node(std::stoull(str_value));
+			case token::number_signed:
+			case token::keyword_type_i32: return new keyword_i32_node(std::stoull(str_value));
+			case token::keyword_type_i64: return new keyword_i64_node(std::stoull(str_value));
+			// unsigned
+			case token::keyword_type_u8:  return new keyword_u8_node(std::stoull(str_value));
+			case token::keyword_type_u16: return new keyword_u16_node(std::stoull(str_value));
+			case token::number_unsigned:
+			case token::keyword_type_u32: return new keyword_u32_node(std::stoull(str_value));
+			case token::keyword_type_u64: return new keyword_u64_node(std::stoull(str_value));
 		default:
 			ASSERT(false, "[parser]: unhandled number format '" + token_to_string(type) + "' encountered");
 			return nullptr;
@@ -372,7 +358,7 @@ namespace channel {
 		}
 	}
 
-	bool parser::peek_is_function_definition() {
+	bool parser::peek_is_function_definition() const {
 		// save the current state
 		lexer temp_lexer = m_lexer;
 		temp_lexer.get_token(); // identifier
@@ -380,7 +366,7 @@ namespace channel {
 		return tok == token::l_parenthesis;
 	}
 
-	bool parser::peek_is_function_call() {
+	bool parser::peek_is_function_call() const {
 		// save the current state
 		lexer temp_lexer = m_lexer;
 		temp_lexer.get_token(); // identifier

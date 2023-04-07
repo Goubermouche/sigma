@@ -13,6 +13,10 @@ namespace channel {
 		return "keyword_i8_node";
 	}
 
+	bool keyword_i8_node::is_signed() const {
+		return true;
+	}
+
 	i8 keyword_i8_node::get_value() const {
 		return m_value;
 	}

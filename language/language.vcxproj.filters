@@ -18,7 +18,7 @@
     <ClCompile Include="main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="source\codegen\abstract_syntax_tree\keywords\types\keyword_i32_node.cpp">
+    <ClCompile Include="source\codegen\abstract_syntax_tree\keywords\types\signed_integers\keyword_i32_node.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="source\codegen\abstract_syntax_tree\operators\operator_addition_node.cpp">
@@ -48,13 +48,13 @@
     <ClCompile Include="source\utility\string_accessor.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="source\codegen\abstract_syntax_tree\keywords\types\keyword_i8_node.cpp">
+    <ClCompile Include="source\codegen\abstract_syntax_tree\keywords\types\signed_integers\keyword_i8_node.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="source\codegen\abstract_syntax_tree\keywords\types\keyword_i16_node.cpp">
+    <ClCompile Include="source\codegen\abstract_syntax_tree\keywords\types\signed_integers\keyword_i16_node.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="source\codegen\abstract_syntax_tree\keywords\types\keyword_i64_node.cpp">
+    <ClCompile Include="source\codegen\abstract_syntax_tree\keywords\types\signed_integers\keyword_i64_node.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="source\codegen\abstract_syntax_tree\operators\operator_subtraction_node.cpp">
@@ -102,12 +102,27 @@
     <ClCompile Include="source\codegen\scope.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="source\codegen\abstract_syntax_tree\keywords\types\unsigned_integers\keyword_u8_node.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="source\codegen\abstract_syntax_tree\keywords\types\unsigned_integers\keyword_u16_node.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="source\codegen\abstract_syntax_tree\keywords\types\unsigned_integers\keyword_u32_node.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="source\codegen\abstract_syntax_tree\keywords\types\unsigned_integers\keyword_u64_node.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="source\codegen\abstract_syntax_tree\keywords\types\integer_base_node.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="test\main.ch" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="source\codegen\abstract_syntax_tree\keywords\types\keyword_i32_node.h">
+    <ClInclude Include="source\codegen\abstract_syntax_tree\keywords\types\signed_integers\keyword_i32_node.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="source\codegen\abstract_syntax_tree\operators\operator_addition_node.h">
@@ -146,13 +161,13 @@
     <ClInclude Include="source\utility\types.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="source\codegen\abstract_syntax_tree\keywords\types\keyword_i8_node.h">
+    <ClInclude Include="source\codegen\abstract_syntax_tree\keywords\types\signed_integers\keyword_i8_node.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="source\codegen\abstract_syntax_tree\keywords\types\keyword_i16_node.h">
+    <ClInclude Include="source\codegen\abstract_syntax_tree\keywords\types\signed_integers\keyword_i16_node.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="source\codegen\abstract_syntax_tree\keywords\types\keyword_i64_node.h">
+    <ClInclude Include="source\codegen\abstract_syntax_tree\keywords\types\signed_integers\keyword_i64_node.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="source\codegen\abstract_syntax_tree\operators\operator_subtraction_node.h">
@@ -201,6 +216,21 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="source\type.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="source\codegen\abstract_syntax_tree\keywords\types\unsigned_integers\keyword_u64_node.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="source\codegen\abstract_syntax_tree\keywords\types\unsigned_integers\keyword_u8_node.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="source\codegen\abstract_syntax_tree\keywords\types\unsigned_integers\keyword_u16_node.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="source\codegen\abstract_syntax_tree\keywords\types\unsigned_integers\keyword_u32_node.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="source\codegen\abstract_syntax_tree\keywords\types\integer_base_node.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

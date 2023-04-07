@@ -13,6 +13,10 @@ namespace channel {
 		return "keyword_i32_node";
 	}
 
+	bool keyword_i32_node::is_signed() const {
+		return true;
+	}
+
 	i32 keyword_i32_node::get_value() const	{
 		return m_value;
 	}

@@ -5,11 +5,15 @@
 #include "../codegen/abstract_syntax_tree/keywords/function_node.h"
 #include "../codegen/abstract_syntax_tree/keywords/return_node.h"
 
-#include "../codegen/abstract_syntax_tree/keywords/types/keyword_i8_node.h"
-#include "../codegen/abstract_syntax_tree/keywords/types/keyword_i16_node.h"
-#include "../codegen/abstract_syntax_tree/keywords/types/keyword_i32_node.h"
-#include "../codegen/abstract_syntax_tree/keywords/types/keyword_i64_node.h"
+#include "../codegen/abstract_syntax_tree/keywords/types/signed_integers/keyword_i8_node.h"
+#include "../codegen/abstract_syntax_tree/keywords/types/signed_integers/keyword_i16_node.h"
+#include "../codegen/abstract_syntax_tree/keywords/types/signed_integers/keyword_i32_node.h"
+#include "../codegen/abstract_syntax_tree/keywords/types/signed_integers/keyword_i64_node.h"
 
+#include "../codegen/abstract_syntax_tree/keywords/types/unsigned_integers/keyword_u8_node.h"
+#include "../codegen/abstract_syntax_tree/keywords/types/unsigned_integers/keyword_u16_node.h"
+#include "../codegen/abstract_syntax_tree/keywords/types/unsigned_integers/keyword_u32_node.h"
+#include "../codegen/abstract_syntax_tree/keywords/types/unsigned_integers/keyword_u64_node.h"
 
 #include "../codegen/abstract_syntax_tree/variables/variable_node.h"
 #include "../codegen/abstract_syntax_tree/variables/declaration/local_declaration_node.h"
@@ -49,7 +53,6 @@ namespace channel {
 
 		if(is_global) {
 			switch (m_current_token) {
-				// todo: generalize
 			case token::identifier:
 				statement = parse_assignment(is_global);
 				break;
@@ -57,6 +60,10 @@ namespace channel {
 			case token::keyword_type_i16:
 			case token::keyword_type_i32:
 			case token::keyword_type_i64:
+			case token::keyword_type_u8:
+			case token::keyword_type_u16:
+			case token::keyword_type_u32:
+			case token::keyword_type_u64:
 				statement = parse_declaration(is_global, m_current_token);
 				break;
 			default:
@@ -66,7 +73,6 @@ namespace channel {
 		}
 		else {
 			switch (m_current_token) {
-				// todo: generalize
 			case token::identifier:
 				if(peek_is_function_call()) {
 					statement = parse_function_call(m_lexer.get_identifier());
@@ -80,6 +86,10 @@ namespace channel {
 			case token::keyword_type_i16:
 			case token::keyword_type_i32:
 			case token::keyword_type_i64:
+			case token::keyword_type_u8:
+			case token::keyword_type_u16:
+			case token::keyword_type_u32:
+			case token::keyword_type_u64:
 				statement = parse_declaration(is_global, m_current_token);
 				break;
 			case token::keyword_return:
@@ -130,14 +140,12 @@ namespace channel {
 	}
 
 	node* parser::parse_assignment(bool is_global) {
-		consume_next_token();
-
-		// parse access-assignment 
 		const std::string name = m_lexer.get_identifier();
+		consume_next_token(); // = 
+		// parse access-assignment 
 		ASSERT(m_current_token == token::operator_assignment, "[parser]: expected an assignment operator, but received '" + token_to_string(m_current_token) + "' instead");
-		consume_next_token();
 		node* value;
-		consume_next_token();
+		consume_next_token(); // value
 
 		if (peek_is_function_call()) {
 			// parse function call and assign the result to the variable
@@ -247,8 +255,17 @@ namespace channel {
 		case token::keyword_type_i32:
 			return new keyword_i32_node(std::stoi(str_value));
 		case token::keyword_type_i64:
-			return new keyword_i64_node(std::stoi(str_value));
+			return new keyword_i64_node(std::stoll(str_value));
 		// unsigned
+		case token::keyword_type_u8:
+			return new keyword_u8_node(static_cast<u8>(std::stoul(str_value)));
+		case token::keyword_type_u16:
+			return new keyword_u16_node(static_cast<u16>(std::stoul(str_value)));
+		case token::number_unsigned:
+		case token::keyword_type_u32:
+			return new keyword_u32_node(std::stoul(str_value));
+		case token::keyword_type_u64:
+			return new keyword_u64_node(std::stoull(str_value));
 		// floating point
 		default:
 			ASSERT(false, "[parser]: unhandled number format '" + token_to_string(type) + "' encountered");
@@ -357,35 +374,17 @@ namespace channel {
 
 	bool parser::peek_is_function_definition() {
 		// save the current state
-		const token saved_token = m_current_token;
-		const u64 saved_position = m_lexer.get_position();
-
-		// peek the next tokens
-		consume_next_token(); // identifier
-		consume_next_token(); // (
-
-		// check if the current token is an opening parenthesis
-		const bool is_function_definition = (m_current_token == token::l_parenthesis);
-
-		// restore the saved state
-		m_current_token = saved_token;
-		m_lexer.set_position(saved_position);
-
-		return is_function_definition;
+		lexer temp_lexer = m_lexer;
+		temp_lexer.get_token(); // identifier
+		const token tok = temp_lexer.get_token(); // (
+		return tok == token::l_parenthesis;
 	}
 
 	bool parser::peek_is_function_call() {
 		// save the current state
-		const token saved_token = m_current_token;
-		const u64 saved_position = m_lexer.get_position();
-
-		consume_next_token(); // (
-		consume_next_token(); // )
-		const bool is_function_call = m_current_token == token::r_parenthesis;
-
-		// restore the saved state
-		m_current_token = saved_token;
-		m_lexer.set_position(saved_position);
-		return is_function_call;
+		lexer temp_lexer = m_lexer;
+		temp_lexer.get_token(); // identifier
+		const token tok = temp_lexer.get_token(); // (
+		return tok == token::l_parenthesis;
 	}
 }

@@ -1,0 +1,19 @@
+#include "keyword_u16_node.h"
+
+namespace channel {
+	keyword_u16_node::keyword_u16_node(u16 value)
+		: m_value(value) {}
+
+	llvm::Value* keyword_u16_node::accept(visitor& visitor) {
+		LOG_NODE_NAME(keyword_u16_node);
+		return visitor.visit_keyword_u16_node(*this);
+	}
+
+	std::string keyword_u16_node::get_node_name() const {
+		return "keyword_u16_node";
+	}
+
+	u16 keyword_u16_node::get_value() const {
+		return m_value;
+	}
+}

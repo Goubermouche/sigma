@@ -1,22 +1,29 @@
 #include "codegen_visitor.h"
 
-#include "abstract_syntax_tree/keywords/assignment_node.h"
-#include "abstract_syntax_tree/keywords/function_call_node.h"
-#include "abstract_syntax_tree/keywords/function_node.h"
-
+// variables
 #include "abstract_syntax_tree/variables/variable_node.h"
 #include "abstract_syntax_tree/variables/declaration/declaration_node.h"
 #include "abstract_syntax_tree/variables/declaration/local_declaration_node.h"
 #include "abstract_syntax_tree/variables/declaration/global_declaration_node.h"
 
 // keywords
-#include "abstract_syntax_tree/keywords/types/keyword_i8_node.h"
-#include "abstract_syntax_tree/keywords/types/keyword_i16_node.h"
-#include "abstract_syntax_tree/keywords/types/keyword_i32_node.h"
-#include "abstract_syntax_tree/keywords/types/keyword_i64_node.h"
+#include "abstract_syntax_tree/keywords/assignment_node.h"
+#include "abstract_syntax_tree/keywords/function_call_node.h"
+#include "abstract_syntax_tree/keywords/function_node.h"
+#include "abstract_syntax_tree/keywords/return_node.h"
+
+// types 
+#include "abstract_syntax_tree/keywords/types/signed_integers/keyword_i8_node.h"
+#include "abstract_syntax_tree/keywords/types/signed_integers/keyword_i16_node.h"
+#include "abstract_syntax_tree/keywords/types/signed_integers/keyword_i32_node.h"
+#include "abstract_syntax_tree/keywords/types/signed_integers/keyword_i64_node.h"
+
+#include "abstract_syntax_tree/keywords/types/unsigned_integers/keyword_u8_node.h"
+#include "abstract_syntax_tree/keywords/types/unsigned_integers/keyword_u16_node.h"
+#include "abstract_syntax_tree/keywords/types/unsigned_integers/keyword_u32_node.h"
+#include "abstract_syntax_tree/keywords/types/unsigned_integers/keyword_u64_node.h"
 
 // operators
-#include "abstract_syntax_tree/keywords/function_call_node.h"
 #include "abstract_syntax_tree/operators/operator_addition_node.h"
 #include "abstract_syntax_tree/operators/operator_subtraction_node.h"
 #include "abstract_syntax_tree/operators/operator_multiplication_node.h"
@@ -24,8 +31,6 @@
 #include "abstract_syntax_tree/operators/operator_modulo_node.h"
 
 #include <llvm/IR/Verifier.h>
-
-#include "abstract_syntax_tree/keywords/return_node.h"
 
 namespace channel {
 	codegen_visitor::codegen_visitor(parser& parser)
@@ -46,21 +51,6 @@ namespace channel {
 		llvm::ArrayType* updated_ctor_array_type = llvm::ArrayType::get(CTOR_STRUCT_TYPE, m_ctors.size());
 		llvm::Constant* updated_ctors = llvm::ConstantArray::get(updated_ctor_array_type, m_ctors);
 		new llvm::GlobalVariable(*m_module, updated_ctor_array_type, false, llvm::GlobalValue::AppendingLinkage, updated_ctors, "llvm.global_ctors");
-	}
-
-	llvm::Type* codegen_visitor::type_to_llvm_type(type type) {
-		switch (type) {
-		case type::i8:
-			return llvm::Type::getInt8Ty(m_context);
-		case type::i16:
-			return llvm::Type::getInt16Ty(m_context);
-		case type::i32:
-			return llvm::Type::getInt32Ty(m_context);
-		case type::i64:
-			return llvm::Type::getInt64Ty(m_context);
-		default:
-			return nullptr;
-		}
 	}
 
 	void codegen_visitor::print_intermediate_representation() const {
@@ -111,6 +101,12 @@ namespace channel {
 			argument_values.push_back(m_builder.GetInsertBlock()->getParent()->back().getTerminator()->getOperand(0));
 		}
 
+		// note: currently, if we were to call something like this:
+		//       i8 func() {}
+		//       i32 main() {
+		//           i16 a = func(); << 'a' would get truncated into an i8
+		//       }
+		// todo: explore if this should be the expected output
 		return m_builder.CreateCall(function, argument_values, "call");
 	}
 
@@ -130,7 +126,7 @@ namespace channel {
 	}
 
 	llvm::Value* codegen_visitor::visit_function_node(function_node& node) {
-		llvm::Type* return_type = type_to_llvm_type(node.get_return_type());
+		llvm::Type* return_type = type_to_llvm_type(node.get_return_type(), m_context);
 		llvm::FunctionType* function_type = llvm::FunctionType::get(return_type, false);
 		llvm::Function* function = llvm::Function::Create(function_type, llvm::Function::ExternalLinkage, node.get_name(), m_module.get());
 
@@ -255,21 +251,84 @@ namespace channel {
 		return llvm::ConstantInt::get(m_context, llvm::APInt(64, node.get_value(), true));
 	}
 
+	llvm::Value* codegen_visitor::visit_keyword_u8_node(keyword_u8_node& node) {
+		return llvm::ConstantInt::get(m_context, llvm::APInt(8, node.get_value(), false));
+	}
+
+	llvm::Value* codegen_visitor::visit_keyword_u16_node(keyword_u16_node& node) {
+		return llvm::ConstantInt::get(m_context, llvm::APInt(16, node.get_value(), false));
+	}
+
+	llvm::Value* codegen_visitor::visit_keyword_u32_node(keyword_u32_node& node) {
+		return llvm::ConstantInt::get(m_context, llvm::APInt(32, node.get_value(), false));
+	}
+
+	llvm::Value* codegen_visitor::visit_keyword_u64_node(keyword_u64_node& node) {
+		return llvm::ConstantInt::get(m_context, llvm::APInt(64, node.get_value(), false));
+	}
+
+	// todo: maybe we should check the type of left and right operands and upcast them in the
+	//       where the operands are not the same type.
+
 	llvm::Value* codegen_visitor::visit_operator_addition_node(operator_addition_node& node) {
 		llvm::Value* left = node.left->accept(*this);
 		llvm::Value* right = node.right->accept(*this);
+
+		std::cout << "left: " << node.left->get_node_name() << '\n';
+		std::cout << "right:" << node.right->get_node_name() << '\n';
+
+		//const llvm::Type* left_type = left->getType();
+		//const llvm::Type* right_type = right->getType();
+
+		//// check if both operands are floating-point types
+		//if (left_type->isFloatingPointTy() && right_type->isFloatingPointTy()) {
+		//	return m_builder.CreateFAdd(left, right, "fadd");
+		//}
+
+
+		// check if both operands are unsigned 
+		//if (!is_signed_type(node.left) && !is_signed_type(node.right)) {
+		//	std::cout << "here\n";
+		//	return m_builder.CreateAdd(left, right, "add", /*HasNUW=*/true);
+		//}
+
+		// fallback to regular addition
 		return m_builder.CreateAdd(left, right, "add");
 	}
 
 	llvm::Value* codegen_visitor::visit_operator_subtraction_node(operator_subtraction_node& node) {
 		llvm::Value* left = node.left->accept(*this);
 		llvm::Value* right = node.right->accept(*this);
+
+		// check if both operands are floating-point types
+		if (left->getType()->isFloatingPointTy() && right->getType()->isFloatingPointTy()) {
+			return m_builder.CreateFSub(left, right, "fsub");
+		}
+
+		// check if both operands are unsigned 
+		//if (!is_signed_type(node.left) && !is_signed_type(node.right)) {
+		//	return m_builder.CreateSub(left, right, "sub", /*HasNUW=*/true);
+		//}
+
+		// fallback
 		return m_builder.CreateSub(left, right, "sub");
 	}
 
 	llvm::Value* codegen_visitor::visit_operator_multiplication_node(operator_multiplication_node& node) {
 		llvm::Value* left = node.left->accept(*this);
 		llvm::Value* right = node.right->accept(*this);
+
+		// check if both operands are floating-point types
+		if (left->getType()->isFloatingPointTy() && right->getType()->isFloatingPointTy()) {
+			return m_builder.CreateFMul(left, right, "fmul");
+		}
+
+		// check if both operands are unsigned 
+		//if (!is_signed_type(node.left) && !is_signed_type(node.right)) {
+		//	return m_builder.CreateMul(left, right, "mul", /*HasNUW=*/true);
+		//}
+
+		// fallback
 		return m_builder.CreateMul(left, right, "mul");
 	}
 
@@ -277,7 +336,20 @@ namespace channel {
 		llvm::Value* left = node.left->accept(*this);
 		llvm::Value* right = node.right->accept(*this);
 
-		// check for division by 0 
+		// check if both operands are floating-point types
+		if (left->getType()->isFloatingPointTy() && right->getType()->isFloatingPointTy()) {
+			return m_builder.CreateFDiv(left, right, "fdiv");
+		}
+
+		// check if both operands are unsigned
+		//if (!is_signed_type(node.left) && !is_signed_type(node.right)) {
+		//	return m_builder.CreateUDiv(left, right, "udiv");
+		//}
+
+		// fallback
+		return m_builder.CreateSDiv(left, right, "div");
+
+		// todo: check for division by 0 
 		//if (right->getType()->isIntegerTy()) {
 		//	llvm::Function* current_function = m_builder.GetInsertBlock()->getParent();
 
@@ -308,33 +380,62 @@ namespace channel {
 
 		//	return phi;
 		//}
-
-		return m_builder.CreateSDiv(left, right, "div");
 	}
 
 	llvm::Value* codegen_visitor::visit_operator_modulo_node(operator_modulo_node& node) {
 		llvm::Value* left = node.left->accept(*this);
 		llvm::Value* right = node.right->accept(*this);
+
+		// check if both operands are floating-point types
+		if (left->getType()->isFloatingPointTy() && right->getType()->isFloatingPointTy()) {
+			return m_builder.CreateFRem(left, right, "fmod");
+		}
+
+		// check if both operands are unsigned
+		//if (!is_signed_type(node.left) && !is_signed_type(node.right)) {
+		//	return m_builder.CreateURem(left, right, "umod");
+		//}
+
+		// fallback
 		return m_builder.CreateSRem(left, right, "mod");
 	}
 
 	bool codegen_visitor::has_main_entry_point() const {
-		return m_module->getFunction("main") != nullptr;
+		return m_functions.at("main") != nullptr;
 	}
 
 	llvm::Value* codegen_visitor::get_declaration_value(const declaration_node& node) {
 		// evaluate the expression to get the initial value
 		llvm::Value* initial_value;
-		llvm::Type* var_type = type_to_llvm_type(node.get_declaration_type());
 
 		if (node.get_expression()) {
 			// evaluate the expression to get the initial value
 			initial_value = node.get_expression()->accept(*this);
 		}
 		else {
-			initial_value = llvm::Constant::getNullValue(var_type);
+			// declared without an expression, set to 0
+			llvm::Type* value_type = type_to_llvm_type(node.get_declaration_type(), m_context);
+			initial_value = llvm::Constant::getNullValue(value_type);
 		}
 
 		return initial_value;
 	}
+
+	type codegen_visitor::get_type_from_value(llvm::Value* value) {
+
+
+		return type();
+	}
+
+	//bool codegen_visitor::is_signed_type(const node* node) {
+	//	// C/C++ -> Language -> Enable Runtime Type Information = Yes (/GR)
+	//	// C/C++ -> Code Generation -> Runtime Library = Multi-threaded DLL (/MD)
+	//	std::cout << "starting cast\n";
+	//	std::cout << node->get_node_name() << '\n';
+	//	std::cout << (node == nullptr) << '\n';
+
+	//	const integer_base_node* integer_node = dynamic_cast<const integer_base_node*>(node);
+	//	std::cout << "cast done\n";
+	//	return integer_node ? integer_node->is_signed() : false;
+	//}
 }

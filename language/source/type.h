@@ -12,12 +12,15 @@ namespace channel {
 		u16,
 		u32,
 		u64,
+		f32,
+		f64,
 		function,
 		function_call
 	};
 
 	bool is_type_signed(type ty);
 	bool is_type_unsigned(type ty);
+	bool is_type_floating_point(type ty);
 
 	type token_to_type(token tok);
 

@@ -278,80 +278,80 @@ namespace channel {
 	//       where the operands are not the same type.
 
 	value* codegen_visitor::visit_operator_addition_node(operator_addition_node& node) {
-		value* left = node.left->accept(*this);
-		value* right = node.right->accept(*this);
+		const value* left = node.left->accept(*this);
+		const value* right = node.right->accept(*this);
 
-		std::cout << "left: " << is_type_signed(left->get_type()) << '\n';
-		std::cout << "right:" << is_type_signed(right->get_type()) << '\n';
-
-		//const llvm::Type* left_type = left->getType();
-		//const llvm::Type* right_type = right->getType();
-
-		//// check if both operands are floating-point types
-		//if (left_type->isFloatingPointTy() && right_type->isFloatingPointTy()) {
-		//	return m_builder.CreateFAdd(left, right, "fadd");
-		//}
-
+		// check if both operands are floating-point types
+		if(is_type_floating_point(left->get_type()) && is_type_floating_point(right->get_type())) {
+			// todo: use return higher precision
+			return new value(type::f32, m_builder.CreateFAdd(left->get_value(), right->get_value(), "fadd"));
+		}
 
 		// check if both operands are unsigned 
-		//if (!is_signed_type(node.left) && !is_signed_type(node.right)) {
-		//	std::cout << "here\n";
-		//	return m_builder.CreateAdd(left, right, "add", /*HasNUW=*/true);
-		//}
+		if (is_type_unsigned(left->get_type()) && is_type_unsigned(left->get_type())) {
+			// todo: use return higher precision
+			return new value(left->get_type(), m_builder.CreateAdd(left->get_value(), right->get_value(), "uadd", true));
+		}
 
-		// fallback to regular addition
+		// fallback
 		return new value(left->get_type(), m_builder.CreateAdd(left->get_value(), right->get_value(), "add"));
 	}
 
 	value* codegen_visitor::visit_operator_subtraction_node(operator_subtraction_node& node) {
-		value* left = node.left->accept(*this);
-		value* right = node.right->accept(*this);
+		const value* left = node.left->accept(*this);
+		const value* right = node.right->accept(*this);
 
 		// check if both operands are floating-point types
-		//if (left->getType()->isFloatingPointTy() && right->getType()->isFloatingPointTy()) {
-		//	return m_builder.CreateFSub(left, right, "fsub");
-		//}
+		if (is_type_floating_point(left->get_type()) && is_type_floating_point(right->get_type())) {
+			// todo: use return higher precision
+			return new value(type::f32, m_builder.CreateFSub(left->get_value(), right->get_value(), "fsub"));
+		}
 
 		// check if both operands are unsigned 
-		//if (!is_signed_type(node.left) && !is_signed_type(node.right)) {
-		//	return m_builder.CreateSub(left, right, "sub", /*HasNUW=*/true);
-		//}
+		if (is_type_unsigned(left->get_type()) && is_type_unsigned(left->get_type())) {
+			// todo: use return higher precision
+			return new value(left->get_type(), m_builder.CreateSub(left->get_value(), right->get_value(), "usub", true));
+		}
 
 		// fallback
 		return new value(left->get_type(), m_builder.CreateSub(left->get_value(), right->get_value(), "sub"));
 	}
 
 	value* codegen_visitor::visit_operator_multiplication_node(operator_multiplication_node& node) {
-		value* left = node.left->accept(*this);
-		value* right = node.right->accept(*this);
+		const value* left = node.left->accept(*this);
+		const value* right = node.right->accept(*this);
 
 		// check if both operands are floating-point types
-		//if (left->getType()->isFloatingPointTy() && right->getType()->isFloatingPointTy()) {
-		//	return m_builder.CreateFMul(left, right, "fmul");
-		//}
+		if (is_type_floating_point(left->get_type()) && is_type_floating_point(right->get_type())) {
+			// todo: use return higher precision
+			return new value(type::f32, m_builder.CreateFMul(left->get_value(), right->get_value(), "fmul"));
+		}
 
 		// check if both operands are unsigned 
-		//if (!is_signed_type(node.left) && !is_signed_type(node.right)) {
-		//	return m_builder.CreateMul(left, right, "mul", /*HasNUW=*/true);
-		//}
+		if (is_type_unsigned(left->get_type()) && is_type_unsigned(left->get_type())) {
+			// todo: use return higher precision
+			return new value(left->get_type(), m_builder.CreateMul(left->get_value(), right->get_value(), "umul", true));
+		}
 
 		// fallback
 		return new value(left->get_type(), m_builder.CreateMul(left->get_value(), right->get_value(), "mul"));
 	}
 
 	value* codegen_visitor::visit_operator_division_node(operator_division_node& node) {
-		value* left = node.left->accept(*this);
-		value* right = node.right->accept(*this);
+		const value* left = node.left->accept(*this);
+		const value* right = node.right->accept(*this);
 
 		// check if both operands are floating-point types
-		//if (left->getType()->isFloatingPointTy() && right->getType()->isFloatingPointTy()) {
-		//	return m_builder.CreateFDiv(left, right, "fdiv");
-		//}
+		if (is_type_floating_point(left->get_type()) && is_type_floating_point(right->get_type())) {
+			// todo: use return higher precision
+			return new value(type::f32, m_builder.CreateFDiv(left->get_value(), right->get_value(), "fdiv"));
+		}
 
-		// check if both operands are unsigned
-		//if (!is_signed_type(node.left) && !is_signed_type(node.right)) {
-		//	return m_builder.CreateUDiv(left, right, "udiv");
-		//}
+		// check if both operands are unsigned 
+		if (is_type_unsigned(left->get_type()) && is_type_unsigned(left->get_type())) {
+			// todo: use return higher precision
+			return new value(left->get_type(), m_builder.CreateUDiv(left->get_value(), right->get_value(), "udiv"));
+		}
 
 		// fallback
 		return new value(left->get_type(), m_builder.CreateSDiv(left->get_value(), right->get_value(), "div"));
@@ -390,18 +390,20 @@ namespace channel {
 	}
 
 	value* codegen_visitor::visit_operator_modulo_node(operator_modulo_node& node) {
-		value* left = node.left->accept(*this);
-		value* right = node.right->accept(*this);
+		const value* left = node.left->accept(*this);
+		const value* right = node.right->accept(*this);
 
 		// check if both operands are floating-point types
-		//if (left->getType()->isFloatingPointTy() && right->getType()->isFloatingPointTy()) {
-		//	return m_builder.CreateFRem(left, right, "fmod");
-		//}
+		if (is_type_floating_point(left->get_type()) && is_type_floating_point(right->get_type())) {
+			// todo: use return higher precision
+			return new value(type::f32, m_builder.CreateFRem(left->get_value(), right->get_value(), "fmod"));
+		}
 
-		// check if both operands are unsigned
-		//if (!is_signed_type(node.left) && !is_signed_type(node.right)) {
-		//	return m_builder.CreateURem(left, right, "umod");
-		//}
+		// check if both operands are unsigned 
+		if (is_type_unsigned(left->get_type()) && is_type_unsigned(left->get_type())) {
+			// todo: use return higher precision
+			return new value(left->get_type(), m_builder.CreateURem(left->get_value(), right->get_value(), "umod"));
+		}
 
 		// fallback
 		return new value(left->get_type(), m_builder.CreateSRem(left->get_value(), right->get_value(), "mod"));

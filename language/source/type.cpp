@@ -15,6 +15,10 @@ namespace channel {
 			ty == type::u64;
 	}
 
+	bool is_type_floating_point(type ty)	{
+		return ty == type::f32 || ty == type::f64;
+	}
+
 	type token_to_type(token tok) {
 		static const std::unordered_map<token, type> token_to_type_map = {
 			{ token::keyword_type_i8 , type::i8  },

@@ -440,13 +440,17 @@ namespace channel {
 		if (is_type_floating_point(result_type)) {
 			if (is_type_floating_point(val_type)) {
 				// float to double
+				std::cout << "[codegen][warning]: upcasting f32 to f64\n";
 				return builder.CreateFPExt(val_value, type_to_llvm_type(result_type, m_context));
 			}
+
 			// integer to float or double
+			std::cout << "[codegen][warning]: upcasting signed integer to floating point\n";
 			return builder.CreateSIToFP(val_value, type_to_llvm_type(result_type, m_context));
 		}
 
 		// integer types
+		std::cout << "[codegen][warning]: upcasting integer\n";
 		return builder.CreateIntCast(val_value, type_to_llvm_type(result_type, m_context), is_type_signed(val_type));
 	}
 }

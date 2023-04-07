@@ -212,8 +212,18 @@ namespace channel {
 
 	inline bool is_token_numerical(token token) {
 		return token == token::number_f32    ||
-			   token == token::number_f64    ||
-			   token == token::number_signed ||
-			   token == token::number_unsigned;
+			token == token::keyword_type_f32 ||
+			token == token::number_f64       ||
+			token == token::keyword_type_f64 ||
+			token == token::number_signed    ||
+			token == token::keyword_type_i8  ||
+			token == token::keyword_type_i16 ||
+			token == token::keyword_type_i32 ||
+			token == token::keyword_type_i64 ||
+			token == token::number_unsigned  ||
+			token == token::keyword_type_u8  ||
+			token == token::keyword_type_u16 ||
+			token == token::keyword_type_u32 ||
+			token == token::keyword_type_u64;
 	}
 }

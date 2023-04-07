@@ -5,7 +5,8 @@ namespace channel {
 		return ty == type::i8 ||
 			ty == type::i16 ||
 			ty == type::i32 ||
-			ty == type::i64;
+			ty == type::i64 ||
+			is_type_floating_point(ty);
 	}
 
 	bool is_type_unsigned(type ty) {
@@ -29,6 +30,8 @@ namespace channel {
 			{ token::keyword_type_u16, type::u16 },
 			{ token::keyword_type_u32, type::u32 },
 			{ token::keyword_type_u64, type::u64 },
+			{ token::keyword_type_f32, type::f32 },
+			{ token::keyword_type_f64, type::f64 },
 		};
 
 		const auto it = token_to_type_map.find(tok);
@@ -46,6 +49,8 @@ namespace channel {
 			{ type::u16,           "u16"           },
 			{ type::u32,           "u32"           },
 			{ type::u64,           "u64"           },
+			{ type::f32,           "f32"           },
+			{ type::f64,           "f64"           },
 			{ type::function,      "function"      },
 			{ type::function_call, "function_call" },
 		};
@@ -58,14 +63,16 @@ namespace channel {
 	llvm::Type* type_to_llvm_type(type ty, llvm::LLVMContext& context) {
 		using type_function = std::function<llvm::Type* (llvm::LLVMContext&)>;
 		static const std::unordered_map<type, type_function> type_to_llvm_type_map = {
-			{ type::i8 ,[](llvm::LLVMContext& ctx) { return llvm::Type::getInt8Ty(ctx); } },
-			{ type::i16,[](llvm::LLVMContext& ctx) { return llvm::Type::getInt16Ty(ctx); } },
-			{ type::i32,[](llvm::LLVMContext& ctx) { return llvm::Type::getInt32Ty(ctx); } },
-			{ type::i64,[](llvm::LLVMContext& ctx) { return llvm::Type::getInt64Ty(ctx); } },
-			{ type::u8 ,[](llvm::LLVMContext& ctx) { return llvm::Type::getInt8Ty(ctx); } },
-			{ type::u16,[](llvm::LLVMContext& ctx) { return llvm::Type::getInt16Ty(ctx); } },
-			{ type::u32,[](llvm::LLVMContext& ctx) { return llvm::Type::getInt32Ty(ctx); } },
-			{ type::u64,[](llvm::LLVMContext& ctx) { return llvm::Type::getInt64Ty(ctx); } }
+			{ type::i8 ,[](llvm::LLVMContext& ctx) { return llvm::Type::getInt8Ty(ctx) ;  } },
+			{ type::i16,[](llvm::LLVMContext& ctx) { return llvm::Type::getInt16Ty(ctx);  } },
+			{ type::i32,[](llvm::LLVMContext& ctx) { return llvm::Type::getInt32Ty(ctx);  } },
+			{ type::i64,[](llvm::LLVMContext& ctx) { return llvm::Type::getInt64Ty(ctx);  } },
+			{ type::u8 ,[](llvm::LLVMContext& ctx) { return llvm::Type::getInt8Ty(ctx) ;  } },
+			{ type::u16,[](llvm::LLVMContext& ctx) { return llvm::Type::getInt16Ty(ctx);  } },
+			{ type::u32,[](llvm::LLVMContext& ctx) { return llvm::Type::getInt32Ty(ctx);  } },
+			{ type::u64,[](llvm::LLVMContext& ctx) { return llvm::Type::getInt64Ty(ctx);  } },
+			{ type::f32,[](llvm::LLVMContext& ctx) { return llvm::Type::getFloatTy(ctx);  } },
+			{ type::f64,[](llvm::LLVMContext& ctx) { return llvm::Type::getDoubleTy(ctx); } },
 		};
 
 		const auto it = type_to_llvm_type_map.find(ty);

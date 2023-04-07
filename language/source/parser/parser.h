@@ -28,6 +28,7 @@ namespace channel {
 		node* parse_function_definition();
 		node* parse_return_statement();
 
+		static node* create_zero_node(type ty);
 		static bool is_token_return_type(token token);
 		bool peek_is_function_definition() const;
 		bool peek_is_function_call() const;

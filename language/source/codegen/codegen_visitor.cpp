@@ -13,15 +13,18 @@
 #include "abstract_syntax_tree/keywords/return_node.h"
 
 // types 
-#include "abstract_syntax_tree/keywords/types/signed_integers/keyword_i8_node.h"
-#include "abstract_syntax_tree/keywords/types/signed_integers/keyword_i16_node.h"
-#include "abstract_syntax_tree/keywords/types/signed_integers/keyword_i32_node.h"
-#include "abstract_syntax_tree/keywords/types/signed_integers/keyword_i64_node.h"
+#include "abstract_syntax_tree/keywords/types/signed_int/keyword_i8_node.h"
+#include "abstract_syntax_tree/keywords/types/signed_int/keyword_i16_node.h"
+#include "abstract_syntax_tree/keywords/types/signed_int/keyword_i32_node.h"
+#include "abstract_syntax_tree/keywords/types/signed_int/keyword_i64_node.h"
 
-#include "abstract_syntax_tree/keywords/types/unsigned_integers/keyword_u8_node.h"
-#include "abstract_syntax_tree/keywords/types/unsigned_integers/keyword_u16_node.h"
-#include "abstract_syntax_tree/keywords/types/unsigned_integers/keyword_u32_node.h"
-#include "abstract_syntax_tree/keywords/types/unsigned_integers/keyword_u64_node.h"
+#include "abstract_syntax_tree/keywords/types/unsigned_int/keyword_u8_node.h"
+#include "abstract_syntax_tree/keywords/types/unsigned_int/keyword_u16_node.h"
+#include "abstract_syntax_tree/keywords/types/unsigned_int/keyword_u32_node.h"
+#include "abstract_syntax_tree/keywords/types/unsigned_int/keyword_u64_node.h"
+
+#include "abstract_syntax_tree/keywords/types/floating_point/keyword_f32_node.h"
+#include "abstract_syntax_tree/keywords/types/floating_point/keyword_f64_node.h"
 
 // operators
 #include "abstract_syntax_tree/operators/operator_addition_node.h"
@@ -113,7 +116,7 @@ namespace channel {
 
 	value* codegen_visitor::visit_variable_node(variable_node& node) {
 		// local variable
-		if (value* variable_value = m_scope->get_named_value(node.get_name())) {
+		if (const value* variable_value = m_scope->get_named_value(node.get_name())) {
 			// load the value from the memory location
 			const llvm::AllocaInst* alloca = llvm::dyn_cast<llvm::AllocaInst>(variable_value->get_value());
 			llvm::Value* load = m_builder.CreateLoad(alloca->getAllocatedType(), variable_value->get_value(), node.get_name());
@@ -122,7 +125,7 @@ namespace channel {
 		}
 
 		// global variable
-		value* pointer_to_global_variable = m_global_named_values[node.get_name()];
+		const value* pointer_to_global_variable = m_global_named_values[node.get_name()];
 		ASSERT(pointer_to_global_variable, "[codegen]: variable '" + node.get_name() + "' not found");
 		const llvm::GlobalValue* global_variable_value = llvm::dyn_cast<llvm::GlobalValue>(pointer_to_global_variable->get_value());
 		llvm::Value* load = m_builder.CreateLoad(global_variable_value->getValueType(), pointer_to_global_variable->get_value(), node.get_name());
@@ -272,6 +275,14 @@ namespace channel {
 
 	value* codegen_visitor::visit_keyword_u64_node(keyword_u64_node& node) {
 		return new value(type::u64, llvm::ConstantInt::get(m_context, llvm::APInt(64, node.get_value(), false)));
+	}
+
+	value* codegen_visitor::visit_keyword_f32_node(keyword_f32_node& node) {
+		return new value(type::f32, llvm::ConstantFP::get(m_context, llvm::APFloat(node.get_value())));
+	}
+
+	value* codegen_visitor::visit_keyword_f64_node(keyword_f64_node& node) {
+		return new value(type::f64, llvm::ConstantFP::get(m_context, llvm::APFloat(node.get_value())));
 	}
 
 	// todo: maybe we should check the type of left and right operands and upcast them in the
@@ -429,16 +440,4 @@ namespace channel {
 
 		return initial_value;
 	}
-
-	//bool codegen_visitor::is_signed_type(const node* node) {
-	//	// C/C++ -> Language -> Enable Runtime Type Information = Yes (/GR)
-	//	// C/C++ -> Code Generation -> Runtime Library = Multi-threaded DLL (/MD)
-	//	std::cout << "starting cast\n";
-	//	std::cout << node->get_node_name() << '\n';
-	//	std::cout << (node == nullptr) << '\n';
-
-	//	const integer_base_node* integer_node = dynamic_cast<const integer_base_node*>(node);
-	//	std::cout << "cast done\n";
-	//	return integer_node ? integer_node->is_signed() : false;
-	//}
 }

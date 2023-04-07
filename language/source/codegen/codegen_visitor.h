@@ -47,6 +47,9 @@ namespace channel {
 		value* visit_keyword_u32_node(keyword_u32_node& node) override;
 		value* visit_keyword_u64_node(keyword_u64_node& node) override;
 
+		value* visit_keyword_f32_node(keyword_f32_node& node) override;
+		value* visit_keyword_f64_node(keyword_f64_node& node) override;
+
 		// operators
 		value* visit_operator_addition_node(operator_addition_node& node) override;
 		value* visit_operator_subtraction_node(operator_subtraction_node& node) override;

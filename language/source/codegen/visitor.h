@@ -12,6 +12,9 @@ namespace channel {
     class keyword_u32_node;
     class keyword_u64_node;
 
+    class keyword_f32_node;
+    class keyword_f64_node;
+
     // operators
     class operator_addition_node;
     class operator_subtraction_node;
@@ -59,6 +62,9 @@ namespace channel {
         virtual value* visit_keyword_u16_node(keyword_u16_node& node) = 0;
         virtual value* visit_keyword_u32_node(keyword_u32_node& node) = 0;
         virtual value* visit_keyword_u64_node(keyword_u64_node& node) = 0;
+
+        virtual value* visit_keyword_f32_node(keyword_f32_node& node) = 0;
+        virtual value* visit_keyword_f64_node(keyword_f64_node& node) = 0;
 
         // operators
         virtual value* visit_operator_addition_node(operator_addition_node& node) = 0;

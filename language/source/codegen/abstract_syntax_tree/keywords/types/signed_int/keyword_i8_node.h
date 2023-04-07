@@ -3,16 +3,16 @@
 
 namespace channel {
 	/**
-	 * \brief AST node, represents the i32 type keyword.
+	 * \brief AST node, represents the i8 type keyword.
 	 */
-	class keyword_i32_node : public node {
+	class keyword_i8_node : public node {
 	public:
-		keyword_i32_node(u64 value);
+		keyword_i8_node(i64 value);
 		value* accept(visitor& visitor) override;
 		std::string get_node_name() const override;
 
-		u64 get_value() const;
+		i64 get_value() const;
 	private:
-		u64 m_value;
+		i64 m_value;
 	};
 }

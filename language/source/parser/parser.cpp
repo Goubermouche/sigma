@@ -4,16 +4,20 @@
 #include "../codegen/abstract_syntax_tree/keywords/function_call_node.h"
 #include "../codegen/abstract_syntax_tree/keywords/function_node.h"
 #include "../codegen/abstract_syntax_tree/keywords/return_node.h"
+#include "../codegen/abstract_syntax_tree/keywords/types/floating_point/keyword_f32_node.h"
 
-#include "../codegen/abstract_syntax_tree/keywords/types/signed_integers/keyword_i8_node.h"
-#include "../codegen/abstract_syntax_tree/keywords/types/signed_integers/keyword_i16_node.h"
-#include "../codegen/abstract_syntax_tree/keywords/types/signed_integers/keyword_i32_node.h"
-#include "../codegen/abstract_syntax_tree/keywords/types/signed_integers/keyword_i64_node.h"
+#include "../codegen/abstract_syntax_tree/keywords/types/signed_int/keyword_i8_node.h"
+#include "../codegen/abstract_syntax_tree/keywords/types/signed_int/keyword_i16_node.h"
+#include "../codegen/abstract_syntax_tree/keywords/types/signed_int/keyword_i32_node.h"
+#include "../codegen/abstract_syntax_tree/keywords/types/signed_int/keyword_i64_node.h"
 
-#include "../codegen/abstract_syntax_tree/keywords/types/unsigned_integers/keyword_u8_node.h"
-#include "../codegen/abstract_syntax_tree/keywords/types/unsigned_integers/keyword_u16_node.h"
-#include "../codegen/abstract_syntax_tree/keywords/types/unsigned_integers/keyword_u32_node.h"
-#include "../codegen/abstract_syntax_tree/keywords/types/unsigned_integers/keyword_u64_node.h"
+#include "../codegen/abstract_syntax_tree/keywords/types/unsigned_int/keyword_u8_node.h"
+#include "../codegen/abstract_syntax_tree/keywords/types/unsigned_int/keyword_u16_node.h"
+#include "../codegen/abstract_syntax_tree/keywords/types/unsigned_int/keyword_u32_node.h"
+#include "../codegen/abstract_syntax_tree/keywords/types/unsigned_int/keyword_u64_node.h"
+
+#include "../codegen/abstract_syntax_tree/keywords/types/floating_point/keyword_f32_node.h"
+#include "../codegen/abstract_syntax_tree/keywords/types/floating_point/keyword_f64_node.h"
 
 #include "../codegen/abstract_syntax_tree/variables/variable_node.h"
 #include "../codegen/abstract_syntax_tree/variables/declaration/local_declaration_node.h"
@@ -62,8 +66,8 @@ namespace channel {
 			case token::keyword_type_i64:
 			case token::keyword_type_u8:
 			case token::keyword_type_u16:
-			case token::keyword_type_u32:
-			case token::keyword_type_u64:
+			case token::keyword_type_f32:
+			case token::keyword_type_f64:
 				statement = parse_declaration(is_global, m_current_token);
 				break;
 			default:
@@ -90,6 +94,8 @@ namespace channel {
 			case token::keyword_type_u16:
 			case token::keyword_type_u32:
 			case token::keyword_type_u64:
+			case token::keyword_type_f32:
+			case token::keyword_type_f64:
 				statement = parse_declaration(is_global, m_current_token);
 				break;
 			case token::keyword_return:
@@ -205,12 +211,14 @@ namespace channel {
 		node* root = nullptr;
 
 		if (is_token_numerical(m_current_token)) {
-			// todo: generalize
 			root = parse_number(type_token);
 		}
 		else if (m_current_token == token::operator_subtraction) {
 			consume_next_token(); // consume the subtraction token
-			root = new operator_subtraction_node(new keyword_i32_node(0), parse_number()); // negate the number by subtracting it from 0
+
+			// negate the number by subtracting it from 0
+			node* zero_node = create_zero_node(token_to_type(type_token));
+			root = new operator_subtraction_node(zero_node, parse_number(type_token));
 		}
 		else if (m_current_token == token::identifier) {
 			const std::string name = m_lexer.get_identifier();
@@ -237,22 +245,27 @@ namespace channel {
 
 	node* parser::parse_number(token type_token) {
 		const std::string str_value = m_lexer.get_value();
-		const token type = (type_token != token::unknown) ? type_token : m_current_token;
+		const token type = type_token != token::unknown ? type_token : m_current_token;
 		consume_next_token();
 
 		switch (type) {
 			// signed
-			case token::keyword_type_i8:  return new keyword_i8_node(std::stoull(str_value));
-			case token::keyword_type_i16: return new keyword_i16_node(std::stoull(str_value));
+			case token::keyword_type_i8:  return new keyword_i8_node(std::stoll(str_value));
+			case token::keyword_type_i16: return new keyword_i16_node(std::stoll(str_value));
 			case token::number_signed:
-			case token::keyword_type_i32: return new keyword_i32_node(std::stoull(str_value));
-			case token::keyword_type_i64: return new keyword_i64_node(std::stoull(str_value));
+			case token::keyword_type_i32: return new keyword_i32_node(std::stoll(str_value));
+			case token::keyword_type_i64: return new keyword_i64_node(std::stoll(str_value));
 			// unsigned
 			case token::keyword_type_u8:  return new keyword_u8_node(std::stoull(str_value));
 			case token::keyword_type_u16: return new keyword_u16_node(std::stoull(str_value));
 			case token::number_unsigned:
 			case token::keyword_type_u32: return new keyword_u32_node(std::stoull(str_value));
 			case token::keyword_type_u64: return new keyword_u64_node(std::stoull(str_value));
+			// floating point
+			case token::number_f32:
+			case token::keyword_type_f32: return new keyword_f32_node(std::stof(str_value));
+			case token::number_f64:
+			case token::keyword_type_f64: return new keyword_f64_node(std::stod(str_value));
 		default:
 			ASSERT(false, "[parser]: unhandled number format '" + token_to_string(type) + "' encountered");
 			return nullptr;
@@ -287,24 +300,7 @@ namespace channel {
 	}
 
 	node* parser::parse_function_definition() {
-		// parse the return type (e.g., int)
-		// todo: generalize
-		type return_type{};
-
-		switch (m_current_token) {
-		case token::keyword_type_i8:
-			return_type = type::i8;
-			break;
-		case token::keyword_type_i16:
-			return_type = type::i16;
-			break;
-		case token::keyword_type_i32:
-			return_type = type::i32;
-			break;
-		case token::keyword_type_i64:
-			return_type = type::i64;
-			break;
-		}
+		const type return_type = token_to_type(m_current_token);
 
 		consume_next_token();
 		// parse the function name (e.g., main, other_function)
@@ -334,6 +330,24 @@ namespace channel {
 		consume_next_token();
 		node* expression = parse_expression();
 		return new return_node(expression);
+	}
+
+	node* parser::create_zero_node(type ty) {
+		switch (ty) {
+			case type::i8:  return new keyword_i8_node(0);
+			case type::i16: return new keyword_i16_node(0);
+			case type::i32: return new keyword_i32_node(0);
+			case type::i64: return new keyword_i64_node(0);
+			case type::u8:  return new keyword_u8_node(0);
+			case type::u16: return new keyword_u16_node(0);
+			case type::u32: return new keyword_u32_node(0);
+			case type::u64: return new keyword_u64_node(0);
+			case type::f32: return new keyword_f32_node(0.0);
+			case type::f64: return new keyword_f64_node(0.0);
+			default:
+				ASSERT(false, "[parser]: cannot convert '" + type_to_string(ty) + "' to a type keyword");
+				return nullptr;
+		}
 	}
 
 	bool parser::is_token_return_type(token token) {

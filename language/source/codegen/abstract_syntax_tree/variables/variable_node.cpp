@@ -4,7 +4,7 @@ namespace channel {
     variable_node::variable_node(const std::string& name)
 	    : m_name(name){}
 
-    llvm::Value* variable_node::accept(visitor& visitor) {
+    value* variable_node::accept(visitor& visitor) {
         LOG_NODE_NAME(variable_node);
         return visitor.visit_variable_node(*this);
     }

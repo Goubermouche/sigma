@@ -4,7 +4,7 @@ namespace channel {
 	keyword_i16_node::keyword_i16_node(i16 value)
 		: m_value(value) {}
 
-	llvm::Value* keyword_i16_node::accept(visitor& visitor) {
+	value* keyword_i16_node::accept(visitor& visitor) {
 		LOG_NODE_NAME(keyword_i16_node);
 		return visitor.visit_keyword_i16_node(*this);
 	}

@@ -4,7 +4,7 @@ namespace channel {
 	operator_division_node::operator_division_node(node* left, node* right)
 		: operator_binary(left, right) {}
 
-	llvm::Value* operator_division_node::accept(visitor& visitor) {
+	value* operator_division_node::accept(visitor& visitor) {
 		LOG_NODE_NAME(operator_division_node);
 		return visitor.visit_operator_division_node(*this);
 	}

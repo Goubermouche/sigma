@@ -8,7 +8,7 @@ namespace channel {
 	class function_call_node : public node {
 	public:
 		function_call_node(const std::string& name, const std::vector<node*>& arguments);
-		llvm::Value* accept(visitor& visitor) override;
+		value* accept(visitor& visitor) override;
 		std::string get_node_name() const override;
 
 		const std::string& get_name() const;

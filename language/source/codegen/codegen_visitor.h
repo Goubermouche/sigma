@@ -28,42 +28,41 @@ namespace channel {
 		void verify_intermediate_representation() const;
 	private:
 		// variables
-		llvm::Value* visit_assignment_node(assignment_node& node) override;
-		llvm::Value* visit_function_call_node(function_call_node& node) override;
-		llvm::Value* visit_variable_node(variable_node& node) override;
-		llvm::Value* visit_function_node(function_node& node) override;
-		llvm::Value* visit_return_node(return_node& node) override;
-		llvm::Value* visit_local_declaration_node(local_declaration_node& node) override;
-		llvm::Value* visit_global_declaration_node(global_declaration_node& node) override;
+		value* visit_assignment_node(assignment_node& node) override;
+		value* visit_function_call_node(function_call_node& node) override;
+		value* visit_variable_node(variable_node& node) override;
+		value* visit_function_node(function_node& node) override;
+		value* visit_return_node(return_node& node) override;
+		value* visit_local_declaration_node(local_declaration_node& node) override;
+		value* visit_global_declaration_node(global_declaration_node& node) override;
 
 		// types
-		llvm::Value* visit_keyword_i8_node(keyword_i8_node& node) override;
-		llvm::Value* visit_keyword_i16_node(keyword_i16_node& node) override;
-		llvm::Value* visit_keyword_i32_node(keyword_i32_node& node) override;
-		llvm::Value* visit_keyword_i64_node(keyword_i64_node& node) override;
+		value* visit_keyword_i8_node(keyword_i8_node& node) override;
+		value* visit_keyword_i16_node(keyword_i16_node& node) override;
+		value* visit_keyword_i32_node(keyword_i32_node& node) override;
+		value* visit_keyword_i64_node(keyword_i64_node& node) override;
 
-		llvm::Value* visit_keyword_u8_node(keyword_u8_node& node) override;
-		llvm::Value* visit_keyword_u16_node(keyword_u16_node& node) override;
-		llvm::Value* visit_keyword_u32_node(keyword_u32_node& node) override;
-		llvm::Value* visit_keyword_u64_node(keyword_u64_node& node) override;
+		value* visit_keyword_u8_node(keyword_u8_node& node) override;
+		value* visit_keyword_u16_node(keyword_u16_node& node) override;
+		value* visit_keyword_u32_node(keyword_u32_node& node) override;
+		value* visit_keyword_u64_node(keyword_u64_node& node) override;
 
 		// operators
-		llvm::Value* visit_operator_addition_node(operator_addition_node& node) override;
-		llvm::Value* visit_operator_subtraction_node(operator_subtraction_node& node) override;
-		llvm::Value* visit_operator_multiplication_node(operator_multiplication_node& node) override;
-		llvm::Value* visit_operator_division_node(operator_division_node& node) override;
-		llvm::Value* visit_operator_modulo_node(operator_modulo_node& node) override;
+		value* visit_operator_addition_node(operator_addition_node& node) override;
+		value* visit_operator_subtraction_node(operator_subtraction_node& node) override;
+		value* visit_operator_multiplication_node(operator_multiplication_node& node) override;
+		value* visit_operator_division_node(operator_division_node& node) override;
+		value* visit_operator_modulo_node(operator_modulo_node& node) override;
 
 		bool has_main_entry_point() const;
 		void initialize_global_variables();
-		llvm::Value* get_declaration_value(const declaration_node& node);
+		value* get_declaration_value(const declaration_node& node);
 		// static bool is_signed_type(const node* node);
-		type get_type_from_value(llvm::Value* value);
 	private:
 		// scope tree hierarchy
 		scope* m_scope;
 		// map of all global variables
-		std::unordered_map<std::string, llvm::Value*> m_global_named_values;
+		std::unordered_map<std::string, value*> m_global_named_values;
 		// global initialization ctors
 		std::vector<llvm::Constant*> m_ctors;
 		// ctor initialization priority 

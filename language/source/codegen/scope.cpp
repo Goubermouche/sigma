@@ -4,11 +4,11 @@ namespace channel {
 	scope::scope(scope* parent)
 		: m_parent(parent) {}
 
-	void scope::insert_named_value(const std::string& name, llvm::Value* value) {
+	void scope::insert_named_value(const std::string& name, value* value) {
 		m_named_values[name] = value;
 	}
 
-	llvm::Value* scope::get_named_value(const std::string& name) {
+	value* scope::get_named_value(const std::string& name) {
 		const auto it = m_named_values.find(name); // try to find an llvm::Value in this scope
 
 		// if we've found a value in this scope, return it
@@ -40,7 +40,7 @@ namespace channel {
 		return false;
 	}
 
-	std::pair<std::unordered_map<std::string, llvm::Value*>::iterator, bool> scope::add_named_value(const std::string& name, llvm::Value* value) {
+	std::pair<std::unordered_map<std::string, value*>::iterator, bool> scope::add_named_value(const std::string& name, value* value) {
 		// check parent scopes
 		if (contains_named_value(name)) {
 			return { {}, false };
@@ -52,17 +52,5 @@ namespace channel {
 	std::unique_ptr<scope> scope::create_nested_scope(const std::string& name) {
 		std::cout << "creating nested scope\n";
 		return std::make_unique<scope>(this);
-	}
-
-	value::value(type type, llvm::Value* value)
-		: m_type(type), m_value(value) {
-	}
-
-	type value::get_type() const {
-		return m_type;
-	}
-
-	llvm::Value* value::get_value() const {
-		return m_value;
 	}
 }

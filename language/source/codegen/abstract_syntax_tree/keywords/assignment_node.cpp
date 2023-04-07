@@ -4,7 +4,7 @@ namespace channel {
 	assignment_node::assignment_node(const std::string& name, node* expression)
 		: m_name(name), m_expression(expression) {}
 
-	llvm::Value* assignment_node::accept(visitor& visitor) {
+	value* assignment_node::accept(visitor& visitor) {
 		LOG_NODE_NAME(assignment_node);
 		return visitor.visit_assignment_node(*this);
 	}

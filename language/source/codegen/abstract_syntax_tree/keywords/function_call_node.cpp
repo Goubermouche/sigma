@@ -4,7 +4,7 @@ namespace channel {
 	function_call_node::function_call_node(const std::string& name, const std::vector<node*>& arguments)
 		: m_name(name), m_arguments(arguments) {}
 
-	llvm::Value* function_call_node::accept(visitor& visitor) {
+	value* function_call_node::accept(visitor& visitor) {
 		LOG_NODE_NAME(function_call_node);
 		return visitor.visit_function_call_node(*this);
 	}

@@ -8,7 +8,7 @@ namespace channel {
 	class keyword_u32_node : public node {
 	public:
 		keyword_u32_node(u32 value);
-		llvm::Value* accept(visitor& visitor) override;
+		value* accept(visitor& visitor) override;
 		std::string get_node_name() const override;
 
 		u32 get_value() const;

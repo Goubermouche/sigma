@@ -4,7 +4,7 @@ namespace channel {
 	keyword_u64_node::keyword_u64_node(u64 value)
 		: m_value(value) {}
 
-	llvm::Value* keyword_u64_node::accept(visitor& visitor) {
+	value* keyword_u64_node::accept(visitor& visitor) {
 		LOG_NODE_NAME(keyword_u64_node);
 		return visitor.visit_keyword_u64_node(*this);
 	}

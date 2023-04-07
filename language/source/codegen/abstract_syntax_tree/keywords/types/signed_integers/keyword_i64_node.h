@@ -8,7 +8,7 @@ namespace channel {
 	class keyword_i64_node : public integer_base_node {
 	public:
 		keyword_i64_node(i64 value);
-		llvm::Value* accept(visitor& visitor) override;
+		value* accept(visitor& visitor) override;
 		std::string get_node_name() const override;
 
 		bool is_signed() const override;

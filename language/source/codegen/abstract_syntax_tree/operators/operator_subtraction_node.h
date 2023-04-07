@@ -8,7 +8,7 @@ namespace channel {
 	class operator_subtraction_node : public operator_binary {
 	public:
 		operator_subtraction_node(node* left, node* right);
-		llvm::Value* accept(visitor& visitor) override;
+		value* accept(visitor& visitor) override;
 		std::string get_node_name() const override;
 	};
 }

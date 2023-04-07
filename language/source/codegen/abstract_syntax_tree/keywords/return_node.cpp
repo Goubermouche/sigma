@@ -5,7 +5,7 @@ namespace channel {
 		: m_expression(expression)
 	{}
 
-	llvm::Value* return_node::accept(visitor& visitor) {
+	value* return_node::accept(visitor& visitor) {
 		LOG_NODE_NAME(return_node);
 		return visitor.visit_return_node(*this);
 	}

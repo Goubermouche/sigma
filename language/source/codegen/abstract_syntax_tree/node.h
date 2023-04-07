@@ -1,4 +1,5 @@
 #pragma once
+#include "value.h"
 #include <llvm/IR/Value.h>
 #include "../../utility/macros.h"
 
@@ -16,7 +17,7 @@ namespace channel {
 		 * \brief Accepts the given \a visitor. 
 		 * \param visitor Visitor to accept
 		 */
-		virtual llvm::Value* accept(visitor& visitor) = 0;
+		virtual value* accept(visitor& visitor) = 0;
 		virtual std::string get_node_name() const = 0;
 	};
 }

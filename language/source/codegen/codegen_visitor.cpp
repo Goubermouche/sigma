@@ -72,7 +72,7 @@ namespace channel {
 
 	value* codegen_visitor::visit_assignment_node(assignment_node& node) {
 		// local variable
-		if (value* local_variable = m_scope->get_named_value(node.get_name())) {
+		if (const value* local_variable = m_scope->get_named_value(node.get_name())) {
 			// evaluate the expression on the right-hand side of the assignment
 			value* new_value = node.get_expression()->accept(*this);
 			// store the value in the memory location of the variable
@@ -82,7 +82,7 @@ namespace channel {
 
 		// global variable
 		// look up the global variable in the m_global_named_values map
-		value* pointer_to_global_variable = m_global_named_values[node.get_name()];
+		const value* pointer_to_global_variable = m_global_named_values[node.get_name()];
 		ASSERT(pointer_to_global_variable, "[codegen]: variable '" + node.get_name() + "' not found");
 
 		// evaluate the expression on the right-hand side of the assignment
@@ -201,7 +201,7 @@ namespace channel {
 		m_builder.SetInsertPoint(init_func_entry); // write to the init function
 
 		// evaluate the assigned value, if there is one
-		value* initial_value = get_declaration_value(node);
+		const value* initial_value = get_declaration_value(node);
 		llvm::Type* value_type = initial_value->get_value()->getType();
 
 		// todo: const evaluation of global variables
@@ -285,8 +285,17 @@ namespace channel {
 		return new value(type::f64, llvm::ConstantFP::get(m_context, llvm::APFloat(node.get_value())));
 	}
 
-	// todo: maybe we should check the type of left and right operands and upcast them in the
-	//       where the operands are not the same type.
+	// todo: maybe we should check the type of left and right operands and upcast them
+	//       when the operands are not of the same type.
+
+	// upcast to larger types to prevent loss of data [emit warning]
+	// f64
+	// f32
+	// u64
+	// 
+	// 
+	// 
+	// 
 
 	value* codegen_visitor::visit_operator_addition_node(operator_addition_node& node) {
 		const value* left = node.left->accept(*this);

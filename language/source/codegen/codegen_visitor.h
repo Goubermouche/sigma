@@ -4,8 +4,6 @@
 #include "visitor.h"
 #include "../parser/parser.h"
 
-#define GLOBAL_INITIALIZATION_FUNCTION "__global_init_function"
-
 #define CTOR_STRUCT_TYPE                 \
 llvm::StructType::get(m_context, {       \
 	llvm::Type::getInt32Ty(m_context),   \
@@ -57,10 +55,10 @@ namespace channel {
 		value* visit_operator_division_node(operator_division_node& node) override;
 		value* visit_operator_modulo_node(operator_modulo_node& node) override;
 
+		// utility
 		bool has_main_entry_point() const;
 		void initialize_global_variables();
 		value* get_declaration_value(const declaration_node& node);
-		// static bool is_signed_type(const node* node);
 	private:
 		// scope tree hierarchy
 		scope* m_scope;

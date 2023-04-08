@@ -1,7 +1,7 @@
 f32 func() {
-    return 20;
+    return 10u;
 } 
 
 i32 main() {
-    u8 c = func();
+    u8 c = func() * 2;
 }

@@ -19,9 +19,11 @@ namespace channel {
 	};
 
 	type get_highest_precision_type(type left_type, type right_type);
+	i32 get_type_bit_width(type ty);
 
 	bool is_type_signed(type ty);
 	bool is_type_unsigned(type ty);
+	bool is_type_integral(type ty);
 	bool is_type_floating_point(type ty);
 
 	type token_to_type(token tok);

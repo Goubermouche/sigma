@@ -16,6 +16,5 @@ namespace channel {
 	private:
 		scope* m_parent = nullptr;
 		std::unordered_map<std::string, value*> m_named_values;
-		std::unordered_map<std::string, llvm::Function*> m_functions;
 	};
 }

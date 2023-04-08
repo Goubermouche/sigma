@@ -20,19 +20,65 @@ namespace channel {
 		return type_priority[left_type] > type_priority[right_type] ? left_type : right_type;
 	}
 
+	i32 get_type_bit_width(type ty) {
+		static const std::unordered_map<type, i32> token_to_bit_width_map = {
+			{ type::i8 , 8  },
+			{ type::i16, 16 },
+			{ type::i32, 32 },
+			{ type::i64, 64 },
+			{ type::u8 , 8  },
+			{ type::u16, 16 },
+			{ type::u32, 32 },
+			{ type::u64, 64 },
+			{ type::f32, 32 },
+			{ type::f64, 64 },
+		};
+
+		const auto it = token_to_bit_width_map.find(ty);
+		ASSERT(it != token_to_bit_width_map.end(), "invalid bit width calculation for type '" + type_to_string(ty) + "'");
+		return it->second;
+	}
+
 	bool is_type_signed(type ty) {
-		return ty == type::i8 ||
-			ty == type::i16 ||
-			ty == type::i32 ||
-			ty == type::i64 ||
-			is_type_floating_point(ty);
+		switch (ty) {
+		case type::i8:
+		case type::i16:
+		case type::i32:
+		case type::i64:
+		case type::f32:
+		case type::f64:
+			return true;
+		default:
+			return false;
+		}
 	}
 
 	bool is_type_unsigned(type ty) {
-		return ty == type::u8 ||
-			ty == type::u16 ||
-			ty == type::u32 ||
-			ty == type::u64;
+		switch (ty) {
+		case type::u8:
+		case type::u16:
+		case type::u32:
+		case type::u64:
+			return true;
+		default:
+			return false;
+		}
+	}
+
+	bool is_type_integral(type ty) {
+		switch (ty) {
+		case type::i8:
+		case type::i16:
+		case type::i32:
+		case type::i64:
+		case type::u8:
+		case type::u16:
+		case type::u32:
+		case type::u64:
+			return true;
+		default:
+			return false;
+		}
 	}
 
 	bool is_type_floating_point(type ty)	{

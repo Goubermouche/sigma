@@ -215,6 +215,8 @@ namespace channel {
 
 		// add a return statement if the function does not have one
 		if (entry_block->getTerminator() == nullptr) {
+			compilation_logger::emit_function_return_auto_generate_warning(node.get_declaration_line_index(), node.get_name());
+
 			if (return_type->isVoidTy()) {
 				m_builder.CreateRetVoid();
 			}

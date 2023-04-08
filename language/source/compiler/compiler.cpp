@@ -2,12 +2,16 @@
 #include "../codegen/codegen_visitor.h"
 
 namespace channel {
-	compiler::compiler(const std::string& source_file, const std::vector<std::string>& arguments) {
-		timer timer; timer.start();
-		parser parser("test/main.ch");
+	void compiler::compile(const std::string& source_file) {
+		std::cout << "compiling file: " << source_file << '\n';
+
+		timer timer;
+		timer.start();
+
+		parser parser(source_file);
 		codegen_visitor visitor;
 
-		if(!visitor.generate(parser)) {
+		if (!visitor.generate(parser)) {
 			// compilation failure
 			return;
 		}

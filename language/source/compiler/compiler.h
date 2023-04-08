@@ -4,6 +4,6 @@
 namespace channel {
 	class compiler {
 	public:
-		compiler(const std::string& source_file, const std::vector<std::string>& arguments);
+		static void compile(const std::string& source_file);
 	};
 }

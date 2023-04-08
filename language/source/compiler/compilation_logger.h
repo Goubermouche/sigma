@@ -8,6 +8,7 @@ namespace channel{
 		// warnings
 		static void emit_cast_warning(u64 line_number, type original_type, type target_type);
 		static void emit_function_return_type_cast_warning(u64 line_number, type original_type, type target_type);
+		static void emit_function_return_auto_generate_warning(u64 line_number, const std::string& function_name);
 
 		// errors
 		static void emit_unexpected_token_error(u64 line_number, token expected_token, token received_token);

@@ -15,6 +15,13 @@ namespace channel {
 		);
 	}
 
+	void compilation_logger::emit_function_return_auto_generate_warning(u64 line_number, const std::string& function_name) {
+		emit_warning(
+			line_number,
+			"implicit function return generated for function '" + function_name + "'"
+		);
+	}
+
 	void compilation_logger::emit_unexpected_token_error(u64 line_number, token expected_token, token received_token) {
 		emit_error(
 			line_number,
@@ -37,9 +44,8 @@ namespace channel {
 	}
 
 	void compilation_logger::emit_main_entry_point_missing_error() {
-		console::log(
-			console::color(color::red, "[error]: ") + "unable to locate main entry point"
-		);
+		console::log(color::red, "[error]: ");
+		console::log(color::white, "unable to locate main entry point\n");
 	}
 
 	void compilation_logger::emit_variable_not_found_error(u64 line_number, const std::string& variable_name)	{
@@ -85,14 +91,12 @@ namespace channel {
 	}
 
 	void compilation_logger::emit_warning(u64 line_number, const std::string& message) {
-		console::log(
-			console::color(color::cyan, "[warning:" + std::to_string(line_number) + "]: ") + message
-		);
+		console::log(color::cyan, "[warning:" + std::to_string(line_number) + "]: ");
+		console::log(color::white, message + '\n');
 	}
 
 	void compilation_logger::emit_error(u64 line_number, const std::string& message) {
-		console::log(
-			console::color(color::red, "[error:" + std::to_string(line_number) + "]: ")	+ message
-		);
+		console::log(color::red, "[error:" + std::to_string(line_number) + "]: ");
+		console::log(color::white, message + '\n');
 	}
 }

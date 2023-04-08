@@ -7,9 +7,9 @@
 #include "abstract_syntax_tree/variables/declaration/global_declaration_node.h"
 
 // keywords
-#include "abstract_syntax_tree/keywords/assignment_node.h"
-#include "abstract_syntax_tree/keywords/function_call_node.h"
-#include "abstract_syntax_tree/keywords/function_node.h"
+#include "abstract_syntax_tree/variables/assignment_node.h"
+#include "abstract_syntax_tree/variables/function_call_node.h"
+#include "abstract_syntax_tree/variables/function_node.h"
 #include "abstract_syntax_tree/keywords/return_node.h"
 
 // types 
@@ -236,7 +236,7 @@ namespace channel {
 		llvm::Value* upcasted_initial_value = cast_value(assigned_value, node.get_declaration_type(), node.get_declaration_line_index());
 
 		// create a global variable
-		value* global_variable = new value(
+		auto* global_variable = new value(
 			node.get_name(),
 			node.get_declaration_type(),
 			new llvm::GlobalVariable(*m_module,
@@ -517,20 +517,19 @@ namespace channel {
 
 	value* codegen_visitor::get_declaration_value(const declaration_node& node) {
 		// evaluate the expression to get the initial value
-		value* initial_value;
+		value* assigned_value;
 
 		if (node.get_expression()) {
-			// evaluate the expression to get the initial value
-			initial_value = node.get_expression()->accept(*this);
-			// initial_value->set_type(node.get_declaration_type());
+			// evaluate the assigned value
+			assigned_value = node.get_expression()->accept(*this);
 		}
 		else {
-			// declared without an expression, set to 0
+			// declared without an assigned value, set to 0
 			llvm::Type* value_type = type_to_llvm_type(node.get_declaration_type(), m_context);
-			initial_value = new value(node.get_name(), node.get_declaration_type(), llvm::Constant::getNullValue(value_type));
+			assigned_value = new value(node.get_name(), node.get_declaration_type(), llvm::Constant::getNullValue(value_type));
 		}
 
-		return initial_value;
+		return assigned_value;
 	}
 
 	llvm::Value* codegen_visitor::cast_value(const value* source_value, type target_type, u64 line_index) {
@@ -539,7 +538,11 @@ namespace channel {
 			return source_value->get_value();
 		}
 
+		// cast function call
 		if (source_value->get_type() == type::function_call) {
+			// use the function return type as its type
+
+
 			const type function_return_type = m_functions[source_value->get_name()]->get_return_type();
 
 			// both types are the same 
@@ -552,6 +555,7 @@ namespace channel {
 			llvm::Value* function_call_result = source_value->get_value();
 			llvm::Type* target_llvm_type = type_to_llvm_type(target_type, function_call_result->getContext());
 
+			// perform the cast op
 			if (is_type_floating_point(function_return_type)) {
 				if (is_type_integral(target_type)) {
 					return m_builder.CreateFPToSI(function_call_result, target_llvm_type, "fptosi");
@@ -590,7 +594,7 @@ namespace channel {
 
 		// other cases
 		if (get_type_bit_width(source_value->get_type()) < get_type_bit_width(target_type)) {
-			// upcast
+			// perform upcast
 			if (is_type_unsigned(source_value->get_type())) {
 				return m_builder.CreateZExt(source_llvm_value, target_llvm_type, "zext");
 			}

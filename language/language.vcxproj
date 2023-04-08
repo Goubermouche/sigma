@@ -161,9 +161,9 @@
     <ClCompile Include="source\codegen\abstract_syntax_tree\variables\declaration\global_declaration_node.cpp" />
     <ClCompile Include="source\codegen\abstract_syntax_tree\variables\declaration\local_declaration_node.cpp" />
     <ClCompile Include="source\codegen\abstract_syntax_tree\operators\operator_modulo_node.cpp" />
-    <ClCompile Include="source\codegen\abstract_syntax_tree\keywords\function_node.cpp" />
-    <ClCompile Include="source\codegen\abstract_syntax_tree\keywords\assignment_node.cpp" />
-    <ClCompile Include="source\codegen\abstract_syntax_tree\keywords\function_call_node.cpp" />
+    <ClCompile Include="source\codegen\abstract_syntax_tree\variables\function_node.cpp" />
+    <ClCompile Include="source\codegen\abstract_syntax_tree\variables\assignment_node.cpp" />
+    <ClCompile Include="source\codegen\abstract_syntax_tree\variables\function_call_node.cpp" />
     <ClCompile Include="source\codegen\abstract_syntax_tree\operators\operator_division_node.cpp" />
     <ClCompile Include="source\codegen\abstract_syntax_tree\operators\operator_multiplication_node.cpp" />
     <ClCompile Include="source\codegen\abstract_syntax_tree\operators\operator_subtraction_node.cpp" />
@@ -203,9 +203,9 @@
     <ClInclude Include="source\codegen\abstract_syntax_tree\variables\declaration\global_declaration_node.h" />
     <ClInclude Include="source\codegen\abstract_syntax_tree\variables\declaration\local_declaration_node.h" />
     <ClInclude Include="source\codegen\abstract_syntax_tree\operators\operator_modulo_node.h" />
-    <ClInclude Include="source\codegen\abstract_syntax_tree\keywords\function_node.h" />
-    <ClInclude Include="source\codegen\abstract_syntax_tree\keywords\assignment_node.h" />
-    <ClInclude Include="source\codegen\abstract_syntax_tree\keywords\function_call_node.h" />
+    <ClInclude Include="source\codegen\abstract_syntax_tree\variables\function_node.h" />
+    <ClInclude Include="source\codegen\abstract_syntax_tree\variables\assignment_node.h" />
+    <ClInclude Include="source\codegen\abstract_syntax_tree\variables\function_call_node.h" />
     <ClInclude Include="source\codegen\abstract_syntax_tree\operators\operator_division_node.h" />
     <ClInclude Include="source\codegen\abstract_syntax_tree\operators\operator_multiplication_node.h" />
     <ClInclude Include="source\codegen\abstract_syntax_tree\operators\operator_subtraction_node.h" />

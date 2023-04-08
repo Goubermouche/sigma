@@ -66,16 +66,16 @@
     <ClCompile Include="source\codegen\abstract_syntax_tree\operators\operator_multiplication_node.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="source\codegen\abstract_syntax_tree\keywords\function_call_node.cpp">
+    <ClCompile Include="source\codegen\abstract_syntax_tree\variables\function_call_node.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="source\codegen\abstract_syntax_tree\variables\variable_node.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="source\codegen\abstract_syntax_tree\keywords\assignment_node.cpp">
+    <ClCompile Include="source\codegen\abstract_syntax_tree\variables\assignment_node.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="source\codegen\abstract_syntax_tree\keywords\function_node.cpp">
+    <ClCompile Include="source\codegen\abstract_syntax_tree\variables\function_node.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="source\codegen\abstract_syntax_tree\operators\operator_modulo_node.cpp">
@@ -188,16 +188,16 @@
     <ClInclude Include="source\codegen\abstract_syntax_tree\operators\operator_multiplication_node.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="source\codegen\abstract_syntax_tree\keywords\function_call_node.h">
+    <ClInclude Include="source\codegen\abstract_syntax_tree\variables\function_call_node.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="source\codegen\abstract_syntax_tree\variables\variable_node.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="source\codegen\abstract_syntax_tree\keywords\assignment_node.h">
+    <ClInclude Include="source\codegen\abstract_syntax_tree\variables\assignment_node.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="source\codegen\abstract_syntax_tree\keywords\function_node.h">
+    <ClInclude Include="source\codegen\abstract_syntax_tree\variables\function_node.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="source\codegen\abstract_syntax_tree\operators\operator_modulo_node.h">

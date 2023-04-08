@@ -11,22 +11,21 @@ namespace channel {
 	public: 
 		parser(const std::string& source_file);
 
-		std::vector<node*> parse();
+		bool parse(std::vector<node*>& abstract_syntax_tree);
 	private:
-		node* parse_statement(bool is_global);
-
+		bool parse_statement(bool is_global, node*& out_node);
 		void consume_next_token();
-		void expect_next_token(token token);
+		bool expect_next_token(token token);
 
-		node* parse_declaration(bool is_global, token type_token);
-		node* parse_assignment(bool is_global);
-		node* parse_expression(token type_token = token::unknown);
-		node* parse_term(token type_token = token::unknown);
-		node* parse_factor(token type_token = token::unknown);
-		node* parse_number(token type_token = token::unknown);
-		node* parse_function_call(const std::string& function_name);
-		node* parse_function_definition();
-		node* parse_return_statement();
+		bool parse_declaration(bool is_global, token type_token, node*& out_node);
+		bool parse_assignment(bool is_global, node*& out_node);
+		bool parse_expression(node*& out_node, token type_token = token::unknown);
+		bool parse_term(node*& out_node, token type_token = token::unknown);
+		bool parse_factor(node*& out_node, token type_token = token::unknown);
+		bool parse_number(node*& out_node, token type_token = token::unknown);
+		bool parse_function_call(const std::string& function_name, node*& out_node);
+		bool parse_function_definition(node*& out_node);
+		bool parse_return_statement(node*& out_node);
 
 		node* create_zero_node(type ty) const;
 		static bool is_token_return_type(token token);

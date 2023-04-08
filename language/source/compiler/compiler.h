@@ -1,5 +1,4 @@
 #pragma once
-#include "../codegen/codegen_visitor.h"
 #include "../utility/timer.h"
 
 namespace channel {

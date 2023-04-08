@@ -148,6 +148,8 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="source\compiler\compilation_logger.cpp" />
+    <ClCompile Include="source\utility\console.cpp" />
     <ClCompile Include="source\codegen\abstract_syntax_tree\keywords\types\floating_point\keyword_f64_node.cpp" />
     <ClCompile Include="source\codegen\abstract_syntax_tree\keywords\types\floating_point\keyword_f32_node.cpp" />
     <ClCompile Include="source\codegen\abstract_syntax_tree\keywords\types\unsigned_int\keyword_u16_node.cpp" />
@@ -190,6 +192,8 @@
     <None Include="test\main.ch" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="source\compiler\compilation_logger.h" />
+    <ClInclude Include="source\utility\console.h" />
     <ClInclude Include="source\codegen\abstract_syntax_tree\keywords\types\floating_point\keyword_f64_node.h" />
     <ClInclude Include="source\codegen\abstract_syntax_tree\keywords\types\floating_point\keyword_f32_node.h" />
     <ClInclude Include="source\codegen\abstract_syntax_tree\keywords\types\unsigned_int\keyword_u16_node.h" />

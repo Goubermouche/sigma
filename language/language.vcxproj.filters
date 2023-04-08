@@ -126,6 +126,12 @@
     <ClCompile Include="source\codegen\abstract_syntax_tree\keywords\types\floating_point\keyword_f64_node.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="source\utility\console.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="source\compiler\compilation_logger.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="test\main.ch" />
@@ -246,6 +252,12 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="source\codegen\abstract_syntax_tree\keywords\types\floating_point\keyword_f64_node.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="source\utility\console.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="source\compiler\compilation_logger.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

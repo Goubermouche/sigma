@@ -20,7 +20,9 @@ namespace channel {
 	 */
 	class codegen_visitor : public visitor {
 	public:
-		codegen_visitor(parser& parser);
+		codegen_visitor();
+
+		bool generate(parser& parser);
 
 		void print_intermediate_representation() const;
 		void verify_intermediate_representation() const;
@@ -60,9 +62,6 @@ namespace channel {
 		void initialize_global_variables();
 		value* get_declaration_value(const declaration_node& node);
 		llvm::Value* cast_value(const value* source_value, type target_type, u64 line_index);
-
-		static void emit_cast_warning(u64 line_index, type original_type, type target_type);
-		static void emit_function_return_type_cast_warning(u64 line_index, type original_type, type target_type);
 	private:
 		// scope tree hierarchy
 		scope* m_scope;

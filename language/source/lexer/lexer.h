@@ -2,6 +2,7 @@
 
 #include "token.h"
 #include "../utility/string_accessor.h"
+#include "../compiler/compilation_logger.h"
 
 namespace channel {
 	class lexer {

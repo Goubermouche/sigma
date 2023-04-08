@@ -36,18 +36,26 @@
 #include <llvm/IR/Verifier.h>
 
 namespace channel {
-	codegen_visitor::codegen_visitor(parser& parser)
+	codegen_visitor::codegen_visitor()
 		: m_scope(new scope(nullptr)), m_builder(m_context) {
 		m_module = std::make_unique<llvm::Module>("channel", m_context);
+	}
+
+	bool codegen_visitor::generate(parser& parser) {
+		// parse the source file
+		std::vector<node*> abstract_syntax_tree;
+		if (!parser.parse(abstract_syntax_tree)) {
+			return false; // parsing failed, return false
+		}
 
 		// walk the abstract syntax tree
-		const std::vector<node*> abstract_syntax_tree = parser.parse();
 		for (node* node : abstract_syntax_tree) {
 			node->accept(*this);
 		}
 
 		initialize_global_variables();
 		std::cout << "----------------------------\n";
+		return true;
 	}
 
 	void codegen_visitor::initialize_global_variables() {
@@ -101,7 +109,6 @@ namespace channel {
 		return new_value;
 	}
 
-	// todo: cast to the return type
 	value* codegen_visitor::visit_function_call_node(function_call_node& node) {
 		llvm::Function* function = m_functions[node.get_name()]->get_function();
 		ASSERT(function, "[codegen]: function '" + node.get_name() + "' cannot be found");
@@ -113,13 +120,6 @@ namespace channel {
 			argument_values.push_back(m_builder.GetInsertBlock()->getParent()->back().getTerminator()->getOperand(0));
 		}
 
-		// note: currently, if we were to call something like this:
-		//       i8 func() {}
-		//       i32 main() {
-		//           i16 a = func(); << 'a' would get truncated into an i8
-		//       }
-		// todo: explore if this should be the expected output
-
 		return new value(node.get_name(), type::function_call, m_builder.CreateCall(function, argument_values, "call"));
 	}
 
@@ -128,7 +128,12 @@ namespace channel {
 		if (const value* variable_value = m_scope->get_named_value(node.get_name())) {
 			// load the value from the memory location
 			const llvm::AllocaInst* alloca = llvm::dyn_cast<llvm::AllocaInst>(variable_value->get_value());
-			llvm::Value* load = m_builder.CreateLoad(alloca->getAllocatedType(), variable_value->get_value(), node.get_name());
+
+			llvm::Value* load = m_builder.CreateLoad(
+				alloca->getAllocatedType(),
+				variable_value->get_value(), 
+				node.get_name()
+			);
 
 			return new value(node.get_name(), variable_value->get_type(), load);
 		}
@@ -137,7 +142,13 @@ namespace channel {
 		const value* pointer_to_global_variable = m_global_named_values[node.get_name()];
 		ASSERT(pointer_to_global_variable, "[codegen]: variable '" + node.get_name() + "' not found");
 		const llvm::GlobalValue* global_variable_value = llvm::dyn_cast<llvm::GlobalValue>(pointer_to_global_variable->get_value());
-		llvm::Value* load = m_builder.CreateLoad(global_variable_value->getValueType(), pointer_to_global_variable->get_value(), node.get_name());
+
+		llvm::Value* load = m_builder.CreateLoad(
+			global_variable_value->getValueType(),
+			pointer_to_global_variable->get_value(),
+			node.get_name()
+		);
+
 		return new value(node.get_name(), pointer_to_global_variable->get_type(), load);
 	}
 
@@ -183,7 +194,7 @@ namespace channel {
 
 	value* codegen_visitor::visit_return_node(return_node& node) {
 		// evaluate the expression of the return statement
-		value* return_value = node.get_expression()->accept(*this);
+		const value* return_value = node.get_expression()->accept(*this);
 
 		// get the return type of the current function
 		const type function_return_type = m_functions[m_builder.GetInsertBlock()->getParent()->getName().str()]->get_return_type();
@@ -541,8 +552,6 @@ namespace channel {
 		// cast function call
 		if (source_value->get_type() == type::function_call) {
 			// use the function return type as its type
-
-
 			const type function_return_type = m_functions[source_value->get_name()]->get_return_type();
 
 			// both types are the same 
@@ -550,7 +559,7 @@ namespace channel {
 				return source_value->get_value();
 			}
 
-			emit_function_return_type_cast_warning(line_index, function_return_type, target_type);
+			compilation_logger::emit_function_return_type_cast_warning(line_index, function_return_type, target_type);
 
 			llvm::Value* function_call_result = source_value->get_value();
 			llvm::Type* target_llvm_type = type_to_llvm_type(target_type, function_call_result->getContext());
@@ -576,7 +585,7 @@ namespace channel {
 			}
 		}
 
-		emit_cast_warning(line_index, source_value->get_type(), target_type);
+		compilation_logger::emit_cast_warning(line_index, source_value->get_type(), target_type);
 
 		// get the LLVM value and type for source and target
 		llvm::Value* source_llvm_value = source_value->get_value();
@@ -604,13 +613,5 @@ namespace channel {
 
 		// downcast
 		return m_builder.CreateTrunc(source_llvm_value, target_llvm_type, "trunc");
-	}
-
-	void codegen_visitor::emit_cast_warning(u64 line_index, type original_type, type target_type) {
-		std::cout << "[warning][" + std::to_string(line_index) + "]: implicit cast from '" << type_to_string(original_type) + "' to '" + type_to_string(target_type) + "'\n";
-	}
-
-	void codegen_visitor::emit_function_return_type_cast_warning(u64 line_index, type original_type, type target_type) {
-		std::cout << "[warning][" + std::to_string(line_index) + "]: implicit function return type cast from '" << type_to_string(original_type) + "' to '" + type_to_string(target_type) + "'\n";
 	}
 }

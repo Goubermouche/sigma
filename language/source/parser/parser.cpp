@@ -66,6 +66,8 @@ namespace channel {
 			case token::keyword_type_i64:
 			case token::keyword_type_u8:
 			case token::keyword_type_u16:
+			case token::keyword_type_u32:
+			case token::keyword_type_u64:
 			case token::keyword_type_f32:
 			case token::keyword_type_f64:
 				statement = parse_declaration(is_global, m_current_token);

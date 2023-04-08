@@ -7,7 +7,8 @@ namespace channel {
 		const codegen_visitor visitor(parser);
 
 		visitor.verify_intermediate_representation();
-		std::cout << "[compiler]: compiled in " << timer.elapsed() << " ms\n\n";
+		std::cout << "[compiler]: compiled in " << timer.elapsed() << " ms\n";
+		std::cout << "----------------------------\n";
 		visitor.print_intermediate_representation();
 	}
 }

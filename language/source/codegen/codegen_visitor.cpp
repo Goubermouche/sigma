@@ -47,7 +47,6 @@ namespace channel {
 		}
 
 		initialize_global_variables();
-
 		std::cout << "----------------------------\n";
 	}
 
@@ -231,20 +230,20 @@ namespace channel {
 		m_builder.SetInsertPoint(init_func_entry); // write to the init function
 
 		// evaluate the assigned value, if there is one
-		const value* initial_value = get_declaration_value(node);
+		const value* assigned_value = get_declaration_value(node);
 
-		const type highest_precision = get_highest_precision_type(node.get_declaration_type(), initial_value->get_type());
-		llvm::Value* upcasted_initial_value = cast_value(initial_value, highest_precision, node.get_declaration_line_index());
+		// const type highest_precision = get_highest_precision_type(node.get_declaration_type(), initial_value->get_type());
+		llvm::Value* upcasted_initial_value = cast_value(assigned_value, node.get_declaration_type(), node.get_declaration_line_index());
 
 		// create a global variable
 		value* global_variable = new value(
 			node.get_name(),
-			highest_precision,
+			node.get_declaration_type(),
 			new llvm::GlobalVariable(*m_module,
-				type_to_llvm_type(highest_precision, m_context),
+				type_to_llvm_type(node.get_declaration_type(), m_context),
 				false,
 				llvm::GlobalValue::ExternalLinkage,
-				llvm::Constant::getNullValue(type_to_llvm_type(highest_precision, m_context)), // default initializer
+				llvm::Constant::getNullValue(type_to_llvm_type(node.get_declaration_type(), m_context)), // default initializer
 				node.get_name()
 			)
 		);

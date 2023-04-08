@@ -1,4 +1,9 @@
-u64 v = 20;
+// todo: project cleanup
+// todo: explicit cast
+//       cast<i32>(value)
+
+f32 f = 100.0f;
+u64 v = 20 * f;
 
 f32 func() {
     return v;

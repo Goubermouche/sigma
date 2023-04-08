@@ -9,7 +9,7 @@ namespace channel {
 	class local_declaration_node : public declaration_node {
 	public:
 		local_declaration_node(u64 line_index, type declaration_type, const std::string& name, node* expression = nullptr);
-		value* accept(visitor& visitor) override;
+		bool accept(visitor& visitor, value*& out_value) override;
 		std::string get_node_name() const override;
 	};
 }

@@ -8,7 +8,7 @@ namespace channel {
 	class return_node : public node {
 	public:
 		return_node(u64 line_index, node* expression);
-		value* accept(visitor& visitor) override;
+		bool accept(visitor& visitor, value*& out_value) override;
 		std::string get_node_name() const override;
 
 		node* get_expression() const;

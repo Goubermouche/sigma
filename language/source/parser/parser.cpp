@@ -364,6 +364,7 @@ namespace channel {
 
 	bool parser::parse_function_definition(node*& out_node) {
 		const type return_type = token_to_type(m_current_token);
+		u64 line_number = m_lexer.get_current_line_index();
 
 		consume_next_token();
 		// parse the function name (e.g., main, other_function)
@@ -395,7 +396,7 @@ namespace channel {
 
 		// consume the closing curly brace '}'
 		consume_next_token();
-		out_node = new function_node(m_lexer.get_current_line_index(), return_type, name, std::move(statements));
+		out_node = new function_node(line_number, return_type, name, std::move(statements));
 		return true;
 	}
 

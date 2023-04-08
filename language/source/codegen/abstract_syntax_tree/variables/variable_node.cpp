@@ -4,9 +4,9 @@ namespace channel {
     variable_node::variable_node(u64 line_index, const std::string& name)
 	    :node(line_index), m_name(name) {}
 
-    value* variable_node::accept(visitor& visitor) {
+    bool variable_node::accept(visitor& visitor, value*& out_value) {
         LOG_NODE_NAME(variable_node);
-        return visitor.visit_variable_node(*this);
+        return visitor.visit_variable_node(*this, out_value);
     }
 
     std::string variable_node::get_node_name() const {

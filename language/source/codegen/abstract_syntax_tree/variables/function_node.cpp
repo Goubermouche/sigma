@@ -4,9 +4,9 @@ namespace channel {
 	function_node::function_node(u64 line_index, type return_type, const std::string& name, std::vector<node*> statements)
 		: node(line_index), m_return_type(return_type), m_name(name), m_statements(std::move(statements)) {}
 
-	value* function_node::accept(visitor& visitor) {
+	bool function_node::accept(visitor& visitor, value*& out_value) {
 		LOG_NODE_NAME(function_node);
-		return visitor.visit_function_node(*this);
+		return visitor.visit_function_node(*this, out_value);
 	}
 
 	std::string function_node::get_node_name() const {

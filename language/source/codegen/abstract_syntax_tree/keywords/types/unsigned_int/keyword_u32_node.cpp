@@ -4,9 +4,9 @@ namespace channel {
 	keyword_u32_node::keyword_u32_node(u64 line_index, u64 value)
 		: node(line_index), m_value(value) {}
 
-	value* keyword_u32_node::accept(visitor& visitor)	{
+	bool keyword_u32_node::accept(visitor& visitor, value*& out_value)	{
 		LOG_NODE_NAME(keyword_u32_node);
-		return visitor.visit_keyword_u32_node(*this);
+		return visitor.visit_keyword_u32_node(*this, out_value);
 	}
 
 	std::string keyword_u32_node::get_node_name() const {

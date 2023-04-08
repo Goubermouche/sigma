@@ -2,12 +2,11 @@
 
 namespace channel {
 	return_node::return_node(u64 line_index, node* expression)
-		: node(line_index), m_expression(expression)
-	{}
+		: node(line_index), m_expression(expression) {}
 
-	value* return_node::accept(visitor& visitor) {
+	bool return_node::accept(visitor& visitor, value*& out_value) {
 		LOG_NODE_NAME(return_node);
-		return visitor.visit_return_node(*this);
+		return visitor.visit_return_node(*this, out_value);
 	}
 
 	std::string return_node::get_node_name() const {

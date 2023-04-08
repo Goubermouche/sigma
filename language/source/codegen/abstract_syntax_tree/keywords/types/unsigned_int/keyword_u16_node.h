@@ -8,7 +8,7 @@ namespace channel {
 	class keyword_u16_node : public node {
 	public:
 		keyword_u16_node(u64 line_index, u64 value);
-		value* accept(visitor& visitor) override;
+		bool accept(visitor& visitor, value*& out_value) override;
 		std::string get_node_name() const override;
 
 		u64 get_value() const;

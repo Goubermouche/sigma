@@ -8,7 +8,7 @@ namespace channel {
 	class assignment_node : public node {
 	public:
 		assignment_node(u64 line_index, const std::string& name, node* expression);
-		value* accept(visitor& visitor) override;
+		bool accept(visitor& visitor, value*& out_value) override;
 		std::string get_node_name() const override;
 
 		const std::string& get_name() const;

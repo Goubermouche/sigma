@@ -36,6 +36,54 @@ namespace channel {
 		);
 	}
 
+	void compilation_logger::emit_main_entry_point_missing_error() {
+		console::log(
+			console::color(color::red, "[error]: ") + "unable to locate main entry point"
+		);
+	}
+
+	void compilation_logger::emit_variable_not_found_error(u64 line_number, const std::string& variable_name)	{
+		emit_error(
+			line_number,
+			"variable '" + variable_name + "' cannot be found"
+		);
+	}
+
+	void compilation_logger::emit_local_variable_already_defined_error(u64 line_number, const std::string& variable_name) {
+		emit_error(
+			line_number,
+			"local variable '" + variable_name + "' has already been defined before"
+		);
+	}
+
+	void compilation_logger::emit_local_variable_already_defined_in_global_scope_error(u64 line_number, const std::string& variable_name) {
+		emit_error(
+			line_number,
+			"local variable '" + variable_name + "' has already been defined in the global scope"
+		);
+	}
+
+	void compilation_logger::emit_global_variable_already_defined_error(u64 line_number, const std::string& variable_name) {
+		emit_error(
+			line_number,
+			"global variable '" + variable_name + "' has already been defined before"
+		);
+	}
+
+	void compilation_logger::emit_function_not_found_error(u64 line_number, const std::string& function_name) {
+		emit_error(
+			line_number,
+			"function '" + function_name + "' cannot not found"
+		);
+	}
+
+	void compilation_logger::emit_function_already_defined_error(u64 line_number, const std::string& function_name)	{
+		emit_error(
+			line_number,
+			"function '" + function_name + "' has already been defined before"
+		);
+	}
+
 	void compilation_logger::emit_warning(u64 line_number, const std::string& message) {
 		console::log(
 			console::color(color::cyan, "[warning:" + std::to_string(line_number) + "]: ") + message

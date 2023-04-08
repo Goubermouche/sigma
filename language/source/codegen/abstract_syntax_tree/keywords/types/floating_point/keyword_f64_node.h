@@ -8,7 +8,7 @@ namespace channel {
 	class keyword_f64_node : public node {
 	public:
 		keyword_f64_node(u64 line_index, f64 value);
-		value* accept(visitor& visitor) override;
+		bool accept(visitor& visitor, value*& out_value) override;
 		std::string get_node_name() const override;
 
 		f64 get_value() const;

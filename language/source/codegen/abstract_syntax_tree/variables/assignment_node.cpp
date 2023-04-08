@@ -4,9 +4,9 @@ namespace channel {
 	assignment_node::assignment_node(u64 line_index, const std::string& name, node* expression)
 		: node(line_index), m_name(name), m_expression(expression) {}
 
-	value* assignment_node::accept(visitor& visitor) {
+	bool assignment_node::accept(visitor& visitor, value*& out_value) {
 		LOG_NODE_NAME(assignment_node);
-		return visitor.visit_assignment_node(*this);
+		return visitor.visit_assignment_node(*this, out_value);
 	}
 
 	std::string assignment_node::get_node_name() const {

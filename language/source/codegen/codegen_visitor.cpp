@@ -49,8 +49,11 @@ namespace channel {
 		}
 
 		// walk the abstract syntax tree
-		for (node* node : abstract_syntax_tree) {
-			node->accept(*this);
+		value* tmp_value;
+		for (node* n : abstract_syntax_tree) {
+			if(!n->accept(*this, tmp_value)) {
+				return false;
+			}
 		}
 
 		initialize_global_variables();
@@ -69,61 +72,79 @@ namespace channel {
 		m_module->print(llvm::outs(), nullptr);
 	}
 
-	void codegen_visitor::verify_intermediate_representation() const {
+	bool codegen_visitor::verify_intermediate_representation() const {
 		// check if we have a 'main' function
-		ASSERT(has_main_entry_point(), "[codegen]: cannot find main entrypoint");
+		if(!has_main_entry_point()) {
+			compilation_logger::emit_main_entry_point_missing_error();
+		}
 
 		// check for IR errors
-		if (!llvm::verifyModule(*m_module, &llvm::outs())) {
-			std::cout << "[codegen]: all checks passed\n";
+		if (llvm::verifyModule(*m_module, &llvm::outs())) {
+			return false;
 		}
+
+		return true;
 	}
 
-	value* codegen_visitor::visit_assignment_node(assignment_node& node) {
+	bool codegen_visitor::visit_assignment_node(assignment_node& node, value*& out_value) {
 		// local variable
 		if (const value* local_variable = m_scope->get_named_value(node.get_name())) {
 			// evaluate the expression on the right-hand side of the assignment
-			value* new_value = node.get_expression()->accept(*this);
+			if(!node.get_expression()->accept(*this, out_value)) {
+				return false;
+			}
 
 			// upcast the new_value if necessary
-			new_value->set_value(cast_value(new_value, local_variable->get_type(), node.get_declaration_line_index()));
+			out_value->set_value(cast_value(out_value, local_variable->get_type(), node.get_declaration_line_index()));
 
 			// store the value in the memory location of the variable
-			m_builder.CreateStore(new_value->get_value(), local_variable->get_value());
-			return new_value;
+			m_builder.CreateStore(out_value->get_value(), local_variable->get_value());
+			return true;
 		}
 
 		// global variable
 		// look up the global variable in the m_global_named_values map
 		const value* pointer_to_global_variable = m_global_named_values[node.get_name()];
-		ASSERT(pointer_to_global_variable, "[codegen]: variable '" + node.get_name() + "' not found");
+		if(!pointer_to_global_variable) {
+			compilation_logger::emit_variable_not_found_error(node.get_declaration_line_index(), node.get_name());
+			return false;
+		}
 
 		// evaluate the expression on the right-hand side of the assignment
-		value* new_value = node.get_expression()->accept(*this);
+		if(!node.get_expression()->accept(*this, out_value)) {
+			return false;
+		}
 
 		// upcast the new_value if necessary
-		new_value->set_value(cast_value(new_value, pointer_to_global_variable->get_type(), node.get_declaration_line_index()));
+		out_value->set_value(cast_value(out_value, pointer_to_global_variable->get_type(), node.get_declaration_line_index()));
 
 		// store the new value in the memory location of the global variable
-		m_builder.CreateStore(new_value->get_value(), pointer_to_global_variable->get_value());
-		return new_value;
+		m_builder.CreateStore(out_value->get_value(), pointer_to_global_variable->get_value());
+		return true;
 	}
 
-	value* codegen_visitor::visit_function_call_node(function_call_node& node) {
+	bool codegen_visitor::visit_function_call_node(function_call_node& node, value*& out_value) {
 		llvm::Function* function = m_functions[node.get_name()]->get_function();
-		ASSERT(function, "[codegen]: function '" + node.get_name() + "' cannot be found");
+		if(!function) {
+			compilation_logger::emit_function_not_found_error(node.get_declaration_line_index(), node.get_name());
+			return false;
+		}
 
 		// generate code for each argument expression
 		std::vector<llvm::Value*> argument_values;
-		for (channel::node* argument : node.get_arguments()) {
-			argument->accept(*this);
-			argument_values.push_back(m_builder.GetInsertBlock()->getParent()->back().getTerminator()->getOperand(0));
-		}
+		//for (channel::node* argument : node.get_arguments()) {
+		//	if(!argument->accept(*this, )) {
+		//		
+		//	}
+		//	
+		//	argument_values.push_back(m_builder.GetInsertBlock()->getParent()->back().getTerminator()->getOperand(0));
+		//}
 
-		return new value(node.get_name(), type::function_call, m_builder.CreateCall(function, argument_values, "call"));
+		out_value = new value(node.get_name(), type::function_call, m_builder.CreateCall(function, argument_values, "call"));
+		return true;
 	}
 
-	value* codegen_visitor::visit_variable_node(variable_node& node) {
+	bool codegen_visitor::visit_variable_node(variable_node& node, value*& out_value) {
 		// local variable
 		if (const value* variable_value = m_scope->get_named_value(node.get_name())) {
 			// load the value from the memory location
@@ -135,12 +156,18 @@ namespace channel {
 				node.get_name()
 			);
 
-			return new value(node.get_name(), variable_value->get_type(), load);
+			out_value = new value(node.get_name(), variable_value->get_type(), load);
+			return true;
 		}
 
 		// global variable
 		const value* pointer_to_global_variable = m_global_named_values[node.get_name()];
-		ASSERT(pointer_to_global_variable, "[codegen]: variable '" + node.get_name() + "' not found");
+
+		if(!pointer_to_global_variable) {
+			compilation_logger::emit_variable_not_found_error(node.get_declaration_line_index(), node.get_name());
+			return false;
+		}
+
 		const llvm::GlobalValue* global_variable_value = llvm::dyn_cast<llvm::GlobalValue>(pointer_to_global_variable->get_value());
 
 		llvm::Value* load = m_builder.CreateLoad(
@@ -149,10 +176,11 @@ namespace channel {
 			node.get_name()
 		);
 
-		return new value(node.get_name(), pointer_to_global_variable->get_type(), load);
+		out_value = new value(node.get_name(), pointer_to_global_variable->get_type(), load);
+		return true;
 	}
 
-	value* codegen_visitor::visit_function_node(function_node& node) {
+	bool codegen_visitor::visit_function_node(function_node& node, value*& out_value) {
 		llvm::Type* return_type = type_to_llvm_type(node.get_return_type(), m_context);
 		llvm::FunctionType* function_type = llvm::FunctionType::get(return_type, false);
 		llvm::Function* func = llvm::Function::Create(function_type, llvm::Function::ExternalLinkage, node.get_name(), m_module.get());
@@ -162,7 +190,10 @@ namespace channel {
 			new function(node.get_return_type(), func)
 		});
 
-		ASSERT(insertion_result.second, "[codegen]: function '" + node.get_name() + "' has already been defined");
+		if(!insertion_result.second) {
+			compilation_logger::emit_function_already_defined_error(node.get_declaration_line_index(), node.get_name());
+			return false;
+		}
 
 		llvm::BasicBlock* entry_block = llvm::BasicBlock::Create(m_context, "entry", func);
 		m_builder.SetInsertPoint(entry_block);
@@ -173,7 +204,10 @@ namespace channel {
 
 		// accept all statements inside the function
 		for (const auto& statement : node.get_statements()) {
-			statement->accept(*this);
+			value* statement_value;
+			if(!statement->accept(*this, statement_value)) {
+				return false;
+			}
 		}
 
 		// restore the previous scope
@@ -189,12 +223,16 @@ namespace channel {
 			}
 		}
 
-		return new value(node.get_name(), type::function, func);
+		out_value = new value(node.get_name(), type::function, func);
+		return true;
 	}
 
-	value* codegen_visitor::visit_return_node(return_node& node) {
+	bool codegen_visitor::visit_return_node(return_node& node, value*& out_value) {
 		// evaluate the expression of the return statement
-		const value* return_value = node.get_expression()->accept(*this);
+		value* return_value;
+		if(!node.get_expression()->accept(*this, return_value)) {
+			return false;
+		}
 
 		// get the return type of the current function
 		const type function_return_type = m_functions[m_builder.GetInsertBlock()->getParent()->getName().str()]->get_return_type();
@@ -206,15 +244,18 @@ namespace channel {
 		m_builder.CreateRet(upcasted_return_value);
 
 		// return the value of the expression (use upcasted value's type)
-		return new value("__return", function_return_type, upcasted_return_value);
+		out_value = new value("__return", function_return_type, upcasted_return_value);
+		return true;
 	}
 
-	value* codegen_visitor::visit_local_declaration_node(local_declaration_node& node) {
+	bool codegen_visitor::visit_local_declaration_node(local_declaration_node& node, value*& out_value) {
 		// evaluate the assigned value, if there is one
-		value* assigned_value = get_declaration_value(node);
+		if(!get_declaration_value(node, out_value)) {
+			return false;
+		}
 
 		// const type highest_precision = get_highest_precision_type(node.get_declaration_type(), assigned_value->get_type());
-		llvm::Value* upcasted_assigned_value = cast_value(assigned_value, node.get_declaration_type(), node.get_declaration_line_index());
+		llvm::Value* upcasted_assigned_value = cast_value(out_value, node.get_declaration_type(), node.get_declaration_line_index());
 
 		// store the initial value in the memory
 		llvm::AllocaInst* alloca = m_builder.CreateAlloca(
@@ -226,13 +267,21 @@ namespace channel {
 		m_builder.CreateStore(upcasted_assigned_value, alloca);
 
 		// add the variable to the current scope
-		ASSERT(!m_global_named_values[node.get_name()], "[codegen]: local variable '" + node.get_name() + "' has alredy been defined in the global scope");
+		if(m_global_named_values[node.get_name()]) {
+			compilation_logger::emit_local_variable_already_defined_in_global_scope_error(node.get_declaration_line_index(), node.get_name());
+			return false;
+		}
+
 		const auto insertion_result = m_scope->add_named_value(node.get_name(), new value(node.get_name(), node.get_declaration_type(), alloca));
-		ASSERT(insertion_result.second, "[codegen]: local variable '" + node.get_name() + "' has already been defined before");
-		return assigned_value;
+		if(!insertion_result.second) {
+			compilation_logger::emit_local_variable_already_defined_error(node.get_declaration_line_index(), node.get_name());
+			return false;
+		}
+
+		return true;
 	}
 
-	value* codegen_visitor::visit_global_declaration_node(global_declaration_node& node) {
+	bool codegen_visitor::visit_global_declaration_node(global_declaration_node& node, value*& out_value) {
 		// start creating the init function
 		const std::string init_func_name = "__global_init_" + node.get_name();
 		llvm::FunctionType* init_func_type = llvm::FunctionType::get(llvm::Type::getVoidTy(m_context), false);
@@ -241,13 +290,16 @@ namespace channel {
 		m_builder.SetInsertPoint(init_func_entry); // write to the init function
 
 		// evaluate the assigned value, if there is one
-		const value* assigned_value = get_declaration_value(node);
+		value* assigned_value;
+		if(!get_declaration_value(node, assigned_value)) {
+			return false;
+		}
 
 		// const type highest_precision = get_highest_precision_type(node.get_declaration_type(), initial_value->get_type());
 		llvm::Value* upcasted_initial_value = cast_value(assigned_value, node.get_declaration_type(), node.get_declaration_line_index());
 
 		// create a global variable
-		auto* global_variable = new value(
+		out_value = new value(
 			node.get_name(),
 			node.get_declaration_type(),
 			new llvm::GlobalVariable(*m_module,
@@ -260,10 +312,13 @@ namespace channel {
 		);
 
 		// add the variable to the m_global_named_values map
-		const auto insertion_result = m_global_named_values.insert({ node.get_name(),  global_variable });
-		ASSERT(insertion_result.second, "[codegen]: global variable '" + node.get_name() + "' has already been defined before");
+		const auto insertion_result = m_global_named_values.insert({ node.get_name(),  out_value });
+		if(!insertion_result.second) {
+			compilation_logger::emit_global_variable_already_defined_error(node.get_declaration_line_index(), node.get_name());
+			return false;
+		}
 
-		m_builder.CreateStore(upcasted_initial_value, global_variable->get_value());
+		m_builder.CreateStore(upcasted_initial_value, out_value->get_value());
 		m_builder.CreateRetVoid();
 
 		// create a new constructor with the given priority
@@ -276,59 +331,76 @@ namespace channel {
 		});
 
 		m_ctors.push_back(new_ctor);
-		return global_variable;
+		return true;
 	}
 
-	value* codegen_visitor::visit_keyword_i8_node(keyword_i8_node& node) {
-		return new value("__i8", type::i8, llvm::ConstantInt::get(m_context, llvm::APInt(8, node.get_value(), true)));
+	bool codegen_visitor::visit_keyword_i8_node(keyword_i8_node& node, value*& out_value) {
+		out_value = new value("__i8", type::i8, llvm::ConstantInt::get(m_context, llvm::APInt(8, node.get_value(), true)));
+		return true;
 	}
 
-	value* codegen_visitor::visit_keyword_i16_node(keyword_i16_node& node) {
-		return new value("__i16", type::i16, llvm::ConstantInt::get(m_context, llvm::APInt(16, node.get_value(), true)));
+	bool codegen_visitor::visit_keyword_i16_node(keyword_i16_node& node, value*& out_value) {
+		out_value = new value("__i16", type::i16, llvm::ConstantInt::get(m_context, llvm::APInt(16, node.get_value(), true)));
+		return true;
 	}
 
-	value* codegen_visitor::visit_keyword_i32_node(keyword_i32_node& node) {
-		return new value("__i32", type::i32, llvm::ConstantInt::get(m_context, llvm::APInt(32, node.get_value(), true)));
+	bool codegen_visitor::visit_keyword_i32_node(keyword_i32_node& node, value*& out_value) {
+		out_value = new value("__i32", type::i32, llvm::ConstantInt::get(m_context, llvm::APInt(32, node.get_value(), true)));
+		return true;
 	}
 
-	value* codegen_visitor::visit_keyword_i64_node(keyword_i64_node& node) {
-		return new value("__i64", type::i64, llvm::ConstantInt::get(m_context, llvm::APInt(64, node.get_value(), true)));
+	bool codegen_visitor::visit_keyword_i64_node(keyword_i64_node& node, value*& out_value) {
+		out_value = new value("__i64", type::i64, llvm::ConstantInt::get(m_context, llvm::APInt(64, node.get_value(), true)));
+		return true;
 	}
 
-	value* codegen_visitor::visit_keyword_u8_node(keyword_u8_node& node) {
-		return new value("__u8", type::u8, llvm::ConstantInt::get(m_context, llvm::APInt(8, node.get_value(), false)));
+	bool codegen_visitor::visit_keyword_u8_node(keyword_u8_node& node, value*& out_value) {
+		out_value = new value("__u8", type::u8, llvm::ConstantInt::get(m_context, llvm::APInt(8, node.get_value(), false)));
+		return true;
 	}
 
-	value* codegen_visitor::visit_keyword_u16_node(keyword_u16_node& node) {
-		return new value("__u16", type::u16, llvm::ConstantInt::get(m_context, llvm::APInt(16, node.get_value(), false)));
+	bool codegen_visitor::visit_keyword_u16_node(keyword_u16_node& node, value*& out_value) {
+		out_value = new value("__u16", type::u16, llvm::ConstantInt::get(m_context, llvm::APInt(16, node.get_value(), false)));
+		return true;
 	}
 
-	value* codegen_visitor::visit_keyword_u32_node(keyword_u32_node& node) {
-		return new value("__u32", type::u32, llvm::ConstantInt::get(m_context, llvm::APInt(32, node.get_value(), false)));
+	bool codegen_visitor::visit_keyword_u32_node(keyword_u32_node& node, value*& out_value) {
+		out_value = new value("__u32", type::u32, llvm::ConstantInt::get(m_context, llvm::APInt(32, node.get_value(), false)));
+		return true;
 	}
 
-	value* codegen_visitor::visit_keyword_u64_node(keyword_u64_node& node) {
-		return new value("__u64", type::u64, llvm::ConstantInt::get(m_context, llvm::APInt(64, node.get_value(), false)));
+	bool codegen_visitor::visit_keyword_u64_node(keyword_u64_node& node, value*& out_value) {
+		out_value = new value("__u64", type::u64, llvm::ConstantInt::get(m_context, llvm::APInt(64, node.get_value(), false)));
+		return true;
 	}
 
-	value* codegen_visitor::visit_keyword_f32_node(keyword_f32_node& node) {
-		return new value("__f32", type::f32, llvm::ConstantFP::get(m_context, llvm::APFloat(node.get_value())));
+	bool codegen_visitor::visit_keyword_f32_node(keyword_f32_node& node, value*& out_value) {
+		out_value = new value("__f32", type::f32, llvm::ConstantFP::get(m_context, llvm::APFloat(node.get_value())));
+		return true;
 	}
 
-	value* codegen_visitor::visit_keyword_f64_node(keyword_f64_node& node) {
-		return new value("__f64", type::f64, llvm::ConstantFP::get(m_context, llvm::APFloat(node.get_value())));
+	bool codegen_visitor::visit_keyword_f64_node(keyword_f64_node& node, value*& out_value) {
+		out_value = new value("__f64", type::f64, llvm::ConstantFP::get(m_context, llvm::APFloat(node.get_value())));
+		return true;
 	}
 
-	value* codegen_visitor::visit_operator_addition_node(operator_addition_node& node) {
-		const value* left = node.left->accept(*this);
-		const value* right = node.right->accept(*this);
+	bool codegen_visitor::visit_operator_addition_node(operator_addition_node& node, value*& out_value) {
+		value* left;
+		if (!node.left->accept(*this, left)) {
+			return false;
+		}
+
+		value* right;
+		if (!node.right->accept(*this, right)) {
+			return false;
+		}
 
 		const type highest_precision = get_highest_precision_type(left->get_type(), right->get_type());
 		llvm::Value* left_value_upcasted = cast_value(left, highest_precision, node.get_declaration_line_index());
 		llvm::Value* right_value_upcasted = cast_value(right, highest_precision, node.get_declaration_line_index());
 
 		if (is_type_floating_point(highest_precision)) {
-			return new value(
+			out_value = new value(
 				"__fadd",
 				highest_precision,
 				m_builder.CreateFAdd(
@@ -336,10 +408,11 @@ namespace channel {
 					right_value_upcasted, 
 					"fadd")
 			);
+			return true;
 		}
 
 		if (is_type_unsigned(highest_precision)) {
-			return new value(
+			out_value = new value(
 				"__uadd",
 				highest_precision,
 				m_builder.CreateAdd(
@@ -348,9 +421,10 @@ namespace channel {
 					"uadd", 
 					true)
 			);
+			return true;
 		}
 
-		return new value(
+		out_value = new value(
 			"__add",
 			highest_precision, 
 			m_builder.CreateAdd(
@@ -358,18 +432,26 @@ namespace channel {
 				right_value_upcasted,
 				"add")
 		);
+		return true;
 	}
 
-	value* codegen_visitor::visit_operator_subtraction_node(operator_subtraction_node& node) {
-		const value* left = node.left->accept(*this);
-		const value* right = node.right->accept(*this);
+	bool codegen_visitor::visit_operator_subtraction_node(operator_subtraction_node& node, value*& out_value) {
+		value* left;
+		if (!node.left->accept(*this, left)) {
+			return false;
+		}
+
+		value* right;
+		if (!node.right->accept(*this, right)) {
+			return false;
+		}
 
 		const type highest_precision = get_highest_precision_type(left->get_type(), right->get_type());
 		llvm::Value* left_value_upcasted = cast_value(left, highest_precision, node.get_declaration_line_index());
 		llvm::Value* right_value_upcasted = cast_value(right, highest_precision, node.get_declaration_line_index());
 
 		if (is_type_floating_point(highest_precision)) {
-			return new value(
+			out_value = new value(
 				"__fsub",
 				highest_precision, 
 				m_builder.CreateFSub(
@@ -377,10 +459,11 @@ namespace channel {
 					right_value_upcasted, 
 					"fsub")
 			);
+			return true;
 		}
 
 		if (is_type_unsigned(highest_precision)) {
-			return new value(
+			out_value = new value(
 				"__usub",
 				highest_precision, 
 				m_builder.CreateSub(
@@ -389,9 +472,10 @@ namespace channel {
 					"usub", 
 					true)
 			);
+			return true;
 		}
 
-		return new value(
+		out_value = new value(
 			"__sub",
 			highest_precision, 
 			m_builder.CreateSub(
@@ -399,18 +483,26 @@ namespace channel {
 				right_value_upcasted, 
 				"sub")
 		);
+		return true;
 	}
 
-	value* codegen_visitor::visit_operator_multiplication_node(operator_multiplication_node& node) {
-		const value* left = node.left->accept(*this);
-		const value* right = node.right->accept(*this);
+	bool codegen_visitor::visit_operator_multiplication_node(operator_multiplication_node& node, value*& out_value) {
+		value* left;
+		if (!node.left->accept(*this, left)) {
+			return false;
+		}
+
+		value* right;
+		if (!node.right->accept(*this, right)) {
+			return false;
+		}
 
 		const type highest_precision = get_highest_precision_type(left->get_type(), right->get_type());
 		llvm::Value* left_value_upcasted = cast_value(left, highest_precision, node.get_declaration_line_index());
 		llvm::Value* right_value_upcasted = cast_value(right, highest_precision, node.get_declaration_line_index());
 
 		if (is_type_floating_point(highest_precision)) {
-			return new value(
+			out_value = new value(
 				"__fmul",
 				highest_precision, 
 				m_builder.CreateFMul(
@@ -418,10 +510,11 @@ namespace channel {
 					right_value_upcasted,
 					"fmul")
 			);
+			return true;
 		}
 
 		if (is_type_unsigned(highest_precision)) {
-			return new value(
+			out_value = new value(
 				"__umul",
 				highest_precision, 
 				m_builder.CreateMul(
@@ -430,9 +523,10 @@ namespace channel {
 					"umul", 
 					true)
 			);
+			return true;
 		}
 
-		return new value(
+		out_value = new value(
 			"__mul",
 			highest_precision, 
 			m_builder.CreateMul(
@@ -440,18 +534,26 @@ namespace channel {
 				right_value_upcasted, 
 				"mul")
 		);
+		return true;
 	}
 
-	value* codegen_visitor::visit_operator_division_node(operator_division_node& node) {
-		const value* left = node.left->accept(*this);
-		const value* right = node.right->accept(*this);
+	bool codegen_visitor::visit_operator_division_node(operator_division_node& node, value*& out_value) {
+		value* left;
+		if (!node.left->accept(*this, left)) {
+			return false;
+		}
+
+		value* right;
+		if (!node.right->accept(*this, right)) {
+			return false;
+		}
 
 		const type highest_precision = get_highest_precision_type(left->get_type(), right->get_type());
 		llvm::Value* left_value_upcasted = cast_value(left, highest_precision, node.get_declaration_line_index());
 		llvm::Value* right_value_upcasted = cast_value(right, highest_precision, node.get_declaration_line_index());
 
 		if (is_type_floating_point(highest_precision)) {
-			return new value(
+			out_value = new value(
 				"__fdiv",
 				highest_precision, 
 				m_builder.CreateFDiv(
@@ -459,10 +561,11 @@ namespace channel {
 					right_value_upcasted,
 					"fdiv")
 			);
+			return true;
 		}
 
 		if (is_type_unsigned(highest_precision)) {
-			return new value(
+			out_value = new value(
 				"__udiv",
 				highest_precision, 
 				m_builder.CreateUDiv(
@@ -470,9 +573,10 @@ namespace channel {
 					right_value_upcasted, 
 					"udiv")
 			);
+			return true;
 		}
 
-		return new value(
+		out_value = new value(
 			"__div",
 			highest_precision, 
 			m_builder.CreateSDiv(
@@ -480,18 +584,26 @@ namespace channel {
 				right_value_upcasted,
 				"div")
 		);
+		return true;
 	}
 
-	value* codegen_visitor::visit_operator_modulo_node(operator_modulo_node& node) {
-		const value* left = node.left->accept(*this);
-		const value* right = node.right->accept(*this);
+	bool codegen_visitor::visit_operator_modulo_node(operator_modulo_node& node, value*& out_value) {
+		value* left;
+		if (!node.left->accept(*this, left)) {
+			return false;
+		}
+
+		value* right;
+		if (!node.right->accept(*this, right)) {
+			return false;
+		}
 
 		const type highest_precision = get_highest_precision_type(left->get_type(), right->get_type());
 		llvm::Value* left_value_upcasted = cast_value(left, highest_precision, node.get_declaration_line_index());
 		llvm::Value* right_value_upcasted = cast_value(right, highest_precision, node.get_declaration_line_index());
 
 		if (is_type_floating_point(highest_precision)) {
-			return new value(
+			out_value = new value(
 				"__frem",
 				highest_precision, 
 				m_builder.CreateFRem(
@@ -499,10 +611,11 @@ namespace channel {
 					right_value_upcasted, 
 					"frem")
 			);
+			return true;
 		}
 
 		if (is_type_unsigned(highest_precision)) {
-			return new value(
+			out_value = new value(
 				"__urem",
 				highest_precision,
 				m_builder.CreateURem(
@@ -510,9 +623,10 @@ namespace channel {
 					right_value_upcasted, 
 					"urem")
 			);
+			return true;
 		}
 
-		return new value(
+		out_value = new value(
 			"__rem",
 			highest_precision,
 			m_builder.CreateSRem(
@@ -520,27 +634,25 @@ namespace channel {
 				right_value_upcasted,
 				"rem")
 		);
+		return true;
 	}
 	
 	bool codegen_visitor::has_main_entry_point() const {
 		return m_functions.at("main") != nullptr;
 	}
 
-	value* codegen_visitor::get_declaration_value(const declaration_node& node) {
+	bool codegen_visitor::get_declaration_value(const declaration_node& node, value*& out_value) {
 		// evaluate the expression to get the initial value
-		value* assigned_value;
 
 		if (node.get_expression()) {
 			// evaluate the assigned value
-			assigned_value = node.get_expression()->accept(*this);
-		}
-		else {
-			// declared without an assigned value, set to 0
-			llvm::Type* value_type = type_to_llvm_type(node.get_declaration_type(), m_context);
-			assigned_value = new value(node.get_name(), node.get_declaration_type(), llvm::Constant::getNullValue(value_type));
+			return node.get_expression()->accept(*this, out_value);
 		}
 
-		return assigned_value;
+		// declared without an assigned value, set to 0
+		llvm::Type* value_type = type_to_llvm_type(node.get_declaration_type(), m_context);
+		out_value = new value(node.get_name(), node.get_declaration_type(), llvm::Constant::getNullValue(value_type));
+		return true;
 	}
 
 	llvm::Value* codegen_visitor::cast_value(const value* source_value, type target_type, u64 line_index) {

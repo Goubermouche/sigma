@@ -1,8 +1,8 @@
 #include "keyword_u16_node.h"
 
 namespace channel {
-	keyword_u16_node::keyword_u16_node(u64 value)
-		: m_value(value) {}
+	keyword_u16_node::keyword_u16_node(u64 line_index, u64 value)
+		:node(line_index), m_value(value) {}
 
 	value* keyword_u16_node::accept(visitor& visitor) {
 		LOG_NODE_NAME(keyword_u16_node);

@@ -1,8 +1,8 @@
 #include "return_node.h"
 
 namespace channel {
-	return_node::return_node(node* expression)
-		: m_expression(expression)
+	return_node::return_node(u64 line_index, node* expression)
+		: node(line_index), m_expression(expression)
 	{}
 
 	value* return_node::accept(visitor& visitor) {

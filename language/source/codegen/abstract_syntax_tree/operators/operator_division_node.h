@@ -7,7 +7,7 @@ namespace channel {
 	 */
 	class operator_division_node : public operator_binary {
 	public:
-		operator_division_node(node* left, node* right);
+		operator_division_node(u64 line_index, node* left, node* right);
 		value* accept(visitor& visitor) override;
 		std::string get_node_name() const override;
 	};

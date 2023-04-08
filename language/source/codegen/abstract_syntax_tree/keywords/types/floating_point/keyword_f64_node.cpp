@@ -1,8 +1,8 @@
 #include "keyword_f64_node.h"
 
 namespace channel {
-	keyword_f64_node::keyword_f64_node(f64 value)
-		: m_value(value) {}
+	keyword_f64_node::keyword_f64_node(u64 line_index, f64 value)
+		:node(line_index), m_value(value) {}
 
 	value* keyword_f64_node::accept(visitor& visitor) {
 		LOG_NODE_NAME(keyword_f64_node);

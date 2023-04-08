@@ -8,7 +8,7 @@ namespace channel {
 	 */
 	class declaration_node : public node {
 	public:
-		declaration_node(type declaration_type, const std::string& name, node* expression = nullptr);
+		declaration_node(u64 line_index, type declaration_type, const std::string& name, node* expression = nullptr);
 
 		const std::string& get_name() const;
 		node* get_expression() const;

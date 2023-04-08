@@ -7,7 +7,7 @@ namespace channel {
 	 */
 	class return_node : public node {
 	public:
-		return_node(node* expression);
+		return_node(u64 line_index, node* expression);
 		value* accept(visitor& visitor) override;
 		std::string get_node_name() const override;
 

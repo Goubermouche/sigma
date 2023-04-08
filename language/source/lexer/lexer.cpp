@@ -13,16 +13,15 @@ namespace channel {
 		}
 	}
 
-	u64 lexer::get_position() const	{
-		return m_accessor.get_position();
-	}
-
-	void lexer::set_position(u64 position) {
-		m_last_character = ' ';
-		m_accessor.set_position(position);
+	u64 lexer::get_current_line_index() const {
+		return m_current_line;
 	}
 
 	void lexer::read_char() {
+		if (m_last_character == '\n') {
+			m_current_line++;
+		}
+
 		m_last_character = m_accessor.get_advance();
 	}
 

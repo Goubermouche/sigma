@@ -7,7 +7,7 @@ namespace channel {
 	 */
 	class operator_multiplication_node : public operator_binary {
 	public:
-		operator_multiplication_node(node* left, node* right);
+		operator_multiplication_node(u64 line_index, node* left, node* right);
 		value* accept(visitor& visitor) override;
 		std::string get_node_name() const override;
 	};

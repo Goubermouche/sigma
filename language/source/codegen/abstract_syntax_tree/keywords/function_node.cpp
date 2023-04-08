@@ -1,8 +1,8 @@
 #include "function_node.h"
 
 namespace channel {
-	function_node::function_node(type return_type, const std::string& name, std::vector<node*> statements)
-		: m_return_type(return_type), m_name(name), m_statements(std::move(statements)) {}
+	function_node::function_node(u64 line_index, type return_type, const std::string& name, std::vector<node*> statements)
+		: node(line_index), m_return_type(return_type), m_name(name), m_statements(std::move(statements)) {}
 
 	value* function_node::accept(visitor& visitor) {
 		LOG_NODE_NAME(function_node);

@@ -141,10 +141,10 @@ namespace channel {
 		}
 
 		if (is_global) {
-			return new global_declaration_node(token_to_type(type_token), name, value);
+			return new global_declaration_node(m_lexer.get_current_line_index(), token_to_type(type_token), name, value);
 		}
 
-		return new local_declaration_node(token_to_type(type_token), name, value);
+		return new local_declaration_node(m_lexer.get_current_line_index(), token_to_type(type_token), name, value);
 	}
 
 	node* parser::parse_assignment(bool is_global) {
@@ -164,7 +164,7 @@ namespace channel {
 			value = parse_expression();
 		}
 
-		return new assignment_node(name, value);
+		return new assignment_node(m_lexer.get_current_line_index(), name, value);
 	}
 
 	node* parser::parse_expression(token type_token) {
@@ -177,10 +177,10 @@ namespace channel {
 			node* right = parse_term(type_token);
 
 			if (op == token::operator_addition) {
-				term = new operator_addition_node(term, right);
+				term = new operator_addition_node(m_lexer.get_current_line_index(), term, right);
 			}
 			else {
-				term = new operator_subtraction_node(term, right);
+				term = new operator_subtraction_node(m_lexer.get_current_line_index(), term, right);
 			}
 		}
 
@@ -196,13 +196,13 @@ namespace channel {
 			node* right = parse_factor(type_token);
 
 			if(op == token::operator_multiplication) {
-				factor = new operator_multiplication_node(factor, right);
+				factor = new operator_multiplication_node(m_lexer.get_current_line_index(), factor, right);
 			}
 			else if(op == token::operator_division) {
-				factor = new operator_division_node(factor, right);
+				factor = new operator_division_node(m_lexer.get_current_line_index(), factor, right);
 			}
 			else if(op == token::operator_modulo) {
-				factor = new operator_modulo_node(factor, right);
+				factor = new operator_modulo_node(m_lexer.get_current_line_index(), factor, right);
 			}
 		}
 
@@ -220,7 +220,7 @@ namespace channel {
 
 			// negate the number by subtracting it from 0
 			node* zero_node = create_zero_node(token_to_type(type_token));
-			root = new operator_subtraction_node(zero_node, parse_number(type_token));
+			root = new operator_subtraction_node(m_lexer.get_current_line_index(), zero_node, parse_number(type_token));
 		}
 		else if (m_current_token == token::identifier) {
 			const std::string name = m_lexer.get_identifier();
@@ -230,7 +230,7 @@ namespace channel {
 				root = parse_function_call(name);
 			}
 			else {
-				root = new variable_node(name);
+				root = new variable_node(m_lexer.get_current_line_index(), name);
 			}
 		}
 		else if (m_current_token == token::l_parenthesis) {
@@ -252,22 +252,22 @@ namespace channel {
 
 		switch (type) {
 			// signed
-			case token::keyword_type_i8:  return new keyword_i8_node(std::stoll(str_value));
-			case token::keyword_type_i16: return new keyword_i16_node(std::stoll(str_value));
+			case token::keyword_type_i8:  return new keyword_i8_node(m_lexer.get_current_line_index(), std::stoll(str_value));
+			case token::keyword_type_i16: return new keyword_i16_node(m_lexer.get_current_line_index(), std::stoll(str_value));
 			case token::number_signed:
-			case token::keyword_type_i32: return new keyword_i32_node(std::stoll(str_value));
-			case token::keyword_type_i64: return new keyword_i64_node(std::stoll(str_value));
+			case token::keyword_type_i32: return new keyword_i32_node(m_lexer.get_current_line_index(),std::stoll(str_value));
+			case token::keyword_type_i64: return new keyword_i64_node(m_lexer.get_current_line_index(),std::stoll(str_value));
 			// unsigned
-			case token::keyword_type_u8:  return new keyword_u8_node(std::stoull(str_value));
-			case token::keyword_type_u16: return new keyword_u16_node(std::stoull(str_value));
+			case token::keyword_type_u8:  return new keyword_u8_node(m_lexer.get_current_line_index(), std::stoull(str_value));
+			case token::keyword_type_u16: return new keyword_u16_node(m_lexer.get_current_line_index(), std::stoull(str_value));
 			case token::number_unsigned:
-			case token::keyword_type_u32: return new keyword_u32_node(std::stoull(str_value));
-			case token::keyword_type_u64: return new keyword_u64_node(std::stoull(str_value));
+			case token::keyword_type_u32: return new keyword_u32_node(m_lexer.get_current_line_index(),std::stoull(str_value));
+			case token::keyword_type_u64: return new keyword_u64_node(m_lexer.get_current_line_index(),std::stoull(str_value));
 			// floating point
 			case token::number_f32:
-			case token::keyword_type_f32: return new keyword_f32_node(std::stof(str_value));
+			case token::keyword_type_f32: return new keyword_f32_node(m_lexer.get_current_line_index(), std::stof(str_value));
 			case token::number_f64:
-			case token::keyword_type_f64: return new keyword_f64_node(std::stod(str_value));
+			case token::keyword_type_f64: return new keyword_f64_node(m_lexer.get_current_line_index(), std::stod(str_value));
 		default:
 			ASSERT(false, "[parser]: unhandled number format '" + token_to_string(type) + "' encountered");
 			return nullptr;
@@ -298,7 +298,7 @@ namespace channel {
 		}
 
 		consume_next_token(); // consume the right parenthesis
-		return new function_call_node(function_name, arguments);
+		return new function_call_node(m_lexer.get_current_line_index(), function_name, arguments);
 	}
 
 	node* parser::parse_function_definition() {
@@ -325,27 +325,27 @@ namespace channel {
 
 		// consume the closing curly brace '}'
 		consume_next_token();
-		return new function_node(return_type, name, std::move(statements));
+		return new function_node(m_lexer.get_current_line_index(), return_type, name, std::move(statements));
 	}
 
 	node* parser::parse_return_statement() {
 		consume_next_token();
 		node* expression = parse_expression();
-		return new return_node(expression);
+		return new return_node(m_lexer.get_current_line_index(), expression);
 	}
 
-	node* parser::create_zero_node(type ty) {
+	node* parser::create_zero_node(type ty) const {
 		switch (ty) {
-			case type::i8:  return new keyword_i8_node(0);
-			case type::i16: return new keyword_i16_node(0);
-			case type::i32: return new keyword_i32_node(0);
-			case type::i64: return new keyword_i64_node(0);
-			case type::u8:  return new keyword_u8_node(0);
-			case type::u16: return new keyword_u16_node(0);
-			case type::u32: return new keyword_u32_node(0);
-			case type::u64: return new keyword_u64_node(0);
-			case type::f32: return new keyword_f32_node(0.0);
-			case type::f64: return new keyword_f64_node(0.0);
+			case type::i8:  return new keyword_i8_node(m_lexer.get_current_line_index(), 0);
+			case type::i16: return new keyword_i16_node(m_lexer.get_current_line_index(), 0);
+			case type::i32: return new keyword_i32_node(m_lexer.get_current_line_index(), 0);
+			case type::i64: return new keyword_i64_node(m_lexer.get_current_line_index(), 0);
+			case type::u8:  return new keyword_u8_node(m_lexer.get_current_line_index(), 0);
+			case type::u16: return new keyword_u16_node(m_lexer.get_current_line_index(), 0);
+			case type::u32: return new keyword_u32_node(m_lexer.get_current_line_index(), 0);
+			case type::u64: return new keyword_u64_node(m_lexer.get_current_line_index(), 0);
+			case type::f32: return new keyword_f32_node(m_lexer.get_current_line_index(), 0.0);
+			case type::f64: return new keyword_f64_node(m_lexer.get_current_line_index(), 0.0);
 			default:
 				ASSERT(false, "[parser]: cannot convert '" + type_to_string(ty) + "' to a type keyword");
 				return nullptr;

@@ -39,17 +39,7 @@ namespace channel {
 		 */
 		const std::string& get_operator() const { return m_operator_string; }
 
-		/**
-		 * \brief Returns the current caret position.
-		 * \return Current caret position
-		 */
-		u64 get_position() const;
-
-		/**
-		 * \brief Updates the caret position and clears the last character.
-		 * \param position Position to use as the new caret position
-		 */
-		void set_position(u64 position);
+		u64 get_current_line_index() const;
 	private:
 		/**
 		 * \brief Helper function that reads the next char in the provided source file and advances the accessor caret.
@@ -74,6 +64,7 @@ namespace channel {
 
 		detail::string_accessor m_accessor;
 		char m_last_character = ' ';
+		u32 m_current_line = 1;
 
 		// tokens that are longer than one character 
 		const std::unordered_map<std::string, token> m_keyword_tokens = {

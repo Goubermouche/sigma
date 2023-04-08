@@ -1,8 +1,8 @@
 #include "declaration_node.h"
 
 namespace channel {
-	declaration_node::declaration_node(type declaration_type, const std::string& name, node* expression)
-		: m_declaration_type(declaration_type), m_name(name), m_expression(expression)
+	declaration_node::declaration_node(u64 line_index, type declaration_type, const std::string& name, node* expression)
+		: node(line_index), m_declaration_type(declaration_type), m_name(name), m_expression(expression)
 	{}
 
 	const std::string& declaration_node::get_name() const {

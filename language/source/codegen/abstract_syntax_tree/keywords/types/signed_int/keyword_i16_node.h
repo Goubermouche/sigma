@@ -7,7 +7,7 @@ namespace channel {
 	 */
 	class keyword_i16_node : public node {
 	public:
-		keyword_i16_node(i64 value);
+		keyword_i16_node(u64 line_index, i64 value);
 		value* accept(visitor& visitor) override;
 		std::string get_node_name() const override;
 

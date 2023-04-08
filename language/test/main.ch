@@ -5,5 +5,6 @@ f32 func() {
 } 
 
 i32 main() {
-    u8 c = func() * 2;
+    u32 x = 20;
+    i8 c = func() * 20u;
 }

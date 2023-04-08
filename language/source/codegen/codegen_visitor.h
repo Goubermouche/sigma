@@ -59,8 +59,10 @@ namespace channel {
 		bool has_main_entry_point() const;
 		void initialize_global_variables();
 		value* get_declaration_value(const declaration_node& node);
+		llvm::Value* cast_value(const value* source_value, type target_type, u64 line_index);
 
-		llvm::Value* upcast_value(value* source_value, type target_type);
+		static void emit_cast_warning(u64 line_index, type original_type, type target_type);
+		static void emit_function_return_type_cast_warning(u64 line_index, type original_type, type target_type);
 	private:
 		// scope tree hierarchy
 		scope* m_scope;

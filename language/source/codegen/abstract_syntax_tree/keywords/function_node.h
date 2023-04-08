@@ -8,7 +8,7 @@ namespace channel {
 	 */
 	class function_node : public node {
 	public:
-		function_node(type type, const std::string& name, std::vector<node*> statements);
+		function_node(u64 line_index, type type, const std::string& name, std::vector<node*> statements);
 		value* accept(visitor& visitor) override;
 		std::string get_node_name() const override;
 

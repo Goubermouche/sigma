@@ -1,8 +1,8 @@
 #include "keyword_i64_node.h"
 
 namespace channel {
-	keyword_i64_node::keyword_i64_node(i64 value)
-		: m_value(value) {}
+	keyword_i64_node::keyword_i64_node(u64 line_index, i64 value)
+		:node(line_index), m_value(value) {}
 
 	value* keyword_i64_node::accept(visitor& visitor) {
 		LOG_NODE_NAME(keyword_i64_node);

@@ -11,6 +11,7 @@ namespace channel {
 	 */
 	class node {
 	public:
+		node(u64 line_index);
 		virtual ~node() = default;
 
 		/**
@@ -19,6 +20,10 @@ namespace channel {
 		 */
 		virtual value* accept(visitor& visitor) = 0;
 		virtual std::string get_node_name() const = 0;
+		u64 get_declaration_line_index() const;
+		// void set_declaration_line_index(u64 line_index);
+	private:
+		u64 m_line_index = 0;
 	};
 }
 

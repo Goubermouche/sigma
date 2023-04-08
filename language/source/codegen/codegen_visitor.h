@@ -59,7 +59,8 @@ namespace channel {
 		bool has_main_entry_point() const;
 		void initialize_global_variables();
 		value* get_declaration_value(const declaration_node& node);
-		value* upcast_value(value* val, type result_type, llvm::IRBuilder<>& builder);
+
+		llvm::Value* upcast_value(value* source_value, type target_type);
 	private:
 		// scope tree hierarchy
 		scope* m_scope;

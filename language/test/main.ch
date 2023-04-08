@@ -1,5 +1,7 @@
+u64 v = 20;
+
 f32 func() {
-    return 10u;
+    return v;
 } 
 
 i32 main() {

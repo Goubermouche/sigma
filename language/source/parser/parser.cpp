@@ -1,5 +1,4 @@
 #include "parser.h"
-
 // functions
 #include "../codegen/abstract_syntax_tree/functions/function_call_node.h"
 #include "../codegen/abstract_syntax_tree/functions/function_node.h"
@@ -37,24 +36,24 @@
 
 namespace channel {
 	parser::parser(const std::string& source_file)
-		: m_lexer(source_file) {
-	}
+		: m_lexer(source_file) {}
 
 	bool parser::parse(std::vector<node*>& abstract_syntax_tree) {
 		consume_next_token();
+
+		// parse individual statements 
 		while (m_current_token != token::end_of_file) {
 			node* node;
-
 			if(is_token_return_type(m_current_token) && peek_is_function_definition()) {
 				// parse a top-level function definition
 				if(!parse_function_definition(node)) {
-					return false;
+					return false; // return on failure
 				}
 			}
 			else {
 				// parse a top-level statement
-				if(!parse_statement(true, node)) {
-					return false;
+				if(!parse_global_statement(node)) {
+					return false; // return on failure
 				}
 			}
 
@@ -65,77 +64,91 @@ namespace channel {
 		return true;
 	}
 
-	bool parser::parse_statement(bool is_global, node*& out_node) {
-		if(is_global) {
-			switch (m_current_token) {
-			case token::identifier:
-				if(!parse_assignment(is_global, out_node)) {
-					return false;
-				}
-				break;
-			case token::keyword_type_i8:
-			case token::keyword_type_i16:
-			case token::keyword_type_i32:
-			case token::keyword_type_i64:
-			case token::keyword_type_u8:
-			case token::keyword_type_u16:
-			case token::keyword_type_u32:
-			case token::keyword_type_u64:
-			case token::keyword_type_f32:
-			case token::keyword_type_f64:
-				if(!parse_declaration(is_global, m_current_token, out_node)) {
-					return false;
-				}
-				break;
-			default:
-				compilation_logger::emit_unhandled_token_error(m_lexer.get_current_line_number(), m_current_token);
-				return false;
+	bool parser::parse_global_statement(node*& out_node) {
+		switch (m_current_token) {
+		case token::identifier:
+			// statements beginning with an identifier has to be an assignment operation
+			if (!parse_assignment(out_node, true)) {
+				return false; // return on failure
 			}
-		}
-		else {
-			switch (m_current_token) {
-			case token::identifier:
-				if(peek_is_function_call()) {
-					 if(!parse_function_call(m_lexer.get_identifier(), out_node)) {
-						 return false;
-					 }
-				}
-				else {
-					if (!parse_assignment(is_global, out_node)) {
-						return false;
-					}
-				}
-
-				break;
-			case token::keyword_type_i8:
-			case token::keyword_type_i16:
-			case token::keyword_type_i32:
-			case token::keyword_type_i64:
-			case token::keyword_type_u8:
-			case token::keyword_type_u16:
-			case token::keyword_type_u32:
-			case token::keyword_type_u64:
-			case token::keyword_type_f32:
-			case token::keyword_type_f64:
-				if(!parse_declaration(is_global, m_current_token, out_node)) {
-					return false;
-				}
-				break;
-			case token::keyword_return:
-				if(!parse_return_statement(out_node)) {
-					return false;
-				}
-				break;
-			default:
-				compilation_logger::emit_unhandled_token_error(m_lexer.get_current_line_number(), m_current_token);
-				return false;
+			break;
+		case token::keyword_type_i8:
+		case token::keyword_type_i16:
+		case token::keyword_type_i32:
+		case token::keyword_type_i64:
+		case token::keyword_type_u8:
+		case token::keyword_type_u16:
+		case token::keyword_type_u32:
+		case token::keyword_type_u64:
+		case token::keyword_type_f32:
+		case token::keyword_type_f64:
+			// statements beginning with a type keyword have to be variable or function declarations
+			if (!parse_declaration(out_node, true, m_current_token)) {
+				return false; // return on failure
 			}
+			break;
+		default:
+			compilation_logger::emit_unhandled_token_error(m_lexer.get_current_line_number(), m_current_token);
+			return false; // return on failure
 		}
 
-		if(!expect_next_token(token::semicolon)) {
-			return false;
+		// end statements with a semicolon
+		if (!expect_next_token(token::semicolon)) {
+			return false; // return on failure
 		}
-		
+
+		return true;
+	}
+
+	bool parser::parse_local_statement(node*& out_node)	{
+		switch (m_current_token) {
+		case token::identifier:
+			// check if the statement is a function call
+			if (peek_is_function_call()) {
+				// parse it as a function call
+				if (!parse_function_call(out_node, m_lexer.get_identifier())) {
+					return false; // return on failure
+				}
+			}
+			// otherwise the statement has to be an assignment
+			else {
+				if (!parse_assignment(out_node, false)) {
+					return false; // return on failure
+				}
+			}
+
+			break;
+		case token::keyword_type_i8:
+		case token::keyword_type_i16:
+		case token::keyword_type_i32:
+		case token::keyword_type_i64:
+		case token::keyword_type_u8:
+		case token::keyword_type_u16:
+		case token::keyword_type_u32:
+		case token::keyword_type_u64:
+		case token::keyword_type_f32:
+		case token::keyword_type_f64:
+			// statements beginning with a type keyword have to be variable or function declarations
+			if (!parse_declaration(out_node, false, m_current_token)) {
+				return false; // return on failure
+			}
+			break;
+		case token::keyword_return:
+			// parse the 'return' keyword
+			if (!parse_return_statement(out_node)) {
+				return false; // return on failure
+			}
+			break;
+		default:
+			compilation_logger::emit_unhandled_token_error(m_lexer.get_current_line_number(), m_current_token);
+			return false; // return on failure
+		}
+
+		// end statements with a semicolon
+		if (!expect_next_token(token::semicolon)) {
+			return false; // return on failure
+		}
+
 		return true;
 	}
 
@@ -150,22 +163,22 @@ namespace channel {
 		}
 
 		compilation_logger::emit_unexpected_token_error(m_lexer.get_current_line_number(), token, m_current_token);
-		return false;
+		return false; // return on failure
 	}
 
-	bool parser::parse_declaration(bool is_global, token type_token, node*& out_node) {
+	bool parser::parse_declaration(node*& out_node, bool is_global, token type_token) {
 		consume_next_token();
 
 		const std::string name = m_lexer.get_identifier();
 		if(!expect_next_token(token::identifier)) {
-			return false;
+			return false; // return on failure
 		}
 
 		node* value = nullptr;
 		if (m_current_token == token::operator_assignment) {
 			consume_next_token();
 			if(!parse_expression(value, type_token)) {
-				return false;
+				return false; // return on failure
 			}
 		}
 
@@ -178,12 +191,12 @@ namespace channel {
 		return true;
 	}
 
-	bool parser::parse_assignment(bool is_global, node*& out_node) {
+	bool parser::parse_assignment(node*& out_node, bool is_global) {
 		const std::string name = m_lexer.get_identifier();
 		consume_next_token(); // =
 
 		if(!expect_next_token(token::operator_assignment)) {
-			return false;
+			return false; // return on failure
 		}
 
 		// parse access-assignment
@@ -191,13 +204,13 @@ namespace channel {
 		if (peek_is_function_call()) {
 			// parse function call and assign the result to the variable
 			const std::string function_name = m_lexer.get_identifier();
-			 if(!parse_function_call(function_name, value)) {
-				 return false;
+			 if(!parse_function_call(value, function_name)) {
+				 return false; // return on failure
 			 }
 		}
 		else {
 			 if(!parse_expression(value)) {
-				 return false;
+				 return false; // return on failure
 			 }
 		}
 
@@ -207,7 +220,7 @@ namespace channel {
 
 	bool parser::parse_expression(node*& out_node, token type_token) {
 		if(!parse_term(out_node, type_token)) {
-			return false;
+			return false; // return on failure
 		}
 
 		while (m_current_token == token::operator_addition || m_current_token == token::operator_subtraction) {
@@ -216,7 +229,7 @@ namespace channel {
 
 			node* right;
 			if(!parse_term(right, type_token)) {
-				return false;
+				return false; // return on failure
 			}
 
 			if (op == token::operator_addition) {
@@ -232,7 +245,7 @@ namespace channel {
 
 	bool parser::parse_term(node*& out_node, token type_token) {
 		if(!parse_factor(out_node, type_token)) {
-			return false;
+			return false; // return on failure
 		}
 
 		while (m_current_token == token::operator_multiplication || m_current_token == token::operator_division || m_current_token == token::operator_modulo) {
@@ -241,7 +254,7 @@ namespace channel {
 			node* right;
 
 			if(!parse_factor(right, type_token)) {
-				return false;
+				return false; // return on failure
 			}
 
 			if(op == token::operator_multiplication) {
@@ -261,7 +274,7 @@ namespace channel {
 	bool parser::parse_factor(node*& out_node, token type_token) {
 		if (is_token_numerical(m_current_token)) {
 			if(!parse_number(out_node, type_token)) {
-				return false;
+				return false; // return on failure
 			}
 		}
 		else if (m_current_token == token::operator_subtraction) {
@@ -272,7 +285,7 @@ namespace channel {
 			node* number;
 
 			if(!parse_number(number, type_token)) {
-				return false;
+				return false; // return on failure
 			}
 
 			out_node = new operator_subtraction_node(m_lexer.get_current_line_number(), zero_node, number);
@@ -282,8 +295,8 @@ namespace channel {
 			consume_next_token(); // consume the identifier token
 
 			if (m_current_token == token::l_parenthesis) {
-				if(!parse_function_call(name, out_node)) {
-					return false;
+				if(!parse_function_call(out_node, name)) {
+					return false; // return on failure
 				}
 			}
 			else {
@@ -294,14 +307,14 @@ namespace channel {
 			consume_next_token(); // consume the left parenthesis
 
 			if(!parse_expression(out_node, type_token)) {
-				return false;
+				return false; // return on failure
 			}
 
 			expect_next_token(token::r_parenthesis); // consume the right parenthesis
 		}
 		else {
 			compilation_logger::emit_unhandled_token_error(m_lexer.get_current_line_number(), m_current_token);
-			return false;
+			return false; // return on failure
 		}
 
 		return true;
@@ -332,11 +345,11 @@ namespace channel {
 		case token::keyword_type_f64: out_node = new f64_node(m_lexer.get_current_line_number(), std::stod(str_value)); return true;
 		default:
 			compilation_logger::emit_unhandled_number_format_error(m_lexer.get_current_line_number(), type);
-			return false;
+			return false; // return on failure
 		}
 	}
 
-	bool parser::parse_function_call(const std::string& function_name, node*& out_node)	{
+	bool parser::parse_function_call(node*& out_node, const std::string& function_name)	{
 		consume_next_token(); // consume the left parenthesis
 
 		std::vector<node*> arguments;
@@ -346,7 +359,7 @@ namespace channel {
 			while (true) {
 				node* argument;
 				if(!parse_expression(argument)) {
-					return false;
+					return false; // return on failure
 				}
 
 				arguments.push_back(argument);
@@ -359,7 +372,7 @@ namespace channel {
 				}
 				else {
 					compilation_logger::emit_unhandled_token_error(m_lexer.get_current_line_number(), m_current_token);
-					return false;
+					return false; // return on failure
 				}
 			}
 		}
@@ -371,7 +384,7 @@ namespace channel {
 
 	bool parser::parse_function_definition(node*& out_node) {
 		const type return_type = token_to_type(m_current_token);
-		u64 line_number = m_lexer.get_current_line_number();
+		const u64 line_number = m_lexer.get_current_line_number();
 
 		consume_next_token();
 		// parse the function name (e.g., main, other_function)
@@ -381,12 +394,12 @@ namespace channel {
 		// parse the parameter list (assume no parameters for now)
 		// todo: add support for parameters
 		if (!expect_next_token(token::l_parenthesis) || !expect_next_token(token::r_parenthesis)) {
-			return false;
+			return false; // return on failure
 		}
 
 		// parse the opening curly brace '{'
 		if (!expect_next_token(token::l_brace)) {
-			return false;
+			return false; // return on failure
 		}
 
 		// parse statements inside the function
@@ -394,8 +407,8 @@ namespace channel {
 		while (m_current_token != token::r_brace) {
 			node* statement;
 
-			if (!parse_statement(false, statement)) {
-				return false;
+			if (!parse_local_statement(statement)) {
+				return false; // return on failure
 			}
 
 			statements.push_back(statement);
@@ -412,7 +425,7 @@ namespace channel {
 
 		node* expression;
 		if(!parse_expression(expression)) {
-			return false;
+			return false; // return on failure
 		}
 
 		out_node = new return_node(m_lexer.get_current_line_number(), expression);
@@ -455,7 +468,7 @@ namespace channel {
 			case token::keyword_type_f64:
 				return true;
 			default:
-				return false;
+				return false; // return on failure
 		}
 	}
 

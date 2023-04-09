@@ -3,7 +3,7 @@
 
 namespace channel {
 	/**
-	 * \brief Wrapper around llvm::Value*, provides utilities such as types
+	 * \brief Wrapper around llvm::Value*, provides utilities such as additional type information
 	 */
 	class value {
 	public:

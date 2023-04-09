@@ -3,16 +3,16 @@
 
 namespace channel {
 	/**
-	 * \brief AST node, represents the f32 type keyword.
+	 * \brief AST node, represents the u64 type keyword.
 	 */
-	class keyword_f32_node : public node {
+	class u64_node : public node {
 	public:
-		keyword_f32_node(u64 line_number, f32 value);
+		u64_node(u64 line_number, u64 value);
 		bool accept(visitor& visitor, value*& out_value) override;
 		std::string get_node_name() const override;
 
-		f32 get_value() const;
+		u64 get_value() const;
 	private:
-		f32 m_value;
+		u64 m_value;
 	};
 }

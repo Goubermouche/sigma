@@ -15,8 +15,10 @@ namespace channel {
 		virtual ~node() = default;
 
 		/**
-		 * \brief Accepts the given \a visitor. 
+		 * \brief Accepts the given \a visitor and handles the given node.
 		 * \param visitor Visitor to accept
+		 * \param out_value Resulting value
+		 * \returns True if no error has been met, otherwise false
 		 */
 		virtual bool accept(visitor& visitor, value*& out_value) = 0;
 		virtual std::string get_node_name() const = 0;

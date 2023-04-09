@@ -1,6 +1,6 @@
 #include "codegen_visitor.h"
 
-#include "../abstract_syntax_tree/keywords/return_node.h"
+#include "../abstract_syntax_tree/keywords/flow_control/return_node.h"
 
 namespace channel {
 	bool codegen_visitor::visit_return_node(return_node& node, value*& out_value) {
@@ -11,7 +11,8 @@ namespace channel {
 		}
 
 		// get the return type of the current function
-		const type function_return_type = m_functions[m_builder.GetInsertBlock()->getParent()->getName().str()]->get_return_type();
+		const llvm::Function* parent_function = m_builder.GetInsertBlock()->getParent();
+		const type function_return_type = m_functions[parent_function->getName().str()]->get_return_type();
 
 		// upcast the return value to match the function's return type
 		llvm::Value* upcasted_return_value = cast_value(return_value, function_return_type, node.get_declaration_line_number());

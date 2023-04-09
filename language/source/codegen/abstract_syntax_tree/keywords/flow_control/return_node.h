@@ -1,5 +1,5 @@
 #pragma once
-#include "../node.h"
+#include "../../node.h"
 
 namespace channel {
 	/**
@@ -16,5 +16,3 @@ namespace channel {
 		node* m_expression;
 	};
 }
-
-

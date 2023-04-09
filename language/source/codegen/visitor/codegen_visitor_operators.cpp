@@ -8,20 +8,24 @@
 
 namespace channel {
 	bool codegen_visitor::visit_operator_addition_node(operator_addition_node& node, value*& out_value) {
+		// accept the left expression
 		value* left;
 		if (!node.left->accept(*this, left)) {
 			return false;
 		}
 
+		// accept the right expression
 		value* right;
 		if (!node.right->accept(*this, right)) {
 			return false;
 		}
 
+		// upcast both expressions
 		const type highest_precision = get_highest_precision_type(left->get_type(), right->get_type());
 		llvm::Value* left_value_upcasted = cast_value(left, highest_precision, node.get_declaration_line_number());
 		llvm::Value* right_value_upcasted = cast_value(right, highest_precision, node.get_declaration_line_number());
 
+		// both types are floating point
 		if (is_type_floating_point(highest_precision)) {
 			out_value = new value(
 				"__fadd",
@@ -34,6 +38,7 @@ namespace channel {
 			return true;
 		}
 
+		// both types are unsigned
 		if (is_type_unsigned(highest_precision)) {
 			out_value = new value(
 				"__uadd",
@@ -47,6 +52,7 @@ namespace channel {
 			return true;
 		}
 
+		// fallback to regular op
 		out_value = new value(
 			"__add",
 			highest_precision,
@@ -59,20 +65,24 @@ namespace channel {
 	}
 
 	bool codegen_visitor::visit_operator_subtraction_node(operator_subtraction_node& node, value*& out_value) {
+		// accept the left expression
 		value* left;
 		if (!node.left->accept(*this, left)) {
 			return false;
 		}
 
+		// accept the right expression
 		value* right;
 		if (!node.right->accept(*this, right)) {
 			return false;
 		}
 
+		// upcast both expressions
 		const type highest_precision = get_highest_precision_type(left->get_type(), right->get_type());
 		llvm::Value* left_value_upcasted = cast_value(left, highest_precision, node.get_declaration_line_number());
 		llvm::Value* right_value_upcasted = cast_value(right, highest_precision, node.get_declaration_line_number());
 
+		// both types are floating point
 		if (is_type_floating_point(highest_precision)) {
 			out_value = new value(
 				"__fsub",
@@ -85,6 +95,7 @@ namespace channel {
 			return true;
 		}
 
+		// both types are unsigned
 		if (is_type_unsigned(highest_precision)) {
 			out_value = new value(
 				"__usub",
@@ -98,6 +109,7 @@ namespace channel {
 			return true;
 		}
 
+		// fallback to regular op
 		out_value = new value(
 			"__sub",
 			highest_precision,
@@ -110,20 +122,24 @@ namespace channel {
 	}
 
 	bool codegen_visitor::visit_operator_multiplication_node(operator_multiplication_node& node, value*& out_value) {
+		// accept the left expression
 		value* left;
 		if (!node.left->accept(*this, left)) {
 			return false;
 		}
 
+		// accept the right expression
 		value* right;
 		if (!node.right->accept(*this, right)) {
 			return false;
 		}
 
+		// upcast both expressions
 		const type highest_precision = get_highest_precision_type(left->get_type(), right->get_type());
 		llvm::Value* left_value_upcasted = cast_value(left, highest_precision, node.get_declaration_line_number());
 		llvm::Value* right_value_upcasted = cast_value(right, highest_precision, node.get_declaration_line_number());
 
+		// both types are floating point
 		if (is_type_floating_point(highest_precision)) {
 			out_value = new value(
 				"__fmul",
@@ -136,6 +152,7 @@ namespace channel {
 			return true;
 		}
 
+		// both types are unsigned
 		if (is_type_unsigned(highest_precision)) {
 			out_value = new value(
 				"__umul",
@@ -149,6 +166,7 @@ namespace channel {
 			return true;
 		}
 
+		// fallback to regular op
 		out_value = new value(
 			"__mul",
 			highest_precision,
@@ -161,20 +179,24 @@ namespace channel {
 	}
 
 	bool codegen_visitor::visit_operator_division_node(operator_division_node& node, value*& out_value) {
+		// accept the left expression
 		value* left;
 		if (!node.left->accept(*this, left)) {
 			return false;
 		}
 
+		// accept the right expression
 		value* right;
 		if (!node.right->accept(*this, right)) {
 			return false;
 		}
 
+		// upcast both expressions
 		const type highest_precision = get_highest_precision_type(left->get_type(), right->get_type());
 		llvm::Value* left_value_upcasted = cast_value(left, highest_precision, node.get_declaration_line_number());
 		llvm::Value* right_value_upcasted = cast_value(right, highest_precision, node.get_declaration_line_number());
 
+		// both types are floating point
 		if (is_type_floating_point(highest_precision)) {
 			out_value = new value(
 				"__fdiv",
@@ -187,6 +209,7 @@ namespace channel {
 			return true;
 		}
 
+		// both types are unsigned
 		if (is_type_unsigned(highest_precision)) {
 			out_value = new value(
 				"__udiv",
@@ -199,6 +222,7 @@ namespace channel {
 			return true;
 		}
 
+		// fallback to regular op
 		out_value = new value(
 			"__div",
 			highest_precision,
@@ -211,20 +235,24 @@ namespace channel {
 	}
 
 	bool codegen_visitor::visit_operator_modulo_node(operator_modulo_node& node, value*& out_value) {
+		// accept the left expression
 		value* left;
 		if (!node.left->accept(*this, left)) {
 			return false;
 		}
 
+		// accept the right expression
 		value* right;
 		if (!node.right->accept(*this, right)) {
 			return false;
 		}
 
+		// upcast both expressions
 		const type highest_precision = get_highest_precision_type(left->get_type(), right->get_type());
 		llvm::Value* left_value_upcasted = cast_value(left, highest_precision, node.get_declaration_line_number());
 		llvm::Value* right_value_upcasted = cast_value(right, highest_precision, node.get_declaration_line_number());
 
+		// both types are floating point
 		if (is_type_floating_point(highest_precision)) {
 			out_value = new value(
 				"__frem",
@@ -237,6 +265,7 @@ namespace channel {
 			return true;
 		}
 
+		// both types are unsigned
 		if (is_type_unsigned(highest_precision)) {
 			out_value = new value(
 				"__urem",
@@ -249,6 +278,7 @@ namespace channel {
 			return true;
 		}
 
+		// fallback to regular op
 		out_value = new value(
 			"__rem",
 			highest_precision,

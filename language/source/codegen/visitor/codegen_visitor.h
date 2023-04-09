@@ -1,8 +1,8 @@
 #pragma once
 
+#include "../../parser/parser.h"
 #include "../scope.h"
 #include "visitor.h"
-#include "../../parser/parser.h"
 
 #define CTOR_STRUCT_TYPE                 \
 llvm::StructType::get(m_context, {       \
@@ -45,18 +45,18 @@ namespace channel {
 		// types
 		// codegen_visitor_types.cpp
 		// signed integers
-		bool visit_keyword_i8_node(keyword_i8_node& node, value*& out_value) override;
-		bool visit_keyword_i16_node(keyword_i16_node& node, value*& out_value) override;
-		bool visit_keyword_i32_node(keyword_i32_node& node, value*& out_value) override;
-		bool visit_keyword_i64_node(keyword_i64_node& node, value*& out_value) override;
+		bool visit_keyword_i8_node(i8_node& node, value*& out_value) override;
+		bool visit_keyword_i16_node(i16_node& node, value*& out_value) override;
+		bool visit_keyword_i32_node(i32_node& node, value*& out_value) override;
+		bool visit_keyword_i64_node(i64_node& node, value*& out_value) override;
 		// unsigned integers
-		bool visit_keyword_u8_node(keyword_u8_node& node, value*& out_value) override;
-		bool visit_keyword_u16_node(keyword_u16_node& node, value*& out_value) override;
-		bool visit_keyword_u32_node(keyword_u32_node& node, value*& out_value) override;
-		bool visit_keyword_u64_node(keyword_u64_node& node, value*& out_value) override;
+		bool visit_keyword_u8_node(u8_node& node, value*& out_value) override;
+		bool visit_keyword_u16_node(u16_node& node, value*& out_value) override;
+		bool visit_keyword_u32_node(u32_node& node, value*& out_value) override;
+		bool visit_keyword_u64_node(u64_node& node, value*& out_value) override;
 		// floating point
-		bool visit_keyword_f32_node(keyword_f32_node& node, value*& out_value) override;
-		bool visit_keyword_f64_node(keyword_f64_node& node, value*& out_value) override;
+		bool visit_keyword_f32_node(f32_node& node, value*& out_value) override;
+		bool visit_keyword_f64_node(f64_node& node, value*& out_value) override;
 
 		// operators
 		// codegen_visitor_operators.cpp
@@ -79,7 +79,7 @@ namespace channel {
 		std::unordered_map<std::string, value*> m_global_named_values;
 
 		// global initialization ctors
-		std::vector<llvm::Constant*> m_ctors;
+		std::vector<llvm::Constant*> m_global_ctors;
 
 		// ctor initialization priority 
 		i32 m_global_initialization_priority = 0;

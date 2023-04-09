@@ -1,27 +1,34 @@
 #include "parser.h"
 
+// functions
+#include "../codegen/abstract_syntax_tree/functions/function_call_node.h"
+#include "../codegen/abstract_syntax_tree/functions/function_node.h"
+
+// variables
 #include "../codegen/abstract_syntax_tree/variables/assignment_node.h"
-#include "../codegen/abstract_syntax_tree/variables/function_call_node.h"
-#include "../codegen/abstract_syntax_tree/variables/function_node.h"
-#include "../codegen/abstract_syntax_tree/keywords/return_node.h"
-#include "../codegen/abstract_syntax_tree/keywords/types/floating_point/keyword_f32_node.h"
-
-#include "../codegen/abstract_syntax_tree/keywords/types/signed_int/keyword_i8_node.h"
-#include "../codegen/abstract_syntax_tree/keywords/types/signed_int/keyword_i16_node.h"
-#include "../codegen/abstract_syntax_tree/keywords/types/signed_int/keyword_i32_node.h"
-#include "../codegen/abstract_syntax_tree/keywords/types/signed_int/keyword_i64_node.h"
-
-#include "../codegen/abstract_syntax_tree/keywords/types/unsigned_int/keyword_u8_node.h"
-#include "../codegen/abstract_syntax_tree/keywords/types/unsigned_int/keyword_u16_node.h"
-#include "../codegen/abstract_syntax_tree/keywords/types/unsigned_int/keyword_u32_node.h"
-#include "../codegen/abstract_syntax_tree/keywords/types/unsigned_int/keyword_u64_node.h"
-
-#include "../codegen/abstract_syntax_tree/keywords/types/floating_point/keyword_f64_node.h"
-
 #include "../codegen/abstract_syntax_tree/variables/variable_node.h"
 #include "../codegen/abstract_syntax_tree/variables/declaration/local_declaration_node.h"
 #include "../codegen/abstract_syntax_tree/variables/declaration/global_declaration_node.h"
 
+// flow control
+#include "../codegen/abstract_syntax_tree/keywords/flow_control/return_node.h"
+
+// types
+// signed integers
+#include "../codegen/abstract_syntax_tree/keywords/types/signed_int/i8_node.h"
+#include "../codegen/abstract_syntax_tree/keywords/types/signed_int/i16_node.h"
+#include "../codegen/abstract_syntax_tree/keywords/types/signed_int/i32_node.h"
+#include "../codegen/abstract_syntax_tree/keywords/types/signed_int/i64_node.h"
+// unsigned integers
+#include "../codegen/abstract_syntax_tree/keywords/types/unsigned_int/u8_node.h"
+#include "../codegen/abstract_syntax_tree/keywords/types/unsigned_int/u16_node.h"
+#include "../codegen/abstract_syntax_tree/keywords/types/unsigned_int/u32_node.h"
+#include "../codegen/abstract_syntax_tree/keywords/types/unsigned_int/u64_node.h"
+// floating point
+#include "../codegen/abstract_syntax_tree/keywords/types/floating_point/f32_node.h"
+#include "../codegen/abstract_syntax_tree/keywords/types/floating_point/f64_node.h"
+
+// operators
 #include "../codegen/abstract_syntax_tree/operators/operator_addition_node.h"
 #include "../codegen/abstract_syntax_tree/operators/operator_division_node.h"
 #include "../codegen/abstract_syntax_tree/operators/operator_multiplication_node.h"
@@ -307,22 +314,22 @@ namespace channel {
 
 		switch (type) {
 		// signed
-		case token::keyword_type_i8:  out_node = new keyword_i8_node(m_lexer.get_current_line_number(), std::stoll(str_value)); return true;
-		case token::keyword_type_i16: out_node = new keyword_i16_node(m_lexer.get_current_line_number(), std::stoll(str_value)); return true;
+		case token::keyword_type_i8:  out_node = new i8_node(m_lexer.get_current_line_number(), std::stoll(str_value)); return true;
+		case token::keyword_type_i16: out_node = new i16_node(m_lexer.get_current_line_number(), std::stoll(str_value)); return true;
 		case token::number_signed:
-		case token::keyword_type_i32: out_node = new keyword_i32_node(m_lexer.get_current_line_number(), std::stoll(str_value)); return true;
-		case token::keyword_type_i64: out_node = new keyword_i64_node(m_lexer.get_current_line_number(), std::stoll(str_value)); return true;
+		case token::keyword_type_i32: out_node = new i32_node(m_lexer.get_current_line_number(), std::stoll(str_value)); return true;
+		case token::keyword_type_i64: out_node = new i64_node(m_lexer.get_current_line_number(), std::stoll(str_value)); return true;
 			// unsigned
-		case token::keyword_type_u8:  out_node = new keyword_u8_node(m_lexer.get_current_line_number(), std::stoull(str_value)); return true;
-		case token::keyword_type_u16: out_node = new keyword_u16_node(m_lexer.get_current_line_number(), std::stoull(str_value)); return true;
+		case token::keyword_type_u8:  out_node = new u8_node(m_lexer.get_current_line_number(), std::stoull(str_value)); return true;
+		case token::keyword_type_u16: out_node = new u16_node(m_lexer.get_current_line_number(), std::stoull(str_value)); return true;
 		case token::number_unsigned:
-		case token::keyword_type_u32: out_node = new keyword_u32_node(m_lexer.get_current_line_number(), std::stoull(str_value)); return true;
-		case token::keyword_type_u64: out_node = new keyword_u64_node(m_lexer.get_current_line_number(), std::stoull(str_value)); return true;
+		case token::keyword_type_u32: out_node = new u32_node(m_lexer.get_current_line_number(), std::stoull(str_value)); return true;
+		case token::keyword_type_u64: out_node = new u64_node(m_lexer.get_current_line_number(), std::stoull(str_value)); return true;
 		// floating point
 		case token::number_f32:
-		case token::keyword_type_f32: out_node = new keyword_f32_node(m_lexer.get_current_line_number(), std::stof(str_value)); return true;
+		case token::keyword_type_f32: out_node = new f32_node(m_lexer.get_current_line_number(), std::stof(str_value)); return true;
 		case token::number_f64:
-		case token::keyword_type_f64: out_node = new keyword_f64_node(m_lexer.get_current_line_number(), std::stod(str_value)); return true;
+		case token::keyword_type_f64: out_node = new f64_node(m_lexer.get_current_line_number(), std::stod(str_value)); return true;
 		default:
 			compilation_logger::emit_unhandled_number_format_error(m_lexer.get_current_line_number(), type);
 			return false;
@@ -414,16 +421,16 @@ namespace channel {
 
 	node* parser::create_zero_node(type ty) const {
 		switch (ty) {
-			case type::i8:  return new keyword_i8_node(m_lexer.get_current_line_number(), 0);
-			case type::i16: return new keyword_i16_node(m_lexer.get_current_line_number(), 0);
-			case type::i32: return new keyword_i32_node(m_lexer.get_current_line_number(), 0);
-			case type::i64: return new keyword_i64_node(m_lexer.get_current_line_number(), 0);
-			case type::u8:  return new keyword_u8_node(m_lexer.get_current_line_number(), 0);
-			case type::u16: return new keyword_u16_node(m_lexer.get_current_line_number(), 0);
-			case type::u32: return new keyword_u32_node(m_lexer.get_current_line_number(), 0);
-			case type::u64: return new keyword_u64_node(m_lexer.get_current_line_number(), 0);
-			case type::f32: return new keyword_f32_node(m_lexer.get_current_line_number(), 0.0);
-			case type::f64: return new keyword_f64_node(m_lexer.get_current_line_number(), 0.0);
+			case type::i8:  return new i8_node(m_lexer.get_current_line_number(), 0);
+			case type::i16: return new i16_node(m_lexer.get_current_line_number(), 0);
+			case type::i32: return new i32_node(m_lexer.get_current_line_number(), 0);
+			case type::i64: return new i64_node(m_lexer.get_current_line_number(), 0);
+			case type::u8:  return new u8_node(m_lexer.get_current_line_number(), 0);
+			case type::u16: return new u16_node(m_lexer.get_current_line_number(), 0);
+			case type::u32: return new u32_node(m_lexer.get_current_line_number(), 0);
+			case type::u64: return new u64_node(m_lexer.get_current_line_number(), 0);
+			case type::f32: return new f32_node(m_lexer.get_current_line_number(), 0.0);
+			case type::f64: return new f64_node(m_lexer.get_current_line_number(), 0.0);
 			default:
 				ASSERT(false, "[parser]: cannot convert '" + type_to_string(ty) + "' to a type keyword");
 				return nullptr;

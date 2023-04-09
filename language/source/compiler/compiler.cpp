@@ -1,9 +1,9 @@
 #include "compiler.h"
-#include "../codegen/codegen_visitor.h"
+#include "../codegen/visitor/codegen_visitor.h"
 
 namespace channel {
 	void compiler::compile(const std::string& source_file) {
-		std::cout << "compiling file: " << source_file << '\n';
+		std::cout << "compiling file '" << source_file << "'\n";
 
 		timer timer;
 		timer.start();
@@ -16,9 +16,12 @@ namespace channel {
 			return;
 		}
 
-		visitor.verify_intermediate_representation();
-		std::cout << "[compiler]: compiled in " << timer.elapsed() << " ms\n";
-		std::cout << "----------------------------\n";
-		visitor.print_intermediate_representation();
+		if(!visitor.verify_intermediate_representation()) {
+			// verification failure
+			return;
+		}
+
+		std::cout << "successfully compiled in " << timer.elapsed() << " ms\n";
+		// std::cout << "----------------------------\n";
 	}
 }

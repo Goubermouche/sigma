@@ -30,4 +30,3 @@ namespace channel{
 		static void emit_error(u64 line_number, const std::string& message);
 	};
 }
-

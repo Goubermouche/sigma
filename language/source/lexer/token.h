@@ -28,6 +28,8 @@ namespace channel {
 		keyword_type_f32,                   // f32 0.0f
 		keyword_type_f64,                   // f64 0.0
 
+		// statements
+		// flow control
 		keyword_return,                     // return
 
 		// math

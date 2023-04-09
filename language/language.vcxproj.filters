@@ -30,7 +30,7 @@
     <ClCompile Include="source\codegen\abstract_syntax_tree\node.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="source\codegen\codegen_visitor.cpp">
+    <ClCompile Include="source\codegen\visitor\codegen_visitor.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="source\codegen\visitor.cpp">
@@ -132,6 +132,21 @@
     <ClCompile Include="source\compiler\compilation_logger.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="source\codegen\visitor\codegen_visitor_types.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="source\codegen\visitor\codegen_visitor_operators.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="source\codegen\visitor\codegen_visitor_functions.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="source\codegen\visitor\codegen_visitor_variables.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="source\codegen\visitor\codegen_visitor_flow_control.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="test\main.ch" />
@@ -149,7 +164,7 @@
     <ClInclude Include="source\codegen\abstract_syntax_tree\node.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="source\codegen\codegen_visitor.h">
+    <ClInclude Include="source\codegen\visitor\codegen_visitor.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="source\codegen\visitor.h">

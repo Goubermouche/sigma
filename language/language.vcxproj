@@ -148,6 +148,11 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="source\codegen\visitor\codegen_visitor_flow_control.cpp" />
+    <ClCompile Include="source\codegen\visitor\codegen_visitor_functions.cpp" />
+    <ClCompile Include="source\codegen\visitor\codegen_visitor_operators.cpp" />
+    <ClCompile Include="source\codegen\visitor\codegen_visitor_types.cpp" />
+    <ClCompile Include="source\codegen\visitor\codegen_visitor_variables.cpp" />
     <ClCompile Include="source\compiler\compilation_logger.cpp" />
     <ClCompile Include="source\utility\console.cpp" />
     <ClCompile Include="source\codegen\abstract_syntax_tree\keywords\types\floating_point\keyword_f64_node.cpp" />
@@ -177,7 +182,7 @@
     <ClCompile Include="source\codegen\abstract_syntax_tree\node.cpp" />
     <ClCompile Include="source\codegen\abstract_syntax_tree\operators\operator_addition_node.cpp" />
     <ClCompile Include="source\codegen\abstract_syntax_tree\operators\operator_binary.cpp" />
-    <ClCompile Include="source\codegen\codegen_visitor.cpp" />
+    <ClCompile Include="source\codegen\visitor\codegen_visitor.cpp" />
     <ClCompile Include="source\codegen\visitor.cpp" />
     <ClCompile Include="source\lexer\lexer.cpp" />
     <ClCompile Include="source\parser\parser.cpp" />
@@ -220,7 +225,7 @@
     <ClInclude Include="source\codegen\abstract_syntax_tree\node.h" />
     <ClInclude Include="source\codegen\abstract_syntax_tree\operators\operator_addition_node.h" />
     <ClInclude Include="source\codegen\abstract_syntax_tree\operators\operator_binary.h" />
-    <ClInclude Include="source\codegen\codegen_visitor.h" />
+    <ClInclude Include="source\codegen\visitor\codegen_visitor.h" />
     <ClInclude Include="source\codegen\visitor.h" />
     <ClInclude Include="source\lexer\lexer.h" />
     <ClInclude Include="source\lexer\token.h" />

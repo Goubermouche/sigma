@@ -1,5 +1,5 @@
 #pragma once
-#include "../../type.h"
+#include "../type.h"
 
 namespace channel {
 	class function {

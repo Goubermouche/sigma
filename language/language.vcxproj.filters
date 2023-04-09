@@ -117,7 +117,7 @@
     <ClCompile Include="source\codegen\llvm_wrappers\value.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="source\type.cpp">
+    <ClCompile Include="source\codegen\type.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="source\codegen\abstract_syntax_tree\keywords\types\floating_point\keyword_f32_node.cpp">
@@ -248,7 +248,7 @@
     <ClInclude Include="source\codegen\scope.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="source\type.h">
+    <ClInclude Include="source\codegen\type.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="source\codegen\abstract_syntax_tree\keywords\types\unsigned_int\keyword_u64_node.h">

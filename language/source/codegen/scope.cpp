@@ -48,9 +48,4 @@ namespace channel {
 
 		return m_named_values.insert({ name, value });
 	}
-
-	std::unique_ptr<scope> scope::create_nested_scope(const std::string& name) {
-		std::cout << "creating nested scope\n";
-		return std::make_unique<scope>(this);
-	}
 }

@@ -80,6 +80,8 @@
       <AdditionalOptions>-IC:\dev\thirdparty\llvm-16.0.0\llvm-project\llvm\include -IC:\dev\thirdparty\llvm-16.0.0\llvm-project\llvm\build\include -std:c++20   /EHs-c- /GR- -D_CRT_SECURE_NO_DEPRECATE -D_CRT_SECURE_NO_WARNINGS -D_CRT_NONSTDC_NO_DEPRECATE -D_CRT_NONSTDC_NO_WARNINGS -D_SCL_SECURE_NO_DEPRECATE -D_SCL_SECURE_NO_WARNINGS -DUNICODE -D_UNICODE -D__STDC_CONSTANT_MACROS -D__STDC_FORMAT_MACROS -D__STDC_LIMIT_MACROS %(AdditionalOptions)</AdditionalOptions>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <RuntimeTypeInfo>false</RuntimeTypeInfo>
+      <AdditionalIncludeDirectories>
+      </AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -99,6 +101,8 @@
       <AdditionalOptions>-IC:\dev\thirdparty\llvm-16.0.0\llvm-project\llvm\include -IC:\dev\thirdparty\llvm-16.0.0\llvm-project\llvm\build\include -std:c++20   /EHs-c- /GR- -D_CRT_SECURE_NO_DEPRECATE -D_CRT_SECURE_NO_WARNINGS -D_CRT_NONSTDC_NO_DEPRECATE -D_CRT_NONSTDC_NO_WARNINGS -D_SCL_SECURE_NO_DEPRECATE -D_SCL_SECURE_NO_WARNINGS -DUNICODE -D_UNICODE -D__STDC_CONSTANT_MACROS -D__STDC_FORMAT_MACROS -D__STDC_LIMIT_MACROS %(AdditionalOptions)</AdditionalOptions>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <RuntimeTypeInfo>false</RuntimeTypeInfo>
+      <AdditionalIncludeDirectories>
+      </AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -118,6 +122,8 @@
       <AdditionalOptions>-IC:\dev\thirdparty\llvm-16.0.0\llvm-project\llvm\include -IC:\dev\thirdparty\llvm-16.0.0\llvm-project\llvm\build\include -std:c++20   /EHs-c- /GR- -D_CRT_SECURE_NO_DEPRECATE -D_CRT_SECURE_NO_WARNINGS -D_CRT_NONSTDC_NO_DEPRECATE -D_CRT_NONSTDC_NO_WARNINGS -D_SCL_SECURE_NO_DEPRECATE -D_SCL_SECURE_NO_WARNINGS -DUNICODE -D_UNICODE -D__STDC_CONSTANT_MACROS -D__STDC_FORMAT_MACROS -D__STDC_LIMIT_MACROS %(AdditionalOptions)</AdditionalOptions>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <RuntimeTypeInfo>false</RuntimeTypeInfo>
+      <AdditionalIncludeDirectories>
+      </AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -137,6 +143,8 @@
       <AdditionalOptions>-IC:\dev\thirdparty\llvm-16.0.0\llvm-project\llvm\include -IC:\dev\thirdparty\llvm-16.0.0\llvm-project\llvm\build\include -std:c++20   /EHs-c- /GR- -D_CRT_SECURE_NO_DEPRECATE -D_CRT_SECURE_NO_WARNINGS -D_CRT_NONSTDC_NO_DEPRECATE -D_CRT_NONSTDC_NO_WARNINGS -D_SCL_SECURE_NO_DEPRECATE -D_SCL_SECURE_NO_WARNINGS -DUNICODE -D_UNICODE -D__STDC_CONSTANT_MACROS -D__STDC_FORMAT_MACROS -D__STDC_LIMIT_MACROS %(AdditionalOptions)</AdditionalOptions>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <RuntimeTypeInfo>false</RuntimeTypeInfo>
+      <AdditionalIncludeDirectories>
+      </AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -187,7 +195,7 @@
     <ClCompile Include="source\codegen\visitor\visitor.cpp" />
     <ClCompile Include="source\lexer\lexer.cpp" />
     <ClCompile Include="source\parser\parser.cpp" />
-    <ClCompile Include="source\type.cpp" />
+    <ClCompile Include="source\codegen\type.cpp" />
     <ClCompile Include="source\utility\filesystem.cpp" />
     <ClCompile Include="source\utility\string_accessor.cpp" />
     <ClCompile Include="source\codegen\abstract_syntax_tree\variables\variable_node.cpp" />
@@ -232,7 +240,7 @@
     <ClInclude Include="source\lexer\lexer.h" />
     <ClInclude Include="source\lexer\token.h" />
     <ClInclude Include="source\parser\parser.h" />
-    <ClInclude Include="source\type.h" />
+    <ClInclude Include="source\codegen\type.h" />
     <ClInclude Include="source\utility\filesystem.h" />
     <ClInclude Include="source\utility\macros.h" />
     <ClInclude Include="source\utility\string_accessor.h" />

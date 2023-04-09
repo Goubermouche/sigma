@@ -2,7 +2,7 @@
 
 #include "../lexer/lexer.h"
 #include "../codegen/abstract_syntax_tree/node.h"
-#include "../type.h"
+#include "../codegen/type.h"
 
 namespace channel {
 	// todo: fix a bug that's causes an error to be thrown when two semicolons

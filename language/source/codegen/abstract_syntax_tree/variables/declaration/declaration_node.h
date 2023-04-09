@@ -1,6 +1,6 @@
 #pragma once
 #include "../../node.h"
-#include "../../../../type.h"
+#include "../../../type.h"
 
 namespace channel {
 	/**

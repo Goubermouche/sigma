@@ -22,6 +22,5 @@ namespace channel {
 		}
 
 		std::cout << "successfully compiled in " << timer.elapsed() << " ms\n";
-		// std::cout << "----------------------------\n";
 	}
 }

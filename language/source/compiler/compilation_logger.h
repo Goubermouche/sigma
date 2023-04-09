@@ -1,6 +1,6 @@
 #pragma once
 #include "../utility/console.h"
-#include "../type.h"
+#include "../codegen/type.h"
 
 namespace channel{
 	class compilation_logger {
@@ -17,10 +17,8 @@ namespace channel{
 		static void emit_main_entry_point_missing_error();
 
 		static void emit_variable_not_found_error(u64 line_number, const std::string& variable_name);
-
 		static void emit_local_variable_already_defined_error(u64 line_number, const std::string& variable_name);
 		static void emit_local_variable_already_defined_in_global_scope_error(u64 line_number, const std::string& variable_name);
-
 		static void emit_global_variable_already_defined_error(u64 line_number, const std::string& variable_name);
 
 		static void emit_function_not_found_error(u64 line_number, const std::string& function_name);

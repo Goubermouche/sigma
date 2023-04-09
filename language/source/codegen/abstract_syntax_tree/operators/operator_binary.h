@@ -7,7 +7,7 @@ namespace channel {
      */
 	class operator_binary : public node	{
     public:
-        operator_binary(u64 line_index, node* left, node* right);
+        operator_binary(u64 line_number, node* left, node* right);
         ~operator_binary() override;
 
         node* left;

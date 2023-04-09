@@ -15,7 +15,7 @@ namespace channel {
 			});
 
 		if (!insertion_result.second) {
-			compilation_logger::emit_function_already_defined_error(node.get_declaration_line_index(), node.get_name());
+			compilation_logger::emit_function_already_defined_error(node.get_declaration_line_number(), node.get_name());
 			return false;
 		}
 
@@ -39,7 +39,7 @@ namespace channel {
 
 		// add a return statement if the function does not have one
 		if (entry_block->getTerminator() == nullptr) {
-			compilation_logger::emit_function_return_auto_generate_warning(node.get_declaration_line_index(), node.get_name());
+			compilation_logger::emit_function_return_auto_generate_warning(node.get_declaration_line_number(), node.get_name());
 
 			if (return_type->isVoidTy()) {
 				m_builder.CreateRetVoid();
@@ -56,7 +56,7 @@ namespace channel {
 	bool codegen_visitor::visit_function_call_node(function_call_node& node, value*& out_value) {
 		llvm::Function* function = m_functions[node.get_name()]->get_function();
 		if (!function) {
-			compilation_logger::emit_function_not_found_error(node.get_declaration_line_index(), node.get_name());
+			compilation_logger::emit_function_not_found_error(node.get_declaration_line_number(), node.get_name());
 			return false;
 		}
 

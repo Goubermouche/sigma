@@ -7,7 +7,7 @@ namespace channel {
 	 */
 	class operator_addition_node : public operator_binary {
 	public:
-		operator_addition_node(u64 line_index, node* left, node* right);
+		operator_addition_node(u64 line_number, node* left, node* right);
 		bool accept(visitor& visitor, value*& out_value) override;
 		std::string get_node_name() const override;
 	};

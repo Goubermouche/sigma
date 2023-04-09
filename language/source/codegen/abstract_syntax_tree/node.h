@@ -1,5 +1,5 @@
 #pragma once
-#include "value.h"
+#include "../llvm_wrappers/value.h"
 #include <llvm/IR/Value.h>
 #include "../../utility/macros.h"
 
@@ -11,7 +11,7 @@ namespace channel {
 	 */
 	class node {
 	public:
-		node(u64 line_index);
+		node(u64 line_number);
 		virtual ~node() = default;
 
 		/**
@@ -20,10 +20,10 @@ namespace channel {
 		 */
 		virtual bool accept(visitor& visitor, value*& out_value) = 0;
 		virtual std::string get_node_name() const = 0;
-		u64 get_declaration_line_index() const;
+		u64 get_declaration_line_number() const;
 	private:
-		u64 m_line_index = 0;
+		u64 m_line_number = 0;
 	};
 }
 
-#include "../visitor.h"
+#include "../visitor/visitor.h"

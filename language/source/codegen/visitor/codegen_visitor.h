@@ -1,7 +1,7 @@
 #pragma once
 
 #include "../scope.h"
-#include "../visitor.h"
+#include "visitor.h"
 #include "../../parser/parser.h"
 
 #define CTOR_STRUCT_TYPE                 \
@@ -67,7 +67,7 @@ namespace channel {
 		bool visit_operator_modulo_node(operator_modulo_node& node, value*& out_value) override;
 
 		// utility
-		llvm::Value* cast_value(const value* source_value, type target_type, u64 line_index);
+		llvm::Value* cast_value(const value* source_value, type target_type, u64 line_number);
 
 		bool has_main_entry_point() const;
 		void initialize_global_variables();

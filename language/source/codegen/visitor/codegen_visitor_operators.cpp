@@ -19,8 +19,8 @@ namespace channel {
 		}
 
 		const type highest_precision = get_highest_precision_type(left->get_type(), right->get_type());
-		llvm::Value* left_value_upcasted = cast_value(left, highest_precision, node.get_declaration_line_index());
-		llvm::Value* right_value_upcasted = cast_value(right, highest_precision, node.get_declaration_line_index());
+		llvm::Value* left_value_upcasted = cast_value(left, highest_precision, node.get_declaration_line_number());
+		llvm::Value* right_value_upcasted = cast_value(right, highest_precision, node.get_declaration_line_number());
 
 		if (is_type_floating_point(highest_precision)) {
 			out_value = new value(
@@ -70,8 +70,8 @@ namespace channel {
 		}
 
 		const type highest_precision = get_highest_precision_type(left->get_type(), right->get_type());
-		llvm::Value* left_value_upcasted = cast_value(left, highest_precision, node.get_declaration_line_index());
-		llvm::Value* right_value_upcasted = cast_value(right, highest_precision, node.get_declaration_line_index());
+		llvm::Value* left_value_upcasted = cast_value(left, highest_precision, node.get_declaration_line_number());
+		llvm::Value* right_value_upcasted = cast_value(right, highest_precision, node.get_declaration_line_number());
 
 		if (is_type_floating_point(highest_precision)) {
 			out_value = new value(
@@ -121,8 +121,8 @@ namespace channel {
 		}
 
 		const type highest_precision = get_highest_precision_type(left->get_type(), right->get_type());
-		llvm::Value* left_value_upcasted = cast_value(left, highest_precision, node.get_declaration_line_index());
-		llvm::Value* right_value_upcasted = cast_value(right, highest_precision, node.get_declaration_line_index());
+		llvm::Value* left_value_upcasted = cast_value(left, highest_precision, node.get_declaration_line_number());
+		llvm::Value* right_value_upcasted = cast_value(right, highest_precision, node.get_declaration_line_number());
 
 		if (is_type_floating_point(highest_precision)) {
 			out_value = new value(
@@ -172,8 +172,8 @@ namespace channel {
 		}
 
 		const type highest_precision = get_highest_precision_type(left->get_type(), right->get_type());
-		llvm::Value* left_value_upcasted = cast_value(left, highest_precision, node.get_declaration_line_index());
-		llvm::Value* right_value_upcasted = cast_value(right, highest_precision, node.get_declaration_line_index());
+		llvm::Value* left_value_upcasted = cast_value(left, highest_precision, node.get_declaration_line_number());
+		llvm::Value* right_value_upcasted = cast_value(right, highest_precision, node.get_declaration_line_number());
 
 		if (is_type_floating_point(highest_precision)) {
 			out_value = new value(
@@ -222,8 +222,8 @@ namespace channel {
 		}
 
 		const type highest_precision = get_highest_precision_type(left->get_type(), right->get_type());
-		llvm::Value* left_value_upcasted = cast_value(left, highest_precision, node.get_declaration_line_index());
-		llvm::Value* right_value_upcasted = cast_value(right, highest_precision, node.get_declaration_line_index());
+		llvm::Value* left_value_upcasted = cast_value(left, highest_precision, node.get_declaration_line_number());
+		llvm::Value* right_value_upcasted = cast_value(right, highest_precision, node.get_declaration_line_number());
 
 		if (is_type_floating_point(highest_precision)) {
 			out_value = new value(

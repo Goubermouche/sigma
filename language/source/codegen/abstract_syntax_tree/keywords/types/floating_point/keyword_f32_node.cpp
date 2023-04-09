@@ -1,8 +1,8 @@
 #include "keyword_f32_node.h"
 
 namespace channel {
-	keyword_f32_node::keyword_f32_node(u64 line_index, f32 value)
-		: node(line_index), m_value(value) {}
+	keyword_f32_node::keyword_f32_node(u64 line_number, f32 value)
+		: node(line_number), m_value(value) {}
 
 	bool keyword_f32_node::accept(visitor& visitor, value*& out_value) {
 		LOG_NODE_NAME(keyword_f32_node);

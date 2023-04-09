@@ -40,7 +40,7 @@ namespace channel {
 		 */
 		const std::string& get_operator() const { return m_operator_string; }
 
-		u64 get_current_line_index() const;
+		u64 get_current_line_number() const;
 	private:
 		/**
 		 * \brief Helper function that reads the next char in the provided source file and advances the accessor caret.

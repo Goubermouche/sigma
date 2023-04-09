@@ -1,6 +1,6 @@
 #pragma once
 #include "../utility/macros.h"
-#include "abstract_syntax_tree/value.h"
+#include "llvm_wrappers/value.h"
 
 namespace channel {
 	class scope	{

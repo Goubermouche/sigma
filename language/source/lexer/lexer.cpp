@@ -13,7 +13,7 @@ namespace channel {
 		}
 	}
 
-	u64 lexer::get_current_line_index() const {
+	u64 lexer::get_current_line_number() const {
 		return m_current_line;
 	}
 

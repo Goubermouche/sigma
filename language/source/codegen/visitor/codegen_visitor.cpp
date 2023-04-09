@@ -56,7 +56,7 @@ namespace channel {
 		return m_functions.at("main") != nullptr;
 	}
 
-	llvm::Value* codegen_visitor::cast_value(const value* source_value, type target_type, u64 line_index) {
+	llvm::Value* codegen_visitor::cast_value(const value* source_value, type target_type, u64 line_number) {
 		// both types are the same 
 		if(source_value->get_type() == target_type) {
 			return source_value->get_value();
@@ -72,7 +72,7 @@ namespace channel {
 				return source_value->get_value();
 			}
 
-			compilation_logger::emit_function_return_type_cast_warning(line_index, function_return_type, target_type);
+			compilation_logger::emit_function_return_type_cast_warning(line_number, function_return_type, target_type);
 
 			llvm::Value* function_call_result = source_value->get_value();
 			llvm::Type* target_llvm_type = type_to_llvm_type(target_type, function_call_result->getContext());
@@ -98,7 +98,7 @@ namespace channel {
 			}
 		}
 
-		compilation_logger::emit_cast_warning(line_index, source_value->get_type(), target_type);
+		compilation_logger::emit_cast_warning(line_number, source_value->get_type(), target_type);
 
 		// get the LLVM value and type for source and target
 		llvm::Value* source_llvm_value = source_value->get_value();

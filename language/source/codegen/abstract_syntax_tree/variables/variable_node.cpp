@@ -1,8 +1,8 @@
 #include "variable_node.h"
 
 namespace channel {
-    variable_node::variable_node(u64 line_index, const std::string& name)
-	    :node(line_index), m_name(name) {}
+    variable_node::variable_node(u64 line_number, const std::string& name)
+	    :node(line_number), m_name(name) {}
 
     bool variable_node::accept(visitor& visitor, value*& out_value) {
         LOG_NODE_NAME(variable_node);

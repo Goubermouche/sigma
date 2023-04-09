@@ -15,7 +15,7 @@ namespace channel {
 			}
 
 			// upcast the new_value if necessary
-			out_value->set_value(cast_value(out_value, local_variable->get_type(), node.get_declaration_line_index()));
+			out_value->set_value(cast_value(out_value, local_variable->get_type(), node.get_declaration_line_number()));
 
 			// store the value in the memory location of the variable
 			m_builder.CreateStore(out_value->get_value(), local_variable->get_value());
@@ -26,7 +26,7 @@ namespace channel {
 		// look up the global variable in the m_global_named_values map
 		const value* pointer_to_global_variable = m_global_named_values[node.get_name()];
 		if (!pointer_to_global_variable) {
-			compilation_logger::emit_variable_not_found_error(node.get_declaration_line_index(), node.get_name());
+			compilation_logger::emit_variable_not_found_error(node.get_declaration_line_number(), node.get_name());
 			return false;
 		}
 
@@ -36,7 +36,7 @@ namespace channel {
 		}
 
 		// upcast the new_value if necessary
-		out_value->set_value(cast_value(out_value, pointer_to_global_variable->get_type(), node.get_declaration_line_index()));
+		out_value->set_value(cast_value(out_value, pointer_to_global_variable->get_type(), node.get_declaration_line_number()));
 
 		// store the new value in the memory location of the global variable
 		m_builder.CreateStore(out_value->get_value(), pointer_to_global_variable->get_value());
@@ -63,7 +63,7 @@ namespace channel {
 		const value* pointer_to_global_variable = m_global_named_values[node.get_name()];
 
 		if (!pointer_to_global_variable) {
-			compilation_logger::emit_variable_not_found_error(node.get_declaration_line_index(), node.get_name());
+			compilation_logger::emit_variable_not_found_error(node.get_declaration_line_number(), node.get_name());
 			return false;
 		}
 
@@ -86,7 +86,7 @@ namespace channel {
 		}
 
 		// const type highest_precision = get_highest_precision_type(node.get_declaration_type(), assigned_value->get_type());
-		llvm::Value* upcasted_assigned_value = cast_value(out_value, node.get_declaration_type(), node.get_declaration_line_index());
+		llvm::Value* upcasted_assigned_value = cast_value(out_value, node.get_declaration_type(), node.get_declaration_line_number());
 
 		// store the initial value in the memory
 		llvm::AllocaInst* alloca = m_builder.CreateAlloca(
@@ -99,13 +99,13 @@ namespace channel {
 
 		// add the variable to the current scope
 		if (m_global_named_values[node.get_name()]) {
-			compilation_logger::emit_local_variable_already_defined_in_global_scope_error(node.get_declaration_line_index(), node.get_name());
+			compilation_logger::emit_local_variable_already_defined_in_global_scope_error(node.get_declaration_line_number(), node.get_name());
 			return false;
 		}
 
 		const auto insertion_result = m_scope->add_named_value(node.get_name(), new value(node.get_name(), node.get_declaration_type(), alloca));
 		if (!insertion_result.second) {
-			compilation_logger::emit_local_variable_already_defined_error(node.get_declaration_line_index(), node.get_name());
+			compilation_logger::emit_local_variable_already_defined_error(node.get_declaration_line_number(), node.get_name());
 			return false;
 		}
 
@@ -127,7 +127,7 @@ namespace channel {
 		}
 
 		// const type highest_precision = get_highest_precision_type(node.get_declaration_type(), initial_value->get_type());
-		llvm::Value* upcasted_initial_value = cast_value(assigned_value, node.get_declaration_type(), node.get_declaration_line_index());
+		llvm::Value* upcasted_initial_value = cast_value(assigned_value, node.get_declaration_type(), node.get_declaration_line_number());
 
 		// create a global variable
 		out_value = new value(
@@ -145,7 +145,7 @@ namespace channel {
 		// add the variable to the m_global_named_values map
 		const auto insertion_result = m_global_named_values.insert({ node.get_name(),  out_value });
 		if (!insertion_result.second) {
-			compilation_logger::emit_global_variable_already_defined_error(node.get_declaration_line_index(), node.get_name());
+			compilation_logger::emit_global_variable_already_defined_error(node.get_declaration_line_number(), node.get_name());
 			return false;
 		}
 

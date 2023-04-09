@@ -33,7 +33,8 @@ namespace channel {
     class global_declaration_node;
 }
 
-#include "abstract_syntax_tree/value.h"
+#include "../llvm_wrappers/value.h"
+#include "../llvm_wrappers/function.h"
 
 namespace channel {
     /**

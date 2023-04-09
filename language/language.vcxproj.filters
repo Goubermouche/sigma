@@ -33,7 +33,7 @@
     <ClCompile Include="source\codegen\visitor\codegen_visitor.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="source\codegen\visitor.cpp">
+    <ClCompile Include="source\codegen\visitor\visitor.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="source\lexer\lexer.cpp">
@@ -114,7 +114,7 @@
     <ClCompile Include="source\codegen\abstract_syntax_tree\keywords\types\unsigned_int\keyword_u64_node.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="source\codegen\abstract_syntax_tree\value.cpp">
+    <ClCompile Include="source\codegen\llvm_wrappers\value.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="source\type.cpp">
@@ -147,6 +147,9 @@
     <ClCompile Include="source\codegen\visitor\codegen_visitor_flow_control.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="source\codegen\llvm_wrappers\function.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="test\main.ch" />
@@ -167,7 +170,7 @@
     <ClInclude Include="source\codegen\visitor\codegen_visitor.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="source\codegen\visitor.h">
+    <ClInclude Include="source\codegen\visitor\visitor.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="source\lexer\lexer.h">
@@ -260,7 +263,7 @@
     <ClInclude Include="source\codegen\abstract_syntax_tree\keywords\types\unsigned_int\keyword_u32_node.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="source\codegen\abstract_syntax_tree\value.h">
+    <ClInclude Include="source\codegen\llvm_wrappers\value.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="source\codegen\abstract_syntax_tree\keywords\types\floating_point\keyword_f32_node.h">
@@ -273,6 +276,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="source\compiler\compilation_logger.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="source\codegen\llvm_wrappers\function.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

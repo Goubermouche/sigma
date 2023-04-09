@@ -1,8 +1,8 @@
 #include "assignment_node.h"
 
 namespace channel {
-	assignment_node::assignment_node(u64 line_index, const std::string& name, node* expression)
-		: node(line_index), m_name(name), m_expression(expression) {}
+	assignment_node::assignment_node(u64 line_number, const std::string& name, node* expression)
+		: node(line_number), m_name(name), m_expression(expression) {}
 
 	bool assignment_node::accept(visitor& visitor, value*& out_value) {
 		LOG_NODE_NAME(assignment_node);

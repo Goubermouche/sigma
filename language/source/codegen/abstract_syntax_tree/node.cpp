@@ -1,15 +1,11 @@
 #include "node.h"
-#include "../visitor.h"
+#include "../visitor/visitor.h"
 
 namespace channel {
-    node::node(u64 line_index)
-	    : m_line_index(line_index) {}
+    node::node(u64 line_number)
+	    : m_line_number(line_number) {}
 
-    u64 node::get_declaration_line_index() const {
-        return m_line_index;
+    u64 node::get_declaration_line_number() const {
+        return m_line_number;
     }
-
-    //void node::set_declaration_line_index(u64 line_index) {
-    //    m_line_index = line_index;
-    //}
 }

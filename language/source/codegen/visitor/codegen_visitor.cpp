@@ -23,8 +23,11 @@ namespace channel {
 		}
 
 		initialize_global_variables();
-		std::cout << "----------------------------\n";
 		return true;
+	}
+
+	std::shared_ptr<llvm::Module> codegen_visitor::get_module() {
+		return m_module;
 	}
 
 	void codegen_visitor::initialize_global_variables() {

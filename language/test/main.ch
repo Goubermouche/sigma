@@ -4,6 +4,7 @@
 // todo: imports
 // todo: explicit cast
 //       cast<i32>(value)
+// todo: check for, and handle, divide by 0 exceptions
 
 f32 f = 100.0f;
 u64 v = 20 * f;

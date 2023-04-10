@@ -22,6 +22,8 @@ namespace channel {
 		codegen_visitor();
 
 		bool generate(parser& parser);
+		std::shared_ptr<llvm::Module> get_module();
+
 		void print_intermediate_representation() const;
 		bool verify_intermediate_representation() const;
 	private:
@@ -90,6 +92,6 @@ namespace channel {
 		// llvm boilerplate
 		llvm::LLVMContext m_context;
 		llvm::IRBuilder<> m_builder;
-		std::unique_ptr<llvm::Module> m_module;
+		std::shared_ptr<llvm::Module> m_module;
 	};
 }

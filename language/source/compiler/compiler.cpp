@@ -1,20 +1,22 @@
 #include "compiler.h"
 #include "../codegen/visitor/codegen_visitor.h"
 
+// llvm
 #include "llvm/Support/VirtualFileSystem.h"
-#include "llvm/IR/Module.h"
-#include "llvm/MC/TargetRegistry.h"
-#include "llvm/Support/Host.h"
 #include "llvm/Support/TargetSelect.h"
 #include "llvm/Support/raw_ostream.h"
+#include "llvm/Support/Host.h"
+#include "llvm/IR/LegacyPassManager.h"
+#include "llvm/MC/TargetRegistry.h"
 #include "llvm/Target/TargetMachine.h"
 #include "llvm/Target/TargetOptions.h"
-#include "llvm/IR/LegacyPassManager.h"
+#include "llvm/Transforms/IPO.h"
+#include "llvm/Transforms/IPO/PassManagerBuilder.h"
+
+// clang
 #include "clang/Driver/Driver.h"
 #include "clang/Driver/Compilation.h"
 #include "clang/Frontend/TextDiagnosticPrinter.h"
-
-#define EXE_PATH "main.exe"
 
 namespace channel {
 	void compiler::compile(const std::string& source_file) {
@@ -23,6 +25,7 @@ namespace channel {
 		timer timer;
 		timer.start();
 
+		// generate LLVM IR
 		parser parser(source_file);
 		codegen_visitor visitor;
 
@@ -36,19 +39,23 @@ namespace channel {
 			return;
 		}
 
+		// compile the file into an exe
+		// get the generated module
 		const std::shared_ptr<llvm::Module> module = visitor.get_module();
+        const std::string target_triple = llvm::sys::getDefaultTargetTriple();
 
-        const auto target_triple = llvm::sys::getDefaultTargetTriple();
+		// initialize LLVM targets
 		llvm::InitializeAllTargetInfos();
 		llvm::InitializeAllTargets();
 		llvm::InitializeAllTargetMCs();
 		llvm::InitializeAllAsmParsers();
 		llvm::InitializeAllAsmPrinters();
 
-		std::string Error;
-		const auto target = llvm::TargetRegistry::lookupTarget(target_triple, Error);
-		const auto cpu = "generic";
-		const auto features = "";
+		// create the target machine 
+		std::string error;
+		const auto target = llvm::TargetRegistry::lookupTarget(target_triple, error);
+		constexpr auto cpu = "generic";
+		constexpr auto features = "";
 
 		const llvm::TargetOptions target_options;
 		constexpr auto relocation_model = llvm::Optional<llvm::Reloc::Model>();
@@ -57,51 +64,69 @@ namespace channel {
 		module->setDataLayout(target_machine->createDataLayout());
 		module->setTargetTriple(target_triple);
 
-		constexpr auto file_name = "output.o";
+		const std::string o_file = "test/out.o";
+		const std::string exe_file = "test/out.exe";
 
-		std::cout << "creating object files\n";
-
+		// generate the .o file
 		{
 			std::error_code error_code;
-			llvm::raw_fd_ostream dest(file_name, error_code, llvm::sys::fs::OF_None);
+			llvm::raw_fd_ostream dest(o_file, error_code, llvm::sys::fs::OF_None);
+			llvm::legacy::PassManager pass_manager;
+			llvm::PassManagerBuilder builder;
 
-			llvm::legacy::PassManager pass;
-			constexpr auto file_type = llvm::CGFT_ObjectFile;
+			// add optimization passes
+			builder.OptLevel = 3; // set the optimization level (0-3)
+			builder.SizeLevel = 0; // set the size optimization level (0-2)
+			builder.Inliner = llvm::createFunctionInliningPass(builder.OptLevel, builder.SizeLevel, false);
+			builder.LoopVectorize = true;
+			builder.SLPVectorize = true;
+			builder.populateModulePassManager(pass_manager);
 
-			if (target_machine->addPassesToEmitFile(pass, dest, nullptr, file_type)) {
+			if (target_machine->addPassesToEmitFile(pass_manager, dest, nullptr, llvm::CGFT_ObjectFile)) {
 				llvm::errs() << "the target machine can't emit a file of this type\n";
 				return;
 			}
 
-			pass.run(*module);
+			pass_manager.run(*module);
 			dest.flush();
 		}
 
-		std::cout << "object files created\n";
-
+		// compile the .o file with clang
+		// create the compiler 
 		const llvm::IntrusiveRefCntPtr diagnostic_options = new clang::DiagnosticOptions;
 		auto* diagnostic_client = new clang::TextDiagnosticPrinter(llvm::errs(), &*diagnostic_options);
 		const llvm::IntrusiveRefCntPtr diagnostic_id(new clang::DiagnosticIDs());
 		clang::DiagnosticsEngine diagnostics_engine(diagnostic_id, &*diagnostic_options, diagnostic_client);
 		clang::driver::Driver driver("/usr/bin/clang++-12", target_triple, diagnostics_engine);
 
-		const std::vector<const char*> argument_vector {
+		// generate clang arguments
+		const std::vector argument_vector {
 			"-g",
-			"output.o",
+			o_file.c_str(),
 			"-o",
-			"main.exe"/*,
-			"-v"*/
+			exe_file.c_str()
 		};
 
-		const llvm::ArrayRef<const char*> arguments(argument_vector);
+		// run the compiler 
+		const llvm::ArrayRef arguments(argument_vector);
 		const std::unique_ptr<clang::driver::Compilation> compilation(driver.BuildCompilation(arguments));
 
-		if (compilation && !compilation->containsError()) {
-			llvm::SmallVector<std::pair<int, const clang::driver::Command*>, 4> failing_commands;
-			driver.ExecuteCompilation(*compilation, failing_commands);
+		// check for compilation errors
+		if (compilation) {
+			if(!compilation->containsError()) {
+				llvm::SmallVector<std::pair<int, const clang::driver::Command*>, 4> failing_commands;
+				driver.ExecuteCompilation(*compilation, failing_commands);
+			}
+			else {
+				return;
+			}
 		}
 
-		remove(file_name);
+		// delete the .o file
+		if(!detail::delete_file(o_file)) {
+			compilation_logger::emit_delete_file_failed_error(o_file);
+			return;
+		}
 
 		std::cout << "successfully compiled in " << timer.elapsed() << "ms\n";
 	}

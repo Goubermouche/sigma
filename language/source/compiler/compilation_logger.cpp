@@ -90,6 +90,12 @@ namespace channel {
 		);
 	}
 
+	void compilation_logger::emit_delete_file_failed_error(const std::string& filepath)	{
+		emit_error(
+			"cannot delete file '" + filepath + "'"
+		);
+	}
+
 	void compilation_logger::emit_warning(u64 line_number, const std::string& message) {
 		console::log(color::cyan, "[warning:" + std::to_string(line_number) + "]: ");
 		console::log(color::white, message + '\n');
@@ -97,6 +103,11 @@ namespace channel {
 
 	void compilation_logger::emit_error(u64 line_number, const std::string& message) {
 		console::log(color::red, "[error:" + std::to_string(line_number) + "]: ");
+		console::log(color::white, message + '\n');
+	}
+
+	void compilation_logger::emit_error(const std::string& message)	{
+		console::log(color::red, "[error]: ");
 		console::log(color::white, message + '\n');
 	}
 }

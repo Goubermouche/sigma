@@ -5,6 +5,7 @@
 namespace channel{
 	class compilation_logger {
 	public:
+		// IR
 		// warnings
 		static void emit_cast_warning(u64 line_number, type original_type, type target_type);
 		static void emit_function_return_type_cast_warning(u64 line_number, type original_type, type target_type);
@@ -23,8 +24,13 @@ namespace channel{
 
 		static void emit_function_not_found_error(u64 line_number, const std::string& function_name);
 		static void emit_function_already_defined_error(u64 line_number, const std::string& function_name);
+
+		// compilation
+		// errors
+		static void emit_delete_file_failed_error(const std::string& filepath);
 	private:
 		static void emit_warning(u64 line_number, const std::string& message);
 		static void emit_error(u64 line_number, const std::string& message);
+		static void emit_error(const std::string& message);
 	};
 }

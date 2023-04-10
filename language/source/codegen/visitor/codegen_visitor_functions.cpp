@@ -40,6 +40,10 @@ namespace channel {
 			}
 		}
 
+		for(const auto& [a, b] : node.get_arguments()) {
+			std::cout << type_to_string(b) << " " << a << '\n';
+		}
+
 		// restore the previous scope
 		m_scope = prev_scope;
 

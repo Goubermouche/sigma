@@ -15,6 +15,7 @@ namespace channel{
 		static void emit_unexpected_token_error(u64 line_number, token expected_token, token received_token);
 		static void emit_unhandled_token_error(u64 line_number, token received_token);
 		static void emit_unhandled_number_format_error(u64 line_number, token received_token);
+		static void emit_token_is_not_type_error(u64 line_number, token received_token);
 		static void emit_main_entry_point_missing_error();
 
 		static void emit_variable_not_found_error(u64 line_number, const std::string& variable_name);
@@ -24,6 +25,7 @@ namespace channel{
 
 		static void emit_function_not_found_error(u64 line_number, const std::string& function_name);
 		static void emit_function_already_defined_error(u64 line_number, const std::string& function_name);
+		static void emit_function_argument_missing_error(u64 line_number);
 
 		// compilation
 		// errors

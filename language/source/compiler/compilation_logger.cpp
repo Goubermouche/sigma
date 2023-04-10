@@ -43,6 +43,13 @@ namespace channel {
 		);
 	}
 
+	void compilation_logger::emit_token_is_not_type_error(u64 line_number, token received_token) {
+		emit_error(
+			line_number,
+			"unexpected non-type token received ('" + token_to_string(received_token) + "')"
+		);
+	}
+
 	void compilation_logger::emit_main_entry_point_missing_error() {
 		console::log(color::red, "[error]: ");
 		console::log(color::white, "unable to locate main entry point\n");
@@ -87,6 +94,13 @@ namespace channel {
 		emit_error(
 			line_number,
 			"function '" + function_name + "' has already been defined before"
+		);
+	}
+
+	void compilation_logger::emit_function_argument_missing_error(u64 line_number) {
+		emit_error(
+			line_number,
+			"function argument missing in function declaration"
 		);
 	}
 

@@ -387,36 +387,68 @@ namespace channel {
 		const u64 line_number = m_lexer.get_current_line_number();
 
 		consume_next_token();
-		// parse the function name (e.g., main, other_function)
 		const std::string name = m_lexer.get_identifier();
 		consume_next_token();
 
-		// parse the parameter list (assume no parameters for now)
-		// todo: add support for parameters
-		if (!expect_next_token(token::l_parenthesis) || !expect_next_token(token::r_parenthesis)) {
-			return false; // return on failure
+		std::vector<std::pair<std::string, type>> arguments;
+		if (!expect_next_token(token::l_parenthesis)) {
+			return false;
 		}
 
-		// parse the opening curly brace '{'
+		if (m_current_token != token::r_parenthesis) {
+			while (true) {
+				if (!is_token_return_type(m_current_token)) {
+					compilation_logger::emit_token_is_not_type_error(m_lexer.get_current_line_number(), m_current_token);
+					return false;
+				}
+
+				type param_type = token_to_type(m_current_token);
+				consume_next_token();
+				std::string param_name = m_lexer.get_identifier();
+				consume_next_token();
+
+				arguments.emplace_back(param_name, param_type);
+
+				if (m_current_token == token::comma) {
+					consume_next_token();
+
+					// handle the case where there is a trailing comma
+					if (m_current_token == token::r_parenthesis) {
+						compilation_logger::emit_function_argument_missing_error(m_lexer.get_current_line_number());
+						return false; // return false when encountering a trailing comma
+					}
+				}
+				else if (!expect_next_token(token::r_parenthesis)) {
+					return false;
+				}
+				else {
+					break;
+				}
+			}
+		}
+		else {
+			if (!expect_next_token(token::r_parenthesis)) {
+				return false;
+			}
+		}
+
 		if (!expect_next_token(token::l_brace)) {
-			return false; // return on failure
+			return false;
 		}
 
-		// parse statements inside the function
 		std::vector<node*> statements;
 		while (m_current_token != token::r_brace) {
 			node* statement;
 
 			if (!parse_local_statement(statement)) {
-				return false; // return on failure
+				return false;
 			}
 
 			statements.push_back(statement);
 		}
 
-		// consume the closing curly brace '}'
 		consume_next_token();
-		out_node = new function_node(line_number, return_type, name, std::move(statements));
+		out_node = new function_node(line_number, return_type, name, std::move(statements), std::move(arguments));
 		return true;
 	}
 

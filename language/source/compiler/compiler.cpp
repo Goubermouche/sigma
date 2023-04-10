@@ -39,6 +39,8 @@ namespace channel {
 			return;
 		}
 
+		// visitor.print_intermediate_representation();
+
 		// compile the file into an exe
 		// get the generated module
 		const std::shared_ptr<llvm::Module> module = visitor.get_module();

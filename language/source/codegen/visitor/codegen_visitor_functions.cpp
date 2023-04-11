@@ -7,15 +7,21 @@ namespace channel {
 	bool codegen_visitor::visit_function_node(function_node& node, value*& out_value) {
 		// get the function return type
 		llvm::Type* return_type = type_to_llvm_type(node.get_return_type(), m_context);
-		llvm::FunctionType* func_type = llvm::FunctionType::get(return_type, false);
+
+		// convert the argument types to LLVM types and store them in a vector
+		std::vector<llvm::Type*> param_types;
+		for (const auto& [arg_name, arg_type] : node.get_arguments()) {
+			param_types.push_back(type_to_llvm_type(arg_type, m_context));
+		}
 
 		// create the LLVM function
+		llvm::FunctionType* func_type = llvm::FunctionType::get(return_type, param_types, false);
 		llvm::Function* func = llvm::Function::Create(func_type, llvm::Function::ExternalLinkage, node.get_name(), m_module.get());
 
 		// add it to our function map
 		const auto insertion_result = m_functions.insert({
 			node.get_name(),
-			new function(node.get_return_type(), func)
+			new function(node.get_return_type(), func, node.get_arguments())
 		});
 
 		// check for multiple definitions by checking if the function has already been added to our map
@@ -32,6 +38,28 @@ namespace channel {
 		scope* prev_scope = m_scope;
 		m_scope = new scope(prev_scope);
 
+		// create the given arguments 
+		u64 index = 0;
+		for (const auto& [arg_name, arg_type] : node.get_arguments()) {
+			// get the corresponding LLVM function argument
+			llvm::Argument* llvm_arg = func->arg_begin() + index;
+			llvm_arg->setName(arg_name);
+
+			// create an alloca instruction for the argument and store the incoming value into it
+			llvm::AllocaInst* alloca = m_builder.CreateAlloca(type_to_llvm_type(arg_type, m_context), nullptr, arg_name);
+			m_builder.CreateStore(llvm_arg, alloca);
+
+
+			// add the alloca to the current scope
+			m_scope->add_named_value(arg_name, new value(
+				arg_name,
+				arg_type,
+				alloca
+			));
+
+			index++;
+		}
+
 		// accept all statements inside the function
 		for (const auto& statement : node.get_statements()) {
 			value* temp_statement_value;
@@ -39,11 +67,7 @@ namespace channel {
 				return false;
 			}
 		}
-
-		for(const auto& [a, b] : node.get_arguments()) {
-			std::cout << type_to_string(b) << " " << a << '\n';
-		}
-
+	
 		// restore the previous scope
 		m_scope = prev_scope;
 
@@ -66,7 +90,7 @@ namespace channel {
 
 	bool codegen_visitor::visit_function_call_node(function_call_node& node, value*& out_value) {
 		// get a reference to the function
-		llvm::Function* func = m_functions[node.get_name()]->get_function();
+		function* func = m_functions[node.get_name()];
 		// check if it exists
 		if (!func) {
 			compilation_logger::emit_function_not_found_error(node.get_declaration_line_number(), node.get_name());
@@ -74,17 +98,34 @@ namespace channel {
 		}
 
 		// todo: generate code for each argument expression
-		std::vector<llvm::Value*> argument_values;
-		//for (channel::node* argument : node.get_arguments()) {
-		//	if(!argument->accept(*this, )) {
-		//		
-		//	}
-		//	
-		//	argument_values.push_back(m_builder.GetInsertBlock()->getParent()->back().getTerminator()->getOperand(0));
-		//}
+		const std::vector<std::pair<std::string, type>>& arguments = func->get_arguments();
+		const std::vector<channel::node*>& given_arguments = node.get_arguments();
+
+		if(arguments.size() != given_arguments.size()) {
+			compilation_logger::emit_function_argument_count_mismatch_error(node.get_declaration_line_number(), node.get_name());
+			return false;
+		}
+
+		std::vector<llvm::Value*> argument_values(arguments.size());
+
+		for (u64 i = 0; i < arguments.size(); i++) {
+			// get tje argument value
+			value* argument_value;
+			if(!given_arguments[i]->accept(*this, argument_value)) {
+				return false;
+			}
+
+			// todo: use type upcasting instead
+			if(arguments[i].second != argument_value->get_type()) {
+				compilation_logger::emit_function_argument_type_mismatch_error(node.get_declaration_line_number(), i, arguments[i].second, argument_value->get_type(), node.get_name());
+				return false;
+			}
+
+			argument_values[i] = argument_value->get_value();
+		}
 
 		// return the function call as the value
-		out_value = new value(node.get_name(), type::function_call, m_builder.CreateCall(func, argument_values, "call"));
+		out_value = new value(node.get_name(), type::function_call, m_builder.CreateCall(func->get_function(), argument_values, "call"));
 		return true;
 	}
 }

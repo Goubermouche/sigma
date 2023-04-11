@@ -104,6 +104,26 @@ namespace channel {
 		);
 	}
 
+	void compilation_logger::emit_function_argument_count_mismatch_error(u64 line_number, const std::string& function_name) {
+		emit_error(
+			line_number,
+			"function argument count mismatch for function '" + function_name + "'"
+		);
+	}
+
+	void compilation_logger::emit_function_argument_type_mismatch_error(u64 line_number, u64 argument_index, type expected_type, type received_type, const std::string& function_name) {
+		emit_error(
+			line_number,
+			"function argument of function call to '"
+			+ function_name
+			+ "' at index '"
+			+ std::to_string(argument_index) 
+			+ "' resulted in a type mismatch (expected '"
+			+ type_to_string(expected_type) + "', but got '"
+			+ type_to_string(received_type) + "' instead)"
+		);
+	}
+
 	void compilation_logger::emit_delete_file_failed_error(const std::string& filepath)	{
 		emit_error(
 			"cannot delete file '" + filepath + "'"

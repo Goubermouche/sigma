@@ -448,7 +448,7 @@ namespace channel {
 		}
 
 		consume_next_token();
-		out_node = new function_node(line_number, return_type, name, std::move(statements), std::move(arguments));
+		out_node = new function_node(line_number, return_type, name, statements, arguments);
 		return true;
 	}
 

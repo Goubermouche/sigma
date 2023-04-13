@@ -1,0 +1,151 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{60661140-4C33-6C4B-754C-5AF36178A1D9}</ProjectGuid>
+    <IgnoreWarnCompileDuplicatedFilename>true</IgnoreWarnCompileDuplicatedFilename>
+    <Keyword>Win32Proj</Keyword>
+    <RootNamespace>compiler</RootNamespace>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <CharacterSet>Unicode</CharacterSet>
+    <PlatformToolset>v143</PlatformToolset>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <LinkIncremental>false</LinkIncremental>
+    <OutDir>..\..\bin\Release\compiler\</OutDir>
+    <IntDir>..\..\bin-int\Release\compiler\</IntDir>
+    <TargetName>compiler</TargetName>
+    <TargetExt>.exe</TargetExt>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>source;..\..\..\thirdparty\llvm\llvm-16.0.0\llvm-install\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <Optimization>Full</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <MinimalRebuild>false</MinimalRebuild>
+      <StringPooling>true</StringPooling>
+      <LanguageStandard>stdcpplatest</LanguageStandard>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <AdditionalDependencies>LLVMAArch64AsmParser.lib;LLVMAArch64CodeGen.lib;LLVMAArch64Desc.lib;LLVMAArch64Disassembler.lib;LLVMAArch64Info.lib;LLVMAArch64Utils.lib;LLVMAMDGPUAsmParser.lib;LLVMAMDGPUCodeGen.lib;LLVMAMDGPUDesc.lib;LLVMAMDGPUDisassembler.lib;LLVMAMDGPUInfo.lib;LLVMAMDGPUTargetMCA.lib;LLVMAMDGPUUtils.lib;LLVMARMAsmParser.lib;LLVMARMCodeGen.lib;LLVMARMDesc.lib;LLVMARMDisassembler.lib;LLVMARMInfo.lib;LLVMARMUtils.lib;LLVMAVRAsmParser.lib;LLVMAVRCodeGen.lib;LLVMAVRDesc.lib;LLVMAVRDisassembler.lib;LLVMAVRInfo.lib;LLVMAggressiveInstCombine.lib;LLVMAnalysis.lib;LLVMAsmParser.lib;LLVMAsmPrinter.lib;LLVMBPFAsmParser.lib;LLVMBPFCodeGen.lib;LLVMBPFDesc.lib;LLVMBPFDisassembler.lib;LLVMBPFInfo.lib;LLVMBinaryFormat.lib;LLVMBitReader.lib;LLVMBitWriter.lib;LLVMBitstreamReader.lib;LLVMCFGuard.lib;LLVMCodeGen.lib;LLVMCore.lib;LLVMCoroutines.lib;LLVMCoverage.lib;LLVMDWARFLinker.lib;LLVMDWARFLinkerParallel.lib;LLVMDWP.lib;LLVMDebugInfoCodeView.lib;LLVMDebugInfoDWARF.lib;LLVMDebugInfoGSYM.lib;LLVMDebugInfoLogicalView.lib;LLVMDebugInfoMSF.lib;LLVMDebugInfoPDB.lib;LLVMDemangle.lib;LLVMDlltoolDriver.lib;LLVMExecutionEngine.lib;LLVMExtensions.lib;LLVMFileCheck.lib;LLVMFrontendHLSL.lib;LLVMFrontendOpenACC.lib;LLVMFrontendOpenMP.lib;LLVMFuzzMutate.lib;LLVMFuzzerCLI.lib;LLVMGlobalISel.lib;LLVMHexagonAsmParser.lib;LLVMHexagonCodeGen.lib;LLVMHexagonDesc.lib;LLVMHexagonDisassembler.lib;LLVMHexagonInfo.lib;LLVMIRPrinter.lib;LLVMIRReader.lib;LLVMInstCombine.lib;LLVMInstrumentation.lib;LLVMInterfaceStub.lib;LLVMInterpreter.lib;LLVMJITLink.lib;LLVMLTO.lib;LLVMLanaiAsmParser.lib;LLVMLanaiCodeGen.lib;LLVMLanaiDesc.lib;LLVMLanaiDisassembler.lib;LLVMLanaiInfo.lib;LLVMLibDriver.lib;LLVMLineEditor.lib;LLVMLinker.lib;LLVMLoongArchAsmParser.lib;LLVMLoongArchCodeGen.lib;LLVMLoongArchDesc.lib;LLVMLoongArchDisassembler.lib;LLVMLoongArchInfo.lib;LLVMMC.lib;LLVMMCA.lib;LLVMMCDisassembler.lib;LLVMMCJIT.lib;LLVMMCParser.lib;LLVMMIRParser.lib;LLVMMSP430AsmParser.lib;LLVMMSP430CodeGen.lib;LLVMMSP430Desc.lib;LLVMMSP430Disassembler.lib;LLVMMSP430Info.lib;LLVMMipsAsmParser.lib;LLVMMipsCodeGen.lib;LLVMMipsDesc.lib;LLVMMipsDisassembler.lib;LLVMMipsInfo.lib;LLVMNVPTXCodeGen.lib;LLVMNVPTXDesc.lib;LLVMNVPTXInfo.lib;LLVMObjCARCOpts.lib;LLVMObjCopy.lib;LLVMObject.lib;LLVMObjectYAML.lib;LLVMOption.lib;LLVMOrcJIT.lib;LLVMOrcShared.lib;LLVMOrcTargetProcess.lib;LLVMPasses.lib;LLVMPowerPCAsmParser.lib;LLVMPowerPCCodeGen.lib;LLVMPowerPCDesc.lib;LLVMPowerPCDisassembler.lib;LLVMPowerPCInfo.lib;LLVMProfileData.lib;LLVMRISCVAsmParser.lib;LLVMRISCVCodeGen.lib;LLVMRISCVDesc.lib;LLVMRISCVDisassembler.lib;LLVMRISCVInfo.lib;LLVMRISCVTargetMCA.lib;LLVMRemarks.lib;LLVMRuntimeDyld.lib;LLVMScalarOpts.lib;LLVMSelectionDAG.lib;LLVMSparcAsmParser.lib;LLVMSparcCodeGen.lib;LLVMSparcDesc.lib;LLVMSparcDisassembler.lib;LLVMSparcInfo.lib;LLVMSupport.lib;LLVMSymbolize.lib;LLVMSystemZAsmParser.lib;LLVMSystemZCodeGen.lib;LLVMSystemZDesc.lib;LLVMSystemZDisassembler.lib;LLVMSystemZInfo.lib;LLVMTableGen.lib;LLVMTarget.lib;LLVMTargetParser.lib;LLVMTextAPI.lib;LLVMTransformUtils.lib;LLVMVEAsmParser.lib;LLVMVECodeGen.lib;LLVMVEDesc.lib;LLVMVEDisassembler.lib;LLVMVEInfo.lib;LLVMVectorize.lib;LLVMWebAssemblyAsmParser.lib;LLVMWebAssemblyCodeGen.lib;LLVMWebAssemblyDesc.lib;LLVMWebAssemblyDisassembler.lib;LLVMWebAssemblyInfo.lib;LLVMWebAssemblyUtils.lib;LLVMWindowsDriver.lib;LLVMWindowsManifest.lib;LLVMX86AsmParser.lib;LLVMX86CodeGen.lib;LLVMX86Desc.lib;LLVMX86Disassembler.lib;LLVMX86Info.lib;LLVMX86TargetMCA.lib;LLVMXCoreCodeGen.lib;LLVMXCoreDesc.lib;LLVMXCoreDisassembler.lib;LLVMXCoreInfo.lib;LLVMXRay.lib;LLVMipo.lib;advapi32.lib;clangAPINotes.lib;clangARCMigrate.lib;clangAST.lib;clangASTMatchers.lib;clangAnalysis.lib;clangAnalysisFlowSensitive.lib;clangAnalysisFlowSensitiveModels.lib;clangBasic.lib;clangCodeGen.lib;clangCrossTU.lib;clangDependencyScanning.lib;clangDirectoryWatcher.lib;clangDriver.lib;clangDynamicASTMatchers.lib;clangEdit.lib;clangExtractAPI.lib;clangFormat.lib;clangFrontend.lib;clangFrontendTool.lib;clangHandleCXX.lib;clangHandleLLVM.lib;clangIndex.lib;clangIndexSerialization.lib;clangInterpreter.lib;clangLex.lib;clangParse.lib;clangRewrite.lib;clangRewriteFrontend.lib;clangSema.lib;clangSerialization.lib;clangStaticAnalyzerCheckers.lib;clangStaticAnalyzerCore.lib;clangStaticAnalyzerFrontend.lib;clangSupport.lib;clangTooling.lib;clangToolingASTDiff.lib;clangToolingCore.lib;clangToolingInclusions.lib;clangToolingInclusionsStdlib.lib;clangToolingRefactoring.lib;clangToolingSyntax.lib;clangTransformer.lib;comdlg32.lib;delayimp.lib;gdi32.lib;kernel32.lib;ole32.lib;oleaut32.lib;psapi.lib;shell32.lib;user32.lib;uuid.lib;version.lib;winspool.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>..\..\..\thirdparty\llvm\llvm-16.0.0\llvm-install\lib;..\..\..\thirdparty\llvm\llvm-16.0.0\llvm-install\Release\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClInclude Include="source\codegen\abstract_syntax_tree\functions\function_call_node.h" />
+    <ClInclude Include="source\codegen\abstract_syntax_tree\functions\function_node.h" />
+    <ClInclude Include="source\codegen\abstract_syntax_tree\keywords\flow_control\return_node.h" />
+    <ClInclude Include="source\codegen\abstract_syntax_tree\keywords\types\floating_point\f32_node.h" />
+    <ClInclude Include="source\codegen\abstract_syntax_tree\keywords\types\floating_point\f64_node.h" />
+    <ClInclude Include="source\codegen\abstract_syntax_tree\keywords\types\signed_int\i16_node.h" />
+    <ClInclude Include="source\codegen\abstract_syntax_tree\keywords\types\signed_int\i32_node.h" />
+    <ClInclude Include="source\codegen\abstract_syntax_tree\keywords\types\signed_int\i64_node.h" />
+    <ClInclude Include="source\codegen\abstract_syntax_tree\keywords\types\signed_int\i8_node.h" />
+    <ClInclude Include="source\codegen\abstract_syntax_tree\keywords\types\unsigned_int\u16_node.h" />
+    <ClInclude Include="source\codegen\abstract_syntax_tree\keywords\types\unsigned_int\u32_node.h" />
+    <ClInclude Include="source\codegen\abstract_syntax_tree\keywords\types\unsigned_int\u64_node.h" />
+    <ClInclude Include="source\codegen\abstract_syntax_tree\keywords\types\unsigned_int\u8_node.h" />
+    <ClInclude Include="source\codegen\abstract_syntax_tree\node.h" />
+    <ClInclude Include="source\codegen\abstract_syntax_tree\operators\operator_addition_node.h" />
+    <ClInclude Include="source\codegen\abstract_syntax_tree\operators\operator_binary.h" />
+    <ClInclude Include="source\codegen\abstract_syntax_tree\operators\operator_division_node.h" />
+    <ClInclude Include="source\codegen\abstract_syntax_tree\operators\operator_modulo_node.h" />
+    <ClInclude Include="source\codegen\abstract_syntax_tree\operators\operator_multiplication_node.h" />
+    <ClInclude Include="source\codegen\abstract_syntax_tree\operators\operator_subtraction_node.h" />
+    <ClInclude Include="source\codegen\abstract_syntax_tree\variables\assignment_node.h" />
+    <ClInclude Include="source\codegen\abstract_syntax_tree\variables\declaration\declaration_node.h" />
+    <ClInclude Include="source\codegen\abstract_syntax_tree\variables\declaration\global_declaration_node.h" />
+    <ClInclude Include="source\codegen\abstract_syntax_tree\variables\declaration\local_declaration_node.h" />
+    <ClInclude Include="source\codegen\abstract_syntax_tree\variables\variable_node.h" />
+    <ClInclude Include="source\codegen\llvm_wrappers\function.h" />
+    <ClInclude Include="source\codegen\llvm_wrappers\value.h" />
+    <ClInclude Include="source\codegen\scope.h" />
+    <ClInclude Include="source\codegen\type.h" />
+    <ClInclude Include="source\codegen\visitor\codegen_visitor.h" />
+    <ClInclude Include="source\codegen\visitor\visitor.h" />
+    <ClInclude Include="source\compiler\compilation_logger.h" />
+    <ClInclude Include="source\compiler\compiler.h" />
+    <ClInclude Include="source\lexer\lexer.h" />
+    <ClInclude Include="source\lexer\token.h" />
+    <ClInclude Include="source\parser\parser.h" />
+    <ClInclude Include="source\utility\console.h" />
+    <ClInclude Include="source\utility\filesystem.h" />
+    <ClInclude Include="source\utility\macros.h" />
+    <ClInclude Include="source\utility\string_accessor.h" />
+    <ClInclude Include="source\utility\timer.h" />
+    <ClInclude Include="source\utility\types.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="main.cpp" />
+    <ClCompile Include="source\codegen\abstract_syntax_tree\functions\function_call_node.cpp" />
+    <ClCompile Include="source\codegen\abstract_syntax_tree\functions\function_node.cpp" />
+    <ClCompile Include="source\codegen\abstract_syntax_tree\keywords\flow_control\return_node.cpp" />
+    <ClCompile Include="source\codegen\abstract_syntax_tree\keywords\types\floating_point\f32_node.cpp" />
+    <ClCompile Include="source\codegen\abstract_syntax_tree\keywords\types\floating_point\f64_node.cpp" />
+    <ClCompile Include="source\codegen\abstract_syntax_tree\keywords\types\signed_int\i16_node.cpp" />
+    <ClCompile Include="source\codegen\abstract_syntax_tree\keywords\types\signed_int\i32_node.cpp" />
+    <ClCompile Include="source\codegen\abstract_syntax_tree\keywords\types\signed_int\i64_node.cpp" />
+    <ClCompile Include="source\codegen\abstract_syntax_tree\keywords\types\signed_int\i8_node.cpp" />
+    <ClCompile Include="source\codegen\abstract_syntax_tree\keywords\types\unsigned_int\u16_node.cpp" />
+    <ClCompile Include="source\codegen\abstract_syntax_tree\keywords\types\unsigned_int\u32_node.cpp" />
+    <ClCompile Include="source\codegen\abstract_syntax_tree\keywords\types\unsigned_int\u64_node.cpp" />
+    <ClCompile Include="source\codegen\abstract_syntax_tree\keywords\types\unsigned_int\u8_node.cpp" />
+    <ClCompile Include="source\codegen\abstract_syntax_tree\node.cpp" />
+    <ClCompile Include="source\codegen\abstract_syntax_tree\operators\operator_addition_node.cpp" />
+    <ClCompile Include="source\codegen\abstract_syntax_tree\operators\operator_binary.cpp" />
+    <ClCompile Include="source\codegen\abstract_syntax_tree\operators\operator_division_node.cpp" />
+    <ClCompile Include="source\codegen\abstract_syntax_tree\operators\operator_modulo_node.cpp" />
+    <ClCompile Include="source\codegen\abstract_syntax_tree\operators\operator_multiplication_node.cpp" />
+    <ClCompile Include="source\codegen\abstract_syntax_tree\operators\operator_subtraction_node.cpp" />
+    <ClCompile Include="source\codegen\abstract_syntax_tree\variables\assignment_node.cpp" />
+    <ClCompile Include="source\codegen\abstract_syntax_tree\variables\declaration\declaration_node.cpp" />
+    <ClCompile Include="source\codegen\abstract_syntax_tree\variables\declaration\global_declaration_node.cpp" />
+    <ClCompile Include="source\codegen\abstract_syntax_tree\variables\declaration\local_declaration_node.cpp" />
+    <ClCompile Include="source\codegen\abstract_syntax_tree\variables\variable_node.cpp" />
+    <ClCompile Include="source\codegen\llvm_wrappers\function.cpp" />
+    <ClCompile Include="source\codegen\llvm_wrappers\value.cpp" />
+    <ClCompile Include="source\codegen\scope.cpp" />
+    <ClCompile Include="source\codegen\type.cpp" />
+    <ClCompile Include="source\codegen\visitor\codegen_visitor.cpp" />
+    <ClCompile Include="source\codegen\visitor\codegen_visitor_flow_control.cpp" />
+    <ClCompile Include="source\codegen\visitor\codegen_visitor_functions.cpp" />
+    <ClCompile Include="source\codegen\visitor\codegen_visitor_operators.cpp" />
+    <ClCompile Include="source\codegen\visitor\codegen_visitor_types.cpp" />
+    <ClCompile Include="source\codegen\visitor\codegen_visitor_variables.cpp" />
+    <ClCompile Include="source\codegen\visitor\visitor.cpp" />
+    <ClCompile Include="source\compiler\compilation_logger.cpp" />
+    <ClCompile Include="source\compiler\compiler.cpp" />
+    <ClCompile Include="source\lexer\lexer.cpp" />
+    <ClCompile Include="source\parser\parser.cpp" />
+    <ClCompile Include="source\utility\console.cpp" />
+    <ClCompile Include="source\utility\filesystem.cpp" />
+    <ClCompile Include="source\utility\string_accessor.cpp" />
+    <ClCompile Include="source\utility\timer.cpp" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

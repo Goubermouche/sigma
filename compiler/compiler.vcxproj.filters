@@ -1,0 +1,325 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="source">
+      <UniqueIdentifier>{76FF3A1C-62A1-65F2-4B5C-7946379DEC42}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="source\codegen">
+      <UniqueIdentifier>{7AFF388B-66CD-2C91-4F61-9DB73BCE08F6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="source\codegen\abstract_syntax_tree">
+      <UniqueIdentifier>{52D5C200-BE8E-2DAB-47EE-4785B3A6E31A}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="source\codegen\abstract_syntax_tree\functions">
+      <UniqueIdentifier>{5A80425A-C6F0-44D3-8F0F-BF5BFB3E7DD4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="source\codegen\abstract_syntax_tree\keywords">
+      <UniqueIdentifier>{590B24B5-451E-240E-EE07-01FBDAF9C05B}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="source\codegen\abstract_syntax_tree\keywords\flow_control">
+      <UniqueIdentifier>{80068E04-EC78-D020-350D-06A5A1BE9A19}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="source\codegen\abstract_syntax_tree\keywords\types">
+      <UniqueIdentifier>{DD3DD9F9-C9D1-CEA1-3296-28561E490994}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="source\codegen\abstract_syntax_tree\keywords\types\floating_point">
+      <UniqueIdentifier>{2918A3FA-9536-B7C7-DE03-BDD94A61F2D0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="source\codegen\abstract_syntax_tree\keywords\types\signed_int">
+      <UniqueIdentifier>{90CC42E8-FC94-106C-C525-197E31AD40A7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="source\codegen\abstract_syntax_tree\keywords\types\unsigned_int">
+      <UniqueIdentifier>{D336D5D2-3FCA-3681-48B1-A637B4C3CD48}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="source\codegen\abstract_syntax_tree\operators">
+      <UniqueIdentifier>{C0C63842-2C37-3BBB-F555-B543618573BC}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="source\codegen\abstract_syntax_tree\variables">
+      <UniqueIdentifier>{7A1F716D-E68F-73E6-AFAE-ED6E1BDEABE7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="source\codegen\abstract_syntax_tree\variables\declaration">
+      <UniqueIdentifier>{0FAC3115-7B1E-7431-C4B2-A9B530643E2A}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="source\codegen\llvm_wrappers">
+      <UniqueIdentifier>{77160437-63D1-F3E2-0C89-6C2DF8223E73}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="source\codegen\visitor">
+      <UniqueIdentifier>{B92BCE93-A525-F7E5-8E92-8DF67A2B5D52}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="source\compiler">
+      <UniqueIdentifier>{C09F1F08-2C2B-8DCC-353C-10C1A146E9CC}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="source\lexer">
+      <UniqueIdentifier>{257A1413-11DD-A3B7-BA62-DC6DA6A46F3A}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="source\parser">
+      <UniqueIdentifier>{52EFAC7E-BEAF-28B5-87EA-7132F3696D91}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="source\utility">
+      <UniqueIdentifier>{D96BD900-C539-CD06-AECD-3D2D9A3AA96B}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="source\codegen\abstract_syntax_tree\functions\function_call_node.h">
+      <Filter>source\codegen\abstract_syntax_tree\functions</Filter>
+    </ClInclude>
+    <ClInclude Include="source\codegen\abstract_syntax_tree\functions\function_node.h">
+      <Filter>source\codegen\abstract_syntax_tree\functions</Filter>
+    </ClInclude>
+    <ClInclude Include="source\codegen\abstract_syntax_tree\keywords\flow_control\return_node.h">
+      <Filter>source\codegen\abstract_syntax_tree\keywords\flow_control</Filter>
+    </ClInclude>
+    <ClInclude Include="source\codegen\abstract_syntax_tree\keywords\types\floating_point\f32_node.h">
+      <Filter>source\codegen\abstract_syntax_tree\keywords\types\floating_point</Filter>
+    </ClInclude>
+    <ClInclude Include="source\codegen\abstract_syntax_tree\keywords\types\floating_point\f64_node.h">
+      <Filter>source\codegen\abstract_syntax_tree\keywords\types\floating_point</Filter>
+    </ClInclude>
+    <ClInclude Include="source\codegen\abstract_syntax_tree\keywords\types\signed_int\i16_node.h">
+      <Filter>source\codegen\abstract_syntax_tree\keywords\types\signed_int</Filter>
+    </ClInclude>
+    <ClInclude Include="source\codegen\abstract_syntax_tree\keywords\types\signed_int\i32_node.h">
+      <Filter>source\codegen\abstract_syntax_tree\keywords\types\signed_int</Filter>
+    </ClInclude>
+    <ClInclude Include="source\codegen\abstract_syntax_tree\keywords\types\signed_int\i64_node.h">
+      <Filter>source\codegen\abstract_syntax_tree\keywords\types\signed_int</Filter>
+    </ClInclude>
+    <ClInclude Include="source\codegen\abstract_syntax_tree\keywords\types\signed_int\i8_node.h">
+      <Filter>source\codegen\abstract_syntax_tree\keywords\types\signed_int</Filter>
+    </ClInclude>
+    <ClInclude Include="source\codegen\abstract_syntax_tree\keywords\types\unsigned_int\u16_node.h">
+      <Filter>source\codegen\abstract_syntax_tree\keywords\types\unsigned_int</Filter>
+    </ClInclude>
+    <ClInclude Include="source\codegen\abstract_syntax_tree\keywords\types\unsigned_int\u32_node.h">
+      <Filter>source\codegen\abstract_syntax_tree\keywords\types\unsigned_int</Filter>
+    </ClInclude>
+    <ClInclude Include="source\codegen\abstract_syntax_tree\keywords\types\unsigned_int\u64_node.h">
+      <Filter>source\codegen\abstract_syntax_tree\keywords\types\unsigned_int</Filter>
+    </ClInclude>
+    <ClInclude Include="source\codegen\abstract_syntax_tree\keywords\types\unsigned_int\u8_node.h">
+      <Filter>source\codegen\abstract_syntax_tree\keywords\types\unsigned_int</Filter>
+    </ClInclude>
+    <ClInclude Include="source\codegen\abstract_syntax_tree\node.h">
+      <Filter>source\codegen\abstract_syntax_tree</Filter>
+    </ClInclude>
+    <ClInclude Include="source\codegen\abstract_syntax_tree\operators\operator_addition_node.h">
+      <Filter>source\codegen\abstract_syntax_tree\operators</Filter>
+    </ClInclude>
+    <ClInclude Include="source\codegen\abstract_syntax_tree\operators\operator_binary.h">
+      <Filter>source\codegen\abstract_syntax_tree\operators</Filter>
+    </ClInclude>
+    <ClInclude Include="source\codegen\abstract_syntax_tree\operators\operator_division_node.h">
+      <Filter>source\codegen\abstract_syntax_tree\operators</Filter>
+    </ClInclude>
+    <ClInclude Include="source\codegen\abstract_syntax_tree\operators\operator_modulo_node.h">
+      <Filter>source\codegen\abstract_syntax_tree\operators</Filter>
+    </ClInclude>
+    <ClInclude Include="source\codegen\abstract_syntax_tree\operators\operator_multiplication_node.h">
+      <Filter>source\codegen\abstract_syntax_tree\operators</Filter>
+    </ClInclude>
+    <ClInclude Include="source\codegen\abstract_syntax_tree\operators\operator_subtraction_node.h">
+      <Filter>source\codegen\abstract_syntax_tree\operators</Filter>
+    </ClInclude>
+    <ClInclude Include="source\codegen\abstract_syntax_tree\variables\assignment_node.h">
+      <Filter>source\codegen\abstract_syntax_tree\variables</Filter>
+    </ClInclude>
+    <ClInclude Include="source\codegen\abstract_syntax_tree\variables\declaration\declaration_node.h">
+      <Filter>source\codegen\abstract_syntax_tree\variables\declaration</Filter>
+    </ClInclude>
+    <ClInclude Include="source\codegen\abstract_syntax_tree\variables\declaration\global_declaration_node.h">
+      <Filter>source\codegen\abstract_syntax_tree\variables\declaration</Filter>
+    </ClInclude>
+    <ClInclude Include="source\codegen\abstract_syntax_tree\variables\declaration\local_declaration_node.h">
+      <Filter>source\codegen\abstract_syntax_tree\variables\declaration</Filter>
+    </ClInclude>
+    <ClInclude Include="source\codegen\abstract_syntax_tree\variables\variable_node.h">
+      <Filter>source\codegen\abstract_syntax_tree\variables</Filter>
+    </ClInclude>
+    <ClInclude Include="source\codegen\llvm_wrappers\function.h">
+      <Filter>source\codegen\llvm_wrappers</Filter>
+    </ClInclude>
+    <ClInclude Include="source\codegen\llvm_wrappers\value.h">
+      <Filter>source\codegen\llvm_wrappers</Filter>
+    </ClInclude>
+    <ClInclude Include="source\codegen\scope.h">
+      <Filter>source\codegen</Filter>
+    </ClInclude>
+    <ClInclude Include="source\codegen\type.h">
+      <Filter>source\codegen</Filter>
+    </ClInclude>
+    <ClInclude Include="source\codegen\visitor\codegen_visitor.h">
+      <Filter>source\codegen\visitor</Filter>
+    </ClInclude>
+    <ClInclude Include="source\codegen\visitor\visitor.h">
+      <Filter>source\codegen\visitor</Filter>
+    </ClInclude>
+    <ClInclude Include="source\compiler\compilation_logger.h">
+      <Filter>source\compiler</Filter>
+    </ClInclude>
+    <ClInclude Include="source\compiler\compiler.h">
+      <Filter>source\compiler</Filter>
+    </ClInclude>
+    <ClInclude Include="source\lexer\lexer.h">
+      <Filter>source\lexer</Filter>
+    </ClInclude>
+    <ClInclude Include="source\lexer\token.h">
+      <Filter>source\lexer</Filter>
+    </ClInclude>
+    <ClInclude Include="source\parser\parser.h">
+      <Filter>source\parser</Filter>
+    </ClInclude>
+    <ClInclude Include="source\utility\console.h">
+      <Filter>source\utility</Filter>
+    </ClInclude>
+    <ClInclude Include="source\utility\filesystem.h">
+      <Filter>source\utility</Filter>
+    </ClInclude>
+    <ClInclude Include="source\utility\macros.h">
+      <Filter>source\utility</Filter>
+    </ClInclude>
+    <ClInclude Include="source\utility\string_accessor.h">
+      <Filter>source\utility</Filter>
+    </ClInclude>
+    <ClInclude Include="source\utility\timer.h">
+      <Filter>source\utility</Filter>
+    </ClInclude>
+    <ClInclude Include="source\utility\types.h">
+      <Filter>source\utility</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="main.cpp" />
+    <ClCompile Include="source\codegen\abstract_syntax_tree\functions\function_call_node.cpp">
+      <Filter>source\codegen\abstract_syntax_tree\functions</Filter>
+    </ClCompile>
+    <ClCompile Include="source\codegen\abstract_syntax_tree\functions\function_node.cpp">
+      <Filter>source\codegen\abstract_syntax_tree\functions</Filter>
+    </ClCompile>
+    <ClCompile Include="source\codegen\abstract_syntax_tree\keywords\flow_control\return_node.cpp">
+      <Filter>source\codegen\abstract_syntax_tree\keywords\flow_control</Filter>
+    </ClCompile>
+    <ClCompile Include="source\codegen\abstract_syntax_tree\keywords\types\floating_point\f32_node.cpp">
+      <Filter>source\codegen\abstract_syntax_tree\keywords\types\floating_point</Filter>
+    </ClCompile>
+    <ClCompile Include="source\codegen\abstract_syntax_tree\keywords\types\floating_point\f64_node.cpp">
+      <Filter>source\codegen\abstract_syntax_tree\keywords\types\floating_point</Filter>
+    </ClCompile>
+    <ClCompile Include="source\codegen\abstract_syntax_tree\keywords\types\signed_int\i16_node.cpp">
+      <Filter>source\codegen\abstract_syntax_tree\keywords\types\signed_int</Filter>
+    </ClCompile>
+    <ClCompile Include="source\codegen\abstract_syntax_tree\keywords\types\signed_int\i32_node.cpp">
+      <Filter>source\codegen\abstract_syntax_tree\keywords\types\signed_int</Filter>
+    </ClCompile>
+    <ClCompile Include="source\codegen\abstract_syntax_tree\keywords\types\signed_int\i64_node.cpp">
+      <Filter>source\codegen\abstract_syntax_tree\keywords\types\signed_int</Filter>
+    </ClCompile>
+    <ClCompile Include="source\codegen\abstract_syntax_tree\keywords\types\signed_int\i8_node.cpp">
+      <Filter>source\codegen\abstract_syntax_tree\keywords\types\signed_int</Filter>
+    </ClCompile>
+    <ClCompile Include="source\codegen\abstract_syntax_tree\keywords\types\unsigned_int\u16_node.cpp">
+      <Filter>source\codegen\abstract_syntax_tree\keywords\types\unsigned_int</Filter>
+    </ClCompile>
+    <ClCompile Include="source\codegen\abstract_syntax_tree\keywords\types\unsigned_int\u32_node.cpp">
+      <Filter>source\codegen\abstract_syntax_tree\keywords\types\unsigned_int</Filter>
+    </ClCompile>
+    <ClCompile Include="source\codegen\abstract_syntax_tree\keywords\types\unsigned_int\u64_node.cpp">
+      <Filter>source\codegen\abstract_syntax_tree\keywords\types\unsigned_int</Filter>
+    </ClCompile>
+    <ClCompile Include="source\codegen\abstract_syntax_tree\keywords\types\unsigned_int\u8_node.cpp">
+      <Filter>source\codegen\abstract_syntax_tree\keywords\types\unsigned_int</Filter>
+    </ClCompile>
+    <ClCompile Include="source\codegen\abstract_syntax_tree\node.cpp">
+      <Filter>source\codegen\abstract_syntax_tree</Filter>
+    </ClCompile>
+    <ClCompile Include="source\codegen\abstract_syntax_tree\operators\operator_addition_node.cpp">
+      <Filter>source\codegen\abstract_syntax_tree\operators</Filter>
+    </ClCompile>
+    <ClCompile Include="source\codegen\abstract_syntax_tree\operators\operator_binary.cpp">
+      <Filter>source\codegen\abstract_syntax_tree\operators</Filter>
+    </ClCompile>
+    <ClCompile Include="source\codegen\abstract_syntax_tree\operators\operator_division_node.cpp">
+      <Filter>source\codegen\abstract_syntax_tree\operators</Filter>
+    </ClCompile>
+    <ClCompile Include="source\codegen\abstract_syntax_tree\operators\operator_modulo_node.cpp">
+      <Filter>source\codegen\abstract_syntax_tree\operators</Filter>
+    </ClCompile>
+    <ClCompile Include="source\codegen\abstract_syntax_tree\operators\operator_multiplication_node.cpp">
+      <Filter>source\codegen\abstract_syntax_tree\operators</Filter>
+    </ClCompile>
+    <ClCompile Include="source\codegen\abstract_syntax_tree\operators\operator_subtraction_node.cpp">
+      <Filter>source\codegen\abstract_syntax_tree\operators</Filter>
+    </ClCompile>
+    <ClCompile Include="source\codegen\abstract_syntax_tree\variables\assignment_node.cpp">
+      <Filter>source\codegen\abstract_syntax_tree\variables</Filter>
+    </ClCompile>
+    <ClCompile Include="source\codegen\abstract_syntax_tree\variables\declaration\declaration_node.cpp">
+      <Filter>source\codegen\abstract_syntax_tree\variables\declaration</Filter>
+    </ClCompile>
+    <ClCompile Include="source\codegen\abstract_syntax_tree\variables\declaration\global_declaration_node.cpp">
+      <Filter>source\codegen\abstract_syntax_tree\variables\declaration</Filter>
+    </ClCompile>
+    <ClCompile Include="source\codegen\abstract_syntax_tree\variables\declaration\local_declaration_node.cpp">
+      <Filter>source\codegen\abstract_syntax_tree\variables\declaration</Filter>
+    </ClCompile>
+    <ClCompile Include="source\codegen\abstract_syntax_tree\variables\variable_node.cpp">
+      <Filter>source\codegen\abstract_syntax_tree\variables</Filter>
+    </ClCompile>
+    <ClCompile Include="source\codegen\llvm_wrappers\function.cpp">
+      <Filter>source\codegen\llvm_wrappers</Filter>
+    </ClCompile>
+    <ClCompile Include="source\codegen\llvm_wrappers\value.cpp">
+      <Filter>source\codegen\llvm_wrappers</Filter>
+    </ClCompile>
+    <ClCompile Include="source\codegen\scope.cpp">
+      <Filter>source\codegen</Filter>
+    </ClCompile>
+    <ClCompile Include="source\codegen\type.cpp">
+      <Filter>source\codegen</Filter>
+    </ClCompile>
+    <ClCompile Include="source\codegen\visitor\codegen_visitor.cpp">
+      <Filter>source\codegen\visitor</Filter>
+    </ClCompile>
+    <ClCompile Include="source\codegen\visitor\codegen_visitor_flow_control.cpp">
+      <Filter>source\codegen\visitor</Filter>
+    </ClCompile>
+    <ClCompile Include="source\codegen\visitor\codegen_visitor_functions.cpp">
+      <Filter>source\codegen\visitor</Filter>
+    </ClCompile>
+    <ClCompile Include="source\codegen\visitor\codegen_visitor_operators.cpp">
+      <Filter>source\codegen\visitor</Filter>
+    </ClCompile>
+    <ClCompile Include="source\codegen\visitor\codegen_visitor_types.cpp">
+      <Filter>source\codegen\visitor</Filter>
+    </ClCompile>
+    <ClCompile Include="source\codegen\visitor\codegen_visitor_variables.cpp">
+      <Filter>source\codegen\visitor</Filter>
+    </ClCompile>
+    <ClCompile Include="source\codegen\visitor\visitor.cpp">
+      <Filter>source\codegen\visitor</Filter>
+    </ClCompile>
+    <ClCompile Include="source\compiler\compilation_logger.cpp">
+      <Filter>source\compiler</Filter>
+    </ClCompile>
+    <ClCompile Include="source\compiler\compiler.cpp">
+      <Filter>source\compiler</Filter>
+    </ClCompile>
+    <ClCompile Include="source\lexer\lexer.cpp">
+      <Filter>source\lexer</Filter>
+    </ClCompile>
+    <ClCompile Include="source\parser\parser.cpp">
+      <Filter>source\parser</Filter>
+    </ClCompile>
+    <ClCompile Include="source\utility\console.cpp">
+      <Filter>source\utility</Filter>
+    </ClCompile>
+    <ClCompile Include="source\utility\filesystem.cpp">
+      <Filter>source\utility</Filter>
+    </ClCompile>
+    <ClCompile Include="source\utility\string_accessor.cpp">
+      <Filter>source\utility</Filter>
+    </ClCompile>
+    <ClCompile Include="source\utility\timer.cpp">
+      <Filter>source\utility</Filter>
+    </ClCompile>
+  </ItemGroup>
+</Project>

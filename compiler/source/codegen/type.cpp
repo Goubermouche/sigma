@@ -87,16 +87,22 @@ namespace channel {
 
 	type token_to_type(token tok) {
 		static const std::unordered_map<token, type> token_to_type_map = {
-			{ token::keyword_type_i8 , type::i8  },
-			{ token::keyword_type_i16, type::i16 },
-			{ token::keyword_type_i32, type::i32 },
-			{ token::keyword_type_i64, type::i64 },
-			{ token::keyword_type_u8 , type::u8  },
-			{ token::keyword_type_u16, type::u16 },
-			{ token::keyword_type_u32, type::u32 },
-			{ token::keyword_type_u64, type::u64 },
-			{ token::keyword_type_f32, type::f32 },
-			{ token::keyword_type_f64, type::f64 },
+			{ token::keyword_type_i8  , type::i8     },
+			{ token::keyword_type_i16 , type::i16    },
+			{ token::number_signed    , type::i32    },
+			{ token::keyword_type_i32 , type::i32    },
+			{ token::keyword_type_i64 , type::i64    },
+			{ token::keyword_type_u8  , type::u8     },
+			{ token::keyword_type_u16 , type::u16    },
+			{ token::number_unsigned  , type::u32    },
+			{ token::keyword_type_u32 , type::u32    },
+			{ token::keyword_type_u64 , type::u64    },
+			{ token::number_f32       , type::f32    },
+			{ token::keyword_type_f32 , type::f32    },
+			{ token::number_f64       , type::f64    },
+			{ token::keyword_type_f64 , type::f64    },
+			{ token::keyword_type_void, type::void_t },
+			// { token::pointer, type::pointer },
 		};
 
 		const auto it = token_to_type_map.find(tok);
@@ -104,20 +110,42 @@ namespace channel {
 		return it->second;
 	}
 
+	bool is_token_type(token tok) {
+		static const std::unordered_map<token, type> token_type_map = {
+			{ token::keyword_type_i8  , type::i8     },
+			{ token::keyword_type_i16 , type::i16    },
+			{ token::keyword_type_i32 , type::i32    },
+			{ token::keyword_type_i64 , type::i64    },
+			{ token::keyword_type_u8  , type::u8     },
+			{ token::keyword_type_u16 , type::u16    },
+			{ token::keyword_type_u32 , type::u32    },
+			{ token::keyword_type_u64 , type::u64    },
+			{ token::keyword_type_f32 , type::f32    },
+			{ token::keyword_type_f64 , type::f64    },
+			{ token::keyword_type_void, type::void_t },
+			// { token::pointer, type::pointer },
+		};
+
+		const auto it = token_type_map.find(tok);
+		return it != token_type_map.end();
+	}
+
 	std::string type_to_string(type ty)	{
 		static const std::unordered_map<type, std::string> type_to_string_map = {
-			{ type::i8,            "i8"            },
-			{ type::i16,           "i16"           },
-			{ type::i32,           "i32"           },
-			{ type::i64,           "i64"           },
-			{ type::u8,            "u8"            },
-			{ type::u16,           "u16"           },
-			{ type::u32,           "u32"           },
-			{ type::u64,           "u64"           },
-			{ type::f32,           "f32"           },
-			{ type::f64,           "f64"           },
-			{ type::function,      "function"      },
+			{ type::i8           , "i8"            },
+			{ type::i16          , "i16"           },
+			{ type::i32          , "i32"           },
+			{ type::i64          , "i64"           },
+			{ type::u8           , "u8"            },
+			{ type::u16          , "u16"           },
+			{ type::u32          , "u32"           },
+			{ type::u64          , "u64"           },
+			{ type::f32          , "f32"           },
+			{ type::f64          , "f64"           },
+			{ type::function     , "function"      },
 			{ type::function_call, "function_call" },
+			{ type::void_t       , "void"          },
+			{ type::pointer      , "pointer"       },
 		};
 
 		const auto it = type_to_string_map.find(ty);
@@ -127,18 +155,20 @@ namespace channel {
 
 	llvm::Type* type_to_llvm_type(type ty, llvm::LLVMContext& context) {
 		using type_function = std::function<llvm::Type* (llvm::LLVMContext&)>;
-		static const std::unordered_map<type, type_function> type_to_llvm_type_map = {
-			{ type::i8 ,[](llvm::LLVMContext& ctx) { return llvm::Type::getInt8Ty(ctx) ;  } },
-			{ type::i16,[](llvm::LLVMContext& ctx) { return llvm::Type::getInt16Ty(ctx);  } },
-			{ type::i32,[](llvm::LLVMContext& ctx) { return llvm::Type::getInt32Ty(ctx);  } },
-			{ type::i64,[](llvm::LLVMContext& ctx) { return llvm::Type::getInt64Ty(ctx);  } },
-			{ type::u8 ,[](llvm::LLVMContext& ctx) { return llvm::Type::getInt8Ty(ctx) ;  } },
-			{ type::u16,[](llvm::LLVMContext& ctx) { return llvm::Type::getInt16Ty(ctx);  } },
-			{ type::u32,[](llvm::LLVMContext& ctx) { return llvm::Type::getInt32Ty(ctx);  } },
-			{ type::u64,[](llvm::LLVMContext& ctx) { return llvm::Type::getInt64Ty(ctx);  } },
-			{ type::f32,[](llvm::LLVMContext& ctx) { return llvm::Type::getFloatTy(ctx);  } },
-			{ type::f64,[](llvm::LLVMContext& ctx) { return llvm::Type::getDoubleTy(ctx); } },
-		};
+		static const std::unordered_map<type, type_function> type_to_llvm_type_map = {			 
+			{ type::i8     ,[](llvm::LLVMContext& ctx) { return llvm::Type::getInt8Ty(ctx) ;   } },
+			{ type::i16    ,[](llvm::LLVMContext& ctx) { return llvm::Type::getInt16Ty(ctx);   } },
+			{ type::i32    ,[](llvm::LLVMContext& ctx) { return llvm::Type::getInt32Ty(ctx);   } },
+			{ type::i64    ,[](llvm::LLVMContext& ctx) { return llvm::Type::getInt64Ty(ctx);   } },
+			{ type::u8     ,[](llvm::LLVMContext& ctx) { return llvm::Type::getInt8Ty(ctx);   } },
+			{ type::u16    ,[](llvm::LLVMContext& ctx) { return llvm::Type::getInt16Ty(ctx);   } },
+			{ type::u32    ,[](llvm::LLVMContext& ctx) { return llvm::Type::getInt32Ty(ctx);   } },
+			{ type::u64    ,[](llvm::LLVMContext& ctx) { return llvm::Type::getInt64Ty(ctx);   } },
+			{ type::f32    ,[](llvm::LLVMContext& ctx) { return llvm::Type::getFloatTy(ctx);   } },
+			{ type::f64    ,[](llvm::LLVMContext& ctx) { return llvm::Type::getDoubleTy(ctx);  } },
+			{ type::void_t ,[](llvm::LLVMContext& ctx) { return llvm::Type::getVoidTy(ctx);    } },
+			{ type::pointer,[](llvm::LLVMContext& ctx) { return llvm::Type::getInt8PtrTy(ctx); } },
+		};																						 
 
 		const auto it = type_to_llvm_type_map.find(ty);
 		return it->second(context);

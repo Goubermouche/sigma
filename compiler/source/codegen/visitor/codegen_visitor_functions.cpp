@@ -91,6 +91,20 @@ namespace channel {
 	bool codegen_visitor::visit_function_call_node(function_call_node& node, value*& out_value) {
 		// get a reference to the function
 		function* func = m_functions[node.get_name()];
+
+		//if(node.get_name() == "print") {
+		//	std::cout << "func print visit\n";
+		//	value* argument_value;
+		//	if (!node.get_arguments()[0]->accept(*this, argument_value)) {
+		//		return false;
+		//	}
+
+		//	llvm::Value* printf_format = m_builder.CreateGlobalStringPtr("%d\n", "printf_format");
+		//	std::vector<llvm::Value*> printf_args = { printf_format, argument_value->get_value() };
+		//	out_value = new value(node.get_name(), type::function_call, m_builder.CreateCall(func->get_function(), printf_args, "call"));
+		//	return true;
+		//}
+
 		// check if it exists
 		if (!func) {
 			compilation_logger::emit_function_not_found_error(node.get_declaration_line_number(), node.get_name());

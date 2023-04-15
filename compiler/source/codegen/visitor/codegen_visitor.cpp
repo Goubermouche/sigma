@@ -5,6 +5,20 @@ namespace channel {
 	codegen_visitor::codegen_visitor()
 		: m_scope(new scope(nullptr)), m_builder(m_context) {
 		m_module = std::make_unique<llvm::Module>("channel", m_context);
+
+
+		// print function
+		// llvm::PointerType* puts_arg_type = llvm::Type::getInt8PtrTy(m_context);
+		// std::vector<llvm::Type*> puts_arg_types = { puts_arg_type };
+		// llvm::FunctionType* puts_type = llvm::FunctionType::get(llvm::Type::getInt32Ty(m_context), puts_arg_types, false);
+		// llvm::Function* puts_func = llvm::Function::Create(puts_type, llvm::Function::ExternalLinkage, "puts", m_module.get());
+
+		llvm::PointerType* printf_arg_type = llvm::Type::getInt8PtrTy(m_context);
+		std::vector<llvm::Type*> printf_arg_types = { printf_arg_type };
+		llvm::FunctionType* printf_type = llvm::FunctionType::get(llvm::Type::getInt32Ty(m_context), printf_arg_types, true);
+		llvm::Function* printf_func = llvm::Function::Create(printf_type, llvm::Function::ExternalLinkage, "printf", m_module.get());
+
+		m_functions["print"] = new function(type::void_t, printf_func, { {"arg", type::pointer} });
 	}
 
 	bool codegen_visitor::generate(parser& parser) {

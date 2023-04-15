@@ -14,7 +14,7 @@ namespace channel{
 		// errors
 		static void emit_unexpected_token_error(u64 line_number, token expected_token, token received_token);
 		static void emit_unhandled_token_error(u64 line_number, token received_token);
-		static void emit_unhandled_number_format_error(u64 line_number, token received_token);
+		static void emit_unhandled_number_format_error(u64 line_number, type received_type);
 		static void emit_token_is_not_type_error(u64 line_number, token received_token);
 		static void emit_main_entry_point_missing_error();
 

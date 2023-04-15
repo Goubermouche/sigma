@@ -4,6 +4,7 @@
 
 namespace channel {
 	enum class type {
+		unknown = -1,
 		i8,
 		i16,
 		i32,
@@ -15,7 +16,9 @@ namespace channel {
 		f32,
 		f64,
 		function,
-		function_call
+		function_call,
+		void_t,
+		pointer
 	};
 
 	type get_highest_precision_type(type left_type, type right_type);
@@ -27,6 +30,7 @@ namespace channel {
 	bool is_type_floating_point(type ty);
 
 	type token_to_type(token tok);
+	bool is_token_type(token tok);
 
 	std::string type_to_string(type ty);
 	llvm::Type* type_to_llvm_type(type ty, llvm::LLVMContext& context);

@@ -39,126 +39,38 @@ namespace channel {
 		: m_lexer(source_file) {}
 
 	bool parser::parse(std::vector<node*>& abstract_syntax_tree) {
-		consume_next_token();
+		while(true) {
+			if(peek_next_token() == token::end_of_file) {
+				return true;
+			}
 
-		// parse individual statements 
-		while (m_current_token != token::end_of_file) {
 			node* node;
-			if(is_token_return_type(m_current_token) && peek_is_function_definition()) {
+
+			if(peek_is_function_definition()) {
 				// parse a top-level function definition
 				if(!parse_function_definition(node)) {
-					return false; // return on failure
+					return false;
 				}
 			}
 			else {
-				// parse a top-level statement
+				// parse a global statement
 				if(!parse_global_statement(node)) {
-					return false; // return on failure
+					return false;
 				}
 			}
 
-			ASSERT(node, "node is null!");
 			abstract_syntax_tree.push_back(node);
 		}
-
-		return true;
 	}
 
-	bool parser::parse_global_statement(node*& out_node) {
-		switch (m_current_token) {
-		case token::identifier:
-			// statements beginning with an identifier has to be an assignment operation
-			if (!parse_assignment(out_node, true)) {
-				return false; // return on failure
-			}
-			break;
-		case token::keyword_type_i8:
-		case token::keyword_type_i16:
-		case token::keyword_type_i32:
-		case token::keyword_type_i64:
-		case token::keyword_type_u8:
-		case token::keyword_type_u16:
-		case token::keyword_type_u32:
-		case token::keyword_type_u64:
-		case token::keyword_type_f32:
-		case token::keyword_type_f64:
-			// statements beginning with a type keyword have to be variable or function declarations
-			if (!parse_declaration(out_node, true, m_current_token)) {
-				return false; // return on failure
-			}
-			break;
-		default:
-			compilation_logger::emit_unhandled_token_error(m_lexer.get_current_line_number(), m_current_token);
-			return false; // return on failure
-		}
-
-		// end statements with a semicolon
-		if (!expect_next_token(token::semicolon)) {
-			return false; // return on failure
-		}
-
-		return true;
-	}
-
-	bool parser::parse_local_statement(node*& out_node)	{
-		switch (m_current_token) {
-		case token::identifier:
-			// check if the statement is a function call
-			if (peek_is_function_call()) {
-				// parse it as a function call
-				if (!parse_function_call(out_node, m_lexer.get_identifier())) {
-					return false; // return on failure
-				}
-			}
-			// otherwise the statement has to be an assignment
-			else {
-				if (!parse_assignment(out_node, false)) {
-					return false; // return on failure
-				}
-			}
-
-			break;
-		case token::keyword_type_i8:
-		case token::keyword_type_i16:
-		case token::keyword_type_i32:
-		case token::keyword_type_i64:
-		case token::keyword_type_u8:
-		case token::keyword_type_u16:
-		case token::keyword_type_u32:
-		case token::keyword_type_u64:
-		case token::keyword_type_f32:
-		case token::keyword_type_f64:
-			// statements beginning with a type keyword have to be variable or function declarations
-			if (!parse_declaration(out_node, false, m_current_token)) {
-				return false; // return on failure
-			}
-			break;
-		case token::keyword_return:
-			// parse the 'return' keyword
-			if (!parse_return_statement(out_node)) {
-				return false; // return on failure
-			}
-			break;
-		default:
-			compilation_logger::emit_unhandled_token_error(m_lexer.get_current_line_number(), m_current_token);
-			return false; // return on failure
-		}
-
-		// end statements with a semicolon
-		if (!expect_next_token(token::semicolon)) {
-			return false; // return on failure
-		}
-
-		return true;
-	}
-
-	void parser::consume_next_token() {
+	void parser::get_next_token() {
 		m_current_token = m_lexer.get_token();
 	}
 
-	bool parser::expect_next_token(token token)	{
-		if(m_current_token == token) {
-			consume_next_token();
+	bool parser::expect_next_token(token token) {
+		get_next_token();
+
+		if (m_current_token == token) {
 			return true;
 		}
 
@@ -166,151 +78,384 @@ namespace channel {
 		return false; // return on failure
 	}
 
-	bool parser::parse_declaration(node*& out_node, bool is_global, token type_token) {
-		consume_next_token();
+	bool parser::parse_function_definition(node*& out_node)	{
+		const u64 line_number = m_lexer.get_current_line_number();
+		get_next_token(); // type (guaranteed)
+		const type return_type = token_to_type(m_current_token);
+		get_next_token(); // identifier (guaranteed)
+		const std::string identifier = m_lexer.get_identifier();
+		get_next_token(); // l_parenthesis (guaranteed)
+		get_next_token(); // r_parenthesis || type
 
-		const std::string name = m_lexer.get_identifier();
-		if(!expect_next_token(token::identifier)) {
-			return false; // return on failure
+		std::vector<std::pair<std::string, type>> arguments;
+
+		// parse arguments
+		if(m_current_token != token::r_parenthesis) {
+			while (true) {
+				if (!is_token_type(m_current_token)) {
+					compilation_logger::emit_token_is_not_type_error(m_lexer.get_current_line_number(), m_current_token);
+					return false;
+				}
+
+				type argument_type = token_to_type(m_current_token);
+
+				if (!expect_next_token(token::identifier)) {
+					return false;
+				}
+
+				std::string argument_name = m_lexer.get_identifier();
+				arguments.emplace_back(argument_name, argument_type);
+
+				get_next_token(); // comma || type || other
+
+				if (m_current_token == token::comma) {
+					get_next_token();
+				}
+				else if (m_current_token != token::r_parenthesis) {
+					compilation_logger::emit_unexpected_token_error(m_lexer.get_current_line_number(), token::r_parenthesis, m_current_token);
+					return false;
+				}
+				else {
+					// break on l_parenthesis
+					break;
+				}
+			}
 		}
 
-		node* value = nullptr;
-		if (m_current_token == token::operator_assignment) {
-			consume_next_token();
-			if(!parse_expression(value, type_token)) {
+		if(!expect_next_token(token::l_brace)) {
+			return false;
+		}
+		
+		std::vector<node*> statements;
+
+		token next_token = peek_next_token();
+		if(next_token != token::r_brace) {
+			while (true) {
+				if (peek_next_token() == token::r_brace) {
+					break;
+				}
+
+				node* statement;
+				if (!parse_local_statement(statement)) {
+					return false;
+				}
+
+				statements.push_back(statement);
+
+				next_token = peek_next_token();
+				if(next_token == token::r_brace) {
+					break;
+				}
+			}
+		}
+		
+		if (!expect_next_token(token::r_brace)) {
+			return false;
+		}
+
+		out_node = new function_node(line_number, return_type, identifier, statements, arguments);
+		return true;
+	}
+
+	bool parser::parse_global_statement(node*& out_node) {
+		const token token = peek_next_token(); // identifier || type || keyword
+
+		if (is_token_type(token)) {
+			// statements beginning with a type keyword have to be variable declarations
+			if (!parse_declaration(out_node, true)) {
+				return false;
+			}
+		}
+		else {
+			switch (token) {
+			case token::identifier:
+				// assignment statement
+				if (!parse_assignment(out_node)) {
+					return false;
+				}
+				break;
+			default:
+				compilation_logger::emit_unhandled_token_error(m_lexer.get_current_line_number(), token);
 				return false; // return on failure
 			}
 		}
 
-		if (is_global) {
-			out_node = new global_declaration_node(m_lexer.get_current_line_number(), token_to_type(type_token), name, value);
-			return true;
+		if (!expect_next_token(token::semicolon)) {
+			return false;
 		}
 
-		out_node = new local_declaration_node(m_lexer.get_current_line_number(), token_to_type(type_token), name, value);
 		return true;
 	}
 
-	bool parser::parse_assignment(node*& out_node, bool is_global) {
-		const std::string name = m_lexer.get_identifier();
-		consume_next_token(); // =
+	bool parser::parse_local_statement(node*& out_node)	{
+		const token token = peek_next_token(); // identifier || type || keyword
 
-		if(!expect_next_token(token::operator_assignment)) {
-			return false; // return on failure
+		if(is_token_type(token)) {
+			// statements beginning with a type keyword have to be variable declarations
+			if(!parse_declaration(out_node, false)) {
+				return false;
+			}
+		}
+		else {
+			switch (token) {
+			case token::identifier:
+				if(peek_is_function_call()) {
+					// function call statement
+					if(!parse_function_call(out_node)) {
+						return false;
+					}
+				}
+				else {
+					// assignment statement
+					if (!parse_assignment(out_node)) {
+						return false;
+					}
+				}
+				break;
+			case token::keyword_return:
+				if (!parse_return_statement(out_node)) {
+					return false;
+				}
+				break;
+			default:
+				compilation_logger::emit_unhandled_token_error(m_lexer.get_current_line_number(), token);
+				return false; // return on failure
+			}
+		}
+
+		if(!expect_next_token(token::semicolon)) {
+			return false;
+		}
+
+		return true;
+	}
+
+	bool parser::parse_assignment(node*& out_node) {
+		get_next_token(); // identifier (guaranteed)
+		const std::string identifier = m_lexer.get_identifier();
+
+		if (!expect_next_token(token::operator_assignment)) {
+			return false; 
 		}
 
 		// parse access-assignment
 		node* value;
+
 		if (peek_is_function_call()) {
-			// parse function call and assign the result to the variable
-			const std::string function_name = m_lexer.get_identifier();
-			 if(!parse_function_call(value, function_name)) {
-				 return false; // return on failure
-			 }
+			if (!parse_function_call(value)) {
+				return false;
+			}
 		}
 		else {
-			 if(!parse_expression(value)) {
-				 return false; // return on failure
-			 }
+			if (!parse_expression(value)) {
+				return false;
+			}
 		}
 
-		out_node = new assignment_node(m_lexer.get_current_line_number(), name, value);
+		out_node = new assignment_node(m_lexer.get_current_line_number(), identifier, value);
 		return true;
 	}
 
-	bool parser::parse_expression(node*& out_node, token type_token) {
-		if(!parse_term(out_node, type_token)) {
-			return false; // return on failure
+	bool parser::parse_function_call(node*& out_node) {
+		get_next_token(); // identifier (guaranteed)
+		const std::string identifier = m_lexer.get_identifier();
+
+		get_next_token(); // l_parenthesis (guaranteed)
+
+		std::vector<node*> arguments;
+
+		token next_token = peek_next_token();
+		if(next_token != token::r_parenthesis) {
+			while(true) {
+				node* argument;
+				if (!parse_expression(argument)) {
+					return false;
+				}
+
+				arguments.push_back(argument);
+
+				next_token = peek_next_token(); // comma || r_parenthesis || other
+
+				if (next_token == token::comma) {
+					get_next_token(); // comma (guaranteed)
+				}
+				else if (next_token == token::r_parenthesis) {
+					break;
+				}
+				else {
+					compilation_logger::emit_unhandled_token_error(m_lexer.get_current_line_number(), m_current_token);
+					return false; 
+				}
+			}
 		}
 
-		while (m_current_token == token::operator_addition || m_current_token == token::operator_subtraction) {
-			const token op = m_current_token;
-			consume_next_token();
+		if(!expect_next_token(token::r_parenthesis)) {
+			return false;
+		}
 
-			node* right;
-			if(!parse_term(right, type_token)) {
-				return false; // return on failure
-			}
+		out_node = new function_call_node(m_lexer.get_current_line_number(), identifier, arguments);
+		return true;
+	}
 
-			if (op == token::operator_addition) {
-				out_node = new operator_addition_node(m_lexer.get_current_line_number(), out_node, right);
+	bool parser::parse_return_statement(node*& out_node) {
+		get_next_token(); // keyword_return (guaranteed)
+
+		node* expression;
+		if(!parse_expression(expression)) {
+			return false;
+		}
+
+		out_node = new return_node(m_lexer.get_current_line_number(), expression);
+		return true;
+	}
+
+	bool parser::parse_declaration(node*& out_node, bool is_global) {
+		get_next_token(); // type (guaranteed)
+		const type declaration_type = token_to_type(m_current_token);
+
+		if(!expect_next_token(token::identifier)) {
+			return false;
+		}
+
+		const std::string identifier = m_lexer.get_identifier();
+
+		node* value = nullptr;
+		if(peek_next_token() == token::operator_assignment) {
+			get_next_token(); // operator_assignment
+			if(!parse_expression(value, declaration_type)) {
+				return false;
 			}
-			else {
-				out_node = new operator_subtraction_node(m_lexer.get_current_line_number(), out_node, right);
+		}
+
+		if(is_global) {
+			out_node = new global_declaration_node(m_lexer.get_current_line_number(), declaration_type, identifier, value);
+			return true;
+		}
+
+		out_node = new local_declaration_node(m_lexer.get_current_line_number(), declaration_type, identifier, value);
+		return true;
+	}
+
+	bool parser::parse_expression(node*& out_node, type expression_type) {
+		if(!parse_term(out_node, expression_type)) {
+			return false;
+		}
+
+		token next_token = peek_next_token();
+		if (next_token == token::operator_addition || next_token == token::operator_subtraction) {
+			while(true) {
+				const token op = next_token;
+				node* right;
+
+				get_next_token(); // operator_addition || operator_subtraction (guaranteed)
+
+				if (!parse_term(right, expression_type)) {
+					return false;
+				}
+
+				if (op == token::operator_addition) {
+					out_node = new operator_addition_node(m_lexer.get_current_line_number(), out_node, right);
+				}
+				else {
+					out_node = new operator_subtraction_node(m_lexer.get_current_line_number(), out_node, right);
+				}
+
+				next_token = peek_next_token();
+				if (!(next_token == token::operator_addition || next_token == token::operator_subtraction || next_token == token::operator_modulo)) {
+					break;
+				}
 			}
 		}
 
 		return true;
 	}
 
-	bool parser::parse_term(node*& out_node, token type_token) {
-		if(!parse_factor(out_node, type_token)) {
-			return false; // return on failure
+	bool parser::parse_term(node*& out_node, type expression_type) {
+		if(!parse_factor(out_node, expression_type)) {
+			return false;
 		}
 
-		while (m_current_token == token::operator_multiplication || m_current_token == token::operator_division || m_current_token == token::operator_modulo) {
-			const token op = m_current_token;
-			consume_next_token();
-			node* right;
+		token next_token = peek_next_token(); // operator_multiplication || operator_division || operator_modulo
+		if(next_token == token::operator_multiplication || next_token == token::operator_division || next_token == token::operator_modulo) {
+			while (true) {
+				const token op = next_token;
+				node* right;
 
-			if(!parse_factor(right, type_token)) {
-				return false; // return on failure
-			}
+				get_next_token(); // operator_multiplication || operator_division || operator_modulo (guaranteed)
 
-			if(op == token::operator_multiplication) {
-				out_node = new operator_multiplication_node(m_lexer.get_current_line_number(), out_node, right);
-			}
-			else if(op == token::operator_division) {
-				out_node = new operator_division_node(m_lexer.get_current_line_number(), out_node, right);
-			}
-			else if(op == token::operator_modulo) {
-				out_node = new operator_modulo_node(m_lexer.get_current_line_number(), out_node, right);
+				if (!parse_factor(right, expression_type)) {
+					return false;
+				}
+
+				if (op == token::operator_multiplication) {
+					out_node = new operator_multiplication_node(m_lexer.get_current_line_number(), out_node, right);
+				}
+				else if (op == token::operator_division) {
+					out_node = new operator_division_node(m_lexer.get_current_line_number(), out_node, right);
+				}
+				else if (op == token::operator_modulo) {
+					out_node = new operator_modulo_node(m_lexer.get_current_line_number(), out_node, right);
+				}
+
+				next_token = peek_next_token();
+				if (!(next_token == token::operator_multiplication || next_token == token::operator_division || next_token == token::operator_modulo)) {
+					break;
+				}
 			}
 		}
 
 		return true;
 	}
 
-	bool parser::parse_factor(node*& out_node, token type_token) {
-		if (is_token_numerical(m_current_token)) {
-			if(!parse_number(out_node, type_token)) {
-				return false; // return on failure
+	bool parser::parse_factor(node*& out_node, type expression_type) {
+		const token token = peek_next_token();
+
+		if(is_token_numerical(token)) {
+			// parse a number
+			if (!parse_number(out_node, expression_type)) {
+				return false;
 			}
 		}
-		else if (m_current_token == token::operator_subtraction) {
-			consume_next_token(); // consume the subtraction token
+		else if(token == token::operator_subtraction) {
+			// parse a negative number
+			get_next_token(); // operator_subtraction (guaranteed)
 
 			// negate the number by subtracting it from 0
-			node* zero_node = create_zero_node(token_to_type(type_token));
+			node* zero_node = create_zero_node(expression_type);
 			node* number;
 
-			if(!parse_number(number, type_token)) {
-				return false; // return on failure
+			if (!parse_number(number, expression_type)) {
+				return false;
 			}
 
 			out_node = new operator_subtraction_node(m_lexer.get_current_line_number(), zero_node, number);
 		}
-		else if (m_current_token == token::identifier) {
-			const std::string name = m_lexer.get_identifier();
-			consume_next_token(); // consume the identifier token
+		else if (token == token::identifier) {
+			// parse a function call or an assignment
 
-			if (m_current_token == token::l_parenthesis) {
-				if(!parse_function_call(out_node, name)) {
+			if(peek_is_function_call()) {
+				if (!parse_function_call(out_node)) {
 					return false; // return on failure
 				}
 			}
 			else {
-				out_node = new variable_node(m_lexer.get_current_line_number(), name);
+
+				get_next_token();
+				const std::string identifier = m_lexer.get_identifier();
+				out_node = new variable_node(m_lexer.get_current_line_number(), identifier);
 			}
 		}
-		else if (m_current_token == token::l_parenthesis) {
-			consume_next_token(); // consume the left parenthesis
+		else if (token == token::l_parenthesis) {
+			// parse a deep expression
+			get_next_token(); // l_parenthesis (guaranteed)
 
-			if(!parse_expression(out_node, type_token)) {
-				return false; // return on failure
+			if (!parse_expression(out_node, expression_type)) {
+				return false;
 			}
 
-			expect_next_token(token::r_parenthesis); // consume the right parenthesis
+			if(!expect_next_token(token::r_parenthesis)) {
+				return false;
+			}
 		}
 		else {
 			compilation_logger::emit_unhandled_token_error(m_lexer.get_current_line_number(), m_current_token);
@@ -320,152 +465,58 @@ namespace channel {
 		return true;
 	}
 
-	bool parser::parse_number(node*& out_node, token type_token) {
+	bool parser::parse_number(node*& out_node, type expression_type) {
+		get_next_token(); // type
 		const std::string str_value = m_lexer.get_value();
-		const token type = type_token != token::unknown ? type_token : m_current_token;
-		consume_next_token();
+		const type type = expression_type == type::unknown ? token_to_type(m_current_token) : expression_type;
+		// std::cout << "parsed type: " << type_to_string(type) << '\n';
 
 		switch (type) {
 		// signed
-		case token::keyword_type_i8:  out_node = new i8_node(m_lexer.get_current_line_number(), std::stoll(str_value)); return true;
-		case token::keyword_type_i16: out_node = new i16_node(m_lexer.get_current_line_number(), std::stoll(str_value)); return true;
-		case token::number_signed:
-		case token::keyword_type_i32: out_node = new i32_node(m_lexer.get_current_line_number(), std::stoll(str_value)); return true;
-		case token::keyword_type_i64: out_node = new i64_node(m_lexer.get_current_line_number(), std::stoll(str_value)); return true;
+		case type::i8:  out_node = new i8_node(m_lexer.get_current_line_number(), std::stoll(str_value)); return true;
+		case type::i16: out_node = new i16_node(m_lexer.get_current_line_number(), std::stoll(str_value)); return true;
+		case type::i32: out_node = new i32_node(m_lexer.get_current_line_number(), std::stoll(str_value)); return true;
+		case type::i64: out_node = new i64_node(m_lexer.get_current_line_number(), std::stoll(str_value)); return true;
 			// unsigned
-		case token::keyword_type_u8:  out_node = new u8_node(m_lexer.get_current_line_number(), std::stoull(str_value)); return true;
-		case token::keyword_type_u16: out_node = new u16_node(m_lexer.get_current_line_number(), std::stoull(str_value)); return true;
-		case token::number_unsigned:
-		case token::keyword_type_u32: out_node = new u32_node(m_lexer.get_current_line_number(), std::stoull(str_value)); return true;
-		case token::keyword_type_u64: out_node = new u64_node(m_lexer.get_current_line_number(), std::stoull(str_value)); return true;
+		case type::u8:  out_node = new u8_node(m_lexer.get_current_line_number(), std::stoull(str_value)); return true;
+		case type::u16: out_node = new u16_node(m_lexer.get_current_line_number(), std::stoull(str_value)); return true;
+		case type::u32: out_node = new u32_node(m_lexer.get_current_line_number(), std::stoull(str_value)); return true;
+		case type::u64: out_node = new u64_node(m_lexer.get_current_line_number(), std::stoull(str_value)); return true;
 		// floating point
-		case token::number_f32:
-		case token::keyword_type_f32: out_node = new f32_node(m_lexer.get_current_line_number(), std::stof(str_value)); return true;
-		case token::number_f64:
-		case token::keyword_type_f64: out_node = new f64_node(m_lexer.get_current_line_number(), std::stod(str_value)); return true;
+		case type::f32: out_node = new f32_node(m_lexer.get_current_line_number(), std::stof(str_value)); return true;
+		case type::f64: out_node = new f64_node(m_lexer.get_current_line_number(), std::stod(str_value)); return true;
 		default:
 			compilation_logger::emit_unhandled_number_format_error(m_lexer.get_current_line_number(), type);
 			return false; // return on failure
 		}
 	}
+	
+	bool parser::peek_is_function_definition() const {
+		lexer temp_lexer = m_lexer;
+		
+		temp_lexer.get_token(); // type
+		temp_lexer.get_token(); // identifier
+		const token t = temp_lexer.get_token(); // l_parenthesis
 
-	bool parser::parse_function_call(node*& out_node, const std::string& function_name)	{
-		consume_next_token(); // consume the left parenthesis
-
-		std::vector<node*> arguments;
-
-		// parse function call arguments
-		if (m_current_token != token::r_parenthesis) {
-			while (true) {
-				node* argument;
-				if(!parse_expression(argument)) {
-					return false; // return on failure
-				}
-
-				arguments.push_back(argument);
-
-				if (m_current_token == token::comma) {
-					consume_next_token(); // consume the comma
-				}
-				else if (m_current_token == token::r_parenthesis) {
-					break;
-				}
-				else {
-					compilation_logger::emit_unhandled_token_error(m_lexer.get_current_line_number(), m_current_token);
-					return false; // return on failure
-				}
-			}
-		}
-
-		consume_next_token(); // consume the right parenthesis
-		out_node = new function_call_node(m_lexer.get_current_line_number(), function_name, arguments);
-		return true;
+		return t == token::l_parenthesis;
 	}
 
-	bool parser::parse_function_definition(node*& out_node) {
-		const type return_type = token_to_type(m_current_token);
-		const u64 line_number = m_lexer.get_current_line_number();
+	bool parser::peek_is_function_call() const {
+		lexer temp_lexer = m_lexer;
 
-		consume_next_token();
-		const std::string name = m_lexer.get_identifier();
-		consume_next_token();
+		temp_lexer.get_token(); // identifier
+		const token t = temp_lexer.get_token(); // l_parenthesis
 
-		std::vector<std::pair<std::string, type>> arguments;
-		if (!expect_next_token(token::l_parenthesis)) {
-			return false;
-		}
-
-		if (m_current_token != token::r_parenthesis) {
-			while (true) {
-				if (!is_token_return_type(m_current_token)) {
-					compilation_logger::emit_token_is_not_type_error(m_lexer.get_current_line_number(), m_current_token);
-					return false;
-				}
-
-				type param_type = token_to_type(m_current_token);
-				consume_next_token();
-				std::string param_name = m_lexer.get_identifier();
-				consume_next_token();
-
-				arguments.emplace_back(param_name, param_type);
-
-				if (m_current_token == token::comma) {
-					consume_next_token();
-
-					// handle the case where there is a trailing comma
-					if (m_current_token == token::r_parenthesis) {
-						compilation_logger::emit_function_argument_missing_error(m_lexer.get_current_line_number());
-						return false; // return false when encountering a trailing comma
-					}
-				}
-				else if (!expect_next_token(token::r_parenthesis)) {
-					return false;
-				}
-				else {
-					break;
-				}
-			}
-		}
-		else {
-			if (!expect_next_token(token::r_parenthesis)) {
-				return false;
-			}
-		}
-
-		if (!expect_next_token(token::l_brace)) {
-			return false;
-		}
-
-		std::vector<node*> statements;
-		while (m_current_token != token::r_brace) {
-			node* statement;
-
-			if (!parse_local_statement(statement)) {
-				return false;
-			}
-
-			statements.push_back(statement);
-		}
-
-		consume_next_token();
-		out_node = new function_node(line_number, return_type, name, statements, arguments);
-		return true;
+		return t == token::l_parenthesis;
 	}
 
-	bool parser::parse_return_statement(node*& out_node) {
-		consume_next_token();
-
-		node* expression;
-		if(!parse_expression(expression)) {
-			return false; // return on failure
-		}
-
-		out_node = new return_node(m_lexer.get_current_line_number(), expression);
-		return true;
+	token parser::peek_next_token() const {
+		lexer temp_lexer = m_lexer;
+		return temp_lexer.get_token();
 	}
 
-	node* parser::create_zero_node(type ty) const {
-		switch (ty) {
+	node* parser::create_zero_node(type expression_type) const {
+		switch (expression_type) {
 			case type::i8:  return new i8_node(m_lexer.get_current_line_number(), 0);
 			case type::i16: return new i16_node(m_lexer.get_current_line_number(), 0);
 			case type::i32: return new i32_node(m_lexer.get_current_line_number(), 0);
@@ -474,49 +525,11 @@ namespace channel {
 			case type::u16: return new u16_node(m_lexer.get_current_line_number(), 0);
 			case type::u32: return new u32_node(m_lexer.get_current_line_number(), 0);
 			case type::u64: return new u64_node(m_lexer.get_current_line_number(), 0);
-			case type::f32: return new f32_node(m_lexer.get_current_line_number(), 0.0);
+			case type::f32: return new f32_node(m_lexer.get_current_line_number(), 0.0f);
 			case type::f64: return new f64_node(m_lexer.get_current_line_number(), 0.0);
 			default:
-				ASSERT(false, "[parser]: cannot convert '" + type_to_string(ty) + "' to a type keyword");
+				ASSERT(false, "[parser]: cannot convert '" + type_to_string(expression_type) + "' to a type keyword");
 				return nullptr;
 		}
-	}
-
-	bool parser::is_token_return_type(token token) {
-		switch (token) {
-			case token::keyword_type_void:
-			// signed integers
-			case token::keyword_type_i8:
-			case token::keyword_type_i16:
-			case token::keyword_type_i32:
-			case token::keyword_type_i64:
-			// unsigned integers          
-			case token::keyword_type_u8:
-			case token::keyword_type_u16:
-			case token::keyword_type_u32:
-			case token::keyword_type_u64:
-			// floating point
-			case token::keyword_type_f32:
-			case token::keyword_type_f64:
-				return true;
-			default:
-				return false; // return on failure
-		}
-	}
-
-	bool parser::peek_is_function_definition() const {
-		// save the current state
-		lexer temp_lexer = m_lexer;
-		temp_lexer.get_token(); // identifier
-		const token tok = temp_lexer.get_token(); // (
-		return tok == token::l_parenthesis;
-	}
-
-	bool parser::peek_is_function_call() const {
-		// save the current state
-		lexer temp_lexer = m_lexer;
-		temp_lexer.get_token(); // identifier
-		const token tok = temp_lexer.get_token(); // (
-		return tok == token::l_parenthesis;
 	}
 }

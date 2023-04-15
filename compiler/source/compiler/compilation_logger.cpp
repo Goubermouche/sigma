@@ -18,7 +18,7 @@ namespace channel {
 	void compilation_logger::emit_function_return_auto_generate_warning(u64 line_number, const std::string& function_name) {
 		emit_warning(
 			line_number,
-			"implicit function return generated for function '" + function_name + "'"
+			"implicit function return generated for call to function '" + function_name + "'"
 		);
 	}
 
@@ -36,10 +36,10 @@ namespace channel {
 		);
 	}
 
-	void compilation_logger::emit_unhandled_number_format_error(u64 line_number, token received_token) {
+	void compilation_logger::emit_unhandled_number_format_error(u64 line_number, type received_type) {
 		emit_error(
 			line_number,
-			"unhandled numerical token received ('" + token_to_string(received_token) + "')"
+			"unhandled numerical token received ('" + type_to_string(received_type) + "')"
 		);
 	}
 
@@ -86,7 +86,7 @@ namespace channel {
 	void compilation_logger::emit_function_not_found_error(u64 line_number, const std::string& function_name) {
 		emit_error(
 			line_number,
-			"function '" + function_name + "' cannot not found"
+			"function '" + function_name + "' cannot be found"
 		);
 	}
 

@@ -2,6 +2,7 @@
 
 -- get the LLVM installation path
 local llvm_root = os.getenv("LLVM_ROOT")
+local script_root = path.getabsolute(".")
 
 workspace "channel"
     configurations { "Release" }
@@ -14,6 +15,7 @@ project "compiler"
     cppdialect "C++20"
 
     location "compiler"
+    -- dependson "external_functions"
 
     targetdir ("../bin/%{cfg.buildcfg}/%{prj.name}")
     objdir ("../bin-int/%{cfg.buildcfg}/%{prj.name}")
@@ -269,7 +271,8 @@ project "compiler"
         "user32.lib",
         "uuid.lib",
         "version.lib",
-        "winspool.lib"
+        "winspool.lib",
+        --"external_functions" -- external funcs
     }
 
     filter "configurations:Release"
@@ -278,3 +281,36 @@ project "compiler"
 
     filter "platforms:Windows"
         systemversion "latest"
+
+-- project "external_functions"
+--     kind "StaticLib"
+--     language "C++"
+--     cppdialect "C++20"
+
+--     location "external_functions"
+
+--     targetdir ("../bin/%{cfg.buildcfg}/%{prj.name}")
+--     objdir ("../bin-int/%{cfg.buildcfg}/%{prj.name}")
+
+--     files
+--     {
+--         "external_functions/source/**.*"
+--     }
+
+--     includedirs
+--     {
+--         "external_functions/source"
+--     }
+
+--     filter "configurations:Release"
+--         defines { "NDEBUG" }
+--         optimize "On"
+
+--     filter "platforms:Windows"
+--         systemversion "latest"
+
+--     filter {} -- Reset the filter
+--     postbuildcommands {
+--         --"clang -c -emit-llvm " .. path.join(script_root, "external_functions/source/external_functions.c") .. " -o " .. path.join(script_root, "external_functions/source/external_functions.bc"),
+--         --"llvm-objcopy --dump-section .llvmbc=" .. path.join(script_root, "external_functions/source/external_functions.bc.inc") .. " " .. path.join(script_root, "external_functions/source/external_functions.bc")
+--     }

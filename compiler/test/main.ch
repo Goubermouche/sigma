@@ -6,12 +6,10 @@
 
 u64 g = 100;
 
-f32 func(i32 a, f32 x, i32 b) {
-    i32 pog = a;
-    return x;
+i32 func(f32 a, i32 b) {
+    return g * a / b;
 }
 
 i32 main() {
-    i32 x = func(1, 2.0f, 3);
-    func(1, 2.0f, g);
+    print(func(20, 3)); // 666
 }

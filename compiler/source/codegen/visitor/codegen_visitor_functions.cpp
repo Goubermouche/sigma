@@ -92,18 +92,18 @@ namespace channel {
 		// get a reference to the function
 		const function* func = m_functions[node.get_name()];
 
-		//if(node.get_name() == "print") {
-		//	std::cout << "func print visit\n";
-		//	value* argument_value;
-		//	if (!node.get_arguments()[0]->accept(*this, argument_value)) {
-		//		return false;
-		//	}
+		if(node.get_name() == "print") {
+			std::cout << "func print visit\n";
+			value* argument_value;
+			if (!node.get_arguments()[0]->accept(*this, argument_value)) {
+				return false;
+			}
 
-		//	llvm::Value* printf_format = m_builder.CreateGlobalStringPtr("%d\n", "printf_format");
-		//	std::vector<llvm::Value*> printf_args = { printf_format, argument_value->get_value() };
-		//	out_value = new value(node.get_name(), type::function_call, m_builder.CreateCall(func->get_function(), printf_args, "call"));
-		//	return true;
-		//}
+			llvm::Value* printf_format = m_builder.CreateGlobalStringPtr("%d\n", "printf_format");
+			std::vector<llvm::Value*> printf_args = { printf_format, argument_value->get_value() };
+			out_value = new value(node.get_name(), type::function_call, m_builder.CreateCall(func->get_function(), printf_args, "call"));
+			return true;
+		}
 
 		// check if it exists
 		if (!func) {

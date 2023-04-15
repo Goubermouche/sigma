@@ -22,8 +22,8 @@ namespace channel {
 	void compiler::compile(const std::string& source_file) {
 		std::cout << "compiling file '" << source_file << "'\n";
 
-		timer timer;
-		timer.start();
+		timer codegen_timer, compile_timer;
+		codegen_timer.start();
 
 		// generate LLVM IR
 		parser parser(source_file);
@@ -33,6 +33,9 @@ namespace channel {
 			// codegen failure
 			return;
 		}
+
+		std::cout << "codegen finished (" << codegen_timer.elapsed() << "ms)\n";
+		compile_timer.start();
 
 		if(!visitor.verify_intermediate_representation()) {
 			// verification failure
@@ -130,6 +133,6 @@ namespace channel {
 			return;
 		}
 
-		std::cout << "successfully compiled in " << timer.elapsed() << "ms\n";
+		std::cout << "compilation finished (" << codegen_timer.elapsed() << "ms)\n";
 	}
 }

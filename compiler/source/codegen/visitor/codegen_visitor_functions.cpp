@@ -90,7 +90,7 @@ namespace channel {
 
 	bool codegen_visitor::visit_function_call_node(function_call_node& node, value*& out_value) {
 		// get a reference to the function
-		function* func = m_functions[node.get_name()];
+		const function* func = m_functions[node.get_name()];
 
 		//if(node.get_name() == "print") {
 		//	std::cout << "func print visit\n";
@@ -123,19 +123,14 @@ namespace channel {
 		std::vector<llvm::Value*> argument_values(arguments.size());
 
 		for (u64 i = 0; i < arguments.size(); i++) {
-			// get tje argument value
+			// get the argument value
 			value* argument_value;
 			if(!given_arguments[i]->accept(*this, argument_value)) {
 				return false;
 			}
 
-			// todo: use type upcasting instead
-			if(arguments[i].second != argument_value->get_type()) {
-				compilation_logger::emit_function_argument_type_mismatch_error(node.get_declaration_line_number(), i, arguments[i].second, argument_value->get_type(), node.get_name());
-				return false;
-			}
-
-			argument_values[i] = argument_value->get_value();
+			// cast the given argument to match the required argument's type, if necessary 
+			argument_values[i] = cast_value(argument_value, arguments[i].second, node.get_declaration_line_number());
 		}
 
 		// return the function call as the value

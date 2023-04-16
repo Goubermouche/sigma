@@ -22,7 +22,7 @@ namespace channel {
 		bool expect_next_token(token token);
 
 		/**
-		 * \brief Attempts to parse a function definition. First expected token is a type.
+		 * \brief Attempts to parse a function definition. The first expected token is a type.
 		 * \param out_node Output AST node
 		 * \return True if a function definition is parsed successfully
 		 */
@@ -43,28 +43,28 @@ namespace channel {
 		bool parse_local_statement(node*& out_node);
 
 		/**
-		 * \brief Attempts to parse an assignment operation. First expected token is an identifier.
+		 * \brief Attempts to parse an assignment operation. The first expected token is an identifier.
 		 * \param out_node Output AST node
 		 * \return True if a function definition is parsed successfully
 		 */
 		bool parse_assignment(node*& out_node);
 
 		/**
-		 * \brief Attempts to parse a function call. First expected token is an identifier.
+		 * \brief Attempts to parse a function call. The first expected token is an identifier.
 		 * \param out_node Output AST node
 		 * \return True if a function definition is parsed successfully
 		 */
 		bool parse_function_call(node*& out_node);
 
 		/**
-		 * \brief Attempts to parse a return statement. First expected token is a return keyword.
+		 * \brief Attempts to parse a return statement. The first expected token is a return keyword.
 		 * \param out_node Output AST node
 		 * \return True if a function definition is parsed successfully
 		 */
 		bool parse_return_statement(node*& out_node);
 
 		/**
-		 * \brief Attempts to parse a variable declaration. First expected token is an identifier.
+		 * \brief Attempts to parse a variable declaration. The first expected token is a type.
 		 * \param out_node Output AST node
 		 * \param is_global Global setting of the declaration (global vs. local declaration)
 		 * \return True if a function definition is parsed successfully
@@ -96,7 +96,7 @@ namespace channel {
 		bool parse_factor(node*& out_node, type expression_type = type::unknown);
 
 		/**
-		 * \brief Attempts to parse a number token. First expected token is a numerical type.
+		 * \brief Attempts to parse a number token. The first expected token is a numerical type.
 		 * \param out_node Output AST node
 		 * \param expression_type Specified expression type
 		 * \return True if a function definition is parsed successfully
@@ -104,22 +104,22 @@ namespace channel {
 		bool parse_number(node*& out_node, type expression_type = type::unknown);
 
 		/**
-		 * \brief Checks if a statement is a function definition. First expected token is a type.
+		 * \brief Checks if a statement is a function definition. The first expected token is a type.
 		 * \return True if the statement is a function definition
 		 */
-		bool peek_is_function_definition() const;
+		static bool peek_is_function_definition(lexer lexer_copy);
 
 		/**
 		 * \brief Checks if the next statement is a function call.
 		 * \return True if the next expression is a function call
 		 */
-		bool peek_is_function_call() const;
+		static bool peek_is_function_call(lexer lexer_copy);
 
 		/**
 		 * \brief Returns the next token without advancing the inner lexer.
 		 * \return Returns the next token
 		 */
-		token peek_next_token() const;
+		static token peek_next_token(lexer lexer_copy);
 
 		/**
 		 * \brief Creates a new numerical node with the value of '0'.
@@ -127,6 +127,12 @@ namespace channel {
 		 * \return Expression of the specified with the value of '0'
 		 */
 		node* create_zero_node(type expression_type) const;
+
+		/**
+		 * \brief Parses the next tokens as a type. The first expected token is a type.
+		 * \return Parsed type token
+		 */
+		type parse_type();
 	private:
 		lexer m_lexer;
 		token m_current_token = token::unknown;

@@ -40,13 +40,13 @@ namespace channel {
 
 	bool parser::parse(std::vector<node*>& abstract_syntax_tree) {
 		while(true) {
-			if(peek_next_token() == token::end_of_file) {
+			if(peek_next_token(m_lexer) == token::end_of_file) {
 				return true;
 			}
 
 			node* node;
 
-			if(peek_is_function_definition()) {
+			if(peek_is_function_definition(m_lexer)) {
 				// parse a top-level function definition
 				if(!parse_function_definition(node)) {
 					return false;
@@ -80,24 +80,19 @@ namespace channel {
 
 	bool parser::parse_function_definition(node*& out_node)	{
 		const u64 line_number = m_lexer.get_current_line_number();
-		get_next_token(); // type (guaranteed)
-		const type return_type = token_to_type(m_current_token);
+		const type return_type = parse_type();
 		get_next_token(); // identifier (guaranteed)
 		const std::string identifier = m_lexer.get_identifier();
 		get_next_token(); // l_parenthesis (guaranteed)
-		get_next_token(); // r_parenthesis || type
+		// get_next_token(); // r_parenthesis || type
 
 		std::vector<std::pair<std::string, type>> arguments;
 
 		// parse arguments
-		if(m_current_token != token::r_parenthesis) {
+		token next_token = peek_next_token(m_lexer);
+		if(next_token != token::r_parenthesis) {
 			while (true) {
-				if (!is_token_type(m_current_token)) {
-					compilation_logger::emit_token_is_not_type_error(m_lexer.get_current_line_number(), m_current_token);
-					return false;
-				}
-
-				type argument_type = token_to_type(m_current_token);
+				type argument_type = parse_type();
 
 				if (!expect_next_token(token::identifier)) {
 					return false;
@@ -106,20 +101,24 @@ namespace channel {
 				std::string argument_name = m_lexer.get_identifier();
 				arguments.emplace_back(argument_name, argument_type);
 
-				get_next_token(); // comma || type || other
+				// get_next_token(); // comma || type || other
 
-				if (m_current_token == token::comma) {
-					get_next_token();
+				next_token = peek_next_token(m_lexer);
+				if (next_token == token::comma) {
+					get_next_token(); // comma (guaranteed)
 				}
-				else if (m_current_token != token::r_parenthesis) {
+				else if (next_token != token::r_parenthesis) {
 					compilation_logger::emit_unexpected_token_error(m_lexer.get_current_line_number(), token::r_parenthesis, m_current_token);
 					return false;
 				}
 				else {
-					// break on l_parenthesis
+					get_next_token(); // r_parenthesis(guaranteed)
 					break;
 				}
 			}
+		}
+		else {
+			get_next_token(); // r_parenthesis (guaranteed)
 		}
 
 		if(!expect_next_token(token::l_brace)) {
@@ -128,10 +127,10 @@ namespace channel {
 		
 		std::vector<node*> statements;
 
-		token next_token = peek_next_token();
+		next_token = peek_next_token(m_lexer);
 		if(next_token != token::r_brace) {
 			while (true) {
-				if (peek_next_token() == token::r_brace) {
+				if (peek_next_token(m_lexer) == token::r_brace) {
 					break;
 				}
 
@@ -142,7 +141,7 @@ namespace channel {
 
 				statements.push_back(statement);
 
-				next_token = peek_next_token();
+				next_token = peek_next_token(m_lexer);
 				if(next_token == token::r_brace) {
 					break;
 				}
@@ -158,7 +157,7 @@ namespace channel {
 	}
 
 	bool parser::parse_global_statement(node*& out_node) {
-		const token token = peek_next_token(); // identifier || type || keyword
+		const token token = peek_next_token(m_lexer); // identifier || type || keyword
 
 		if (is_token_type(token)) {
 			// statements beginning with a type keyword have to be variable declarations
@@ -188,7 +187,7 @@ namespace channel {
 	}
 
 	bool parser::parse_local_statement(node*& out_node)	{
-		const token token = peek_next_token(); // identifier || type || keyword
+		const token token = peek_next_token(m_lexer); // identifier || type || keyword
 
 		if(is_token_type(token)) {
 			// statements beginning with a type keyword have to be variable declarations
@@ -199,7 +198,7 @@ namespace channel {
 		else {
 			switch (token) {
 			case token::identifier:
-				if(peek_is_function_call()) {
+				if(peek_is_function_call(m_lexer)) {
 					// function call statement
 					if(!parse_function_call(out_node)) {
 						return false;
@@ -241,7 +240,7 @@ namespace channel {
 		// parse access-assignment
 		node* value;
 
-		if (peek_is_function_call()) {
+		if (peek_is_function_call(m_lexer)) {
 			if (!parse_function_call(value)) {
 				return false;
 			}
@@ -264,7 +263,7 @@ namespace channel {
 
 		std::vector<node*> arguments;
 
-		token next_token = peek_next_token();
+		token next_token = peek_next_token(m_lexer);
 		if(next_token != token::r_parenthesis) {
 			while(true) {
 				node* argument;
@@ -274,7 +273,7 @@ namespace channel {
 
 				arguments.push_back(argument);
 
-				next_token = peek_next_token(); // comma || r_parenthesis || other
+				next_token = peek_next_token(m_lexer); // comma || r_parenthesis || other
 
 				if (next_token == token::comma) {
 					get_next_token(); // comma (guaranteed)
@@ -310,8 +309,7 @@ namespace channel {
 	}
 
 	bool parser::parse_declaration(node*& out_node, bool is_global) {
-		get_next_token(); // type (guaranteed)
-		const type declaration_type = token_to_type(m_current_token);
+		const type declaration_type = parse_type();
 
 		if(!expect_next_token(token::identifier)) {
 			return false;
@@ -320,7 +318,7 @@ namespace channel {
 		const std::string identifier = m_lexer.get_identifier();
 
 		node* value = nullptr;
-		if(peek_next_token() == token::operator_assignment) {
+		if(peek_next_token(m_lexer) == token::operator_assignment) {
 			get_next_token(); // operator_assignment
 			if(!parse_expression(value, declaration_type)) {
 				return false;
@@ -341,7 +339,7 @@ namespace channel {
 			return false;
 		}
 
-		token next_token = peek_next_token();
+		token next_token = peek_next_token(m_lexer);
 		if (next_token == token::operator_addition || next_token == token::operator_subtraction) {
 			while(true) {
 				const token op = next_token;
@@ -360,7 +358,7 @@ namespace channel {
 					out_node = new operator_subtraction_node(m_lexer.get_current_line_number(), out_node, right);
 				}
 
-				next_token = peek_next_token();
+				next_token = peek_next_token(m_lexer);
 				if (!(next_token == token::operator_addition || next_token == token::operator_subtraction || next_token == token::operator_modulo)) {
 					break;
 				}
@@ -375,7 +373,7 @@ namespace channel {
 			return false;
 		}
 
-		token next_token = peek_next_token(); // operator_multiplication || operator_division || operator_modulo
+		token next_token = peek_next_token(m_lexer); // operator_multiplication || operator_division || operator_modulo
 		if(next_token == token::operator_multiplication || next_token == token::operator_division || next_token == token::operator_modulo) {
 			while (true) {
 				const token op = next_token;
@@ -397,7 +395,7 @@ namespace channel {
 					out_node = new operator_modulo_node(m_lexer.get_current_line_number(), out_node, right);
 				}
 
-				next_token = peek_next_token();
+				next_token = peek_next_token(m_lexer);
 				if (!(next_token == token::operator_multiplication || next_token == token::operator_division || next_token == token::operator_modulo)) {
 					break;
 				}
@@ -408,7 +406,7 @@ namespace channel {
 	}
 
 	bool parser::parse_factor(node*& out_node, type expression_type) {
-		const token token = peek_next_token();
+		const token token = peek_next_token(m_lexer);
 
 		if(is_token_numerical(token)) {
 			// parse a number
@@ -433,7 +431,7 @@ namespace channel {
 		else if (token == token::identifier) {
 			// parse a function call or an assignment
 
-			if(peek_is_function_call()) {
+			if(peek_is_function_call(m_lexer)) {
 				if (!parse_function_call(out_node)) {
 					return false; // return on failure
 				}
@@ -491,28 +489,41 @@ namespace channel {
 		}
 	}
 	
-	bool parser::peek_is_function_definition() const {
-		lexer temp_lexer = m_lexer;
-		
-		temp_lexer.get_token(); // type
-		temp_lexer.get_token(); // identifier
-		const token t = temp_lexer.get_token(); // l_parenthesis
+	bool parser::peek_is_function_definition(lexer lexer_copy) {
+		// type
+		if(!is_token_type(lexer_copy.get_token())) {
+			return false;
+		}
 
-		return t == token::l_parenthesis;
+		// type
+		const token next_token = peek_next_token(lexer_copy);
+		if(next_token == token::operator_multiplication) {
+			lexer_copy.get_token(); // operator_multiplication (guaranteed)
+		}
+		else if(next_token != token::identifier) {
+			return false;
+		}
+
+		// identifier
+		if(lexer_copy.get_token() != token::identifier) {
+			return false;
+		}
+
+		// l_parenthesis
+		return lexer_copy.get_token() == token::l_parenthesis;
 	}
 
-	bool parser::peek_is_function_call() const {
-		lexer temp_lexer = m_lexer;
+	bool parser::peek_is_function_call(lexer lexer_copy) {
+		// identifier
+		if(lexer_copy.get_token() != token::identifier) {
+			return false;
+		}
 
-		temp_lexer.get_token(); // identifier
-		const token t = temp_lexer.get_token(); // l_parenthesis
-
-		return t == token::l_parenthesis;
+		return lexer_copy.get_token() == token::l_parenthesis;
 	}
 
-	token parser::peek_next_token() const {
-		lexer temp_lexer = m_lexer;
-		return temp_lexer.get_token();
+	token parser::peek_next_token(lexer lexer_copy) {
+		return lexer_copy.get_token();
 	}
 
 	node* parser::create_zero_node(type expression_type) const {
@@ -531,5 +542,24 @@ namespace channel {
 				ASSERT(false, "[parser]: cannot convert '" + type_to_string(expression_type) + "' to a type keyword");
 				return nullptr;
 		}
+	}
+
+	type parser::parse_type() {
+		get_next_token();
+
+		if(!is_token_type(m_current_token)) {
+			compilation_logger::emit_token_is_not_type_error(m_lexer.get_current_line_number(), m_current_token);
+		}
+
+		const type type = token_to_type(m_current_token);
+
+		// check if the next token is an asterisk
+		if(peek_next_token(m_lexer) == token::operator_multiplication) {
+			get_next_token(); // operator_multiplication (guaranteed)
+			// get the respective pointer type
+			return get_pointer_type(type);
+		}
+
+		return type;
 	}
 }

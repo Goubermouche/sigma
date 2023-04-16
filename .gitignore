@@ -4,7 +4,7 @@
 ## Get latest from https://github.com/github/gitignore/blob/master/VisualStudio.gitignore
 
 # test/exe files
-language/test/*.exe
+compiler/test/*.exe
 
 # User-specific files
 *.rsuser

@@ -18,7 +18,7 @@ namespace channel {
 		llvm::FunctionType* printf_type = llvm::FunctionType::get(llvm::Type::getInt32Ty(m_context), printf_arg_types, true);
 		llvm::Function* printf_func = llvm::Function::Create(printf_type, llvm::Function::ExternalLinkage, "printf", m_module.get());
 
-		m_functions["print"] = new function(type::void_t, printf_func, { {"arg", type::pointer} });
+		m_functions["print"] = new function(type::void_type, printf_func, { {"arg", type::i8_pointer} });
 	}
 
 	bool codegen_visitor::generate(parser& parser) {

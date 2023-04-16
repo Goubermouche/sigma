@@ -6,11 +6,10 @@
 
 u64 g = 100;
 
-i8* void_func(f32* arg) {
-    
-}
+i8* void_func(f32* arg) {}
 
 i32 func(f32 a, i32 b) {
+    f32 g = 20.0f;
     return g * a / b;
 }
 

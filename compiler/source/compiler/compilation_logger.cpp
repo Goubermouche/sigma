@@ -18,7 +18,7 @@ namespace channel {
 	void compilation_logger::emit_function_return_auto_generate_warning(u64 line_number, const std::string& function_name) {
 		emit_warning(
 			line_number,
-			"implicit function return generated for call to function '" + function_name + "'"
+			"implicit function return generated for function '" + function_name + "'"
 		);
 	}
 

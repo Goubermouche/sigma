@@ -22,17 +22,17 @@ namespace channel {
 
 	type get_pointer_type(type ty) {
 		static const std::unordered_map<type, type> type_to_type_map = {
-			{ type::i8    , type::i8_pointer      },
-			{ type::i16   , type::i16_pointer     },
-			{ type::i32   , type::i32_pointer     },
-			{ type::i64   , type::i64_pointer     },
-			{ type::u8    , type::u8_pointer      },
-			{ type::u16   , type::u16_pointer     },
-			{ type::u32   , type::u32_pointer     },
-			{ type::u64   , type::u64_pointer     },
-			{ type::f32   , type::f32_pointer     },
-			{ type::f64   , type::f64_pointer     },
-			{ type::void_type, type::void_pointer },
+			{ type::i8       , type::i8_pointer      },
+			{ type::i16      , type::i16_pointer     },
+			{ type::i32      , type::i32_pointer     },
+			{ type::i64      , type::i64_pointer     },
+			{ type::u8       , type::u8_pointer      },
+			{ type::u16      , type::u16_pointer     },
+			{ type::u32      , type::u32_pointer     },
+			{ type::u64      , type::u64_pointer     },
+			{ type::f32      , type::f32_pointer     },
+			{ type::f64      , type::f64_pointer     },
+			{ type::void_type, type::void_pointer    },
 		};
 
 		const auto it = type_to_type_map.find(ty);
@@ -216,7 +216,7 @@ namespace channel {
 			{ type::u64         , [](llvm::LLVMContext& ctx) { return llvm::Type::getInt64Ty(ctx);     } },
 			{ type::f32         , [](llvm::LLVMContext& ctx) { return llvm::Type::getFloatTy(ctx);     } },
 			{ type::f64         , [](llvm::LLVMContext& ctx) { return llvm::Type::getDoubleTy(ctx);    } },
-			{ type::void_type      , [](llvm::LLVMContext& ctx) { return llvm::Type::getVoidTy(ctx);   } },
+			{ type::void_type   , [](llvm::LLVMContext& ctx) { return llvm::Type::getVoidTy(ctx);      } },
 			// pointers			  
 			{ type::i8_pointer  , [](llvm::LLVMContext& ctx) { return llvm::Type::getInt8PtrTy(ctx);   } },
 			{ type::i16_pointer , [](llvm::LLVMContext& ctx) { return llvm::Type::getInt16PtrTy(ctx);  } },

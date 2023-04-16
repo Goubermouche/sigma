@@ -79,8 +79,8 @@ namespace channel {
 	}
 
 	bool parser::parse_function_definition(node*& out_node)	{
-		const u64 line_number = m_lexer.get_current_line_number();
 		const type return_type = parse_type();
+		const u64 line_number = m_lexer.get_current_line_number();
 		get_next_token(); // identifier (guaranteed)
 		const std::string identifier = m_lexer.get_identifier();
 		get_next_token(); // l_parenthesis (guaranteed)

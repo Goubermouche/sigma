@@ -130,7 +130,9 @@ namespace channel {
 			}
 
 			// cast the given argument to match the required argument's type, if necessary 
-			argument_values[i] = cast_value(argument_value, arguments[i].second, node.get_declaration_line_number());
+			if(!cast_value(argument_values[i], argument_value, arguments[i].second, node.get_declaration_line_number())) {
+				return false;
+			}
 		}
 
 		// return the function call as the value

@@ -7,6 +7,8 @@ namespace channel {
 		r_parenthesis,                      // token identifier for the ')' character
 		l_brace,                            // token identifier for the '{' character
 		r_brace,                            // token identifier for the '}' character
+		l_bracket,                          // token identifier for the '[' character
+		r_bracket,                          // token identifier for the ']' character
 		comma,                              // ,
 
 		// keywords
@@ -31,6 +33,8 @@ namespace channel {
 		// statements
 		// flow control
 		keyword_return,                     // return
+
+		keyword_new,                        // new
 
 		// math
 		// vectors
@@ -97,6 +101,10 @@ namespace channel {
 			return "l_parenthesis";
 		case token::r_parenthesis:
 			return "r_parenthesis";
+		case token::l_bracket:
+			return "l_bracket";
+		case token::r_bracket:
+			return "r_bracket";
 		case token::comma:
 			return "comma";
 
@@ -132,6 +140,8 @@ namespace channel {
 
 		case token::keyword_return:
 			return "keyword_return";
+		case token::keyword_new:
+			return "keyword_new";
 
 		// operators
 		case token::operator_addition:

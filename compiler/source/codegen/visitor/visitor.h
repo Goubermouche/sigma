@@ -10,6 +10,7 @@ namespace channel {
     class variable_node;
     class local_declaration_node;
     class global_declaration_node;
+    class allocation_node;
 
     // flow control
     class return_node;
@@ -57,6 +58,7 @@ namespace channel {
         virtual bool visit_variable_node(variable_node& node, value*& out_value) = 0;
         virtual bool visit_local_declaration_node(local_declaration_node& node, value*& out_value) = 0;
         virtual bool visit_global_declaration_node(global_declaration_node& node, value*& out_value) = 0;
+        virtual bool visit_allocation_node(allocation_node& node, value*& out_value) = 0;
 
         // flow control
         virtual bool visit_return_node(return_node& node, value*& out_value) = 0;

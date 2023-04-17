@@ -42,7 +42,7 @@ namespace channel {
 			return;
 		}
 
-		// visitor.print_intermediate_representation();
+		visitor.print_intermediate_representation();
 
 		// compile the file into an exe
 		// get the generated module

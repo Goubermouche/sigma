@@ -47,6 +47,8 @@ namespace channel {
 	 */
 	type get_pointer_type(type ty);
 
+	type get_inherent_pointer_type(type ty);
+
 	/**
 	 * \brief Gets the bit width of the specified type.
 	 * \param ty Type to get the bit width of

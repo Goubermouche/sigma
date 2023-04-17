@@ -38,6 +38,8 @@ namespace channel {
 		bool visit_variable_node(variable_node& node, value*& out_value) override;
 		bool visit_local_declaration_node(local_declaration_node& node, value*& out_value) override;
 		bool visit_global_declaration_node(global_declaration_node& node, value*& out_value) override;
+		bool visit_allocation_node(allocation_node& node, value*& out_value) override;
+
 		bool get_declaration_value(const declaration_node& node, value*& out_value); // utility
 
 		// flow control
@@ -69,7 +71,7 @@ namespace channel {
 		bool visit_operator_modulo_node(operator_modulo_node& node, value*& out_value) override;
 
 		// utility
-		llvm::Value* cast_value(const value* source_value, type target_type, u64 line_number);
+		bool cast_value(llvm::Value*& out_value, const value* source_value, type target_type, u64 line_number);
 
 		bool has_main_entry_point() const;
 		void initialize_global_variables();

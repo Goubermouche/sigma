@@ -15,7 +15,10 @@ namespace channel {
 		const type function_return_type = m_functions[parent_function->getName().str()]->get_return_type();
 
 		// upcast the return value to match the function's return type
-		llvm::Value* upcasted_return_value = cast_value(return_value, function_return_type, node.get_declaration_line_number());
+		llvm::Value* upcasted_return_value;
+		if(!cast_value(upcasted_return_value, return_value, function_return_type, node.get_declaration_line_number())) {
+			return false;
+		}
 
 		// generate the LLVM return instruction with the upcasted value
 		m_builder.CreateRet(upcasted_return_value);

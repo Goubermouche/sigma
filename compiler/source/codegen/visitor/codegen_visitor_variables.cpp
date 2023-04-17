@@ -2,6 +2,7 @@
 
 #include "../abstract_syntax_tree/variables/assignment_node.h"
 #include "../abstract_syntax_tree/variables/variable_node.h"
+#include "../abstract_syntax_tree/variables/allocation_node.h"
 #include "../abstract_syntax_tree/variables/declaration/local_declaration_node.h"
 #include "../abstract_syntax_tree/variables/declaration/global_declaration_node.h"
 
@@ -14,30 +15,26 @@ namespace channel {
 
 		// assignment to a local variable
 		// look up the local variable in the active scope
-		if (const value* local_variable = m_scope->get_named_value(node.get_name())) {
-			// upcast the expression, if necessary
-			out_value->set_value(cast_value(out_value, local_variable->get_type(), node.get_declaration_line_number()));
+		const value* variable = m_scope->get_named_value(node.get_name());
 
-			// store the value in the memory location of the variable
-			m_builder.CreateStore(out_value->get_value(), local_variable->get_value());
-			return true;
+		// we haven't found a local variable with the specified name, attempt to find a global one
+		if (!variable) {
+			variable = m_global_named_values[node.get_name()];
+
+			// check if the global variable exists
+			if (!variable) {
+				compilation_logger::emit_variable_not_found_error(node.get_declaration_line_number(), node.get_name());
+				return false;
+			}
 		}
 
-		// we haven't found a local variable, check if we're assigning to a global one
-		// assignment to a global variable
-		// look up the global variable in the m_global_named_values map
-		const value* pointer_to_global_variable = m_global_named_values[node.get_name()];
-		// check if the global variable exists
-		if (!pointer_to_global_variable) {
-			compilation_logger::emit_variable_not_found_error(node.get_declaration_line_number(), node.get_name());
+		llvm::Value* out_cast;
+		if(!cast_value(out_cast, out_value, variable->get_type(), node.get_declaration_line_number())) {
 			return false;
 		}
 
-		// upcast the expression, if necessary
-		out_value->set_value(cast_value(out_value, pointer_to_global_variable->get_type(), node.get_declaration_line_number()));
-
-		// store the new value in the memory location of the global variable
-		m_builder.CreateStore(out_value->get_value(), pointer_to_global_variable->get_value());
+		out_value->set_value(out_cast);
+		m_builder.CreateStore(out_value->get_value(), variable->get_value());
 		return true;
 	}
 
@@ -89,7 +86,10 @@ namespace channel {
 		}
 
 		// cast the right-hand side operator to the assigned type
-		llvm::Value* cast_assigned_value = cast_value(out_value, node.get_declaration_type(), node.get_declaration_line_number());
+		llvm::Value* cast_assigned_value;
+		if(!cast_value(cast_assigned_value, out_value, node.get_declaration_type(), node.get_declaration_line_number())) {
+			return false;
+		}
 
 		// store the initial value
 		llvm::AllocaInst* alloca = m_builder.CreateAlloca(
@@ -132,7 +132,10 @@ namespace channel {
 		}
 
 		// cast the right-hand side operator to the assigned type
-		llvm::Value* cast_assigned_value = cast_value(assigned_value, node.get_declaration_type(), node.get_declaration_line_number());
+		llvm::Value* cast_assigned_value;
+		if(!cast_value(cast_assigned_value, assigned_value, node.get_declaration_type(), node.get_declaration_line_number())) {
+			return false;
+		}
 
 		// create a global variable
 		out_value = new value(
@@ -169,6 +172,39 @@ namespace channel {
 
 		// push the constructor to the ctor list
 		m_global_ctors.push_back(new_ctor);
+		return true;
+	}
+
+	bool codegen_visitor::visit_allocation_node(allocation_node& node, value*& out_value) {
+		// calculate the allocation size
+		llvm::Type* element_type = type_to_llvm_type(node.get_element_type(), m_context);
+		value* num_elements;
+
+		if(!node.get_array_size_node()->accept(*this, num_elements)) {
+			return false;
+		}
+
+		// get the malloc function
+		const llvm::FunctionCallee malloc_func = m_module->getOrInsertFunction(
+			"malloc", 
+			llvm::FunctionType::get(
+				llvm::Type::getInt8PtrTy(m_context),
+				llvm::Type::getInt64Ty(m_context),
+				false)
+		);
+
+		// calculate the total size
+		llvm::Value* element_size = llvm::ConstantInt::get(m_context, llvm::APInt(64, element_type->getPrimitiveSizeInBits() / 8));
+		llvm::Value* total_size = m_builder.CreateMul(num_elements->get_value(), element_size);
+
+		// call malloc
+		llvm::Value* allocated_ptr = m_builder.CreateCall(malloc_func, total_size);
+
+		// cast the result to the correct pointer type
+		llvm::Value* typed_ptr = m_builder.CreateBitCast(allocated_ptr, llvm::PointerType::getUnqual(element_type));
+
+		// return the typed pointer as a value
+		out_value = new value("new", get_pointer_type(node.get_element_type()), typed_ptr);
 		return true;
 	}
 

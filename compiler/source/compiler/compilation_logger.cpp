@@ -83,6 +83,20 @@ namespace channel {
 		);
 	}
 
+	void compilation_logger::emit_cannot_allocate_for_non_pointer_type_error(u64 line_number, type ty) {
+		emit_error(
+			line_number,
+			"cannot allocate memory for non-pointer type '" + type_to_string(ty) + "'"
+		);
+	}
+
+	void compilation_logger::emit_cannot_cast_pointer_type_error(u64 line_number, type ty1, type ty2) {
+		emit_error(
+			line_number,
+			"cannot cast between pointer types ('" + type_to_string(ty1) + "', '" + type_to_string(ty2) + "')"
+		);
+	}
+
 	void compilation_logger::emit_function_not_found_error(u64 line_number, const std::string& function_name) {
 		emit_error(
 			line_number,

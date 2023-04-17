@@ -69,25 +69,26 @@ namespace channel {
 
 		// tokens that are longer than one character 
 		const std::unordered_map<std::string, token> m_keyword_tokens = {
-			{ "void", token::keyword_type_void  },
+			{ "void"  , token::keyword_type_void },
 
 			// signed integers			
-			{ "i8"  , token::keyword_type_i8  },
-			{ "i16" , token::keyword_type_i16 },
-			{ "i32" , token::keyword_type_i32 },
-			{ "i64" , token::keyword_type_i64 },
+			{ "i8"    , token::keyword_type_i8   },
+			{ "i16"   , token::keyword_type_i16  },
+			{ "i32"   , token::keyword_type_i32  },
+			{ "i64"   , token::keyword_type_i64  },
 
 			// unsigned integers		 
-			{ "u8"  , token::keyword_type_u8  },
-			{ "u16" , token::keyword_type_u16 },
-			{ "u32" , token::keyword_type_u32 },
-			{ "u64" , token::keyword_type_u64 },
+			{ "u8"    , token::keyword_type_u8   },
+			{ "u16"   , token::keyword_type_u16  },
+			{ "u32"   , token::keyword_type_u32  },
+			{ "u64"   , token::keyword_type_u64  },
 
 			// floating point			 
-			{ "f32" , token::keyword_type_f32 },
-			{ "f64" , token::keyword_type_f64 },
+			{ "f32"   , token::keyword_type_f32  },
+			{ "f64"   , token::keyword_type_f64  },
 
-			{ "return", token::keyword_return },
+			{ "return", token::keyword_return    },
+			{ "new"   , token::keyword_new       },
 		};
 
 		// tokens that consist of special chars (non-alphabetical and non-digit chars), note that the "//"
@@ -102,6 +103,8 @@ namespace channel {
 			{ ")" , token::r_parenthesis                      },
 			{ "{" , token::l_brace                            },
 			{ "}" , token::r_brace                            },
+			{ "[" , token::l_bracket                          },
+			{ "]" , token::r_bracket                          },
 			{ "," , token::comma                              },
 														      
 			// operators								      

@@ -6,6 +6,7 @@
 // variables
 #include "../codegen/abstract_syntax_tree/variables/assignment_node.h"
 #include "../codegen/abstract_syntax_tree/variables/variable_node.h"
+#include "../codegen/abstract_syntax_tree/variables/allocation_node.h"
 #include "../codegen/abstract_syntax_tree/variables/declaration/local_declaration_node.h"
 #include "../codegen/abstract_syntax_tree/variables/declaration/global_declaration_node.h"
 
@@ -455,6 +456,11 @@ namespace channel {
 				return false;
 			}
 		}
+		else if(token == token::keyword_new) {
+			if(!parse_new_allocation(out_node, expression_type)) {
+				return false;
+			}
+		}
 		else {
 			compilation_logger::emit_unhandled_token_error(m_lexer.get_current_line_number(), m_current_token);
 			return false; // return on failure
@@ -487,6 +493,34 @@ namespace channel {
 			compilation_logger::emit_unhandled_number_format_error(m_lexer.get_current_line_number(), type);
 			return false; // return on failure
 		}
+	}
+
+	bool parser::parse_new_allocation(node*& out_node, type expression_type) {
+		get_next_token(); // keyword_new (guaranteed)
+
+		const u64 line_number = m_lexer.get_current_line_number();
+		const type allocation_type = parse_type();
+
+		// l_bracket
+		if (!expect_next_token(token::l_bracket)) {
+			return false;
+		}
+
+		// parse array size
+		node* array_size;
+		if(!parse_expression(array_size, type::i64)) {
+			return false;
+		}
+
+		// r_bracket
+		if (!expect_next_token(token::r_bracket)) {
+			return false;
+		}
+
+
+
+		out_node = new allocation_node(line_number, allocation_type, array_size);
+		return true;
 	}
 	
 	bool parser::peek_is_function_definition(lexer lexer_copy) {

@@ -103,6 +103,8 @@ namespace channel {
 		 */
 		bool parse_number(node*& out_node, type expression_type = type::unknown);
 
+		bool parse_new_allocation(node*& out_node, type expression_type = type::unknown);
+		
 		/**
 		 * \brief Checks if a statement is a function definition. The first expected token is a type.
 		 * \return True if the statement is a function definition

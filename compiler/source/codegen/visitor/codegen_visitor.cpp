@@ -73,10 +73,16 @@ namespace channel {
 		return m_functions.at("main") != nullptr;
 	}
 
-	llvm::Value* codegen_visitor::cast_value(const value* source_value, type target_type, u64 line_number) {
+	bool codegen_visitor::cast_value(llvm::Value*& out_value, const value* source_value, type target_type, u64 line_number) {
 		// both types are the same 
 		if(source_value->get_type() == target_type) {
-			return source_value->get_value();
+			out_value = source_value->get_value();
+			return true;
+		}
+
+		if(is_type_pointer(source_value->get_type()) || is_type_pointer(target_type)) {
+			compilation_logger::emit_cannot_cast_pointer_type_error(line_number, source_value->get_type(), target_type);
+			return false;
 		}
 
 		// cast function call
@@ -86,7 +92,8 @@ namespace channel {
 
 			// both types are the same 
 			if(function_return_type == target_type) {
-				return source_value->get_value();
+				out_value = source_value->get_value();
+				return true;
 			}
 
 			compilation_logger::emit_function_return_type_cast_warning(line_number, function_return_type, target_type);
@@ -97,20 +104,24 @@ namespace channel {
 			// perform the cast op
 			if (is_type_floating_point(function_return_type)) {
 				if (is_type_integral(target_type)) {
-					return m_builder.CreateFPToSI(function_call_result, target_llvm_type, "fptosi");
+					out_value = m_builder.CreateFPToSI(function_call_result, target_llvm_type, "fptosi");
+					return true;
 				}
 
 				if (is_type_floating_point(target_type)) {
-					return m_builder.CreateFPCast(function_call_result, target_llvm_type, "fpcast");
+					out_value = m_builder.CreateFPCast(function_call_result, target_llvm_type, "fpcast");
+					return true;
 				}
 			}
 			else if (is_type_integral(function_return_type)) {
 				if (is_type_floating_point(target_type)) {
-					return m_builder.CreateSIToFP(function_call_result, target_llvm_type, "sitofp");
+					out_value = m_builder.CreateSIToFP(function_call_result, target_llvm_type, "sitofp");
+					return true;
 				}
 
 				if (is_type_integral(target_type)) {
-					return m_builder.CreateIntCast(function_call_result, target_llvm_type, is_type_signed(target_type), "intcast");
+					out_value = m_builder.CreateIntCast(function_call_result, target_llvm_type, is_type_signed(target_type), "intcast");
+					return true;
 				}
 			}
 		}
@@ -123,25 +134,30 @@ namespace channel {
 
 		// floating-point to integer
 		if (is_type_floating_point(source_value->get_type()) && is_type_integral(target_type)) {
-			return m_builder.CreateFPToSI(source_llvm_value, target_llvm_type);
+			out_value = m_builder.CreateFPToSI(source_llvm_value, target_llvm_type);
+			return true;
 		}
 
 		// integer to floating-point
 		if (is_type_integral(source_value->get_type()) && is_type_floating_point(target_type)) {
-			return m_builder.CreateSIToFP(source_llvm_value, target_llvm_type);
+			out_value = m_builder.CreateSIToFP(source_llvm_value, target_llvm_type);
+			return true;
 		}
 
 		// other cases
 		if (get_type_bit_width(source_value->get_type()) < get_type_bit_width(target_type)) {
 			// perform upcast
 			if (is_type_unsigned(source_value->get_type())) {
-				return m_builder.CreateZExt(source_llvm_value, target_llvm_type, "zext");
+				out_value = m_builder.CreateZExt(source_llvm_value, target_llvm_type, "zext");
+				return true;
 			}
 
-			return m_builder.CreateSExt(source_llvm_value, target_llvm_type, "sext");
+			out_value = m_builder.CreateSExt(source_llvm_value, target_llvm_type, "sext");
+			return true;
 		}
 
 		// downcast
-		return m_builder.CreateTrunc(source_llvm_value, target_llvm_type, "trunc");
+		out_value = m_builder.CreateTrunc(source_llvm_value, target_llvm_type, "trunc");
+		return true;
 	}
 }

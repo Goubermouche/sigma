@@ -40,6 +40,26 @@ namespace channel {
 		return it->second;
 	}
 
+	type get_inherent_pointer_type(type ty) {
+		static const std::unordered_map<type, type> type_to_type_map = {
+			{ type::i8_pointer  , type::i8        },
+			{ type::i16_pointer , type::i16       },
+			{ type::i32_pointer , type::i32       },
+			{ type::i64_pointer , type::i64       },
+			{ type::u8_pointer  , type::u8        },
+			{ type::u16_pointer , type::u16       },
+			{ type::u32_pointer , type::u32       },
+			{ type::u64_pointer , type::u64       },
+			{ type::f32_pointer , type::f32       },
+			{ type::f64_pointer , type::f64       },
+			{ type::void_pointer, type::void_type },
+		};
+
+		const auto it = type_to_type_map.find(ty);
+		ASSERT(it != type_to_type_map.end(), "type for pointer type '" + type_to_string(ty) + "' does not exist");
+		return it->second;
+	}
+
 	i32 get_type_bit_width(type ty) {
 		static const std::unordered_map<type, i32> token_to_bit_width_map = {
 			{ type::i8 , 8  },

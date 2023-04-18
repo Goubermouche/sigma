@@ -176,26 +176,33 @@ namespace channel {
 	}
 
 	bool codegen_visitor::visit_allocation_node(allocation_node& node, value*& out_value) {
-		// calculate the allocation size
-		llvm::Type* element_type = type_to_llvm_type(node.get_element_type(), m_context);
-		value* num_elements;
+		// get the count of allocated elements
+		value* element_count;
+		if(!node.get_element_count_node()->accept(*this, element_count)) {
+			return false;
+		}
 
-		if(!node.get_array_size_node()->accept(*this, num_elements)) {
+		// cast the element count node to i64
+		llvm::Value* element_count_cast;
+		if(!cast_value(element_count_cast, element_count, type::i64, node.get_element_count_node()->get_declaration_line_number())) {
 			return false;
 		}
 
 		// get the malloc function
+		// todo: move to a separate class for managing declared functions
 		const llvm::FunctionCallee malloc_func = m_module->getOrInsertFunction(
 			"malloc", 
 			llvm::FunctionType::get(
 				llvm::Type::getInt8PtrTy(m_context),
 				llvm::Type::getInt64Ty(m_context),
-				false)
+				false
+			)
 		);
 
 		// calculate the total size
+		llvm::Type* element_type = type_to_llvm_type(node.get_element_type(), m_context);
 		llvm::Value* element_size = llvm::ConstantInt::get(m_context, llvm::APInt(64, element_type->getPrimitiveSizeInBits() / 8));
-		llvm::Value* total_size = m_builder.CreateMul(num_elements->get_value(), element_size);
+		llvm::Value* total_size = m_builder.CreateMul(element_count_cast, element_size);
 
 		// call malloc
 		llvm::Value* allocated_ptr = m_builder.CreateCall(malloc_func, total_size);
@@ -203,7 +210,7 @@ namespace channel {
 		// cast the result to the correct pointer type
 		llvm::Value* typed_ptr = m_builder.CreateBitCast(allocated_ptr, llvm::PointerType::getUnqual(element_type));
 
-		// return the typed pointer as a value
+		// return the typed pointer as the value
 		out_value = new value("new", get_pointer_type(node.get_element_type()), typed_ptr);
 		return true;
 	}

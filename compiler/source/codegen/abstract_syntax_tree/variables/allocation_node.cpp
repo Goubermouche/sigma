@@ -17,7 +17,7 @@ namespace channel {
 		return m_element_type;
 	}
 
-	node* allocation_node::get_array_size_node() const {
+	node* allocation_node::get_element_count_node() const {
 		return m_array_size;
 	}
 }

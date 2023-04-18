@@ -9,7 +9,7 @@ namespace channel {
 		std::string get_node_name() const override;
 
 		type get_element_type() const;
-		node* get_array_size_node() const;
+		node* get_element_count_node() const;
 	private:
 		type m_element_type;
 		node* m_array_size;

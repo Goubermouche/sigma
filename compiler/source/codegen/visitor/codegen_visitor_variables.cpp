@@ -2,9 +2,11 @@
 
 #include "../abstract_syntax_tree/variables/assignment_node.h"
 #include "../abstract_syntax_tree/variables/variable_node.h"
-#include "../abstract_syntax_tree/variables/allocation_node.h"
+#include "../abstract_syntax_tree/variables/array/allocation_node.h"
+#include "../abstract_syntax_tree/variables/array/array_assignment_node.h"
 #include "../abstract_syntax_tree/variables/declaration/local_declaration_node.h"
 #include "../abstract_syntax_tree/variables/declaration/global_declaration_node.h"
+#include "codegen/abstract_syntax_tree/variables/array/array_access_node.h"
 
 namespace channel {
 	bool codegen_visitor::visit_assignment_node(assignment_node& node, value*& out_value) {
@@ -208,10 +210,105 @@ namespace channel {
 		llvm::Value* allocated_ptr = m_builder.CreateCall(malloc_func, total_size);
 
 		// cast the result to the correct pointer type
+		element_type = type_to_llvm_type(node.get_element_type(), m_context);
 		llvm::Value* typed_ptr = m_builder.CreateBitCast(allocated_ptr, llvm::PointerType::getUnqual(element_type));
 
 		// return the typed pointer as the value
 		out_value = new value("new", get_pointer_type(node.get_element_type()), typed_ptr);
+		return true;
+	}
+
+	bool codegen_visitor::visit_array_access_node(array_access_node& node, value*& out_value) {
+		value* index_value;
+
+		// visit the array expression and index expression
+		if (!node.get_array_index_node()->accept(*this, index_value)) {
+			return false;
+		}
+
+		const value* array_ptr = m_scope->get_named_value(node.get_array_identifier());
+		if (!array_ptr) {
+			array_ptr = m_global_named_values[node.get_array_identifier()];
+
+			// check if the global variable exists
+			if (!array_ptr) {
+				compilation_logger::emit_variable_not_found_error(node.get_declaration_line_number(), node.get_array_identifier());
+				return false;
+			}
+		}
+
+		std::cout << type_to_string(array_ptr->get_type()) << '\n';
+		if (!is_type_pointer(array_ptr->get_type())) {
+			std::cout << "not pointer \n";
+			// compilation_logger::emit_array_access_on_non_pointer_error(node.get_declaration_line_number());
+			return false;
+		}
+
+		// Get the element type of the pointer
+		llvm::Type* element_type = type_to_llvm_type(get_inherent_pointer_type(array_ptr->get_type()), m_context);
+
+		// Cast index_value to i64
+		llvm::Value* index_value_cast;
+		if (!cast_value(index_value_cast, index_value, type::u64, node.get_declaration_line_number())) {
+			return false;
+		}
+
+		// Calculate the address of the desired element
+		llvm::Value* element_address = m_builder.CreateGEP(llvm::PointerType::getUnqual(element_type), array_ptr->get_value(), index_value_cast);
+
+		// Load the value at the element address
+		llvm::Value* loaded_value = m_builder.CreateLoad(element_type, element_address);
+
+		out_value = new value("array_element", get_inherent_pointer_type(array_ptr->get_type()), loaded_value);
+		return true;
+	}
+
+	bool codegen_visitor::visit_array_assignment_node(array_assignment_node& node, value*& out_value) {
+		value* index_value;
+		value* expression_value;
+
+		// visit the array expression and index expression
+		if (!node.get_array_index_node()->accept(*this, index_value)) {
+			return false;
+		}
+
+		const value* array_ptr = m_scope->get_named_value(node.get_name());
+		if (!array_ptr) {
+			array_ptr = m_global_named_values[node.get_name()];
+
+			// check if the global variable exists
+			if (!array_ptr) {
+				compilation_logger::emit_variable_not_found_error(node.get_declaration_line_number(), node.get_name());
+				return false;
+			}
+		}
+
+		// Ensure the array is a pointer
+		if (!is_type_pointer(array_ptr->get_type())) {
+			// compilation_logger::emit_expected_array_error(node.get_declaration_line_number());
+			return false;
+		}
+
+		// evaluate the right-hand side expression
+		if (!node.get_expression_node()->accept(*this, expression_value)) {
+			return false;
+		}
+
+		// compute the address of the desired array element
+		llvm::Value* index_value_cast;
+		if (!cast_value(index_value_cast, index_value, type::u64, node.get_declaration_line_number())) {
+			return false;
+		}
+
+		llvm::Type* element_type = type_to_llvm_type(array_ptr->get_type(), m_context);
+		llvm::Value* element_address = m_builder.CreateGEP(llvm::PointerType::getUnqual(element_type), array_ptr->get_value(), index_value_cast);
+
+		// store the result of the right-hand side expression in the array
+		m_builder.CreateStore(expression_value->get_value(), element_address);
+
+		// set out_value to expression_value for potential use in chained assignments
+		out_value = expression_value;
+
 		return true;
 	}
 

@@ -39,6 +39,8 @@ namespace channel {
 		bool visit_local_declaration_node(local_declaration_node& node, value*& out_value) override;
 		bool visit_global_declaration_node(global_declaration_node& node, value*& out_value) override;
 		bool visit_allocation_node(allocation_node& node, value*& out_value) override;
+		bool visit_array_access_node(array_access_node& node, value*& out_value) override;
+		bool visit_array_assignment_node(array_assignment_node& node, value*& out_value) override;
 
 		bool get_declaration_value(const declaration_node& node, value*& out_value); // utility
 

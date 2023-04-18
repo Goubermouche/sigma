@@ -55,7 +55,9 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="source\codegen\abstract_syntax_tree\variables\allocation_node.h" />
+    <ClInclude Include="source\codegen\abstract_syntax_tree\variables\array\array_assignment_node.h" />
+    <ClInclude Include="source\codegen\abstract_syntax_tree\variables\array\array_access_node.h" />
+    <ClInclude Include="source\codegen\abstract_syntax_tree\variables\array\allocation_node.h" />
     <ClInclude Include="source\codegen\abstract_syntax_tree\functions\function_call_node.h" />
     <ClInclude Include="source\codegen\abstract_syntax_tree\functions\function_node.h" />
     <ClInclude Include="source\codegen\abstract_syntax_tree\keywords\flow_control\return_node.h" />
@@ -100,7 +102,9 @@
     <ClInclude Include="source\utility\types.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="source\codegen\abstract_syntax_tree\variables\allocation_node.cpp" />
+    <ClCompile Include="source\codegen\abstract_syntax_tree\variables\array\array_assignment_node.cpp" />
+    <ClCompile Include="source\codegen\abstract_syntax_tree\variables\array\array_access_node.cpp" />
+    <ClCompile Include="source\codegen\abstract_syntax_tree\variables\array\allocation_node.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="source\codegen\abstract_syntax_tree\functions\function_call_node.cpp" />
     <ClCompile Include="source\codegen\abstract_syntax_tree\functions\function_node.cpp" />

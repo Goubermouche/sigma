@@ -186,7 +186,9 @@
     <ClInclude Include="source\utility\types.h">
       <Filter>source\utility</Filter>
     </ClInclude>
-    <ClInclude Include="source\codegen\abstract_syntax_tree\variables\allocation_node.h" />
+    <ClInclude Include="source\codegen\abstract_syntax_tree\variables\array\allocation_node.h" />
+    <ClInclude Include="source\codegen\abstract_syntax_tree\variables\array\array_access_node.h" />
+    <ClInclude Include="source\codegen\abstract_syntax_tree\variables\array\array_assignment_node.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp" />
@@ -322,6 +324,8 @@
     <ClCompile Include="source\utility\timer.cpp">
       <Filter>source\utility</Filter>
     </ClCompile>
-    <ClCompile Include="source\codegen\abstract_syntax_tree\variables\allocation_node.cpp" />
+    <ClCompile Include="source\codegen\abstract_syntax_tree\variables\array\allocation_node.cpp" />
+    <ClCompile Include="source\codegen\abstract_syntax_tree\variables\array\array_access_node.cpp" />
+    <ClCompile Include="source\codegen\abstract_syntax_tree\variables\array\array_assignment_node.cpp" />
   </ItemGroup>
 </Project>

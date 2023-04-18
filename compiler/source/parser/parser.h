@@ -49,6 +49,8 @@ namespace channel {
 		 */
 		bool parse_assignment(node*& out_node);
 
+		bool parse_array_access(node*& out_node);
+
 		/**
 		 * \brief Attempts to parse a function call. The first expected token is an identifier.
 		 * \param out_node Output AST node
@@ -144,6 +146,8 @@ namespace channel {
 		 * \return True if the next expression is a function call
 		 */
 		static bool peek_is_function_call(lexer lexer_copy);
+
+		static bool peek_is_array_index_access(lexer lexer_copy);
 
 		/**
 		 * \brief Returns the next token without advancing the inner lexer.

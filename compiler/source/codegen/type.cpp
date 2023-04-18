@@ -203,7 +203,7 @@ namespace channel {
 			{ type::f64          , "f64"           },
 			{ type::function     , "function"      },
 			{ type::function_call, "function_call" },
-			{ type::void_type       , "void"       },
+			{ type::void_type    , "void"          },
 			// pointers			 
 			{ type::i8_pointer   , "i8_pointer"    },
 			{ type::i16_pointer  , "i16_pointer"   },

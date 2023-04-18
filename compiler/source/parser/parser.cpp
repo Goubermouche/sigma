@@ -411,62 +411,26 @@ namespace channel {
 
 		if(is_token_numerical(token)) {
 			// parse a number
-			if (!parse_number(out_node, expression_type)) {
-				return false;
-			}
+			return parse_number(out_node, expression_type);
 		}
-		else if(token == token::operator_subtraction) {
+
+		switch(token) {
+		case token::operator_subtraction:
 			// parse a negative number
-			get_next_token(); // operator_subtraction (guaranteed)
-
-			// negate the number by subtracting it from 0
-			node* zero_node = create_zero_node(expression_type);
-			node* number;
-
-			if (!parse_number(number, expression_type)) {
-				return false;
-			}
-
-			out_node = new operator_subtraction_node(m_lexer.get_current_line_number(), zero_node, number);
-		}
-		else if (token == token::identifier) {
+			return parse_negative_number(out_node, expression_type);
+		case token::identifier:
 			// parse a function call or an assignment
-
-			if(peek_is_function_call(m_lexer)) {
-				if (!parse_function_call(out_node)) {
-					return false; // return on failure
-				}
-			}
-			else {
-
-				get_next_token();
-				const std::string identifier = m_lexer.get_identifier();
-				out_node = new variable_node(m_lexer.get_current_line_number(), identifier);
-			}
-		}
-		else if (token == token::l_parenthesis) {
+			return parse_function_call_or_assignment(out_node);
+		case token::l_parenthesis:
 			// parse a deep expression
-			get_next_token(); // l_parenthesis (guaranteed)
-
-			if (!parse_expression(out_node, expression_type)) {
-				return false;
-			}
-
-			if(!expect_next_token(token::r_parenthesis)) {
-				return false;
-			}
-		}
-		else if(token == token::keyword_new) {
-			if(!parse_new_allocation(out_node, expression_type)) {
-				return false;
-			}
-		}
-		else {
-			compilation_logger::emit_unhandled_token_error(m_lexer.get_current_line_number(), m_current_token);
-			return false; // return on failure
+			return parse_deep_expression(out_node, expression_type);
+		case token::keyword_new:
+			// parse an allocation
+			return parse_new_allocation(out_node);
 		}
 
-		return true;
+		compilation_logger::emit_unhandled_token_error(m_lexer.get_current_line_number(), m_current_token);
+		return false;
 	}
 
 	bool parser::parse_number(node*& out_node, type expression_type) {
@@ -495,7 +459,22 @@ namespace channel {
 		}
 	}
 
-	bool parser::parse_new_allocation(node*& out_node, type expression_type) {
+	bool parser::parse_negative_number(node*& out_node, type expression_type) {
+		get_next_token(); // operator_subtraction (guaranteed)
+
+		// negate the number by subtracting it from 0
+		node* zero_node = create_zero_node(expression_type);
+		node* number;
+
+		if (!parse_number(number, expression_type)) {
+			return false;
+		}
+
+		out_node = new operator_subtraction_node(m_lexer.get_current_line_number(), zero_node, number);
+		return true;
+	}
+
+	bool parser::parse_new_allocation(node*& out_node) {
 		get_next_token(); // keyword_new (guaranteed)
 
 		const u64 line_number = m_lexer.get_current_line_number();
@@ -508,7 +487,7 @@ namespace channel {
 
 		// parse array size
 		node* array_size;
-		if(!parse_expression(array_size, type::i64)) {
+		if(!parse_expression(array_size, type::u64)) {
 			return false;
 		}
 
@@ -517,9 +496,40 @@ namespace channel {
 			return false;
 		}
 
-
-
 		out_node = new allocation_node(line_number, allocation_type, array_size);
+		return true;
+	}
+
+	bool parser::parse_function_call_or_assignment(node*& out_node) {
+		if (peek_is_function_call(m_lexer)) {
+			// parse a function call
+			if (!parse_function_call(out_node)) {
+				return false; // return on failure
+			}
+		}
+		else {
+			// parse an assignment
+			get_next_token();
+			const std::string identifier = m_lexer.get_identifier();
+			out_node = new variable_node(m_lexer.get_current_line_number(), identifier);
+		}
+
+		return true;
+	}
+
+	bool parser::parse_deep_expression(node*& out_node, type expression_type) {
+		get_next_token(); // l_parenthesis (guaranteed)
+
+		// nested expression
+		if (!parse_expression(out_node, expression_type)) {
+			return false;
+		}
+
+		// r_parenthesis
+		if (!expect_next_token(token::r_parenthesis)) {
+			return false;
+		}
+
 		return true;
 	}
 	
@@ -562,19 +572,19 @@ namespace channel {
 
 	node* parser::create_zero_node(type expression_type) const {
 		switch (expression_type) {
-			case type::i8:  return new i8_node(m_lexer.get_current_line_number(), 0);
-			case type::i16: return new i16_node(m_lexer.get_current_line_number(), 0);
-			case type::i32: return new i32_node(m_lexer.get_current_line_number(), 0);
-			case type::i64: return new i64_node(m_lexer.get_current_line_number(), 0);
-			case type::u8:  return new u8_node(m_lexer.get_current_line_number(), 0);
-			case type::u16: return new u16_node(m_lexer.get_current_line_number(), 0);
-			case type::u32: return new u32_node(m_lexer.get_current_line_number(), 0);
-			case type::u64: return new u64_node(m_lexer.get_current_line_number(), 0);
-			case type::f32: return new f32_node(m_lexer.get_current_line_number(), 0.0f);
-			case type::f64: return new f64_node(m_lexer.get_current_line_number(), 0.0);
-			default:
-				ASSERT(false, "[parser]: cannot convert '" + type_to_string(expression_type) + "' to a type keyword");
-				return nullptr;
+		case type::i8:  return new i8_node(m_lexer.get_current_line_number(), 0);
+		case type::i16: return new i16_node(m_lexer.get_current_line_number(), 0);
+		case type::i32: return new i32_node(m_lexer.get_current_line_number(), 0);
+		case type::i64: return new i64_node(m_lexer.get_current_line_number(), 0);
+		case type::u8:  return new u8_node(m_lexer.get_current_line_number(), 0);
+		case type::u16: return new u16_node(m_lexer.get_current_line_number(), 0);
+		case type::u32: return new u32_node(m_lexer.get_current_line_number(), 0);
+		case type::u64: return new u64_node(m_lexer.get_current_line_number(), 0);
+		case type::f32: return new f32_node(m_lexer.get_current_line_number(), 0.0f);
+		case type::f64: return new f64_node(m_lexer.get_current_line_number(), 0.0);
+		default:
+			ASSERT(false, "[parser]: cannot convert '" + type_to_string(expression_type) + "' to a type keyword");
+			return nullptr;
 		}
 	}
 

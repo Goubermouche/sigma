@@ -182,9 +182,9 @@ namespace channel {
 			return false;
 		}
 
-		// cast the element count node to i64
+		// cast the element count node to u64
 		llvm::Value* element_count_cast;
-		if(!cast_value(element_count_cast, element_count, type::i64, node.get_element_count_node()->get_declaration_line_number())) {
+		if(!cast_value(element_count_cast, element_count, type::u64, node.get_element_count_node()->get_declaration_line_number())) {
 			return false;
 		}
 

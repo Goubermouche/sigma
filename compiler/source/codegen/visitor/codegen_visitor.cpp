@@ -80,6 +80,7 @@ namespace channel {
 			return true;
 		}
 
+		// don't allow pointer casting for now
 		if(is_type_pointer(source_value->get_type()) || is_type_pointer(target_type)) {
 			compilation_logger::emit_cannot_cast_pointer_type_error(line_number, source_value->get_type(), target_type);
 			return false;
@@ -158,6 +159,22 @@ namespace channel {
 
 		// downcast
 		out_value = m_builder.CreateTrunc(source_llvm_value, target_llvm_type, "trunc");
+		return true;
+	}
+
+	bool codegen_visitor::get_named_value(value*& out_value, const std::string& variable_name) {
+		// check the local scope
+		out_value = m_scope->get_named_value(variable_name);
+		if (!out_value) {
+			// variable with the given name was not found in the local scope hierarchy, check global variables
+			out_value = m_global_named_values[variable_name];
+
+			if (!out_value) {
+				// variable not found
+				return false;
+			}
+		}
+
 		return true;
 	}
 }

@@ -35,14 +35,16 @@ namespace channel {
 		// variables
 		// codegen_visitor_variables.cpp
 		bool visit_assignment_node(assignment_node& node, value*& out_value) override;
-		bool visit_variable_node(variable_node& node, value*& out_value) override;
+		bool visit_variable_node(access_node& node, value*& out_value) override;
 		bool visit_local_declaration_node(local_declaration_node& node, value*& out_value) override;
 		bool visit_global_declaration_node(global_declaration_node& node, value*& out_value) override;
-		bool visit_allocation_node(allocation_node& node, value*& out_value) override;
+		bool visit_allocation_node(array_allocation_node& node, value*& out_value) override;
 		bool visit_array_access_node(array_access_node& node, value*& out_value) override;
 		bool visit_array_assignment_node(array_assignment_node& node, value*& out_value) override;
 
-		bool get_declaration_value(const declaration_node& node, value*& out_value); // utility
+		// utility
+		bool get_declaration_value(const declaration_node& node, value*& out_value); 
+		bool get_named_value(value*& out_value, const std::string& variable_name);
 
 		// flow control
 		// codegen_visitor_flow_control.cpp

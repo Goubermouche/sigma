@@ -10,13 +10,13 @@ namespace channel {
 	bool codegen_visitor::visit_operator_addition_node(operator_addition_node& node, value*& out_value) {
 		// accept the left expression
 		value* left;
-		if (!node.left->accept(*this, left)) {
+		if (!node.left_expression_node->accept(*this, left)) {
 			return false;
 		}
 
 		// accept the right expression
 		value* right;
-		if (!node.right->accept(*this, right)) {
+		if (!node.right_expression_node->accept(*this, right)) {
 			return false;
 		}
 
@@ -74,13 +74,13 @@ namespace channel {
 	bool codegen_visitor::visit_operator_subtraction_node(operator_subtraction_node& node, value*& out_value) {
 		// accept the left expression
 		value* left;
-		if (!node.left->accept(*this, left)) {
+		if (!node.left_expression_node->accept(*this, left)) {
 			return false;
 		}
 
 		// accept the right expression
 		value* right;
-		if (!node.right->accept(*this, right)) {
+		if (!node.right_expression_node->accept(*this, right)) {
 			return false;
 		}
 
@@ -138,13 +138,13 @@ namespace channel {
 	bool codegen_visitor::visit_operator_multiplication_node(operator_multiplication_node& node, value*& out_value) {
 		// accept the left expression
 		value* left;
-		if (!node.left->accept(*this, left)) {
+		if (!node.left_expression_node->accept(*this, left)) {
 			return false;
 		}
 
 		// accept the right expression
 		value* right;
-		if (!node.right->accept(*this, right)) {
+		if (!node.right_expression_node->accept(*this, right)) {
 			return false;
 		}
 
@@ -202,13 +202,13 @@ namespace channel {
 	bool codegen_visitor::visit_operator_division_node(operator_division_node& node, value*& out_value) {
 		// accept the left expression
 		value* left;
-		if (!node.left->accept(*this, left)) {
+		if (!node.left_expression_node->accept(*this, left)) {
 			return false;
 		}
 
 		// accept the right expression
 		value* right;
-		if (!node.right->accept(*this, right)) {
+		if (!node.right_expression_node->accept(*this, right)) {
 			return false;
 		}
 
@@ -265,13 +265,13 @@ namespace channel {
 	bool codegen_visitor::visit_operator_modulo_node(operator_modulo_node& node, value*& out_value) {
 		// accept the left expression
 		value* left;
-		if (!node.left->accept(*this, left)) {
+		if (!node.left_expression_node->accept(*this, left)) {
 			return false;
 		}
 
 		// accept the right expression
 		value* right;
-		if (!node.right->accept(*this, right)) {
+		if (!node.right_expression_node->accept(*this, right)) {
 			return false;
 		}
 

@@ -6,7 +6,7 @@ namespace channel {
 	bool codegen_visitor::visit_return_node(return_node& node, value*& out_value) {
 		// evaluate the expression of the return statement
 		value* return_value;
-		if (!node.get_expression()->accept(*this, return_value)) {
+		if (!node.get_return_expression_node()->accept(*this, return_value)) {
 			return false;
 		}
 

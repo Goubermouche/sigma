@@ -6,27 +6,27 @@
 namespace channel {
 	bool codegen_visitor::visit_function_node(function_node& node, value*& out_value) {
 		// get the function return type
-		llvm::Type* return_type = type_to_llvm_type(node.get_return_type(), m_context);
+		llvm::Type* return_type = type_to_llvm_type(node.get_function_return_type(), m_context);
 
 		// convert the argument types to LLVM types and store them in a vector
 		std::vector<llvm::Type*> param_types;
-		for (const auto& [arg_name, arg_type] : node.get_arguments()) {
+		for (const auto& [arg_name, arg_type] : node.get_function_arguments()) {
 			param_types.push_back(type_to_llvm_type(arg_type, m_context));
 		}
 
 		// create the LLVM function
 		llvm::FunctionType* func_type = llvm::FunctionType::get(return_type, param_types, false);
-		llvm::Function* func = llvm::Function::Create(func_type, llvm::Function::ExternalLinkage, node.get_name(), m_module.get());
+		llvm::Function* func = llvm::Function::Create(func_type, llvm::Function::ExternalLinkage, node.get_function_identifier(), m_module.get());
 
 		// add it to our function map
 		const auto insertion_result = m_functions.insert({
-			node.get_name(),
-			new function(node.get_return_type(), func, node.get_arguments())
+			node.get_function_identifier(),
+			new function(node.get_function_return_type(), func, node.get_function_arguments())
 		});
 
 		// check for multiple definitions by checking if the function has already been added to our map
 		if (!insertion_result.second) {
-			compilation_logger::emit_function_already_defined_error(node.get_declaration_line_number(), node.get_name());
+			compilation_logger::emit_function_already_defined_error(node.get_declaration_line_number(), node.get_function_identifier());
 			return false;
 		}
 
@@ -40,7 +40,7 @@ namespace channel {
 
 		// create the given arguments 
 		u64 index = 0;
-		for (const auto& [arg_name, arg_type] : node.get_arguments()) {
+		for (const auto& [arg_name, arg_type] : node.get_function_arguments()) {
 			// get the corresponding LLVM function argument
 			llvm::Argument* llvm_arg = func->arg_begin() + index;
 			llvm_arg->setName(arg_name);
@@ -61,7 +61,7 @@ namespace channel {
 		}
 
 		// accept all statements inside the function
-		for (const auto& statement : node.get_statements()) {
+		for (const auto& statement : node.get_function_statements()) {
 			value* temp_statement_value;
 			if (!statement->accept(*this, temp_statement_value)) {
 				return false;
@@ -73,7 +73,7 @@ namespace channel {
 
 		// add a return statement if the function does not have one
 		if (entry_block->getTerminator() == nullptr) {
-			compilation_logger::emit_function_return_auto_generate_warning(node.get_declaration_line_number(), node.get_name());
+			compilation_logger::emit_function_return_auto_generate_warning(node.get_declaration_line_number(), node.get_function_identifier());
 
 			if (return_type->isVoidTy()) {
 				m_builder.CreateRetVoid();
@@ -84,39 +84,39 @@ namespace channel {
 		}
 
 		// return the function as the value
-		out_value = new value(node.get_name(), type::function, func);
+		out_value = new value(node.get_function_identifier(), type::function, func);
 		return true;
 	}
 
 	bool codegen_visitor::visit_function_call_node(function_call_node& node, value*& out_value) {
 		// get a reference to the function
-		const function* func = m_functions[node.get_name()];
+		const function* func = m_functions[node.get_function_identifier()];
 
 		// temp: create a system for importing C functions.
-		if(node.get_name() == "print") {
+		if(node.get_function_identifier() == "print") {
 			value* argument_value;
-			if (!node.get_arguments()[0]->accept(*this, argument_value)) {
+			if (!node.get_function_arguments()[0]->accept(*this, argument_value)) {
 				return false;
 			}
 
 			llvm::Value* printf_format = m_builder.CreateGlobalStringPtr("%d\n", "printf_format");
 			std::vector<llvm::Value*> printf_args = { printf_format, argument_value->get_value() };
-			out_value = new value(node.get_name(), type::function_call, m_builder.CreateCall(func->get_function(), printf_args, "call"));
+			out_value = new value(node.get_function_identifier(), type::function_call, m_builder.CreateCall(func->get_function(), printf_args, "call"));
 			return true;
 		}
 
 		// check if it exists
 		if (!func) {
-			compilation_logger::emit_function_not_found_error(node.get_declaration_line_number(), node.get_name());
+			compilation_logger::emit_function_not_found_error(node.get_declaration_line_number(), node.get_function_identifier());
 			return false;
 		}
 
 		// todo: generate code for each argument expression
 		const std::vector<std::pair<std::string, type>>& arguments = func->get_arguments();
-		const std::vector<channel::node*>& given_arguments = node.get_arguments();
+		const std::vector<channel::node*>& given_arguments = node.get_function_arguments();
 
 		if(arguments.size() != given_arguments.size()) {
-			compilation_logger::emit_function_argument_count_mismatch_error(node.get_declaration_line_number(), node.get_name());
+			compilation_logger::emit_function_argument_count_mismatch_error(node.get_declaration_line_number(), node.get_function_identifier());
 			return false;
 		}
 
@@ -136,7 +136,7 @@ namespace channel {
 		}
 
 		// return the function call as the value
-		out_value = new value(node.get_name(), type::function_call, m_builder.CreateCall(func->get_function(), argument_values, "call"));
+		out_value = new value(node.get_function_identifier(), type::function_call, m_builder.CreateCall(func->get_function(), argument_values, "call"));
 		return true;
 	}
 }

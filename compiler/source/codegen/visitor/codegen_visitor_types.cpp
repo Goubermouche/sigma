@@ -13,6 +13,8 @@
 // floating point
 #include "../abstract_syntax_tree/keywords/types/floating_point/f32_node.h"
 #include "../abstract_syntax_tree/keywords/types/floating_point/f64_node.h"
+// text
+#include "../abstract_syntax_tree/keywords/types/text/char_node.h"
 
 namespace channel {
 	bool codegen_visitor::visit_keyword_i8_node(i8_node& node, value*& out_value) {
@@ -62,6 +64,11 @@ namespace channel {
 
 	bool codegen_visitor::visit_keyword_f64_node(f64_node& node, value*& out_value) {
 		out_value = new value("__f64", type::f64, llvm::ConstantFP::get(m_context, llvm::APFloat(node.get_value())));
+		return true;
+	}
+
+	bool codegen_visitor::visit_keyword_char_node(char_node& node, value*& out_value) {
+		out_value = new value("__char", type::char_type, llvm::ConstantInt::get(m_context, llvm::APInt(8, static_cast<u64>(node.get_value()), false)));
 		return true;
 	}
 }

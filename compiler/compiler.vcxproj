@@ -55,6 +55,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="source\codegen\abstract_syntax_tree\keywords\types\text\char_node.h" />
     <ClInclude Include="source\codegen\abstract_syntax_tree\variables\array\array_assignment_node.h" />
     <ClInclude Include="source\codegen\abstract_syntax_tree\variables\array\array_access_node.h" />
     <ClInclude Include="source\codegen\abstract_syntax_tree\variables\array\array_allocation_node.h" />
@@ -102,6 +103,7 @@
     <ClInclude Include="source\utility\types.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="source\codegen\abstract_syntax_tree\keywords\types\text\char_node.cpp" />
     <ClCompile Include="source\codegen\abstract_syntax_tree\variables\array\array_assignment_node.cpp" />
     <ClCompile Include="source\codegen\abstract_syntax_tree\variables\array\array_access_node.cpp" />
     <ClCompile Include="source\codegen\abstract_syntax_tree\variables\array\array_allocation_node.cpp" />

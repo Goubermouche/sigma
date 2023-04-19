@@ -58,6 +58,8 @@ namespace channel {
 		 * \return Best-fitting numerical token
 		 */
 		token get_number_token();
+
+		token get_char_literal_token();
 	private:
 		std::string m_identifier_string; // current identifier
 		std::string m_value_string;      // current value
@@ -87,6 +89,9 @@ namespace channel {
 			{ "f32"   , token::keyword_type_f32  },
 			{ "f64"   , token::keyword_type_f64  },
 
+			// text
+			{ "char"  , token::keyword_type_char },
+
 			{ "return", token::keyword_return    },
 			{ "new"   , token::keyword_new       },
 		};
@@ -98,7 +103,6 @@ namespace channel {
 		// note: 2-letter tokens need their first token to exist, otherwise the longer version doesn't get
 		//       selected and an identifier is returned.
 		const std::unordered_map<std::string, token> m_special_tokens = {
-			{ ";" , token::semicolon                          },
 			{ "(" , token::l_parenthesis                      },
 			{ ")" , token::r_parenthesis                      },
 			{ "{" , token::l_brace                            },
@@ -106,7 +110,10 @@ namespace channel {
 			{ "[" , token::l_bracket                          },
 			{ "]" , token::r_bracket                          },
 			{ "," , token::comma                              },
-														      
+			{ ";" , token::semicolon                          },
+			{ "\'", token::single_quote                       },
+			{ "\"", token::double_quote                       },
+
 			// operators								      
 			{ "+" , token::operator_addition                  },
 			{ "+=", token::operator_addition_assignment       },

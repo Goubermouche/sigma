@@ -10,6 +10,9 @@ namespace channel {
 		l_bracket,                          // token identifier for the '[' character
 		r_bracket,                          // token identifier for the ']' character
 		comma,                              // ,
+		semicolon,                          // ;
+		single_quote,                       // '
+		double_quote,                       // "
 
 		// keywords
 		keyword_type_void,                  // void nullptr
@@ -29,6 +32,10 @@ namespace channel {
 		// floating point	                
 		keyword_type_f32,                   // f32 0.0f
 		keyword_type_f64,                   // f64 0.0
+
+		// text
+		keyword_type_char,                  // char
+		char_literal,
 
 		// statements
 		// flow control
@@ -85,7 +92,6 @@ namespace channel {
 		number_f64,                         // 0.0
 
 		identifier,
-		semicolon,                          // ;
 
 		end_of_file,
 		unknown
@@ -107,6 +113,12 @@ namespace channel {
 			return "r_bracket";
 		case token::comma:
 			return "comma";
+		case token::semicolon:
+			return "semicolon";
+		case token::single_quote:
+			return "single_quote";
+		case token::double_quote:
+			return "double_quote";
 
 		// keywords
 		case token::keyword_type_void:
@@ -137,6 +149,12 @@ namespace channel {
 			return "keyword_type_f32";
 		case token::keyword_type_f64:
 			return "keyword_type_f64";
+
+		// text
+		case token::keyword_type_char:
+			return "keyword_type_char";
+		case token::char_literal:
+			return "literal_char";
 
 		case token::keyword_return:
 			return "keyword_return";
@@ -210,9 +228,6 @@ namespace channel {
 		// other
 		case token::identifier:
 			return "identifier";
-		case token::semicolon:
-			return "semicolon";
-	
 		case token::end_of_file:
 			return "end_of_file";
 		case token::unknown:

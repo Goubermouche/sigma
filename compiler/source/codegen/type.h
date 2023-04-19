@@ -18,6 +18,7 @@ namespace channel {
 		function,
 		function_call,
 		void_type,
+		char_type,
 		// pointers
 		i8_pointer,
 		i16_pointer,

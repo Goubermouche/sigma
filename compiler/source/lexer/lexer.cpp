@@ -47,6 +47,10 @@ namespace channel {
 			return get_number_token();
 		}
 
+		if (m_last_character == '\'') {
+			return get_char_literal_token();
+		}
+
 		// prevent '.' characters from being located at the beginning of a token
 		// note: we may want to allow this in some cases (ie. when calling member functions)
 		if (m_last_character == '.') {
@@ -182,5 +186,27 @@ namespace channel {
 
 		// 0 format
 		return token::number_signed;
+	}
+
+	token lexer::get_char_literal_token() {
+		m_value_string = "";
+		read_char(); // read the character after the opening quote
+
+		// handle escape characters
+		if (m_last_character == '\\') {
+			read_char();
+			// todo: ... handle specific escape characters (e.g., '\\', '\'', '\n', '\t', etc.) ...
+		}
+
+		m_value_string += m_last_character;
+		read_char(); // read the character after the literal
+
+		if (m_last_character == '\'') {
+			read_char(); // read the character after the closing quote
+			return token::char_literal;
+		}
+
+		ASSERT(false, "[lexer]: unterminated character literal");
+		return token::unknown;
 	}
 }

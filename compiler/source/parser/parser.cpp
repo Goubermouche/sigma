@@ -29,6 +29,8 @@
 // floating point
 #include "../codegen/abstract_syntax_tree/keywords/types/floating_point/f32_node.h"
 #include "../codegen/abstract_syntax_tree/keywords/types/floating_point/f64_node.h"
+// text
+#include "../codegen/abstract_syntax_tree/keywords/types/text/char_node.h"
 
 // operators
 #include "../codegen/abstract_syntax_tree/operators/operator_addition_node.h"
@@ -105,7 +107,6 @@ namespace channel {
 				arguments.emplace_back(argument_name, argument_type);
 
 				// get_next_token(); // comma || type || other
-
 				next_token = peek_next_token(m_lexer);
 				if (next_token == token::comma) {
 					get_next_token(); // comma (guaranteed)
@@ -477,6 +478,10 @@ namespace channel {
 			return parse_number(out_node, expression_type);
 		}
 
+		if(token == token::char_literal) {
+			return parse_char(out_node);
+		}
+
 		switch(token) {
 		case token::operator_subtraction:
 			// parse a negative number
@@ -520,6 +525,12 @@ namespace channel {
 			compilation_logger::emit_unhandled_number_format_error(m_lexer.get_current_line_number(), type);
 			return false; // return on failure
 		}
+	}
+
+	bool parser::parse_char(node*& out_node) {
+		get_next_token(); // char_literal (guaranteed)
+		out_node = new char_node(m_lexer.get_current_line_number(), m_lexer.get_value()[0]);
+		return true;
 	}
 
 	bool parser::parse_negative_number(node*& out_node, type expression_type) {

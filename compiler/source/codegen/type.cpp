@@ -161,6 +161,7 @@ namespace channel {
 			{ token::number_f64       , type::f64       },
 			{ token::keyword_type_f64 , type::f64       },
 			{ token::keyword_type_void, type::void_type },
+			{ token::keyword_type_char, type::char_type },
 			// { token::pointer, type::pointer },
 		};
 
@@ -182,6 +183,7 @@ namespace channel {
 			{ token::keyword_type_f32 , type::f32       },
 			{ token::keyword_type_f64 , type::f64       },
 			{ token::keyword_type_void, type::void_type },
+			{ token::keyword_type_char, type::char_type },
 			// { token::pointer, type::pointer },
 		};
 
@@ -204,6 +206,7 @@ namespace channel {
 			{ type::function     , "function"      },
 			{ type::function_call, "function_call" },
 			{ type::void_type    , "void"          },
+			{ type::char_type    , "char"          },
 			// pointers			 
 			{ type::i8_pointer   , "i8_pointer"    },
 			{ type::i16_pointer  , "i16_pointer"   },
@@ -237,6 +240,7 @@ namespace channel {
 			{ type::f32         , [](llvm::LLVMContext& ctx) { return llvm::Type::getFloatTy(ctx);     } },
 			{ type::f64         , [](llvm::LLVMContext& ctx) { return llvm::Type::getDoubleTy(ctx);    } },
 			{ type::void_type   , [](llvm::LLVMContext& ctx) { return llvm::Type::getVoidTy(ctx);      } },
+			{ type::char_type   , [](llvm::LLVMContext& ctx) { return llvm::Type::getInt8Ty(ctx);      } },
 			// pointers			  
 			{ type::i8_pointer  , [](llvm::LLVMContext& ctx) { return llvm::Type::getInt8PtrTy(ctx);   } },
 			{ type::i16_pointer , [](llvm::LLVMContext& ctx) { return llvm::Type::getInt16PtrTy(ctx);  } },
@@ -252,6 +256,7 @@ namespace channel {
 		};																						 
 
 		const auto it = type_to_llvm_type_map.find(ty);
+		ASSERT(it != type_to_llvm_type_map.end(), "type '" << type_to_string(ty) + "' cannot be converted to an llvm::Type*");
 		return it->second(context);
 	}
 }

@@ -31,6 +31,8 @@ namespace channel {
     // floating point
     class f32_node;
     class f64_node;
+    // text
+    class char_node;
 
     // operators
     class operator_addition_node;
@@ -81,7 +83,9 @@ namespace channel {
         // floating point
         virtual bool visit_keyword_f32_node(f32_node& node, value*& out_value) = 0;
         virtual bool visit_keyword_f64_node(f64_node& node, value*& out_value) = 0;
-
+        // text
+        virtual bool visit_keyword_char_node(char_node& node, value*& out_value) = 0;
+        
         // operators
         virtual bool visit_operator_addition_node(operator_addition_node& node, value*& out_value) = 0;
         virtual bool visit_operator_subtraction_node(operator_subtraction_node& node, value*& out_value) = 0;

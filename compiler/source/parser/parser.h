@@ -107,6 +107,8 @@ namespace channel {
 		 */
 		bool parse_number(node*& out_node, type expression_type = type::unknown);
 
+		bool parse_char(node*& out_node);
+
 		/**
 		 * \brief Parses a negative number. The first expected token is a minus operator.
 		 * \param out_node Output AST node

@@ -65,6 +65,8 @@ namespace channel {
 		// floating point
 		bool visit_keyword_f32_node(f32_node& node, value*& out_value) override;
 		bool visit_keyword_f64_node(f64_node& node, value*& out_value) override;
+		// text
+		bool visit_keyword_char_node(char_node& node, value*& out_value) override;
 
 		// operators
 		// codegen_visitor_operators.cpp

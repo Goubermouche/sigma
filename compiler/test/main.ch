@@ -1,8 +1,6 @@
 // todo: pointers
 //  - add support for nested arrays (multiple aserisks)
-//  - accessor operators ([index])
-//  - cleanup declares
-//  - void* doesn't behave as expected
+//  - add support for chars 
 
 // todo: explicit cast
 //       cast<i32>(value)
@@ -10,8 +8,6 @@
 // todo: check for, and handle, divide by 0 exceptions
 
 i32 main() {
-	i32* arr = new i32[3];
-	i32 index = 0;
-	arr[index] = 999;
-	print(arr[0]);
-} 
+	char c = 'x'; // todo: handle error cases ('', 'xx')
+	char x = '1';
+}

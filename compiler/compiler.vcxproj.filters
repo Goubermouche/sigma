@@ -132,7 +132,7 @@
     <ClInclude Include="source\codegen\abstract_syntax_tree\variables\declaration\local_declaration_node.h">
       <Filter>source\codegen\abstract_syntax_tree\variables\declaration</Filter>
     </ClInclude>
-    <ClInclude Include="source\codegen\abstract_syntax_tree\variables\variable_node.h">
+    <ClInclude Include="source\codegen\abstract_syntax_tree\variables\access_node.h">
       <Filter>source\codegen\abstract_syntax_tree\variables</Filter>
     </ClInclude>
     <ClInclude Include="source\codegen\llvm_wrappers\function.h">
@@ -186,7 +186,7 @@
     <ClInclude Include="source\utility\types.h">
       <Filter>source\utility</Filter>
     </ClInclude>
-    <ClInclude Include="source\codegen\abstract_syntax_tree\variables\array\allocation_node.h" />
+    <ClInclude Include="source\codegen\abstract_syntax_tree\variables\array\array_allocation_node.h" />
     <ClInclude Include="source\codegen\abstract_syntax_tree\variables\array\array_access_node.h" />
     <ClInclude Include="source\codegen\abstract_syntax_tree\variables\array\array_assignment_node.h" />
   </ItemGroup>
@@ -264,7 +264,7 @@
     <ClCompile Include="source\codegen\abstract_syntax_tree\variables\declaration\local_declaration_node.cpp">
       <Filter>source\codegen\abstract_syntax_tree\variables\declaration</Filter>
     </ClCompile>
-    <ClCompile Include="source\codegen\abstract_syntax_tree\variables\variable_node.cpp">
+    <ClCompile Include="source\codegen\abstract_syntax_tree\variables\access_node.cpp">
       <Filter>source\codegen\abstract_syntax_tree\variables</Filter>
     </ClCompile>
     <ClCompile Include="source\codegen\llvm_wrappers\function.cpp">
@@ -324,7 +324,7 @@
     <ClCompile Include="source\utility\timer.cpp">
       <Filter>source\utility</Filter>
     </ClCompile>
-    <ClCompile Include="source\codegen\abstract_syntax_tree\variables\array\allocation_node.cpp" />
+    <ClCompile Include="source\codegen\abstract_syntax_tree\variables\array\array_allocation_node.cpp" />
     <ClCompile Include="source\codegen\abstract_syntax_tree\variables\array\array_access_node.cpp" />
     <ClCompile Include="source\codegen\abstract_syntax_tree\variables\array\array_assignment_node.cpp" />
   </ItemGroup>

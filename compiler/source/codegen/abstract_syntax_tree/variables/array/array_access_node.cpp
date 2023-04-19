@@ -2,7 +2,7 @@
 
 namespace channel {
 	array_access_node::array_access_node(u64 line_number, const std::string& array_identifier, node* array_index_node)
-		: node(line_number), m_array_identifier(array_identifier), m_array_index(array_index_node){
+		: node(line_number), m_array_identifier(array_identifier), m_array_element_index_node(array_index_node){
 	}
 
 	bool array_access_node::accept(visitor& visitor, value*& out_value) {
@@ -18,7 +18,7 @@ namespace channel {
 		return m_array_identifier;
 	}
 
-	node* array_access_node::get_array_index_node() const {
-		return m_array_index;
+	node* array_access_node::get_array_element_index_node() const {
+		return m_array_element_index_node;
 	}
 }

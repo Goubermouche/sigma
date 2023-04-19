@@ -5,8 +5,8 @@
 
 // variables
 #include "../codegen/abstract_syntax_tree/variables/assignment_node.h"
-#include "../codegen/abstract_syntax_tree/variables/variable_node.h"
-#include "../codegen/abstract_syntax_tree/variables/array/allocation_node.h"
+#include "../codegen/abstract_syntax_tree/variables/access_node.h"
+#include "../codegen/abstract_syntax_tree/variables/array/array_allocation_node.h"
 #include "../codegen/abstract_syntax_tree/variables/array/array_access_node.h"
 #include "../codegen/abstract_syntax_tree/variables/array/array_assignment_node.h"
 #include "../codegen/abstract_syntax_tree/variables/declaration/local_declaration_node.h"
@@ -207,10 +207,12 @@ namespace channel {
 						return false;
 					}
 				}
-				//else if(peek_is_array_index_access(m_lexer)) {
-				//	std::cout << "array\n";
-				//	return false;
-				//}
+				else if(peek_is_array_index_access(m_lexer)) {
+					// array assignment
+					if(!parse_array_assignment(out_node)) {
+						return false;
+					}
+				}
 				else {
 					// assignment statement
 					if (!parse_assignment(out_node)) {
@@ -238,46 +240,45 @@ namespace channel {
 		return true;
 	}
 
+	bool parser::parse_array_assignment(node*& out_node) {
+		get_next_token(); // identifier (guaranteed)
+		const std::string identifier = m_lexer.get_identifier();
+		get_next_token(); // l_bracket (guaranteed)
+
+		node* index_node;
+		if (!parse_expression(index_node)) {
+			return false;
+		}
+
+		// Make sure the next token is a right square bracket
+		if (!expect_next_token(token::r_bracket)) {
+			return false;
+		}
+
+		if (!expect_next_token(token::operator_assignment)) {
+			return false;
+		}
+
+		// parse access-assignment
+		node* value;
+		if (peek_is_function_call(m_lexer)) {
+			if (!parse_function_call(value)) {
+				return false;
+			}
+		}
+		else {
+			if (!parse_expression(value)) {
+				return false;
+			}
+		}
+
+		out_node = new array_assignment_node(m_lexer.get_current_line_number(), identifier, index_node, value);
+		return true;
+	}
+
 	bool parser::parse_assignment(node*& out_node) {
 		get_next_token(); // identifier (guaranteed)
 		const std::string identifier = m_lexer.get_identifier();
-
-		// check if the next token is a left square bracket for array indexing
-		if (peek_next_token(m_lexer) == token::l_bracket) {
-			get_next_token(); // l_bracket (guaranteed)
-
-			node* index_node;
-			if (!parse_expression(index_node)) {
-				return false;
-			}
-
-			// Make sure the next token is a right square bracket
-			if (!expect_next_token(token::r_bracket)) {
-				return false;
-			}
-
-			if (!expect_next_token(token::operator_assignment)) {
-				return false;
-			}
-		
-			node* value;
-
-			if (peek_is_function_call(m_lexer)) {
-				if (!parse_function_call(value)) {
-					return false;
-				}
-			}
-			else {
-				if (!parse_expression(value)) {
-					return false;
-				}
-			}
-
-		
-
-			out_node = new array_assignment_node(m_lexer.get_current_line_number(), identifier, index_node, value);
-			return true;
-		}
 
 		if (!expect_next_token(token::operator_assignment)) {
 			return false; 
@@ -285,7 +286,6 @@ namespace channel {
 
 		// parse access-assignment
 		node* value;
-
 		if (peek_is_function_call(m_lexer)) {
 			if (!parse_function_call(value)) {
 				return false;
@@ -559,7 +559,7 @@ namespace channel {
 			return false;
 		}
 
-		out_node = new allocation_node(line_number, allocation_type, array_size);
+		out_node = new array_allocation_node(line_number, allocation_type, array_size);
 		return true;
 	}
 
@@ -576,7 +576,7 @@ namespace channel {
 		// parse an assignment
 		get_next_token();
 		const std::string identifier = m_lexer.get_identifier();
-		out_node = new variable_node(m_lexer.get_current_line_number(), identifier);
+		out_node = new access_node(m_lexer.get_current_line_number(), identifier);
 
 		return true;
 	}

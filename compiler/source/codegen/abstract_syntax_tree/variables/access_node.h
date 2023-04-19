@@ -5,14 +5,14 @@ namespace channel {
 	/**
 	 * \brief AST node, represents a variable.
 	 */
-	class variable_node : public node {
+	class access_node : public node {
 	public:
-		variable_node(u64 line_number, const std::string& name);
+		access_node(u64 line_number, const std::string& variable_identifier);
 		bool accept(visitor& visitor, value*& out_value) override;
 		std::string get_node_name() const override;
 
-		const std::string& get_name() const;
+		const std::string& get_variable_identifier() const;
 	private:
-		std::string m_name;
+		std::string m_variable_identifier;
 	};
 }

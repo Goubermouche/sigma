@@ -24,6 +24,7 @@ namespace channel{
 		static void emit_global_variable_already_defined_error(u64 line_number, const std::string& variable_name);
 		static void emit_cannot_allocate_for_non_pointer_type_error(u64 line_number, type ty);
 		static void emit_cannot_cast_pointer_type_error(u64 line_number, type ty1, type ty2);
+		static void emit_array_access_on_non_pointer_error(u64 line_number, type actual_type, const std::string& variable_name);
 
 		static void emit_function_not_found_error(u64 line_number, const std::string& function_name);
 		static void emit_function_already_defined_error(u64 line_number, const std::string& function_name);

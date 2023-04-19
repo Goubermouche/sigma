@@ -57,7 +57,7 @@
   <ItemGroup>
     <ClInclude Include="source\codegen\abstract_syntax_tree\variables\array\array_assignment_node.h" />
     <ClInclude Include="source\codegen\abstract_syntax_tree\variables\array\array_access_node.h" />
-    <ClInclude Include="source\codegen\abstract_syntax_tree\variables\array\allocation_node.h" />
+    <ClInclude Include="source\codegen\abstract_syntax_tree\variables\array\array_allocation_node.h" />
     <ClInclude Include="source\codegen\abstract_syntax_tree\functions\function_call_node.h" />
     <ClInclude Include="source\codegen\abstract_syntax_tree\functions\function_node.h" />
     <ClInclude Include="source\codegen\abstract_syntax_tree\keywords\flow_control\return_node.h" />
@@ -82,7 +82,7 @@
     <ClInclude Include="source\codegen\abstract_syntax_tree\variables\declaration\declaration_node.h" />
     <ClInclude Include="source\codegen\abstract_syntax_tree\variables\declaration\global_declaration_node.h" />
     <ClInclude Include="source\codegen\abstract_syntax_tree\variables\declaration\local_declaration_node.h" />
-    <ClInclude Include="source\codegen\abstract_syntax_tree\variables\variable_node.h" />
+    <ClInclude Include="source\codegen\abstract_syntax_tree\variables\access_node.h" />
     <ClInclude Include="source\codegen\llvm_wrappers\function.h" />
     <ClInclude Include="source\codegen\llvm_wrappers\value.h" />
     <ClInclude Include="source\codegen\scope.h" />
@@ -104,7 +104,7 @@
   <ItemGroup>
     <ClCompile Include="source\codegen\abstract_syntax_tree\variables\array\array_assignment_node.cpp" />
     <ClCompile Include="source\codegen\abstract_syntax_tree\variables\array\array_access_node.cpp" />
-    <ClCompile Include="source\codegen\abstract_syntax_tree\variables\array\allocation_node.cpp" />
+    <ClCompile Include="source\codegen\abstract_syntax_tree\variables\array\array_allocation_node.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="source\codegen\abstract_syntax_tree\functions\function_call_node.cpp" />
     <ClCompile Include="source\codegen\abstract_syntax_tree\functions\function_node.cpp" />
@@ -130,7 +130,7 @@
     <ClCompile Include="source\codegen\abstract_syntax_tree\variables\declaration\declaration_node.cpp" />
     <ClCompile Include="source\codegen\abstract_syntax_tree\variables\declaration\global_declaration_node.cpp" />
     <ClCompile Include="source\codegen\abstract_syntax_tree\variables\declaration\local_declaration_node.cpp" />
-    <ClCompile Include="source\codegen\abstract_syntax_tree\variables\variable_node.cpp" />
+    <ClCompile Include="source\codegen\abstract_syntax_tree\variables\access_node.cpp" />
     <ClCompile Include="source\codegen\llvm_wrappers\function.cpp" />
     <ClCompile Include="source\codegen\llvm_wrappers\value.cpp" />
     <ClCompile Include="source\codegen\scope.cpp" />

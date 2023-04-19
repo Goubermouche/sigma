@@ -8,14 +8,14 @@ namespace channel {
 	 */
 	class declaration_node : public node {
 	public:
-		declaration_node(u64 line_number, type declaration_type, const std::string& name, node* expression = nullptr);
+		declaration_node(u64 line_number, type declaration_type, const std::string& declaration_identifier, node* expression_node = nullptr);
 
-		const std::string& get_name() const;
-		node* get_expression() const;
+		const std::string& get_declaration_identifier() const;
+		node* get_expression_node() const;
 		type get_declaration_type() const;
 	private:
 		type m_declaration_type;
-		std::string m_name;
-		node* m_expression;
+		std::string m_declaration_identifier;
+		node* m_expression_node;
 	};
 }

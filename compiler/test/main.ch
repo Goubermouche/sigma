@@ -10,7 +10,8 @@
 // todo: check for, and handle, divide by 0 exceptions
 
 i32 main() {
-	i32* arr = new i32[10];
-	arr[3] = 666;
-	print(arr[3]);
+	i32* arr = new i32[3];
+	i32 index = 0;
+	arr[index] = 999;
+	print(arr[0]);
 } 

@@ -97,6 +97,13 @@ namespace channel {
 		);
 	}
 
+	void compilation_logger::emit_array_access_on_non_pointer_error(u64 line_number, type actual_type, const std::string& variable_name) {
+		emit_error(
+			line_number,
+			"invalid array access on non pointer type '" + type_to_string(actual_type) + "' ('" + variable_name + "')"
+		);
+	}
+
 	void compilation_logger::emit_function_not_found_error(u64 line_number, const std::string& function_name) {
 		emit_error(
 			line_number,

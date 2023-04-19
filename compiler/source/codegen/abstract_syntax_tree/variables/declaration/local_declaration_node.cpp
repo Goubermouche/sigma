@@ -1,8 +1,8 @@
 #include "local_declaration_node.h"
 
 namespace channel {
-	local_declaration_node::local_declaration_node(u64 line_number, type declaration_type, const std::string& name, node* expression)
-		: declaration_node(line_number, declaration_type, name, expression) {}
+	local_declaration_node::local_declaration_node(u64 line_number, type declaration_type, const std::string& declaration_identifier, node* expression_node)
+		: declaration_node(line_number, declaration_type, declaration_identifier, expression_node) {}
 
 	bool local_declaration_node::accept(visitor& visitor, value*& out_value) {
 		LOG_NODE_NAME(local_declaration_node);

@@ -8,18 +8,18 @@ namespace channel {
 	 */
 	class function_node : public node {
 	public:
-		function_node(u64 line_number, type return_type, const std::string& name, const std::vector<node*>& statements, const std::vector<std::pair<std::string, type>>& arguments);
+		function_node(u64 line_number, type function_return_type, const std::string& function_identifier, const std::vector<node*>& function_statements, const std::vector<std::pair<std::string, type>>& function_arguments);
 		bool accept(visitor& visitor, value*& out_value) override;
 		std::string get_node_name() const override;
 
-		type get_return_type() const;
-		const std::string& get_name() const;
-		const std::vector<node*>& get_statements() const;
-		const std::vector<std::pair<std::string, type>>& get_arguments() const;
+		type get_function_return_type() const;
+		const std::string& get_function_identifier() const;
+		const std::vector<node*>& get_function_statements() const;
+		const std::vector<std::pair<std::string, type>>& get_function_arguments() const;
 	private:
-		type m_return_type;
-		std::string m_name;
-		std::vector<node*> m_statements;
-		std::vector<std::pair<std::string, type>> m_arguments;
+		type m_function_return_type;
+		std::string m_function_identifier;
+		std::vector<node*> m_function_statements;
+		std::vector<std::pair<std::string, type>> m_function_arguments;
 	};
 }

@@ -7,14 +7,14 @@ namespace channel {
 	 */
 	class function_call_node : public node {
 	public:
-		function_call_node(u64 line_number, const std::string& name, const std::vector<node*>& arguments);
+		function_call_node(u64 line_number, const std::string& function_identifier, const std::vector<node*>& function_arguments);
 		bool accept(visitor& visitor, value*& out_value) override;
 		std::string get_node_name() const override;
 
-		const std::string& get_name() const;
-		const std::vector<node*>& get_arguments() const;
+		const std::string& get_function_identifier() const;
+		const std::vector<node*>& get_function_arguments() const;
 	private:
-		std::string m_name;
-		std::vector<node*> m_arguments;
+		std::string m_function_name;
+		std::vector<node*> m_function_arguments;
 	};
 }

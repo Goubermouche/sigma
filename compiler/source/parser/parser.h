@@ -49,6 +49,8 @@ namespace channel {
 		 */
 		bool parse_assignment(node*& out_node);
 
+		bool parse_array_assignment(node*& out_node);
+
 		bool parse_array_access(node*& out_node);
 
 		/**

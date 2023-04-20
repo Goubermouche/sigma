@@ -33,6 +33,7 @@ namespace channel {
 			{ type::f32      , type::f32_pointer     },
 			{ type::f64      , type::f64_pointer     },
 			{ type::void_type, type::void_pointer    },
+			{ type::char_type, type::char_pointer    },
 		};
 
 		const auto it = type_to_type_map.find(ty);
@@ -53,6 +54,7 @@ namespace channel {
 			{ type::f32_pointer , type::f32       },
 			{ type::f64_pointer , type::f64       },
 			{ type::void_pointer, type::void_type },
+			{ type::char_pointer, type::char_type },
 		};
 
 		const auto it = type_to_type_map.find(ty);
@@ -138,6 +140,7 @@ namespace channel {
 		case type::f32_pointer:
 		case type::f64_pointer:
 		case type::void_pointer:
+		case type::char_pointer:
 			return true;
 		default:
 			return false;
@@ -162,7 +165,6 @@ namespace channel {
 			{ token::keyword_type_f64 , type::f64       },
 			{ token::keyword_type_void, type::void_type },
 			{ token::keyword_type_char, type::char_type },
-			// { token::pointer, type::pointer },
 		};
 
 		const auto it = token_to_type_map.find(tok);
@@ -184,7 +186,6 @@ namespace channel {
 			{ token::keyword_type_f64 , type::f64       },
 			{ token::keyword_type_void, type::void_type },
 			{ token::keyword_type_char, type::char_type },
-			// { token::pointer, type::pointer },
 		};
 
 		const auto it = token_type_map.find(tok);
@@ -219,6 +220,7 @@ namespace channel {
 			{ type::f32_pointer  , "f32_pointer"   },
 			{ type::f64_pointer  , "f64_pointer"   },
 			{ type::void_pointer , "void_pointer"  },
+			{ type::char_pointer , "char_pointer"  },
 		};
 
 		const auto it = type_to_string_map.find(ty);
@@ -253,6 +255,7 @@ namespace channel {
 			{ type::f32_pointer , [](llvm::LLVMContext& ctx) { return llvm::Type::getFloatPtrTy(ctx);  } },
 			{ type::f64_pointer , [](llvm::LLVMContext& ctx) { return llvm::Type::getDoublePtrTy(ctx); } },
 			{ type::void_pointer, [](llvm::LLVMContext& ctx) { return llvm::Type::getInt8PtrTy(ctx);   } },
+			{ type::char_pointer, [](llvm::LLVMContext& ctx) { return llvm::Type::getInt8PtrTy(ctx);   } },
 		};																						 
 
 		const auto it = type_to_llvm_type_map.find(ty);

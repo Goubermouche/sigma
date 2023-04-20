@@ -190,6 +190,7 @@
     <ClInclude Include="source\codegen\abstract_syntax_tree\variables\array\array_access_node.h" />
     <ClInclude Include="source\codegen\abstract_syntax_tree\variables\array\array_assignment_node.h" />
     <ClInclude Include="source\codegen\abstract_syntax_tree\keywords\types\text\char_node.h" />
+    <ClInclude Include="source\codegen\abstract_syntax_tree\keywords\types\text\string_node.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp" />
@@ -329,5 +330,6 @@
     <ClCompile Include="source\codegen\abstract_syntax_tree\variables\array\array_access_node.cpp" />
     <ClCompile Include="source\codegen\abstract_syntax_tree\variables\array\array_assignment_node.cpp" />
     <ClCompile Include="source\codegen\abstract_syntax_tree\keywords\types\text\char_node.cpp" />
+    <ClCompile Include="source\codegen\abstract_syntax_tree\keywords\types\text\string_node.cpp" />
   </ItemGroup>
 </Project>

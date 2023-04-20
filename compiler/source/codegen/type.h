@@ -30,7 +30,8 @@ namespace channel {
 		u64_pointer,
 		f32_pointer,
 		f64_pointer,
-		void_pointer
+		void_pointer,
+		char_pointer
 	};
 
 	/**

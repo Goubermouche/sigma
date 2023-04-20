@@ -31,6 +31,7 @@
 #include "../codegen/abstract_syntax_tree/keywords/types/floating_point/f64_node.h"
 // text
 #include "../codegen/abstract_syntax_tree/keywords/types/text/char_node.h"
+#include "../codegen/abstract_syntax_tree/keywords/types/text/string_node.h"
 
 // operators
 #include "../codegen/abstract_syntax_tree/operators/operator_addition_node.h"
@@ -478,10 +479,6 @@ namespace channel {
 			return parse_number(out_node, expression_type);
 		}
 
-		if(token == token::char_literal) {
-			return parse_char(out_node);
-		}
-
 		switch(token) {
 		case token::operator_subtraction:
 			// parse a negative number
@@ -495,6 +492,10 @@ namespace channel {
 		case token::keyword_new:
 			// parse an allocation
 			return parse_new_allocation(out_node);
+		case token::char_literal:
+			return parse_char(out_node);
+		case token::string_literal:
+			return parse_string(out_node);
 		}
 
 		compilation_logger::emit_unhandled_token_error(m_lexer.get_current_line_number(), m_current_token);
@@ -530,6 +531,12 @@ namespace channel {
 	bool parser::parse_char(node*& out_node) {
 		get_next_token(); // char_literal (guaranteed)
 		out_node = new char_node(m_lexer.get_current_line_number(), m_lexer.get_value()[0]);
+		return true;
+	}
+
+	bool parser::parse_string(node*& out_node) {
+		get_next_token(); // string_literal (guaranteed)
+		out_node = new string_node(m_lexer.get_current_line_number(), m_lexer.get_value());
 		return true;
 	}
 

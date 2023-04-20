@@ -15,6 +15,7 @@
 #include "../abstract_syntax_tree/keywords/types/floating_point/f64_node.h"
 // text
 #include "../abstract_syntax_tree/keywords/types/text/char_node.h"
+#include "../abstract_syntax_tree/keywords/types/text/string_node.h"
 
 namespace channel {
 	bool codegen_visitor::visit_keyword_i8_node(i8_node& node, value*& out_value) {
@@ -69,6 +70,25 @@ namespace channel {
 
 	bool codegen_visitor::visit_keyword_char_node(char_node& node, value*& out_value) {
 		out_value = new value("__char", type::char_type, llvm::ConstantInt::get(m_context, llvm::APInt(8, static_cast<u64>(node.get_value()), false)));
+		return true;
+	}
+
+	bool codegen_visitor::visit_keyword_string_node(string_node& node, value*& out_value) {
+		// note: + 1 is for the null termination character
+		const u64 string_length = node.get_value().size() + 1;
+
+		// allocate memory for the string literal on the stack
+		llvm::ArrayType* array_type = llvm::ArrayType::get(type_to_llvm_type(type::char_type, m_context), string_length);
+		llvm::AllocaInst* stack_string_literal = m_builder.CreateAlloca(array_type);
+
+		// store the string literal in the allocated memory
+		llvm::Constant* string_constant = llvm::ConstantDataArray::getString(m_context, node.get_value());
+		m_builder.CreateStore(string_constant, stack_string_literal);
+
+		// bit cast the pointer to the allocated memory into a char* (i8*)
+		llvm::Value* string_literal_ptr = m_builder.CreateBitCast(stack_string_literal, type_to_llvm_type(type::char_pointer, m_context));
+
+		out_value = new value("__string", type::char_pointer, string_literal_ptr);
 		return true;
 	}
 }

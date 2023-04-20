@@ -51,6 +51,10 @@ namespace channel {
 			return get_char_literal_token();
 		}
 
+		if (m_last_character == '"') {
+			return get_string_literal_token();
+		}
+
 		// prevent '.' characters from being located at the beginning of a token
 		// note: we may want to allow this in some cases (ie. when calling member functions)
 		if (m_last_character == '.') {
@@ -208,5 +212,48 @@ namespace channel {
 
 		ASSERT(false, "[lexer]: unterminated character literal");
 		return token::unknown;
+	}
+
+	token lexer::get_string_literal_token() {
+		m_value_string = "";
+		read_char();
+
+		while(m_last_character != '"' && !m_accessor.end()) {
+			if (m_last_character == '\\') {
+				// handle escape sequences
+				read_char();
+				switch(m_last_character) {
+				case 'n':
+					m_value_string.push_back('\n');
+					break;
+				case 't':
+					m_value_string.push_back('\t');
+					break;
+				case '\\':
+					m_value_string.push_back('\\');
+					break;
+				case '"':
+					m_value_string.push_back('"');
+					break;
+				default:
+					ASSERT(false, "invalid escape sequence used in string literal");
+					break;
+				}
+			}
+			else {
+				m_value_string.push_back(m_last_character);
+			}
+
+			read_char();
+		}
+
+		if(m_last_character == '"') {
+			read_char();
+		}
+		else {
+			ASSERT(false, "unterminated string literal used");
+		}
+
+		return token::string_literal;
 	}
 }

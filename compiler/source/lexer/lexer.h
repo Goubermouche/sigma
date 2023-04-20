@@ -60,6 +60,8 @@ namespace channel {
 		token get_number_token();
 
 		token get_char_literal_token();
+
+		token get_string_literal_token();
 	private:
 		std::string m_identifier_string; // current identifier
 		std::string m_value_string;      // current value

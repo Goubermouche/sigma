@@ -109,6 +109,8 @@ namespace channel {
 
 		bool parse_char(node*& out_node);
 
+		bool parse_string(node*& out_node);
+
 		/**
 		 * \brief Parses a negative number. The first expected token is a minus operator.
 		 * \param out_node Output AST node

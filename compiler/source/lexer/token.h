@@ -36,6 +36,7 @@ namespace channel {
 		// text
 		keyword_type_char,                  // char
 		char_literal,
+		string_literal,
 
 		// statements
 		// flow control
@@ -154,7 +155,9 @@ namespace channel {
 		case token::keyword_type_char:
 			return "keyword_type_char";
 		case token::char_literal:
-			return "literal_char";
+			return "char_literal";
+		case token::string_literal:
+			return "string_literal";
 
 		case token::keyword_return:
 			return "keyword_return";

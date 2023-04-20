@@ -18,7 +18,7 @@ namespace channel {
 		llvm::FunctionType* printf_type = llvm::FunctionType::get(llvm::Type::getInt32Ty(m_context), printf_arg_types, true);
 		llvm::Function* printf_func = llvm::Function::Create(printf_type, llvm::Function::ExternalLinkage, "printf", m_module.get());
 
-		m_functions["print"] = new function(type::void_type, printf_func, {{ "format", type::char_pointer }});
+		m_functions["print"] = new function(type::void_type, printf_func, {{ "format", type::char_pointer }}, true);
 	}
 
 	bool codegen_visitor::generate(parser& parser) {
@@ -142,6 +142,13 @@ namespace channel {
 		// integer to floating-point
 		if (is_type_integral(source_value->get_type()) && is_type_floating_point(target_type)) {
 			out_value = m_builder.CreateSIToFP(source_llvm_value, target_llvm_type);
+			return true;
+		}
+
+		// floating-point upcast
+		if (is_type_floating_point(source_value->get_type()) && is_type_floating_point(target_type)) {
+			// floating-point upcast or downcast
+			out_value = m_builder.CreateFPCast(source_llvm_value, target_llvm_type, "fpcast");
 			return true;
 		}
 

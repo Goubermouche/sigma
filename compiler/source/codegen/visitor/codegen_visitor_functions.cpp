@@ -21,7 +21,7 @@ namespace channel {
 		// add it to our function map
 		const auto insertion_result = m_functions.insert({
 			node.get_function_identifier(),
-			new function(node.get_function_return_type(), func, node.get_function_arguments())
+			new function(node.get_function_return_type(), func, node.get_function_arguments(), false)
 		});
 
 		// check for multiple definitions by checking if the function has already been added to our map
@@ -98,18 +98,17 @@ namespace channel {
 			return false;
 		}
 
-		// todo: generate code for each argument expression
-		const std::vector<std::pair<std::string, type>>& arguments = func->get_arguments();
+		const std::vector<std::pair<std::string, type>>& required_arguments = func->get_arguments();
 		const std::vector<channel::node*>& given_arguments = node.get_function_arguments();
 
-		if(arguments.size() != given_arguments.size()) {
+		if(!func->is_variadic() && required_arguments.size() != given_arguments.size()) {
 			compilation_logger::emit_function_argument_count_mismatch_error(node.get_declaration_line_number(), node.get_function_identifier());
 			return false;
 		}
 
-		std::vector<llvm::Value*> argument_values(arguments.size());
+		std::vector<llvm::Value*> argument_values(required_arguments.size());
 
-		for (u64 i = 0; i < arguments.size(); i++) {
+		for (u64 i = 0; i < required_arguments.size(); i++) {
 			// get the argument value
 			value* argument_value;
 			if(!given_arguments[i]->accept(*this, argument_value)) {
@@ -117,9 +116,30 @@ namespace channel {
 			}
 
 			// cast the given argument to match the required argument's type, if necessary 
-			if(!cast_value(argument_values[i], argument_value, arguments[i].second, node.get_declaration_line_number())) {
+			if(!cast_value(argument_values[i], argument_value, required_arguments[i].second, node.get_declaration_line_number())) {
 				return false;
 			}
+		}
+
+		for (u64 i = required_arguments.size(); i < given_arguments.size(); i++) {
+			// get the argument value
+			value* argument_value;
+			if (!given_arguments[i]->accept(*this, argument_value)) {
+				return false;
+			}
+
+			// todo: try and find a way around this issue
+			// we have to upcast f32 arguments to f64 for the printf() function
+			if(node.get_function_identifier() == "print" && argument_value->get_type() == type::f32) {
+				llvm::Value* argument_value_cast;
+				if(!cast_value(argument_value_cast, argument_value, type::f64, given_arguments[i]->get_declaration_line_number())) {
+					return false;
+				}
+
+				argument_value = new value(argument_value->get_name(), type::f64, argument_value_cast);
+			}
+
+			argument_values.push_back(argument_value->get_value());
 		}
 
 		// return the function call as the value

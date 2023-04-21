@@ -6,12 +6,12 @@
 namespace channel {
 	bool codegen_visitor::visit_function_node(function_node& node, value*& out_value) {
 		// get the function return type
-		llvm::Type* return_type = type_to_llvm_type(node.get_function_return_type(), m_context);
+		llvm::Type* return_type = node.get_function_return_type().get_llvm_type(m_context);
 
 		// convert the argument types to LLVM types and store them in a vector
 		std::vector<llvm::Type*> param_types;
 		for (const auto& [arg_name, arg_type] : node.get_function_arguments()) {
-			param_types.push_back(type_to_llvm_type(arg_type, m_context));
+			param_types.push_back(arg_type.get_llvm_type(m_context));
 		}
 
 		// create the LLVM function
@@ -46,7 +46,7 @@ namespace channel {
 			llvm_arg->setName(arg_name);
 
 			// create an alloca instruction for the argument and store the incoming value into it
-			llvm::AllocaInst* alloca = m_builder.CreateAlloca(type_to_llvm_type(arg_type, m_context), nullptr, arg_name);
+			llvm::AllocaInst* alloca = m_builder.CreateAlloca(arg_type.get_llvm_type(m_context), nullptr, arg_name);
 			m_builder.CreateStore(llvm_arg, alloca);
 
 
@@ -84,7 +84,7 @@ namespace channel {
 		}
 
 		// return the function as the value
-		out_value = new value(node.get_function_identifier(), type::function, func);
+		out_value = new value(node.get_function_identifier(), type(type::base::function, 0), func);
 		return true;
 	}
 
@@ -128,22 +128,22 @@ namespace channel {
 				return false;
 			}
 
-			// todo: try and find a way around this issue
-			// we have to upcast f32 arguments to f64 for the printf() function
-			if(node.get_function_identifier() == "print" && argument_value->get_type() == type::f32) {
+			// we have to upcast f32 arguments to f64 for variadic functions 
+			if(argument_value->get_type() == type(type::base::f32, 0)) {
 				llvm::Value* argument_value_cast;
-				if(!cast_value(argument_value_cast, argument_value, type::f64, given_arguments[i]->get_declaration_line_number())) {
+				if(!cast_value(argument_value_cast, argument_value, type(type::base::f64, 0), given_arguments[i]->get_declaration_line_number())) {
 					return false;
 				}
 
-				argument_value = new value(argument_value->get_name(), type::f64, argument_value_cast);
+				argument_value = new value(argument_value->get_name(), type(type::base::f64, 0), argument_value_cast);
 			}
 
+			std::cout << "..." << argument_value->get_type().to_string() << '\n';
 			argument_values.push_back(argument_value->get_value());
 		}
 
 		// return the function call as the value
-		out_value = new value(node.get_function_identifier(), type::function_call, m_builder.CreateCall(func->get_function(), argument_values, "call"));
+		out_value = new value(node.get_function_identifier(), type(type::base::function_call, 0), m_builder.CreateCall(func->get_function(), argument_values, "call"));
 		return true;
 	}
 }

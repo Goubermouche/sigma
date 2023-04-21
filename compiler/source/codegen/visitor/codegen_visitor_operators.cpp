@@ -33,7 +33,7 @@ namespace channel {
 		}
 
 		// both types are floating point
-		if (is_type_floating_point(highest_precision)) {
+		if (highest_precision.is_floating_point()) {
 			out_value = new value(
 				"__fadd",
 				highest_precision,
@@ -46,7 +46,7 @@ namespace channel {
 		}
 
 		// both types are unsigned
-		if (is_type_unsigned(highest_precision)) {
+		if (highest_precision.is_unsigned()) {
 			out_value = new value(
 				"__uadd",
 				highest_precision,
@@ -97,7 +97,7 @@ namespace channel {
 		}
 
 		// both types are floating point
-		if (is_type_floating_point(highest_precision)) {
+		if (highest_precision.is_floating_point()) {
 			out_value = new value(
 				"__fsub",
 				highest_precision,
@@ -110,7 +110,7 @@ namespace channel {
 		}
 
 		// both types are unsigned
-		if (is_type_unsigned(highest_precision)) {
+		if (highest_precision.is_unsigned()) {
 			out_value = new value(
 				"__usub",
 				highest_precision,
@@ -161,7 +161,7 @@ namespace channel {
 		}
 
 		// both types are floating point
-		if (is_type_floating_point(highest_precision)) {
+		if (highest_precision.is_floating_point()) {
 			out_value = new value(
 				"__fmul",
 				highest_precision,
@@ -174,7 +174,7 @@ namespace channel {
 		}
 
 		// both types are unsigned
-		if (is_type_unsigned(highest_precision)) {
+		if (highest_precision.is_unsigned()) {
 			out_value = new value(
 				"__umul",
 				highest_precision,
@@ -225,7 +225,7 @@ namespace channel {
 		}
 
 		// both types are floating point
-		if (is_type_floating_point(highest_precision)) {
+		if (highest_precision.is_floating_point()) {
 			out_value = new value(
 				"__fdiv",
 				highest_precision,
@@ -238,7 +238,7 @@ namespace channel {
 		}
 
 		// both types are unsigned
-		if (is_type_unsigned(highest_precision)) {
+		if (highest_precision.is_unsigned()) {
 			out_value = new value(
 				"__udiv",
 				highest_precision,
@@ -288,7 +288,7 @@ namespace channel {
 		}
 
 		// both types are floating point
-		if (is_type_floating_point(highest_precision)) {
+		if (highest_precision.is_floating_point()) {
 			out_value = new value(
 				"__frem",
 				highest_precision,
@@ -301,7 +301,7 @@ namespace channel {
 		}
 
 		// both types are unsigned
-		if (is_type_unsigned(highest_precision)) {
+		if (highest_precision.is_unsigned()) {
 			out_value = new value(
 				"__urem",
 				highest_precision,

@@ -4,14 +4,14 @@ namespace channel {
 	void compilation_logger::emit_cast_warning(u64 line_number, type original_type, type target_type) {
 		emit_warning(
 			line_number,
-			"implicit type cast ('" + type_to_string(original_type) + "' to '" + type_to_string(target_type) + "')"
+			"implicit type cast ('" + original_type.to_string() + "' to '" + target_type.to_string() + "')"
 		);
 	}
 
 	void compilation_logger::emit_function_return_type_cast_warning(u64 line_number, type original_type, type target_type) {
 		emit_warning(
 			line_number,
-			"implicit function return type cast ('" + type_to_string(original_type) + "' to '" + type_to_string(target_type) + "')"
+			"implicit function return type cast ('" + original_type.to_string() + "' to '" + target_type.to_string() + "')"
 		);
 	}
 
@@ -39,7 +39,7 @@ namespace channel {
 	void compilation_logger::emit_unhandled_number_format_error(u64 line_number, type received_type) {
 		emit_error(
 			line_number,
-			"unhandled numerical token received ('" + type_to_string(received_type) + "')"
+			"unhandled numerical token received ('" + received_type.to_string() + "')"
 		);
 	}
 
@@ -86,21 +86,21 @@ namespace channel {
 	void compilation_logger::emit_cannot_allocate_for_non_pointer_type_error(u64 line_number, type ty) {
 		emit_error(
 			line_number,
-			"cannot allocate memory for non-pointer type '" + type_to_string(ty) + "'"
+			"cannot allocate memory for non-pointer type '" + ty.to_string() + "'"
 		);
 	}
 
 	void compilation_logger::emit_cannot_cast_pointer_type_error(u64 line_number, type ty1, type ty2) {
 		emit_error(
 			line_number,
-			"cannot cast between pointer types ('" + type_to_string(ty1) + "', '" + type_to_string(ty2) + "')"
+			"cannot cast between pointer types ('" + ty1.to_string() + "', '" + ty2.to_string() + "')"
 		);
 	}
 
 	void compilation_logger::emit_array_access_on_non_pointer_error(u64 line_number, type actual_type, const std::string& variable_name) {
 		emit_error(
 			line_number,
-			"invalid array access on non pointer type '" + type_to_string(actual_type) + "' ('" + variable_name + "')"
+			"invalid array access on non pointer type '" + actual_type.to_string() + "' ('" + variable_name + "')"
 		);
 	}
 
@@ -140,8 +140,8 @@ namespace channel {
 			+ "' at index '"
 			+ std::to_string(argument_index) 
 			+ "' resulted in a type mismatch (expected '"
-			+ type_to_string(expected_type) + "', but got '"
-			+ type_to_string(received_type) + "' instead)"
+			+ expected_type.to_string() + "', but got '"
+			+ received_type.to_string() + "' instead)"
 		);
 	}
 

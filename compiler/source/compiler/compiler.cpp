@@ -37,12 +37,12 @@ namespace channel {
 		std::cout << "codegen finished (" << codegen_timer.elapsed() << "ms)\n";
 		compile_timer.start();
 
-		if(!visitor.verify_intermediate_representation()) {
+		visitor.print_intermediate_representation();
+
+		if (!visitor.verify_intermediate_representation()) {
 			// verification failure
 			return;
 		}
-
-		visitor.print_intermediate_representation();
 
 		// compile the file into an exe
 		// get the generated module

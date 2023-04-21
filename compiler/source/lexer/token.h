@@ -15,7 +15,8 @@ namespace channel {
 		double_quote,                       // "
 
 		// keywords
-		keyword_type_void,                  // void nullptr
+		keyword_type_void,                  // void
+		keyword_type_bool,                  // bool
 
 		// signed integers	                
 		keyword_type_i8,                    // i8  0
@@ -124,6 +125,8 @@ namespace channel {
 		// keywords
 		case token::keyword_type_void:
 			return "keyword_type_void";
+		case token::keyword_type_bool:
+			return "keyword_type_bool";
 
 		// signed integers
 		case token::keyword_type_i8:

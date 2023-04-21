@@ -81,7 +81,7 @@ namespace channel {
 		 * \param expression_type Specified expression type
 		 * \return True if the expression is parsed successfully
 		 */
-		bool parse_expression(node*& out_node, type expression_type = type::unknown);
+		bool parse_expression(node*& out_node, type expression_type = type::unknown());
 
 		/**
 		 * \brief Attempts to parse a term.
@@ -89,7 +89,7 @@ namespace channel {
 		 * \param expression_type Specified expression type
 		 * \return True if the expression is parsed successfully
 		 */
-		bool parse_term(node*& out_node, type expression_type = type::unknown);
+		bool parse_term(node*& out_node, type expression_type = type::unknown());
 
 		/**
 		 * \brief Attempts to parse a factor.
@@ -97,7 +97,7 @@ namespace channel {
 		 * \param expression_type Specified expression type
 		 * \return True if the expression is parsed successfully
 		 */
-		bool parse_factor(node*& out_node, type expression_type = type::unknown);
+		bool parse_factor(node*& out_node, type expression_type = type::unknown());
 
 		/**
 		 * \brief Attempts to parse a number token. The first expected token is a numerical type.
@@ -105,7 +105,7 @@ namespace channel {
 		 * \param expression_type Specified expression type
 		 * \return True if the expression is parsed successfully
 		 */
-		bool parse_number(node*& out_node, type expression_type = type::unknown);
+		bool parse_number(node*& out_node, type expression_type = type::unknown());
 
 		bool parse_char(node*& out_node);
 
@@ -117,7 +117,7 @@ namespace channel {
 		 * \param expression_type Specified expression type
 		 * \return True if the expression is parsed successfully
 		 */
-		bool parse_negative_number(node*& out_node, type expression_type = type::unknown);
+		bool parse_negative_number(node*& out_node, type expression_type = type::unknown());
 
 		/**
 		 * \brief Parses a new allocation. The first expected token is the 'new' keyword.
@@ -139,7 +139,7 @@ namespace channel {
 		 * \param expression_type Specified expression type
 		 * \return True if the expression is parsed successfully
 		 */
-		bool parse_deep_expression(node*& out_node, type expression_type = type::unknown);
+		bool parse_deep_expression(node*& out_node, type expression_type = type::unknown());
 
 		/**
 		 * \brief Checks if a statement is a function definition. The first expected token is a type.

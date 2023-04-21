@@ -74,6 +74,7 @@ namespace channel {
 		return true;
 	}
 
+
 	bool codegen_visitor::visit_local_declaration_node(local_declaration_node& node, value*& out_value) {
 		// evaluate the assigned value, if there is one
 		if (!get_declaration_value(node, out_value)) {
@@ -82,13 +83,13 @@ namespace channel {
 
 		// cast the right-hand side operator to the assigned type
 		llvm::Value* cast_assigned_value;
-		if(!cast_value(cast_assigned_value, out_value, node.get_declaration_type(), node.get_declaration_line_number())) {
+		if (!cast_value(cast_assigned_value, out_value, node.get_declaration_type(), node.get_declaration_line_number())) {
 			return false;
 		}
 
 		// store the initial value
 		llvm::AllocaInst* alloca = m_builder.CreateAlloca(
-			type_to_llvm_type(node.get_declaration_type(), m_context),
+			node.get_declaration_type().get_llvm_type(m_context),
 			nullptr,
 			node.get_declaration_identifier()
 		);
@@ -111,6 +112,7 @@ namespace channel {
 
 		return true;
 	}
+
 
 	bool codegen_visitor::visit_global_declaration_node(global_declaration_node& node, value*& out_value) {
 		// start creating the init function for our global ctor
@@ -137,10 +139,10 @@ namespace channel {
 			node.get_declaration_identifier(),
 			node.get_declaration_type(),
 			new llvm::GlobalVariable(*m_module,
-				type_to_llvm_type(node.get_declaration_type(), m_context),
+				node.get_declaration_type().get_llvm_type(m_context),
 				false,
 				llvm::GlobalValue::ExternalLinkage,
-				llvm::Constant::getNullValue(type_to_llvm_type(node.get_declaration_type(), m_context)), // default initializer
+				llvm::Constant::getNullValue(node.get_declaration_type().get_llvm_type(m_context)), // default initializer
 				node.get_declaration_identifier()
 			)
 		);
@@ -179,7 +181,7 @@ namespace channel {
 
 		// cast the element count node to u64
 		llvm::Value* element_count_cast;
-		if(!cast_value(element_count_cast, element_count, type::u64, node.get_array_element_count_node()->get_declaration_line_number())) {
+		if(!cast_value(element_count_cast, element_count, type(type::base::u64, 0), node.get_array_element_count_node()->get_declaration_line_number())) {
 			return false;
 		}
 
@@ -195,7 +197,7 @@ namespace channel {
 		);
 
 		// calculate the total size
-		llvm::Type* element_type = type_to_llvm_type(node.get_array_element_type(), m_context);
+		llvm::Type* element_type = node.get_array_element_type().get_llvm_type(m_context);
 		llvm::Value* element_size = llvm::ConstantInt::get(m_context, llvm::APInt(64, element_type->getPrimitiveSizeInBits() / 8));
 		llvm::Value* total_size = m_builder.CreateMul(element_count_cast, element_size);
 
@@ -206,7 +208,7 @@ namespace channel {
 		llvm::Value* typed_ptr = m_builder.CreateBitCast(allocated_ptr, llvm::PointerType::getUnqual(element_type));
 
 		// return the typed pointer as the value
-		out_value = new value("new", get_pointer_type(node.get_array_element_type()), typed_ptr);
+		out_value = new value("new", node.get_array_element_type().get_pointer_type(), typed_ptr);
 		return true;
 	}
 
@@ -226,17 +228,17 @@ namespace channel {
 		}
 
 		// check if the array value is actually a pointer
-		if (!is_type_pointer(array_ptr->get_type())) {
+		if (!array_ptr->get_type().is_pointer()) {
 			compilation_logger::emit_array_access_on_non_pointer_error(node.get_declaration_line_number(), array_ptr->get_type(), node.get_array_identifier());
 			return false;
 		}
 
 		// get the element type of the pointer
-		llvm::Type* element_type = type_to_llvm_type(get_inherent_pointer_type(array_ptr->get_type()), m_context);
+		llvm::Type* element_type = array_ptr->get_type().get_element_type().get_llvm_type(m_context);
 
 		// cast the index value to u64
 		llvm::Value* index_value_cast;
-		if (!cast_value(index_value_cast, index_value, type::u64, node.get_declaration_line_number())) {
+		if (!cast_value(index_value_cast, index_value, type(type::base::u64, 0), node.get_declaration_line_number())) {
 			return false;
 		}
 
@@ -246,7 +248,7 @@ namespace channel {
 		// load the value at the element address
 		llvm::Value* loaded_value = m_builder.CreateLoad(element_type, element_address);
 
-		out_value = new value("array_element", get_inherent_pointer_type(array_ptr->get_type()), loaded_value);
+		out_value = new value("array_element", array_ptr->get_type().get_element_type(), loaded_value);
 		return true;
 	}
 
@@ -267,7 +269,7 @@ namespace channel {
 		}
 
 		// check if the array value is actually a pointer
-		if (!is_type_pointer(array_ptr->get_type())) {
+		if (!array_ptr->get_type().is_pointer()) {
 			compilation_logger::emit_array_access_on_non_pointer_error(node.get_declaration_line_number(), array_ptr->get_type(), node.get_array_identifier());
 			return false;
 		}
@@ -279,12 +281,12 @@ namespace channel {
 
 		// cast the index value to u64
 		llvm::Value* index_value_cast;
-		if (!cast_value(index_value_cast, index_value, type::u64, node.get_declaration_line_number())) {
+		if (!cast_value(index_value_cast, index_value, type(type::base::u64, 0), node.get_declaration_line_number())) {
 			return false;
 		}
 
 		// compute the address of the desired array element
-		llvm::Type* element_type = type_to_llvm_type(array_ptr->get_type(), m_context);
+		llvm::Type* element_type = array_ptr->get_type().get_llvm_type(m_context);
 		llvm::Value* element_address = m_builder.CreateGEP(llvm::PointerType::getUnqual(element_type), array_ptr->get_value(), index_value_cast);
 
 		// store the result of the right-hand side expression in the array
@@ -301,7 +303,7 @@ namespace channel {
 		}
 
 		// declared without an assigned value, set it to 0
-		llvm::Type* value_type = type_to_llvm_type(node.get_declaration_type(), m_context);
+		llvm::Type* value_type = node.get_declaration_type().get_llvm_type(m_context);
 		out_value = new value(node.get_declaration_identifier(), node.get_declaration_type(), llvm::Constant::getNullValue(value_type));
 		return true;
 	}

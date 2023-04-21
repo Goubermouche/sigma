@@ -311,7 +311,7 @@ namespace channel {
 
 		// parse access index
 		node* array_index;
-		if (!parse_expression(array_index, type::u64)) {
+		if (!parse_expression(array_index, type(type::base::u64, 0))) {
 			return false;
 		}
 
@@ -505,25 +505,25 @@ namespace channel {
 	bool parser::parse_number(node*& out_node, type expression_type) {
 		get_next_token(); // type
 		const std::string str_value = m_lexer.get_value();
-		const type type = expression_type == type::unknown ? token_to_type(m_current_token) : expression_type;
+		const type ty = expression_type.is_unknown() ? type(m_current_token, 0) : expression_type;
 		// std::cout << "parsed type: " << type_to_string(type) << '\n';
 
-		switch (type) {
+		switch (ty.get_base()) {
 		// signed
-		case type::i8:  out_node = new i8_node(m_lexer.get_current_line_number(), std::stoll(str_value)); return true;
-		case type::i16: out_node = new i16_node(m_lexer.get_current_line_number(), std::stoll(str_value)); return true;
-		case type::i32: out_node = new i32_node(m_lexer.get_current_line_number(), std::stoll(str_value)); return true;
-		case type::i64: out_node = new i64_node(m_lexer.get_current_line_number(), std::stoll(str_value)); return true;
-			// unsigned
-		case type::u8:  out_node = new u8_node(m_lexer.get_current_line_number(), std::stoull(str_value)); return true;
-		case type::u16: out_node = new u16_node(m_lexer.get_current_line_number(), std::stoull(str_value)); return true;
-		case type::u32: out_node = new u32_node(m_lexer.get_current_line_number(), std::stoull(str_value)); return true;
-		case type::u64: out_node = new u64_node(m_lexer.get_current_line_number(), std::stoull(str_value)); return true;
+		case type::base::i8:  out_node = new i8_node(m_lexer.get_current_line_number(), std::stoll(str_value)); return true;
+		case type::base::i16: out_node = new i16_node(m_lexer.get_current_line_number(), std::stoll(str_value)); return true;
+		case type::base::i32: out_node = new i32_node(m_lexer.get_current_line_number(), std::stoll(str_value)); return true;
+		case type::base::i64: out_node = new i64_node(m_lexer.get_current_line_number(), std::stoll(str_value)); return true;
+		 // unsigned
+		case type::base::u8:  out_node = new u8_node(m_lexer.get_current_line_number(), std::stoull(str_value)); return true;
+		case type::base::u16: out_node = new u16_node(m_lexer.get_current_line_number(), std::stoull(str_value)); return true;
+		case type::base::u32: out_node = new u32_node(m_lexer.get_current_line_number(), std::stoull(str_value)); return true;
+		case type::base::u64: out_node = new u64_node(m_lexer.get_current_line_number(), std::stoull(str_value)); return true;
 		// floating point
-		case type::f32: out_node = new f32_node(m_lexer.get_current_line_number(), std::stof(str_value)); return true;
-		case type::f64: out_node = new f64_node(m_lexer.get_current_line_number(), std::stod(str_value)); return true;
+		case type::base::f32: out_node = new f32_node(m_lexer.get_current_line_number(), std::stof(str_value)); return true;
+		case type::base::f64: out_node = new f64_node(m_lexer.get_current_line_number(), std::stod(str_value)); return true;
 		default:
-			compilation_logger::emit_unhandled_number_format_error(m_lexer.get_current_line_number(), type);
+			compilation_logger::emit_unhandled_number_format_error(m_lexer.get_current_line_number(), ty);
 			return false; // return on failure
 		}
 	}
@@ -568,7 +568,7 @@ namespace channel {
 
 		// parse array size
 		node* array_size;
-		if(!parse_expression(array_size, type::u64)) {
+		if(!parse_expression(array_size, type(type::base::u64, 0))) {
 			return false;
 		}
 
@@ -662,19 +662,19 @@ namespace channel {
 	}
 
 	node* parser::create_zero_node(type expression_type) const {
-		switch (expression_type) {
-		case type::i8:  return new i8_node(m_lexer.get_current_line_number(), 0);
-		case type::i16: return new i16_node(m_lexer.get_current_line_number(), 0);
-		case type::i32: return new i32_node(m_lexer.get_current_line_number(), 0);
-		case type::i64: return new i64_node(m_lexer.get_current_line_number(), 0);
-		case type::u8:  return new u8_node(m_lexer.get_current_line_number(), 0);
-		case type::u16: return new u16_node(m_lexer.get_current_line_number(), 0);
-		case type::u32: return new u32_node(m_lexer.get_current_line_number(), 0);
-		case type::u64: return new u64_node(m_lexer.get_current_line_number(), 0);
-		case type::f32: return new f32_node(m_lexer.get_current_line_number(), 0.0f);
-		case type::f64: return new f64_node(m_lexer.get_current_line_number(), 0.0);
+		switch (expression_type.get_base()) {
+		case type::base::i8:  return new i8_node(m_lexer.get_current_line_number(), 0);
+		case type::base::i16: return new i16_node(m_lexer.get_current_line_number(), 0);
+		case type::base::i32: return new i32_node(m_lexer.get_current_line_number(), 0);
+		case type::base::i64: return new i64_node(m_lexer.get_current_line_number(), 0);
+		case type::base::u8:  return new u8_node(m_lexer.get_current_line_number(), 0);
+		case type::base::u16: return new u16_node(m_lexer.get_current_line_number(), 0);
+		case type::base::u32: return new u32_node(m_lexer.get_current_line_number(), 0);
+		case type::base::u64: return new u64_node(m_lexer.get_current_line_number(), 0);
+		case type::base::f32: return new f32_node(m_lexer.get_current_line_number(), 0.0f);
+		case type::base::f64: return new f64_node(m_lexer.get_current_line_number(), 0.0);
 		default:
-			ASSERT(false, "[parser]: cannot convert '" + type_to_string(expression_type) + "' to a type keyword");
+			ASSERT(false, "[parser]: cannot convert '" + expression_type.to_string() + "' to a type keyword");
 			return nullptr;
 		}
 	}
@@ -686,15 +686,15 @@ namespace channel {
 			compilation_logger::emit_token_is_not_type_error(m_lexer.get_current_line_number(), m_current_token);
 		}
 
-		const type type = token_to_type(m_current_token);
+		const type ty = type(m_current_token, 0);
 
 		// check if the next token is an asterisk
 		if(peek_next_token(m_lexer) == token::operator_multiplication) {
 			get_next_token(); // operator_multiplication (guaranteed)
 			// get the respective pointer type
-			return get_pointer_type(type);
+			return ty.get_pointer_type();
 		}
 
-		return type;
+		return ty;
 	}
 }

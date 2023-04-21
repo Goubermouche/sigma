@@ -52,6 +52,14 @@ namespace channel {
 		return type(m_base, m_pointer_level + 1);
 	}
 
+	void type::set_pointer_level(u16 pointer_level)	{
+		m_pointer_level = pointer_level;
+	}
+
+	u16 type::get_pointer_level() const	{
+		return m_pointer_level;
+	}
+
 	u16 type::get_bit_width() const	{
 		// todo: get type bit widths when compiling
 		static const std::unordered_map<base, u16> type_to_bit_width = {

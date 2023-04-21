@@ -686,13 +686,12 @@ namespace channel {
 			compilation_logger::emit_token_is_not_type_error(m_lexer.get_current_line_number(), m_current_token);
 		}
 
-		const type ty = type(m_current_token, 0);
+		type ty = type(m_current_token, 0);
 
 		// check if the next token is an asterisk
-		if(peek_next_token(m_lexer) == token::operator_multiplication) {
+		while(peek_next_token(m_lexer) == token::operator_multiplication) {
 			get_next_token(); // operator_multiplication (guaranteed)
-			// get the respective pointer type
-			return ty.get_pointer_type();
+			ty.set_pointer_level(ty.get_pointer_level() + 1);
 		}
 
 		return ty;

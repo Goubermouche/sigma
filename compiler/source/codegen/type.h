@@ -34,6 +34,9 @@ namespace channel {
 		type get_element_type() const;
 		type get_pointer_type() const;
 
+        void set_pointer_level(u16 pointer_level);
+        u16 get_pointer_level() const;
+
 		u16 get_bit_width() const;
         base get_base() const;
 

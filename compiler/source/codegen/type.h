@@ -23,6 +23,7 @@ namespace channel {
             unknown,
         };
 
+        type() = default;
         type(base base, u16 pointer_level);
         type(token tok, u16 pointer_level);
 

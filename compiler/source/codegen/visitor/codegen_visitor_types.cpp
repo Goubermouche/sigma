@@ -16,6 +16,8 @@
 // text
 #include "../abstract_syntax_tree/keywords/types/text/char_node.h"
 #include "../abstract_syntax_tree/keywords/types/text/string_node.h"
+// other
+#include "../abstract_syntax_tree/keywords/types/bool_node.h"
 
 namespace channel {
 	bool codegen_visitor::visit_keyword_i8_node(i8_node& node, value*& out_value) {
@@ -89,6 +91,11 @@ namespace channel {
 		llvm::Value* string_literal_ptr = m_builder.CreateBitCast(stack_string_literal, type(type::base::character, 1).get_llvm_type(m_context));
 
 		out_value = new value("__string", type(type::base::character, 1), string_literal_ptr);
+		return true;
+	}
+
+	bool codegen_visitor::visit_keyword_bool_node(bool_node& node, value*& out_value) {
+		out_value = new value("__bool", type(type::base::boolean, 0), llvm::ConstantInt::get(m_context, llvm::APInt(1, node.get_value(), false)));
 		return true;
 	}
 }

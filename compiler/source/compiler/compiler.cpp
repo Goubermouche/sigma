@@ -1,6 +1,5 @@
 #include "compiler.h"
 #include "../codegen/visitor/codegen_visitor.h"
-
 // llvm
 #include "llvm/Support/VirtualFileSystem.h"
 #include "llvm/Support/TargetSelect.h"
@@ -12,7 +11,6 @@
 #include "llvm/Target/TargetOptions.h"
 #include "llvm/Transforms/IPO.h"
 #include "llvm/Transforms/IPO/PassManagerBuilder.h"
-
 // clang
 #include "clang/Driver/Driver.h"
 #include "clang/Driver/Compilation.h"
@@ -81,7 +79,7 @@ namespace channel {
 
 			// add optimization passes
 			builder.OptLevel = 3; // set the optimization level (0-3)
-			builder.SizeLevel = 0; // set the size optimization level (0-2)
+			builder.SizeLevel = 2; // set the size optimization level (0-2)
 			builder.Inliner = llvm::createFunctionInliningPass(builder.OptLevel, builder.SizeLevel, false);
 			builder.LoopVectorize = true;
 			builder.SLPVectorize = true;

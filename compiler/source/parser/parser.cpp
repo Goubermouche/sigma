@@ -39,6 +39,7 @@
 #include "../codegen/abstract_syntax_tree/operators/operator_multiplication_node.h"
 #include "../codegen/abstract_syntax_tree/operators/operator_subtraction_node.h"
 #include "../codegen/abstract_syntax_tree/operators/operator_modulo_node.h"
+#include "codegen/abstract_syntax_tree/keywords/types/bool_node.h"
 
 namespace channel {
 	parser::parser(const std::string& source_file)
@@ -85,12 +86,15 @@ namespace channel {
 	}
 
 	bool parser::parse_function_definition(node*& out_node)	{
-		const type return_type = parse_type();
+		type return_type;
+		if (!parse_type(return_type)) {
+			return false;
+		}
+
 		const u64 line_number = m_lexer.get_current_line_number();
 		get_next_token(); // identifier (guaranteed)
 		const std::string identifier = m_lexer.get_identifier();
 		get_next_token(); // l_parenthesis (guaranteed)
-		// get_next_token(); // r_parenthesis || type
 
 		std::vector<std::pair<std::string, type>> arguments;
 
@@ -98,7 +102,10 @@ namespace channel {
 		token next_token = peek_next_token(m_lexer);
 		if(next_token != token::r_parenthesis) {
 			while (true) {
-				type argument_type = parse_type();
+				type argument_type;
+				if(!parse_type(argument_type)) {
+					return false;
+				}
 
 				if (!expect_next_token(token::identifier)) {
 					return false;
@@ -375,7 +382,10 @@ namespace channel {
 	}
 
 	bool parser::parse_declaration(node*& out_node, bool is_global) {
-		const type declaration_type = parse_type();
+		type declaration_type;
+		if(!parse_type(declaration_type)) {
+			return false;
+		}
 
 		if(!expect_next_token(token::identifier)) {
 			return false;
@@ -496,6 +506,9 @@ namespace channel {
 			return parse_char(out_node);
 		case token::string_literal:
 			return parse_string(out_node);
+		case token::bool_literal_true:
+		case token::bool_literal_false:
+			return parse_bool(out_node);
 		}
 
 		compilation_logger::emit_unhandled_token_error(m_lexer.get_current_line_number(), m_current_token);
@@ -506,7 +519,6 @@ namespace channel {
 		get_next_token(); // type
 		const std::string str_value = m_lexer.get_value();
 		const type ty = expression_type.is_unknown() ? type(m_current_token, 0) : expression_type;
-		// std::cout << "parsed type: " << type_to_string(type) << '\n';
 
 		switch (ty.get_base()) {
 		// signed
@@ -522,6 +534,8 @@ namespace channel {
 		// floating point
 		case type::base::f32: out_node = new f32_node(m_lexer.get_current_line_number(), std::stof(str_value)); return true;
 		case type::base::f64: out_node = new f64_node(m_lexer.get_current_line_number(), std::stod(str_value)); return true;
+		// bool
+		case type::base::boolean: out_node = new bool_node(m_lexer.get_current_line_number(), std::stoi(str_value)); return true;
 		default:
 			compilation_logger::emit_unhandled_number_format_error(m_lexer.get_current_line_number(), ty);
 			return false; // return on failure
@@ -537,6 +551,12 @@ namespace channel {
 	bool parser::parse_string(node*& out_node) {
 		get_next_token(); // string_literal (guaranteed)
 		out_node = new string_node(m_lexer.get_current_line_number(), m_lexer.get_value());
+		return true;
+	}
+
+	bool parser::parse_bool(node*& out_node) {
+		get_next_token(); // bool_literal_true || bool_literal_false (guaranteed)
+		out_node = new bool_node(m_lexer.get_current_line_number(), m_current_token == token::bool_literal_true);
 		return true;
 	}
 
@@ -559,7 +579,10 @@ namespace channel {
 		get_next_token(); // keyword_new (guaranteed)
 
 		const u64 line_number = m_lexer.get_current_line_number();
-		const type allocation_type = parse_type();
+		type allocation_type;
+		if(!parse_type(allocation_type)) {
+			return false;
+		}
 
 		// l_bracket
 		if (!expect_next_token(token::l_bracket)) {
@@ -679,14 +702,15 @@ namespace channel {
 		}
 	}
 
-	type parser::parse_type() {
+	bool parser::parse_type(type& ty) {
 		get_next_token();
 
 		if(!is_token_type(m_current_token)) {
 			compilation_logger::emit_token_is_not_type_error(m_lexer.get_current_line_number(), m_current_token);
+			return false;
 		}
 
-		type ty = type(m_current_token, 0);
+		ty = type(m_current_token, 0);
 
 		// check if the next token is an asterisk
 		while(peek_next_token(m_lexer) == token::operator_multiplication) {
@@ -694,6 +718,6 @@ namespace channel {
 			ty.set_pointer_level(ty.get_pointer_level() + 1);
 		}
 
-		return ty;
+		return true;
 	}
 }

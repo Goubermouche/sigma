@@ -8,11 +8,11 @@ namespace channel {
 	 */
 	class function_node : public node {
 	public:
-		function_node(u64 line_number, type function_return_type, const std::string& function_identifier, const std::vector<node*>& function_statements, const std::vector<std::pair<std::string, type>>& function_arguments);
+		function_node(u64 line_number, const type& function_return_type, const std::string& function_identifier, const std::vector<node*>& function_statements, const std::vector<std::pair<std::string, type>>& function_arguments);
 		bool accept(visitor& visitor, value*& out_value) override;
 		std::string get_node_name() const override;
 
-		type get_function_return_type() const;
+		const type& get_function_return_type() const;
 		const std::string& get_function_identifier() const;
 		const std::vector<node*>& get_function_statements() const;
 		const std::vector<std::pair<std::string, type>>& get_function_arguments() const;

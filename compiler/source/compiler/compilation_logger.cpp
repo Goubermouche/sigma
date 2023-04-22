@@ -39,7 +39,7 @@ namespace channel {
 	void compilation_logger::emit_unhandled_number_format_error(u64 line_number, type received_type) {
 		emit_error(
 			line_number,
-			"unhandled numerical token received ('" + received_type.to_string() + "')"
+			"unhandled non-numerical token received ('" + received_type.to_string() + "')"
 		);
 	}
 

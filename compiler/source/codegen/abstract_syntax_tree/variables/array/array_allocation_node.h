@@ -4,11 +4,11 @@
 namespace channel {
 	class array_allocation_node : public node {
 	public:
-		array_allocation_node(u64 line_number, type array_element_type, node* array_element_count_node);
+		array_allocation_node(u64 line_number, const type& array_element_type, node* array_element_count_node);
 		bool accept(visitor& visitor, value*& out_value) override;
 		std::string get_node_name() const override;
 
-		type get_array_element_type() const;
+		const type& get_array_element_type() const;
 		node* get_array_element_count_node() const;
 	private:
 		type m_array_element_type;

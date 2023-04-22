@@ -17,11 +17,13 @@ namespace channel {
 		// keywords
 		keyword_type_void,                  // void
 		keyword_type_bool,                  // bool
+		bool_literal_true,
+		bool_literal_false,
 
 		// signed integers	                
 		keyword_type_i8,                    // i8  0
 		keyword_type_i16,                   // i16 0
-		keyword_type_i32,                   // i32 0 keyword_i32_node
+		keyword_type_i32,                   // i32 0
 		keyword_type_i64,                   // i64 0
 							                
 		// unsigned integers                
@@ -60,7 +62,7 @@ namespace channel {
 		// map<K, V>
 								        
 		// operators
-		operator_addition,                  // +  operator_addition_node
+		operator_addition,                  // + 
 		operator_addition_assignment,       // +=
 		operator_subtraction,               // -
 		operator_subtraction_assignment,    // -=

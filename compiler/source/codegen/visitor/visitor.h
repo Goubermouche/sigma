@@ -34,6 +34,8 @@ namespace channel {
     // text
     class char_node;
     class string_node;
+    // other
+    class bool_node;
 
     // operators
     class operator_addition_node;
@@ -87,7 +89,9 @@ namespace channel {
         // text
         virtual bool visit_keyword_char_node(char_node& node, value*& out_value) = 0;
         virtual bool visit_keyword_string_node(string_node& node, value*& out_value) = 0;
-        
+        // other
+    	virtual bool visit_keyword_bool_node(bool_node& node, value*& out_value) = 0;
+
         // operators
         virtual bool visit_operator_addition_node(operator_addition_node& node, value*& out_value) = 0;
         virtual bool visit_operator_subtraction_node(operator_subtraction_node& node, value*& out_value) = 0;

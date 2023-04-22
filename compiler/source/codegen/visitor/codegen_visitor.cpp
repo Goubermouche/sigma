@@ -67,14 +67,14 @@ namespace channel {
 	}
 
 	bool codegen_visitor::cast_value(llvm::Value*& out_value, const value* source_value, type target_type, u64 line_number) {
-		// both types are the same 
-		if(source_value->get_type() == target_type) {
+		// both types are the same
+		if (source_value->get_type() == target_type) {
 			out_value = source_value->get_value();
 			return true;
 		}
 
 		// don't allow pointer casting for now
-		if(source_value->get_type().is_pointer() || target_type.is_pointer()) {
+		if (source_value->get_type().is_pointer() || target_type.is_pointer()) {
 			compilation_logger::emit_cannot_cast_pointer_type_error(line_number, source_value->get_type(), target_type);
 			return false;
 		}
@@ -85,7 +85,7 @@ namespace channel {
 			const type function_return_type = m_functions[source_value->get_name()]->get_return_type();
 
 			// both types are the same 
-			if(function_return_type == target_type) {
+			if (function_return_type == target_type) {
 				out_value = source_value->get_value();
 				return true;
 			}
@@ -126,6 +126,12 @@ namespace channel {
 		llvm::Value* source_llvm_value = source_value->get_value();
 		llvm::Type* target_llvm_type = target_type.get_llvm_type(source_llvm_value->getContext());
 
+		// bool to i32
+		if (source_value->get_type().get_base() == type::base::boolean && target_type.get_base() == type::base::i32) {
+			out_value = m_builder.CreateZExt(source_llvm_value, target_llvm_type, "zext");
+			return true;
+		}
+
 		// floating-point to integer
 		if (source_value->get_type().is_floating_point() && target_type.is_integral()) {
 			out_value = m_builder.CreateFPToSI(source_llvm_value, target_llvm_type);
@@ -140,7 +146,6 @@ namespace channel {
 
 		// floating-point upcast or downcast
 		if (source_value->get_type().is_floating_point() && target_type.is_floating_point()) {
-			std::cout << "hewe\n";
 			out_value = m_builder.CreateFPCast(source_llvm_value, target_llvm_type, "fpcast");
 			return true;
 		}
@@ -161,6 +166,7 @@ namespace channel {
 		out_value = m_builder.CreateTrunc(source_llvm_value, target_llvm_type, "trunc");
 		return true;
 	}
+
 
 	bool codegen_visitor::get_named_value(value*& out_value, const std::string& variable_name) {
 		// check the local scope

@@ -74,7 +74,6 @@ namespace channel {
 		return true;
 	}
 
-
 	bool codegen_visitor::visit_local_declaration_node(local_declaration_node& node, value*& out_value) {
 		// evaluate the assigned value, if there is one
 		if (!get_declaration_value(node, out_value)) {
@@ -112,7 +111,6 @@ namespace channel {
 
 		return true;
 	}
-
 
 	bool codegen_visitor::visit_global_declaration_node(global_declaration_node& node, value*& out_value) {
 		// start creating the init function for our global ctor
@@ -198,8 +196,9 @@ namespace channel {
 
 		// calculate the total size
 		llvm::Type* element_type = node.get_array_element_type().get_llvm_type(m_context);
-		llvm::Value* element_size = llvm::ConstantInt::get(m_context, llvm::APInt(64, element_type->getPrimitiveSizeInBits() / 8));
+		llvm::Value* element_size = llvm::ConstantInt::get(m_context, llvm::APInt(64, (element_type->getPrimitiveSizeInBits() + 7) / 8));
 		llvm::Value* total_size = m_builder.CreateMul(element_count_cast, element_size);
+		// total_size = llvm::ConstantInt::get(m_context, llvm::APInt(64, 20));
 
 		// call malloc
 		llvm::Value* allocated_ptr = m_builder.CreateCall(malloc_func, total_size);
@@ -278,6 +277,14 @@ namespace channel {
 		if (!node.get_expression_node()->accept(*this, expression_value)) {
 			return false;
 		}
+
+		// cast the expression value to the array element type
+		llvm::Value* expression_llvm_value_cast;
+		if(!cast_value(expression_llvm_value_cast, expression_value, array_ptr->get_type().get_element_type(), node.get_declaration_line_number())) {
+			return false;
+		}
+
+		expression_value = new value(expression_value->get_name(), array_ptr->get_type().get_element_type(), expression_llvm_value_cast);
 
 		// cast the index value to u64
 		llvm::Value* index_value_cast;

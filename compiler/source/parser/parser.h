@@ -111,6 +111,8 @@ namespace channel {
 
 		bool parse_string(node*& out_node);
 
+		bool parse_bool(node*& out_node);
+
 		/**
 		 * \brief Parses a negative number. The first expected token is a minus operator.
 		 * \param out_node Output AST node
@@ -172,7 +174,7 @@ namespace channel {
 		 * \brief Parses the next tokens as a type. The first expected token is a type.
 		 * \return Parsed type token
 		 */
-		type parse_type();
+		bool parse_type(type& ty);
 	private:
 		lexer m_lexer;
 		token m_current_token = token::unknown;

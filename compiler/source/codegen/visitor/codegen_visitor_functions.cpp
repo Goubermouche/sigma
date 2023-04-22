@@ -128,8 +128,10 @@ namespace channel {
 				return false;
 			}
 
-			// we have to upcast f32 arguments to f64 for variadic functions 
-			if(argument_value->get_type() == type(type::base::f32, 0)) {
+			// default variadic promotions:
+			const type argument_type = argument_value->get_type();
+			if(argument_type == type(type::base::f32, 0)) {
+				// f32 -> f64
 				llvm::Value* argument_value_cast;
 				if(!cast_value(argument_value_cast, argument_value, type(type::base::f64, 0), given_arguments[i]->get_declaration_line_number())) {
 					return false;
@@ -137,8 +139,16 @@ namespace channel {
 
 				argument_value = new value(argument_value->get_name(), type(type::base::f64, 0), argument_value_cast);
 			}
+			else if(argument_type.get_bit_width() < type(type::base::i32, 0).get_bit_width()) {
+				// i1, i8, i16 -> i32
+				llvm::Value* argument_value_cast;
+				if (!cast_value(argument_value_cast, argument_value, type(type::base::i32, 0), given_arguments[i]->get_declaration_line_number())) {
+					return false;
+				}
 
-			std::cout << "..." << argument_value->get_type().to_string() << '\n';
+				argument_value = new value(argument_value->get_name(), type(type::base::i32, 0), argument_value_cast);
+			}
+
 			argument_values.push_back(argument_value->get_value());
 		}
 

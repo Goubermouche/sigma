@@ -68,6 +68,8 @@ namespace channel {
 		// text
 		bool visit_keyword_char_node(char_node& node, value*& out_value) override;
 		bool visit_keyword_string_node(string_node& node, value*& out_value) override;
+		// other
+		bool visit_keyword_bool_node(bool_node& node, value*& out_value) override;
 
 		// operators
 		// codegen_visitor_operators.cpp

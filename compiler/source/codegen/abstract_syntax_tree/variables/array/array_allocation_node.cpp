@@ -1,7 +1,7 @@
 #include "array_allocation_node.h"
 
 namespace channel {
-	array_allocation_node::array_allocation_node(u64 line_number, type array_element_type, node* array_element_count_node)
+	array_allocation_node::array_allocation_node(u64 line_number, const type& array_element_type, node* array_element_count_node)
 		: node(line_number), m_array_element_type(array_element_type), m_array_element_count(array_element_count_node) {}
 
 	bool array_allocation_node::accept(visitor& visitor, value*& out_value) {
@@ -13,7 +13,7 @@ namespace channel {
 		return "array_allocation_node";
 	}
 
-	type array_allocation_node::get_array_element_type() const {
+	const type& array_allocation_node::get_array_element_type() const {
 		return m_array_element_type;
 	}
 

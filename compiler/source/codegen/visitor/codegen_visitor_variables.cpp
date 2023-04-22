@@ -173,20 +173,18 @@ namespace channel {
 	bool codegen_visitor::visit_allocation_node(array_allocation_node& node, value*& out_value) {
 		// get the count of allocated elements
 		value* element_count;
-		if(!node.get_array_element_count_node()->accept(*this, element_count)) {
+		if (!node.get_array_element_count_node()->accept(*this, element_count)) {
 			return false;
 		}
 
-		// cast the element count node to u64
+		// cast the element count node to i64
 		llvm::Value* element_count_cast;
-		if(!cast_value(element_count_cast, element_count, type(type::base::u64, 0), node.get_array_element_count_node()->get_declaration_line_number())) {
+		if (!cast_value(element_count_cast, element_count, type(type::base::i64, 0), node.get_array_element_count_node()->get_declaration_line_number())) {
 			return false;
 		}
 
-		// get the malloc function
-		// todo: move to a separate class for managing declared functions
 		const llvm::FunctionCallee malloc_func = m_module->getOrInsertFunction(
-			"malloc", 
+			"malloc",
 			llvm::FunctionType::get(
 				llvm::Type::getInt8PtrTy(m_context),
 				llvm::Type::getInt64Ty(m_context),
@@ -196,18 +194,15 @@ namespace channel {
 
 		// calculate the total size
 		llvm::Type* element_type = node.get_array_element_type().get_llvm_type(m_context);
-		llvm::Value* element_size = llvm::ConstantInt::get(m_context, llvm::APInt(64, (element_type->getPrimitiveSizeInBits() + 7) / 8));
+		llvm::Value* element_size = llvm::ConstantInt::get(m_context, llvm::APInt(64, (node.get_array_element_type().get_bit_width() + 7) / 8));
 		llvm::Value* total_size = m_builder.CreateMul(element_count_cast, element_size);
-		// total_size = llvm::ConstantInt::get(m_context, llvm::APInt(64, 20));
 
-		// call malloc
 		llvm::Value* allocated_ptr = m_builder.CreateCall(malloc_func, total_size);
 
 		// cast the result to the correct pointer type
 		llvm::Value* typed_ptr = m_builder.CreateBitCast(allocated_ptr, llvm::PointerType::getUnqual(element_type));
 
-		// return the typed pointer as the value
-		out_value = new value("new", node.get_array_element_type().get_pointer_type(), typed_ptr);
+		out_value = new value("alloca", node.get_array_element_type().get_pointer_type(), typed_ptr);
 		return true;
 	}
 
@@ -235,14 +230,17 @@ namespace channel {
 		// get the element type of the pointer
 		llvm::Type* element_type = array_ptr->get_type().get_element_type().get_llvm_type(m_context);
 
-		// cast the index value to u64
+		// cast the index value to i64
 		llvm::Value* index_value_cast;
-		if (!cast_value(index_value_cast, index_value, type(type::base::u64, 0), node.get_declaration_line_number())) {
+		if (!cast_value(index_value_cast, index_value, type(type::base::i64, 0), node.get_declaration_line_number())) {
 			return false;
 		}
 
+		// load the actual pointer value
+		llvm::Value* loaded_array_ptr = m_builder.CreateLoad(array_ptr->get_type().get_llvm_type(m_context), array_ptr->get_value());
+
 		// calculate the address of the desired element
-		llvm::Value* element_address = m_builder.CreateGEP(llvm::PointerType::getUnqual(element_type), array_ptr->get_value(), index_value_cast);
+		llvm::Value* element_address = m_builder.CreateGEP(llvm::PointerType::getUnqual(element_type), loaded_array_ptr, index_value_cast);
 
 		// load the value at the element address
 		llvm::Value* loaded_value = m_builder.CreateLoad(element_type, element_address);
@@ -262,7 +260,7 @@ namespace channel {
 
 		// find the array value in our named values
 		value* array_ptr;
-		if(!get_named_value(array_ptr, node.get_array_identifier())) {
+		if (!get_named_value(array_ptr, node.get_array_identifier())) {
 			compilation_logger::emit_variable_not_found_error(node.get_declaration_line_number(), node.get_array_identifier());
 			return false;
 		}
@@ -280,21 +278,23 @@ namespace channel {
 
 		// cast the expression value to the array element type
 		llvm::Value* expression_llvm_value_cast;
-		if(!cast_value(expression_llvm_value_cast, expression_value, array_ptr->get_type().get_element_type(), node.get_declaration_line_number())) {
+		if (!cast_value(expression_llvm_value_cast, expression_value, array_ptr->get_type().get_element_type(), node.get_declaration_line_number())) {
 			return false;
 		}
 
 		expression_value = new value(expression_value->get_name(), array_ptr->get_type().get_element_type(), expression_llvm_value_cast);
 
-		// cast the index value to u64
+		// cast the index value to i64
 		llvm::Value* index_value_cast;
-		if (!cast_value(index_value_cast, index_value, type(type::base::u64, 0), node.get_declaration_line_number())) {
+		if (!cast_value(index_value_cast, index_value, type(type::base::i64, 0), node.get_declaration_line_number())) {
 			return false;
 		}
 
+		// Load the array pointer value
+		llvm::Value* array_ptr_value = m_builder.CreateLoad(array_ptr->get_type().get_llvm_type(m_context), array_ptr->get_value());
+
 		// compute the address of the desired array element
-		llvm::Type* element_type = array_ptr->get_type().get_llvm_type(m_context);
-		llvm::Value* element_address = m_builder.CreateGEP(llvm::PointerType::getUnqual(element_type), array_ptr->get_value(), index_value_cast);
+		llvm::Value* element_address = m_builder.CreateGEP(llvm::PointerType::getUnqual(array_ptr->get_type().get_element_type().get_llvm_type(m_context)), array_ptr_value, index_value_cast);
 
 		// store the result of the right-hand side expression in the array
 		m_builder.CreateStore(expression_value->get_value(), element_address);

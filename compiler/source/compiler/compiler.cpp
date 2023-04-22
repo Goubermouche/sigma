@@ -78,8 +78,8 @@ namespace channel {
 			llvm::PassManagerBuilder builder;
 
 			// add optimization passes
-			builder.OptLevel = 3; // set the optimization level (0-3)
-			builder.SizeLevel = 2; // set the size optimization level (0-2)
+			builder.OptLevel = 0; // set the optimization level (0-3)
+			builder.SizeLevel = 0; // set the size optimization level (0-2)
 			builder.Inliner = llvm::createFunctionInliningPass(builder.OptLevel, builder.SizeLevel, false);
 			builder.LoopVectorize = true;
 			builder.SLPVectorize = true;

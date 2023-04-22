@@ -61,6 +61,10 @@ namespace channel {
 	}
 
 	u16 type::get_bit_width() const	{
+		if(m_pointer_level > 0) {
+			return 64; // todo: make this work in an os-safe way
+		}
+
 		// todo: get type bit widths when compiling
 		static const std::unordered_map<base, u16> type_to_bit_width = {
 			{ base::i8       , 8  },

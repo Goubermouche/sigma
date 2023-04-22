@@ -318,7 +318,7 @@ namespace channel {
 
 		// parse access index
 		node* array_index;
-		if (!parse_expression(array_index, type(type::base::u64, 0))) {
+		if (!parse_expression(array_index, type(type::base::i64, 0))) {
 			return false;
 		}
 
@@ -591,7 +591,7 @@ namespace channel {
 
 		// parse array size
 		node* array_size;
-		if(!parse_expression(array_size, type(type::base::u64, 0))) {
+		if(!parse_expression(array_size, type(type::base::i64, 0))) {
 			return false;
 		}
 

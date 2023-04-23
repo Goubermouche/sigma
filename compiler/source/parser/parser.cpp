@@ -257,7 +257,7 @@ namespace channel {
 		while (peek_next_token(m_lexer) == token::l_bracket) {
 			get_next_token(); // l_bracket (guaranteed)
 			node* index_node;
-			if (!parse_expression(index_node, type(type::base::i64, 0))) {
+			if (!parse_expression(index_node, type(type::base::u64, 0))) {
 				return false;
 			}
 			index_nodes.push_back(index_node);
@@ -328,7 +328,7 @@ namespace channel {
 		while (m_current_token == token::l_bracket) {
 			// parse access index
 			node* array_index;
-			if (!parse_expression(array_index, type(type::base::i64, 0))) {
+			if (!parse_expression(array_index, type(type::base::u64, 0))) {
 				return false;
 			}
 			index_nodes.push_back(array_index);
@@ -611,7 +611,7 @@ namespace channel {
 
 		// parse array size
 		node* array_size;
-		if(!parse_expression(array_size, type(type::base::i64, 0))) {
+		if(!parse_expression(array_size, type(type::base::u64, 0))) {
 			return false;
 		}
 

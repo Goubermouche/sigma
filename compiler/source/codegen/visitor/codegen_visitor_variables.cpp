@@ -177,20 +177,13 @@ namespace channel {
 			return false;
 		}
 
-		// cast the element count node to i64
+		// cast the element count node to u64
 		llvm::Value* element_count_cast;
-		if (!cast_value(element_count_cast, element_count, type(type::base::i64, 0), node.get_array_element_count_node()->get_declaration_line_number())) {
+		if (!cast_value(element_count_cast, element_count, type(type::base::u64, 0), node.get_array_element_count_node()->get_declaration_line_number())) {
 			return false;
 		}
 
-		const llvm::FunctionCallee malloc_func = m_module->getOrInsertFunction(
-			"malloc",
-			llvm::FunctionType::get(
-				llvm::Type::getInt8PtrTy(m_context),
-				llvm::Type::getInt64Ty(m_context),
-				false
-			)
-		);
+		const llvm::FunctionCallee malloc_func = m_functions["malloc"]->get_function();
 
 		// calculate the total size
 		llvm::Type* element_type = node.get_array_element_type().get_llvm_type(m_context);
@@ -226,9 +219,9 @@ namespace channel {
 				return false;
 			}
 
-			// cast the index value to i64
+			// cast the index value to u64
 			llvm::Value* index_value_cast;
-			if (!cast_value(index_value_cast, index_value, type(type::base::i64, 0), node.get_declaration_line_number())) {
+			if (!cast_value(index_value_cast, index_value, type(type::base::u64, 0), node.get_declaration_line_number())) {
 				return false;
 			}
 
@@ -272,9 +265,9 @@ namespace channel {
 				return false;
 			}
 
-			// cast the index value to i64
+			// cast the index value to u64
 			llvm::Value* index_value_cast;
-			if (!cast_value(index_value_cast, index_value, type(type::base::i64, 0), node.get_declaration_line_number())) {
+			if (!cast_value(index_value_cast, index_value, type(type::base::u64, 0), node.get_declaration_line_number())) {
 				return false;
 			}
 

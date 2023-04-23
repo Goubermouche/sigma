@@ -6,12 +6,21 @@ namespace channel {
 		: m_scope(new scope(nullptr)), m_builder(m_context) {
 		m_module = std::make_unique<llvm::Module>("channel", m_context);
 
-		llvm::PointerType* printf_arg_type = llvm::Type::getInt8PtrTy(m_context);
-		std::vector<llvm::Type*> printf_arg_types = { printf_arg_type };
-		llvm::FunctionType* printf_type = llvm::FunctionType::get(llvm::Type::getInt32Ty(m_context), printf_arg_types, true);
-		llvm::Function* printf_func = llvm::Function::Create(printf_type, llvm::Function::ExternalLinkage, "printf", m_module.get());
+		// printf
+		{
+			const std::vector<llvm::Type*> arg_types = { llvm::Type::getInt8PtrTy(m_context) };
+			llvm::FunctionType* func_type = llvm::FunctionType::get(llvm::Type::getInt32Ty(m_context), arg_types, true);
+			llvm::Function* func = llvm::Function::Create(func_type, llvm::Function::ExternalLinkage, "printf", m_module.get());
+			m_functions["print"] = new function(type(type::base::i32, 0), func, { {"format", type(type::base::character, 1)} }, true);
+		}
 
-		m_functions["print"] = new function(type(type::base::empty, 0), printf_func, {{"format", type(type::base::character, 1)}}, true);
+		// malloc
+		{
+			const std::vector<llvm::Type*> arg_types = { llvm::Type::getInt64Ty(m_context) };
+			llvm::FunctionType* func_type = llvm::FunctionType::get(llvm::Type::getInt8PtrTy(m_context), arg_types, false);
+			llvm::Function* func = llvm::Function::Create(func_type, llvm::Function::ExternalLinkage, "malloc", m_module.get());
+			m_functions["malloc"] = new function(type(type::base::i8, 1), func, { {"size", type(type::base::u64, 0)} }, false);
+		}
 	}
 
 	bool codegen_visitor::generate(parser& parser) {

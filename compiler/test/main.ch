@@ -15,8 +15,11 @@
 //  - check for, and handle, divide by 0 exceptions
 
 i32 main() {
-	char** strings = new char*[3];
-	strings[0] = "Hello, world! %i";
-	bool working = true;
-	print(strings[0], working);
+	i32** matrix = new i32*[2];
+	matrix[0] = new i32[2];
+	matrix[1] = new i32[2];
+	matrix[0][0] = 1;
+	matrix[1][0] = 2;
+	matrix[1][1] = 3;
+	print("values: %i %i %i\n", matrix[0][0], matrix[1][0], matrix[1][1]);
 }

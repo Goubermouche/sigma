@@ -6,7 +6,7 @@ namespace channel {
 
     bool access_node::accept(visitor& visitor, value*& out_value) {
         LOG_NODE_NAME(variable_node);
-        return visitor.visit_variable_node(*this, out_value);
+        return visitor.visit_access_node(*this, out_value);
     }
 
     std::string access_node::get_node_name() const {

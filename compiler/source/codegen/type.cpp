@@ -44,7 +44,7 @@ namespace channel {
 	}
 
 	type type::get_element_type() const {
-		ASSERT(m_pointer_level > 0, "");
+		ASSERT(m_pointer_level > 0, "cannot get an element type of a non pointer type");
 		return type(m_base, m_pointer_level - 1);
 	}
 
@@ -82,7 +82,7 @@ namespace channel {
 		};
 
 		const auto it = type_to_bit_width.find(m_base);
-		ASSERT(it != type_to_bit_width.end(), "");
+		ASSERT(it != type_to_bit_width.end(), "cannot get the bit width of the given type");
 		return it->second;
 	}
 
@@ -167,7 +167,7 @@ namespace channel {
 			case base::boolean:
 				return llvm::Type::getInt1PtrTy(context);
 			default:
-				ASSERT(false, "Invalid base type");
+				ASSERT(false, "invalid base type");
 				return nullptr;
 			}
 		}
@@ -221,7 +221,7 @@ namespace channel {
 		};
 
 		const auto it = type_to_string_map.find(m_base);
-		ASSERT(it != type_to_string_map.end(), "");
+		ASSERT(it != type_to_string_map.end(), "cannot convert the given type to a string");
 		return it->second + std::string(m_pointer_level, '*');
 	}
 
@@ -252,7 +252,7 @@ namespace channel {
 	type get_highest_precision_type(const type& left_type, const type& right_type) {
 		assert(left_type != type::function && left_type != type::function_call &&
 			right_type != type::function && right_type != type::function_call &&
-			"Invalid types for get_highest_precision_type");
+			"invalid types for get_highest_precision_type");
 
 		if (left_type.is_floating_point() || right_type.is_floating_point()) {
 			return (left_type.get_base() == type::base::f64 || right_type.get_base() == type::base::f64) ? type(type::base::f64, 0) : type(type::base::f32, 0);

@@ -11,6 +11,7 @@
 #include "../codegen/abstract_syntax_tree/variables/array/array_assignment_node.h"
 #include "../codegen/abstract_syntax_tree/variables/declaration/local_declaration_node.h"
 #include "../codegen/abstract_syntax_tree/variables/declaration/global_declaration_node.h"
+#include "../codegen/abstract_syntax_tree/variables/variable_node.h"
 
 // flow control
 #include "../codegen/abstract_syntax_tree/keywords/flow_control/return_node.h"
@@ -229,7 +230,6 @@ namespace channel {
 					}
 				}
 
-
 				break;
 			case token::keyword_return:
 				if (!parse_return_statement(out_node)) {
@@ -252,16 +252,20 @@ namespace channel {
 	bool parser::parse_array_assignment(node*& out_node) {
 		get_next_token(); // identifier (guaranteed)
 		const std::string identifier = m_lexer.get_identifier();
-		get_next_token(); // l_bracket (guaranteed)
 
-		node* index_node;
-		if (!parse_expression(index_node)) {
-			return false;
-		}
+		std::vector<node*> index_nodes;
+		while (peek_next_token(m_lexer) == token::l_bracket) {
+			get_next_token(); // l_bracket (guaranteed)
+			node* index_node;
+			if (!parse_expression(index_node)) {
+				return false;
+			}
+			index_nodes.push_back(index_node);
 
-		// Make sure the next token is a right square bracket
-		if (!expect_next_token(token::r_bracket)) {
-			return false;
+			// Make sure the next token is a right square bracket
+			if (!expect_next_token(token::r_bracket)) {
+				return false;
+			}
 		}
 
 		if (!expect_next_token(token::operator_assignment)) {
@@ -281,7 +285,8 @@ namespace channel {
 			}
 		}
 
-		out_node = new array_assignment_node(m_lexer.get_current_line_number(), identifier, index_node, value);
+		node* array_node = new variable_node(m_lexer.get_current_line_number(), identifier);
+		out_node = new array_assignment_node(m_lexer.get_current_line_number(), array_node, index_nodes, value);
 		return true;
 	}
 
@@ -314,17 +319,32 @@ namespace channel {
 		get_next_token(); // identifier (guaranteed)
 		const std::string identifier = m_lexer.get_identifier();
 
-		get_next_token(); // l_bracket
+		node* array_node = new variable_node(m_lexer.get_current_line_number(), identifier);
+		std::vector<node*> index_nodes;
 
-		// parse access index
-		node* array_index;
-		if (!parse_expression(array_index, type(type::base::i64, 0))) {
-			return false;
+		get_next_token(); // l_bracket (guaranteed)
+
+		// parse access indices for multiple dimensions
+		while (m_current_token == token::l_bracket) {
+			// parse access index
+			node* array_index;
+			if (!parse_expression(array_index, type(type::base::i64, 0))) {
+				return false;
+			}
+			index_nodes.push_back(array_index);
+
+			if(!expect_next_token(token::r_bracket)) {
+				return false;
+			}
+
+			if(peek_next_token(m_lexer) != token::l_bracket) {
+				break;
+			}
+
+			get_next_token(); // l_bracket(guaranteed)
 		}
 
-		get_next_token(); // r_bracket
-
-		out_node = new array_access_node(m_lexer.get_current_line_number(), identifier, array_index);
+		out_node = new array_access_node(m_lexer.get_current_line_number(), array_node, index_nodes);
 		return true;
 	}
 

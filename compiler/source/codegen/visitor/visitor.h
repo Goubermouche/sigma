@@ -13,6 +13,7 @@ namespace channel {
     class array_allocation_node;
     class array_access_node;
     class array_assignment_node;
+    class variable_node;
 
     // flow control
     class return_node;
@@ -62,13 +63,14 @@ namespace channel {
 
         // variables
         virtual bool visit_assignment_node(assignment_node& node, value*& out_value) = 0;
-        virtual bool visit_variable_node(access_node& node, value*& out_value) = 0;
+        virtual bool visit_access_node(access_node& node, value*& out_value) = 0;
         virtual bool visit_local_declaration_node(local_declaration_node& node, value*& out_value) = 0;
         virtual bool visit_global_declaration_node(global_declaration_node& node, value*& out_value) = 0;
         virtual bool visit_allocation_node(array_allocation_node& node, value*& out_value) = 0;
         virtual bool visit_array_access_node(array_access_node& node, value*& out_value) = 0;
         virtual bool visit_array_assignment_node(array_assignment_node& node, value*& out_value) = 0;
-        
+        virtual bool visit_variable_node(variable_node& node, value*& out_value) = 0;
+
         // flow control
         virtual bool visit_return_node(return_node& node, value*& out_value) = 0;
 

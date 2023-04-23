@@ -79,16 +79,15 @@ namespace channel {
 		// note: + 1 is for the null termination character
 		const u64 string_length = node.get_value().size() + 1;
 
-		// allocate memory for the string literal on the stack
+		// allocate memory for the string literal as a global constant
 		llvm::ArrayType* array_type = llvm::ArrayType::get(type(type::base::character, 0).get_llvm_type(m_context), string_length);
-		llvm::AllocaInst* stack_string_literal = m_builder.CreateAlloca(array_type);
-
-		// store the string literal in the allocated memory
 		llvm::Constant* string_constant = llvm::ConstantDataArray::getString(m_context, node.get_value());
-		m_builder.CreateStore(string_constant, stack_string_literal);
 
-		// bit cast the pointer to the allocated memory into a char* (i8*)
-		llvm::Value* string_literal_ptr = m_builder.CreateBitCast(stack_string_literal, type(type::base::character, 1).get_llvm_type(m_context));
+		// create a global variable to store the string constant
+		llvm::GlobalVariable* global_string_literal = new llvm::GlobalVariable(*m_module, array_type, true, llvm::GlobalValue::PrivateLinkage, string_constant, ".str");
+
+		// bit cast the pointer to the global variable into a char* (i8*)
+		llvm::Value* string_literal_ptr = m_builder.CreateBitCast(global_string_literal, type(type::base::character, 1).get_llvm_type(m_context));
 
 		out_value = new value("__string", type(type::base::character, 1), string_literal_ptr);
 		return true;

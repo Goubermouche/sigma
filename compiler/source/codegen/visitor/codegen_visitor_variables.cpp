@@ -205,12 +205,12 @@ namespace channel {
 		// cast the result to the correct pointer type
 		llvm::Value* typed_ptr = m_builder.CreateBitCast(allocated_ptr, llvm::PointerType::getUnqual(element_type));
 
-		out_value = new value("alloca", node.get_array_element_type().get_pointer_type(), typed_ptr);
+		out_value = new value("__alloca", node.get_array_element_type().get_pointer_type(), typed_ptr);
 		return true;
 	}
 
 	bool codegen_visitor::visit_array_access_node(array_access_node& node, value*& out_value) {
-		std::vector<channel::node*> index_nodes = node.get_array_element_index_nodes();
+		const std::vector<channel::node*>& index_nodes = node.get_array_element_index_nodes();
 		value* array_ptr;
 
 		// evaluate the array base expression
@@ -241,7 +241,8 @@ namespace channel {
 			// get the next level pointer
 			current_ptr = m_builder.CreateGEP(current_type.get_element_type().get_llvm_type(m_context), current_ptr, index_value_cast);
 
-			if (i != index_nodes.size() - 1 && current_type.get_pointer_level() > 0) {
+			// update the current_type for the next iteration
+			if (i != index_nodes.size() - 1) {
 				current_type = current_type.get_element_type();
 			}
 		}
@@ -254,7 +255,7 @@ namespace channel {
 	}
 
 	bool codegen_visitor::visit_array_assignment_node(array_assignment_node& node, value*& out_value) {
-		const std::vector<channel::node*> index_nodes = node.get_array_element_index_nodes();
+		const std::vector<channel::node*>& index_nodes = node.get_array_element_index_nodes();
 		value* array_ptr;
 
 		// evaluate the array base expression
@@ -285,7 +286,8 @@ namespace channel {
 			// get the next level pointer
 			current_ptr = m_builder.CreateGEP(current_type.get_element_type().get_llvm_type(m_context), current_ptr, index_value_cast);
 
-			if (i != index_nodes.size() - 1 && current_type.get_pointer_level() > 0) {
+			// update the current_type for the next iteration
+			if (i != index_nodes.size() - 1) {
 				current_type = current_type.get_element_type();
 			}
 		}
@@ -297,12 +299,7 @@ namespace channel {
 		}
 
 		// get the final element type for the assignment
-		type final_element_type = current_type.get_element_type();
-		for (size_t i = 1; i < index_nodes.size(); ++i) {
-			if (final_element_type.get_pointer_level() > 0) {
-				final_element_type = final_element_type.get_element_type();
-			}
-		}
+		const type final_element_type = current_type.get_element_type();
 
 		// cast the expression value to the array element type
 		llvm::Value* expression_llvm_value_cast;

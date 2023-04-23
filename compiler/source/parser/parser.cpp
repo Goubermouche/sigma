@@ -292,7 +292,7 @@ namespace channel {
 
 	bool parser::parse_assignment(node*& out_node) {
 		get_next_token(); // identifier (guaranteed)
-		const std::string identifier = m_lexer.get_identifier();
+		node* variable = new variable_node(m_lexer.get_current_line_number(), m_lexer.get_identifier());
 
 		if (!expect_next_token(token::operator_assignment)) {
 			return false; 
@@ -311,7 +311,7 @@ namespace channel {
 			}
 		}
 
-		out_node = new assignment_node(m_lexer.get_current_line_number(), identifier, value);
+		out_node = new assignment_node(m_lexer.get_current_line_number(), variable, value);
 		return true;
 	}
 

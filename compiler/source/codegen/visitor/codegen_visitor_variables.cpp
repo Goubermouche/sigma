@@ -19,8 +19,7 @@ namespace channel {
 		// assignment to a local variable
 		// look up the local variable in the active scope
 		value* variable;
-		if (!get_named_value(variable, node.get_variable_identifier())) {
-			compilation_logger::emit_variable_not_found_error(node.get_declaration_line_number(), node.get_variable_identifier());
+		if(!node.get_variable_node()->accept(*this, variable)) {
 			return false;
 		}
 
@@ -249,7 +248,7 @@ namespace channel {
 		// load the value at the final element address
 		llvm::Value* loaded_value = m_builder.CreateLoad(current_type.get_element_type().get_llvm_type(m_context), current_ptr);
 
-		out_value = new value("array_element", current_type.get_element_type(), loaded_value);
+		out_value = new value("__array_element", current_type.get_element_type(), loaded_value);
 		return true;
 	}
 

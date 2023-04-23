@@ -173,8 +173,6 @@ namespace channel {
 
 	bool codegen_visitor::visit_allocation_node(array_allocation_node& node, value*& out_value) {
 		// get the count of allocated elements
-		std::cout << "pointer level: " << node.get_array_element_type().to_string() << '\n';
-
 		value* element_count;
 		if (!node.get_array_element_count_node()->accept(*this, element_count)) {
 			return false;
@@ -239,7 +237,8 @@ namespace channel {
 			current_ptr = m_builder.CreateLoad(current_type.get_llvm_type(m_context), current_ptr);
 
 			// get the next level pointer
-			current_ptr = m_builder.CreateGEP(current_type.get_element_type().get_llvm_type(m_context), current_ptr, index_value_cast);
+			// current_ptr = m_builder.CreateGEP(current_type.get_element_type().get_llvm_type(m_context), current_ptr, index_value_cast);
+			current_ptr = m_builder.CreateInBoundsGEP(current_type.get_element_type().get_llvm_type(m_context), current_ptr, index_value_cast); // Changed to CreateInBoundsGEP
 
 			// update the current_type for the next iteration
 			if (i != index_nodes.size() - 1) {
@@ -284,7 +283,8 @@ namespace channel {
 			current_ptr = m_builder.CreateLoad(current_type.get_llvm_type(m_context), current_ptr);
 
 			// get the next level pointer
-			current_ptr = m_builder.CreateGEP(current_type.get_element_type().get_llvm_type(m_context), current_ptr, index_value_cast);
+			// current_ptr = m_builder.CreateGEP(current_type.get_element_type().get_llvm_type(m_context), current_ptr, index_value_cast);
+			current_ptr = m_builder.CreateInBoundsGEP(current_type.get_element_type().get_llvm_type(m_context), current_ptr, index_value_cast); // Changed to CreateInBoundsGEP
 
 			// update the current_type for the next iteration
 			if (i != index_nodes.size() - 1) {

@@ -257,7 +257,7 @@ namespace channel {
 		while (peek_next_token(m_lexer) == token::l_bracket) {
 			get_next_token(); // l_bracket (guaranteed)
 			node* index_node;
-			if (!parse_expression(index_node)) {
+			if (!parse_expression(index_node, type(type::base::i64, 0))) {
 				return false;
 			}
 			index_nodes.push_back(index_node);

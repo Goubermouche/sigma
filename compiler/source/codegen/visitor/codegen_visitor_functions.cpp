@@ -153,7 +153,17 @@ namespace channel {
 		}
 
 		// return the function call as the value
-		out_value = new value(node.get_function_identifier(), type(type::base::function_call, 0), m_builder.CreateCall(func->get_function(), argument_values, "call"));
+		llvm::CallInst* call_inst = m_builder.CreateCall(func->get_function(), argument_values);
+		const type return_type = func->get_return_type();
+
+		// only return the call if we have to store the value (if the function returns a non-void and non-pointer value)
+		if (return_type.is_pointer() || return_type.get_base() != type::base::empty) {
+			out_value = new value(node.get_function_identifier(), return_type, call_inst);
+		}
+		else {
+			out_value = nullptr;
+		}
+
 		return true;
 	}
 }

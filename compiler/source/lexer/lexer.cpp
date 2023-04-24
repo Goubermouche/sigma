@@ -25,11 +25,6 @@ namespace channel {
 		m_last_character = m_accessor.get_advance();
 	}
 
-	// considerations: handle nested scopes using a stack (when we encounter a new l_brace we push a new scope to the
-	//                 stack, then we add variables to that scope, once we encounter an r_brace we pop the stack.
-	// implications:   add a scope class which will contain all variables in the given scope. note that we need to add
-	//                 a check for l_brace/r_brace into the parser main loop, and manage the scope stack over there.
-
 	token lexer::get_token() {
 		// ignore spaces between tokens 
 		while(isspace(m_last_character) && !m_accessor.end()) {

@@ -82,12 +82,6 @@ namespace channel {
 			return true;
 		}
 
-		// don't allow pointer casting for now
-		if (source_value->get_type().is_pointer() || target_type.is_pointer()) {
-			compilation_logger::emit_cannot_cast_pointer_type_error(line_number, source_value->get_type(), target_type);
-			return false;
-		}
-
 		// cast function call
 		if (source_value->get_type() == type(type::base::function_call, 0)) {
 			// use the function return type as its type
@@ -97,6 +91,12 @@ namespace channel {
 			if (function_return_type == target_type) {
 				out_value = source_value->get_value();
 				return true;
+			}
+
+			// don't allow pointer casting for now
+			if (function_return_type.is_pointer() || target_type.is_pointer()) {
+				compilation_logger::emit_cannot_cast_pointer_type_error(line_number, source_value->get_type(), target_type);
+				return false;
 			}
 
 			compilation_logger::emit_function_return_type_cast_warning(line_number, function_return_type, target_type);
@@ -127,6 +127,12 @@ namespace channel {
 					return true;
 				}
 			}
+		}
+
+		// don't allow pointer casting for now
+		if (source_value->get_type().is_pointer() || target_type.is_pointer()) {
+			compilation_logger::emit_cannot_cast_pointer_type_error(line_number, source_value->get_type(), target_type);
+			return false;
 		}
 
 		compilation_logger::emit_cast_warning(line_number, source_value->get_type(), target_type);
@@ -175,7 +181,6 @@ namespace channel {
 		out_value = m_builder.CreateTrunc(source_llvm_value, target_llvm_type, "trunc");
 		return true;
 	}
-
 
 	bool codegen_visitor::get_named_value(value*& out_value, const std::string& variable_name) {
 		// check the local scope

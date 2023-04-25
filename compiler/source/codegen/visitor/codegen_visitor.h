@@ -19,9 +19,9 @@ namespace channel {
 	 */
 	class codegen_visitor : public visitor {
 	public:
-		codegen_visitor();
+		codegen_visitor(const parser& parser);
 
-		bool generate(parser& parser);
+		bool generate();
 		std::shared_ptr<llvm::Module> get_module();
 
 		void print_intermediate_representation() const;
@@ -86,6 +86,8 @@ namespace channel {
 		bool has_main_entry_point() const;
 		void initialize_global_variables();
 	private:
+		parser m_parser;
+
 		// scope tree hierarchy
 		scope* m_scope;
 

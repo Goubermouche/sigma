@@ -41,8 +41,7 @@ namespace channel {
 			const llvm::AllocaInst* alloca = llvm::dyn_cast<llvm::AllocaInst>(variable_value->get_value());
 			llvm::Value* load = m_builder.CreateLoad(
 				alloca->getAllocatedType(),
-				variable_value->get_value(),
-				node.get_variable_identifier()
+				variable_value->get_value()
 			);
 
 			// return the load instruction as a value
@@ -65,8 +64,7 @@ namespace channel {
 		// load the value from the memory location
 		llvm::Value* load = m_builder.CreateLoad(
 			global_variable_value->getValueType(),
-			global_variable->get_value(),
-			node.get_variable_identifier()
+			global_variable->get_value()
 		);
 
 		// return the load instruction as a value
@@ -89,8 +87,7 @@ namespace channel {
 		// store the initial value
 		llvm::AllocaInst* alloca = m_builder.CreateAlloca(
 			node.get_declaration_type().get_llvm_type(m_context),
-			nullptr,
-			node.get_declaration_identifier()
+			nullptr
 		);
 
 		m_builder.CreateStore(cast_assigned_value, alloca);
@@ -246,7 +243,7 @@ namespace channel {
 
 			// get the next level pointer
 			// current_ptr = m_builder.CreateGEP(current_type.get_element_type().get_llvm_type(m_context), current_ptr, index_value_cast);
-			current_ptr = m_builder.CreateInBoundsGEP(current_type.get_element_type().get_llvm_type(m_context), current_ptr, index_value_cast); // Changed to CreateInBoundsGEP
+			current_ptr = m_builder.CreateInBoundsGEP(current_type.get_element_type().get_llvm_type(m_context), current_ptr, index_value_cast);
 
 			// update the current_type for the next iteration
 			if (i != index_nodes.size() - 1) {
@@ -292,7 +289,7 @@ namespace channel {
 
 			// get the next level pointer
 			// current_ptr = m_builder.CreateGEP(current_type.get_element_type().get_llvm_type(m_context), current_ptr, index_value_cast);
-			current_ptr = m_builder.CreateInBoundsGEP(current_type.get_element_type().get_llvm_type(m_context), current_ptr, index_value_cast); // Changed to CreateInBoundsGEP
+			current_ptr = m_builder.CreateInBoundsGEP(current_type.get_element_type().get_llvm_type(m_context), current_ptr, index_value_cast);
 
 			// update the current_type for the next iteration
 			if (i != index_nodes.size() - 1) {

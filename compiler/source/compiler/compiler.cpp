@@ -31,9 +31,13 @@ namespace channel {
 		}
 
 		parser parser(lexer);
-		codegen_visitor visitor;
+		if(!parser.parse()) {
+			// parser failure
+			return;
+		}
 
-		if (!visitor.generate(parser)) {
+		codegen_visitor visitor(parser);
+		if (!visitor.generate()) {
 			// codegen failure
 			return;
 		}

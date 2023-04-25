@@ -7,7 +7,9 @@ namespace channel {
 	class parser {
 	public: 
 		parser(const lexer& lexer);
-		bool parse(std::vector<node*>& abstract_syntax_tree);
+		bool parse();
+
+		const std::vector<node*>& get_abstract_syntax_tree();
 	private:
 		/**
 		 * \brief Retrieves the next token from the lexer.
@@ -178,5 +180,6 @@ namespace channel {
 	private:
 		lexer m_lexer;
 		token_data m_current_token;
+		std::vector<node*> m_abstract_syntax_tree;
 	};
 }

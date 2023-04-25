@@ -46,7 +46,7 @@ namespace channel {
 	parser::parser(const lexer& lexer)
 		: m_lexer(lexer) {}
 
-	bool parser::parse(std::vector<node*>& abstract_syntax_tree) {
+	bool parser::parse() {
 		while(true) {
 			if(peek_next_token() == token::end_of_file) {
 				return true;
@@ -67,8 +67,12 @@ namespace channel {
 				}
 			}
 
-			abstract_syntax_tree.push_back(node);
+			m_abstract_syntax_tree.push_back(node);
 		}
+	}
+
+	const std::vector<node*>& parser::get_abstract_syntax_tree() {
+		return m_abstract_syntax_tree;
 	}
 
 	void parser::get_next_token() {

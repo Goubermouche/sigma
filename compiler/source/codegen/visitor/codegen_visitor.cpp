@@ -2,8 +2,8 @@
 #include <llvm/IR/Verifier.h>
 
 namespace channel {
-	codegen_visitor::codegen_visitor()
-		: m_scope(new scope(nullptr)), m_builder(m_context) {
+	codegen_visitor::codegen_visitor(const parser& parser)
+		: m_parser(parser), m_scope(new scope(nullptr)), m_builder(m_context) {
 		m_module = std::make_unique<llvm::Module>("channel", m_context);
 
 		// printf
@@ -23,16 +23,10 @@ namespace channel {
 		}
 	}
 
-	bool codegen_visitor::generate(parser& parser) {
-		// parse the source file
-		std::vector<node*> abstract_syntax_tree;
-		if (!parser.parse(abstract_syntax_tree)) {
-			return false; // parsing failed, return false
-		}
-
+	bool codegen_visitor::generate() {
 		// walk the abstract syntax tree
 		value* tmp_value;
-		for (node* n : abstract_syntax_tree) {
+		for (node* n : m_parser.get_abstract_syntax_tree()) {
 			if(!n->accept(*this, tmp_value)) {
 				return false;
 			}

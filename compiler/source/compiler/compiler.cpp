@@ -24,7 +24,13 @@ namespace channel {
 		codegen_timer.start();
 
 		// generate LLVM IR
-		parser parser(source_file);
+		lexer lexer(source_file);
+		if(!lexer.tokenize()) {
+			// lexer failure;
+			return;
+		}
+
+		parser parser(lexer);
 		codegen_visitor visitor;
 
 		if (!visitor.generate(parser)) {

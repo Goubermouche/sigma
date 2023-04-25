@@ -1,5 +1,7 @@
-// todo: lexer (!)
-//  - clean up the parsing functions for literals and fix some bugs with parsing escape sequences
+// todo: lexer rework (!!!)
+//  - tokenize everything first 
+//    - check for tokenizer errors first
+//  - store tokens in a vector together with the current value
 
 // todo: explicit cast (!)
 //  - cast<i32>(value)
@@ -14,8 +16,10 @@ i32 main() {
 	values[0][0] = 100;
 	values[0][2] = 300;
 
-	char* fmt = "%i %i %i\n";
+	char* fmt = "%i %i %i %.3f\n";
+
+	f32 fval = 1024.01f;
 
 	test(values);
-	print(fmt, values[0][0], values[0][1], values[0][2]);
+	print(fmt, values[0][0], values[0][1], values[0][2], fval);
 }

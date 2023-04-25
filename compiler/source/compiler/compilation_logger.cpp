@@ -145,6 +145,11 @@ namespace channel {
 		);
 	}
 
+	void compilation_logger::emit_cannot_open_file_error(const std::string& filepath) {
+		console::log(color::red, "[error:]: ");
+		console::log(color::white, "cannot open file '" + filepath + "'\n");
+	}
+
 	void compilation_logger::emit_delete_file_failed_error(const std::string& filepath)	{
 		emit_error(
 			"cannot delete file '" + filepath + "'"

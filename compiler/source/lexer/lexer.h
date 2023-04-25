@@ -5,43 +5,47 @@
 #include "../compiler/compilation_logger.h"
 
 namespace channel {
+	struct token_value_pair {
+		token token;
+		std::string value;
+	};
+
 	class lexer {
 	public:
-		/**
-		 * \brief Constructs the lexer for the given \source_file. 
-		 * \param source_file Source file to analyze
-		 */
 		lexer(const std::string& source_file);
 
-		/**
-		 * \brief Extracts the next token from the given source file and returns it.
-		 * \return Extracted token
-		 */
-		token get_token();
+		bool tokenize();
+
+		void print_tokens() const;
+
+		const token_value_pair& get_token();
+
+		const token_value_pair& peek_token();
+
+		void synchronize_indices();
 
 		/**
 		 * \brief Returns the last known identifier from the lexing process. If there isn't 
 		 *  one, an empty string is returned.
 		 * \return Extracted identifier
 		 */
-		const std::string& get_identifier() const { return m_identifier_string; }
+		// const std::string& get_identifier() const { return m_identifier_string; }
 
 		/**
 		 * \brief Returns the last known value from the lexing process. If there isn't
 		 * one, an empty string is returned.
 		 * \return Extracted value
 		 */
-		const std::string& get_value() const { return m_value_string; }
-
-		/**
-		 * \brief Returns the last known operator from the lexing process. If there isn't
-		 * one, an empty string is returned.
-		 * \return Extracted operator
-		 */
-		const std::string& get_operator() const { return m_operator_string; }
+		// const std::string& get_value() const { return m_value_string; }
 
 		u64 get_current_line_number() const;
 	private:
+		/**
+		 * \brief Extracts the next token from the given source file and returns it.
+		 * \return Extracted token
+		 */
+		token extract_next_token();
+
 		/**
 		 * \brief Helper function that reads the next char in the provided source file and advances the accessor caret.
 		 */
@@ -63,6 +67,12 @@ namespace channel {
 
 		token get_string_literal_token();
 	private:
+		std::vector<token_value_pair> m_tokens;
+		u64 m_token_index = 0;
+		u64 m_token_peek_index = 0;
+
+		std::string m_source_file;
+
 		std::string m_identifier_string; // current identifier
 		std::string m_value_string;      // current value
 		std::string m_operator_string;   // current operator string

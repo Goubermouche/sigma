@@ -6,7 +6,7 @@
 namespace channel {
 	class parser {
 	public: 
-		parser(const std::string& source_file);
+		parser(const lexer& lexer);
 		bool parse(std::vector<node*>& abstract_syntax_tree);
 	private:
 		/**
@@ -147,21 +147,21 @@ namespace channel {
 		 * \brief Checks if a statement is a function definition. The first expected token is a type.
 		 * \return True if the statement is a function definition
 		 */
-		static bool peek_is_function_definition(lexer lexer_copy);
+		bool peek_is_function_definition();
 
 		/**
 		 * \brief Checks if the next statement is a function call.
 		 * \return True if the next expression is a function call
 		 */
-		static bool peek_is_function_call(lexer lexer_copy);
+		bool peek_is_function_call();
 
-		static bool peek_is_array_index_access(lexer lexer_copy);
+		bool peek_is_array_index_access();
 
 		/**
 		 * \brief Returns the next token without advancing the inner lexer.
 		 * \return Returns the next token
 		 */
-		static token peek_next_token(lexer lexer_copy);
+		token peek_next_token();
 
 		/**
 		 * \brief Creates a new numerical node with the value of '0'.
@@ -177,6 +177,6 @@ namespace channel {
 		bool parse_type(type& ty);
 	private:
 		lexer m_lexer;
-		token m_current_token = token::unknown;
+		token_value_pair m_current_token;
 	};
 }

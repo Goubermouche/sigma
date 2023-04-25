@@ -1,16 +1,74 @@
 #include "lexer.h"
 
 namespace channel {
-	lexer::lexer(const std::string& source_file) {
+	lexer::lexer(const std::string& source_file)
+		: m_source_file(source_file) {}
+
+	bool lexer::tokenize() {
 		std::string source;
 
 		// check if the file exists, and if it has been opened successfully
-		if (detail::read_file(source_file, source)) {
+		if (detail::read_file(m_source_file, source)) {
 			m_accessor = detail::string_accessor(source);
 		}
 		else {
-			ASSERT(false, std::string("cannot open source file '" + source_file + "'\n").c_str());
+			compilation_logger::emit_cannot_open_file_error(m_source_file);
+			return false;
 		}
+
+		// tokenize
+		token tok = token::unknown;
+		while(tok != token::end_of_file) {
+			tok = extract_next_token();
+
+			switch(tok) {
+			// m_identifier_string
+			case token::identifier:
+				m_tokens.push_back({ tok, m_identifier_string });
+				break;
+			// m_value_string
+			case token::number_unsigned:
+			case token::number_signed:
+			case token::number_f32:
+			case token::number_f64:
+			case token::char_literal:
+			case token::string_literal:
+				m_tokens.push_back({ tok, m_value_string });
+				break;
+			default:
+				m_tokens.push_back({ tok, "" });
+			}
+		}
+
+		// print_tokens();
+
+		return true;
+	}
+
+	void lexer::print_tokens() const {
+		for(const token_value_pair& t : m_tokens) {
+			std::cout << std::left << std::setw(40) << token_to_string(t.token);
+
+			if(!t.value.empty()) {
+				// the value string may contain escape sequences 
+				std::cout << escape_string(t.value);
+			}
+
+			std::cout << '\n';
+		}
+	}
+
+	const token_value_pair& lexer::get_token() {
+		m_token_peek_index++;
+		return  m_tokens[m_token_index++];
+	}
+
+	const token_value_pair& lexer::peek_token() {
+		return m_tokens[m_token_peek_index++];
+	}
+
+	void lexer::synchronize_indices() {
+		m_token_peek_index = m_token_index;
 	}
 
 	u64 lexer::get_current_line_number() const {
@@ -25,7 +83,7 @@ namespace channel {
 		m_last_character = m_accessor.get_advance();
 	}
 
-	token lexer::get_token() {
+	token lexer::extract_next_token() {
 		// ignore spaces between tokens 
 		while(isspace(m_last_character) && !m_accessor.end()) {
 			read_char();
@@ -93,7 +151,7 @@ namespace channel {
 						read_char();
 					} while (!m_accessor.end() && m_last_character != '\n' && m_last_character != '\r');
 
-					return get_token(); // return the following token
+					return extract_next_token(); // return the following token
 				}
 			}
 

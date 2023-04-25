@@ -129,6 +129,10 @@ namespace channel {
 			return "keyword_type_void";
 		case token::keyword_type_bool:
 			return "keyword_type_bool";
+		case token::bool_literal_true:
+			return "bool_literal_true";
+		case token::bool_literal_false:
+			return "bool_literal_false";
 
 		// signed integers
 		case token::keyword_type_i8:

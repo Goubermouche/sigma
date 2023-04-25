@@ -35,4 +35,29 @@ namespace channel {
             SetConsoleTextAttribute(console_handle, static_cast<WORD>(color));
         }
     };
+
+    inline std::string escape_string(const std::string& input) {
+        std::string output;
+        for (const char ch : input) {
+            if (ch == '\\' || ch == '\'' || ch == '\"' || ch == '\a' || ch == '\b' || ch == '\f' || ch == '\n' || ch == '\r' || ch == '\t' || ch == '\v') {
+                output.push_back('\\');
+                switch (ch) {
+                case '\\': output.push_back('\\'); break;
+                case '\'': output.push_back('\''); break;
+                case '\"': output.push_back('\"'); break;
+                case '\a': output.push_back('a'); break;
+                case '\b': output.push_back('b'); break;
+                case '\f': output.push_back('f'); break;
+                case '\n': output.push_back('n'); break;
+                case '\r': output.push_back('r'); break;
+                case '\t': output.push_back('t'); break;
+                case '\v': output.push_back('v'); break;
+                }
+            }
+            else {
+                output.push_back(ch);
+            }
+        }
+        return output;
+    }
 }

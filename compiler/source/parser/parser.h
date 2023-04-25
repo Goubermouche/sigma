@@ -177,6 +177,6 @@ namespace channel {
 		bool parse_type(type& ty);
 	private:
 		lexer m_lexer;
-		token_value_pair m_current_token;
+		token_data m_current_token;
 	};
 }

@@ -82,7 +82,7 @@ namespace channel {
 			return true;
 		}
 
-		compilation_logger::emit_unexpected_token_error(m_lexer.get_current_line_number(), token, m_current_token.token);
+		compilation_logger::emit_unexpected_token_error(m_current_token.line_number, token, m_current_token.token);
 		return false; // return on failure
 	}
 
@@ -92,7 +92,7 @@ namespace channel {
 			return false;
 		}
 
-		const u64 line_number = m_lexer.get_current_line_number();
+		const u64 line_number = m_current_token.line_number;
 		get_next_token(); // identifier (guaranteed)
 		const std::string identifier = m_current_token.value;
 		get_next_token(); // l_parenthesis (guaranteed)
@@ -121,7 +121,7 @@ namespace channel {
 					get_next_token(); // comma (guaranteed)
 				}
 				else if (next_token != token::r_parenthesis) {
-					compilation_logger::emit_unexpected_token_error(m_lexer.get_current_line_number(), token::r_parenthesis, m_current_token.token);
+					compilation_logger::emit_unexpected_token_error(m_current_token.line_number, token::r_parenthesis, m_current_token.token);
 					return false;
 				}
 				else {
@@ -187,7 +187,7 @@ namespace channel {
 				}
 				break;
 			default:
-				compilation_logger::emit_unhandled_token_error(m_lexer.get_current_line_number(), token);
+				compilation_logger::emit_unhandled_token_error(m_current_token.line_number, token);
 				return false; // return on failure
 			}
 		}
@@ -237,7 +237,7 @@ namespace channel {
 				}
 				break;
 			default:
-				compilation_logger::emit_unhandled_token_error(m_lexer.get_current_line_number(), token);
+				compilation_logger::emit_unhandled_token_error(m_current_token.line_number, token);
 				return false; // return on failure
 			}
 		}
@@ -285,14 +285,14 @@ namespace channel {
 			}
 		}
 
-		node* array_node = new variable_node(m_lexer.get_current_line_number(), identifier);
-		out_node = new array_assignment_node(m_lexer.get_current_line_number(), array_node, index_nodes, value);
+		node* array_node = new variable_node(m_current_token.line_number, identifier);
+		out_node = new array_assignment_node(m_current_token.line_number, array_node, index_nodes, value);
 		return true;
 	}
 
 	bool parser::parse_assignment(node*& out_node) {
 		get_next_token(); // identifier (guaranteed)
-		node* variable = new variable_node(m_lexer.get_current_line_number(), m_current_token.value);
+		node* variable = new variable_node(m_current_token.line_number, m_current_token.value);
 
 		if (!expect_next_token(token::operator_assignment)) {
 			return false; 
@@ -311,7 +311,7 @@ namespace channel {
 			}
 		}
 
-		out_node = new assignment_node(m_lexer.get_current_line_number(), variable, value);
+		out_node = new assignment_node(m_current_token.line_number, variable, value);
 		return true;
 	}
 
@@ -319,7 +319,7 @@ namespace channel {
 		get_next_token(); // identifier (guaranteed)
 		const std::string identifier = m_current_token.value;
 
-		node* array_node = new variable_node(m_lexer.get_current_line_number(), identifier);
+		node* array_node = new variable_node(m_current_token.line_number, identifier);
 		std::vector<node*> index_nodes;
 
 		get_next_token(); // l_bracket (guaranteed)
@@ -344,7 +344,7 @@ namespace channel {
 			get_next_token(); // l_bracket(guaranteed)
 		}
 
-		out_node = new array_access_node(m_lexer.get_current_line_number(), array_node, index_nodes);
+		out_node = new array_access_node(m_current_token.line_number, array_node, index_nodes);
 		return true;
 	}
 
@@ -375,7 +375,7 @@ namespace channel {
 					break;
 				}
 				else {
-					compilation_logger::emit_unhandled_token_error(m_lexer.get_current_line_number(), m_current_token.token);
+					compilation_logger::emit_unhandled_token_error(m_current_token.line_number, m_current_token.token);
 					return false; 
 				}
 			}
@@ -385,7 +385,7 @@ namespace channel {
 			return false;
 		}
 
-		out_node = new function_call_node(m_lexer.get_current_line_number(), identifier, arguments);
+		out_node = new function_call_node(m_current_token.line_number, identifier, arguments);
 		return true;
 	}
 
@@ -397,7 +397,7 @@ namespace channel {
 			return false;
 		}
 
-		out_node = new return_node(m_lexer.get_current_line_number(), expression);
+		out_node = new return_node(m_current_token.line_number, expression);
 		return true;
 	}
 
@@ -422,11 +422,11 @@ namespace channel {
 		}
 
 		if(is_global) {
-			out_node = new global_declaration_node(m_lexer.get_current_line_number(), declaration_type, identifier, value);
+			out_node = new global_declaration_node(m_current_token.line_number, declaration_type, identifier, value);
 			return true;
 		}
 
-		out_node = new local_declaration_node(m_lexer.get_current_line_number(), declaration_type, identifier, value);
+		out_node = new local_declaration_node(m_current_token.line_number, declaration_type, identifier, value);
 		return true;
 	}
 
@@ -448,10 +448,10 @@ namespace channel {
 				}
 
 				if (op == token::operator_addition) {
-					out_node = new operator_addition_node(m_lexer.get_current_line_number(), out_node, right);
+					out_node = new operator_addition_node(m_current_token.line_number, out_node, right);
 				}
 				else {
-					out_node = new operator_subtraction_node(m_lexer.get_current_line_number(), out_node, right);
+					out_node = new operator_subtraction_node(m_current_token.line_number, out_node, right);
 				}
 
 				next_token = peek_next_token();
@@ -482,13 +482,13 @@ namespace channel {
 				}
 
 				if (op == token::operator_multiplication) {
-					out_node = new operator_multiplication_node(m_lexer.get_current_line_number(), out_node, right);
+					out_node = new operator_multiplication_node(m_current_token.line_number, out_node, right);
 				}
 				else if (op == token::operator_division) {
-					out_node = new operator_division_node(m_lexer.get_current_line_number(), out_node, right);
+					out_node = new operator_division_node(m_current_token.line_number, out_node, right);
 				}
 				else if (op == token::operator_modulo) {
-					out_node = new operator_modulo_node(m_lexer.get_current_line_number(), out_node, right);
+					out_node = new operator_modulo_node(m_current_token.line_number, out_node, right);
 				}
 
 				next_token = peek_next_token();
@@ -531,7 +531,7 @@ namespace channel {
 			return parse_bool(out_node);
 		}
 
-		compilation_logger::emit_unhandled_token_error(m_lexer.get_current_line_number(), m_current_token.token);
+		compilation_logger::emit_unhandled_token_error(m_current_token.line_number, m_current_token.token);
 		return false;
 	}
 
@@ -542,41 +542,41 @@ namespace channel {
 
 		switch (ty.get_base()) {
 		// signed
-		case type::base::i8:  out_node = new i8_node(m_lexer.get_current_line_number(), std::stoll(str_value)); return true;
-		case type::base::i16: out_node = new i16_node(m_lexer.get_current_line_number(), std::stoll(str_value)); return true;
-		case type::base::i32: out_node = new i32_node(m_lexer.get_current_line_number(), std::stoll(str_value)); return true;
-		case type::base::i64: out_node = new i64_node(m_lexer.get_current_line_number(), std::stoll(str_value)); return true;
+		case type::base::i8:  out_node = new i8_node(m_current_token.line_number, std::stoll(str_value)); return true;
+		case type::base::i16: out_node = new i16_node(m_current_token.line_number, std::stoll(str_value)); return true;
+		case type::base::i32: out_node = new i32_node(m_current_token.line_number, std::stoll(str_value)); return true;
+		case type::base::i64: out_node = new i64_node(m_current_token.line_number, std::stoll(str_value)); return true;
 		 // unsigned
-		case type::base::u8:  out_node = new u8_node(m_lexer.get_current_line_number(), std::stoull(str_value)); return true;
-		case type::base::u16: out_node = new u16_node(m_lexer.get_current_line_number(), std::stoull(str_value)); return true;
-		case type::base::u32: out_node = new u32_node(m_lexer.get_current_line_number(), std::stoull(str_value)); return true;
-		case type::base::u64: out_node = new u64_node(m_lexer.get_current_line_number(), std::stoull(str_value)); return true;
+		case type::base::u8:  out_node = new u8_node(m_current_token.line_number, std::stoull(str_value)); return true;
+		case type::base::u16: out_node = new u16_node(m_current_token.line_number, std::stoull(str_value)); return true;
+		case type::base::u32: out_node = new u32_node(m_current_token.line_number, std::stoull(str_value)); return true;
+		case type::base::u64: out_node = new u64_node(m_current_token.line_number, std::stoull(str_value)); return true;
 		// floating point
-		case type::base::f32: out_node = new f32_node(m_lexer.get_current_line_number(), std::stof(str_value)); return true;
-		case type::base::f64: out_node = new f64_node(m_lexer.get_current_line_number(), std::stod(str_value)); return true;
+		case type::base::f32: out_node = new f32_node(m_current_token.line_number, std::stof(str_value)); return true;
+		case type::base::f64: out_node = new f64_node(m_current_token.line_number, std::stod(str_value)); return true;
 		// bool
-		case type::base::boolean: out_node = new bool_node(m_lexer.get_current_line_number(), std::stoi(str_value)); return true;
+		case type::base::boolean: out_node = new bool_node(m_current_token.line_number, std::stoi(str_value)); return true;
 		default:
-			compilation_logger::emit_unhandled_number_format_error(m_lexer.get_current_line_number(), ty);
+			compilation_logger::emit_unhandled_number_format_error(m_current_token.line_number, ty);
 			return false; // return on failure
 		}
 	}
 
 	bool parser::parse_char(node*& out_node) {
 		get_next_token(); // char_literal (guaranteed)
-		out_node = new char_node(m_lexer.get_current_line_number(), m_current_token.value[0]);
+		out_node = new char_node(m_current_token.line_number, m_current_token.value[0]);
 		return true;
 	}
 
 	bool parser::parse_string(node*& out_node) {
 		get_next_token(); // string_literal (guaranteed)
-		out_node = new string_node(m_lexer.get_current_line_number(), m_current_token.value);
+		out_node = new string_node(m_current_token.line_number, m_current_token.value);
 		return true;
 	}
 
 	bool parser::parse_bool(node*& out_node) {
 		get_next_token(); // bool_literal_true || bool_literal_false (guaranteed)
-		out_node = new bool_node(m_lexer.get_current_line_number(), m_current_token.token == token::bool_literal_true);
+		out_node = new bool_node(m_current_token.line_number, m_current_token.token == token::bool_literal_true);
 		return true;
 	}
 
@@ -591,14 +591,14 @@ namespace channel {
 			return false;
 		}
 
-		out_node = new operator_subtraction_node(m_lexer.get_current_line_number(), zero_node, number);
+		out_node = new operator_subtraction_node(m_current_token.line_number, zero_node, number);
 		return true;
 	}
 
 	bool parser::parse_new_allocation(node*& out_node) {
 		get_next_token(); // keyword_new (guaranteed)
 
-		const u64 line_number = m_lexer.get_current_line_number();
+		const u64 line_number = m_current_token.line_number;
 		type allocation_type;
 		if(!parse_type(allocation_type)) {
 			return false;
@@ -637,7 +637,7 @@ namespace channel {
 		// parse an assignment
 		get_next_token();
 		const std::string identifier = m_current_token.value;
-		out_node = new access_node(m_lexer.get_current_line_number(), identifier);
+		out_node = new access_node(m_current_token.line_number, identifier);
 
 		return true;
 	}
@@ -707,23 +707,23 @@ namespace channel {
 	}
 
 	token parser::peek_next_token() {
-		const token_value_pair& pair = m_lexer.peek_token();
+		const token_data& pair = m_lexer.peek_token();
 		m_lexer.synchronize_indices();
 		return pair.token;
 	}
 
 	node* parser::create_zero_node(type expression_type) const {
 		switch (expression_type.get_base()) {
-		case type::base::i8:  return new i8_node(m_lexer.get_current_line_number(), 0);
-		case type::base::i16: return new i16_node(m_lexer.get_current_line_number(), 0);
-		case type::base::i32: return new i32_node(m_lexer.get_current_line_number(), 0);
-		case type::base::i64: return new i64_node(m_lexer.get_current_line_number(), 0);
-		case type::base::u8:  return new u8_node(m_lexer.get_current_line_number(), 0);
-		case type::base::u16: return new u16_node(m_lexer.get_current_line_number(), 0);
-		case type::base::u32: return new u32_node(m_lexer.get_current_line_number(), 0);
-		case type::base::u64: return new u64_node(m_lexer.get_current_line_number(), 0);
-		case type::base::f32: return new f32_node(m_lexer.get_current_line_number(), 0.0f);
-		case type::base::f64: return new f64_node(m_lexer.get_current_line_number(), 0.0);
+		case type::base::i8:  return new i8_node(m_current_token.line_number, 0);
+		case type::base::i16: return new i16_node(m_current_token.line_number, 0);
+		case type::base::i32: return new i32_node(m_current_token.line_number, 0);
+		case type::base::i64: return new i64_node(m_current_token.line_number, 0);
+		case type::base::u8:  return new u8_node(m_current_token.line_number, 0);
+		case type::base::u16: return new u16_node(m_current_token.line_number, 0);
+		case type::base::u32: return new u32_node(m_current_token.line_number, 0);
+		case type::base::u64: return new u64_node(m_current_token.line_number, 0);
+		case type::base::f32: return new f32_node(m_current_token.line_number, 0.0f);
+		case type::base::f64: return new f64_node(m_current_token.line_number, 0.0);
 		default:
 			ASSERT(false, "[parser]: cannot convert '" + expression_type.to_string() + "' to a type keyword");
 			return nullptr;
@@ -734,7 +734,7 @@ namespace channel {
 		get_next_token();
 
 		if(!is_token_type(m_current_token.token)) {
-			compilation_logger::emit_token_is_not_type_error(m_lexer.get_current_line_number(), m_current_token.token);
+			compilation_logger::emit_token_is_not_type_error(m_current_token.line_number, m_current_token.token);
 			return false;
 		}
 

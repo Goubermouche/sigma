@@ -5,9 +5,10 @@
 #include "../compiler/compilation_logger.h"
 
 namespace channel {
-	struct token_value_pair {
+	struct token_data {
 		token token;
 		std::string value;
+		u64 line_number;
 	};
 
 	class lexer {
@@ -18,64 +19,45 @@ namespace channel {
 
 		void print_tokens() const;
 
-		const token_value_pair& get_token();
+		const token_data& get_token();
 
-		const token_value_pair& peek_token();
+		const token_data& peek_token();
 
 		void synchronize_indices();
-
-		/**
-		 * \brief Returns the last known identifier from the lexing process. If there isn't 
-		 *  one, an empty string is returned.
-		 * \return Extracted identifier
-		 */
-		// const std::string& get_identifier() const { return m_identifier_string; }
-
-		/**
-		 * \brief Returns the last known value from the lexing process. If there isn't
-		 * one, an empty string is returned.
-		 * \return Extracted value
-		 */
-		// const std::string& get_value() const { return m_value_string; }
-
-		u64 get_current_line_number() const;
 	private:
-		/**
-		 * \brief Extracts the next token from the given source file and returns it.
-		 * \return Extracted token
-		 */
-		token extract_next_token();
-
 		/**
 		 * \brief Helper function that reads the next char in the provided source file and advances the accessor caret.
 		 */
 		void read_char();
 
 		/**
+		 * \brief Extracts the next token from the given source file and returns it.
+		 * \return Extracted token
+		 */
+		bool extract_next_token(token& tok);
+
+		/**
 		 * \brief Extracts the next numerical token from the source accessor.
 		 * \return Keyword/identifier token, depending on the format and keyword availability
 		 */
-		token get_identifier_token();
+		bool get_identifier_token(token& tok);
 
 		/**
 		 * \brief Extracts the next numerical token from the source accessor.
 		 * \return Best-fitting numerical token
 		 */
-		token get_number_token();
+		bool get_numerical_token(token& tok);
 
-		token get_char_literal_token();
+		bool get_char_literal_token(token& tok);
 
-		token get_string_literal_token();
+		bool get_string_literal_token(token& tok);
 	private:
-		std::vector<token_value_pair> m_tokens;
+		std::vector<token_data> m_tokens;
 		u64 m_token_index = 0;
 		u64 m_token_peek_index = 0;
 
 		std::string m_source_file;
-
-		std::string m_identifier_string; // current identifier
-		std::string m_value_string;      // current value
-		std::string m_operator_string;   // current operator string
+		std::string m_value_string; 
 
 		detail::string_accessor m_accessor;
 		char m_last_character = ' ';

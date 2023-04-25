@@ -34,6 +34,16 @@ namespace channel{
 
 		static void emit_cannot_open_file_error(const std::string& filepath);
 
+		// lexer
+		// errors
+		static void emit_invalid_dot_character_at_token_start_error();
+		static void emit_invalid_double_underscore_error();
+		static void emit_invalid_number_format_only_one_dot_allowed_error();
+		static void emit_invalid_number_format_unsigned_number_may_not_contain_dot_characters_error();
+		static void emit_invalid_number_format_floating_point_must_contain_dot_character_error();
+		static void emit_unterminated_character_literal_error();
+		static void emit_unterminated_string_literal_error();
+
 		// compilation
 		// errors
 		static void emit_delete_file_failed_error(const std::string& filepath);

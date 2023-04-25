@@ -51,8 +51,9 @@ namespace channel {
 	}
 
 	void compilation_logger::emit_main_entry_point_missing_error() {
-		console::log(color::red, "[error]: ");
-		console::log(color::white, "unable to locate main entry point\n");
+		emit_error(
+			"unable to locate main entry point\n"
+		);
 	}
 
 	void compilation_logger::emit_variable_not_found_error(u64 line_number, const std::string& variable_name)	{
@@ -148,6 +149,48 @@ namespace channel {
 	void compilation_logger::emit_cannot_open_file_error(const std::string& filepath) {
 		console::log(color::red, "[error:]: ");
 		console::log(color::white, "cannot open file '" + filepath + "'\n");
+	}
+
+	void compilation_logger::emit_invalid_dot_character_at_token_start_error() {
+		emit_error(
+			"invalid '.' character detected at token start"
+		);
+	}
+
+	void compilation_logger::emit_invalid_double_underscore_error() {
+		emit_error(
+			"two '_' characters immediately one after another are not allowed"
+		);
+	}
+
+	void compilation_logger::emit_invalid_number_format_only_one_dot_allowed_error() {
+		emit_error(
+			"invalid number format - cannot declare a number with more that one '.' character"
+		);
+	}
+
+	void compilation_logger::emit_invalid_number_format_unsigned_number_may_not_contain_dot_characters_error() {
+		emit_error(
+			"invalid number format - cannot declare an unsigned number containing '.' characters"
+		);
+	}
+
+	void compilation_logger::emit_invalid_number_format_floating_point_must_contain_dot_character_error() {
+		emit_error(
+			"invalid number format - floating point number must contain a '.' character"
+		);
+	}
+
+	void compilation_logger::emit_unterminated_character_literal_error() {
+		emit_error(
+			"invalid unterminated character literal detected"
+		);
+	}
+
+	void compilation_logger::emit_unterminated_string_literal_error() {
+		emit_error(
+			"invalid unterminated string literal detected"
+		);
 	}
 
 	void compilation_logger::emit_delete_file_failed_error(const std::string& filepath)	{

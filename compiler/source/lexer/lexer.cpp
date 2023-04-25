@@ -19,25 +19,11 @@ namespace channel {
 		// tokenize
 		token tok = token::unknown;
 		while(tok != token::end_of_file) {
-			tok = extract_next_token();
-
-			switch(tok) {
-			// m_identifier_string
-			case token::identifier:
-				m_tokens.push_back({ tok, m_identifier_string });
-				break;
-			// m_value_string
-			case token::number_unsigned:
-			case token::number_signed:
-			case token::number_f32:
-			case token::number_f64:
-			case token::char_literal:
-			case token::string_literal:
-				m_tokens.push_back({ tok, m_value_string });
-				break;
-			default:
-				m_tokens.push_back({ tok, "" });
+			if(!extract_next_token(tok)) {
+				return false;
 			}
+
+			m_tokens.push_back({ tok, m_value_string });
 		}
 
 		// print_tokens();
@@ -46,7 +32,7 @@ namespace channel {
 	}
 
 	void lexer::print_tokens() const {
-		for(const token_value_pair& t : m_tokens) {
+		for(const token_data& t : m_tokens) {
 			std::cout << std::left << std::setw(40) << token_to_string(t.token);
 
 			if(!t.value.empty()) {
@@ -58,21 +44,17 @@ namespace channel {
 		}
 	}
 
-	const token_value_pair& lexer::get_token() {
+	const token_data& lexer::get_token() {
 		m_token_peek_index++;
 		return  m_tokens[m_token_index++];
 	}
 
-	const token_value_pair& lexer::peek_token() {
+	const token_data& lexer::peek_token() {
 		return m_tokens[m_token_peek_index++];
 	}
 
 	void lexer::synchronize_indices() {
 		m_token_peek_index = m_token_index;
-	}
-
-	u64 lexer::get_current_line_number() const {
-		return m_current_line;
 	}
 
 	void lexer::read_char() {
@@ -83,7 +65,9 @@ namespace channel {
 		m_last_character = m_accessor.get_advance();
 	}
 
-	token lexer::extract_next_token() {
+	bool lexer::extract_next_token(token& tok) {
+		m_value_string.clear();
+
 		// ignore spaces between tokens 
 		while(isspace(m_last_character) && !m_accessor.end()) {
 			read_char();
@@ -92,37 +76,40 @@ namespace channel {
 		// identifiers
 		// extract identifiers
 		if(isalpha(m_last_character) && !m_accessor.end()) {
-			return get_identifier_token();
+			return get_identifier_token(tok);
 		}
 
 		// extract numbers
 		if(isdigit(m_last_character) && !m_accessor.end()) {
-			return get_number_token();
+			return get_numerical_token(tok);
 		}
 
 		if (m_last_character == '\'') {
-			return get_char_literal_token();
+			return get_char_literal_token(tok);
 		}
 
 		if (m_last_character == '"') {
-			return get_string_literal_token();
+			return get_string_literal_token(tok);
 		}
 
 		// prevent '.' characters from being located at the beginning of a token
 		// note: we may want to allow this in some cases (ie. when calling member functions)
 		if (m_last_character == '.') {
-			ASSERT(false, "[lexer]: invalid '.' character at token start");
-			return token::unknown;
+			compilation_logger::emit_invalid_dot_character_at_token_start_error();
+			tok = token::unknown;
+			return false;
 		}
 
 		// check for EOF so we don't have to do it in the individual brace checks 
 		if(m_accessor.end()) {
-			return token::end_of_file;
+			tok = token::end_of_file;
+			return true;
 		}
 
 		// extract special tokens
-		m_operator_string = m_last_character;
-		const auto operator_token_short = m_special_tokens.find(m_operator_string);
+		std::string special_string;
+		special_string = m_last_character;
+		const auto operator_token_short = m_special_tokens.find(special_string);
 
 		// todo: check for longer tokens using a while loop.
 		// todo: check for longer tokens in case a short token does not exist.
@@ -133,13 +120,14 @@ namespace channel {
 
 			// we have a special token consisting of 1 character, check if we can find a longer one using that character 
 			if(!isspace(m_last_character) && !isalnum(m_last_character)) {
-				m_operator_string += m_last_character;
+				special_string += m_last_character;
 
-				const auto operator_token_long = m_special_tokens.find(m_operator_string);
+				const auto operator_token_long = m_special_tokens.find(special_string);
 				// we've found a longer token, return it
 				if(operator_token_long != m_special_tokens.end()) {
 					read_char();
-					return operator_token_long->second;
+					tok = operator_token_long->second;
+					return true;
 				}
 
 				// since we don't have the "//" token in our token table we check for it separately, and if we find
@@ -151,21 +139,23 @@ namespace channel {
 						read_char();
 					} while (!m_accessor.end() && m_last_character != '\n' && m_last_character != '\r');
 
-					return extract_next_token(); // return the following token
+					return extract_next_token(tok); // return the following token
 				}
 			}
 
-			return operator_token_short->second;
+			tok = operator_token_short->second;
+			return true;
 		}
 
 		// not a token, return an identifier
-		m_identifier_string = m_last_character;
-		return token::identifier;
+		m_value_string = m_last_character;
+		tok = token::identifier;
+		return true;
     }
 
-	token lexer::get_identifier_token()	{
+	bool lexer::get_identifier_token(token& tok)	{
 		bool last_char_was_underscore = false;
-		m_identifier_string = m_last_character;
+		m_value_string = m_last_character;
 
 		// read until we reach the end of our identifier, or the end of the file
 		// note that identifiers can contains '_' underscore characters with regular alnum chars between them 
@@ -173,28 +163,31 @@ namespace channel {
 		while ((isalnum(m_last_character) || m_last_character == '_') && !m_accessor.end()) {
 			// prevent two underscore characters from being right next to each other
 			if (m_last_character == '_' && last_char_was_underscore) {
-				ASSERT(false, "[lexer]: two '_' characters immediately one after another are not allowed");
-			}
-			else {
-				last_char_was_underscore = (m_last_character == '_');
+				compilation_logger::emit_invalid_double_underscore_error();
+				return false;
 			}
 
-			m_identifier_string += m_last_character;
+			last_char_was_underscore = (m_last_character == '_');
+
+			m_value_string += m_last_character;
 			read_char();
 		}
 
 		// check if the current identifier is a keyword
-		const auto token = m_keyword_tokens.find(m_identifier_string);
+		const auto token = m_keyword_tokens.find(m_value_string);
 		if (token != m_keyword_tokens.end()) {
 			// return the appropriate token
-			return token->second;
+			m_value_string.clear(); // clear the value string since we don't want our token value to be equal to the token type
+			tok = token->second;
+			return true;
 		}
 
 		// the identifier is not a keyword
-		return token::identifier;
+		tok = token::identifier;
+		return true;
 	}
 
-	token lexer::get_number_token() {
+	bool lexer::get_numerical_token(token& tok) {
 		m_value_string = m_last_character;
 		// keep track of whether we've met the '.' character
 		bool dot_met = false;
@@ -205,27 +198,33 @@ namespace channel {
 		while (!isspace(m_last_character) && !m_accessor.end()) {
 			if (m_last_character == '.') {
 				if (dot_met) {
-					ASSERT(false, "[lexer]: invalid number: cannot declare number with more than one '.' characters");
+					compilation_logger::emit_invalid_number_format_only_one_dot_allowed_error();
+					return false;
 				}
+
 				dot_met = true;
 			}
 			else if (m_last_character == 'u') {
 				if (!dot_met) {
 					read_char();
 					// 0u format
-					return token::number_unsigned;
+					tok = token::number_unsigned;
+					return true;
 				}
 
-				ASSERT(false, "[lexer]: invalid number_unsigned token");
-				break;
+				compilation_logger::emit_invalid_number_format_unsigned_number_may_not_contain_dot_characters_error();
+				return false;
 			}
 			else if (m_last_character == 'f') {
 				if (dot_met) {
 					read_char();
 					// 0.0f format
-					return token::number_f32;
+					tok = token::number_f32;
+					return true;
 				}
-				ASSERT(false, "[lexer]: invalid number_f32 token (missing '.' character)");
+
+				compilation_logger::emit_invalid_number_format_floating_point_must_contain_dot_character_error();
+				return false;
 			}
 			// break early if we have a non-special and non-digit character
 			else if (!isdigit(m_last_character)) {
@@ -238,36 +237,50 @@ namespace channel {
 
 		// 0.0 format
 		if (dot_met) {
-			return token::number_f64;
+			tok = token::number_f64;
+			return true;
 		}
 
 		// 0 format
-		return token::number_signed;
+		tok = token::number_signed;
+		return true;
 	}
 
-	token lexer::get_char_literal_token() {
+	bool lexer::get_char_literal_token(token& tok) {
 		m_value_string = "";
 		read_char(); // read the character after the opening quote
 
 		// handle escape characters
 		if (m_last_character == '\\') {
 			read_char();
-			// todo: ... handle specific escape characters (e.g., '\\', '\'', '\n', '\t', etc.) ...
+			// handle specific escape characters
+			switch (m_last_character) {
+			case '\\': m_value_string += '\\'; break;
+			case '\'': m_value_string += '\''; break;
+			case 'n': m_value_string += '\n'; break;
+			case 't': m_value_string += '\t'; break;
+			case 'r': m_value_string += '\r'; break;
+			default: m_value_string += m_last_character; break;
+			}
+		}
+		else {
+			m_value_string += m_last_character;
 		}
 
-		m_value_string += m_last_character;
 		read_char(); // read the character after the literal
 
 		if (m_last_character == '\'') {
 			read_char(); // read the character after the closing quote
-			return token::char_literal;
+			tok = token::char_literal;
+			std::cout << escape_string(m_value_string) << '\n';
+			return true;
 		}
 
-		ASSERT(false, "[lexer]: unterminated character literal");
-		return token::unknown;
+		compilation_logger::emit_unterminated_character_literal_error();
+		return false;
 	}
 
-	token lexer::get_string_literal_token() {
+	bool lexer::get_string_literal_token(token& tok) {
 		m_value_string = "";
 		read_char();
 
@@ -276,21 +289,12 @@ namespace channel {
 				// handle escape sequences
 				read_char();
 				switch(m_last_character) {
-				case 'n':
-					m_value_string.push_back('\n');
-					break;
-				case 't':
-					m_value_string.push_back('\t');
-					break;
-				case '\\':
-					m_value_string.push_back('\\');
-					break;
-				case '"':
-					m_value_string.push_back('"');
-					break;
-				default:
-					ASSERT(false, "invalid escape sequence used in string literal");
-					break;
+				case '\\': m_value_string += '\\'; break;
+				case '\"': m_value_string += '\"'; break;
+				case 'n': m_value_string += '\n'; break;
+				case 't': m_value_string += '\t'; break;
+				case 'r': m_value_string += '\r'; break;
+				default: m_value_string += m_last_character; break;
 				}
 			}
 			else {
@@ -304,9 +308,11 @@ namespace channel {
 			read_char();
 		}
 		else {
-			ASSERT(false, "unterminated string literal used");
+			compilation_logger::emit_unterminated_string_literal_error();
+			return false;
 		}
 
-		return token::string_literal;
+		tok = token::string_literal;
+		return true;
 	}
 }

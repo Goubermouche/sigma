@@ -186,16 +186,32 @@ namespace channel {
 		const llvm::FunctionCallee malloc_func = m_functions["malloc"]->get_function();
 
 		// calculate the total size
-		llvm::Type* element_type = node.get_array_element_type().get_llvm_type(m_context);
+		const type array_element_type = node.get_array_element_type();
+		llvm::Type* element_type = array_element_type.get_llvm_type(m_context);
 		llvm::Value* element_size = llvm::ConstantInt::get(m_context, llvm::APInt(64, (node.get_array_element_type().get_bit_width() + 7) / 8));
 		llvm::Value* total_size = m_builder.CreateMul(element_count_cast, element_size);
+
+		// check if we have a char*
+		const bool is_char_pointer = array_element_type.get_base() == type::base::character && array_element_type.get_pointer_level() == 0;
+
+		// add space for a null terminator if the element type is a character
+		if (is_char_pointer) {
+			llvm::Value* extra_size = llvm::ConstantInt::get(m_context, llvm::APInt(64, 1)); // space for a null terminator
+			total_size = m_builder.CreateAdd(total_size, extra_size);
+		}
 
 		llvm::Value* allocated_ptr = m_builder.CreateCall(malloc_func, total_size);
 
 		// cast the result to the correct pointer type
 		llvm::Value* typed_ptr = m_builder.CreateBitCast(allocated_ptr, llvm::PointerType::getUnqual(element_type));
 
-		out_value = new value("__alloca", node.get_array_element_type().get_pointer_type(), typed_ptr);
+		// add null terminator if the element type is a character
+		if (is_char_pointer) {
+			llvm::Value* null_terminator_ptr = m_builder.CreateGEP(element_type, typed_ptr, element_count_cast);
+			m_builder.CreateStore(llvm::ConstantInt::get(m_context, llvm::APInt(8, 0)), null_terminator_ptr);
+		}
+
+		out_value = new value("__alloca", array_element_type.get_pointer_type(), typed_ptr);
 		return true;
 	}
 

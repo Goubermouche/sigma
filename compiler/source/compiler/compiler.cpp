@@ -36,8 +36,6 @@ namespace channel {
 			return;
 		}
 
-		return;
-
 		codegen_visitor visitor(parser);
 		if (!visitor.generate()) {
 			// codegen failure

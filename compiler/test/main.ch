@@ -2,20 +2,8 @@
 //  - cast<i32>(value)
 
 i32 main() {
-    bool val = true;
-
-	if(val || true) {
-	}
-	else if(val) {
-		
-	}
-	else if(val) {
-		
-	}
-	else if(val) {
-		
-	}
-	else {
-		
-	}
+	bool a = false;
+	bool b = true;
+	bool c = a || b;
+	print("%i\n", c);
 }

@@ -330,11 +330,52 @@ namespace channel {
 	}
 
 	bool codegen_visitor::visit_operator_logical_conjunction_node(operator_conjunction_node& node, value*& out_value) {
-		std::cout << "visit visit_operator_logical_conjunction_node\n";
-		return false;
+		// accept the left expression
+		value* left;
+		if (!node.left_expression_node->accept(*this, left)) {
+			return false;
+		}
+
+		// accept the right expression
+		value* right;
+		if (!node.right_expression_node->accept(*this, right)) {
+			return false;
+		}
+
+		// both expressions must be boolean
+		if (left->get_type().get_base() != type::base::boolean || right->get_type().get_base() != type::base::boolean) {
+			// Throw an error or return false based on the error handling strategy of your codebase
+			return false;
+		}
+
+		// create a logical AND operation
+		llvm::Value* and_result = m_builder.CreateAnd(left->get_value(), right->get_value(), "and");
+		out_value = new value("__logical_conjunction", type(type::base::boolean, 0), and_result);
+		return true;
 	}
+
 	bool codegen_visitor::visit_operator_logical_disjunction_node(operator_disjunction_node& node, value*& out_value) {
-		std::cout << "visit visit_operator_logical_disjunction_node\n";
-		return false;
+		// accept the left expression
+		value* left;
+		if (!node.left_expression_node->accept(*this, left)) {
+			return false;
+		}
+
+		// accept the right expression
+		value* right;
+		if (!node.right_expression_node->accept(*this, right)) {
+			return false;
+		}
+
+		// both expressions must be boolean
+		if (left->get_type().get_base() != type::base::boolean || right->get_type().get_base() != type::base::boolean) {
+			// Throw an error or return false based on the error handling strategy of your codebase
+			return false;
+		}
+
+		// create a logical OR operation
+		llvm::Value* or_result = m_builder.CreateOr(left->get_value(), right->get_value(), "or");
+		out_value = new value("__logical_disjunction", type(type::base::boolean, 0), or_result);
+		return true;
 	}
 }

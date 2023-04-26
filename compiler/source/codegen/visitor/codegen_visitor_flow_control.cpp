@@ -30,7 +30,7 @@ namespace channel {
 	}
 
 	bool codegen_visitor::visit_if_else_node(if_else_node& node, value*& out_value) {
-		std::cout << "visit if else\n";
+		std::cout << "visit_if_else_node\n";
 		return false;
 	}
 }

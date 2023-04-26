@@ -1,4 +1,5 @@
 #pragma once
+#include "codegen/abstract_syntax_tree/keywords/flow_control/if_else_node.h"
 
 namespace channel {
     // functions
@@ -17,6 +18,7 @@ namespace channel {
 
     // flow control
     class return_node;
+    class if_else_node;
 
     // types
     // signed integers
@@ -39,11 +41,15 @@ namespace channel {
     class bool_node;
 
     // operators
+    // arithmetic
     class operator_addition_node;
     class operator_subtraction_node;
     class operator_multiplication_node;
     class operator_division_node;
     class operator_modulo_node;
+    // logical
+    class operator_conjunction_node;
+    class operator_disjunction_node;
 }
 
 #include "../llvm_wrappers/value.h"
@@ -73,6 +79,7 @@ namespace channel {
 
         // flow control
         virtual bool visit_return_node(return_node& node, value*& out_value) = 0;
+        virtual bool visit_if_else_node(if_else_node& node, value*& out_value) = 0;
 
         // types
         // signed integers
@@ -95,10 +102,14 @@ namespace channel {
     	virtual bool visit_keyword_bool_node(bool_node& node, value*& out_value) = 0;
 
         // operators
+        // arithmetic
         virtual bool visit_operator_addition_node(operator_addition_node& node, value*& out_value) = 0;
         virtual bool visit_operator_subtraction_node(operator_subtraction_node& node, value*& out_value) = 0;
         virtual bool visit_operator_multiplication_node(operator_multiplication_node& node, value*& out_value) = 0;
         virtual bool visit_operator_division_node(operator_division_node& node, value*& out_value) = 0;
         virtual bool visit_operator_modulo_node(operator_modulo_node& node, value*& out_value) = 0;
+        // logical
+        virtual bool visit_operator_logical_conjunction_node(operator_conjunction_node& node, value*& out_value) = 0;
+        virtual bool visit_operator_logical_disjunction_node(operator_disjunction_node& node, value*& out_value) = 0;
     };
 }

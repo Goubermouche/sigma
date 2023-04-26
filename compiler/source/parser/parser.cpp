@@ -15,6 +15,7 @@
 
 // flow control
 #include "../codegen/abstract_syntax_tree/keywords/flow_control/return_node.h"
+#include "../codegen/abstract_syntax_tree/keywords/flow_control/if_else_node.h"
 
 // types
 // signed integers
@@ -33,14 +34,19 @@
 // text
 #include "../codegen/abstract_syntax_tree/keywords/types/text/char_node.h"
 #include "../codegen/abstract_syntax_tree/keywords/types/text/string_node.h"
+// other
+#include "codegen/abstract_syntax_tree/keywords/types/bool_node.h"
 
 // operators
-#include "../codegen/abstract_syntax_tree/operators/operator_addition_node.h"
-#include "../codegen/abstract_syntax_tree/operators/operator_division_node.h"
-#include "../codegen/abstract_syntax_tree/operators/operator_multiplication_node.h"
-#include "../codegen/abstract_syntax_tree/operators/operator_subtraction_node.h"
-#include "../codegen/abstract_syntax_tree/operators/operator_modulo_node.h"
-#include "codegen/abstract_syntax_tree/keywords/types/bool_node.h"
+// arithmetic
+#include "../codegen/abstract_syntax_tree/operators/arithmetic/operator_addition_node.h"
+#include "../codegen/abstract_syntax_tree/operators/arithmetic/operator_division_node.h"
+#include "../codegen/abstract_syntax_tree/operators/arithmetic/operator_multiplication_node.h"
+#include "../codegen/abstract_syntax_tree/operators/arithmetic/operator_subtraction_node.h"
+#include "../codegen/abstract_syntax_tree/operators/arithmetic/operator_modulo_node.h"
+// logical
+#include "../codegen/abstract_syntax_tree/operators/logical/operator_conjunction_node.h"
+#include "../codegen/abstract_syntax_tree/operators/logical/operator_disjunction_node.h"
 
 namespace channel {
 	parser::parser(const lexer& lexer)
@@ -309,8 +315,7 @@ namespace channel {
 			}
 		}
 
-		std::cout << "condition count: " << conditions.size() << '\n';
-		std::cout << "branch count: " << branches.size() << '\n';
+		out_node = new if_else_node(m_current_token.line_number, conditions, branches);
 		return true;
 	}
 
@@ -556,12 +561,10 @@ namespace channel {
 				}
 
 				if (op == token::operator_logical_conjunction) {
-					std::cout << "operator_logical_conjunction_node\n";
-					// out_node = new operator_logical_conjunction_node(m_current_token.line_number, out_node, right);
+					out_node = new operator_conjunction_node(m_current_token.line_number, out_node, right);
 				}
 				else {
-					std::cout << "operator_logical_disjunction_node\n";
-					// out_node = new operator_logical_disjunction_node(m_current_token.line_number, out_node, right);
+					out_node = new operator_disjunction_node(m_current_token.line_number, out_node, right);
 				}
 
 				next_token = peek_next_token();

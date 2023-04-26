@@ -50,6 +50,7 @@ namespace channel {
 		// flow control
 		// codegen_visitor_flow_control.cpp
 		bool visit_return_node(return_node& node, value*& out_value) override;
+		bool visit_if_else_node(if_else_node& node, value*& out_value) override;
 
 		// types
 		// codegen_visitor_types.cpp
@@ -74,11 +75,15 @@ namespace channel {
 
 		// operators
 		// codegen_visitor_operators.cpp
+		// arithmetic
 		bool visit_operator_addition_node(operator_addition_node& node, value*& out_value) override;
 		bool visit_operator_subtraction_node(operator_subtraction_node& node, value*& out_value) override;
 		bool visit_operator_multiplication_node(operator_multiplication_node& node, value*& out_value) override;
 		bool visit_operator_division_node(operator_division_node& node, value*& out_value) override;
 		bool visit_operator_modulo_node(operator_modulo_node& node, value*& out_value) override;
+		// logical
+		bool visit_operator_logical_conjunction_node(operator_conjunction_node& node, value*& out_value) override;
+		bool visit_operator_logical_disjunction_node(operator_disjunction_node& node, value*& out_value) override;
 
 		// utility
 		bool cast_value(llvm::Value*& out_value, const value* source_value, type target_type, u64 line_number);

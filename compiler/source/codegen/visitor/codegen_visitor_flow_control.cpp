@@ -1,6 +1,7 @@
 #include "codegen_visitor.h"
 
 #include "../abstract_syntax_tree/keywords/flow_control/return_node.h"
+#include "../abstract_syntax_tree/keywords/flow_control/if_else_node.h"
 
 namespace channel {
 	bool codegen_visitor::visit_return_node(return_node& node, value*& out_value) {
@@ -26,5 +27,10 @@ namespace channel {
 		// return the value of the expression (use upcasted value's type)
 		out_value = new value("__return", function_return_type, upcasted_return_value);
 		return true;
+	}
+
+	bool codegen_visitor::visit_if_else_node(if_else_node& node, value*& out_value) {
+		std::cout << "visit if else\n";
+		return false;
 	}
 }

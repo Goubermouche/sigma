@@ -1,10 +1,14 @@
 #include "codegen_visitor.h"
 
-#include "../abstract_syntax_tree/operators/operator_addition_node.h"
-#include "../abstract_syntax_tree/operators/operator_subtraction_node.h"
-#include "../abstract_syntax_tree/operators/operator_multiplication_node.h"
-#include "../abstract_syntax_tree/operators/operator_division_node.h"
-#include "../abstract_syntax_tree/operators/operator_modulo_node.h"
+// arithmetic
+#include "../abstract_syntax_tree/operators/arithmetic/operator_addition_node.h"
+#include "../abstract_syntax_tree/operators/arithmetic/operator_subtraction_node.h"
+#include "../abstract_syntax_tree/operators/arithmetic/operator_multiplication_node.h"
+#include "../abstract_syntax_tree/operators/arithmetic/operator_division_node.h"
+#include "../abstract_syntax_tree/operators/arithmetic/operator_modulo_node.h"
+// logical
+#include "../abstract_syntax_tree/operators/logical/operator_conjunction_node.h"
+#include "../abstract_syntax_tree/operators/logical/operator_disjunction_node.h"
 
 namespace channel {
 	bool codegen_visitor::visit_operator_addition_node(operator_addition_node& node, value*& out_value) {
@@ -323,5 +327,14 @@ namespace channel {
 				"rem")
 		);
 		return true;
+	}
+
+	bool codegen_visitor::visit_operator_logical_conjunction_node(operator_conjunction_node& node, value*& out_value) {
+		std::cout << "visit visit_operator_logical_conjunction_node\n";
+		return false;
+	}
+	bool codegen_visitor::visit_operator_logical_disjunction_node(operator_disjunction_node& node, value*& out_value) {
+		std::cout << "visit visit_operator_logical_disjunction_node\n";
+		return false;
 	}
 }

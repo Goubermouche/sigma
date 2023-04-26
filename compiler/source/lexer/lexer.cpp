@@ -252,8 +252,8 @@ namespace channel {
 
 		// handle escape characters
 		if (m_last_character == '\\') {
+			// handle escape sequences
 			read_char();
-			// handle specific escape characters
 			switch (m_last_character) {
 			case '\\': m_value_string += '\\'; break;
 			case '\'': m_value_string += '\''; break;

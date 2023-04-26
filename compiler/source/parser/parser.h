@@ -44,6 +44,8 @@ namespace channel {
 		 */
 		bool parse_local_statement(node*& out_node);
 
+		bool parse_if_else_statement(node*& out_node);
+
 		/**
 		 * \brief Attempts to parse an assignment operation. The first expected token is an identifier.
 		 * \param out_node Output AST node
@@ -84,6 +86,10 @@ namespace channel {
 		 * \return True if the expression is parsed successfully
 		 */
 		bool parse_expression(node*& out_node, type expression_type = type::unknown());
+
+		bool parse_arithmetic_expression(node*& out_node, type expression_type);
+
+		bool parse_logical_expression(node*& out_node, type expression_type);
 
 		/**
 		 * \brief Attempts to parse a term.

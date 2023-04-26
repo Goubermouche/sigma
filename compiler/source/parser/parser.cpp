@@ -240,6 +240,9 @@ namespace channel {
 					return false;
 				}
 				break;
+			case token::keyword_if:
+				// return right away since we don't want to check for a semicolon at the end of the statement
+				return parse_if_else_statement(out_node);
 			default:
 				compilation_logger::emit_unhandled_token_error(m_current_token.line_number, token);
 				return false; // return on failure
@@ -250,6 +253,64 @@ namespace channel {
 			return false;
 		}
 
+		return true;
+	}
+
+	bool parser::parse_if_else_statement(node*& out_node) {
+		std::vector<node*> conditions;
+		std::vector<std::vector<node*>> branches;
+		bool has_else = false;
+
+		while (true) {
+			if (!has_else && peek_next_token() == token::keyword_else) {
+				get_next_token(); // keyword_else (guaranteed)
+				if (peek_next_token() != token::keyword_if) {
+					has_else = true;
+				}
+			}
+
+			if (peek_next_token() == token::keyword_if || has_else) {
+				if (!has_else) {
+					get_next_token(); // keyword_if (guaranteed)
+				}
+
+				node* condition = nullptr;
+				if (!has_else) {
+					if (!expect_next_token(token::l_parenthesis) ||
+						!parse_expression(condition, type(type::base::boolean, 0)) ||
+						!expect_next_token(token::r_parenthesis)) {
+						return false;
+					}
+				}
+
+				conditions.push_back(condition);
+			}
+			else {
+				break;
+			}
+
+			if (!expect_next_token(token::l_brace)) {
+				return false;
+			}
+
+			std::vector<node*> branch_statements;
+			while (peek_next_token() != token::r_brace) {
+				node* statement;
+				if (!parse_local_statement(statement)) {
+					return false;
+				}
+				branch_statements.push_back(statement);
+			}
+			branches.push_back(branch_statements);
+			get_next_token(); // r_brace (guaranteed)
+
+			if (has_else) {
+				break;
+			}
+		}
+
+		std::cout << "condition count: " << conditions.size() << '\n';
+		std::cout << "branch count: " << branches.size() << '\n';
 		return true;
 	}
 
@@ -266,7 +327,7 @@ namespace channel {
 			}
 			index_nodes.push_back(index_node);
 
-			// Make sure the next token is a right square bracket
+			// make sure the next token is a right square bracket
 			if (!expect_next_token(token::r_bracket)) {
 				return false;
 			}
@@ -439,9 +500,21 @@ namespace channel {
 			return false;
 		}
 
+		if(!parse_arithmetic_expression(out_node, expression_type)) {
+			return false;
+		}
+
+		if(!parse_logical_expression(out_node, expression_type)) {
+			return false;
+		}
+
+		return true;
+	}
+
+	bool parser::parse_arithmetic_expression(node*& out_node, type expression_type) {
 		token next_token = peek_next_token();
 		if (next_token == token::operator_addition || next_token == token::operator_subtraction) {
-			while(true) {
+			while (true) {
 				const token op = next_token;
 				node* right;
 
@@ -460,6 +533,39 @@ namespace channel {
 
 				next_token = peek_next_token();
 				if (!(next_token == token::operator_addition || next_token == token::operator_subtraction || next_token == token::operator_modulo)) {
+					break;
+				}
+			}
+		}
+
+		return true;
+	}
+
+	bool parser::parse_logical_expression(node*& out_node, type expression_type) {
+		token next_token = peek_next_token();
+
+		if (next_token == token::operator_logical_conjunction || next_token == token::operator_logical_disjunction) {
+			while (true) {
+				const token op = next_token;
+				node* right;
+
+				get_next_token(); // operator_logical_conjunction || operator_logical_disjunction (guaranteed)
+
+				if (!parse_term(right, expression_type)) {
+					return false;
+				}
+
+				if (op == token::operator_logical_conjunction) {
+					std::cout << "operator_logical_conjunction_node\n";
+					// out_node = new operator_logical_conjunction_node(m_current_token.line_number, out_node, right);
+				}
+				else {
+					std::cout << "operator_logical_disjunction_node\n";
+					// out_node = new operator_logical_disjunction_node(m_current_token.line_number, out_node, right);
+				}
+
+				next_token = peek_next_token();
+				if (!(next_token == token::operator_logical_conjunction || next_token == token::operator_logical_disjunction)) {
 					break;
 				}
 			}

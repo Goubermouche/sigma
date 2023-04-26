@@ -45,6 +45,9 @@ namespace channel {
 		// flow control
 		keyword_return,                     // return
 
+		keyword_if,                         // if
+		keyword_else,                       // else
+
 		keyword_new,                        // new
 
 		// math
@@ -170,6 +173,10 @@ namespace channel {
 
 		case token::keyword_return:
 			return "keyword_return";
+		case token::keyword_if:
+			return "keyword_if";
+		case token::keyword_else:
+			return "keyword_else";
 		case token::keyword_new:
 			return "keyword_new";
 

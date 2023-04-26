@@ -90,6 +90,8 @@ namespace channel {
 			{ "char"  , token::keyword_type_char  },
 
 			{ "return", token::keyword_return     },
+			{ "if"    , token::keyword_if         },
+			{ "else"  , token::keyword_else       },
 			{ "new"   , token::keyword_new        },
 		};
 

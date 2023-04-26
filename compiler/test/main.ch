@@ -1,9 +1,11 @@
 // todo: explicit cast (!)
 //  - cast<i32>(value)
 
+// todo: compare ops should use proper types (!!)
+
 i32 main() {
-	bool a = false;
-	bool b = true;
-	bool c = a || b;
-	print("%i\n", c);
+	f32 a = 10;
+	f32 b = 10;
+	bool result = a != b;
+	print("%i\n", result);
 }

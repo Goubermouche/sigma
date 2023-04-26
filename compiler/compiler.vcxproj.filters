@@ -196,6 +196,12 @@
     <ClInclude Include="source\codegen\abstract_syntax_tree\keywords\flow_control\if_else_node.h" />
     <ClInclude Include="source\codegen\abstract_syntax_tree\operators\logical\operator_disjunction_node.h" />
     <ClInclude Include="source\codegen\abstract_syntax_tree\operators\logical\operator_conjunction_node.h" />
+    <ClInclude Include="source\codegen\abstract_syntax_tree\operators\logical\operator_greater_than_node.h" />
+    <ClInclude Include="source\codegen\abstract_syntax_tree\operators\logical\operator_greater_than_equal_to_node.h" />
+    <ClInclude Include="source\codegen\abstract_syntax_tree\operators\logical\operator_less_than_node.h" />
+    <ClInclude Include="source\codegen\abstract_syntax_tree\operators\logical\operator_less_than_equal_to_node.h" />
+    <ClInclude Include="source\codegen\abstract_syntax_tree\operators\logical\operator_equals_node.h" />
+    <ClInclude Include="source\codegen\abstract_syntax_tree\operators\logical\operator_not_equals_node.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp" />
@@ -341,5 +347,11 @@
     <ClCompile Include="source\codegen\abstract_syntax_tree\keywords\flow_control\if_else_node.cpp" />
     <ClCompile Include="source\codegen\abstract_syntax_tree\operators\logical\operator_disjunction_node.cpp" />
     <ClCompile Include="source\codegen\abstract_syntax_tree\operators\logical\operator_conjunction_node.cpp" />
+    <ClCompile Include="source\codegen\abstract_syntax_tree\operators\logical\operator_greater_than_node.cpp" />
+    <ClCompile Include="source\codegen\abstract_syntax_tree\operators\logical\operator_greater_than_equal_to_node.cpp" />
+    <ClCompile Include="source\codegen\abstract_syntax_tree\operators\logical\operator_less_than_node.cpp" />
+    <ClCompile Include="source\codegen\abstract_syntax_tree\operators\logical\operator_less_than_equal_to_node.cpp" />
+    <ClCompile Include="source\codegen\abstract_syntax_tree\operators\logical\operator_equals_node.cpp" />
+    <ClCompile Include="source\codegen\abstract_syntax_tree\operators\logical\operator_not_equals_node.cpp" />
   </ItemGroup>
 </Project>

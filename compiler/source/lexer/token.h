@@ -65,6 +65,7 @@ namespace channel {
 		// map<K, V>
 								        
 		// operators
+		// arithmetic operators
 		operator_addition,                  // + 
 		operator_addition_assignment,       // +=
 		operator_subtraction,               // -
@@ -76,21 +77,22 @@ namespace channel {
 		operator_division,                  // /
 		operator_division_assignment,       // /=
 		operator_assignment,                // =
-		operator_equals,                    // ==
-		operator_greater_than,              // >
-		operator_bitwise_right_shift,       // >>
-		operator_greater_than_equal_to,     // >=
-		operator_less_than,                 // <
-		operator_bitwise_left_shift,        // <<
-		operator_less_than_equal_to,        // <=
-		operator_not,                       // !
-		operator_not_equals,                // !=
-		operator_bitwise_and,               // &
-		operator_logical_conjunction,       // &&
-		operator_bitwise_or,                // |
-		operator_logical_disjunction,       // ||
-		operator_bitwise_not,               // ~
-		operator_bitwise_xor,               // ^
+		// logical operators
+		operator_equals,                    // == x
+		operator_greater_than,              // >  x
+		operator_bitwise_right_shift,       // >> 
+		operator_greater_than_equal_to,     // >= x
+		operator_less_than,                 // <  x
+		operator_bitwise_left_shift,        // << 
+		operator_less_than_equal_to,        // <= x
+		operator_not,                       // !  
+		operator_not_equals,                // != x
+		operator_bitwise_and,               // &  
+		operator_logical_conjunction,       // && x
+		operator_bitwise_or,                // |  
+		operator_logical_disjunction,       // || x
+		operator_bitwise_not,               // ~  
+		operator_bitwise_xor,               // ^  
 
 		// numbers
 		number_signed,                      // 0

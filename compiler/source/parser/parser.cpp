@@ -47,6 +47,12 @@
 // logical
 #include "../codegen/abstract_syntax_tree/operators/logical/operator_conjunction_node.h"
 #include "../codegen/abstract_syntax_tree/operators/logical/operator_disjunction_node.h"
+#include "../codegen/abstract_syntax_tree/operators/logical/operator_greater_than_node.h"
+#include "../codegen/abstract_syntax_tree/operators/logical/operator_greater_than_equal_to_node.h"
+#include "../codegen/abstract_syntax_tree/operators/logical/operator_less_than_node.h"
+#include "../codegen/abstract_syntax_tree/operators/logical/operator_less_than_equal_to_node.h"
+#include "../codegen/abstract_syntax_tree/operators/logical/operator_equals_node.h"
+#include "../codegen/abstract_syntax_tree/operators/logical/operator_not_equals_node.h"
 
 namespace channel {
 	parser::parser(const lexer& lexer)
@@ -549,7 +555,15 @@ namespace channel {
 	bool parser::parse_logical_expression(node*& out_node, type expression_type) {
 		token next_token = peek_next_token();
 
-		if (next_token == token::operator_logical_conjunction || next_token == token::operator_logical_disjunction) {
+		if (
+			next_token == token::operator_logical_conjunction || 
+			next_token == token::operator_logical_disjunction ||
+			next_token == token::operator_greater_than ||
+			next_token == token::operator_greater_than_equal_to ||
+			next_token == token::operator_less_than ||
+			next_token == token::operator_less_than_equal_to ||
+			next_token == token::operator_equals ||
+			next_token == token::operator_not_equals) {
 			while (true) {
 				const token op = next_token;
 				node* right;
@@ -560,15 +574,27 @@ namespace channel {
 					return false;
 				}
 
-				if (op == token::operator_logical_conjunction) {
-					out_node = new operator_conjunction_node(m_current_token.line_number, out_node, right);
-				}
-				else {
-					out_node = new operator_disjunction_node(m_current_token.line_number, out_node, right);
+				switch(op) {
+				case token::operator_logical_conjunction:   out_node = new operator_conjunction_node(m_current_token.line_number, out_node, right); break;
+				case token::operator_logical_disjunction:   out_node = new operator_disjunction_node(m_current_token.line_number, out_node, right); break;
+				case token::operator_greater_than:          out_node = new operator_greater_than_node(m_current_token.line_number, out_node, right); break;
+				case token::operator_greater_than_equal_to: out_node = new operator_greater_than_equal_to_node(m_current_token.line_number, out_node, right); break;
+				case token::operator_less_than:             out_node = new operator_less_than_node(m_current_token.line_number, out_node, right); break;
+				case token::operator_less_than_equal_to:    out_node = new operator_less_than_equal_to_node(m_current_token.line_number, out_node, right); break;
+				case token::operator_equals:                out_node = new operator_equals_node(m_current_token.line_number, out_node, right); break;
+				case token::operator_not_equals:            out_node = new operator_not_equals_node(m_current_token.line_number, out_node, right); break;
 				}
 
 				next_token = peek_next_token();
-				if (!(next_token == token::operator_logical_conjunction || next_token == token::operator_logical_disjunction)) {
+				if (!(
+					next_token == token::operator_logical_conjunction ||
+					next_token == token::operator_logical_disjunction ||
+					next_token == token::operator_greater_than ||
+					next_token == token::operator_greater_than_equal_to ||
+					next_token == token::operator_less_than ||
+					next_token == token::operator_less_than_equal_to ||
+					next_token == token::operator_equals ||
+					next_token == token::operator_not_equals)) {
 					break;
 				}
 			}

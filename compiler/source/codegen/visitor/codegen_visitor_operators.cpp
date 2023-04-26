@@ -9,6 +9,12 @@
 // logical
 #include "../abstract_syntax_tree/operators/logical/operator_conjunction_node.h"
 #include "../abstract_syntax_tree/operators/logical/operator_disjunction_node.h"
+#include "../abstract_syntax_tree/operators/logical/operator_greater_than_node.h"
+#include "../abstract_syntax_tree/operators/logical/operator_greater_than_equal_to_node.h"
+#include "../abstract_syntax_tree/operators/logical/operator_less_than_node.h"
+#include "../abstract_syntax_tree/operators/logical/operator_less_than_equal_to_node.h"
+#include "../abstract_syntax_tree/operators/logical/operator_equals_node.h"
+#include "../abstract_syntax_tree/operators/logical/operator_not_equals_node.h"
 
 namespace channel {
 	bool codegen_visitor::visit_operator_addition_node(operator_addition_node& node, value*& out_value) {
@@ -376,6 +382,130 @@ namespace channel {
 		// create a logical OR operation
 		llvm::Value* or_result = m_builder.CreateOr(left->get_value(), right->get_value(), "or");
 		out_value = new value("__logical_disjunction", type(type::base::boolean, 0), or_result);
+		return true;
+	}
+
+	bool codegen_visitor::visit_operator_greater_than_node(operator_greater_than_node& node, value*& out_value) {
+		// accept the left expression
+		value* left;
+		if (!node.left_expression_node->accept(*this, left)) {
+			return false;
+		}
+
+		// accept the right expression
+		value* right;
+		if (!node.right_expression_node->accept(*this, right)) {
+			return false;
+		}
+
+		// create a greater than operation
+		llvm::Value* greater_than_result = m_builder.CreateICmpSGT(left->get_value(), right->get_value(), "gt");
+
+		out_value = new value("greater_than", type(type::base::boolean, 0), greater_than_result);
+
+		return true;
+	}
+
+	bool codegen_visitor::visit_operator_greater_than_equal_to(operator_greater_than_equal_to_node& node, value*& out_value) {
+		// accept the left expression
+		value* left;
+		if (!node.left_expression_node->accept(*this, left)) {
+			return false;
+		}
+
+		// accept the right expression
+		value* right;
+		if (!node.right_expression_node->accept(*this, right)) {
+			return false;
+		}
+
+		// create a greater than or equal to operation
+		llvm::Value* greater_than_equal_result = m_builder.CreateICmpSGE(left->get_value(), right->get_value(), "ge");
+
+		out_value = new value("greater_than_equal_to", type(type::base::boolean, 0), greater_than_equal_result);
+
+		return true;
+	}
+
+	bool codegen_visitor::visit_operator_less_than_node(operator_less_than_node& node, value*& out_value) {
+		// accept the left expression
+		value* left;
+		if (!node.left_expression_node->accept(*this, left)) {
+			return false;
+		}
+
+		// accept the right expression
+		value* right;
+		if (!node.right_expression_node->accept(*this, right)) {
+			return false;
+		}
+
+		// create a less than operation
+		llvm::Value* less_than_result = m_builder.CreateICmpSLT(left->get_value(), right->get_value(), "lt");
+
+		out_value = new value("less_than", type(type::base::boolean, 0), less_than_result);
+
+		return true;
+	}
+
+	bool codegen_visitor::visit_operator_less_than_equal_to_node(operator_less_than_equal_to_node& node, value*& out_value) {
+		// accept the left expression
+		value* left;
+		if (!node.left_expression_node->accept(*this, left)) {
+			return false;
+		}
+
+		// accept the right expression
+		value* right;
+		if (!node.right_expression_node->accept(*this, right)) {
+			return false;
+		}
+
+		// create a less than or equal to operation
+		llvm::Value* less_than_equal_result = m_builder.CreateICmpSLE(left->get_value(), right->get_value(), "le");
+
+		out_value = new value("less_than_equal_to", type(type::base::boolean, 0), less_than_equal_result);
+		return true;
+	}
+
+	bool codegen_visitor::visit_operator_equals_node(operator_equals_node& node, value*& out_value) {
+		// accept the left expression
+		value* left;
+		if (!node.left_expression_node->accept(*this, left)) {
+			return false;
+		}
+
+		// accept the right expression
+		value* right;
+		if (!node.right_expression_node->accept(*this, right)) {
+			return false;
+		}
+
+		// create an equals operation
+		llvm::Value* equals_result = m_builder.CreateICmpEQ(left->get_value(), right->get_value(), "eq");
+
+		out_value = new value("equals", type(type::base::boolean, 0), equals_result);
+
+		return true;
+	}
+
+	bool codegen_visitor::visit_operator_not_equals_node(operator_not_equals_node& node, value*& out_value) {
+		// accept the left expression
+		value* left;
+		if (!node.left_expression_node->accept(*this, left)) {
+			return false;
+		}
+
+		// accept the right expression
+		value* right;
+		if (!node.right_expression_node->accept(*this, right)) {
+			return false;
+		}
+
+		// create a not equals operation
+		llvm::Value* not_equals_result = m_builder.CreateICmpNE(left->get_value(), right->get_value(), "ne");
+
+		out_value = new value("not_equals", type(type::base::boolean, 0), not_equals_result);
 		return true;
 	}
 }

@@ -50,6 +50,12 @@ namespace channel {
     // logical
     class operator_conjunction_node;
     class operator_disjunction_node;
+    class operator_greater_than_node;
+    class operator_greater_than_equal_to_node;
+    class operator_less_than_node;
+    class operator_less_than_equal_to_node;
+    class operator_equals_node;
+    class operator_not_equals_node;
 }
 
 #include "../llvm_wrappers/value.h"
@@ -111,5 +117,11 @@ namespace channel {
         // logical
         virtual bool visit_operator_logical_conjunction_node(operator_conjunction_node& node, value*& out_value) = 0;
         virtual bool visit_operator_logical_disjunction_node(operator_disjunction_node& node, value*& out_value) = 0;
+        virtual bool visit_operator_greater_than_node(operator_greater_than_node& node, value*& out_value) = 0;
+        virtual bool visit_operator_greater_than_equal_to(operator_greater_than_equal_to_node& node, value*& out_value) = 0;
+        virtual bool visit_operator_less_than_node(operator_less_than_node& node, value*& out_value) = 0;
+        virtual bool visit_operator_less_than_equal_to_node(operator_less_than_equal_to_node& node, value*& out_value) = 0;
+        virtual bool visit_operator_equals_node(operator_equals_node& node, value*& out_value) = 0;
+        virtual bool visit_operator_not_equals_node(operator_not_equals_node& node, value*& out_value) = 0;
     };
 }

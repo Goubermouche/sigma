@@ -84,6 +84,12 @@ namespace channel {
 		// logical
 		bool visit_operator_logical_conjunction_node(operator_conjunction_node& node, value*& out_value) override;
 		bool visit_operator_logical_disjunction_node(operator_disjunction_node& node, value*& out_value) override;
+		bool visit_operator_greater_than_node(operator_greater_than_node& node, value*& out_value) override;
+		bool visit_operator_greater_than_equal_to(operator_greater_than_equal_to_node& node, value*& out_value) override;
+		bool visit_operator_less_than_node(operator_less_than_node& node, value*& out_value) override;
+		bool visit_operator_less_than_equal_to_node(operator_less_than_equal_to_node& node, value*& out_value) override;
+		bool visit_operator_equals_node(operator_equals_node& node, value*& out_value) override;
+		bool visit_operator_not_equals_node(operator_not_equals_node& node, value*& out_value) override;
 
 		// utility
 		bool cast_value(llvm::Value*& out_value, const value* source_value, type target_type, u64 line_number);

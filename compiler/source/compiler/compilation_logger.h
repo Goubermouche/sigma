@@ -32,6 +32,9 @@ namespace channel{
 		static void emit_function_argument_count_mismatch_error(u64 line_number, const std::string& function_name);
 		static void emit_function_argument_type_mismatch_error(u64 line_number, u64 argument_index, type expected_type, type received_type, const std::string& function_name);
 
+		static void emit_conjunction_operation_expects_booleans(u64 line_number, type left, type right);
+		static void emit_disjunction_operation_expects_booleans(u64 line_number, type left, type right);
+
 		static void emit_cannot_open_file_error(const std::string& filepath);
 
 		// lexer

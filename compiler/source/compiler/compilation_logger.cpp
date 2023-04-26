@@ -146,6 +146,20 @@ namespace channel {
 		);
 	}
 
+	void compilation_logger::emit_conjunction_operation_expects_booleans(u64 line_number, type left, type right) {
+		emit_error(
+			line_number,
+			"conjunction operation expects two booleans, but received '" + left.to_string() + "' and '" + right.to_string() + "'"
+		);
+	}
+
+	void compilation_logger::emit_disjunction_operation_expects_booleans(u64 line_number, type left, type right) {
+		emit_error(
+			line_number,
+			"disjunction operation expects two booleans, but received '" + left.to_string() + "' and '" + right.to_string() + "'"
+		);
+	}
+
 	void compilation_logger::emit_cannot_open_file_error(const std::string& filepath) {
 		console::log(color::red, "[error:]: ");
 		console::log(color::white, "cannot open file '" + filepath + "'\n");

@@ -219,6 +219,7 @@ namespace channel {
 			{ base::empty        , "void"          },
 			{ base::character    , "char"          },
 			{ base::boolean      , "bool"          },
+			{ base::unknown      , "unknown"       },
 		};
 
 		const auto it = type_to_string_map.find(m_base);

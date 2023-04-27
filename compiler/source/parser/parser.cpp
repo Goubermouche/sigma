@@ -289,7 +289,7 @@ namespace channel {
 				node* condition = nullptr;
 				if (!has_else) {
 					if (!expect_next_token(token::l_parenthesis) ||
-						!parse_expression(condition, type(type::base::boolean, 0)) ||
+						!parse_expression(condition) ||
 						!expect_next_token(token::r_parenthesis)) {
 						return false;
 					}
@@ -492,7 +492,7 @@ namespace channel {
 		node* value = nullptr;
 		if(peek_next_token() == token::operator_assignment) {
 			get_next_token(); // operator_assignment
-			if(!parse_expression(value, declaration_type)) {
+			if(!parse_expression(value)) {
 				return false;
 			}
 		}
@@ -507,6 +507,7 @@ namespace channel {
 	}
 
 	bool parser::parse_expression(node*& out_node, type expression_type) {
+
 		return parse_logical_conjunction(out_node, expression_type);
 	}
 
@@ -566,8 +567,7 @@ namespace channel {
 			peek_next_token() == token::operator_less_than ||
 			peek_next_token() == token::operator_less_than_equal_to ||
 			peek_next_token() == token::operator_equals ||
-			peek_next_token() == token::operator_not_equals
-			) {
+			peek_next_token() == token::operator_not_equals) {
 			get_next_token();
 			const token_data op = m_current_token;
 
@@ -608,7 +608,8 @@ namespace channel {
 			return false;
 		}
 
-		while (peek_next_token() == token::operator_addition ||
+		while (
+			peek_next_token() == token::operator_addition ||
 			peek_next_token() == token::operator_subtraction) {
 			get_next_token();
 			const token_data op = m_current_token;
@@ -668,8 +669,7 @@ namespace channel {
 		return true;
 	}
 
-	bool parser::parse_primary(node*& out_node, type expression_type)
-	{
+	bool parser::parse_primary(node*& out_node, type expression_type) {
 		const token token = peek_next_token();
 
 		if (is_token_numerical(token)) {
@@ -691,11 +691,14 @@ namespace channel {
 			// parse an allocation
 			return parse_new_allocation(out_node);
 		case token::char_literal:
+			// parse a char literal
 			return parse_char(out_node);
 		case token::string_literal:
+			// parse a string literal
 			return parse_string(out_node);
 		case token::bool_literal_true:
 		case token::bool_literal_false:
+			// parse a boolean
 			return parse_bool(out_node);
 		}
 
@@ -779,7 +782,7 @@ namespace channel {
 
 		// parse array size
 		node* array_size;
-		if(!parse_expression(array_size, type(type::base::u64, 0))) {
+		if(!parse_expression(array_size)) {
 			return false;
 		}
 

@@ -272,7 +272,6 @@ namespace channel {
 		if (m_last_character == '\'') {
 			read_char(); // read the character after the closing quote
 			tok = token::char_literal;
-			std::cout << escape_string(m_value_string) << '\n';
 			return true;
 		}
 

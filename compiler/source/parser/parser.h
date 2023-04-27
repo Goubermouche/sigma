@@ -44,6 +44,11 @@ namespace channel {
 		 */
 		bool parse_local_statement(node*& out_node);
 
+		/**
+		 * \brief Attempts to parse an if else chain. The first expected token is the keyword_if token.
+		 * \param out_node Output AST node
+		 * \return True if the expression is parsed successfully
+		 */
 		bool parse_if_else_statement(node*& out_node);
 
 		/**
@@ -53,8 +58,18 @@ namespace channel {
 		 */
 		bool parse_assignment(node*& out_node);
 
+		/**
+		 * \brief Attempts to parse an array assignment. The first expected token is an identifier.
+		 * \param out_node Output AST node
+		 * \return True if the expression is parsed successfully
+		 */
 		bool parse_array_assignment(node*& out_node);
 
+		/**
+		 * \brief Attempts to parse an array access. The first expected token is an identifier.
+		 * \param out_node Output AST node
+		 * \return True if the expression is parsed successfully
+		 */
 		bool parse_array_access(node*& out_node);
 
 		/**
@@ -87,11 +102,52 @@ namespace channel {
 		 */
 		bool parse_expression(node*& out_node, type expression_type = type::unknown());
 
+		/**
+		 * \brief Attempts to parse a conjunction expression node.
+		 * \param out_node Output AST node
+		 * \param expression_type Specified expression type
+		 * \return True if the expression is parsed successfully
+		 */
 		bool parse_logical_conjunction(node*& out_node, type expression_type);
+
+		/**
+		 * \brief Attempts to parse a disjunction expression node.
+		 * \param out_node Output AST node
+		 * \param expression_type Specified expression type
+		 * \return True if the expression is parsed successfully
+		 */
 		bool parse_logical_disjunction(node*& out_node, type expression_type);
+
+		/**
+		 * \brief Attempts to parse a comparison expression node.
+		 * \param out_node Output AST node
+		 * \param expression_type Specified expression type
+		 * \return True if the expression is parsed successfully
+		 */
 		bool parse_comparison(node*& out_node, type expression_type);
+
+		/**
+		 * \brief Attempts to parse a term expression node.
+		 * \param out_node Output AST node
+		 * \param expression_type Specified expression type
+		 * \return True if the expression is parsed successfully
+		 */
 		bool parse_term(node*& out_node, type expression_type);
+
+		/**
+		 * \brief Attempts to parse a factor expression node.
+		 * \param out_node Output AST node
+		 * \param expression_type Specified expression type
+		 * \return True if the expression is parsed successfully
+		 */
 		bool parse_factor(node*& out_node, type expression_type);
+
+		/**
+		 * \brief Attempts to parse a primary expression node.
+		 * \param out_node Output AST node
+		 * \param expression_type Specified expression type
+		 * \return True if the expression is parsed successfully
+		 */
 		bool parse_primary(node*& out_node, type expression_type);
 
 		/**
@@ -102,10 +158,25 @@ namespace channel {
 		 */
 		bool parse_number(node*& out_node, type expression_type = type::unknown());
 
+		/**
+		 * \brief Attempts to parse a char literal. The first expected token is a char_literal.
+		 * \param out_node Output AST node
+		 * \return True if the expression is parsed successfully
+		 */
 		bool parse_char(node*& out_node);
 
+		/**
+		 * \brief Attempts to parse a string literal. The first expected token is a string_literal.
+		 * \param out_node Output AST node
+		 * \return True if the expression is parsed successfully
+		 */
 		bool parse_string(node*& out_node);
 
+		/**
+		 * \brief Attempts to parse a boolean value. The first expected token is either a bool_literal_true or a bool_literal_false.
+		 * \param out_node Output AST node
+		 * \return True if the expression is parsed successfully
+		 */
 		bool parse_bool(node*& out_node);
 
 		/**
@@ -136,7 +207,7 @@ namespace channel {
 		 * \param expression_type Specified expression type
 		 * \return True if the expression is parsed successfully
 		 */
-		bool parse_deep_expression(node*& out_node, type expression_type = type::unknown());
+		bool parse_deep_expression(node*& out_node, type expression_type);
 
 		/**
 		 * \brief Checks if a statement is a function definition. The first expected token is a type.
@@ -150,6 +221,10 @@ namespace channel {
 		 */
 		bool peek_is_function_call();
 
+		/**
+		 * \brief Checks if the next statement is an array index access.
+		 * \return True if the next statement is an array index access.
+		 */
 		bool peek_is_array_index_access();
 
 		/**

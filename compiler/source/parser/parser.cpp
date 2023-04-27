@@ -507,148 +507,176 @@ namespace channel {
 	}
 
 	bool parser::parse_expression(node*& out_node, type expression_type) {
-		if(!parse_term(out_node, expression_type)) {
+		return parse_logical_conjunction(out_node, expression_type);
+	}
+
+	bool parser::parse_logical_conjunction(node*& out_node, type expression_type) {
+		node* left;
+		if (!parse_logical_disjunction(left, expression_type)) {
 			return false;
 		}
 
-		if(!parse_arithmetic_expression(out_node, expression_type)) {
-			return false;
+		while (peek_next_token() == token::operator_logical_conjunction) {
+			get_next_token();
+			const token_data& op = m_current_token;
+
+			node* right;
+			if (!parse_logical_disjunction(right, expression_type)) {
+				return false;
+			}
+
+			left = new operator_conjunction_node(op.line_number, left, right);
 		}
 
-		if(!parse_logical_expression(out_node, expression_type)) {
-			return false;
-		}
-
+		out_node = left;
 		return true;
 	}
 
-	bool parser::parse_arithmetic_expression(node*& out_node, type expression_type) {
-		token next_token = peek_next_token();
-		if (next_token == token::operator_addition || next_token == token::operator_subtraction) {
-			while (true) {
-				const token op = next_token;
-				node* right;
-
-				get_next_token(); // operator_addition || operator_subtraction (guaranteed)
-
-				if (!parse_term(right, expression_type)) {
-					return false;
-				}
-
-				if (op == token::operator_addition) {
-					out_node = new operator_addition_node(m_current_token.line_number, out_node, right);
-				}
-				else {
-					out_node = new operator_subtraction_node(m_current_token.line_number, out_node, right);
-				}
-
-				next_token = peek_next_token();
-				if (!(next_token == token::operator_addition || next_token == token::operator_subtraction || next_token == token::operator_modulo)) {
-					break;
-				}
-			}
+	bool parser::parse_logical_disjunction(node*& out_node, type expression_type) {
+		node* left;
+		if (!parse_comparison(left, expression_type)) {
+			return false;
 		}
 
+		while (peek_next_token() == token::operator_logical_disjunction) {
+			get_next_token();
+			const token_data& op = m_current_token;
+
+			node* right;
+			if (!parse_comparison(right, expression_type)) {
+				return false;
+			}
+
+			left = new operator_disjunction_node(op.line_number, left, right);
+		}
+
+		out_node = left;
 		return true;
 	}
 
-	bool parser::parse_logical_expression(node*& out_node, type expression_type) {
-		token next_token = peek_next_token();
+	bool parser::parse_comparison(node*& out_node, type expression_type) {
+		node* left;
+		if (!parse_term(left, expression_type)) {
+			return false;
+		}
 
-		if (
-			next_token == token::operator_logical_conjunction || 
-			next_token == token::operator_logical_disjunction ||
-			next_token == token::operator_greater_than ||
-			next_token == token::operator_greater_than_equal_to ||
-			next_token == token::operator_less_than ||
-			next_token == token::operator_less_than_equal_to ||
-			next_token == token::operator_equals ||
-			next_token == token::operator_not_equals) {
-			while (true) {
-				const token op = next_token;
-				node* right;
+		while (
+			peek_next_token() == token::operator_greater_than ||
+			peek_next_token() == token::operator_greater_than_equal_to ||
+			peek_next_token() == token::operator_less_than ||
+			peek_next_token() == token::operator_less_than_equal_to ||
+			peek_next_token() == token::operator_equals ||
+			peek_next_token() == token::operator_not_equals
+			) {
+			get_next_token();
+			const token_data op = m_current_token;
 
-				get_next_token(); // operator_logical_conjunction || operator_logical_disjunction (guaranteed)
+			node* right;
+			if (!parse_term(right, expression_type)) {
+				return false;
+			}
 
-				if (!parse_term(right, expression_type)) {
-					return false;
-				}
-
-				switch(op) {
-				case token::operator_logical_conjunction:   out_node = new operator_conjunction_node(m_current_token.line_number, out_node, right); break;
-				case token::operator_logical_disjunction:   out_node = new operator_disjunction_node(m_current_token.line_number, out_node, right); break;
-				case token::operator_greater_than:          out_node = new operator_greater_than_node(m_current_token.line_number, out_node, right); break;
-				case token::operator_greater_than_equal_to: out_node = new operator_greater_than_equal_to_node(m_current_token.line_number, out_node, right); break;
-				case token::operator_less_than:             out_node = new operator_less_than_node(m_current_token.line_number, out_node, right); break;
-				case token::operator_less_than_equal_to:    out_node = new operator_less_than_equal_to_node(m_current_token.line_number, out_node, right); break;
-				case token::operator_equals:                out_node = new operator_equals_node(m_current_token.line_number, out_node, right); break;
-				case token::operator_not_equals:            out_node = new operator_not_equals_node(m_current_token.line_number, out_node, right); break;
-				}
-
-				next_token = peek_next_token();
-				if (!(
-					next_token == token::operator_logical_conjunction ||
-					next_token == token::operator_logical_disjunction ||
-					next_token == token::operator_greater_than ||
-					next_token == token::operator_greater_than_equal_to ||
-					next_token == token::operator_less_than ||
-					next_token == token::operator_less_than_equal_to ||
-					next_token == token::operator_equals ||
-					next_token == token::operator_not_equals)) {
-					break;
-				}
+			switch(op.token) {
+			case token::operator_greater_than:
+				left = new operator_greater_than_node(m_current_token.line_number, left, right);
+				break;
+			case token::operator_greater_than_equal_to:
+				left = new operator_greater_than_equal_to_node(m_current_token.line_number, left, right);
+				break;
+			case token::operator_less_than:
+				left = new operator_less_than_node(m_current_token.line_number, left, right);
+				break;
+			case token::operator_less_than_equal_to:
+				left = new operator_less_than_equal_to_node(m_current_token.line_number, left, right);
+				break;
+			case token::operator_equals:
+				left = new operator_equals_node(m_current_token.line_number, left, right);
+				break;
+			case token::operator_not_equals:
+				left = new operator_not_equals_node(m_current_token.line_number, left, right);
+				break;
 			}
 		}
 
+		out_node = left;
 		return true;
 	}
 
 	bool parser::parse_term(node*& out_node, type expression_type) {
-		if(!parse_factor(out_node, expression_type)) {
+		node* left;
+		if (!parse_factor(left, expression_type)) {
 			return false;
 		}
 
-		token next_token = peek_next_token(); // operator_multiplication || operator_division || operator_modulo
-		if(next_token == token::operator_multiplication || next_token == token::operator_division || next_token == token::operator_modulo) {
-			while (true) {
-				const token op = next_token;
-				node* right;
+		while (peek_next_token() == token::operator_addition ||
+			peek_next_token() == token::operator_subtraction) {
+			get_next_token();
+			const token_data& op = m_current_token;
 
-				get_next_token(); // operator_multiplication || operator_division || operator_modulo (guaranteed)
+			node* right;
+			if (!parse_factor(right, expression_type)) {
+				return false;
+			}
 
-				if (!parse_factor(right, expression_type)) {
-					return false;
-				}
-
-				if (op == token::operator_multiplication) {
-					out_node = new operator_multiplication_node(m_current_token.line_number, out_node, right);
-				}
-				else if (op == token::operator_division) {
-					out_node = new operator_division_node(m_current_token.line_number, out_node, right);
-				}
-				else if (op == token::operator_modulo) {
-					out_node = new operator_modulo_node(m_current_token.line_number, out_node, right);
-				}
-
-				next_token = peek_next_token();
-				if (!(next_token == token::operator_multiplication || next_token == token::operator_division || next_token == token::operator_modulo)) {
-					break;
-				}
+			switch (op.token) {
+			case token::operator_addition:    
+				left = new operator_addition_node(op.line_number, left, right);
+				break;
+			case token::operator_subtraction: 
+				left = new operator_subtraction_node(op.line_number, left, right);
+				break;
 			}
 		}
 
+		out_node = left;
 		return true;
 	}
 
 	bool parser::parse_factor(node*& out_node, type expression_type) {
+		node* left;
+		if (!parse_primary(left, expression_type)) {
+			return false;
+		}
+
+		while (
+			peek_next_token() == token::operator_multiplication ||
+			peek_next_token() == token::operator_division ||
+			peek_next_token() == token::operator_modulo) {
+			get_next_token();
+			const token_data& op = m_current_token;
+
+			node* right;
+			if (!parse_primary(right, expression_type)) {
+				return false;
+			}
+
+			switch (op.token) {
+			case token::operator_multiplication: 
+				left = new operator_multiplication_node(op.line_number, left, right);
+				break;
+			case token::operator_division:      
+				left = new operator_division_node(op.line_number, left, right);
+				break;
+			case token::operator_modulo:        
+				left = new operator_modulo_node(op.line_number, left, right);
+				break;
+			}
+		}
+
+		out_node = left;
+		return true;
+	}
+
+	bool parser::parse_primary(node*& out_node, type expression_type)
+	{
 		const token token = peek_next_token();
 
-		if(is_token_numerical(token)) {
+		if (is_token_numerical(token)) {
 			// parse a number
 			return parse_number(out_node, expression_type);
 		}
 
-		switch(token) {
+		switch (token) {
 		case token::operator_subtraction:
 			// parse a negative number
 			return parse_negative_number(out_node, expression_type);

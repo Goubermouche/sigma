@@ -87,25 +87,12 @@ namespace channel {
 		 */
 		bool parse_expression(node*& out_node, type expression_type = type::unknown());
 
-		bool parse_arithmetic_expression(node*& out_node, type expression_type);
-
-		bool parse_logical_expression(node*& out_node, type expression_type);
-
-		/**
-		 * \brief Attempts to parse a term.
-		 * \param out_node Output AST node
-		 * \param expression_type Specified expression type
-		 * \return True if the expression is parsed successfully
-		 */
-		bool parse_term(node*& out_node, type expression_type = type::unknown());
-
-		/**
-		 * \brief Attempts to parse a factor.
-		 * \param out_node Output AST node
-		 * \param expression_type Specified expression type
-		 * \return True if the expression is parsed successfully
-		 */
-		bool parse_factor(node*& out_node, type expression_type = type::unknown());
+		bool parse_logical_conjunction(node*& out_node, type expression_type);
+		bool parse_logical_disjunction(node*& out_node, type expression_type);
+		bool parse_comparison(node*& out_node, type expression_type);
+		bool parse_term(node*& out_node, type expression_type);
+		bool parse_factor(node*& out_node, type expression_type);
+		bool parse_primary(node*& out_node, type expression_type);
 
 		/**
 		 * \brief Attempts to parse a number token. The first expected token is a numerical type.

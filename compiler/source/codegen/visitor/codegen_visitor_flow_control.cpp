@@ -32,82 +32,64 @@ namespace channel {
 	bool codegen_visitor::visit_if_else_node(if_else_node& node, value*& out_value) {
         llvm::BasicBlock* entry_block = m_builder.GetInsertBlock();
         llvm::Function* parent_function = entry_block->getParent();
+        // create the block for the end of the if-else statement
         llvm::BasicBlock* after_if_else_block = llvm::BasicBlock::Create(m_context, "", parent_function);
 
-		const auto& condition_nodes = node.get_condition_nodes();
+        // get condition and branch nodes
+        const auto& condition_nodes = node.get_condition_nodes();
         const auto& branch_nodes = node.get_branch_nodes();
 
+        // determine if there is a trailing else block
         const bool has_trailing_else = condition_nodes.back() == nullptr;
         const u64 condition_node_count = has_trailing_else ? condition_nodes.size() - 2 : condition_nodes.size() - 1;
 
-        std::vector<llvm::BasicBlock*> condition_blocks;
-        std::vector<llvm::BasicBlock*> branch_blocks;
+        // initialize condition and branch blocks with their respective sizes
+        std::vector<llvm::BasicBlock*> condition_blocks(condition_node_count);
+        std::vector<llvm::BasicBlock*> branch_blocks(branch_nodes.size());
 
         // create condition blocks
         for (u64 i = 0; i < condition_node_count; ++i) {
-            condition_blocks.emplace_back(llvm::BasicBlock::Create(m_context, "", parent_function));
+            condition_blocks[i] = llvm::BasicBlock::Create(m_context, "", parent_function);
         }
 
         // create branch blocks
         for (u64 i = 0; i < branch_nodes.size(); ++i) {
-            branch_blocks.emplace_back(llvm::BasicBlock::Create(m_context, "", parent_function));
+            branch_blocks[i] = llvm::BasicBlock::Create(m_context, "", parent_function);
         }
 
-        // accept the first condition manually
+        // accept the first condition
         value* condition_value;
         if (!condition_nodes[0]->accept(*this, condition_value)) {
             return false;
         }
 
-        // determine the next block 
-        if(condition_blocks.empty()) {
-            // we don't have other condition blocks, so the next block either has to be an else branch, or the end branch
-            m_builder.CreateCondBr(
-                condition_value->get_value(),
-                branch_blocks[0],
-                has_trailing_else ? branch_blocks.back() : after_if_else_block
-            );
-        }
-        else {
-            // we still have more condition blocks, use that as the fail-case
-            m_builder.CreateCondBr(
-                condition_value->get_value(),
-                branch_blocks[0],
-                condition_blocks[0]
-            );
-        }
-       
-        // accept other conditions
+        // create a conditional branch based on the first condition
+        m_builder.CreateCondBr(
+            condition_value->get_value(),
+            branch_blocks[0],
+            condition_blocks.empty() ? (has_trailing_else ? branch_blocks.back() : after_if_else_block) : condition_blocks[0]
+        );
+
+        // process remaining conditions and create appropriate branches
         for (u64 i = 0; i < condition_node_count; ++i) {
             m_builder.SetInsertPoint(condition_blocks[i]);
 
-            // accept the condition
             if (!condition_nodes[i + 1]->accept(*this, condition_value)) {
                 return false;
             }
 
-            // determine the next block
-            // check if we still have some available condition branches
-            if(i < condition_node_count - 1) {
-                m_builder.CreateCondBr(
-                    condition_value->get_value(),
-                    branch_blocks[i + 1], 
-                    condition_blocks[i + 1] // fail case: go into the next condition branch
-                );
-            }
-            else {
-                m_builder.CreateCondBr(
-                    condition_value->get_value(),
-                    branch_blocks[i + 1],
-                    branch_blocks.back() // fail case: go into the last branch block
-                );
-            }
+            m_builder.CreateCondBr(
+                condition_value->get_value(),
+                branch_blocks[i + 1],
+                i < condition_node_count - 1 ? condition_blocks[i + 1] : branch_blocks.back()
+            );
         }
 
+        // save the previous scope
         scope* prev_scope = m_scope;
 
-        // accepts inner statements for every condition
-		for (u64 i = 0; i < branch_nodes.size(); ++i) {
+        // process branch nodes and create appropriate inner statements
+        for (u64 i = 0; i < branch_nodes.size(); ++i) {
             m_builder.SetInsertPoint(branch_blocks[i]);
             m_scope = new scope(prev_scope);
 
@@ -118,13 +100,12 @@ namespace channel {
                 }
             }
 
-            // return to the end block
+            // create a branch to the end block
             m_builder.CreateBr(after_if_else_block);
         }
 
+        // restore the previous scope and set the insert point to the end block
         m_scope = prev_scope;
-
-        // use the end block as the new entry point
         m_builder.SetInsertPoint(after_if_else_block);
         out_value = nullptr;
         return true;

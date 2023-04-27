@@ -380,7 +380,7 @@ namespace channel {
 		}
 
 		// create a logical OR operation
-		llvm::Value* or_result = m_builder.CreateOr(left->get_value(), right->get_value(), "or");
+		llvm::Value* or_result = m_builder.CreateOr(left->get_value(), right->get_value());
 		out_value = new value("__logical_disjunction", type(type::base::boolean, 0), or_result);
 		return true;
 	}
@@ -413,14 +413,14 @@ namespace channel {
 		// create a greater than operation based on the highest_precision type
 		llvm::Value* greater_than_result;
 		if (highest_precision.is_floating_point()) {
-			greater_than_result = m_builder.CreateFCmpOGT(left_value_upcasted, right_value_upcasted, "fgt");
+			greater_than_result = m_builder.CreateFCmpOGT(left_value_upcasted, right_value_upcasted);
 		}
 		else {
 			if (highest_precision.is_unsigned()) {
-				greater_than_result = m_builder.CreateICmpUGT(left_value_upcasted, right_value_upcasted, "ugt");
+				greater_than_result = m_builder.CreateICmpUGT(left_value_upcasted, right_value_upcasted);
 			}
 			else {
-				greater_than_result = m_builder.CreateICmpSGT(left_value_upcasted, right_value_upcasted, "sgt");
+				greater_than_result = m_builder.CreateICmpSGT(left_value_upcasted, right_value_upcasted);
 			}
 		}
 
@@ -456,14 +456,14 @@ namespace channel {
 		// create a greater than or equal to operation based on the highest_precision type
 		llvm::Value* greater_than_equal_result;
 		if (highest_precision.is_floating_point()) {
-			greater_than_equal_result = m_builder.CreateFCmpOGE(left_value_upcasted, right_value_upcasted, "fge");
+			greater_than_equal_result = m_builder.CreateFCmpOGE(left_value_upcasted, right_value_upcasted);
 		}
 		else {
 			if (highest_precision.is_unsigned()) {
-				greater_than_equal_result = m_builder.CreateICmpUGE(left_value_upcasted, right_value_upcasted, "uge");
+				greater_than_equal_result = m_builder.CreateICmpUGE(left_value_upcasted, right_value_upcasted);
 			}
 			else {
-				greater_than_equal_result = m_builder.CreateICmpSGE(left_value_upcasted, right_value_upcasted, "sge");
+				greater_than_equal_result = m_builder.CreateICmpSGE(left_value_upcasted, right_value_upcasted);
 			}
 		}
 
@@ -499,14 +499,14 @@ namespace channel {
 		// create a less than operation based on the highest_precision type
 		llvm::Value* less_than_result;
 		if (highest_precision.is_floating_point()) {
-			less_than_result = m_builder.CreateFCmpOLT(left_value_upcasted, right_value_upcasted, "flt");
+			less_than_result = m_builder.CreateFCmpOLT(left_value_upcasted, right_value_upcasted);
 		}
 		else {
 			if (highest_precision.is_unsigned()) {
-				less_than_result = m_builder.CreateICmpULT(left_value_upcasted, right_value_upcasted, "ult");
+				less_than_result = m_builder.CreateICmpULT(left_value_upcasted, right_value_upcasted);
 			}
 			else {
-				less_than_result = m_builder.CreateICmpSLT(left_value_upcasted, right_value_upcasted, "slt");
+				less_than_result = m_builder.CreateICmpSLT(left_value_upcasted, right_value_upcasted);
 			}
 		}
 
@@ -542,14 +542,14 @@ namespace channel {
 		// create a less than or equal to operation based on the highest_precision type
 		llvm::Value* less_than_equal_result;
 		if (highest_precision.is_floating_point()) {
-			less_than_equal_result = m_builder.CreateFCmpOLE(left_value_upcasted, right_value_upcasted, "fle");
+			less_than_equal_result = m_builder.CreateFCmpOLE(left_value_upcasted, right_value_upcasted);
 		}
 		else {
 			if (highest_precision.is_unsigned()) {
-				less_than_equal_result = m_builder.CreateICmpULE(left_value_upcasted, right_value_upcasted, "ule");
+				less_than_equal_result = m_builder.CreateICmpULE(left_value_upcasted, right_value_upcasted);
 			}
 			else {
-				less_than_equal_result = m_builder.CreateICmpSLE(left_value_upcasted, right_value_upcasted, "sle");
+				less_than_equal_result = m_builder.CreateICmpSLE(left_value_upcasted, right_value_upcasted);
 			}
 		}
 
@@ -585,10 +585,10 @@ namespace channel {
 		// create an equals operation based on the highest_precision type
 		llvm::Value* equals_result;
 		if (highest_precision.is_floating_point()) {
-			equals_result = m_builder.CreateFCmpOEQ(left_value_upcasted, right_value_upcasted, "feq");
+			equals_result = m_builder.CreateFCmpOEQ(left_value_upcasted, right_value_upcasted);
 		}
 		else {
-			equals_result = m_builder.CreateICmpEQ(left_value_upcasted, right_value_upcasted, "eq");
+			equals_result = m_builder.CreateICmpEQ(left_value_upcasted, right_value_upcasted);
 		}
 
 		out_value = new value("__equals", type(type::base::boolean, 0), equals_result);
@@ -623,10 +623,10 @@ namespace channel {
 		// create a not equals operation based on the highest_precision type
 		llvm::Value* not_equals_result;
 		if (highest_precision.is_floating_point()) {
-			not_equals_result = m_builder.CreateFCmpONE(left_value_upcasted, right_value_upcasted, "fne");
+			not_equals_result = m_builder.CreateFCmpONE(left_value_upcasted, right_value_upcasted);
 		}
 		else {
-			not_equals_result = m_builder.CreateICmpNE(left_value_upcasted, right_value_upcasted, "ne");
+			not_equals_result = m_builder.CreateICmpNE(left_value_upcasted, right_value_upcasted);
 		}
 
 		out_value = new value("__not_equals", type(type::base::boolean, 0), not_equals_result);

@@ -72,7 +72,7 @@ namespace channel {
 		m_scope = prev_scope;
 
 		// add a return statement if the function does not have one
-		if (entry_block->getTerminator() == nullptr) {
+		if (m_builder.GetInsertBlock()->getTerminator() == nullptr) {
 			compilation_logger::emit_function_return_auto_generate_warning(node.get_declaration_line_number(), node.get_function_identifier());
 
 			if (return_type->isVoidTy()) {

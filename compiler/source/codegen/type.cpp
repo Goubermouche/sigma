@@ -135,6 +135,7 @@ namespace channel {
 		case base::u16:
 		case base::u32:
 		case base::u64:
+		case base::boolean:
 			return true;
 		default:
 			return false;

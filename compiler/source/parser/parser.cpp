@@ -518,7 +518,7 @@ namespace channel {
 
 		while (peek_next_token() == token::operator_logical_conjunction) {
 			get_next_token();
-			const token_data& op = m_current_token;
+			const token_data op = m_current_token;
 
 			node* right;
 			if (!parse_logical_disjunction(right, expression_type)) {
@@ -540,7 +540,7 @@ namespace channel {
 
 		while (peek_next_token() == token::operator_logical_disjunction) {
 			get_next_token();
-			const token_data& op = m_current_token;
+			const token_data op = m_current_token;
 
 			node* right;
 			if (!parse_comparison(right, expression_type)) {
@@ -611,7 +611,7 @@ namespace channel {
 		while (peek_next_token() == token::operator_addition ||
 			peek_next_token() == token::operator_subtraction) {
 			get_next_token();
-			const token_data& op = m_current_token;
+			const token_data op = m_current_token;
 
 			node* right;
 			if (!parse_factor(right, expression_type)) {
@@ -619,10 +619,10 @@ namespace channel {
 			}
 
 			switch (op.token) {
-			case token::operator_addition:    
+			case token::operator_addition:
 				left = new operator_addition_node(op.line_number, left, right);
 				break;
-			case token::operator_subtraction: 
+			case token::operator_subtraction:
 				left = new operator_subtraction_node(op.line_number, left, right);
 				break;
 			}
@@ -642,8 +642,9 @@ namespace channel {
 			peek_next_token() == token::operator_multiplication ||
 			peek_next_token() == token::operator_division ||
 			peek_next_token() == token::operator_modulo) {
+
 			get_next_token();
-			const token_data& op = m_current_token;
+			const token_data op = m_current_token;
 
 			node* right;
 			if (!parse_primary(right, expression_type)) {
@@ -651,13 +652,13 @@ namespace channel {
 			}
 
 			switch (op.token) {
-			case token::operator_multiplication: 
+			case token::operator_multiplication:
 				left = new operator_multiplication_node(op.line_number, left, right);
 				break;
-			case token::operator_division:      
+			case token::operator_division:
 				left = new operator_division_node(op.line_number, left, right);
 				break;
-			case token::operator_modulo:        
+			case token::operator_modulo:
 				left = new operator_modulo_node(op.line_number, left, right);
 				break;
 			}
@@ -874,7 +875,7 @@ namespace channel {
 	}
 
 	token parser::peek_next_token() {
-		const token_data& pair = m_lexer.peek_token();
+		const token_data pair = m_lexer.peek_token();
 		m_lexer.synchronize_indices();
 		return pair.token;
 	}

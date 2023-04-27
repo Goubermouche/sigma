@@ -5,6 +5,8 @@
 //  - upcast for comparisons 
 
 i32 main() {
-	if(true) {
-	}
+	i32 integer = 2 * (10 / 5);
+	bool boolean = integer < 3 && true;
+
+	print("%i %i\n", integer, boolean);
 }

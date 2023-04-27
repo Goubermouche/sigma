@@ -31,7 +31,7 @@ namespace channel {
 		}
 
 		// create and use a new entry block
-		llvm::BasicBlock* entry_block = llvm::BasicBlock::Create(m_context, "entry", func);
+		llvm::BasicBlock* entry_block = llvm::BasicBlock::Create(m_context, "", func);
 		m_builder.SetInsertPoint(entry_block);
 
 		// create a new nested scope for the function body

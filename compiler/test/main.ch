@@ -1,6 +1,14 @@
 // todo: explicit cast (!)
 //  - cast<i32>(value)
 
+// todo: references (!!)
+//  - add support for references (&)
+
+// todo: loops (!!!)
+//  - add support for loops 
+//    - for
+//    - while
+
 char* arr = new char[3];
 
 i32 main() {

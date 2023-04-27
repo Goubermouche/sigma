@@ -114,7 +114,7 @@ namespace channel {
 		const std::string init_func_name = "__global_init_" + node.get_declaration_identifier();
 		llvm::FunctionType* init_func_type = llvm::FunctionType::get(llvm::Type::getVoidTy(m_context), false);
 		llvm::Function* init_func = llvm::Function::Create(init_func_type, llvm::Function::InternalLinkage, init_func_name, m_module.get());
-		llvm::BasicBlock* init_func_entry = llvm::BasicBlock::Create(m_context, "entry", init_func);
+		llvm::BasicBlock* init_func_entry = llvm::BasicBlock::Create(m_context, "", init_func);
 		m_builder.SetInsertPoint(init_func_entry); // write to the init function
 
 		// evaluate the assigned value, if there is one

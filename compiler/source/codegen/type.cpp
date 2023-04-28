@@ -142,6 +142,24 @@ namespace channel {
 		}
 	}
 
+	bool type::is_numerical() const {
+		switch (m_base) {
+		case base::i8:
+		case base::i16:
+		case base::i32:
+		case base::i64:
+		case base::u8:
+		case base::u16:
+		case base::u32:
+		case base::u64:
+		case base::f32:
+		case base::f64:
+			return true;
+		default:
+			return false;
+		}
+	}
+
 	llvm::Type* type::get_llvm_type(llvm::LLVMContext& context) const {
 		// pointer types
 		if (m_pointer_level > 0) {

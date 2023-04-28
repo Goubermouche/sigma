@@ -45,6 +45,7 @@ namespace channel {
 		bool is_unsigned() const;
 		bool is_floating_point() const;
         bool is_integral() const;
+        bool is_numerical() const;
 
 		llvm::Type* get_llvm_type(llvm::LLVMContext& context) const;
 		std::string to_string() const;

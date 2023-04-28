@@ -10,6 +10,7 @@ namespace channel {
         operator_unary(u64 line_number, node* expression_node);
         ~operator_unary() override;
 
+        node* get_expression_node() const;
     private:
         node* m_expression_node;
     };

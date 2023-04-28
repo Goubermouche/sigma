@@ -23,10 +23,10 @@ namespace channel {
 				return false;
 			}
 
-			m_tokens.push_back({ tok, m_value_string });
+			m_tokens.push_back({ tok, m_value_string, m_current_line });
 		}
 
-		print_tokens();
+		// print_tokens();
 
 		return true;
 	}

@@ -38,7 +38,7 @@ namespace channel {
 		// look up the local variable in the active scope
 		if (const value* variable_value = m_scope->get_named_value(node.get_variable_identifier())) {
 			// load the value from the memory location
-			const llvm::AllocaInst* alloca = llvm::dyn_cast<llvm::AllocaInst>(variable_value->get_value());
+			llvm::AllocaInst* alloca = llvm::dyn_cast<llvm::AllocaInst>(variable_value->get_value());
 			llvm::Value* load = m_builder.CreateLoad(
 				alloca->getAllocatedType(),
 				variable_value->get_value()
@@ -46,6 +46,7 @@ namespace channel {
 
 			// return the load instruction as a value
 			out_value = new value(node.get_variable_identifier(), variable_value->get_type(), load);
+			out_value->set_pointer(alloca);
 			return true;
 		}
 
@@ -91,6 +92,7 @@ namespace channel {
 		);
 
 		m_builder.CreateStore(cast_assigned_value, alloca);
+		out_value->set_pointer(alloca);
 
 		// check if the variable already exists as a global
 		if (m_global_named_values[node.get_declaration_identifier()]) {
@@ -151,6 +153,7 @@ namespace channel {
 		}
 
 		m_builder.CreateStore(cast_assigned_value, out_value->get_value());
+		out_value->set_pointer(out_value->get_value());
 		m_builder.CreateRetVoid();
 
 		// create a new constructor with the given priority
@@ -209,6 +212,7 @@ namespace channel {
 		}
 
 		out_value = new value("__alloca", array_element_type.get_pointer_type(), typed_ptr);
+		out_value->set_pointer(allocated_ptr);
 		return true;
 	}
 
@@ -255,6 +259,7 @@ namespace channel {
 		llvm::Value* loaded_value = m_builder.CreateLoad(current_type.get_element_type().get_llvm_type(m_context), current_ptr);
 
 		out_value = new value("__array_element", current_type.get_element_type(), loaded_value);
+		out_value->set_pointer(current_ptr);
 		return true;
 	}
 
@@ -317,6 +322,7 @@ namespace channel {
 		// store the result of the right-hand side expression in the array
 		m_builder.CreateStore(expression_value->get_value(), current_ptr);
 		out_value = expression_value;
+		out_value->set_pointer(current_ptr);
 		return true;
 	}
 

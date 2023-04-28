@@ -7,4 +7,8 @@ namespace channel {
 	operator_unary::~operator_unary() {
 		delete m_expression_node;
 	}
+
+	node* operator_unary::get_expression_node() const {
+		return m_expression_node;
+	}
 }

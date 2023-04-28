@@ -25,6 +25,7 @@ namespace channel{
 		static void emit_cannot_allocate_for_non_pointer_type_error(u64 line_number, type ty);
 		static void emit_cannot_cast_pointer_type_error(u64 line_number, type ty1, type ty2);
 		static void emit_array_access_on_non_pointer_error(u64 line_number, type actual_type, const std::string& variable_name);
+		static void emit_cannot_apply_unary_function_to_non_identifier_error(u64 line_number);
 
 		static void emit_function_not_found_error(u64 line_number, const std::string& function_name);
 		static void emit_function_already_defined_error(u64 line_number, const std::string& function_name);
@@ -35,8 +36,9 @@ namespace channel{
 		static void emit_conjunction_operation_expects_booleans(u64 line_number, type left, type right);
 		static void emit_disjunction_operation_expects_booleans(u64 line_number, type left, type right);
 
-		static void emit_cannot_open_file_error(const std::string& filepath);
+		static void emit_unary_operation_expects_numerical(u64 line_number, type actual_type);
 
+		static void emit_cannot_open_file_error(const std::string& filepath);
 		// lexer
 		// errors
 		static void emit_invalid_dot_character_at_token_start_error();

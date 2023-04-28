@@ -105,6 +105,13 @@ namespace channel {
 		);
 	}
 
+	void compilation_logger::emit_cannot_apply_unary_function_to_non_identifier_error(u64 line_number) {
+		emit_error(
+			line_number,
+			"cannot apply unary operator to a non-identifier value"
+		);
+	}
+
 	void compilation_logger::emit_function_not_found_error(u64 line_number, const std::string& function_name) {
 		emit_error(
 			line_number,
@@ -157,6 +164,13 @@ namespace channel {
 		emit_error(
 			line_number,
 			"disjunction operation expects two booleans, but received '" + left.to_string() + "' and '" + right.to_string() + "'"
+		);
+	}
+
+	void compilation_logger::emit_unary_operation_expects_numerical(u64 line_number, type actual_type) {
+		emit_error(
+			line_number,
+			"unary operator expected a numerical value, but got '" + actual_type.to_string() + "' instead"
 		);
 	}
 

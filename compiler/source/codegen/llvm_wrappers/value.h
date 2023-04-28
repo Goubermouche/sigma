@@ -11,12 +11,15 @@ namespace channel {
 
 		type get_type() const;
 		llvm::Value* get_value() const;
+		llvm::Value* get_pointer() const;
 		void set_type(type ty);
 		void set_value(llvm::Value* value);
+		void set_pointer(llvm::Value* pointer);
 		const std::string& get_name() const;
 	private:
 		std::string m_name;
 		type m_type;
 		llvm::Value* m_value;
+		llvm::Value* m_pointer;
 	};
 }

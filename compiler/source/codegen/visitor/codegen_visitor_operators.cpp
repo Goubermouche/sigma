@@ -25,23 +25,119 @@
 
 namespace channel {
 	bool codegen_visitor::visit_operator_post_decrement_node(operator_post_decrement& node, value*& out_value) {
-		std::cout << "visit_operator_post_decrement_node\n";
-		return false;
+		value* loaded_value;
+		if (!node.get_expression_node()->accept(*this, loaded_value)) {
+			return false;
+		}
+
+		// check if the expression is an integer or a floating-point value
+		if (!loaded_value->get_type().is_numerical()) {
+			compilation_logger::emit_unary_operation_expects_numerical(node.get_declaration_line_number(), loaded_value->get_type());
+			return false;
+		}
+
+		llvm::Value* decrement_result;
+		if (loaded_value->get_type().is_floating_point()) {
+			decrement_result = m_builder.CreateFSub(loaded_value->get_value(), llvm::ConstantFP::get(loaded_value->get_type().get_llvm_type(m_context), 1.0));
+		}
+		else {
+			decrement_result = m_builder.CreateSub(loaded_value->get_value(), llvm::ConstantInt::get(loaded_value->get_type().get_llvm_type(m_context), 1));
+		}
+
+		// assert that the pointer is not nullptr
+		ASSERT(loaded_value->get_pointer() != nullptr, "pointer is nullptr");
+
+		m_builder.CreateStore(
+			decrement_result,
+			loaded_value->get_pointer()
+		);
+
+		out_value = loaded_value;
+		return true;
 	}
 
 	bool codegen_visitor::visit_operator_post_increment_node(operator_post_increment& node, value*& out_value) {
-		std::cout << "visit_operator_post_increment_node\n";
-		return false;
+		value* loaded_value;
+		if (!node.get_expression_node()->accept(*this, loaded_value)) {
+			return false;
+		}
+
+		// check if the expression is an integer or a floating-point value
+		if (!loaded_value->get_type().is_numerical()) {
+			compilation_logger::emit_unary_operation_expects_numerical(node.get_declaration_line_number(), loaded_value->get_type());
+			return false;
+		}
+
+		llvm::Value* decrement_result;
+		if (loaded_value->get_type().is_floating_point()) {
+			decrement_result = m_builder.CreateFAdd(loaded_value->get_value(), llvm::ConstantFP::get(loaded_value->get_type().get_llvm_type(m_context), 1.0));
+		}
+		else {
+			decrement_result = m_builder.CreateAdd(loaded_value->get_value(), llvm::ConstantInt::get(loaded_value->get_type().get_llvm_type(m_context), 1));
+		}
+
+		// assert that the pointer is not nullptr
+		ASSERT(loaded_value->get_pointer() != nullptr, "pointer is nullptr");
+
+		m_builder.CreateStore(
+			decrement_result,
+			loaded_value->get_pointer()
+		);
+
+		out_value = loaded_value;
+		return true;
 	}
 
 	bool codegen_visitor::visit_operator_pre_decrement_node(operator_pre_decrement& node, value*& out_value) {
-		std::cout << "visit_operator_pre_decrement_node\n";
-		return false;
+		// accept the expression
+		value* expression;
+		if (!node.get_expression_node()->accept(*this, expression)) {
+			return false;
+		}
+
+		// check if the expression is an integer or a floating-point value
+		if (!expression->get_type().is_numerical()) {
+			compilation_logger::emit_unary_operation_expects_numerical(node.get_declaration_line_number(), expression->get_type());
+			return false;
+		}
+
+		// decrement the expression
+		llvm::Value* decrement_result;
+		if (expression->get_type().is_floating_point()) {
+			decrement_result = m_builder.CreateFSub(expression->get_value(), llvm::ConstantFP::get(expression->get_type().get_llvm_type(m_context), 1.0));
+		}
+		else {
+			decrement_result = m_builder.CreateSub(expression->get_value(), llvm::ConstantInt::get(expression->get_type().get_llvm_type(m_context), 1));
+		}
+
+		out_value = new value("__pre_decrement", expression->get_type(), decrement_result);
+		return true;
 	}
 
 	bool codegen_visitor::visit_operator_pre_increment_node(operator_pre_increment& node, value*& out_value) {
-		std::cout << "visit_operator_pre_increment_node\n";
-		return false;
+		// accept the expression
+		value* expression;
+		if (!node.get_expression_node()->accept(*this, expression)) {
+			return false;
+		}
+
+		// check if the expression is an integer or a floating-point value
+		if (!expression->get_type().is_numerical()) {
+			compilation_logger::emit_unary_operation_expects_numerical(node.get_declaration_line_number(), expression->get_type());
+			return false;
+		}
+
+		// decrement the expression
+		llvm::Value* decrement_result;
+		if (expression->get_type().is_floating_point()) {
+			decrement_result = m_builder.CreateFAdd(expression->get_value(), llvm::ConstantFP::get(expression->get_type().get_llvm_type(m_context), 1.0));
+		}
+		else {
+			decrement_result = m_builder.CreateAdd(expression->get_value(), llvm::ConstantInt::get(expression->get_type().get_llvm_type(m_context), 1));
+		}
+
+		out_value = new value("__pre_decrement", expression->get_type(), decrement_result);
+		return true;
 	}
 
 	bool codegen_visitor::visit_operator_addition_node(operator_addition_node& node, value*& out_value) {

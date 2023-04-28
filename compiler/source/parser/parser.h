@@ -142,6 +142,9 @@ namespace channel {
 		 */
 		bool parse_factor(node*& out_node, type expression_type);
 
+		bool parse_pre_operator(node*& out_node);
+		bool parse_post_operator(node* operand, node*& out_node);
+
 		/**
 		 * \brief Attempts to parse a primary expression node.
 		 * \param out_node Output AST node
@@ -178,10 +181,6 @@ namespace channel {
 		 * \return True if the expression is parsed successfully
 		 */
 		bool parse_bool(node*& out_node);
-
-		bool parse_post_operator(node*& out_node);
-
-		bool parse_pre_operator(node*& out_node);
 
 		/**
 		 * \brief Parses a negative number. The first expected token is a minus operator.
@@ -225,6 +224,8 @@ namespace channel {
 		 */
 		bool peek_is_function_call();
 
+		bool peek_is_assignment();
+
 		/**
 		 * \brief Checks if the next statement is an array index access.
 		 * \return True if the next statement is an array index access.
@@ -238,6 +239,8 @@ namespace channel {
 		 * \return Returns the next token
 		 */
 		token peek_next_token();
+
+		token peek_nth_token(u64 offset);
 
 		/**
 		 * \brief Creates a new numerical node with the value of '0'.

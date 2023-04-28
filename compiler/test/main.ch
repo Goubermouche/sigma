@@ -9,11 +9,9 @@
 //    - for
 //    - while
 
-// todo: post and pre ops 
-//  - handle parentheses 
-//  - handle arrays 
-
 i32 main() {
-	i32 integer = 3;
-	--integer;
+	i32* arr = new i32[3];
+	arr[1] = 20;
+	print("%i\n", arr[1]++);
+	print("%i\n", arr[1]+++ 100);
 }

@@ -43,17 +43,16 @@ void mandelbrot(i32* array, i32 cols, i32 rows) {
 			bool is_inside = true;
 
 			for(u64 n = 0; n < max_iterations; n++) {
-				if(is_inside) {
-					f64 z_re2 = z_re * z_re;
-					f64 z_im2 = z_im * z_im;
+				f64 z_re2 = z_re * z_re;
+				f64 z_im2 = z_im * z_im;
 
-					if(z_re2 + z_im2 > 4) {
-						is_inside = false;
-					}
-
-					z_im = 2 * z_re * z_im + c_im;
-					z_re = z_re2 - z_im2 + c_re;
+				if(z_re2 + z_im2 > 4) {
+					is_inside = false;
+					break;
 				}
+
+				z_im = 2 * z_re * z_im + c_im;
+				z_re = z_re2 - z_im2 + c_re;
 			}
 
 			if(is_inside) {

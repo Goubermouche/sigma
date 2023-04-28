@@ -1,8 +1,8 @@
 #include "scope.h"
 
 namespace channel {
-	scope::scope(scope* parent)
-		: m_parent(parent) {}
+	scope::scope(scope* parent, llvm::BasicBlock* loop_end_block)
+		: m_parent(parent), m_loop_end_block(loop_end_block) {}
 
 	void scope::insert_named_value(const std::string& name, value* value) {
 		m_named_values[name] = value;
@@ -22,6 +22,18 @@ namespace channel {
 		}
 
 		// value does not exist in current scope
+		return nullptr;
+	}
+
+	llvm::BasicBlock* scope::get_loop_end_block() const {
+		if(m_loop_end_block != nullptr) {
+			return m_loop_end_block;
+		}
+
+		if(m_parent != nullptr) {
+			return m_parent->get_loop_end_block();
+		}
+
 		return nullptr;
 	}
 

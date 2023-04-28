@@ -3,7 +3,7 @@
 
 namespace channel {
 	codegen_visitor::codegen_visitor(const parser& parser)
-		: m_parser(parser), m_scope(new scope(nullptr)), m_builder(m_context) {
+		: m_parser(parser), m_scope(new scope(nullptr, nullptr)), m_builder(m_context) {
 		m_module = std::make_unique<llvm::Module>("channel", m_context);
 
 		// printf

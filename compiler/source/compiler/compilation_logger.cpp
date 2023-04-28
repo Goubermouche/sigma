@@ -174,6 +174,13 @@ namespace channel {
 		);
 	}
 
+	void compilation_logger::emit_break_outside_loop_error(u64 line_number) {
+		emit_error(
+			line_number,
+			"invalid break statement detected outside a valid loop"
+		);
+	}
+
 	void compilation_logger::emit_unary_operation_expects_numerical(u64 line_number, type actual_type) {
 		emit_error(
 			line_number,

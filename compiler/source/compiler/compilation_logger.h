@@ -36,6 +36,7 @@ namespace channel{
 		static void emit_conjunction_operation_expects_booleans(u64 line_number, type left, type right);
 		static void emit_disjunction_operation_expects_booleans(u64 line_number, type left, type right);
 		static void emit_for_conditional_has_to_be_boolean(u64 line_number, type actual_type);
+		static void emit_break_outside_loop_error(u64 line_number);
 
 		static void emit_unary_operation_expects_numerical(u64 line_number, type actual_type);
 

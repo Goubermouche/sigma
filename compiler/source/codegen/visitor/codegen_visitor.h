@@ -53,6 +53,7 @@ namespace channel {
 		bool visit_if_else_node(if_else_node& node, value*& out_value) override;
 		bool visit_while_node(while_node& node, value*& out_value) override;
 		bool visit_for_node(for_node& node, value*& out_value) override;
+		bool visit_break_node(break_node& node, value*& out_value) override;
 
 		// types
 		// codegen_visitor_types.cpp

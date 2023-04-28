@@ -4,6 +4,7 @@
 #include "../abstract_syntax_tree/keywords/flow_control/if_else_node.h"
 #include "../abstract_syntax_tree/keywords/flow_control/while_node.h"
 #include "../abstract_syntax_tree/keywords/flow_control/for_node.h"
+#include "../abstract_syntax_tree/keywords/flow_control/break_node.h"
 
 namespace channel {
 	bool codegen_visitor::visit_return_node(return_node& node, value*& out_value) {
@@ -93,7 +94,7 @@ namespace channel {
         // process branch nodes and create appropriate inner statements
         for (u64 i = 0; i < branch_nodes.size(); ++i) {
             m_builder.SetInsertPoint(branch_blocks[i]);
-            m_scope = new scope(prev_scope);
+            m_scope = new scope(prev_scope, nullptr);
 
             for (const auto& statement : branch_nodes[i]) {
                 value* temp_statement_value;
@@ -143,7 +144,7 @@ namespace channel {
 
         // save the previous scope
         scope* prev_scope = m_scope;
-        m_scope = new scope(prev_scope);
+        m_scope = new scope(prev_scope, end_block);
 
         for(channel::node* n : node.get_statement_nodes()) {
             value* temp_value;
@@ -212,7 +213,7 @@ namespace channel {
 
         // save the previous scope
         scope* prev_scope = m_scope;
-        m_scope = new scope(prev_scope);
+        m_scope = new scope(prev_scope, end_block);
 
         // accept all inner statements
         for (channel::node* n : node.get_statement_nodes()) {
@@ -225,6 +226,25 @@ namespace channel {
         m_scope = prev_scope;
         m_builder.CreateBr(increment_block);
         m_builder.SetInsertPoint(end_block);
+        out_value = nullptr;
+        return true;
+    }
+
+    bool codegen_visitor::visit_break_node(break_node& node, value*& out_value) {
+        llvm::BasicBlock* end_block = m_scope->get_loop_end_block();
+        if (end_block == nullptr) {
+            // emit an error if there's no enclosing loop to break from
+            compilation_logger::emit_break_outside_loop_error(node.get_declaration_line_number());
+            return false;
+        }
+
+        m_builder.CreateBr(end_block);
+
+        // create a new basic block for the remaining loop body and set it as the current insert point
+        llvm::Function* parent_function = end_block->getParent();
+        llvm::BasicBlock* continue_block = llvm::BasicBlock::Create(m_context, "", parent_function);
+        m_builder.SetInsertPoint(continue_block);
+
         out_value = nullptr;
         return true;
     }

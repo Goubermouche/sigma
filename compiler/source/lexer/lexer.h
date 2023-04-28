@@ -95,7 +95,8 @@ namespace channel {
 			{ "else"  , token::keyword_else       },
 			{ "while" , token::keyword_while      },
 			{ "for"   , token::keyword_for        },
-
+			{ "break" , token::keyword_break      },
+			
 			{ "new"   , token::keyword_new        },
 		};
 

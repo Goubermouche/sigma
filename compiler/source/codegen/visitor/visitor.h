@@ -21,6 +21,7 @@ namespace channel {
     class if_else_node;
     class while_node;
     class for_node;
+    class break_node;
 
     // types
     // signed integers
@@ -97,6 +98,7 @@ namespace channel {
         virtual bool visit_if_else_node(if_else_node& node, value*& out_value) = 0;
         virtual bool visit_while_node(while_node& node, value*& out_value) = 0;
         virtual bool visit_for_node(for_node& node, value*& out_value) = 0;
+        virtual bool visit_break_node(break_node& node, value*& out_value) = 0;
 
         // types
         // signed integers

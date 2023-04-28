@@ -48,6 +48,7 @@ namespace channel {
 		keyword_else,                       // else
 		keyword_while,                      // while
 		keyword_for,                        // for
+		keyword_break,                      // break
 
 		keyword_new,                        // new
 
@@ -188,6 +189,8 @@ namespace channel {
 			return "keyword_while";
 		case token::keyword_for:
 			return "keyword_for";
+		case token::keyword_break:
+			return "keyword_break";
 
 		case token::keyword_new:
 			return "keyword_new";

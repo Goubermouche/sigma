@@ -18,6 +18,7 @@
 #include "../codegen/abstract_syntax_tree/keywords/flow_control/if_else_node.h"
 #include "../codegen/abstract_syntax_tree/keywords/flow_control/while_node.h"
 #include "../codegen/abstract_syntax_tree/keywords/flow_control/for_node.h"
+#include "../codegen/abstract_syntax_tree/keywords/flow_control/break_node.h"
 
 // types
 // signed integers
@@ -63,6 +64,7 @@
 #include "../codegen/abstract_syntax_tree/operators/binary/logical/operator_less_than_equal_to_node.h"
 #include "../codegen/abstract_syntax_tree/operators/binary/logical/operator_equals_node.h"
 #include "../codegen/abstract_syntax_tree/operators/binary/logical/operator_not_equals_node.h"
+#include "codegen/abstract_syntax_tree/keywords/flow_control/break_node.h"
 
 namespace channel {
 	parser::parser(const lexer& lexer)
@@ -273,6 +275,11 @@ namespace channel {
 				break;
 			case token::keyword_return:
 				if (!parse_return_statement(out_node)) {
+					return false;
+				}
+				break;
+			case token::keyword_break:
+				if (!parse_break_keyword(out_node)) {
 					return false;
 				}
 				break;
@@ -997,6 +1004,12 @@ namespace channel {
 	bool parser::parse_bool(node*& out_node) {
 		get_next_token(); // bool_literal_true || bool_literal_false (guaranteed)
 		out_node = new bool_node(m_current_token.line_number, m_current_token.token == token::bool_literal_true);
+		return true;
+	}
+
+	bool parser::parse_break_keyword(node*& out_node) {
+		get_next_token(); // keyword_break (guaranteed)
+		out_node = new break_node(m_current_token.line_number);
 		return true;
 	}
 

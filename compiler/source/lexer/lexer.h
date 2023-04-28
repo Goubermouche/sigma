@@ -89,9 +89,13 @@ namespace channel {
 			// text
 			{ "char"  , token::keyword_type_char  },
 
+			// control flow
 			{ "return", token::keyword_return     },
 			{ "if"    , token::keyword_if         },
 			{ "else"  , token::keyword_else       },
+			{ "while" , token::keyword_while      },
+			{ "for"   , token::keyword_for        },
+
 			{ "new"   , token::keyword_new        },
 		};
 

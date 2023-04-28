@@ -55,6 +55,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="source\codegen\abstract_syntax_tree\keywords\flow_control\for_node.h" />
     <ClInclude Include="source\codegen\abstract_syntax_tree\operators\unary\arithmetic\operator_post_decrement.h" />
     <ClInclude Include="source\codegen\abstract_syntax_tree\operators\unary\arithmetic\operator_post_increment.h" />
     <ClInclude Include="source\codegen\abstract_syntax_tree\operators\unary\arithmetic\operator_pre_decrement.h" />
@@ -118,8 +119,10 @@
     <ClInclude Include="source\codegen\abstract_syntax_tree\keywords\types\text\string_node.h" />
     <ClInclude Include="source\codegen\abstract_syntax_tree\variables\variable_node.h" />
     <ClInclude Include="source\codegen\abstract_syntax_tree\operators\binary\logical\operator_equals_node.h" />
+    <ClInclude Include="source\codegen\abstract_syntax_tree\keywords\flow_control\while_node.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="source\codegen\abstract_syntax_tree\keywords\flow_control\for_node.cpp" />
     <ClCompile Include="source\codegen\abstract_syntax_tree\operators\unary\arithmetic\operator_post_decrement.cpp" />
     <ClCompile Include="source\codegen\abstract_syntax_tree\operators\unary\arithmetic\operator_post_increment.cpp" />
     <ClCompile Include="source\codegen\abstract_syntax_tree\operators\unary\arithmetic\operator_pre_decrement.cpp" />
@@ -186,6 +189,7 @@
     <ClCompile Include="source\codegen\abstract_syntax_tree\keywords\types\text\string_node.cpp" />
     <ClCompile Include="source\codegen\abstract_syntax_tree\variables\variable_node.cpp" />
     <ClCompile Include="source\codegen\abstract_syntax_tree\operators\binary\logical\operator_equals_node.cpp" />
+    <ClCompile Include="source\codegen\abstract_syntax_tree\keywords\flow_control\while_node.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

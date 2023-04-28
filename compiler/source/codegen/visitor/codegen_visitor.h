@@ -51,6 +51,8 @@ namespace channel {
 		// codegen_visitor_flow_control.cpp
 		bool visit_return_node(return_node& node, value*& out_value) override;
 		bool visit_if_else_node(if_else_node& node, value*& out_value) override;
+		bool visit_while_node(while_node& node, value*& out_value) override;
+		bool visit_for_node(for_node& node, value*& out_value) override;
 
 		// types
 		// codegen_visitor_types.cpp

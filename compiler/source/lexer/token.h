@@ -44,9 +44,10 @@ namespace channel {
 		// statements
 		// flow control
 		keyword_return,                     // return
-
 		keyword_if,                         // if
 		keyword_else,                       // else
+		keyword_while,                      // while
+		keyword_for,                        // for
 
 		keyword_new,                        // new
 
@@ -132,6 +133,7 @@ namespace channel {
 			return "double_quote";
 
 		// keywords
+		// types
 		case token::keyword_type_void:
 			return "keyword_type_void";
 		case token::keyword_type_bool:
@@ -175,12 +177,18 @@ namespace channel {
 		case token::string_literal:
 			return "string_literal";
 
+		// flow control
 		case token::keyword_return:
 			return "keyword_return";
 		case token::keyword_if:
 			return "keyword_if";
 		case token::keyword_else:
 			return "keyword_else";
+		case token::keyword_while:
+			return "keyword_while";
+		case token::keyword_for:
+			return "keyword_for";
+
 		case token::keyword_new:
 			return "keyword_new";
 

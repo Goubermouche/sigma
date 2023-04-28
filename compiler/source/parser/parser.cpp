@@ -16,6 +16,8 @@
 // flow control
 #include "../codegen/abstract_syntax_tree/keywords/flow_control/return_node.h"
 #include "../codegen/abstract_syntax_tree/keywords/flow_control/if_else_node.h"
+#include "../codegen/abstract_syntax_tree/keywords/flow_control/while_node.h"
+#include "../codegen/abstract_syntax_tree/keywords/flow_control/for_node.h"
 
 // types
 // signed integers
@@ -308,6 +310,9 @@ namespace channel {
 			case token::keyword_if:
 				// return right away since we don't want to check for a semicolon at the end of the statement
 				return parse_if_else_statement(out_node);
+			case token::keyword_while:
+				// return right away since we don't want to check for a semicolon at the end of the statement
+				return parse_while_loop(out_node);
 			default:
 				compilation_logger::emit_unhandled_token_error(m_current_token.line_number, next_token);
 				return false; // return on failure
@@ -364,6 +369,7 @@ namespace channel {
 				if (!parse_local_statement(statement)) {
 					return false;
 				}
+
 				branch_statements.push_back(statement);
 			}
 			branches.push_back(branch_statements);
@@ -375,6 +381,42 @@ namespace channel {
 		}
 
 		out_node = new if_else_node(m_current_token.line_number, conditions, branches);
+		return true;
+	}
+
+	bool parser::parse_while_loop(node*& out_node) {
+		get_next_token(); // keyword_while (guaranteed)
+		const u64 line_number = m_current_token.line_number;
+
+		if(!expect_next_token(token::l_parenthesis)) {
+			return false;
+		}
+
+		node* loop_condition_node;
+		if(!parse_expression(loop_condition_node)) {
+			return false;
+		}
+
+		if (!expect_next_token(token::r_parenthesis)) {
+			return false;
+		}
+
+		if (!expect_next_token(token::l_brace)) {
+			return false;
+		}
+
+		std::vector<node*> loop_statements;
+		while (peek_next_token() != token::r_brace) {
+			node* statement;
+			if (!parse_local_statement(statement)) {
+				return false;
+			}
+
+			loop_statements.push_back(statement);
+		}
+
+		get_next_token(); // r_brace (guaranteed)
+		out_node = new while_node(line_number, loop_condition_node, loop_statements);
 		return true;
 	}
 

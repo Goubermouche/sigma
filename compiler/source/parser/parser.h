@@ -51,6 +51,8 @@ namespace channel {
 		 */
 		bool parse_if_else_statement(node*& out_node);
 
+		bool parse_while_loop(node*& out_node);
+
 		/**
 		 * \brief Attempts to parse an assignment operation. The first expected token is an identifier.
 		 * \param out_node Output AST node

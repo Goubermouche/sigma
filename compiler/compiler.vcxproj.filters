@@ -207,6 +207,8 @@
     <ClInclude Include="source\codegen\abstract_syntax_tree\operators\unary\arithmetic\operator_post_decrement.h" />
     <ClInclude Include="source\codegen\abstract_syntax_tree\operators\unary\arithmetic\operator_pre_increment.h" />
     <ClInclude Include="source\codegen\abstract_syntax_tree\operators\unary\arithmetic\operator_pre_decrement.h" />
+    <ClInclude Include="source\codegen\abstract_syntax_tree\keywords\flow_control\while_node.h" />
+    <ClInclude Include="source\codegen\abstract_syntax_tree\keywords\flow_control\for_node.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp" />
@@ -363,5 +365,7 @@
     <ClCompile Include="source\codegen\abstract_syntax_tree\operators\unary\arithmetic\operator_post_decrement.cpp" />
     <ClCompile Include="source\codegen\abstract_syntax_tree\operators\unary\arithmetic\operator_pre_increment.cpp" />
     <ClCompile Include="source\codegen\abstract_syntax_tree\operators\unary\arithmetic\operator_pre_decrement.cpp" />
+    <ClCompile Include="source\codegen\abstract_syntax_tree\keywords\flow_control\while_node.cpp" />
+    <ClCompile Include="source\codegen\abstract_syntax_tree\keywords\flow_control\for_node.cpp" />
   </ItemGroup>
 </Project>

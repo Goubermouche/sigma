@@ -2,6 +2,8 @@
 
 #include "../abstract_syntax_tree/keywords/flow_control/return_node.h"
 #include "../abstract_syntax_tree/keywords/flow_control/if_else_node.h"
+#include "../abstract_syntax_tree/keywords/flow_control/while_node.h"
+#include "../abstract_syntax_tree/keywords/flow_control/for_node.h"
 
 namespace channel {
 	bool codegen_visitor::visit_return_node(return_node& node, value*& out_value) {
@@ -110,4 +112,60 @@ namespace channel {
         out_value = nullptr;
         return true;
 	}
+
+    bool codegen_visitor::visit_while_node(while_node& node, value*& out_value) {
+        llvm::BasicBlock* entry_block = m_builder.GetInsertBlock();
+        llvm::Function* parent_function = entry_block->getParent();
+        // create the block for the end of the if-else statement
+        llvm::BasicBlock* after_if_else_block = llvm::BasicBlock::Create(m_context, "", parent_function);
+
+        llvm::BasicBlock* condition_block = llvm::BasicBlock::Create(m_context, "cond", parent_function);
+        llvm::BasicBlock* loop_body_block = llvm::BasicBlock::Create(m_context, "body", parent_function);
+
+        m_builder.CreateBr(condition_block);
+
+        // condition block
+        m_builder.SetInsertPoint(condition_block);
+
+        // accept the condition node
+        value* condition_value;
+        if (!node.get_loop_condition_node()->accept(*this, condition_value)) {
+            return false;
+        }
+
+        m_builder.CreateCondBr(
+            condition_value->get_value(),
+            loop_body_block,
+            after_if_else_block
+        );
+
+        // accept all statements in the loop body
+        m_builder.SetInsertPoint(loop_body_block);
+
+        // save the previous scope
+        scope* prev_scope = m_scope;
+        m_scope = new scope(prev_scope);
+
+        for(channel::node* n : node.get_statement_nodes()) {
+            value* temp_value;
+            if(!n->accept(*this, temp_value)) {
+                return false;
+            }
+        }
+
+        // restore the previous scope and set the insert point to the end block
+        m_scope = prev_scope;
+
+        m_builder.CreateBr(
+            condition_block
+        );
+        
+        m_builder.SetInsertPoint(after_if_else_block);
+        out_value = nullptr;
+        return true;
+    }
+
+    bool codegen_visitor::visit_for_node(for_node& node, value*& out_value) {
+        return false;
+    }
 }

@@ -14,6 +14,14 @@ namespace channel {
 			m_functions["print"] = new function(type(type::base::i32, 0), func, { {"format", type(type::base::character, 1)} }, true);
 		}
 
+		// putchar
+		{
+			const std::vector<llvm::Type*> arg_types = { llvm::Type::getInt8Ty(m_context) };
+			llvm::FunctionType* func_type = llvm::FunctionType::get(llvm::Type::getVoidTy(m_context), arg_types, false);
+			llvm::Function* func = llvm::Function::Create(func_type, llvm::Function::ExternalLinkage, "putchar", m_module.get());
+			m_functions["printc"] = new function(type(type::base::empty, 0), func, { {"character", type(type::base::character, 0)} }, false);
+		}
+
 		// malloc
 		{
 			const std::vector<llvm::Type*> arg_types = { llvm::Type::getInt64Ty(m_context) };

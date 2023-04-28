@@ -44,6 +44,8 @@ namespace channel {
 		 */
 		bool parse_local_statement(node*& out_node);
 
+		bool parse_local_statement_identifier(node*& out_node);
+
 		/**
 		 * \brief Attempts to parse an if else chain. The first expected token is the keyword_if token.
 		 * \param out_node Output AST node
@@ -52,6 +54,10 @@ namespace channel {
 		bool parse_if_else_statement(node*& out_node);
 
 		bool parse_while_loop(node*& out_node);
+
+		bool parse_loop_increment(node*& out_node);
+
+		bool parse_for_loop(node*& out_node);
 
 		/**
 		 * \brief Attempts to parse an assignment operation. The first expected token is an identifier.

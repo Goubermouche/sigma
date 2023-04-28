@@ -237,38 +237,9 @@ namespace channel {
 		else {
 			switch (next_token) {
 			case token::identifier:
-				if (peek_is_function_call()) {
-					// function call statement
-					if (!parse_function_call(out_node)) {
-						return false;
-					}
+				if(!parse_local_statement_identifier(out_node)) {
+					return false;
 				}
-				else if (peek_is_array_index_access()) {
-					// array assignment
-					if (!parse_array_assignment(out_node)) {
-						return false;
-					}
-				}
-				else if (peek_is_assignment()) {
-					// assignment statement
-					if (!parse_assignment(out_node)) {
-						return false;
-					}
-				}
-				else {
-					// create a simple access node
-					get_next_token(); // identifier (guaranteed)
-					out_node = new access_node(m_current_token.line_number, m_current_token.value);
-				}
-
-				// check for post unary operators after identifier, deep expression, or array index access
-				if (peek_next_token() == token::operator_increment || peek_next_token() == token::operator_decrement) {
-					node* operand = out_node;
-					if (!parse_post_operator(operand, out_node)) {
-						return false;
-					}
-				}
-
 				break;
 			case token::l_parenthesis:
 				// parse a deep expression (parenthesized expression)
@@ -283,7 +254,6 @@ namespace channel {
 						return false;
 					}
 				}
-
 				break;
 			case token::operator_increment:
 			case token::operator_decrement:
@@ -300,7 +270,6 @@ namespace channel {
 					compilation_logger::emit_cannot_apply_unary_function_to_non_identifier_error(m_current_token.line_number);
 					return false;
 				}
-
 				break;
 			case token::keyword_return:
 				if (!parse_return_statement(out_node)) {
@@ -313,6 +282,9 @@ namespace channel {
 			case token::keyword_while:
 				// return right away since we don't want to check for a semicolon at the end of the statement
 				return parse_while_loop(out_node);
+			case token::keyword_for:
+				// return right away since we don't want to check for a semicolon at the end of the statement
+				return parse_for_loop(out_node);
 			default:
 				compilation_logger::emit_unhandled_token_error(m_current_token.line_number, next_token);
 				return false; // return on failure
@@ -321,6 +293,42 @@ namespace channel {
 
 		if (!expect_next_token(token::semicolon)) {
 			return false;
+		}
+
+		return true;
+	}
+
+	bool parser::parse_local_statement_identifier(node*& out_node) {
+		if (peek_is_function_call()) {
+			// function call statement
+			if (!parse_function_call(out_node)) {
+				return false;
+			}
+		}
+		else if (peek_is_array_index_access()) {
+			// array assignment
+			if (!parse_array_assignment(out_node)) {
+				return false;
+			}
+		}
+		else if (peek_is_assignment()) {
+			// assignment statement
+			if (!parse_assignment(out_node)) {
+				return false;
+			}
+		}
+		else {
+			// create a simple access node
+			get_next_token(); // identifier (guaranteed)
+			out_node = new access_node(m_current_token.line_number, m_current_token.value);
+		}
+
+		// check for post unary operators after identifier, deep expression, or array index access
+		if (peek_next_token() == token::operator_increment || peek_next_token() == token::operator_decrement) {
+			node* operand = out_node;
+			if (!parse_post_operator(operand, out_node)) {
+				return false;
+			}
 		}
 
 		return true;
@@ -417,6 +425,131 @@ namespace channel {
 
 		get_next_token(); // r_brace (guaranteed)
 		out_node = new while_node(line_number, loop_condition_node, loop_statements);
+		return true;
+	}
+
+	bool parser::parse_loop_increment(node*& out_node) {
+		switch (const token next_token = peek_next_token()) {
+		case token::identifier:
+			if (!parse_local_statement_identifier(out_node)) {
+				return false;
+			}
+			break;
+		case token::operator_increment:
+		case token::operator_decrement:
+			// check if the next token is an identifier or an opening parenthesis
+			token next_next_token;
+			next_next_token = peek_nth_token(2);
+
+			if (next_next_token == token::identifier || next_next_token == token::l_parenthesis) {
+				if (!parse_pre_operator(out_node)) {
+					return false;
+				}
+			}
+			else {
+				compilation_logger::emit_cannot_apply_unary_function_to_non_identifier_error(m_current_token.line_number);
+				return false;
+			}
+			break;
+		case token::r_parenthesis:
+			break;
+		default:
+			compilation_logger::emit_unhandled_token_error(m_current_token.line_number, next_token);
+			return false;
+		}
+
+		return true;
+	}
+
+	bool parser::parse_for_loop(node*& out_node) {
+		get_next_token(); // keyword_for (guaranteed)
+		const u64 line_number = m_current_token.line_number;
+
+		if (!expect_next_token(token::l_parenthesis)) {
+			return false;
+		}
+
+		// parse the initialization section
+		node* loop_initialization_node;
+		const token next_token = peek_next_token();
+
+		if (is_token_type(next_token)) {
+			// statements beginning with a type keyword have to be variable declarations
+			if (!parse_declaration(loop_initialization_node, false)) {
+				return false;
+			}
+		}
+		else {
+			switch (next_token) {
+			case token::identifier:
+				if (!parse_local_statement_identifier(loop_initialization_node)) {
+					return false;
+				}
+				break;
+			default:
+				compilation_logger::emit_unhandled_token_error(m_current_token.line_number, next_token);
+				return false;
+			}
+		}
+
+		if(!expect_next_token(token::semicolon)) {
+			return false;
+		}
+
+		// parse the loop condition section
+		node* loop_condition_node;
+		if(!parse_expression(loop_condition_node)) {
+			return false;
+		}
+
+		if (!expect_next_token(token::semicolon)) {
+			return false;
+		}
+
+		// parse the increment section
+		std::vector<node*> post_iteration_nodes;
+
+		while (true) {
+			node* post_iteration_node;
+
+			if(peek_next_token() == token::r_parenthesis) {
+				break;
+			}
+
+			if (!parse_loop_increment(post_iteration_node)) {
+				return false;
+			}
+
+			post_iteration_nodes.push_back(post_iteration_node);
+
+			if (peek_next_token() != token::comma) {
+				break;
+			}
+
+			get_next_token(); // comma (guaranteed)
+		}
+
+		if(!expect_next_token(token::r_parenthesis)) {
+			return false;
+		}
+
+		if (!expect_next_token(token::l_brace)) {
+			return false;
+		}
+
+		// parse body statements
+		std::vector<node*> loop_statements;
+		while (peek_next_token() != token::r_brace) {
+			node* statement;
+			if (!parse_local_statement(statement)) {
+				return false;
+			}
+
+			loop_statements.push_back(statement);
+		}
+
+		get_next_token(); // r_brace (guaranteed)
+	 	out_node = new for_node(line_number, loop_initialization_node, loop_condition_node, post_iteration_nodes, loop_statements);
 		return true;
 	}
 
@@ -597,7 +730,7 @@ namespace channel {
 		node* value = nullptr;
 		if(peek_next_token() == token::operator_assignment) {
 			get_next_token(); // operator_assignment
-			if(!parse_expression(value)) {
+			if(!parse_expression(value, declaration_type)) {
 				return false;
 			}
 		}

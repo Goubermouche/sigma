@@ -34,8 +34,8 @@ namespace channel {
 	bool codegen_visitor::visit_if_else_node(if_else_node& node, value*& out_value) {
         llvm::BasicBlock* entry_block = m_builder.GetInsertBlock();
         llvm::Function* parent_function = entry_block->getParent();
-        // create the block for the end of the if-else statement
-        llvm::BasicBlock* after_if_else_block = llvm::BasicBlock::Create(m_context, "", parent_function);
+
+        llvm::BasicBlock* end_block = llvm::BasicBlock::Create(m_context, "", parent_function);
 
         // get condition and branch nodes
         const auto& condition_nodes = node.get_condition_nodes();
@@ -69,7 +69,7 @@ namespace channel {
         m_builder.CreateCondBr(
             condition_value->get_value(),
             branch_blocks[0],
-            condition_blocks.empty() ? (has_trailing_else ? branch_blocks.back() : after_if_else_block) : condition_blocks[0]
+            condition_blocks.empty() ? (has_trailing_else ? branch_blocks.back() : end_block) : condition_blocks[0]
         );
 
         // process remaining conditions and create appropriate branches
@@ -103,12 +103,12 @@ namespace channel {
             }
 
             // create a branch to the end block
-            m_builder.CreateBr(after_if_else_block);
+            m_builder.CreateBr(end_block);
         }
 
         // restore the previous scope and set the insert point to the end block
         m_scope = prev_scope;
-        m_builder.SetInsertPoint(after_if_else_block);
+        m_builder.SetInsertPoint(end_block);
         out_value = nullptr;
         return true;
 	}
@@ -116,11 +116,10 @@ namespace channel {
     bool codegen_visitor::visit_while_node(while_node& node, value*& out_value) {
         llvm::BasicBlock* entry_block = m_builder.GetInsertBlock();
         llvm::Function* parent_function = entry_block->getParent();
-        // create the block for the end of the if-else statement
-        llvm::BasicBlock* after_if_else_block = llvm::BasicBlock::Create(m_context, "", parent_function);
 
-        llvm::BasicBlock* condition_block = llvm::BasicBlock::Create(m_context, "cond", parent_function);
-        llvm::BasicBlock* loop_body_block = llvm::BasicBlock::Create(m_context, "body", parent_function);
+        llvm::BasicBlock* end_block = llvm::BasicBlock::Create(m_context, "", parent_function);
+        llvm::BasicBlock* condition_block = llvm::BasicBlock::Create(m_context, "", parent_function);
+        llvm::BasicBlock* loop_body_block = llvm::BasicBlock::Create(m_context, "", parent_function);
 
         m_builder.CreateBr(condition_block);
 
@@ -136,7 +135,7 @@ namespace channel {
         m_builder.CreateCondBr(
             condition_value->get_value(),
             loop_body_block,
-            after_if_else_block
+            end_block
         );
 
         // accept all statements in the loop body
@@ -155,17 +154,78 @@ namespace channel {
 
         // restore the previous scope and set the insert point to the end block
         m_scope = prev_scope;
-
-        m_builder.CreateBr(
-            condition_block
-        );
-        
-        m_builder.SetInsertPoint(after_if_else_block);
+        m_builder.CreateBr(condition_block);
+        m_builder.SetInsertPoint(end_block);
         out_value = nullptr;
         return true;
     }
 
     bool codegen_visitor::visit_for_node(for_node& node, value*& out_value) {
-        return false;
+        llvm::BasicBlock* entry_block = m_builder.GetInsertBlock();
+        llvm::Function* parent_function = entry_block->getParent();
+
+        llvm::BasicBlock* end_block = llvm::BasicBlock::Create(m_context, "", parent_function);
+        llvm::BasicBlock* condition_block = llvm::BasicBlock::Create(m_context, "", parent_function);
+        llvm::BasicBlock* increment_block = llvm::BasicBlock::Create(m_context, "", parent_function);
+        llvm::BasicBlock* loop_body_block = llvm::BasicBlock::Create(m_context, "", parent_function);
+
+        value* temp_value;
+
+        // create the index expression
+        if (!node.get_loop_initialization_node()->accept(*this, temp_value)) {
+            return false;
+        }
+
+        m_builder.CreateBr(condition_block);
+
+        // accept the condition block
+        m_builder.SetInsertPoint(condition_block);
+        value* condition_value;
+        if(!node.get_loop_condition_node()->accept(*this, condition_value)) {
+            return false;
+        }
+
+        // check if the conditional operator evaluates to a boolean
+        if(condition_value->get_type().get_base() != type::base::boolean || condition_value->get_type().is_pointer()) {
+            compilation_logger::emit_for_conditional_has_to_be_boolean(node.get_declaration_line_number(), condition_value->get_type());
+            return false;
+        }
+
+        m_builder.CreateCondBr(
+            condition_value->get_value(),
+            loop_body_block,
+            end_block
+        );
+
+        // create the increment block
+        m_builder.SetInsertPoint(increment_block);
+        for (channel::node* n : node.get_post_iteration_nodes()) {
+            if (!n->accept(*this, temp_value)) {
+                return false;
+            }
+        }
+
+        m_builder.CreateBr(condition_block);
+
+        // create the loop body block
+        m_builder.SetInsertPoint(loop_body_block);
+
+        // save the previous scope
+        scope* prev_scope = m_scope;
+        m_scope = new scope(prev_scope);
+
+        // accept all inner statements
+        for (channel::node* n : node.get_statement_nodes()) {
+            if (!n->accept(*this, temp_value)) {
+                return false;
+            }
+        }
+
+        // restore the previous scope and set the insert point to the end block
+        m_scope = prev_scope;
+        m_builder.CreateBr(increment_block);
+        m_builder.SetInsertPoint(end_block);
+        out_value = nullptr;
+        return true;
     }
 }

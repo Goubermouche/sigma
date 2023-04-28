@@ -26,7 +26,7 @@ namespace channel {
 			m_tokens.push_back({ tok, m_value_string });
 		}
 
-		// print_tokens();
+		print_tokens();
 
 		return true;
 	}

@@ -38,21 +38,29 @@
 #include "codegen/abstract_syntax_tree/keywords/types/bool_node.h"
 
 // operators
+// unary
 // arithmetic
-#include "../codegen/abstract_syntax_tree/operators/arithmetic/operator_addition_node.h"
-#include "../codegen/abstract_syntax_tree/operators/arithmetic/operator_division_node.h"
-#include "../codegen/abstract_syntax_tree/operators/arithmetic/operator_multiplication_node.h"
-#include "../codegen/abstract_syntax_tree/operators/arithmetic/operator_subtraction_node.h"
-#include "../codegen/abstract_syntax_tree/operators/arithmetic/operator_modulo_node.h"
+#include "../codegen/abstract_syntax_tree/operators/unary/arithmetic/operator_post_decrement.h"
+#include "../codegen/abstract_syntax_tree/operators/unary/arithmetic/operator_post_increment.h"
+#include "../codegen/abstract_syntax_tree/operators/unary/arithmetic/operator_pre_decrement.h"
+#include "../codegen/abstract_syntax_tree/operators/unary/arithmetic/operator_pre_increment.h"
+
+// binary
+// arithmetic
+#include "../codegen/abstract_syntax_tree/operators/binary/arithmetic/operator_addition_node.h"
+#include "../codegen/abstract_syntax_tree/operators/binary/arithmetic/operator_division_node.h"
+#include "../codegen/abstract_syntax_tree/operators/binary/arithmetic/operator_multiplication_node.h"
+#include "../codegen/abstract_syntax_tree/operators/binary/arithmetic/operator_subtraction_node.h"
+#include "../codegen/abstract_syntax_tree/operators/binary/arithmetic/operator_modulo_node.h"
 // logical
-#include "../codegen/abstract_syntax_tree/operators/logical/operator_conjunction_node.h"
-#include "../codegen/abstract_syntax_tree/operators/logical/operator_disjunction_node.h"
-#include "../codegen/abstract_syntax_tree/operators/logical/operator_greater_than_node.h"
-#include "../codegen/abstract_syntax_tree/operators/logical/operator_greater_than_equal_to_node.h"
-#include "../codegen/abstract_syntax_tree/operators/logical/operator_less_than_node.h"
-#include "../codegen/abstract_syntax_tree/operators/logical/operator_less_than_equal_to_node.h"
-#include "../codegen/abstract_syntax_tree/operators/logical/operator_equals_node.h"
-#include "../codegen/abstract_syntax_tree/operators/logical/operator_not_equals_node.h"
+#include "../codegen/abstract_syntax_tree/operators/binary/logical/operator_conjunction_node.h"
+#include "../codegen/abstract_syntax_tree/operators/binary/logical/operator_disjunction_node.h"
+#include "../codegen/abstract_syntax_tree/operators/binary/logical/operator_greater_than_node.h"
+#include "../codegen/abstract_syntax_tree/operators/binary/logical/operator_greater_than_equal_to_node.h"
+#include "../codegen/abstract_syntax_tree/operators/binary/logical/operator_less_than_node.h"
+#include "../codegen/abstract_syntax_tree/operators/binary/logical/operator_less_than_equal_to_node.h"
+#include "../codegen/abstract_syntax_tree/operators/binary/logical/operator_equals_node.h"
+#include "../codegen/abstract_syntax_tree/operators/binary/logical/operator_not_equals_node.h"
 
 namespace channel {
 	parser::parser(const lexer& lexer)
@@ -247,6 +255,12 @@ namespace channel {
 				}
 
 				break;
+			case token::operator_increment:
+			case token::operator_decrement:
+				if(!parse_pre_operator(out_node)) {
+					return false;
+				}
+				break;
 			case token::keyword_return:
 				if (!parse_return_statement(out_node)) {
 					return false;
@@ -367,6 +381,11 @@ namespace channel {
 	}
 
 	bool parser::parse_assignment(node*& out_node) {
+		if (peek_is_post_operator()) {
+			// parse a post operator
+			return parse_post_operator(out_node);
+		}
+
 		get_next_token(); // identifier (guaranteed)
 		node* variable = new variable_node(m_current_token.line_number, m_current_token.value);
 
@@ -683,7 +702,10 @@ namespace channel {
 			return parse_negative_number(out_node, expression_type);
 		case token::identifier:
 			// parse a function call or an assignment
-			return parse_function_call_or_assignment(out_node);
+			return parse_primary_identifier(out_node);
+		case token::operator_increment:
+		case token::operator_decrement:
+			return parse_pre_operator(out_node);
 		case token::l_parenthesis:
 			// parse a deep expression
 			return parse_deep_expression(out_node, expression_type);
@@ -751,6 +773,40 @@ namespace channel {
 		return true;
 	}
 
+	bool parser::parse_post_operator(node*& out_node) {
+		get_next_token(); // identifier (guaranteed)
+		const token_data data = m_current_token;
+
+		get_next_token(); // operator_increment || operator_decrement (guaranteed)
+
+		if(m_current_token.token == token::operator_increment) {
+			out_node = new operator_post_increment(data.line_number, new access_node(data.line_number, data.value));
+		}
+		else {
+			out_node = new operator_post_decrement(data.line_number, new access_node(data.line_number, data.value));
+		}
+
+		return true;
+	}
+
+	bool parser::parse_pre_operator(node*& out_node) {
+		get_next_token(); // operator_increment || operator_decrement (guaranteed)
+		const token_data data = m_current_token;
+
+		if(!expect_next_token(token::identifier)) {
+			return false;
+		}
+
+		if(data.token == token::operator_increment) {
+			out_node = new operator_pre_increment(data.line_number, new access_node(m_current_token.line_number, m_current_token.value));
+		}
+		else {
+			out_node = new operator_pre_decrement(data.line_number, new access_node(m_current_token.line_number, m_current_token.value));
+		}
+
+		return true;
+	}
+
 	bool parser::parse_negative_number(node*& out_node, type expression_type) {
 		get_next_token(); // operator_subtraction (guaranteed)
 
@@ -795,7 +851,7 @@ namespace channel {
 		return true;
 	}
 
-	bool parser::parse_function_call_or_assignment(node*& out_node) {
+	bool parser::parse_primary_identifier(node*& out_node) {
 		if (peek_is_function_call()) {
 			// parse a function call
 			return parse_function_call(out_node);
@@ -803,6 +859,11 @@ namespace channel {
 
 		if(peek_is_array_index_access()) {
 			return parse_array_access(out_node);
+		}
+
+		if(peek_is_post_operator()) {
+			// parse a post operator
+			return parse_post_operator(out_node);
 		}
 
 		// parse an assignment
@@ -873,6 +934,19 @@ namespace channel {
 		}
 
 		const bool result = m_lexer.peek_token().token == token::l_bracket;
+		m_lexer.synchronize_indices();
+		return result;
+	}
+
+	bool parser::peek_is_post_operator() {
+		// identifier
+		if (m_lexer.peek_token().token != token::identifier) {
+			m_lexer.synchronize_indices();
+			return false;
+		}
+
+		const token tok = m_lexer.peek_token().token;
+		const bool result = tok == token::operator_decrement || tok == token::operator_increment;
 		m_lexer.synchronize_indices();
 		return result;
 	}

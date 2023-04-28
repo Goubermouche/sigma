@@ -55,13 +55,18 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="source\codegen\abstract_syntax_tree\operators\logical\operator_greater_than_equal_to_node.h" />
-    <ClInclude Include="source\codegen\abstract_syntax_tree\operators\logical\operator_greater_than_node.h" />
-    <ClInclude Include="source\codegen\abstract_syntax_tree\operators\logical\operator_less_than_equal_to_node.h" />
-    <ClInclude Include="source\codegen\abstract_syntax_tree\operators\logical\operator_less_than_node.h" />
-    <ClInclude Include="source\codegen\abstract_syntax_tree\operators\logical\operator_not_equals_node.h" />
-    <ClInclude Include="source\codegen\abstract_syntax_tree\operators\logical\operator_conjunction_node.h" />
-    <ClInclude Include="source\codegen\abstract_syntax_tree\operators\logical\operator_disjunction_node.h" />
+    <ClInclude Include="source\codegen\abstract_syntax_tree\operators\unary\arithmetic\operator_post_decrement.h" />
+    <ClInclude Include="source\codegen\abstract_syntax_tree\operators\unary\arithmetic\operator_post_increment.h" />
+    <ClInclude Include="source\codegen\abstract_syntax_tree\operators\unary\arithmetic\operator_pre_decrement.h" />
+    <ClInclude Include="source\codegen\abstract_syntax_tree\operators\unary\arithmetic\operator_pre_increment.h" />
+    <ClInclude Include="source\codegen\abstract_syntax_tree\operators\unary\operator_unary.h" />
+    <ClInclude Include="source\codegen\abstract_syntax_tree\operators\binary\logical\operator_greater_than_equal_to_node.h" />
+    <ClInclude Include="source\codegen\abstract_syntax_tree\operators\binary\logical\operator_greater_than_node.h" />
+    <ClInclude Include="source\codegen\abstract_syntax_tree\operators\binary\logical\operator_less_than_equal_to_node.h" />
+    <ClInclude Include="source\codegen\abstract_syntax_tree\operators\binary\logical\operator_less_than_node.h" />
+    <ClInclude Include="source\codegen\abstract_syntax_tree\operators\binary\logical\operator_not_equals_node.h" />
+    <ClInclude Include="source\codegen\abstract_syntax_tree\operators\binary\logical\operator_conjunction_node.h" />
+    <ClInclude Include="source\codegen\abstract_syntax_tree\operators\binary\logical\operator_disjunction_node.h" />
     <ClInclude Include="source\codegen\abstract_syntax_tree\keywords\flow_control\if_else_node.h" />
     <ClInclude Include="source\codegen\abstract_syntax_tree\keywords\types\bool_node.h" />
     <ClInclude Include="source\codegen\abstract_syntax_tree\keywords\types\text\char_node.h" />
@@ -82,12 +87,12 @@
     <ClInclude Include="source\codegen\abstract_syntax_tree\keywords\types\unsigned_int\u64_node.h" />
     <ClInclude Include="source\codegen\abstract_syntax_tree\keywords\types\unsigned_int\u8_node.h" />
     <ClInclude Include="source\codegen\abstract_syntax_tree\node.h" />
-    <ClInclude Include="source\codegen\abstract_syntax_tree\operators\arithmetic\operator_addition_node.h" />
-    <ClInclude Include="source\codegen\abstract_syntax_tree\operators\operator_binary.h" />
-    <ClInclude Include="source\codegen\abstract_syntax_tree\operators\arithmetic\operator_division_node.h" />
-    <ClInclude Include="source\codegen\abstract_syntax_tree\operators\arithmetic\operator_modulo_node.h" />
-    <ClInclude Include="source\codegen\abstract_syntax_tree\operators\arithmetic\operator_multiplication_node.h" />
-    <ClInclude Include="source\codegen\abstract_syntax_tree\operators\arithmetic\operator_subtraction_node.h" />
+    <ClInclude Include="source\codegen\abstract_syntax_tree\operators\binary\arithmetic\operator_addition_node.h" />
+    <ClInclude Include="source\codegen\abstract_syntax_tree\operators\binary\operator_binary.h" />
+    <ClInclude Include="source\codegen\abstract_syntax_tree\operators\binary\arithmetic\operator_division_node.h" />
+    <ClInclude Include="source\codegen\abstract_syntax_tree\operators\binary\arithmetic\operator_modulo_node.h" />
+    <ClInclude Include="source\codegen\abstract_syntax_tree\operators\binary\arithmetic\operator_multiplication_node.h" />
+    <ClInclude Include="source\codegen\abstract_syntax_tree\operators\binary\arithmetic\operator_subtraction_node.h" />
     <ClInclude Include="source\codegen\abstract_syntax_tree\variables\assignment_node.h" />
     <ClInclude Include="source\codegen\abstract_syntax_tree\variables\declaration\declaration_node.h" />
     <ClInclude Include="source\codegen\abstract_syntax_tree\variables\declaration\global_declaration_node.h" />
@@ -112,16 +117,21 @@
     <ClInclude Include="source\utility\types.h" />
     <ClInclude Include="source\codegen\abstract_syntax_tree\keywords\types\text\string_node.h" />
     <ClInclude Include="source\codegen\abstract_syntax_tree\variables\variable_node.h" />
-    <ClInclude Include="source\codegen\abstract_syntax_tree\operators\logical\operator_equals_node.h" />
+    <ClInclude Include="source\codegen\abstract_syntax_tree\operators\binary\logical\operator_equals_node.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="source\codegen\abstract_syntax_tree\operators\logical\operator_greater_than_equal_to_node.cpp" />
-    <ClCompile Include="source\codegen\abstract_syntax_tree\operators\logical\operator_greater_than_node.cpp" />
-    <ClCompile Include="source\codegen\abstract_syntax_tree\operators\logical\operator_less_than_equal_to_node.cpp" />
-    <ClCompile Include="source\codegen\abstract_syntax_tree\operators\logical\operator_less_than_node.cpp" />
-    <ClCompile Include="source\codegen\abstract_syntax_tree\operators\logical\operator_not_equals_node.cpp" />
-    <ClCompile Include="source\codegen\abstract_syntax_tree\operators\logical\operator_conjunction_node.cpp" />
-    <ClCompile Include="source\codegen\abstract_syntax_tree\operators\logical\operator_disjunction_node.cpp" />
+    <ClCompile Include="source\codegen\abstract_syntax_tree\operators\unary\arithmetic\operator_post_decrement.cpp" />
+    <ClCompile Include="source\codegen\abstract_syntax_tree\operators\unary\arithmetic\operator_post_increment.cpp" />
+    <ClCompile Include="source\codegen\abstract_syntax_tree\operators\unary\arithmetic\operator_pre_decrement.cpp" />
+    <ClCompile Include="source\codegen\abstract_syntax_tree\operators\unary\arithmetic\operator_pre_increment.cpp" />
+    <ClCompile Include="source\codegen\abstract_syntax_tree\operators\unary\operator_unary.cpp" />
+    <ClCompile Include="source\codegen\abstract_syntax_tree\operators\binary\logical\operator_greater_than_equal_to_node.cpp" />
+    <ClCompile Include="source\codegen\abstract_syntax_tree\operators\binary\logical\operator_greater_than_node.cpp" />
+    <ClCompile Include="source\codegen\abstract_syntax_tree\operators\binary\logical\operator_less_than_equal_to_node.cpp" />
+    <ClCompile Include="source\codegen\abstract_syntax_tree\operators\binary\logical\operator_less_than_node.cpp" />
+    <ClCompile Include="source\codegen\abstract_syntax_tree\operators\binary\logical\operator_not_equals_node.cpp" />
+    <ClCompile Include="source\codegen\abstract_syntax_tree\operators\binary\logical\operator_conjunction_node.cpp" />
+    <ClCompile Include="source\codegen\abstract_syntax_tree\operators\binary\logical\operator_disjunction_node.cpp" />
     <ClCompile Include="source\codegen\abstract_syntax_tree\keywords\flow_control\if_else_node.cpp" />
     <ClCompile Include="source\codegen\abstract_syntax_tree\keywords\types\bool_node.cpp" />
     <ClCompile Include="source\codegen\abstract_syntax_tree\keywords\types\text\char_node.cpp" />
@@ -143,12 +153,12 @@
     <ClCompile Include="source\codegen\abstract_syntax_tree\keywords\types\unsigned_int\u64_node.cpp" />
     <ClCompile Include="source\codegen\abstract_syntax_tree\keywords\types\unsigned_int\u8_node.cpp" />
     <ClCompile Include="source\codegen\abstract_syntax_tree\node.cpp" />
-    <ClCompile Include="source\codegen\abstract_syntax_tree\operators\arithmetic\operator_addition_node.cpp" />
-    <ClCompile Include="source\codegen\abstract_syntax_tree\operators\operator_binary.cpp" />
-    <ClCompile Include="source\codegen\abstract_syntax_tree\operators\arithmetic\operator_division_node.cpp" />
-    <ClCompile Include="source\codegen\abstract_syntax_tree\operators\arithmetic\operator_modulo_node.cpp" />
-    <ClCompile Include="source\codegen\abstract_syntax_tree\operators\arithmetic\operator_multiplication_node.cpp" />
-    <ClCompile Include="source\codegen\abstract_syntax_tree\operators\arithmetic\operator_subtraction_node.cpp" />
+    <ClCompile Include="source\codegen\abstract_syntax_tree\operators\binary\arithmetic\operator_addition_node.cpp" />
+    <ClCompile Include="source\codegen\abstract_syntax_tree\operators\binary\operator_binary.cpp" />
+    <ClCompile Include="source\codegen\abstract_syntax_tree\operators\binary\arithmetic\operator_division_node.cpp" />
+    <ClCompile Include="source\codegen\abstract_syntax_tree\operators\binary\arithmetic\operator_modulo_node.cpp" />
+    <ClCompile Include="source\codegen\abstract_syntax_tree\operators\binary\arithmetic\operator_multiplication_node.cpp" />
+    <ClCompile Include="source\codegen\abstract_syntax_tree\operators\binary\arithmetic\operator_subtraction_node.cpp" />
     <ClCompile Include="source\codegen\abstract_syntax_tree\variables\assignment_node.cpp" />
     <ClCompile Include="source\codegen\abstract_syntax_tree\variables\declaration\declaration_node.cpp" />
     <ClCompile Include="source\codegen\abstract_syntax_tree\variables\declaration\global_declaration_node.cpp" />
@@ -175,7 +185,7 @@
     <ClCompile Include="source\utility\timer.cpp" />
     <ClCompile Include="source\codegen\abstract_syntax_tree\keywords\types\text\string_node.cpp" />
     <ClCompile Include="source\codegen\abstract_syntax_tree\variables\variable_node.cpp" />
-    <ClCompile Include="source\codegen\abstract_syntax_tree\operators\logical\operator_equals_node.cpp" />
+    <ClCompile Include="source\codegen\abstract_syntax_tree\operators\binary\logical\operator_equals_node.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

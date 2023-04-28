@@ -41,6 +41,13 @@ namespace channel {
     class bool_node;
 
     // operators
+    // unary
+    // arithmetic
+    class operator_post_decrement;
+    class operator_post_increment;
+    class operator_pre_decrement;
+    class operator_pre_increment;
+    // binary
     // arithmetic
     class operator_addition_node;
     class operator_subtraction_node;
@@ -108,6 +115,13 @@ namespace channel {
     	virtual bool visit_keyword_bool_node(bool_node& node, value*& out_value) = 0;
 
         // operators
+        // unary
+        // arithmetic
+        virtual bool visit_operator_post_decrement_node(operator_post_decrement& node, value*& out_value) = 0;
+        virtual bool visit_operator_post_increment_node(operator_post_increment& node, value*& out_value) = 0;
+        virtual bool visit_operator_pre_decrement_node(operator_pre_decrement& node, value*& out_value) = 0;
+        virtual bool visit_operator_pre_increment_node(operator_pre_increment& node, value*& out_value) = 0;
+        // binary
         // arithmetic
         virtual bool visit_operator_addition_node(operator_addition_node& node, value*& out_value) = 0;
         virtual bool visit_operator_subtraction_node(operator_subtraction_node& node, value*& out_value) = 0;

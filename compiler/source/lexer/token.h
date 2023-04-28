@@ -67,8 +67,10 @@ namespace channel {
 		// operators
 		// arithmetic operators
 		operator_addition,                  // + 
+		operator_increment,                 // ++
 		operator_addition_assignment,       // +=
 		operator_subtraction,               // -
+		operator_decrement,                 // --
 		operator_subtraction_assignment,    // -=
 		operator_multiplication,            // *
 		operator_multiplication_assignment, // *=
@@ -184,11 +186,15 @@ namespace channel {
 
 		// operators
 		case token::operator_addition:
-			return "operator_add";
+			return "operator_addition";
+		case token::operator_increment:
+			return "operator_increment";
 		case token::operator_addition_assignment:
 			return "operator_addition_assignment";
 		case token::operator_subtraction:
 			return "operator_subtraction";
+		case token::operator_decrement:
+			return "operator_decrement";
 		case token::operator_subtraction_assignment:
 			return "operator_subtraction_assignment";
 		case token::operator_multiplication:

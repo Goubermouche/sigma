@@ -75,6 +75,13 @@ namespace channel {
 
 		// operators
 		// codegen_visitor_operators.cpp
+		// unary
+		// arithmetic
+		bool visit_operator_post_decrement_node(operator_post_decrement& node, value*& out_value) override;
+		bool visit_operator_post_increment_node(operator_post_increment& node, value*& out_value) override;
+		bool visit_operator_pre_decrement_node(operator_pre_decrement& node, value*& out_value) override;
+		bool visit_operator_pre_increment_node(operator_pre_increment& node, value*& out_value) override;
+		// binary
 		// arithmetic
 		bool visit_operator_addition_node(operator_addition_node& node, value*& out_value) override;
 		bool visit_operator_subtraction_node(operator_subtraction_node& node, value*& out_value) override;

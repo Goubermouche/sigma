@@ -179,6 +179,10 @@ namespace channel {
 		 */
 		bool parse_bool(node*& out_node);
 
+		bool parse_post_operator(node*& out_node);
+
+		bool parse_pre_operator(node*& out_node);
+
 		/**
 		 * \brief Parses a negative number. The first expected token is a minus operator.
 		 * \param out_node Output AST node
@@ -199,7 +203,7 @@ namespace channel {
 		 * \param out_node Output AST node
 		 * \return True if the expression is parsed successfully
 		 */
-		bool parse_function_call_or_assignment(node*& out_node);
+		bool parse_primary_identifier(node*& out_node);
 
 		/**
 		 * \brief Parses a deep (nested) expression. The first expected token is a left parenthesis. 
@@ -226,6 +230,8 @@ namespace channel {
 		 * \return True if the next statement is an array index access.
 		 */
 		bool peek_is_array_index_access();
+
+		bool peek_is_post_operator();
 
 		/**
 		 * \brief Returns the next token without advancing the inner lexer.

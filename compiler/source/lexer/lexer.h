@@ -115,8 +115,10 @@ namespace channel {
 
 			// operators								      
 			{ "+" , token::operator_addition                  },
+			{ "++", token::operator_increment                 },
 			{ "+=", token::operator_addition_assignment       },
 			{ "-" , token::operator_subtraction               },
+			{ "--", token::operator_decrement                 },
 			{ "-=", token::operator_subtraction_assignment    },
 			{ "*" , token::operator_multiplication            },
 			{ "*=", token::operator_multiplication_assignment },

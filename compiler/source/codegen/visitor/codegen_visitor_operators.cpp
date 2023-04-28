@@ -1,22 +1,49 @@
 #include "codegen_visitor.h"
 
+// unary
 // arithmetic
-#include "../abstract_syntax_tree/operators/arithmetic/operator_addition_node.h"
-#include "../abstract_syntax_tree/operators/arithmetic/operator_subtraction_node.h"
-#include "../abstract_syntax_tree/operators/arithmetic/operator_multiplication_node.h"
-#include "../abstract_syntax_tree/operators/arithmetic/operator_division_node.h"
-#include "../abstract_syntax_tree/operators/arithmetic/operator_modulo_node.h"
+#include "../abstract_syntax_tree/operators/unary/arithmetic/operator_post_decrement.h"
+#include "../abstract_syntax_tree/operators/unary/arithmetic/operator_post_increment.h"
+#include "../abstract_syntax_tree/operators/unary/arithmetic/operator_pre_decrement.h"
+#include "../abstract_syntax_tree/operators/unary/arithmetic/operator_pre_increment.h"
+// binary
+// arithmetic
+#include "../abstract_syntax_tree/operators/binary/arithmetic/operator_addition_node.h"
+#include "../abstract_syntax_tree/operators/binary/arithmetic/operator_subtraction_node.h"
+#include "../abstract_syntax_tree/operators/binary/arithmetic/operator_multiplication_node.h"
+#include "../abstract_syntax_tree/operators/binary/arithmetic/operator_division_node.h"
+#include "../abstract_syntax_tree/operators/binary/arithmetic/operator_modulo_node.h"
 // logical
-#include "../abstract_syntax_tree/operators/logical/operator_conjunction_node.h"
-#include "../abstract_syntax_tree/operators/logical/operator_disjunction_node.h"
-#include "../abstract_syntax_tree/operators/logical/operator_greater_than_node.h"
-#include "../abstract_syntax_tree/operators/logical/operator_greater_than_equal_to_node.h"
-#include "../abstract_syntax_tree/operators/logical/operator_less_than_node.h"
-#include "../abstract_syntax_tree/operators/logical/operator_less_than_equal_to_node.h"
-#include "../abstract_syntax_tree/operators/logical/operator_equals_node.h"
-#include "../abstract_syntax_tree/operators/logical/operator_not_equals_node.h"
+#include "../abstract_syntax_tree/operators/binary/logical/operator_conjunction_node.h"
+#include "../abstract_syntax_tree/operators/binary/logical/operator_disjunction_node.h"
+#include "../abstract_syntax_tree/operators/binary/logical/operator_greater_than_node.h"
+#include "../abstract_syntax_tree/operators/binary/logical/operator_greater_than_equal_to_node.h"
+#include "../abstract_syntax_tree/operators/binary/logical/operator_less_than_node.h"
+#include "../abstract_syntax_tree/operators/binary/logical/operator_less_than_equal_to_node.h"
+#include "../abstract_syntax_tree/operators/binary/logical/operator_equals_node.h"
+#include "../abstract_syntax_tree/operators/binary/logical/operator_not_equals_node.h"
 
 namespace channel {
+	bool codegen_visitor::visit_operator_post_decrement_node(operator_post_decrement& node, value*& out_value) {
+		std::cout << "visit_operator_post_decrement_node\n";
+		return false;
+	}
+
+	bool codegen_visitor::visit_operator_post_increment_node(operator_post_increment& node, value*& out_value) {
+		std::cout << "visit_operator_post_increment_node\n";
+		return false;
+	}
+
+	bool codegen_visitor::visit_operator_pre_decrement_node(operator_pre_decrement& node, value*& out_value) {
+		std::cout << "visit_operator_pre_decrement_node\n";
+		return false;
+	}
+
+	bool codegen_visitor::visit_operator_pre_increment_node(operator_pre_increment& node, value*& out_value) {
+		std::cout << "visit_operator_pre_increment_node\n";
+		return false;
+	}
+
 	bool codegen_visitor::visit_operator_addition_node(operator_addition_node& node, value*& out_value) {
 		// accept the left expression
 		value* left;

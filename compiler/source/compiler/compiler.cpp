@@ -25,6 +25,7 @@ namespace channel {
 
 		// generate LLVM IR
 		lexer lexer(source_file);
+
 		if(!lexer.tokenize()) {
 			// lexer failure;
 			return;

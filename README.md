@@ -132,6 +132,8 @@ The expected output, after running the generated .exe, looks like this:
 0000000000000000000000000000000011111111111111111111111111110000000000000000000000000000000000000000
 0000000000000000000000000000000000111111111111111111111111000000000000000000000000000000000000000000
 ```
+## Tooling
+- [Syntax highlighting](https://github.com/Goubermouche/channel-syntax-highlighter)
 
 ### Dependencies 
 - [LLVM 16.0.0](https://github.com/llvm/llvm-project/tree/release/16.x)

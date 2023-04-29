@@ -101,16 +101,25 @@ namespace channel {
 			return false;
 		}
 
-		// decrement the expression
-		llvm::Value* decrement_result;
+		// increment the expression
+		llvm::Value* increment_result;
 		if (expression->get_type().is_floating_point()) {
-			decrement_result = m_builder.CreateFSub(expression->get_value(), llvm::ConstantFP::get(expression->get_type().get_llvm_type(m_context), 1.0));
+			increment_result = m_builder.CreateFSub(expression->get_value(), llvm::ConstantFP::get(expression->get_type().get_llvm_type(m_context), 1.0));
 		}
 		else {
-			decrement_result = m_builder.CreateSub(expression->get_value(), llvm::ConstantInt::get(expression->get_type().get_llvm_type(m_context), 1));
+			increment_result = m_builder.CreateSub(expression->get_value(), llvm::ConstantInt::get(expression->get_type().get_llvm_type(m_context), 1));
 		}
 
-		out_value = new value("__pre_decrement", expression->get_type(), decrement_result);
+		// assert that the pointer is not nullptr
+		ASSERT(expression->get_pointer() != nullptr, "pointer is nullptr");
+
+		// store the decremented value back to memory
+		m_builder.CreateStore(
+			increment_result,
+			expression->get_pointer()
+		);
+
+		out_value = new value("__pre_increment", expression->get_type(), increment_result);
 		return true;
 	}
 
@@ -127,16 +136,25 @@ namespace channel {
 			return false;
 		}
 
-		// decrement the expression
-		llvm::Value* decrement_result;
+		// increment the expression
+		llvm::Value* increment_result;
 		if (expression->get_type().is_floating_point()) {
-			decrement_result = m_builder.CreateFAdd(expression->get_value(), llvm::ConstantFP::get(expression->get_type().get_llvm_type(m_context), 1.0));
+			increment_result = m_builder.CreateFAdd(expression->get_value(), llvm::ConstantFP::get(expression->get_type().get_llvm_type(m_context), 1.0));
 		}
 		else {
-			decrement_result = m_builder.CreateAdd(expression->get_value(), llvm::ConstantInt::get(expression->get_type().get_llvm_type(m_context), 1));
+			increment_result = m_builder.CreateAdd(expression->get_value(), llvm::ConstantInt::get(expression->get_type().get_llvm_type(m_context), 1));
 		}
 
-		out_value = new value("__pre_decrement", expression->get_type(), decrement_result);
+		// assert that the pointer is not nullptr
+		ASSERT(expression->get_pointer() != nullptr, "pointer is nullptr");
+
+		// store the incremented value back to memory
+		m_builder.CreateStore(
+			increment_result,
+			expression->get_pointer()
+		);
+
+		out_value = new value("__pre_increment", expression->get_type(), increment_result);
 		return true;
 	}
 

@@ -20,23 +20,32 @@ namespace channel {
 	void compiler::compile(const std::string& source_file) {
 		std::cout << "compiling file '" << source_file << "'\n";
 
-		timer codegen_timer, compile_timer;
-		codegen_timer.start();
+		timer lexer_timer;
+		timer parser_timer;
+		timer codegen_timer;
+		timer compile_timer;
 
 		// generate LLVM IR
 		lexer lexer(source_file);
 
+		lexer_timer.start();
 		if(!lexer.tokenize()) {
 			// lexer failure;
 			return;
 		}
 
+		std::cout << "lexing finished (" << lexer_timer.elapsed() << "ms)\n";
+
+		parser_timer.start();
 		parser parser(lexer);
 		if(!parser.parse()) {
 			// parser failure
 			return;
 		}
 
+		std::cout << "parsing finished (" << parser_timer.elapsed() << "ms)\n";
+
+		codegen_timer.start();
 		codegen_visitor visitor(parser);
 		if (!visitor.generate()) {
 			// codegen failure
@@ -46,7 +55,7 @@ namespace channel {
 		std::cout << "codegen finished (" << codegen_timer.elapsed() << "ms)\n";
 		compile_timer.start();
 
-		visitor.print_intermediate_representation();
+		// visitor.print_intermediate_representation();
 
 		if (!visitor.verify_intermediate_representation()) {
 			// verification failure

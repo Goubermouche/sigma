@@ -279,10 +279,11 @@ namespace channel {
 		}
 
 		static std::unordered_map<type::base, i32> type_priority = {
-			{ type::base::i8 , 1}, {type::base::u8 , 1 },
-			{ type::base::i16, 2}, {type::base::u16, 2 },
-			{ type::base::i32, 3}, {type::base::u32, 3 },
-			{ type::base::i64, 4}, {type::base::u64, 4 }
+			// { type::base::boolean, 1 }, { type::base::boolean, 1 },
+			{ type::base::i8     , 1 }, { type::base::u8     , 1 },
+			{ type::base::i16    , 2 }, { type::base::u16    , 2 },
+			{ type::base::i32    , 3 }, { type::base::u32    , 3 },
+			{ type::base::i64    , 4 }, { type::base::u64    , 4 }
 		};
 
 		return type_priority[left_type.get_base()] > type_priority[right_type.get_base()] ? left_type : right_type;

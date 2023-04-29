@@ -60,9 +60,9 @@ namespace channel {
 	}
 
 	bool codegen_visitor::verify_intermediate_representation() const {
-		// check if we have a 'main' function
-		if(!has_main_entry_point()) {
-			compilation_logger::emit_main_entry_point_missing_error();
+		// check if we have a valid 'main' function
+		if(!verify_main_entry_point()) {
+			return false;
 		}
 
 		// check for IR errors
@@ -73,8 +73,22 @@ namespace channel {
 		return true;
 	}
 
-	bool codegen_visitor::has_main_entry_point() const {
-		return m_functions.at("main") != nullptr;
+	bool codegen_visitor::verify_main_entry_point() const {
+		const auto it = m_functions.find("main");
+
+		// check if we have a main entry point
+		if(it == m_functions.end()) {
+			compilation_logger::emit_main_entry_point_missing_error();
+			return false;
+		}
+
+		// check if the main entry point's return type is an i32
+		if(it->second->get_return_type().get_base() != type::base::i32) {
+			compilation_logger::emit_main_entry_point_has_to_be_i32(it->second->get_return_type());
+			return false;
+		}
+
+		return true;
 	}
 
 	bool codegen_visitor::cast_value(llvm::Value*& out_value, const value* source_value, type target_type, u64 line_number) {

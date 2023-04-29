@@ -104,7 +104,7 @@ namespace channel {
 		// utility
 		bool cast_value(llvm::Value*& out_value, const value* source_value, type target_type, u64 line_number);
 
-		bool has_main_entry_point() const;
+		bool verify_main_entry_point() const;
 		void initialize_global_variables();
 	private:
 		parser m_parser;

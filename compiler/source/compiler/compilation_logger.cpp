@@ -52,7 +52,13 @@ namespace channel {
 
 	void compilation_logger::emit_main_entry_point_missing_error() {
 		emit_error(
-			"unable to locate main entry point\n"
+			"unable to locate main entry point"
+		);
+	}
+
+	void compilation_logger::emit_main_entry_point_has_to_be_i32(type received_type) {
+		emit_error(
+			"unable to declare a main entry point of type '" + received_type.to_string() + "' (expecting '" + type(type::base::i32, 0).to_string() + "')"
 		);
 	}
 

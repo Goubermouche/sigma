@@ -24,7 +24,7 @@ Below is a simple example for visualizing a slizce of a [Mandelbrot set](https:/
 ```cpp
 // declare variables for the number of rows and columns, and a pointer to an array
 u64 rows = 20;
-u64 cols = 80;
+u64 cols = 100;
 i32* array;
 
 // function for setting the value of a specific pixel in the array

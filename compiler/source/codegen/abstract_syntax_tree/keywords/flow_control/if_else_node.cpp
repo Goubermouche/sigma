@@ -18,11 +18,11 @@ namespace channel {
 		// print inner statements
 		for (u64 i = 0; i < m_branch_nodes.size(); ++i) {
 			const bool has_body_statements = !m_branch_nodes[i].empty();
-			bool last = false;
+			bool last;
 
 			if (m_condition_nodes[i]) {
 				if (i == m_condition_nodes.size() - 2) {
-					last = !has_trailing_else || !m_branch_nodes[i + 1].empty();
+					last = has_body_statements ? false : !(has_trailing_else && !m_branch_nodes[i + 1].empty());
 				}
 				else {
 					last = !has_body_statements && (i == m_condition_nodes.size() - 1);

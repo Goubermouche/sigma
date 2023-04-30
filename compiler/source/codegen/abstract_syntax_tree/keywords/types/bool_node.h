@@ -9,7 +9,7 @@ namespace channel {
 	public:
 		bool_node(u64 line_number, bool value);
 		bool accept(visitor& visitor, value*& out_value) override;
-		std::string get_node_name() const override;
+		void print(int depth, const std::wstring& prefix, bool is_last) override;
 
 		bool get_value() const;
 	private:

@@ -1,4 +1,5 @@
 #include "string_node.h"
+#include "../../../../../utility/console.h"
 
 namespace channel {
 	string_node::string_node(u64 line_number, const std::string& value)
@@ -9,8 +10,8 @@ namespace channel {
 		return visitor.visit_keyword_string_node(*this, out_value);
 	}
 
-	std::string string_node::get_node_name() const {
-		return "string_node";
+	void string_node::print(int depth, const std::wstring& prefix, bool is_last) {
+		print_value(depth, prefix, L"StringLiteral", "'char[" + std::to_string(m_value.size()) + "]' '" + escape_string(m_value) + "'\n", is_last);
 	}
 
 	const std::string& string_node::get_value() const {

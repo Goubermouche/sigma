@@ -9,7 +9,7 @@ namespace channel {
 	public:
 		if_else_node(u64 line_number, const std::vector<node*>& condition_nodes, const std::vector<std::vector<node*>>& branch_nodes);
 		bool accept(visitor& visitor, value*& out_value) override;
-		std::string get_node_name() const override;
+		void print(int depth, const std::wstring& prefix, bool is_last) override;
 
 		const std::vector<node*>& get_condition_nodes();
 		const std::vector<std::vector<node*>>& get_branch_nodes();

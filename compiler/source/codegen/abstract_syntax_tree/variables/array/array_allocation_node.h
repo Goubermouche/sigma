@@ -6,7 +6,7 @@ namespace channel {
 	public:
 		array_allocation_node(u64 line_number, const type& array_element_type, node* array_element_count_node);
 		bool accept(visitor& visitor, value*& out_value) override;
-		std::string get_node_name() const override;
+		void print(int depth, const std::wstring& prefix, bool is_last) override;
 
 		const type& get_array_element_type() const;
 		node* get_array_element_count_node() const;

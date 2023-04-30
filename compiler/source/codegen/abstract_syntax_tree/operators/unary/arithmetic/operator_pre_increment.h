@@ -6,6 +6,6 @@ namespace channel {
 	public:
 		operator_pre_increment(u64 line_number, node* expression_node);
 		bool accept(visitor& visitor, value*& out_value) override;
-		std::string get_node_name() const override;
+		void print(int depth, const std::wstring& prefix, bool is_last) override;
 	};
 }

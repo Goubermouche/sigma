@@ -7,6 +7,9 @@
 #include <iomanip>
 #include <unordered_map>
 #include <chrono>
+#include <codecvt>
+#include <io.h>
+#include <fcntl.h>
 
 namespace channel {
 	namespace types {
@@ -25,6 +28,8 @@ namespace channel {
 		// floating point
 		using f32 = float;
 		using f64 = double;
+
+		static std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> s_ws_to_s_converter;
 	}
 
 	using namespace types;

@@ -9,8 +9,8 @@ namespace channel {
 		return visitor.visit_keyword_u8_node(*this, out_value);
 	}
 
-	std::string u8_node::get_node_name() const {
-		return "keyword_u8_node";
+	void u8_node::print(int depth, const std::wstring& prefix, bool is_last) {
+		print_value(depth, prefix, L"IntegerLiteral", "'u8' '" + std::to_string(m_value) + "'\n", is_last);
 	}
 
 	u64 u8_node::get_value() const {

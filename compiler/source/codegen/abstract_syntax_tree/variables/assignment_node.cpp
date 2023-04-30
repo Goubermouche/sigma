@@ -9,8 +9,13 @@ namespace channel {
 		return visitor.visit_assignment_node(*this, out_value);
 	}
 
-	std::string assignment_node::get_node_name() const {
-		return "assignment_node";
+	void assignment_node::print(int depth, const std::wstring& prefix, bool is_last) {
+		print_value(depth, prefix, L"VariableAssignment", "\n", is_last);
+		const std::wstring new_prefix = get_new_prefix(depth, prefix, is_last);
+
+		// print the inner statements
+		m_variable_node->print(depth + 1, new_prefix, false);
+		m_expression_node->print(depth + 1, new_prefix, true);
 	}
 
 	node* assignment_node::get_variable_node() const {

@@ -9,8 +9,16 @@ namespace channel {
 		return visitor.visit_array_access_node(*this, out_value);
 	}
 
-	std::string array_access_node::get_node_name() const {
-		return "array_access_node";
+	void array_access_node::print(int depth, const std::wstring& prefix, bool is_last) {
+		print_value(depth, prefix, L"ArrayAccess", "\n", is_last);
+		const std::wstring new_prefix = get_new_prefix(depth, prefix, is_last);
+
+		// print the inner statements
+		m_array_base->print(depth + 1, new_prefix, false);
+
+		for (u64 i = 0; i < m_array_element_index_nodes.size(); ++i) {
+			m_array_element_index_nodes[i]->print(depth + 1, new_prefix, i == m_array_element_index_nodes.size() - 1);
+		}
 	}
 
 	node* array_access_node::get_array_base_node() const {

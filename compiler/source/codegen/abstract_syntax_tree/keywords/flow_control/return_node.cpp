@@ -9,8 +9,12 @@ namespace channel {
 		return visitor.visit_return_node(*this, out_value);
 	}
 
-	std::string return_node::get_node_name() const {
-		return "return_node";
+	void return_node::print(int depth, const std::wstring& prefix, bool is_last) {
+		print_value(depth, prefix, L"ReturnStmt", "\n", is_last);
+		const std::wstring new_prefix = get_new_prefix(depth, prefix, is_last);
+
+		// print the inner statement
+		m_return_expression_node->print(depth + 1, new_prefix, true);
 	}
 
 	node* return_node::get_return_expression_node() const {

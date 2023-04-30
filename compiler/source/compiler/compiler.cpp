@@ -18,7 +18,7 @@
 
 namespace channel {
 	void compiler::compile(const std::string& source_file) {
-		std::cout << "compiling file '" << source_file << "'\n";
+		// std::cout << "compiling file '" << source_file << "'\n";
 
 		timer lexer_timer;
 		timer parser_timer;
@@ -34,7 +34,7 @@ namespace channel {
 			return;
 		}
 
-		std::cout << "lexing finished (" << lexer_timer.elapsed() << "ms)\n";
+		// std::cout << "lexing finished (" << lexer_timer.elapsed() << "ms)\n";
 
 		parser_timer.start();
 		parser parser(lexer);
@@ -43,8 +43,11 @@ namespace channel {
 			return;
 		}
 
-		std::cout << "parsing finished (" << parser_timer.elapsed() << "ms)\n";
+		// std::cout << "parsing finished (" << parser_timer.elapsed() << "ms)\n";
 
+		parser.get_abstract_syntax_tree().print_nodes();
+
+		return;
 		codegen_timer.start();
 		codegen_visitor visitor(parser);
 		if (!visitor.generate()) {

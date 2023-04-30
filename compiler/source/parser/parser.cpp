@@ -1,4 +1,7 @@
 #include "parser.h"
+
+#include "../codegen/abstract_syntax_tree/translation_unit_node.h"
+
 // functions
 #include "../codegen/abstract_syntax_tree/functions/function_call_node.h"
 #include "../codegen/abstract_syntax_tree/functions/function_node.h"
@@ -71,8 +74,11 @@ namespace channel {
 		: m_lexer(lexer) {}
 
 	bool parser::parse() {
+		std::vector<node*> nodes;
+
 		while(true) {
 			if(peek_next_token() == token::end_of_file) {
+				m_abstract_syntax_tree.add_node(new translation_unit_node(nodes));
 				return true;
 			}
 
@@ -91,11 +97,11 @@ namespace channel {
 				}
 			}
 
-			m_abstract_syntax_tree.push_back(node);
+			nodes.push_back(node);
 		}
 	}
 
-	const std::vector<node*>& parser::get_abstract_syntax_tree() {
+	const abstract_syntax_tree& parser::get_abstract_syntax_tree() {
 		return m_abstract_syntax_tree;
 	}
 

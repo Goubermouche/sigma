@@ -10,6 +10,6 @@ namespace channel {
 	public:
 		global_declaration_node(u64 line_number, const type& declaration_type, const std::string& declaration_identifier, node* expression_node = nullptr);
 		bool accept(visitor& visitor, value*& out_value) override;
-		std::string get_node_name() const override;
+		void print(int depth, const std::wstring& prefix, bool is_last) override;
 	};
 }

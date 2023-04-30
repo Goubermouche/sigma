@@ -2,6 +2,8 @@
 #include "codegen/abstract_syntax_tree/keywords/flow_control/if_else_node.h"
 
 namespace channel {
+    class translation_unit_node;
+
     // functions
     class function_node;
     class function_call_node;
@@ -78,6 +80,8 @@ namespace channel {
     class visitor {
     public:
         virtual ~visitor() = default;
+
+        virtual bool visit_translation_unit_node(translation_unit_node& node, value*& out_value) = 0;
 
         // functions
         virtual bool visit_function_node(function_node& node, value*& out_value) = 0;

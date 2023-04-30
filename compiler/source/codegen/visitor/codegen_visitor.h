@@ -27,6 +27,8 @@ namespace channel {
 		void print_intermediate_representation() const;
 		bool verify_intermediate_representation() const;
 	private:
+		bool visit_translation_unit_node(translation_unit_node& node, value*& out_value) override;
+
 		// functions
 		// codegen_visitor_functions.cpp
 		bool visit_function_node(function_node& node, value*& out_value) override;

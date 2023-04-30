@@ -9,8 +9,8 @@ namespace channel {
 		return visitor.visit_keyword_u64_node(*this, out_value);
 	}
 
-	std::string u64_node::get_node_name() const {
-		return "keyword_u64_node";
+	void u64_node::print(int depth, const std::wstring& prefix, bool is_last) {
+		print_value(depth, prefix, L"IntegerLiteral", "'u64' '" + std::to_string(m_value) + "'\n", is_last);
 	}
 
 	u64 u64_node::get_value() const {

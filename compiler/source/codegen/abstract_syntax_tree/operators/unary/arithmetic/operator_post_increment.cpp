@@ -9,7 +9,11 @@ namespace channel {
 		return visitor.visit_operator_post_increment_node(*this, out_value);
 	}
 
-	std::string operator_post_increment::get_node_name() const {
-		return "operator_post_increment";
+	void operator_post_increment::print(int depth, const std::wstring& prefix, bool is_last) {
+		print_value(depth, prefix, L"UnaryOperator", "'postfix' '++'\n", is_last);
+		const std::wstring new_prefix = get_new_prefix(depth, prefix, is_last);
+
+		// print the inner statement
+		get_expression_node()->print(depth + 1, new_prefix, true);
 	}
 }

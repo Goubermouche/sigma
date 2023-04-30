@@ -9,7 +9,7 @@ namespace channel {
 		return visitor.visit_break_node(*this, out_value);
 	}
 
-	std::string break_node::get_node_name() const {
-		return "break_node";
+	void break_node::print(int depth, const std::wstring& prefix, bool is_last) {
+		print_value(depth, prefix, L"BreakStmt", "\n", is_last);
 	}
 }

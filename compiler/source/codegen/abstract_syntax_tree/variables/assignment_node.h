@@ -9,7 +9,7 @@ namespace channel {
 	public:
 		assignment_node(u64 line_number, node* variable, node* expression_node);
 		bool accept(visitor& visitor, value*& out_value) override;
-		std::string get_node_name() const override;
+		void print(int depth, const std::wstring& prefix, bool is_last) override;
 
 		node* get_variable_node() const;
 		node* get_expression_node() const;

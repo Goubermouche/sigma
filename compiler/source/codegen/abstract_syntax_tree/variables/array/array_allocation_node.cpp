@@ -9,8 +9,12 @@ namespace channel {
 		return visitor.visit_allocation_node(*this, out_value);
 	}
 
-	std::string array_allocation_node::get_node_name() const {
-		return "array_allocation_node";
+	void array_allocation_node::print(int depth, const std::wstring& prefix, bool is_last) {
+		print_value(depth, prefix, L"ArrayAllocation", "'" + m_array_element_type.to_string() +"'\n", is_last);
+		const std::wstring new_prefix = get_new_prefix(depth, prefix, is_last);
+
+		// print the inner statement
+		m_array_element_count->print(depth + 1, new_prefix, true);
 	}
 
 	const type& array_allocation_node::get_array_element_type() const {

@@ -9,8 +9,8 @@ namespace channel {
         return visitor.visit_access_node(*this, out_value);
     }
 
-    std::string access_node::get_node_name() const {
-        return "access_node";
+    void access_node::print(int depth, const std::wstring& prefix, bool is_last) {
+        print_value(depth, prefix, L"VariableAccess", "'" + m_variable_identifier +"'\n", is_last);
     }
 
     const std::string& access_node::get_variable_identifier() const {

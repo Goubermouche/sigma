@@ -161,13 +161,13 @@ namespace channel {
 	bool codegen_visitor::visit_operator_addition_node(operator_addition_node& node, value*& out_value) {
 		// accept the left expression
 		value* left;
-		if (!node.left_expression_node->accept(*this, left)) {
+		if (!node.get_left_expression_node()->accept(*this, left)) {
 			return false;
 		}
 
 		// accept the right expression
 		value* right;
-		if (!node.right_expression_node->accept(*this, right)) {
+		if (!node.get_right_expression_node()->accept(*this, right)) {
 			return false;
 		}
 
@@ -225,13 +225,13 @@ namespace channel {
 	bool codegen_visitor::visit_operator_subtraction_node(operator_subtraction_node& node, value*& out_value) {
 		// accept the left expression
 		value* left;
-		if (!node.left_expression_node->accept(*this, left)) {
+		if (!node.get_left_expression_node()->accept(*this, left)) {
 			return false;
 		}
 
 		// accept the right expression
 		value* right;
-		if (!node.right_expression_node->accept(*this, right)) {
+		if (!node.get_right_expression_node()->accept(*this, right)) {
 			return false;
 		}
 
@@ -289,13 +289,13 @@ namespace channel {
 	bool codegen_visitor::visit_operator_multiplication_node(operator_multiplication_node& node, value*& out_value) {
 		// accept the left expression
 		value* left;
-		if (!node.left_expression_node->accept(*this, left)) {
+		if (!node.get_left_expression_node()->accept(*this, left)) {
 			return false;
 		}
 
 		// accept the right expression
 		value* right;
-		if (!node.right_expression_node->accept(*this, right)) {
+		if (!node.get_right_expression_node()->accept(*this, right)) {
 			return false;
 		}
 
@@ -353,13 +353,13 @@ namespace channel {
 	bool codegen_visitor::visit_operator_division_node(operator_division_node& node, value*& out_value) {
 		// accept the left expression
 		value* left;
-		if (!node.left_expression_node->accept(*this, left)) {
+		if (!node.get_left_expression_node()->accept(*this, left)) {
 			return false;
 		}
 
 		// accept the right expression
 		value* right;
-		if (!node.right_expression_node->accept(*this, right)) {
+		if (!node.get_right_expression_node()->accept(*this, right)) {
 			return false;
 		}
 
@@ -416,13 +416,13 @@ namespace channel {
 	bool codegen_visitor::visit_operator_modulo_node(operator_modulo_node& node, value*& out_value) {
 		// accept the left expression
 		value* left;
-		if (!node.left_expression_node->accept(*this, left)) {
+		if (!node.get_left_expression_node()->accept(*this, left)) {
 			return false;
 		}
 
 		// accept the right expression
 		value* right;
-		if (!node.right_expression_node->accept(*this, right)) {
+		if (!node.get_right_expression_node()->accept(*this, right)) {
 			return false;
 		}
 
@@ -479,13 +479,13 @@ namespace channel {
 	bool codegen_visitor::visit_operator_logical_conjunction_node(operator_conjunction_node& node, value*& out_value) {
 		// accept the left expression
 		value* left;
-		if (!node.left_expression_node->accept(*this, left)) {
+		if (!node.get_left_expression_node()->accept(*this, left)) {
 			return false;
 		}
 
 		// accept the right expression
 		value* right;
-		if (!node.right_expression_node->accept(*this, right)) {
+		if (!node.get_right_expression_node()->accept(*this, right)) {
 			return false;
 		}
 
@@ -504,13 +504,13 @@ namespace channel {
 	bool codegen_visitor::visit_operator_logical_disjunction_node(operator_disjunction_node& node, value*& out_value) {
 		// accept the left expression
 		value* left;
-		if (!node.left_expression_node->accept(*this, left)) {
+		if (!node.get_left_expression_node()->accept(*this, left)) {
 			return false;
 		}
 
 		// accept the right expression
 		value* right;
-		if (!node.right_expression_node->accept(*this, right)) {
+		if (!node.get_right_expression_node()->accept(*this, right)) {
 			return false;
 		}
 
@@ -529,13 +529,13 @@ namespace channel {
 	bool codegen_visitor::visit_operator_greater_than_node(operator_greater_than_node& node, value*& out_value) {
 		// accept the left expression
 		value* left;
-		if (!node.left_expression_node->accept(*this, left)) {
+		if (!node.get_left_expression_node()->accept(*this, left)) {
 			return false;
 		}
 
 		// accept the right expression
 		value* right;
-		if (!node.right_expression_node->accept(*this, right)) {
+		if (!node.get_right_expression_node()->accept(*this, right)) {
 			return false;
 		}
 
@@ -572,13 +572,13 @@ namespace channel {
 	bool codegen_visitor::visit_operator_greater_than_equal_to(operator_greater_than_equal_to_node& node, value*& out_value) {
 		// accept the left expression
 		value* left;
-		if (!node.left_expression_node->accept(*this, left)) {
+		if (!node.get_left_expression_node()->accept(*this, left)) {
 			return false;
 		}
 
 		// accept the right expression
 		value* right;
-		if (!node.right_expression_node->accept(*this, right)) {
+		if (!node.get_right_expression_node()->accept(*this, right)) {
 			return false;
 		}
 
@@ -615,13 +615,13 @@ namespace channel {
 	bool codegen_visitor::visit_operator_less_than_node(operator_less_than_node& node, value*& out_value) {
 		// accept the left expression
 		value* left;
-		if (!node.left_expression_node->accept(*this, left)) {
+		if (!node.get_left_expression_node()->accept(*this, left)) {
 			return false;
 		}
 
 		// accept the right expression
 		value* right;
-		if (!node.right_expression_node->accept(*this, right)) {
+		if (!node.get_right_expression_node()->accept(*this, right)) {
 			return false;
 		}
 
@@ -658,13 +658,13 @@ namespace channel {
 	bool codegen_visitor::visit_operator_less_than_equal_to_node(operator_less_than_equal_to_node& node, value*& out_value) {
 		// accept the left expression
 		value* left;
-		if (!node.left_expression_node->accept(*this, left)) {
+		if (!node.get_left_expression_node()->accept(*this, left)) {
 			return false;
 		}
 
 		// accept the right expression
 		value* right;
-		if (!node.right_expression_node->accept(*this, right)) {
+		if (!node.get_right_expression_node()->accept(*this, right)) {
 			return false;
 		}
 
@@ -701,13 +701,13 @@ namespace channel {
 	bool codegen_visitor::visit_operator_equals_node(operator_equals_node& node, value*& out_value) {
 		// accept the left expression
 		value* left;
-		if (!node.left_expression_node->accept(*this, left)) {
+		if (!node.get_left_expression_node()->accept(*this, left)) {
 			return false;
 		}
 
 		// accept the right expression
 		value* right;
-		if (!node.right_expression_node->accept(*this, right)) {
+		if (!node.get_right_expression_node()->accept(*this, right)) {
 			return false;
 		}
 
@@ -739,13 +739,13 @@ namespace channel {
 	bool codegen_visitor::visit_operator_not_equals_node(operator_not_equals_node& node, value*& out_value) {
 		// accept the left expression
 		value* left;
-		if (!node.left_expression_node->accept(*this, left)) {
+		if (!node.get_left_expression_node()->accept(*this, left)) {
 			return false;
 		}
 
 		// accept the right expression
 		value* right;
-		if (!node.right_expression_node->accept(*this, right)) {
+		if (!node.get_right_expression_node()->accept(*this, right)) {
 			return false;
 		}
 

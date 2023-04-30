@@ -9,7 +9,11 @@ namespace channel {
 		return visitor.visit_operator_post_decrement_node(*this, out_value);
 	}
 
-	std::string operator_post_decrement::get_node_name() const {
-		return "operator_post_decrement";
+	void operator_post_decrement::print(int depth, const std::wstring& prefix, bool is_last) {
+		print_value(depth, prefix, L"UnaryOperator", "'postfix' '--'\n", is_last);
+		const std::wstring new_prefix = get_new_prefix(depth, prefix, is_last);
+
+		// print the inner statement
+		get_expression_node()->print(depth + 1, new_prefix, true);
 	}
 }

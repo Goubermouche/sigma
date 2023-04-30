@@ -1,6 +1,8 @@
 #include "codegen_visitor.h"
 #include <llvm/IR/Verifier.h>
 
+#include "codegen/abstract_syntax_tree/translation_unit_node.h"
+
 namespace channel {
 	codegen_visitor::codegen_visitor(const parser& parser)
 		: m_parser(parser), m_scope(new scope(nullptr, nullptr)), m_builder(m_context) {
@@ -34,7 +36,9 @@ namespace channel {
 	bool codegen_visitor::generate() {
 		// walk the abstract syntax tree
 		value* tmp_value;
-		for (node* n : m_parser.get_abstract_syntax_tree()) {
+		abstract_syntax_tree tree = m_parser.get_abstract_syntax_tree();
+
+		for (node* n : tree) {
 			if(!n->accept(*this, tmp_value)) {
 				return false;
 			}
@@ -68,6 +72,17 @@ namespace channel {
 		// check for IR errors
 		if (llvm::verifyModule(*m_module, &llvm::outs())) {
 			return false;
+		}
+
+		return true;
+	}
+
+	bool codegen_visitor::visit_translation_unit_node(translation_unit_node& node, value*& out_value) {
+		value* temp_value;
+		for(const auto& n : node.get_nodes()) {
+			if(!n->accept(*this, temp_value)) {
+				return false;
+			}
 		}
 
 		return true;

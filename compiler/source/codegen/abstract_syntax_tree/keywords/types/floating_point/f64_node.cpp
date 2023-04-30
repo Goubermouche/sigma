@@ -9,8 +9,8 @@ namespace channel {
 		return visitor.visit_keyword_f64_node(*this, out_value);
 	}
 
-	std::string f64_node::get_node_name() const {
-		return "keyword_f64_node";
+	void f64_node::print(int depth, const std::wstring& prefix, bool is_last) {
+		print_value(depth, prefix, L"FloatingLiteral", "'f64' '" + std::to_string(m_value) + "'\n", is_last);
 	}
 
 	f64 f64_node::get_value() const {

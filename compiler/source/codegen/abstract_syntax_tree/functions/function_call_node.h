@@ -9,7 +9,7 @@ namespace channel {
 	public:
 		function_call_node(u64 line_number, const std::string& function_identifier, const std::vector<node*>& function_arguments);
 		bool accept(visitor& visitor, value*& out_value) override;
-		std::string get_node_name() const override;
+		void print(int depth, const std::wstring& prefix, bool is_last) override;
 
 		const std::string& get_function_identifier() const;
 		const std::vector<node*>& get_function_arguments() const;

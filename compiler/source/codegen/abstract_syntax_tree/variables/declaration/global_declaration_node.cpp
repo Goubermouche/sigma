@@ -9,7 +9,15 @@ namespace channel {
 		return visitor.visit_global_declaration_node(*this, out_value);
 	}
 
-	std::string global_declaration_node::get_node_name() const {
-		return "global_declaration_node";
+	void global_declaration_node::print(int depth, const std::wstring& prefix, bool is_last) {
+		print_value(depth, prefix, L"GlobalDecl", "'" + get_declaration_identifier() + "' '" + get_declaration_type().to_string() + "'\n", is_last);
+		const std::wstring new_prefix = get_new_prefix(depth, prefix, is_last);
+
+		// print the inner statement
+		node* expression = get_expression_node();
+
+		if(expression != nullptr) {
+			expression->print(depth + 1, new_prefix, true);
+		}
 	}
 }

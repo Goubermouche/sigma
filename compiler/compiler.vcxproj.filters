@@ -210,6 +210,8 @@
     <ClInclude Include="source\codegen\abstract_syntax_tree\keywords\flow_control\while_node.h" />
     <ClInclude Include="source\codegen\abstract_syntax_tree\keywords\flow_control\for_node.h" />
     <ClInclude Include="source\codegen\abstract_syntax_tree\keywords\flow_control\break_node.h" />
+    <ClInclude Include="source\codegen\abstract_syntax_tree\abstract_syntax_tree.h" />
+    <ClInclude Include="source\codegen\abstract_syntax_tree\translation_unit_node.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp" />
@@ -369,5 +371,7 @@
     <ClCompile Include="source\codegen\abstract_syntax_tree\keywords\flow_control\while_node.cpp" />
     <ClCompile Include="source\codegen\abstract_syntax_tree\keywords\flow_control\for_node.cpp" />
     <ClCompile Include="source\codegen\abstract_syntax_tree\keywords\flow_control\break_node.cpp" />
+    <ClCompile Include="source\codegen\abstract_syntax_tree\abstract_syntax_tree.cpp" />
+    <ClCompile Include="source\codegen\abstract_syntax_tree\translation_unit_node.cpp" />
   </ItemGroup>
 </Project>

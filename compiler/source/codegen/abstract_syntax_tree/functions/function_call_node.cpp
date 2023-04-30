@@ -9,8 +9,14 @@ namespace channel {
 		return visitor.visit_function_call_node(*this, out_value);
 	}
 
-	std::string function_call_node::get_node_name() const {
-		return "function_call_node";
+	void function_call_node::print(int depth, const std::wstring& prefix, bool is_last) {
+		print_value(depth, prefix, L"FunctionCall", "'" + m_function_name + "'\n", is_last);
+		const std::wstring new_prefix = get_new_prefix(depth, prefix, is_last);
+
+		// print arguments
+		for (u64 i = 0; i < m_function_arguments.size(); ++i) {
+			m_function_arguments[i]->print(depth + 1, new_prefix, i == m_function_arguments.size() - 1);
+		}
 	}
 
 	const std::string& function_call_node::get_function_identifier() const	{

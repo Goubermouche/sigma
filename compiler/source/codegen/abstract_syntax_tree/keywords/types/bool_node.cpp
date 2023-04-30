@@ -9,8 +9,9 @@ namespace channel {
 		return visitor.visit_keyword_bool_node(*this, out_value);
 	}
 
-	std::string bool_node::get_node_name() const {
-		return "bool_node";
+	void bool_node::print(int depth, const std::wstring& prefix, bool is_last) {
+		const std::string value_string = m_value ? "true" : "false";
+		print_value(depth, prefix, L"BoolLiteral", "'bool' '" + value_string + "'\n", is_last);
 	}
 
 	bool bool_node::get_value() const {

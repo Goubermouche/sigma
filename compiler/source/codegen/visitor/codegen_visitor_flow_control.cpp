@@ -146,7 +146,7 @@ namespace channel {
         scope* prev_scope = m_scope;
         m_scope = new scope(prev_scope, end_block);
 
-        for(channel::node* n : node.get_statement_nodes()) {
+        for(channel::node* n : node.get_loop_body_nodes()) {
             value* temp_value;
             if(!n->accept(*this, temp_value)) {
                 return false;
@@ -216,7 +216,7 @@ namespace channel {
         m_scope = new scope(prev_scope, end_block);
 
         // accept all inner statements
-        for (channel::node* n : node.get_statement_nodes()) {
+        for (channel::node* n : node.get_loop_body_nodes()) {
             if (!n->accept(*this, temp_value)) {
                 return false;
             }

@@ -7,13 +7,13 @@ namespace channel {
      */
 	class operator_binary : public node	{
     public:
-        operator_binary(u64 line_number, node* left_expression_node, node* right_expression_node);
+        operator_binary(u64 line_number, node_ptr left_expression_node, node_ptr right_expression_node);
         ~operator_binary() override;
 
-        node* get_left_expression_node() const;
-        node* get_right_expression_node() const;
+        node_ptr get_left_expression_node() const;
+        node_ptr get_right_expression_node() const;
 	private:
-        node* m_left_expression_node;
-        node* m_right_expression_node;
+        node_ptr m_left_expression_node;
+        node_ptr m_right_expression_node;
 	};
 }

@@ -1,10 +1,10 @@
 #include "while_node.h"
 
 namespace channel {
-	while_node::while_node(u64 line_number, node* loop_condition_node, const std::vector<node*>& statement_nodes)
+	while_node::while_node(u64 line_number, node_ptr loop_condition_node, const std::vector<node_ptr>& statement_nodes)
 		: node(line_number), m_loop_condition_node(loop_condition_node), m_loop_body_nodes(statement_nodes) {}
 
-	bool while_node::accept(visitor& visitor, value*& out_value) {
+	bool while_node::accept(visitor& visitor, value_ptr& out_value) {
 		LOG_NODE_NAME(while_node);
 		return visitor.visit_while_node(*this, out_value);
 	}
@@ -23,11 +23,11 @@ namespace channel {
 		}
 	}
 
-	node* while_node::get_loop_condition_node() const {
+	node_ptr while_node::get_loop_condition_node() const {
 		return m_loop_condition_node;
 	}
 
-	const std::vector<node*>& while_node::get_loop_body_nodes() const {
+	const std::vector<node_ptr>& while_node::get_loop_body_nodes() const {
 		return m_loop_body_nodes;
 	}
 }

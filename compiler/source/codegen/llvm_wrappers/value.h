@@ -2,6 +2,9 @@
 #include "../type.h"
 
 namespace channel {
+	class value;
+	using value_ptr = std::shared_ptr<value>;
+
 	/**
 	 * \brief Wrapper around llvm::Value*, provides utilities such as additional type information
 	 */

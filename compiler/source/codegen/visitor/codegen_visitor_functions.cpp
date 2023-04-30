@@ -4,7 +4,7 @@
 #include "../abstract_syntax_tree/functions/function_node.h"
 
 namespace channel {
-	bool codegen_visitor::visit_function_node(function_node& node, value*& out_value) {
+	bool codegen_visitor::visit_function_node(function_node& node, value_ptr& out_value) {
 		// get the function return type
 		llvm::Type* return_type = node.get_function_return_type().get_llvm_type(m_context);
 
@@ -51,7 +51,7 @@ namespace channel {
 
 
 			// add the alloca to the current scope
-			m_scope->add_named_value(arg_name, new value(
+			m_scope->add_named_value(arg_name, std::make_shared<value>(
 				arg_name,
 				arg_type,
 				alloca
@@ -62,7 +62,7 @@ namespace channel {
 
 		// accept all statements inside the function
 		for (const auto& statement : node.get_function_statements()) {
-			value* temp_statement_value;
+			value_ptr temp_statement_value;
 			if (!statement->accept(*this, temp_statement_value)) {
 				return false;
 			}
@@ -84,11 +84,11 @@ namespace channel {
 		}
 
 		// return the function as the value
-		out_value = new value(node.get_function_identifier(), type(type::base::function, 0), func);
+		out_value = std::make_shared<value>(node.get_function_identifier(), type(type::base::function, 0), func);
 		return true;
 	}
 
-	bool codegen_visitor::visit_function_call_node(function_call_node& node, value*& out_value) {
+	bool codegen_visitor::visit_function_call_node(function_call_node& node, value_ptr& out_value) {
 		// get a reference to the function
 		const function* func = m_functions[node.get_function_identifier()];
 
@@ -110,7 +110,7 @@ namespace channel {
 
 		for (u64 i = 0; i < required_arguments.size(); i++) {
 			// get the argument value
-			value* argument_value;
+			value_ptr argument_value;
 			if(!given_arguments[i]->accept(*this, argument_value)) {
 				return false;
 			}
@@ -123,7 +123,7 @@ namespace channel {
 
 		for (u64 i = required_arguments.size(); i < given_arguments.size(); i++) {
 			// get the argument value
-			value* argument_value;
+			value_ptr argument_value;
 			if (!given_arguments[i]->accept(*this, argument_value)) {
 				return false;
 			}
@@ -137,7 +137,7 @@ namespace channel {
 					return false;
 				}
 
-				argument_value = new value(argument_value->get_name(), type(type::base::f64, 0), argument_value_cast);
+				argument_value = std::make_shared<value>(argument_value->get_name(), type(type::base::f64, 0), argument_value_cast);
 			}
 			else if(argument_type.get_bit_width() < type(type::base::i32, 0).get_bit_width()) {
 				// i1, i8, i16 -> i32
@@ -146,7 +146,7 @@ namespace channel {
 					return false;
 				}
 
-				argument_value = new value(argument_value->get_name(), type(type::base::i32, 0), argument_value_cast);
+				argument_value = std::make_shared<value>(argument_value->get_name(), type(type::base::i32, 0), argument_value_cast);
 			}
 
 			argument_values.push_back(argument_value->get_value());
@@ -158,7 +158,7 @@ namespace channel {
 
 		// only return the call if we have to store the value (if the function returns a non-void and non-pointer value)
 		if (return_type.is_pointer() || return_type.get_base() != type::base::empty) {
-			out_value = new value(node.get_function_identifier(), return_type, call_inst);
+			out_value = std::make_shared<value>(node.get_function_identifier(), return_type, call_inst);
 		}
 		else {
 			out_value = nullptr;

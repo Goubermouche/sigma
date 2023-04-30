@@ -7,9 +7,9 @@
 #include "../abstract_syntax_tree/keywords/flow_control/break_node.h"
 
 namespace channel {
-	bool codegen_visitor::visit_return_node(return_node& node, value*& out_value) {
+	bool codegen_visitor::visit_return_node(return_node& node, value_ptr& out_value) {
 		// evaluate the expression of the return statement
-		value* return_value;
+		value_ptr return_value;
 		if (!node.get_return_expression_node()->accept(*this, return_value)) {
 			return false;
 		}
@@ -28,11 +28,11 @@ namespace channel {
 		m_builder.CreateRet(upcasted_return_value);
 
 		// return the value of the expression (use upcasted value's type)
-		out_value = new value("__return", function_return_type, upcasted_return_value);
+        out_value = std::make_shared<value>("__return", function_return_type, upcasted_return_value);
 		return true;
 	}
 
-	bool codegen_visitor::visit_if_else_node(if_else_node& node, value*& out_value) {
+	bool codegen_visitor::visit_if_else_node(if_else_node& node, value_ptr& out_value) {
         llvm::BasicBlock* entry_block = m_builder.GetInsertBlock();
         llvm::Function* parent_function = entry_block->getParent();
 
@@ -61,7 +61,7 @@ namespace channel {
         }
 
         // accept the first condition
-        value* condition_value;
+        value_ptr condition_value;
         if (!condition_nodes[0]->accept(*this, condition_value)) {
             return false;
         }
@@ -97,7 +97,7 @@ namespace channel {
             m_scope = new scope(prev_scope, nullptr);
 
             for (const auto& statement : branch_nodes[i]) {
-                value* temp_statement_value;
+                value_ptr temp_statement_value;
                 if (!statement->accept(*this, temp_statement_value)) {
                     return false;
                 }
@@ -114,7 +114,7 @@ namespace channel {
         return true;
 	}
 
-    bool codegen_visitor::visit_while_node(while_node& node, value*& out_value) {
+    bool codegen_visitor::visit_while_node(while_node& node, value_ptr& out_value) {
         llvm::BasicBlock* entry_block = m_builder.GetInsertBlock();
         llvm::Function* parent_function = entry_block->getParent();
 
@@ -128,7 +128,7 @@ namespace channel {
         m_builder.SetInsertPoint(condition_block);
 
         // accept the condition node
-        value* condition_value;
+        value_ptr condition_value;
         if (!node.get_loop_condition_node()->accept(*this, condition_value)) {
             return false;
         }
@@ -147,7 +147,7 @@ namespace channel {
         m_scope = new scope(prev_scope, end_block);
 
         for(channel::node* n : node.get_loop_body_nodes()) {
-            value* temp_value;
+            value_ptr temp_value;
             if(!n->accept(*this, temp_value)) {
                 return false;
             }
@@ -161,7 +161,7 @@ namespace channel {
         return true;
     }
 
-    bool codegen_visitor::visit_for_node(for_node& node, value*& out_value) {
+    bool codegen_visitor::visit_for_node(for_node& node, value_ptr& out_value) {
         llvm::BasicBlock* entry_block = m_builder.GetInsertBlock();
         llvm::Function* parent_function = entry_block->getParent();
 
@@ -170,7 +170,7 @@ namespace channel {
         llvm::BasicBlock* increment_block = llvm::BasicBlock::Create(m_context, "", parent_function);
         llvm::BasicBlock* loop_body_block = llvm::BasicBlock::Create(m_context, "", parent_function);
 
-        value* temp_value;
+        value_ptr temp_value;
 
         // create the index expression
         if (!node.get_loop_initialization_node()->accept(*this, temp_value)) {
@@ -181,7 +181,7 @@ namespace channel {
 
         // accept the condition block
         m_builder.SetInsertPoint(condition_block);
-        value* condition_value;
+        value_ptr condition_value;
         if(!node.get_loop_condition_node()->accept(*this, condition_value)) {
             return false;
         }
@@ -230,7 +230,7 @@ namespace channel {
         return true;
     }
 
-    bool codegen_visitor::visit_break_node(break_node& node, value*& out_value) {
+    bool codegen_visitor::visit_break_node(break_node& node, value_ptr& out_value) {
         llvm::BasicBlock* end_block = m_scope->get_loop_end_block();
         if (end_block == nullptr) {
             // emit an error if there's no enclosing loop to break from

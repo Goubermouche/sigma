@@ -7,11 +7,11 @@ namespace channel {
      */
     class operator_unary : public node {
     public:
-        operator_unary(u64 line_number, node* expression_node);
+        operator_unary(u64 line_number, node_ptr expression_node);
         ~operator_unary() override;
 
-        node* get_expression_node() const;
+        node_ptr get_expression_node() const;
     private:
-        node* m_expression_node;
+        node_ptr m_expression_node;
     };
 }

@@ -4,7 +4,7 @@ namespace channel {
 	i32_node::i32_node(u64 line_number, i64 value)
 		: node(line_number), m_value(value) {}
 
-	bool i32_node::accept(visitor& visitor, value*& out_value)	{
+	bool i32_node::accept(visitor& visitor, value_ptr& out_value)	{
 		LOG_NODE_NAME(keyword_i32_node);
 		return visitor.visit_keyword_i32_node(*this, out_value);
 	}

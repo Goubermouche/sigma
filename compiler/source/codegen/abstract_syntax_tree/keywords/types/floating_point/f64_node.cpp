@@ -4,7 +4,7 @@ namespace channel {
 	f64_node::f64_node(u64 line_number, f64 value)
 		:node(line_number), m_value(value) {}
 
-	bool f64_node::accept(visitor& visitor, value*& out_value) {
+	bool f64_node::accept(visitor& visitor, value_ptr& out_value) {
 		LOG_NODE_NAME(keyword_f64_node);
 		return visitor.visit_keyword_f64_node(*this, out_value);
 	}

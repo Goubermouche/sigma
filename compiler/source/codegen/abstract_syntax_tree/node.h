@@ -5,6 +5,9 @@
 
 namespace channel {
 	class visitor;
+	class node;
+
+	using node_ptr = node*;
 
 	/**
 	 * \brief base AST node.
@@ -20,7 +23,7 @@ namespace channel {
 		 * \param out_value Resulting value
 		 * \returns True if no error has been met, otherwise false
 		 */
-		virtual bool accept(visitor& visitor, value*& out_value) = 0;
+		virtual bool accept(visitor& visitor, value_ptr& out_value) = 0;
 		virtual void print(int depth, const std::wstring& prefix, bool is_last) = 0;
 		u64 get_declaration_line_number() const;
 	protected:

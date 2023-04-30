@@ -7,14 +7,14 @@ namespace channel {
 	 */
 	class while_node : public node {
 	public:
-		while_node(u64 line_number, node* loop_condition_node, const std::vector<node*>& statement_nodes);
-		bool accept(visitor& visitor, value*& out_value) override;
+		while_node(u64 line_number, node_ptr loop_condition_node, const std::vector<node_ptr>& statement_nodes);
+		bool accept(visitor& visitor, value_ptr& out_value) override;
 		void print(int depth, const std::wstring& prefix, bool is_last) override;
 
-		node* get_loop_condition_node() const;
-		const std::vector<node*>& get_loop_body_nodes() const;
+		node_ptr get_loop_condition_node() const;
+		const std::vector<node_ptr>& get_loop_body_nodes() const;
 	private:
-		node* m_loop_condition_node;
-		std::vector<node*> m_loop_body_nodes;
+		node_ptr m_loop_condition_node;
+		std::vector<node_ptr> m_loop_body_nodes;
 	};
 }

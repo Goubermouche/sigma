@@ -1,10 +1,10 @@
 #include "operator_less_than_equal_to_node.h"
 
 namespace channel {
-	operator_less_than_equal_to_node::operator_less_than_equal_to_node(u64 line_number, node* left_expression_node, node* right_expression_node)
+	operator_less_than_equal_to_node::operator_less_than_equal_to_node(u64 line_number, node_ptr left_expression_node, node_ptr right_expression_node)
 		: operator_binary(line_number, left_expression_node, right_expression_node) {}
 
-	bool operator_less_than_equal_to_node::accept(visitor& visitor, value*& out_value) {
+	bool operator_less_than_equal_to_node::accept(visitor& visitor, value_ptr& out_value) {
 		LOG_NODE_NAME(operator_logical_disjunction_node);
 		return visitor.visit_operator_less_than_equal_to_node(*this, out_value);
 	}

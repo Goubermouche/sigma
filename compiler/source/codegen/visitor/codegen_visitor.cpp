@@ -35,7 +35,7 @@ namespace channel {
 
 	bool codegen_visitor::generate() {
 		// walk the abstract syntax tree
-		value* tmp_value;
+		value_ptr tmp_value;
 		abstract_syntax_tree tree = m_parser.get_abstract_syntax_tree();
 
 		for (node* n : tree) {
@@ -77,8 +77,8 @@ namespace channel {
 		return true;
 	}
 
-	bool codegen_visitor::visit_translation_unit_node(translation_unit_node& node, value*& out_value) {
-		value* temp_value;
+	bool codegen_visitor::visit_translation_unit_node(translation_unit_node& node, value_ptr& out_value) {
+		value_ptr temp_value;
 		for(const auto& n : node.get_nodes()) {
 			if(!n->accept(*this, temp_value)) {
 				return false;
@@ -106,7 +106,7 @@ namespace channel {
 		return true;
 	}
 
-	bool codegen_visitor::cast_value(llvm::Value*& out_value, const value* source_value, type target_type, u64 line_number) {
+	bool codegen_visitor::cast_value(llvm::Value*& out_value, const value_ptr source_value, type target_type, u64 line_number) {
 		// both types are the same
 		if (source_value->get_type() == target_type) {
 			out_value = source_value->get_value();
@@ -213,7 +213,7 @@ namespace channel {
 		return true;
 	}
 
-	bool codegen_visitor::get_named_value(value*& out_value, const std::string& variable_name) {
+	bool codegen_visitor::get_named_value(value_ptr& out_value, const std::string& variable_name) {
 		// check the local scope
 		out_value = m_scope->get_named_value(variable_name);
 		if (!out_value) {

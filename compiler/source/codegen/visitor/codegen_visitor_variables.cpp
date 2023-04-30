@@ -10,7 +10,7 @@
 #include "../abstract_syntax_tree/variables/declaration/global_declaration_node.h"
 
 namespace channel {
-	bool codegen_visitor::visit_assignment_node(assignment_node& node, value*& out_value) {
+	bool codegen_visitor::visit_assignment_node(assignment_node& node, value_ptr& out_value) {
 		// evaluate the expression on the right-hand side of the assignment
 		if (!node.get_expression_node()->accept(*this, out_value)) {
 			return false;
@@ -18,7 +18,7 @@ namespace channel {
 
 		// assignment to a local variable
 		// look up the local variable in the active scope
-		value* variable;
+		value_ptr variable;
 		if(!node.get_variable_node()->accept(*this, variable)) {
 			return false;
 		}
@@ -33,10 +33,10 @@ namespace channel {
 		return true;
 	}
 
-	bool codegen_visitor::visit_access_node(access_node& node, value*& out_value) {
+	bool codegen_visitor::visit_access_node(access_node& node, value_ptr& out_value) {
 		// load a local variable
 		// look up the local variable in the active scope
-		if (const value* variable_value = m_scope->get_named_value(node.get_variable_identifier())) {
+		if (const value_ptr variable_value = m_scope->get_named_value(node.get_variable_identifier())) {
 			// load the value from the memory location
 			llvm::AllocaInst* alloca = llvm::dyn_cast<llvm::AllocaInst>(variable_value->get_value());
 			llvm::Value* load = m_builder.CreateLoad(
@@ -45,7 +45,7 @@ namespace channel {
 			);
 
 			// return the load instruction as a value
-			out_value = new value(node.get_variable_identifier(), variable_value->get_type(), load);
+			out_value = std::make_shared<value>(node.get_variable_identifier(), variable_value->get_type(), load);
 			out_value->set_pointer(alloca);
 			return true;
 		}
@@ -53,7 +53,7 @@ namespace channel {
 		// we haven't found a local variable, check if we're loading a global one
 		// load a global variable
 		// look up the global variable in the m_global_named_values map
-		const value* global_variable = m_global_named_values[node.get_variable_identifier()];
+		const value_ptr global_variable = m_global_named_values[node.get_variable_identifier()];
 		// check if the global variable exists
 		if (!global_variable) {
 			compilation_logger::emit_variable_not_found_error(node.get_declaration_line_number(), node.get_variable_identifier());
@@ -69,11 +69,11 @@ namespace channel {
 		);
 
 		// return the load instruction as a value
-		out_value = new value(node.get_variable_identifier(), global_variable->get_type(), load);
+		out_value = std::make_shared<value>(node.get_variable_identifier(), global_variable->get_type(), load);
 		return true;
 	}
 
-	bool codegen_visitor::visit_local_declaration_node(local_declaration_node& node, value*& out_value) {
+	bool codegen_visitor::visit_local_declaration_node(local_declaration_node& node, value_ptr& out_value) {
 		// evaluate the assigned value, if there is one
 		if (!get_declaration_value(node, out_value)) {
 			return false;
@@ -101,7 +101,7 @@ namespace channel {
 		}
 
 		// add the variable to the active scope
-		const auto insertion_result = m_scope->add_named_value(node.get_declaration_identifier(), new value(node.get_declaration_identifier(), node.get_declaration_type(), alloca));
+		const auto insertion_result = m_scope->add_named_value(node.get_declaration_identifier(), std::make_shared<value>(node.get_declaration_identifier(), node.get_declaration_type(), alloca));
 		// check if the active scope already contains the variable
 		if (!insertion_result.second) {
 			compilation_logger::emit_local_variable_already_defined_error(node.get_declaration_line_number(), node.get_declaration_identifier());
@@ -111,7 +111,7 @@ namespace channel {
 		return true;
 	}
 
-	bool codegen_visitor::visit_global_declaration_node(global_declaration_node& node, value*& out_value) {
+	bool codegen_visitor::visit_global_declaration_node(global_declaration_node& node, value_ptr& out_value) {
 		// start creating the init function for our global ctor
 		const std::string init_func_name = "__global_init_" + node.get_declaration_identifier();
 		llvm::FunctionType* init_func_type = llvm::FunctionType::get(llvm::Type::getVoidTy(m_context), false);
@@ -120,7 +120,7 @@ namespace channel {
 		m_builder.SetInsertPoint(init_func_entry); // write to the init function
 
 		// evaluate the assigned value, if there is one
-		value* assigned_value;
+		value_ptr assigned_value;
 		if (!get_declaration_value(node, assigned_value)) {
 			return false;
 		}
@@ -132,7 +132,7 @@ namespace channel {
 		}
 
 		// create a global variable
-		out_value = new value(
+		out_value = std::make_shared<value>(
 			node.get_declaration_identifier(),
 			node.get_declaration_type(),
 			new llvm::GlobalVariable(*m_module,
@@ -170,9 +170,9 @@ namespace channel {
 		return true;
 	}
 
-	bool codegen_visitor::visit_allocation_node(array_allocation_node& node, value*& out_value) {
+	bool codegen_visitor::visit_allocation_node(array_allocation_node& node, value_ptr& out_value) {
 		// get the count of allocated elements
-		value* element_count;
+		value_ptr element_count;
 		if (!node.get_array_element_count_node()->accept(*this, element_count)) {
 			return false;
 		}
@@ -211,14 +211,14 @@ namespace channel {
 			m_builder.CreateStore(llvm::ConstantInt::get(m_context, llvm::APInt(8, 0)), null_terminator_ptr);
 		}
 
-		out_value = new value("__alloca", array_element_type.get_pointer_type(), typed_ptr);
+		out_value = std::make_shared<value>("__alloca", array_element_type.get_pointer_type(), typed_ptr);
 		out_value->set_pointer(allocated_ptr);
 		return true;
 	}
 
-	bool codegen_visitor::visit_array_access_node(array_access_node& node, value*& out_value) {
+	bool codegen_visitor::visit_array_access_node(array_access_node& node, value_ptr& out_value) {
 		const std::vector<channel::node*>& index_nodes = node.get_array_element_index_nodes();
-		value* array_ptr;
+		value_ptr array_ptr;
 
 		// evaluate the array base expression
 		if (!node.get_array_base_node()->accept(*this, array_ptr)) {
@@ -230,7 +230,7 @@ namespace channel {
 		llvm::Value* current_ptr = array_ptr->get_value();
 
 		for (size_t i = 0; i < index_nodes.size(); ++i) {
-			value* index_value;
+			value_ptr index_value;
 
 			if (!index_nodes[i]->accept(*this, index_value)) {
 				return false;
@@ -258,14 +258,14 @@ namespace channel {
 		// load the value at the final element address
 		llvm::Value* loaded_value = m_builder.CreateLoad(current_type.get_element_type().get_llvm_type(m_context), current_ptr);
 
-		out_value = new value("__array_element", current_type.get_element_type(), loaded_value);
+		out_value = std::make_shared<value>("__array_element", current_type.get_element_type(), loaded_value);
 		out_value->set_pointer(current_ptr);
 		return true;
 	}
 
-	bool codegen_visitor::visit_array_assignment_node(array_assignment_node& node, value*& out_value) {
+	bool codegen_visitor::visit_array_assignment_node(array_assignment_node& node, value_ptr& out_value) {
 		const std::vector<channel::node*>& index_nodes = node.get_array_element_index_nodes();
-		value* array_ptr;
+		value_ptr array_ptr;
 
 		// evaluate the array base expression
 		if (!node.get_array_base_node()->accept(*this, array_ptr)) {
@@ -277,7 +277,7 @@ namespace channel {
 		llvm::Value* current_ptr = array_ptr->get_value();
 
 		for (size_t i = 0; i < index_nodes.size(); ++i) {
-			value* index_value;
+			value_ptr index_value;
 
 			if (!index_nodes[i]->accept(*this, index_value)) {
 				return false;
@@ -303,7 +303,7 @@ namespace channel {
 		}
 
 		// evaluate the right-hand side expression
-		value* expression_value;
+		value_ptr expression_value;
 		if (!node.get_expression_node()->accept(*this, expression_value)) {
 			return false;
 		}
@@ -317,7 +317,7 @@ namespace channel {
 			return false;
 		}
 
-		expression_value = new value(expression_value->get_name(), final_element_type, expression_llvm_value_cast);
+		expression_value = std::make_shared<value>(expression_value->get_name(), final_element_type, expression_llvm_value_cast);
 
 		// store the result of the right-hand side expression in the array
 		m_builder.CreateStore(expression_value->get_value(), current_ptr);
@@ -326,9 +326,9 @@ namespace channel {
 		return true;
 	}
 
-	bool codegen_visitor::visit_variable_node(variable_node& node, value*& out_value) {
+	bool codegen_visitor::visit_variable_node(variable_node& node, value_ptr& out_value) {
 		// find the variable value in our named values
-		value* var_value;
+		value_ptr var_value;
 		if (!get_named_value(var_value, node.get_variable_identifier())) {
 			compilation_logger::emit_variable_not_found_error(node.get_declaration_line_number(), node.get_variable_identifier());
 			return false;
@@ -340,7 +340,7 @@ namespace channel {
 		return true;
 	}
 
-	bool codegen_visitor::get_declaration_value(const declaration_node& node, value*& out_value) {
+	bool codegen_visitor::get_declaration_value(const declaration_node& node, value_ptr& out_value) {
 		// evaluate the expression to get the initial value
 		if (channel::node* expression = node.get_expression_node()) {
 			// evaluate the assigned value
@@ -349,7 +349,7 @@ namespace channel {
 
 		// declared without an assigned value, set it to 0
 		llvm::Type* value_type = node.get_declaration_type().get_llvm_type(m_context);
-		out_value = new value(node.get_declaration_identifier(), node.get_declaration_type(), llvm::Constant::getNullValue(value_type));
+		out_value = std::make_shared<value>(node.get_declaration_identifier(), node.get_declaration_type(), llvm::Constant::getNullValue(value_type));
 		return true;
 	}
 }

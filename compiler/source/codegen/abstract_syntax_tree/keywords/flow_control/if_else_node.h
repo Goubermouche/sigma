@@ -7,14 +7,14 @@ namespace channel {
 	 */
 	class if_else_node : public node {
 	public:
-		if_else_node(u64 line_number, const std::vector<node*>& condition_nodes, const std::vector<std::vector<node*>>& branch_nodes);
-		bool accept(visitor& visitor, value*& out_value) override;
+		if_else_node(u64 line_number, const std::vector<node_ptr>& condition_nodes, const std::vector<std::vector<node_ptr>>& branch_nodes);
+		bool accept(visitor& visitor, value_ptr& out_value) override;
 		void print(int depth, const std::wstring& prefix, bool is_last) override;
 
-		const std::vector<node*>& get_condition_nodes();
-		const std::vector<std::vector<node*>>& get_branch_nodes();
+		const std::vector<node_ptr>& get_condition_nodes();
+		const std::vector<std::vector<node_ptr>>& get_branch_nodes();
 	private:
-		std::vector<node*> m_condition_nodes;
-		std::vector<std::vector<node*>> m_branch_nodes;
+		std::vector<node_ptr> m_condition_nodes;
+		std::vector<std::vector<node_ptr>> m_branch_nodes;
 	};
 }

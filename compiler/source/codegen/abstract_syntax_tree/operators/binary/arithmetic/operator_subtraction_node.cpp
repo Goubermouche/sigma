@@ -1,10 +1,10 @@
 #include "operator_subtraction_node.h"
 
 namespace channel {
-	operator_subtraction_node::operator_subtraction_node(u64 line_number, node* left, node* right)
+	operator_subtraction_node::operator_subtraction_node(u64 line_number, node_ptr left, node_ptr right)
 		: operator_binary(line_number, left, right) {}
 
-	bool operator_subtraction_node::accept(visitor& visitor, value*& out_value) {
+	bool operator_subtraction_node::accept(visitor& visitor, value_ptr& out_value) {
 		LOG_NODE_NAME(operator_subtraction_node);
 		return visitor.visit_operator_subtraction_node(*this, out_value);
 	}

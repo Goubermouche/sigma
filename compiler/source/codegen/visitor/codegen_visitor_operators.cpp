@@ -24,8 +24,8 @@
 #include "../abstract_syntax_tree/operators/binary/logical/operator_not_equals_node.h"
 
 namespace channel {
-	bool codegen_visitor::visit_operator_post_decrement_node(operator_post_decrement& node, value*& out_value) {
-		value* loaded_value;
+	bool codegen_visitor::visit_operator_post_decrement_node(operator_post_decrement& node, value_ptr& out_value) {
+		value_ptr loaded_value;
 		if (!node.get_expression_node()->accept(*this, loaded_value)) {
 			return false;
 		}
@@ -56,8 +56,8 @@ namespace channel {
 		return true;
 	}
 
-	bool codegen_visitor::visit_operator_post_increment_node(operator_post_increment& node, value*& out_value) {
-		value* loaded_value;
+	bool codegen_visitor::visit_operator_post_increment_node(operator_post_increment& node, value_ptr& out_value) {
+		value_ptr loaded_value;
 		if (!node.get_expression_node()->accept(*this, loaded_value)) {
 			return false;
 		}
@@ -88,9 +88,9 @@ namespace channel {
 		return true;
 	}
 
-	bool codegen_visitor::visit_operator_pre_decrement_node(operator_pre_decrement& node, value*& out_value) {
+	bool codegen_visitor::visit_operator_pre_decrement_node(operator_pre_decrement& node, value_ptr& out_value) {
 		// accept the expression
-		value* expression;
+		value_ptr expression;
 		if (!node.get_expression_node()->accept(*this, expression)) {
 			return false;
 		}
@@ -119,13 +119,13 @@ namespace channel {
 			expression->get_pointer()
 		);
 
-		out_value = new value("__pre_increment", expression->get_type(), increment_result);
+		out_value = std::make_shared<value>("__pre_increment", expression->get_type(), increment_result);
 		return true;
 	}
 
-	bool codegen_visitor::visit_operator_pre_increment_node(operator_pre_increment& node, value*& out_value) {
+	bool codegen_visitor::visit_operator_pre_increment_node(operator_pre_increment& node, value_ptr& out_value) {
 		// accept the expression
-		value* expression;
+		value_ptr expression;
 		if (!node.get_expression_node()->accept(*this, expression)) {
 			return false;
 		}
@@ -154,19 +154,19 @@ namespace channel {
 			expression->get_pointer()
 		);
 
-		out_value = new value("__pre_increment", expression->get_type(), increment_result);
+		out_value = std::make_shared<value>("__pre_increment", expression->get_type(), increment_result);
 		return true;
 	}
 
-	bool codegen_visitor::visit_operator_addition_node(operator_addition_node& node, value*& out_value) {
+	bool codegen_visitor::visit_operator_addition_node(operator_addition_node& node, value_ptr& out_value) {
 		// accept the left expression
-		value* left;
+		value_ptr left;
 		if (!node.get_left_expression_node()->accept(*this, left)) {
 			return false;
 		}
 
 		// accept the right expression
-		value* right;
+		value_ptr right;
 		if (!node.get_right_expression_node()->accept(*this, right)) {
 			return false;
 		}
@@ -185,7 +185,7 @@ namespace channel {
 
 		// both types are floating point
 		if (highest_precision.is_floating_point()) {
-			out_value = new value(
+			out_value = std::make_shared<value>(
 				"__fadd",
 				highest_precision,
 				m_builder.CreateFAdd(
@@ -198,7 +198,7 @@ namespace channel {
 
 		// both types are unsigned
 		if (highest_precision.is_unsigned()) {
-			out_value = new value(
+			out_value = std::make_shared<value>(
 				"__uadd",
 				highest_precision,
 				m_builder.CreateAdd(
@@ -211,7 +211,7 @@ namespace channel {
 		}
 
 		// fallback to regular op
-		out_value = new value(
+		out_value = std::make_shared<value>(
 			"__add",
 			highest_precision,
 			m_builder.CreateAdd(
@@ -222,15 +222,15 @@ namespace channel {
 		return true;
 	}
 
-	bool codegen_visitor::visit_operator_subtraction_node(operator_subtraction_node& node, value*& out_value) {
+	bool codegen_visitor::visit_operator_subtraction_node(operator_subtraction_node& node, value_ptr& out_value) {
 		// accept the left expression
-		value* left;
+		value_ptr left;
 		if (!node.get_left_expression_node()->accept(*this, left)) {
 			return false;
 		}
 
 		// accept the right expression
-		value* right;
+		value_ptr right;
 		if (!node.get_right_expression_node()->accept(*this, right)) {
 			return false;
 		}
@@ -249,7 +249,7 @@ namespace channel {
 
 		// both types are floating point
 		if (highest_precision.is_floating_point()) {
-			out_value = new value(
+			out_value = std::make_shared<value>(
 				"__fsub",
 				highest_precision,
 				m_builder.CreateFSub(
@@ -262,7 +262,7 @@ namespace channel {
 
 		// both types are unsigned
 		if (highest_precision.is_unsigned()) {
-			out_value = new value(
+			out_value = std::make_shared<value>(
 				"__usub",
 				highest_precision,
 				m_builder.CreateSub(
@@ -275,7 +275,7 @@ namespace channel {
 		}
 
 		// fallback to regular op
-		out_value = new value(
+		out_value = std::make_shared<value>(
 			"__sub",
 			highest_precision,
 			m_builder.CreateSub(
@@ -286,15 +286,15 @@ namespace channel {
 		return true;
 	}
 
-	bool codegen_visitor::visit_operator_multiplication_node(operator_multiplication_node& node, value*& out_value) {
+	bool codegen_visitor::visit_operator_multiplication_node(operator_multiplication_node& node, value_ptr& out_value) {
 		// accept the left expression
-		value* left;
+		value_ptr left;
 		if (!node.get_left_expression_node()->accept(*this, left)) {
 			return false;
 		}
 
 		// accept the right expression
-		value* right;
+		value_ptr right;
 		if (!node.get_right_expression_node()->accept(*this, right)) {
 			return false;
 		}
@@ -313,7 +313,7 @@ namespace channel {
 
 		// both types are floating point
 		if (highest_precision.is_floating_point()) {
-			out_value = new value(
+			out_value = std::make_shared<value>(
 				"__fmul",
 				highest_precision,
 				m_builder.CreateFMul(
@@ -326,7 +326,7 @@ namespace channel {
 
 		// both types are unsigned
 		if (highest_precision.is_unsigned()) {
-			out_value = new value(
+			out_value = std::make_shared<value>(
 				"__umul",
 				highest_precision,
 				m_builder.CreateMul(
@@ -339,7 +339,7 @@ namespace channel {
 		}
 
 		// fallback to regular op
-		out_value = new value(
+		out_value = std::make_shared<value>(
 			"__mul",
 			highest_precision,
 			m_builder.CreateMul(
@@ -350,15 +350,15 @@ namespace channel {
 		return true;
 	}
 
-	bool codegen_visitor::visit_operator_division_node(operator_division_node& node, value*& out_value) {
+	bool codegen_visitor::visit_operator_division_node(operator_division_node& node, value_ptr& out_value) {
 		// accept the left expression
-		value* left;
+		value_ptr left;
 		if (!node.get_left_expression_node()->accept(*this, left)) {
 			return false;
 		}
 
 		// accept the right expression
-		value* right;
+		value_ptr right;
 		if (!node.get_right_expression_node()->accept(*this, right)) {
 			return false;
 		}
@@ -377,7 +377,7 @@ namespace channel {
 
 		// both types are floating point
 		if (highest_precision.is_floating_point()) {
-			out_value = new value(
+			out_value = std::make_shared<value>(
 				"__fdiv",
 				highest_precision,
 				m_builder.CreateFDiv(
@@ -390,7 +390,7 @@ namespace channel {
 
 		// both types are unsigned
 		if (highest_precision.is_unsigned()) {
-			out_value = new value(
+			out_value = std::make_shared<value>(
 				"__udiv",
 				highest_precision,
 				m_builder.CreateUDiv(
@@ -402,7 +402,7 @@ namespace channel {
 		}
 
 		// fallback to regular op
-		out_value = new value(
+		out_value = std::make_shared<value>(
 			"__div",
 			highest_precision,
 			m_builder.CreateSDiv(
@@ -413,15 +413,15 @@ namespace channel {
 		return true;
 	}
 
-	bool codegen_visitor::visit_operator_modulo_node(operator_modulo_node& node, value*& out_value) {
+	bool codegen_visitor::visit_operator_modulo_node(operator_modulo_node& node, value_ptr& out_value) {
 		// accept the left expression
-		value* left;
+		value_ptr left;
 		if (!node.get_left_expression_node()->accept(*this, left)) {
 			return false;
 		}
 
 		// accept the right expression
-		value* right;
+		value_ptr right;
 		if (!node.get_right_expression_node()->accept(*this, right)) {
 			return false;
 		}
@@ -440,7 +440,7 @@ namespace channel {
 
 		// both types are floating point
 		if (highest_precision.is_floating_point()) {
-			out_value = new value(
+			out_value = std::make_shared<value>(
 				"__frem",
 				highest_precision,
 				m_builder.CreateFRem(
@@ -453,7 +453,7 @@ namespace channel {
 
 		// both types are unsigned
 		if (highest_precision.is_unsigned()) {
-			out_value = new value(
+			out_value = std::make_shared<value>(
 				"__urem",
 				highest_precision,
 				m_builder.CreateURem(
@@ -465,7 +465,7 @@ namespace channel {
 		}
 
 		// fallback to regular op
-		out_value = new value(
+		out_value = std::make_shared<value>(
 			"__rem",
 			highest_precision,
 			m_builder.CreateSRem(
@@ -476,15 +476,15 @@ namespace channel {
 		return true;
 	}
 
-	bool codegen_visitor::visit_operator_logical_conjunction_node(operator_conjunction_node& node, value*& out_value) {
+	bool codegen_visitor::visit_operator_logical_conjunction_node(operator_conjunction_node& node, value_ptr& out_value) {
 		// accept the left expression
-		value* left;
+		value_ptr left;
 		if (!node.get_left_expression_node()->accept(*this, left)) {
 			return false;
 		}
 
 		// accept the right expression
-		value* right;
+		value_ptr right;
 		if (!node.get_right_expression_node()->accept(*this, right)) {
 			return false;
 		}
@@ -497,19 +497,19 @@ namespace channel {
 
 		// create a logical AND operation
 		llvm::Value* and_result = m_builder.CreateAnd(left->get_value(), right->get_value(), "and");
-		out_value = new value("__logical_conjunction", type(type::base::boolean, 0), and_result);
+		out_value = std::make_shared<value>("__logical_conjunction", type(type::base::boolean, 0), and_result);
 		return true;
 	}
 
-	bool codegen_visitor::visit_operator_logical_disjunction_node(operator_disjunction_node& node, value*& out_value) {
+	bool codegen_visitor::visit_operator_logical_disjunction_node(operator_disjunction_node& node, value_ptr& out_value) {
 		// accept the left expression
-		value* left;
+		value_ptr left;
 		if (!node.get_left_expression_node()->accept(*this, left)) {
 			return false;
 		}
 
 		// accept the right expression
-		value* right;
+		value_ptr right;
 		if (!node.get_right_expression_node()->accept(*this, right)) {
 			return false;
 		}
@@ -522,19 +522,19 @@ namespace channel {
 
 		// create a logical OR operation
 		llvm::Value* or_result = m_builder.CreateOr(left->get_value(), right->get_value());
-		out_value = new value("__logical_disjunction", type(type::base::boolean, 0), or_result);
+		out_value = std::make_shared<value>("__logical_disjunction", type(type::base::boolean, 0), or_result);
 		return true;
 	}
 
-	bool codegen_visitor::visit_operator_greater_than_node(operator_greater_than_node& node, value*& out_value) {
+	bool codegen_visitor::visit_operator_greater_than_node(operator_greater_than_node& node, value_ptr& out_value) {
 		// accept the left expression
-		value* left;
+		value_ptr left;
 		if (!node.get_left_expression_node()->accept(*this, left)) {
 			return false;
 		}
 
 		// accept the right expression
-		value* right;
+		value_ptr right;
 		if (!node.get_right_expression_node()->accept(*this, right)) {
 			return false;
 		}
@@ -565,19 +565,19 @@ namespace channel {
 			}
 		}
 
-		out_value = new value("__greater_than", type(type::base::boolean, 0), greater_than_result);
+		out_value = std::make_shared<value>("__greater_than", type(type::base::boolean, 0), greater_than_result);
 		return true;
 	}
 
-	bool codegen_visitor::visit_operator_greater_than_equal_to(operator_greater_than_equal_to_node& node, value*& out_value) {
+	bool codegen_visitor::visit_operator_greater_than_equal_to(operator_greater_than_equal_to_node& node, value_ptr& out_value) {
 		// accept the left expression
-		value* left;
+		value_ptr left;
 		if (!node.get_left_expression_node()->accept(*this, left)) {
 			return false;
 		}
 
 		// accept the right expression
-		value* right;
+		value_ptr right;
 		if (!node.get_right_expression_node()->accept(*this, right)) {
 			return false;
 		}
@@ -608,19 +608,19 @@ namespace channel {
 			}
 		}
 
-		out_value = new value("__greater_than_equal_to", type(type::base::boolean, 0), greater_than_equal_result);
+		out_value = std::make_shared<value>("__greater_than_equal_to", type(type::base::boolean, 0), greater_than_equal_result);
 		return true;
 	}
 
-	bool codegen_visitor::visit_operator_less_than_node(operator_less_than_node& node, value*& out_value) {
+	bool codegen_visitor::visit_operator_less_than_node(operator_less_than_node& node, value_ptr& out_value) {
 		// accept the left expression
-		value* left;
+		value_ptr left;
 		if (!node.get_left_expression_node()->accept(*this, left)) {
 			return false;
 		}
 
 		// accept the right expression
-		value* right;
+		value_ptr right;
 		if (!node.get_right_expression_node()->accept(*this, right)) {
 			return false;
 		}
@@ -651,19 +651,19 @@ namespace channel {
 			}
 		}
 
-		out_value = new value("__less_than", type(type::base::boolean, 0), less_than_result);
+		out_value = std::make_shared<value>("__less_than", type(type::base::boolean, 0), less_than_result);
 		return true;
 	}
 
-	bool codegen_visitor::visit_operator_less_than_equal_to_node(operator_less_than_equal_to_node& node, value*& out_value) {
+	bool codegen_visitor::visit_operator_less_than_equal_to_node(operator_less_than_equal_to_node& node, value_ptr& out_value) {
 		// accept the left expression
-		value* left;
+		value_ptr left;
 		if (!node.get_left_expression_node()->accept(*this, left)) {
 			return false;
 		}
 
 		// accept the right expression
-		value* right;
+		value_ptr right;
 		if (!node.get_right_expression_node()->accept(*this, right)) {
 			return false;
 		}
@@ -694,19 +694,19 @@ namespace channel {
 			}
 		}
 
-		out_value = new value("__less_than_equal_to", type(type::base::boolean, 0), less_than_equal_result);
+		out_value = std::make_shared<value>("__less_than_equal_to", type(type::base::boolean, 0), less_than_equal_result);
 		return true;
 	}
 
-	bool codegen_visitor::visit_operator_equals_node(operator_equals_node& node, value*& out_value) {
+	bool codegen_visitor::visit_operator_equals_node(operator_equals_node& node, value_ptr& out_value) {
 		// accept the left expression
-		value* left;
+		value_ptr left;
 		if (!node.get_left_expression_node()->accept(*this, left)) {
 			return false;
 		}
 
 		// accept the right expression
-		value* right;
+		value_ptr right;
 		if (!node.get_right_expression_node()->accept(*this, right)) {
 			return false;
 		}
@@ -732,19 +732,19 @@ namespace channel {
 			equals_result = m_builder.CreateICmpEQ(left_value_upcasted, right_value_upcasted);
 		}
 
-		out_value = new value("__equals", type(type::base::boolean, 0), equals_result);
+		out_value = std::make_shared<value>("__equals", type(type::base::boolean, 0), equals_result);
 		return true;
 	}
 
-	bool codegen_visitor::visit_operator_not_equals_node(operator_not_equals_node& node, value*& out_value) {
+	bool codegen_visitor::visit_operator_not_equals_node(operator_not_equals_node& node, value_ptr& out_value) {
 		// accept the left expression
-		value* left;
+		value_ptr left;
 		if (!node.get_left_expression_node()->accept(*this, left)) {
 			return false;
 		}
 
 		// accept the right expression
-		value* right;
+		value_ptr right;
 		if (!node.get_right_expression_node()->accept(*this, right)) {
 			return false;
 		}
@@ -770,7 +770,7 @@ namespace channel {
 			not_equals_result = m_builder.CreateICmpNE(left_value_upcasted, right_value_upcasted);
 		}
 
-		out_value = new value("__not_equals", type(type::base::boolean, 0), not_equals_result);
+		out_value = std::make_shared<value>("__not_equals", type(type::base::boolean, 0), not_equals_result);
 		return true;
 	}
 }

@@ -1,5 +1,4 @@
 #pragma once
-#include "../utility/console.h"
 #include "../codegen/type.h"
 
 namespace channel{

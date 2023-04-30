@@ -1,6 +1,6 @@
 #pragma once
 
-#include "types.h"
+#include "utility/console.h"
 
 //#define LANG_REPORT_BASE(...) (void) ((1 != _CrtDbgReport(__VA_ARGS__)) || (__debugbreak(), 0))
 //#define LANG_REPORT_F0(rptno, msg) LANG_REPORT_BASE(rptno, __FILE__, __LINE__, NULL, "%s", msg)

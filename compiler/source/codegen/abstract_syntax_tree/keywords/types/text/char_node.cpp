@@ -1,5 +1,4 @@
 #include "char_node.h"
-#include "../../../../../utility/console.h"
 
 namespace channel {
 	char_node::char_node(u64 line_number, char value)

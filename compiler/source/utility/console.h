@@ -1,40 +1,48 @@
 #pragma once
-#include "macros.h"
+#include "types.h"
 
 #define NOMINMAX
 #include <Windows.h>
 
 namespace channel {
-    enum class color {
-        red = FOREGROUND_RED,
-        green = FOREGROUND_GREEN,
-        yellow = FOREGROUND_RED | FOREGROUND_GREEN,
-        blue = FOREGROUND_BLUE,
-        magenta = FOREGROUND_RED | FOREGROUND_BLUE,
-        cyan = FOREGROUND_GREEN | FOREGROUND_BLUE,
-        white = FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE,
-        light_red = FOREGROUND_RED | FOREGROUND_INTENSITY,
-        light_green = FOREGROUND_GREEN | FOREGROUND_INTENSITY,
-        light_yellow = FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_INTENSITY,
-        light_blue = FOREGROUND_BLUE | FOREGROUND_INTENSITY,
-        light_magenta = FOREGROUND_RED | FOREGROUND_BLUE | FOREGROUND_INTENSITY,
-        light_cyan = FOREGROUND_GREEN | FOREGROUND_BLUE | FOREGROUND_INTENSITY,
-        light_white = FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE | FOREGROUND_INTENSITY
-	};
+    class color {
+    public:
+        static constexpr WORD red = FOREGROUND_RED;
+        static constexpr WORD green = FOREGROUND_GREEN;
+        static constexpr WORD yellow = FOREGROUND_RED | FOREGROUND_GREEN;
+        static constexpr WORD blue = FOREGROUND_BLUE;
+        static constexpr WORD magenta = FOREGROUND_RED | FOREGROUND_BLUE;
+        static constexpr WORD cyan = FOREGROUND_GREEN | FOREGROUND_BLUE;
+        static constexpr WORD white = FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE;
+        static constexpr WORD light_red = FOREGROUND_RED | FOREGROUND_INTENSITY;
+        static constexpr WORD light_green = FOREGROUND_GREEN | FOREGROUND_INTENSITY;
+        static constexpr WORD light_yellow = FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_INTENSITY;
+        static constexpr WORD light_blue = FOREGROUND_BLUE | FOREGROUND_INTENSITY;
+        static constexpr WORD light_magenta = FOREGROUND_RED | FOREGROUND_BLUE | FOREGROUND_INTENSITY;
+        static constexpr WORD light_cyan = FOREGROUND_GREEN | FOREGROUND_BLUE | FOREGROUND_INTENSITY;
+        static constexpr WORD light_white = FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE | FOREGROUND_INTENSITY;
+    };
 
     class console {
     public:
-        static void log(color color, const std::string& message) {
-            set_color(color);
-            std::cout << message;
-            set_color(color::white);
-        }
+        static void init();
+        static console& out;
+
+        console& operator<<(WORD color);
+        console& operator<<(const std::string& value);
+
+        template <typename T>
+        console& operator<<(const T& value);
     private:
-        static void set_color(color color) {
-            const HANDLE console_handle = GetStdHandle(STD_OUTPUT_HANDLE);
-            SetConsoleTextAttribute(console_handle, static_cast<WORD>(color));
-        }
+        console() = default;
+        static void set_color(WORD color);
     };
+
+    template<typename T>
+    console& console::operator<<(const T& value) {
+        std::wcout << value;
+        return *this;
+    }
 
     inline std::string escape_string(const std::string& input) {
         std::string output;

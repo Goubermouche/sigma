@@ -10,7 +10,7 @@ namespace channel {
     }
 
     void node::print_value(int depth, const std::wstring& prefix, const std::wstring& node_name, const std::string& value, bool is_last) {
-        std::wcout
+        console::out 
             << prefix
             << (depth == 0 ? L"" : (is_last ? L"╰─" : L"├─"))
             << node_name

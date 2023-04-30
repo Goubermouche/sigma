@@ -195,8 +195,7 @@ namespace channel {
 	}
 
 	void compilation_logger::emit_cannot_open_file_error(const std::string& filepath) {
-		console::log(color::red, "[error:]: ");
-		console::log(color::white, "cannot open file '" + filepath + "'\n");
+		console::out << color::red << "[error:]: " << color::white << "cannot open file '" + filepath + "'\n";
 	}
 
 	void compilation_logger::emit_invalid_dot_character_at_token_start_error() {
@@ -248,17 +247,14 @@ namespace channel {
 	}
 
 	void compilation_logger::emit_warning(u64 line_number, const std::string& message) {
-		console::log(color::cyan, "[warning:" + std::to_string(line_number) + "]: ");
-		console::log(color::white, message + '\n');
+		console::out << color::cyan << "[warning:" << std::to_string(line_number) << "]: " << color::white << message << '\n';
 	}
 
 	void compilation_logger::emit_error(u64 line_number, const std::string& message) {
-		console::log(color::red, "[error:" + std::to_string(line_number) + "]: ");
-		console::log(color::white, message + '\n');
+		console::out << color::red << "[error:" << std::to_string(line_number) << "]: " << color::white << message << '\n';
 	}
 
 	void compilation_logger::emit_error(const std::string& message)	{
-		console::log(color::red, "[error]: ");
-		console::log(color::white, message + '\n');
+		console::out << color::red << "[error]: " << color::white << message << '\n';
 	}
 }

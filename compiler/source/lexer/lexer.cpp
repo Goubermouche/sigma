@@ -33,14 +33,14 @@ namespace channel {
 
 	void lexer::print_tokens() const {
 		for(const token_data& t : m_tokens) {
-			std::cout << std::left << std::setw(40) << token_to_string(t.token);
+			console::out << std::left << std::setw(40) << token_to_string(t.token);
 
 			if(!t.value.empty()) {
 				// the value string may contain escape sequences 
-				std::cout << escape_string(t.value);
+				console::out << escape_string(t.value);
 			}
 
-			std::cout << '\n';
+			console::out << '\n';
 		}
 	}
 

@@ -3,7 +3,7 @@
 using namespace channel::types;
 
 int main(int argc, char* argv[]) {
-	_setmode(_fileno(stdout), _O_U16TEXT);
+	channel::console::init();
 
 	// use the last argument for now
 	channel::compiler::compile("test/main.ch");

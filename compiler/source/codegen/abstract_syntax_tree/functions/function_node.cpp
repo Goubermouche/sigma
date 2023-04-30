@@ -20,10 +20,10 @@ namespace channel {
 
 		// print function arguments
 		for (u64 i = 0; i < m_function_arguments.size(); ++i) {
-			std::wcout << s_ws_to_s_converter.from_bytes(m_function_arguments[i].second.to_string()) << (i == m_function_arguments.size() - 1 ? "" : ", ");
+			console::out << s_ws_to_s_converter.from_bytes(m_function_arguments[i].second.to_string()) << (i == m_function_arguments.size() - 1 ? "" : ", ");
 		}
 
-		std::wcout << L")\n";
+		console::out  << L")\n";
 
 		// print inner statements 
 		for (u64 i = 0; i < m_function_statements.size(); ++i) {

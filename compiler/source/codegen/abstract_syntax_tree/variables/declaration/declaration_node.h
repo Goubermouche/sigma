@@ -1,6 +1,6 @@
 #pragma once
 #include "../../node.h"
-#include "../../../type.h"
+#include "../../../llvm_wrappers/type.h"
 
 namespace channel {
 	/**
@@ -8,10 +8,15 @@ namespace channel {
 	 */
 	class declaration_node : public node {
 	public:
-		declaration_node(u64 line_number, const type& declaration_type, const std::string& declaration_identifier, node_ptr expression_node = nullptr);
+		declaration_node(
+			u64 line_number, 
+			const type& declaration_type,
+			const std::string& declaration_identifier,
+			const node_ptr& expression_node = nullptr
+		);
 
 		const std::string& get_declaration_identifier() const;
-		node_ptr get_expression_node() const;
+		const node_ptr& get_expression_node() const;
 		const type& get_declaration_type() const;
 	private:
 		type m_declaration_type;

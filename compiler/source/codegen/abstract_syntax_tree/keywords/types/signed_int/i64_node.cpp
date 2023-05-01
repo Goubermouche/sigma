@@ -10,7 +10,13 @@ namespace channel {
 	}
 
 	void i64_node::print(int depth, const std::wstring& prefix, bool is_last) {
-		print_value(depth, prefix, L"IntegerLiteral", "'i64' '" + std::to_string(m_value) + "'\n", is_last);
+		print_value(
+			depth, 
+			prefix,
+			"integral literal",
+			"'i64' '" + std::to_string(m_value) + "'\n", 
+			is_last
+		);
 	}
 
 	i64 i64_node::get_value() const {

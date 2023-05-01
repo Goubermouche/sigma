@@ -11,7 +11,14 @@ namespace channel {
 
 	void bool_node::print(int depth, const std::wstring& prefix, bool is_last) {
 		const std::string value_string = m_value ? "true" : "false";
-		print_value(depth, prefix, L"BoolLiteral", "'bool' '" + value_string + "'\n", is_last);
+
+		print_value(
+			depth,
+			prefix, 
+			"boolean literal",
+			"'bool' '" + value_string + "'\n", 
+			is_last
+		);
 	}
 
 	bool bool_node::get_value() const {

@@ -1,7 +1,7 @@
 #include "codegen_visitor.h"
 
 #include "../abstract_syntax_tree/variables/assignment_node.h"
-#include "../abstract_syntax_tree/variables/access_node.h"
+#include "../abstract_syntax_tree/variables/variable_access_node.h"
 #include "../abstract_syntax_tree/variables/variable_node.h"
 #include "../abstract_syntax_tree/variables/array/array_allocation_node.h"
 #include "../abstract_syntax_tree/variables/array/array_assignment_node.h"
@@ -33,7 +33,7 @@ namespace channel {
 		return true;
 	}
 
-	bool codegen_visitor::visit_access_node(access_node& node, value_ptr& out_value) {
+	bool codegen_visitor::visit_variable_access_node(variable_access_node& node, value_ptr& out_value) {
 		// load a local variable
 		// look up the local variable in the active scope
 		if (const value_ptr variable_value = m_scope->get_named_value(node.get_variable_identifier())) {

@@ -10,7 +10,13 @@ namespace channel {
 	}
 
 	void char_node::print(int depth, const std::wstring& prefix, bool is_last) {
-		print_value(depth, prefix, L"CharacterLiteral", "'char' '" + escape_string(std::to_string(m_value)) + "'\n", is_last);
+		print_value(
+			depth,
+			prefix, 
+			"character literal", 
+			"'char' '" + escape_string(std::to_string(m_value)) + "'\n",
+			is_last
+		);
 	}
 
 	char char_node::get_value() const {

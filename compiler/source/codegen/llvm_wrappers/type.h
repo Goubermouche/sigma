@@ -1,6 +1,6 @@
 #pragma once
 #include <llvm/IR/IRBuilder.h>
-#include "../lexer/token.h"
+#include "../../lexer/token.h"
 
 namespace channel {
     struct type {

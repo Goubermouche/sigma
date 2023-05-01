@@ -1,14 +1,22 @@
 #pragma once
-#include "../utility/macros.h"
-#include "llvm_wrappers/value.h"
+#include "../../utility/macros.h"
+#include "value.h"
 
 namespace channel {
 	class scope	{
 	public:
-		scope(scope* parent, llvm::BasicBlock* loop_end_block);
+		scope(
+			scope* parent,
+			llvm::BasicBlock* loop_end_block
+		);
 
 		void insert_named_value(const std::string& name, value_ptr value);
-		std::pair<std::unordered_map<std::string, value_ptr>::iterator, bool> add_named_value(const std::string& name, value_ptr value);
+
+		std::pair<std::unordered_map<std::string, value_ptr>::iterator, bool> add_named_value(
+			const std::string& name,
+			value_ptr value
+		);
+
 		bool contains_named_value(const std::string& name) const;
 
 		value_ptr get_named_value(const std::string& name);

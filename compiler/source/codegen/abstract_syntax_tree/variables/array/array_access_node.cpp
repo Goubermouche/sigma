@@ -1,8 +1,13 @@
 #include "array_access_node.h"
 
 namespace channel {
-	array_access_node::array_access_node(u64 line_number, node_ptr array_base, const std::vector<node_ptr>& array_element_index_nodes)
-		: node(line_number), m_array_base(array_base), m_array_element_index_nodes(array_element_index_nodes) {}
+	array_access_node::array_access_node(
+		u64 line_number,
+		const node_ptr& array_base,
+		const std::vector<node_ptr>& array_element_index_nodes
+	) : node(line_number),
+	m_array_base(array_base),
+	m_array_element_index_nodes(array_element_index_nodes) {}
 
 	bool array_access_node::accept(visitor& visitor, value_ptr& out_value) {
 		LOG_NODE_NAME(array_access_node);
@@ -10,7 +15,7 @@ namespace channel {
 	}
 
 	void array_access_node::print(int depth, const std::wstring& prefix, bool is_last) {
-		print_value(depth, prefix, L"ArrayAccess", "\n", is_last);
+		print_value(depth, prefix, "array access", "\n", is_last);
 		const std::wstring new_prefix = get_new_prefix(depth, prefix, is_last);
 
 		// print the inner statements
@@ -21,7 +26,7 @@ namespace channel {
 		}
 	}
 
-	node_ptr array_access_node::get_array_base_node() const {
+	const node_ptr& array_access_node::get_array_base_node() const {
 		return m_array_base;
 	}
 

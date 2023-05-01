@@ -1,5 +1,5 @@
 #pragma once
-#include "../codegen/type.h"
+#include "../codegen/llvm_wrappers/type.h"
 
 namespace channel{
 	class compilation_logger {

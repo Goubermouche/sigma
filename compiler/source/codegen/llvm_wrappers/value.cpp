@@ -1,9 +1,13 @@
 #include "value.h"
 
 namespace channel {
-	value::value(const std::string& name, type type, llvm::Value* value)
-		: m_name(name), m_type(type), m_value(value) {
-	}
+	value::value(
+		const std::string& name, 
+		type type,
+		llvm::Value* value
+	) : m_name(name),
+	m_type(type),
+	m_value(value) {}
 
 	type value::get_type() const {
 		return m_type;

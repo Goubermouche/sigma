@@ -8,7 +8,13 @@ namespace channel {
 	 */
 	class global_declaration_node : public declaration_node {
 	public:
-		global_declaration_node(u64 line_number, const type& declaration_type, const std::string& declaration_identifier, node_ptr expression_node = nullptr);
+		global_declaration_node(
+			u64 line_number, 
+			const type& declaration_type,
+			const std::string& declaration_identifier, 
+			const node_ptr& expression_node = nullptr
+		);
+
 		bool accept(visitor& visitor, value_ptr& out_value) override;
 		void print(int depth, const std::wstring& prefix, bool is_last) override;
 	};

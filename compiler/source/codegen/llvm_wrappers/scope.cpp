@@ -1,8 +1,11 @@
 #include "scope.h"
 
 namespace channel {
-	scope::scope(scope* parent, llvm::BasicBlock* loop_end_block)
-		: m_parent(parent), m_loop_end_block(loop_end_block) {}
+	scope::scope(
+		scope* parent,
+		llvm::BasicBlock* loop_end_block
+	) : m_parent(parent),
+	m_loop_end_block(loop_end_block) {}
 
 	void scope::insert_named_value(const std::string& name, value_ptr value) {
 		m_named_values[name] = value;
@@ -52,7 +55,10 @@ namespace channel {
 		return false;
 	}
 
-	std::pair<std::unordered_map<std::string, value_ptr>::iterator, bool> scope::add_named_value(const std::string& name, value_ptr value) {
+	std::pair<std::unordered_map<std::string, value_ptr>::iterator, bool> scope::add_named_value(
+		const std::string& name, 
+		value_ptr value
+	) {
 		// check parent scopes
 		if (contains_named_value(name)) {
 			return { {}, false };

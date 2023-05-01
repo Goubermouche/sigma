@@ -132,7 +132,7 @@
     <ClInclude Include="source\codegen\abstract_syntax_tree\variables\declaration\local_declaration_node.h">
       <Filter>source\codegen\abstract_syntax_tree\variables\declaration</Filter>
     </ClInclude>
-    <ClInclude Include="source\codegen\abstract_syntax_tree\variables\access_node.h">
+    <ClInclude Include="source\codegen\abstract_syntax_tree\variables\variable_access_node.h">
       <Filter>source\codegen\abstract_syntax_tree\variables</Filter>
     </ClInclude>
     <ClInclude Include="source\codegen\llvm_wrappers\function.h">
@@ -141,10 +141,10 @@
     <ClInclude Include="source\codegen\llvm_wrappers\value.h">
       <Filter>source\codegen\llvm_wrappers</Filter>
     </ClInclude>
-    <ClInclude Include="source\codegen\scope.h">
+    <ClInclude Include="source\codegen\llvm_wrappers\scope.h">
       <Filter>source\codegen</Filter>
     </ClInclude>
-    <ClInclude Include="source\codegen\type.h">
+    <ClInclude Include="source\codegen\llvm_wrappers\type.h">
       <Filter>source\codegen</Filter>
     </ClInclude>
     <ClInclude Include="source\codegen\visitor\codegen_visitor.h">
@@ -287,7 +287,7 @@
     <ClCompile Include="source\codegen\abstract_syntax_tree\variables\declaration\local_declaration_node.cpp">
       <Filter>source\codegen\abstract_syntax_tree\variables\declaration</Filter>
     </ClCompile>
-    <ClCompile Include="source\codegen\abstract_syntax_tree\variables\access_node.cpp">
+    <ClCompile Include="source\codegen\abstract_syntax_tree\variables\variable_access_node.cpp">
       <Filter>source\codegen\abstract_syntax_tree\variables</Filter>
     </ClCompile>
     <ClCompile Include="source\codegen\llvm_wrappers\function.cpp">
@@ -296,10 +296,10 @@
     <ClCompile Include="source\codegen\llvm_wrappers\value.cpp">
       <Filter>source\codegen\llvm_wrappers</Filter>
     </ClCompile>
-    <ClCompile Include="source\codegen\scope.cpp">
+    <ClCompile Include="source\codegen\llvm_wrappers\scope.cpp">
       <Filter>source\codegen</Filter>
     </ClCompile>
-    <ClCompile Include="source\codegen\type.cpp">
+    <ClCompile Include="source\codegen\llvm_wrappers\type.cpp">
       <Filter>source\codegen</Filter>
     </ClCompile>
     <ClCompile Include="source\codegen\visitor\codegen_visitor.cpp">

@@ -1,5 +1,5 @@
 #pragma once
-#include "../type.h"
+#include "type.h"
 
 namespace channel {
 	class value;
@@ -10,7 +10,11 @@ namespace channel {
 	 */
 	class value {
 	public:
-		value(const std::string& name, type type, llvm::Value* value);
+		value(
+			const std::string& name,
+			type type, 
+			llvm::Value* value
+		);
 
 		type get_type() const;
 		llvm::Value* get_value() const;

@@ -1,8 +1,13 @@
 #include "if_else_node.h"
 
 namespace channel {
-	if_else_node::if_else_node(u64 line_number, const std::vector<node_ptr>& condition_nodes, const std::vector<std::vector<node_ptr>>& branch_nodes)
-		: node(line_number), m_condition_nodes(condition_nodes), m_branch_nodes(branch_nodes) {}
+	if_else_node::if_else_node(
+		u64 line_number,
+		const std::vector<node_ptr>& condition_nodes,
+		const std::vector<std::vector<node_ptr>>& branch_nodes
+	) : node(line_number),
+	m_condition_nodes(condition_nodes),
+	m_branch_nodes(branch_nodes) {}
 
 	bool if_else_node::accept(visitor& visitor, value_ptr& out_value) {
 		LOG_NODE_NAME(if_else_node);
@@ -10,7 +15,7 @@ namespace channel {
 	}
 
 	void if_else_node::print(int depth, const std::wstring& prefix, bool is_last) {
-		print_value(depth, prefix, L"IfStmt", "\n", is_last);
+		print_value(depth, prefix, "if statement", "\n", is_last);
 		const std::wstring new_prefix = get_new_prefix(depth, prefix, is_last);
 
 		const bool has_trailing_else = m_condition_nodes.back() == nullptr;

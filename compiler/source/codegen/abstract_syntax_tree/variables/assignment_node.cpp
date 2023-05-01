@@ -1,8 +1,13 @@
 #include "assignment_node.h"
 
 namespace channel {
-	assignment_node::assignment_node(u64 line_number, node_ptr variable, node_ptr expression_node)
-		: node(line_number), m_variable_node(variable), m_expression_node(expression_node) {}
+	assignment_node::assignment_node(
+		u64 line_number,
+		const node_ptr& variable,
+		const node_ptr& expression_node
+	) : node(line_number),
+	m_variable_node(variable),
+	m_expression_node(expression_node) {}
 
 	bool assignment_node::accept(visitor& visitor, value_ptr& out_value) {
 		LOG_NODE_NAME(assignment_node);
@@ -10,7 +15,7 @@ namespace channel {
 	}
 
 	void assignment_node::print(int depth, const std::wstring& prefix, bool is_last) {
-		print_value(depth, prefix, L"VariableAssignment", "\n", is_last);
+		print_value(depth, prefix, "variable assignment", "\n", is_last);
 		const std::wstring new_prefix = get_new_prefix(depth, prefix, is_last);
 
 		// print the inner statements
@@ -18,11 +23,11 @@ namespace channel {
 		m_expression_node->print(depth + 1, new_prefix, true);
 	}
 
-	node_ptr assignment_node::get_variable_node() const {
+	const node_ptr& assignment_node::get_variable_node() const {
 		return m_variable_node;
 	}
 
-	node_ptr assignment_node::get_expression_node() const {
+	const node_ptr& assignment_node::get_expression_node() const {
 		return m_expression_node;
 	}
 }

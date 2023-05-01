@@ -1,8 +1,15 @@
 #include "array_assignment_node.h"
 
 namespace channel {
-	array_assignment_node::array_assignment_node(u64 line_number, node_ptr array_base, const std::vector<node_ptr>& index_nodes, node_ptr expression_node)
-		: node(line_number), m_array_base_node(array_base), m_array_element_index_nodes(index_nodes), m_expression_node(expression_node) {}
+	array_assignment_node::array_assignment_node(
+		u64 line_number,
+		const node_ptr& array_base,
+		const std::vector<node_ptr>& index_nodes,
+		const node_ptr& expression_node
+	) : node(line_number),
+	m_array_base_node(array_base),
+	m_array_element_index_nodes(index_nodes),
+	m_expression_node(expression_node) {}
 
 	bool array_assignment_node::accept(visitor& visitor, value_ptr& out_value) {
 		LOG_NODE_NAME(array_assignment_node);
@@ -10,7 +17,7 @@ namespace channel {
 	}
 
 	void array_assignment_node::print(int depth, const std::wstring& prefix, bool is_last) {
-		print_value(depth, prefix, L"ArrayAssignment", "\n", is_last);
+		print_value(depth, prefix, "array assignment", "\n", is_last);
 		const std::wstring new_prefix = get_new_prefix(depth, prefix, is_last);
 
 		// print the inner statements
@@ -23,7 +30,7 @@ namespace channel {
 		m_expression_node->print(depth + 1, new_prefix, true);
 	}
 
-	node_ptr array_assignment_node::get_array_base_node() const	{
+	const node_ptr& array_assignment_node::get_array_base_node() const	{
 		return m_array_base_node;
 	}
 
@@ -31,7 +38,7 @@ namespace channel {
 		return m_array_element_index_nodes;
 	}
 
-	node_ptr array_assignment_node::get_expression_node() const {
+	const node_ptr& array_assignment_node::get_expression_node() const {
 		return m_expression_node;
 	}
 }

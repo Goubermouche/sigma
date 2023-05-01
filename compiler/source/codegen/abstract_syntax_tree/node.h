@@ -27,8 +27,19 @@ namespace channel {
 		virtual void print(int depth, const std::wstring& prefix, bool is_last) = 0;
 		u64 get_declaration_line_number() const;
 	protected:
-		static void print_value(int depth, const std::wstring& prefix, const std::wstring& node_name, const std::string& value, bool is_last);
-		static std::wstring get_new_prefix(int depth, const std::wstring& prefix, bool is_last);
+		static void print_value(
+			int depth, 
+			const std::wstring& prefix,
+			const std::string& node_name,
+			const std::string& value,
+			bool is_last
+		);
+
+		static std::wstring get_new_prefix(
+			int depth, 
+			const std::wstring& prefix,
+			bool is_last
+		);
 	private:
 		u64 m_line_number = 0;
 	};

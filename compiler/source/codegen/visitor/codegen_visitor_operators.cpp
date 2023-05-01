@@ -569,7 +569,7 @@ namespace channel {
 		return true;
 	}
 
-	bool codegen_visitor::visit_operator_greater_than_equal_to(operator_greater_than_equal_to_node& node, value_ptr& out_value) {
+	bool codegen_visitor::visit_operator_greater_than_equal_to_node(operator_greater_than_equal_to_node& node, value_ptr& out_value) {
 		// accept the left expression
 		value_ptr left;
 		if (!node.get_left_expression_node()->accept(*this, left)) {

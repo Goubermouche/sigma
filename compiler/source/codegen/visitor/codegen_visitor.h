@@ -1,7 +1,7 @@
 #pragma once
 
 #include "../../parser/parser.h"
-#include "../scope.h"
+#include "../llvm_wrappers/scope.h"
 #include "visitor.h"
 
 #define CTOR_STRUCT_TYPE                 \
@@ -37,7 +37,7 @@ namespace channel {
 		// variables
 		// codegen_visitor_variables.cpp
 		bool visit_assignment_node(assignment_node& node, value_ptr& out_value) override;
-		bool visit_access_node(access_node& node, value_ptr& out_value) override;
+		bool visit_variable_access_node(variable_access_node& node, value_ptr& out_value) override;
 		bool visit_local_declaration_node(local_declaration_node& node, value_ptr& out_value) override;
 		bool visit_global_declaration_node(global_declaration_node& node, value_ptr& out_value) override;
 		bool visit_allocation_node(array_allocation_node& node, value_ptr& out_value) override;
@@ -97,7 +97,7 @@ namespace channel {
 		bool visit_operator_logical_conjunction_node(operator_conjunction_node& node, value_ptr& out_value) override;
 		bool visit_operator_logical_disjunction_node(operator_disjunction_node& node, value_ptr& out_value) override;
 		bool visit_operator_greater_than_node(operator_greater_than_node& node, value_ptr& out_value) override;
-		bool visit_operator_greater_than_equal_to(operator_greater_than_equal_to_node& node, value_ptr& out_value) override;
+		bool visit_operator_greater_than_equal_to_node(operator_greater_than_equal_to_node& node, value_ptr& out_value) override;
 		bool visit_operator_less_than_node(operator_less_than_node& node, value_ptr& out_value) override;
 		bool visit_operator_less_than_equal_to_node(operator_less_than_equal_to_node& node, value_ptr& out_value) override;
 		bool visit_operator_equals_node(operator_equals_node& node, value_ptr& out_value) override;

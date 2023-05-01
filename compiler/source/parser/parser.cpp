@@ -8,7 +8,7 @@
 
 // variables
 #include "../codegen/abstract_syntax_tree/variables/assignment_node.h"
-#include "../codegen/abstract_syntax_tree/variables/access_node.h"
+#include "../codegen/abstract_syntax_tree/variables/variable_access_node.h"
 #include "../codegen/abstract_syntax_tree/variables/array/array_allocation_node.h"
 #include "../codegen/abstract_syntax_tree/variables/array/array_access_node.h"
 #include "../codegen/abstract_syntax_tree/variables/array/array_assignment_node.h"
@@ -199,7 +199,7 @@ namespace channel {
 			return false;
 		}
 
-		out_node = new function_node(line_number, return_type, identifier, statements, arguments);
+		out_node = new function_node(line_number, return_type, identifier, arguments, statements);
 		return true;
 	}
 
@@ -333,7 +333,7 @@ namespace channel {
 		else {
 			// create a simple access node
 			get_next_token(); // identifier (guaranteed)
-			out_node = new access_node(m_current_token.line_number, m_current_token.value);
+			out_node = new variable_access_node(m_current_token.line_number, m_current_token.value);
 		}
 
 		// check for post unary operators after identifier, deep expression, or array index access
@@ -1111,7 +1111,7 @@ namespace channel {
 			// parse an assignment
 			get_next_token();
 			const std::string identifier = m_current_token.value;
-			out_node = new access_node(m_current_token.line_number, identifier);
+			out_node = new variable_access_node(m_current_token.line_number, identifier);
 		}
 		
 		// post increment

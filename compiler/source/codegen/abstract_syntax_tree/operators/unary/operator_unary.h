@@ -3,14 +3,16 @@
 
 namespace channel {
     /**
-     * \brief Base AST node, all binary operators derive from this node.
+     * \brief Base AST node, all unary operators derive from this node.
      */
     class operator_unary : public node {
     public:
-        operator_unary(u64 line_number, node_ptr expression_node);
-        ~operator_unary() override;
+        operator_unary(
+            u64 line_number,
+            const node_ptr& expression_node
+        );
 
-        node_ptr get_expression_node() const;
+        const node_ptr& get_expression_node() const;
     private:
         node_ptr m_expression_node;
     };

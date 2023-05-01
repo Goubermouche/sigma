@@ -2,11 +2,15 @@
 
 namespace channel {
 	for_node::for_node(u64 line_number,
-		node_ptr loop_initialization_node,
-		node_ptr loop_condition_node,
+		const node_ptr& loop_initialization_node,
+		const node_ptr& loop_condition_node,
 		const std::vector<node_ptr>& post_iteration_nodes,
-		const std::vector<node_ptr>& statement_nodes)
-		: node(line_number), m_loop_initialization_node(loop_initialization_node), m_loop_condition_node(loop_condition_node), m_post_iteration_nodes(post_iteration_nodes), m_loop_body_nodes(statement_nodes) {}
+		const std::vector<node_ptr>& statement_nodes
+	) : node(line_number),
+	m_loop_initialization_node(loop_initialization_node),
+	m_loop_condition_node(loop_condition_node),
+	m_post_iteration_nodes(post_iteration_nodes),
+	m_loop_body_nodes(statement_nodes) {}
 
 	bool for_node::accept(visitor& visitor, value_ptr& out_value) {
 		LOG_NODE_NAME(for_node);
@@ -14,7 +18,7 @@ namespace channel {
 	}
 
 	void for_node::print(int depth, const std::wstring& prefix, bool is_last) {
-		print_value(depth, prefix, L"ForStmt", "\n", is_last);
+		print_value(depth, prefix, "for statement", "\n", is_last);
 		const std::wstring new_prefix = get_new_prefix(depth, prefix, is_last);
 
 		const bool has_post_iteration_nodes = !m_post_iteration_nodes.empty();
@@ -33,11 +37,11 @@ namespace channel {
 		}
 	}
 
-	node_ptr for_node::get_loop_initialization_node() const {
+	const node_ptr& for_node::get_loop_initialization_node() const {
 		return m_loop_initialization_node;
 	}
 
-	node_ptr for_node::get_loop_condition_node() const {
+	const node_ptr& for_node::get_loop_condition_node() const {
 		return m_loop_condition_node;
 	}
 

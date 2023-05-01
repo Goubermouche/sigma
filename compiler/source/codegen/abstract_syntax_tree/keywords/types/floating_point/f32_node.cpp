@@ -10,7 +10,13 @@ namespace channel {
 	}
 
 	void f32_node::print(int depth, const std::wstring& prefix, bool is_last) {
-		print_value(depth, prefix, L"FloatingLiteral", "'f32' '" + std::to_string(m_value) + "'\n", is_last);
+		print_value(
+			depth, 
+			prefix,
+			"floating literal", 
+			"'f32' '" + std::to_string(m_value) + "'\n",
+			is_last
+		);
 	}
 
 	f32 f32_node::get_value() const	{

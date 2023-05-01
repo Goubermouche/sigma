@@ -9,7 +9,13 @@ namespace channel {
         return m_line_number;
     }
 
-    void node::print_value(int depth, const std::wstring& prefix, const std::wstring& node_name, const std::string& value, bool is_last) {
+    void node::print_value(
+        int depth, 
+        const std::wstring& prefix,
+        const std::string& node_name, 
+        const std::string& value, 
+        bool is_last
+    ) {
         console::out 
             << prefix
             << (depth == 0 ? L"" : (is_last ? L"╰─" : L"├─"))
@@ -18,7 +24,11 @@ namespace channel {
             << s_ws_to_s_converter.from_bytes(value);
     }
 
-    std::wstring node::get_new_prefix(int depth, const std::wstring& prefix, bool is_last) {
+    std::wstring node::get_new_prefix(
+        int depth, 
+        const std::wstring& prefix,
+        bool is_last
+    ) {
         return depth == 0 ? L"" : prefix + (is_last ? L"  " : L"│ ");
     }
 }

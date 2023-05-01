@@ -10,7 +10,13 @@ namespace channel {
 	}
 
 	void u8_node::print(int depth, const std::wstring& prefix, bool is_last) {
-		print_value(depth, prefix, L"IntegerLiteral", "'u8' '" + std::to_string(m_value) + "'\n", is_last);
+		print_value(
+			depth,
+			prefix,
+			"integral literal", 
+			"'u8' '" + std::to_string(m_value) + "'\n",
+			is_last
+		);
 	}
 
 	u64 u8_node::get_value() const {

@@ -10,7 +10,7 @@ namespace channel {
 
     // variables
     class assignment_node;
-    class access_node;
+    class variable_access_node;
     class local_declaration_node;
     class global_declaration_node;
     class array_allocation_node;
@@ -89,7 +89,7 @@ namespace channel {
 
         // variables
         virtual bool visit_assignment_node(assignment_node& node, value_ptr& out_value) = 0;
-        virtual bool visit_access_node(access_node& node, value_ptr& out_value) = 0;
+        virtual bool visit_variable_access_node(variable_access_node& node, value_ptr& out_value) = 0;
         virtual bool visit_local_declaration_node(local_declaration_node& node, value_ptr& out_value) = 0;
         virtual bool visit_global_declaration_node(global_declaration_node& node, value_ptr& out_value) = 0;
         virtual bool visit_allocation_node(array_allocation_node& node, value_ptr& out_value) = 0;
@@ -142,7 +142,7 @@ namespace channel {
         virtual bool visit_operator_logical_conjunction_node(operator_conjunction_node& node, value_ptr& out_value) = 0;
         virtual bool visit_operator_logical_disjunction_node(operator_disjunction_node& node, value_ptr& out_value) = 0;
         virtual bool visit_operator_greater_than_node(operator_greater_than_node& node, value_ptr& out_value) = 0;
-        virtual bool visit_operator_greater_than_equal_to(operator_greater_than_equal_to_node& node, value_ptr& out_value) = 0;
+        virtual bool visit_operator_greater_than_equal_to_node(operator_greater_than_equal_to_node& node, value_ptr& out_value) = 0;
         virtual bool visit_operator_less_than_node(operator_less_than_node& node, value_ptr& out_value) = 0;
         virtual bool visit_operator_less_than_equal_to_node(operator_less_than_equal_to_node& node, value_ptr& out_value) = 0;
         virtual bool visit_operator_equals_node(operator_equals_node& node, value_ptr& out_value) = 0;

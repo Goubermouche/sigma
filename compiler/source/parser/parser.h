@@ -1,6 +1,6 @@
 #pragma once
 #include "../lexer/lexer.h"
-#include "../codegen/type.h"
+#include "../codegen/llvm_wrappers/type.h"
 #include "../codegen/abstract_syntax_tree/abstract_syntax_tree.h"
 
 namespace channel {

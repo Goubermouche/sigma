@@ -3,11 +3,12 @@
 
 namespace channel {
 	/**
-	 * \brief AST node, represents the i64 type keyword.
+	 * \brief AST node, represents a char literal.
 	 */
 	class char_node : public node {
 	public:
 		char_node(u64 line_number, char value);
+
 		bool accept(visitor& visitor, value_ptr& out_value) override;
 		void print(int depth, const std::wstring& prefix, bool is_last) override;
 

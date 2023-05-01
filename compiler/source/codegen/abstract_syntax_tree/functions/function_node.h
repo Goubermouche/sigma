@@ -1,14 +1,21 @@
 #pragma once
 #include "../node.h"
-#include "../../type.h"
+#include "../../llvm_wrappers/type.h"
 
 namespace channel {
 	/**
-	 * \brief AST node, represents a function.
+	 * \brief AST node, represents a function declaration.
 	 */
 	class function_node : public node {
 	public:
-		function_node(u64 line_number, const type& function_return_type, const std::string& function_identifier, const std::vector<node_ptr>& function_statements, const std::vector<std::pair<std::string, type>>& function_arguments);
+		function_node(
+			u64 line_number, 
+			const type& function_return_type,
+			const std::string& function_identifier,
+			const std::vector<std::pair<std::string, type>>& function_arguments,
+			const std::vector<node_ptr>& function_statements
+		);
+
 		bool accept(visitor& visitor, value_ptr& out_value) override;
 		void print(int depth, const std::wstring& prefix, bool is_last) override;
 
@@ -19,7 +26,7 @@ namespace channel {
 	private:
 		type m_function_return_type;
 		std::string m_function_identifier;
-		std::vector<node_ptr> m_function_statements;
 		std::vector<std::pair<std::string, type>> m_function_arguments;
+		std::vector<node_ptr> m_function_statements;
 	};
 }

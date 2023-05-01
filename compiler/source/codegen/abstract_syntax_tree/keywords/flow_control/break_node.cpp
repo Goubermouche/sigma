@@ -10,6 +10,7 @@ namespace channel {
 	}
 
 	void break_node::print(int depth, const std::wstring& prefix, bool is_last) {
-		print_value(depth, prefix, "break statement", "\n", is_last);
+		print_value(depth, prefix, "break statement", is_last);
+		console::out << "\n";
 	}
 }

@@ -12,7 +12,9 @@ namespace channel {
 	}
 
 	void translation_unit_node::print(int depth, const std::wstring& prefix, bool is_last) {
-		print_value(depth, prefix, "translation unit", "\n", is_last);
+		print_value(depth, prefix, "translation unit", is_last);
+		console::out << "\n";
+
 		const std::wstring new_prefix = get_new_prefix(depth, prefix, is_last);
 
 		// print inner statements

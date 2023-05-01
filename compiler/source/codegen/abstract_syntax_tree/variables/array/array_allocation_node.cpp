@@ -19,9 +19,10 @@ namespace channel {
 			depth, 
 			prefix, 
 			"array allocation", 
-			"'" + m_array_element_type.to_string() +"'\n",
 			is_last
 		);
+
+		console::out << "'" + m_array_element_type.to_string() + "'\n";
 
 		const std::wstring new_prefix = get_new_prefix(depth, prefix, is_last);
 

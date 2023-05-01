@@ -12,7 +12,18 @@ namespace channel {
 	}
 
 	void operator_pre_increment::print(int depth, const std::wstring& prefix, bool is_last) {
-		print_value(depth, prefix, "unary operator", "'prefix' '++'\n", is_last);
+		print_value(depth, prefix, "unary operator", is_last);
+		console::out
+			<< '\''
+			<< AST_NODE_OPERATOR_COLOR
+			<< "prefix"
+			<< color::white
+			<< "' '"
+			<< AST_NODE_OPERATOR_COLOR
+			<< "++"
+			<< color::white
+			<< "'\n";
+
 		const std::wstring new_prefix = get_new_prefix(depth, prefix, is_last);
 
 		// print the inner statement

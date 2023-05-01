@@ -14,6 +14,7 @@ namespace channel {
         static constexpr WORD magenta = FOREGROUND_RED | FOREGROUND_BLUE;
         static constexpr WORD cyan = FOREGROUND_GREEN | FOREGROUND_BLUE;
         static constexpr WORD white = FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE;
+        static constexpr WORD gray = 8;
         static constexpr WORD light_red = FOREGROUND_RED | FOREGROUND_INTENSITY;
         static constexpr WORD light_green = FOREGROUND_GREEN | FOREGROUND_INTENSITY;
         static constexpr WORD light_yellow = FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_INTENSITY;

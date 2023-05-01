@@ -17,9 +17,15 @@ namespace channel {
             depth, 
             prefix, 
             "variable access", 
-            "'" + m_variable_identifier +"'\n", 
             is_last
         );
+
+        console::out
+    		<< "'"
+    		<< AST_NODE_VARIABLE_COLOR
+    		<< m_variable_identifier 
+            << color::white
+    		<< "'\n";
     }
 
     const std::string& variable_access_node::get_variable_identifier() const {

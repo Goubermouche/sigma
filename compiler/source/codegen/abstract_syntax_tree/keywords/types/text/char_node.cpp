@@ -14,9 +14,16 @@ namespace channel {
 			depth,
 			prefix, 
 			"character literal", 
-			"'char' '" + escape_string(std::to_string(m_value)) + "'\n",
 			is_last
 		);
+
+		console::out
+			<< AST_NODE_VARIABLE_COLOR
+			<< "'char' '"
+			<< AST_NODE_TEXT_LITERAL_COLOR
+			<< escape_string(std::to_string(m_value))
+			<< color::white
+			<< "'\n";
 	}
 
 	char char_node::get_value() const {

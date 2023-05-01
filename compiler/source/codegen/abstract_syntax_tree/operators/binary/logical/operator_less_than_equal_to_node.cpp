@@ -17,7 +17,14 @@ namespace channel {
 	}
 
 	void operator_less_than_equal_to_node::print(int depth, const std::wstring& prefix, bool is_last) {
-		print_value(depth, prefix, "binary operator", "'<='\n", is_last);
+		print_value(depth, prefix, "binary operator", is_last);
+		console::out
+			<< '\''
+			<< AST_NODE_OPERATOR_COLOR
+			<< "<="
+			<< color::white
+			<< "'\n";
+
 		const std::wstring new_prefix = get_new_prefix(depth, prefix, is_last);
 
 		// print the inner statements

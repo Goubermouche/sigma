@@ -15,7 +15,9 @@ namespace channel {
 	}
 
 	void if_else_node::print(int depth, const std::wstring& prefix, bool is_last) {
-		print_value(depth, prefix, "if statement", "\n", is_last);
+		print_value(depth, prefix, "if statement", is_last);
+		console::out << "\n";
+
 		const std::wstring new_prefix = get_new_prefix(depth, prefix, is_last);
 
 		const bool has_trailing_else = m_condition_nodes.back() == nullptr;

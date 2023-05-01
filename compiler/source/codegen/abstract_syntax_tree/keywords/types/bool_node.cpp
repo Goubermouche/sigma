@@ -16,9 +16,16 @@ namespace channel {
 			depth,
 			prefix, 
 			"boolean literal",
-			"'bool' '" + value_string + "'\n", 
 			is_last
 		);
+
+		console::out
+			<< AST_NODE_VARIABLE_COLOR
+			<< "'bool' '"
+			<< AST_NODE_BOOLEAN_LITERAL_COLOR
+			<< value_string
+			<< color::white
+			<< "'\n";
 	}
 
 	bool bool_node::get_value() const {

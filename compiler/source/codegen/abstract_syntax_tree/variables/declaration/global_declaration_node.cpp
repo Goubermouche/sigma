@@ -23,9 +23,19 @@ namespace channel {
 			depth, 
 			prefix, 
 			"global declaration", 
-			"'" + get_declaration_identifier() + "' '" + get_declaration_type().to_string() + "'\n", 
 			is_last
 		);
+
+		console::out
+			<< "'"
+			<< AST_NODE_VARIABLE_COLOR
+			<< get_declaration_identifier()
+			<< color::white
+			<< "' '"
+			<< AST_NODE_TYPE_COLOR
+			<< get_declaration_type().to_string()
+			<< color::white
+			<< "'\n";
 
 		const std::wstring new_prefix = get_new_prefix(depth, prefix, is_last);
 

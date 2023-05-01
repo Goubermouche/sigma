@@ -14,9 +14,16 @@ namespace channel {
 			depth,
 			prefix, 
 			"floating literal",
-			"'f64' '" + std::to_string(m_value) + "'\n", 
 			is_last
 		);
+
+		console::out
+			<< AST_NODE_VARIABLE_COLOR
+			<< "'f64' '"
+			<< AST_NODE_NUMERICAL_LITERAL_COLOR
+			<< std::to_string(m_value)
+			<< color::white
+			<< "'\n";
 	}
 
 	f64 f64_node::get_value() const {

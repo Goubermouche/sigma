@@ -14,9 +14,16 @@ namespace channel {
 			depth,
 			prefix,
 			"integral literal", 
-			"'u8' '" + std::to_string(m_value) + "'\n",
 			is_last
 		);
+
+		console::out
+			<< AST_NODE_VARIABLE_COLOR
+			<< "'u8' '"
+			<< AST_NODE_NUMERICAL_LITERAL_COLOR
+			<< std::to_string(m_value)
+			<< color::white
+			<< "'\n";
 	}
 
 	u64 u8_node::get_value() const {

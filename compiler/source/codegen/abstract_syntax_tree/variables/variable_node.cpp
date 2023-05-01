@@ -17,9 +17,10 @@ namespace channel {
 			depth,
 			prefix, 
 			"variable", 
-			"'" + m_variable_identifier +"'\n",
 			is_last
 		);
+
+		console::out << "'" + m_variable_identifier + "'\n";
 	}
 
 	const std::string& variable_node::get_variable_identifier() const {

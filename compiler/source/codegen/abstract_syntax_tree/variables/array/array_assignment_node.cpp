@@ -17,7 +17,9 @@ namespace channel {
 	}
 
 	void array_assignment_node::print(int depth, const std::wstring& prefix, bool is_last) {
-		print_value(depth, prefix, "array assignment", "\n", is_last);
+		print_value(depth, prefix, "array assignment", is_last);
+		console::out << "\n";
+
 		const std::wstring new_prefix = get_new_prefix(depth, prefix, is_last);
 
 		// print the inner statements

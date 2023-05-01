@@ -14,9 +14,16 @@ namespace channel {
 			depth, 
 			prefix,
 			"integral literal", 
-			"'i8' '" + std::to_string(m_value) + "'\n", 
 			is_last
 		);
+
+		console::out
+			<< AST_NODE_VARIABLE_COLOR
+			<< "'i8' '"
+			<< AST_NODE_NUMERICAL_LITERAL_COLOR
+			<< std::to_string(m_value)
+			<< color::white
+			<< "'\n";
 	}
 
 	i64 i8_node::get_value() const {

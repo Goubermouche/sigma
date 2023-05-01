@@ -15,7 +15,9 @@ namespace channel {
 	}
 
 	void assignment_node::print(int depth, const std::wstring& prefix, bool is_last) {
-		print_value(depth, prefix, "variable assignment", "\n", is_last);
+		print_value(depth, prefix, "variable assignment", is_last);
+		console::out << "\n";
+
 		const std::wstring new_prefix = get_new_prefix(depth, prefix, is_last);
 
 		// print the inner statements

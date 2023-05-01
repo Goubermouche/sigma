@@ -15,7 +15,14 @@ namespace channel {
 	}
 
 	void function_call_node::print(int depth, const std::wstring& prefix, bool is_last) {
-		print_value(depth, prefix, "function call", "'" + m_function_name + "'\n",	is_last);
+		print_value(depth, prefix, "function call",	is_last);
+		console::out
+			<< "'"
+			<< AST_NODE_VARIABLE_COLOR
+			<< m_function_name
+			<< color::white
+			<< "'\n";
+
 		const std::wstring new_prefix = get_new_prefix(depth, prefix, is_last);
 
 		// print function argument statements 

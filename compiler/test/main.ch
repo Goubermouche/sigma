@@ -15,8 +15,8 @@
 //  - tests
 //  - numerical literals should always be cast to the desired type, as long as it is not a boolean
 
-i32 main() {
-	for(i32 i = 0; i <= 100; ++i) {
+void fizz_buzz(u64 iteration_count) {
+	for(u64 i = 0; i <= iteration_count; ++i) {
 		if(i % 15 == 0) {
 			print("FizzBuzz\t");
 		}
@@ -30,4 +30,8 @@ i32 main() {
 			print("%d\t", i);
 		}
 	}
+}
+
+i32 main() {
+	fizz_buzz(100);
 }

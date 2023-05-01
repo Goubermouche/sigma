@@ -13,15 +13,13 @@ namespace channel {
         int depth, 
         const std::wstring& prefix,
         const std::string& node_name, 
-        const std::string& value, 
         bool is_last
     ) {
-        console::out 
+        console::out
             << prefix
             << (depth == 0 ? L"" : (is_last ? L"╰─" : L"├─"))
             << node_name
-            << ' '
-            << s_ws_to_s_converter.from_bytes(value);
+            << ' ';
     }
 
     std::wstring node::get_new_prefix(

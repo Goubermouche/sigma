@@ -15,7 +15,9 @@ namespace channel {
 	}
 
 	void while_node::print(int depth, const std::wstring& prefix, bool is_last) {
-		print_value(depth, prefix, "while statement", "\n", is_last);
+		print_value(depth, prefix, "while statement", is_last);
+		console::out << "\n";
+
 		const std::wstring new_prefix = get_new_prefix(depth, prefix, is_last);
 
 		const bool has_body_statements = !m_loop_body_nodes.empty();

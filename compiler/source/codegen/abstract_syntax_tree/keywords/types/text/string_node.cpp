@@ -1,4 +1,4 @@
-#include "string_node.h"
+#include "string_node.h"	
 
 namespace channel {
 	string_node::string_node(u64 line_number, const std::string& value)
@@ -14,9 +14,20 @@ namespace channel {
 			depth, 
 			prefix, 
 			"string literal", 
-			"'char[" + std::to_string(m_value.size()) + "]' '" + escape_string(m_value) + "'\n",
 			is_last
 		);
+
+		console::out
+			<< AST_NODE_VARIABLE_COLOR
+			<< "'char[" 
+			<< AST_NODE_NUMERICAL_LITERAL_COLOR
+			<< std::to_string(m_value.size())
+			<< color::white 
+			<< "]' '"
+			<< AST_NODE_TEXT_LITERAL_COLOR
+			<< escape_string(m_value)
+			<< color::white
+			<< "'\n";
 	}
 
 	const std::string& string_node::get_value() const {

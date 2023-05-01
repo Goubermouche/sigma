@@ -13,10 +13,17 @@ namespace channel {
 		print_value(
 			depth, 
 			prefix,
-			"floating literal", 
-			"'f32' '" + std::to_string(m_value) + "'\n",
+			"floating literal",
 			is_last
 		);
+
+		console::out
+			<< AST_NODE_VARIABLE_COLOR
+			<< "'f32' '"
+			<< AST_NODE_NUMERICAL_LITERAL_COLOR
+			<< std::to_string(m_value)
+			<< color::white
+			<< "'\n";
 	}
 
 	f32 f32_node::get_value() const	{

@@ -24,17 +24,32 @@ namespace channel {
 			depth,
 			prefix,
 			"function declaration",
-			"'" + m_function_return_type.to_string() + "' '" + m_function_identifier + "' (", is_last
+			is_last
 		);
+
+		console::out
+			<< "'"
+			<< AST_NODE_TYPE_COLOR
+			<< m_function_return_type.to_string()
+			<< color::white
+			<< "' '"
+			<< AST_NODE_VARIABLE_COLOR
+			<< m_function_identifier
+			<< color::white
+			<< "' (";
 
 		const std::wstring new_prefix = get_new_prefix(depth, prefix, is_last);
 
 		// print function arguments 
 		for (u64 i = 0; i < m_function_arguments.size(); ++i) {
-			console::out << s_ws_to_s_converter.from_bytes(m_function_arguments[i].second.to_string()) << (i == m_function_arguments.size() - 1 ? "" : ", ");
+			console::out
+				<< AST_NODE_TYPE_COLOR
+				<< m_function_arguments[i].second.to_string()
+				<< color::white
+				<< (i == m_function_arguments.size() - 1 ? "" : ", ");
 		}
 
-		console::out  << L")\n";
+		console::out  << ")\n";
 
 		// print inner statements 
 		for (u64 i = 0; i < m_function_statements.size(); ++i) {

@@ -20,7 +20,11 @@ project "compiler"
     targetdir ("../bin/%{cfg.buildcfg}/%{prj.name}")
     objdir ("../bin-int/%{cfg.buildcfg}/%{prj.name}")
 
-    buildoptions { "/external:anglebrackets", "/external:W0" }
+    buildoptions { 
+        "/external:anglebrackets", -- handle < includes as external
+        "/external:W0", -- disable warnings for external files
+        "/MP" -- enable multi-processor compilation
+    }
 
     files
     {

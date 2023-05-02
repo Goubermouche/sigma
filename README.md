@@ -20,117 +20,98 @@ setx LLVM_ROOT path/to/llvm
 After building LLVM you'll have to link the necessary libraries and create the basic project structure. To do this, navigate to the root channel directory and run the [setup.bat](https://github.com/Goubermouche/channel-language/blob/1546a311f1e7280321ca556ac2f5c380e62bd97e/setup.bat) script. This will generate the necessary project files for VS 2022, note that if you want to build for something else you'll need to modify the [setup.bat](https://github.com/Goubermouche/channel-language/blob/1546a311f1e7280321ca556ac2f5c380e62bd97e/setup.bat) script. 
 
 ## Language example
-Below is a simple example for visualizing a slizce of a [Mandelbrot set](https://en.wikipedia.org/wiki/Mandelbrot_set) using the Channel language, the implementation is inspired by a [third party repository](https://github.com/rkosegi/mandelbrot_console).
+Below is a simple example for visualizing a slizce of a [Mandelbrot set](https://en.wikipedia.org/wiki/Mandelbrot_set) using the Channel language.
 ```cpp
-// declare variables for the number of rows and columns, and a pointer to an array
-u64 rows = 20;
-u64 cols = 100;
-i32* array;
+i32 WIDTH = 100;
+i32 HEIGHT = 30;
+i32 MAX_ITER = 1000;
 
-// function for setting the value of a specific pixel in the array
-void set_pixel(u64 x, u64 y, i32 value) {
-   u64 idx = x + cols * y;
-   array[idx] = value;
+i32 mandelbrot(f64 real, f64 imag) {
+    f64 z_real = 0;
+    f64 z_imag = 0;
+    f64 z_real_sq;
+    f64 z_imag_sq;
+
+    for (i32 i = 0; i < MAX_ITER; i++) {
+        z_real_sq = z_real * z_real;
+        z_imag_sq = z_imag * z_imag;
+
+        if (z_real_sq + z_imag_sq > 4.0) {
+            return i; 
+        }
+
+        z_imag = 2 * z_real * z_imag + imag;
+        z_real = z_real_sq - z_imag_sq + real;
+    }
+
+    return MAX_ITER;
 }
 
-//function for generating the mandelbrot set
-void mandelbrot() {
-   // set up the initial parameters for the mandelbrot set
-   f64 min_re = -2.0;
-   f64 max_re = 2.0;
-   f64 min_im = -1.2;
-   f64 max_im = min_im + (max_re - min_re) * rows / cols;
-   f64 re_factor = (max_re - min_re) / (cols - 1);
-   f64 im_factor = (max_im - min_im) / (rows - 1);
-   u64 max_iterations = 30;
+char get_char(i32 iterations) {
+    if (iterations == MAX_ITER) {
+        return ' ';
+    }
 
-   // iterate through each row and column
-   for(u64 y = 0; y < rows; ++y) {
-      f64 c_im = max_im + y * im_factor;
-
-      for(u64 x = 0; x < cols; ++x) {
-         f64 c_re = min_re + x * re_factor;
-
-         // initialize complex numbers for the mandelbrot set
-         f64 z_re = c_re;
-         f64 z_im = c_im;
-         bool is_inside = true;
-
-         // iterate and check for convergence
-         for(u64 n = 0; n < max_iterations; ++n) {
-            f64 z_re2 = z_re * z_re;
-            f64 z_im2 = z_im * z_im;
-
-            // check for divergence
-            if(z_re2 + z_im2 > 4.0) {
-               is_inside = false;
-               break;
-            }
-
-            // calculate the next iteration
-            z_im = 2.0 * z_re * z_im + c_im;
-            z_re = z_re2 - z_im2 + c_re;
-         }
-
-         // set the pixel value if it is inside the Mandelbrot set
-         if(is_inside) {
-            set_pixel(x, y, 1);
-         }
-      }
-   }
+    char* charset = ".,-~:;=!*#$@";
+    i32 charset_size = 12;
+    return charset[iterations % charset_size];
 }
 
-// function for printing the contents of the array
-void dump() {
-   for(u64 idx = 0; idx < rows * cols; idx++) {
-      print("%i", array[idx]);
-
-      // print a newline character at the end of each row
-      if(((idx + 1) % cols) == 0) {
-         print("\n");
-      }
-   }
-}
-
-// main entry point
 i32 main() {
-   u64 array_size = rows * cols;
-   array = new i32[array_size];	
-
-   // initialize the array with zeros
-   for(u64 i = 0; i < array_size; i++) {
-      array[i] = 0;
-   }
-
-   // generate the mandelbrot set and print the result
-   mandelbrot();
-   dump();
-
-   return 0;
+    f64 x_min = -2.0;
+    f64 x_max = 1.0;
+    f64 y_min = -1.0;
+    f64 y_max = 1.0;
+    
+    f64 x_step = (x_max - x_min) / WIDTH;
+    f64 y_step = (y_max - y_min) / HEIGHT;
+    
+    for (f64 y = y_min; y < y_max; y = y + y_step) {
+        for (f64 x = x_min; x < x_max; x = x + x_step) {
+            i32 iterations = mandelbrot(x, y);
+            printc(get_char(iterations));
+        }
+    
+        printc('\n');
+    }
+    
+    return 0;
+}
 }
 ```
 The expected output, after running the generated .exe, looks like this: 
 ```
-0000000000000000000000000000000000111111111111111111111111000000000000000000000000000000000000000000
-0000000000000000000000000000000011111111111111111111111111110000000000000000000000000000000000000000
-0000000000000000000000000000000001111111111111111111111111110000000000000000000000000000000000000000
-0000000000000000000001000101000011111111111111111111111111100000000000000000000000000000000000000000
-0000000000000000000001111111100011111111111111111111111111110000000000000000000000000000000000000000
-0000000000000000000011111111110011111111111111111111111111100000000000000000000000000000000000000000
-0000000000000000000011111111111111111111111111111111111111110000000000000000000000000000000000000000
-0000000000000000000111111111111111111111111111111111111111100000000000000000000000000000000000000000
-0000000000000000110111111111111111111111111111111111111111000000000000000000000000000000000000000000
-0000000000000001111111111111111111111111111111111111111111000000000000000000000000000000000000000000
-0000000000000001111111111111111111111111111111111111111111000000000000000000000000000000000000000000
-0000000000000000110111111111111111111111111111111111111111000000000000000000000000000000000000000000
-0000000000000000000111111111111111111111111111111111111111100000000000000000000000000000000000000000
-0000000000000000000011111111111111111111111111111111111111110000000000000000000000000000000000000000
-0000000000000000000011111111110011111111111111111111111111100000000000000000000000000000000000000000
-0000000000000000000001111111100011111111111111111111111111110000000000000000000000000000000000000000
-0000000000000000000001000101000011111111111111111111111111100000000000000000000000000000000000000000
-0000000000000000000000000000000001111111111111111111111111110000000000000000000000000000000000000000
-0000000000000000000000000000000011111111111111111111111111110000000000000000000000000000000000000000
-0000000000000000000000000000000000111111111111111111111111000000000000000000000000000000000000000000
+,,,,,,,,,--------~~~~~~~~~~~~~~~~~~~~~~~~~~~::::::::::;;;;==!#~$#@!=;:::::::~~~~~~~~----------------
+,,,,,,,,-------~~~~~~~~~~~~~~~~~~~~~~~~~~::::::::::::;;;;=!!*#@*.#*!=;;::::::::~~~~~~~--------------
+,,,,,,,-----~~~~~~~~~~~~~~~~~~~~~~~~~~~::::::::::::;;;;==*$=.-; ..$$*=;;;;::::::~~~~~~~~~-----------
+,,,,,,----~~~~~~~~~~~~~~~~~~~~~~~~~~::::::::::::;;;====!*#.@      #-#!==;;;;;:::::~~~~~~~~~---------
+,,,,,----~~~~~~~~~~~~~~~~~~~~~~~~:::::::::::;;;=====!!!*#$,*      @,#*!!=====;;;:::~~~~~~~~~--------
+,,,,---~~~~~~~~~~~~~~~~~~~~~~~~::::::::;;;;;=!~-= @##$:;,$:;@    @;=-,@;=*!!!!#~=;::~~~~~~~~~~------
+,,,,--~~~~~~~~~~~~~~~~~~~~~~::::::;;;;;;;;===!$,=  ;~,-                 :,@--~-=~!;::~~~~~~~~~~-----
+,,,--~~~~~~~~~~~~~~~~~~~~::::;;;;;;;;;;;====**#@:,                        .   #@*=;;::~~~~~~~~~~----
+,,--~~~~~~~~~~~~~~~~::::;;=;;;;;;;;;=====!!@#@@!                             :@#!==;;::~~~~~~~~~~---
+,,-~~~~~~~~~~~::::::;;==#.*!!!!!!!!!!!!!!**$,**                               $.##$=;:::~~~~~~~~~~--
+,-~~~~~~:::::::::;;;;==!#=@@,$#$$-$##***##@!                                     *.=;::::~~~~~~~~~~-
+,~~~~::::::::::;;;;;;=!!*#@~@,!#$ :*=~,@@@-,                                    ,#!=;::::~~~~~~~~~~~
+,~~::::::::::;;;;;;;=!!*.@-!~          ;~~#                                     !:!;;::::~~~~~~~~~~~
+,::::::::::;;=====!*,$#@@:.              @=                                    ~*!=;;:::::~~~~~~~~~~
+,:;;;;;=!!====!!!!##.$-!.!                                                    ~#!=;;;:::::~~~~~~~~~~
+~*:=#=:: $:-:@*@!*==                                                        :@#!!=;;;:::::~~~~~~~~~~
+,:;;;;;=!!====!!!!##.$-!.!                                                    ~#!=;;;:::::~~~~~~~~~~
+,::::::::::;;=====!*,$#@@:.              @=                                    ~*!=;;:::::~~~~~~~~~~
+,~~::::::::::;;;;;;;=!!*.@-!~          ;~~#                                     !:!;;::::~~~~~~~~~~~
+,~~~~::::::::::;;;;;;=!!*#@~@,!#$ :*=~,@@@-,                                    ,#!=;::::~~~~~~~~~~~
+,-~~~~~~:::::::::;;;;==!#=@@,$#$$-$##***##@!                                     *.=;::::~~~~~~~~~~-
+,,-~~~~~~~~~~~::::::;;==#.*!!!!!!!!!!!!!!**$,**                               $.##$=;:::~~~~~~~~~~--
+,,--~~~~~~~~~~~~~~~~::::;;=;;;;;;;;;=====!!@#@@!                             :@#!==;;::~~~~~~~~~~---
+,,,--~~~~~~~~~~~~~~~~~~~~::::;;;;;;;;;;;====**#@:,                        .   #@*=;;::~~~~~~~~~~----
+,,,,--~~~~~~~~~~~~~~~~~~~~~~::::::;;;;;;;;===!$,=  ;~,-                 :,@--~-=~!;::~~~~~~~~~~-----
+,,,,---~~~~~~~~~~~~~~~~~~~~~~~~::::::::;;;;;=!~-= @##$:;,$:;@    @;=-,@;=*!!!!#~=;::~~~~~~~~~~------
+,,,,,----~~~~~~~~~~~~~~~~~~~~~~~~:::::::::::;;;=====!!!*#$,*      @,#*!!=====;;;:::~~~~~~~~~--------
+,,,,,,----~~~~~~~~~~~~~~~~~~~~~~~~~~::::::::::::;;;====!*#.@      #-#!==;;;;;:::::~~~~~~~~~---------
+,,,,,,,-----~~~~~~~~~~~~~~~~~~~~~~~~~~~::::::::::::;;;;==*$=.-; ..$$*=;;;;::::::~~~~~~~~~-----------
+,,,,,,,,-------~~~~~~~~~~~~~~~~~~~~~~~~~~::::::::::::;;;;=!!*#@*.#*!=;;::::::::~~~~~~~--------------
+,,,,,,,,,--------~~~~~~~~~~~~~~~~~~~~~~~~~~~::::::::::;;;;==!#~$#@!=;:::::::~~~~~~~~----------------
 ```
 ## Tooling
 - [Syntax highlighting](https://github.com/Goubermouche/channel-syntax-highlighter)

@@ -20,6 +20,8 @@ project "compiler"
     targetdir ("../bin/%{cfg.buildcfg}/%{prj.name}")
     objdir ("../bin-int/%{cfg.buildcfg}/%{prj.name}")
 
+    buildoptions { "/external:anglebrackets", "/external:W0" }
+
     files
     {
         "compiler/source/**.*",
@@ -278,6 +280,7 @@ project "compiler"
     filter "configurations:Release"
         defines { "NDEBUG" }
         optimize "On"
+        warnings "High"
 
     filter "platforms:Windows"
         systemversion "latest"

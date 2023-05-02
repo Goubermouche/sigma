@@ -28,14 +28,35 @@
     <Filter Include="source\codegen\abstract_syntax_tree\keywords\types\signed_int">
       <UniqueIdentifier>{90CC42E8-FC94-106C-C525-197E31AD40A7}</UniqueIdentifier>
     </Filter>
+    <Filter Include="source\codegen\abstract_syntax_tree\keywords\types\text">
+      <UniqueIdentifier>{31493F5B-9D30-2A51-A61E-2CCD1285CD13}</UniqueIdentifier>
+    </Filter>
     <Filter Include="source\codegen\abstract_syntax_tree\keywords\types\unsigned_int">
       <UniqueIdentifier>{D336D5D2-3FCA-3681-48B1-A637B4C3CD48}</UniqueIdentifier>
     </Filter>
     <Filter Include="source\codegen\abstract_syntax_tree\operators">
       <UniqueIdentifier>{C0C63842-2C37-3BBB-F555-B543618573BC}</UniqueIdentifier>
     </Filter>
+    <Filter Include="source\codegen\abstract_syntax_tree\operators\binary">
+      <UniqueIdentifier>{346E72BD-20AD-1C39-C92F-F96AB54DD2A3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="source\codegen\abstract_syntax_tree\operators\binary\arithmetic">
+      <UniqueIdentifier>{4D621B5C-B9F5-7C0A-C2DC-ECC02EEF13D2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="source\codegen\abstract_syntax_tree\operators\binary\logical">
+      <UniqueIdentifier>{7ED85E15-6A43-1F21-135F-8486FFA8E203}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="source\codegen\abstract_syntax_tree\operators\unary">
+      <UniqueIdentifier>{BE7C08C9-2A8E-B06F-B3DF-42AF1FF039A9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="source\codegen\abstract_syntax_tree\operators\unary\arithmetic">
+      <UniqueIdentifier>{97063DF0-83DC-C3ED-6C86-DE4058FBF68E}</UniqueIdentifier>
+    </Filter>
     <Filter Include="source\codegen\abstract_syntax_tree\variables">
       <UniqueIdentifier>{7A1F716D-E68F-73E6-AFAE-ED6E1BDEABE7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="source\codegen\abstract_syntax_tree\variables\array">
+      <UniqueIdentifier>{88868B6F-F497-3316-7DE9-C555E9F9BC4F}</UniqueIdentifier>
     </Filter>
     <Filter Include="source\codegen\abstract_syntax_tree\variables\declaration">
       <UniqueIdentifier>{0FAC3115-7B1E-7431-C4B2-A9B530643E2A}</UniqueIdentifier>
@@ -60,14 +81,32 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="source\codegen\abstract_syntax_tree\abstract_syntax_tree.h">
+      <Filter>source\codegen\abstract_syntax_tree</Filter>
+    </ClInclude>
     <ClInclude Include="source\codegen\abstract_syntax_tree\functions\function_call_node.h">
       <Filter>source\codegen\abstract_syntax_tree\functions</Filter>
     </ClInclude>
     <ClInclude Include="source\codegen\abstract_syntax_tree\functions\function_node.h">
       <Filter>source\codegen\abstract_syntax_tree\functions</Filter>
     </ClInclude>
+    <ClInclude Include="source\codegen\abstract_syntax_tree\keywords\flow_control\break_node.h">
+      <Filter>source\codegen\abstract_syntax_tree\keywords\flow_control</Filter>
+    </ClInclude>
+    <ClInclude Include="source\codegen\abstract_syntax_tree\keywords\flow_control\for_node.h">
+      <Filter>source\codegen\abstract_syntax_tree\keywords\flow_control</Filter>
+    </ClInclude>
+    <ClInclude Include="source\codegen\abstract_syntax_tree\keywords\flow_control\if_else_node.h">
+      <Filter>source\codegen\abstract_syntax_tree\keywords\flow_control</Filter>
+    </ClInclude>
     <ClInclude Include="source\codegen\abstract_syntax_tree\keywords\flow_control\return_node.h">
       <Filter>source\codegen\abstract_syntax_tree\keywords\flow_control</Filter>
+    </ClInclude>
+    <ClInclude Include="source\codegen\abstract_syntax_tree\keywords\flow_control\while_node.h">
+      <Filter>source\codegen\abstract_syntax_tree\keywords\flow_control</Filter>
+    </ClInclude>
+    <ClInclude Include="source\codegen\abstract_syntax_tree\keywords\types\bool_node.h">
+      <Filter>source\codegen\abstract_syntax_tree\keywords\types</Filter>
     </ClInclude>
     <ClInclude Include="source\codegen\abstract_syntax_tree\keywords\types\floating_point\f32_node.h">
       <Filter>source\codegen\abstract_syntax_tree\keywords\types\floating_point</Filter>
@@ -87,6 +126,12 @@
     <ClInclude Include="source\codegen\abstract_syntax_tree\keywords\types\signed_int\i8_node.h">
       <Filter>source\codegen\abstract_syntax_tree\keywords\types\signed_int</Filter>
     </ClInclude>
+    <ClInclude Include="source\codegen\abstract_syntax_tree\keywords\types\text\char_node.h">
+      <Filter>source\codegen\abstract_syntax_tree\keywords\types\text</Filter>
+    </ClInclude>
+    <ClInclude Include="source\codegen\abstract_syntax_tree\keywords\types\text\string_node.h">
+      <Filter>source\codegen\abstract_syntax_tree\keywords\types\text</Filter>
+    </ClInclude>
     <ClInclude Include="source\codegen\abstract_syntax_tree\keywords\types\unsigned_int\u16_node.h">
       <Filter>source\codegen\abstract_syntax_tree\keywords\types\unsigned_int</Filter>
     </ClInclude>
@@ -103,22 +148,73 @@
       <Filter>source\codegen\abstract_syntax_tree</Filter>
     </ClInclude>
     <ClInclude Include="source\codegen\abstract_syntax_tree\operators\binary\arithmetic\operator_addition_node.h">
-      <Filter>source\codegen\abstract_syntax_tree\operators</Filter>
-    </ClInclude>
-    <ClInclude Include="source\codegen\abstract_syntax_tree\operators\binary\operator_binary.h">
-      <Filter>source\codegen\abstract_syntax_tree\operators</Filter>
+      <Filter>source\codegen\abstract_syntax_tree\operators\binary\arithmetic</Filter>
     </ClInclude>
     <ClInclude Include="source\codegen\abstract_syntax_tree\operators\binary\arithmetic\operator_division_node.h">
-      <Filter>source\codegen\abstract_syntax_tree\operators</Filter>
+      <Filter>source\codegen\abstract_syntax_tree\operators\binary\arithmetic</Filter>
     </ClInclude>
     <ClInclude Include="source\codegen\abstract_syntax_tree\operators\binary\arithmetic\operator_modulo_node.h">
-      <Filter>source\codegen\abstract_syntax_tree\operators</Filter>
+      <Filter>source\codegen\abstract_syntax_tree\operators\binary\arithmetic</Filter>
     </ClInclude>
     <ClInclude Include="source\codegen\abstract_syntax_tree\operators\binary\arithmetic\operator_multiplication_node.h">
-      <Filter>source\codegen\abstract_syntax_tree\operators</Filter>
+      <Filter>source\codegen\abstract_syntax_tree\operators\binary\arithmetic</Filter>
     </ClInclude>
     <ClInclude Include="source\codegen\abstract_syntax_tree\operators\binary\arithmetic\operator_subtraction_node.h">
-      <Filter>source\codegen\abstract_syntax_tree\operators</Filter>
+      <Filter>source\codegen\abstract_syntax_tree\operators\binary\arithmetic</Filter>
+    </ClInclude>
+    <ClInclude Include="source\codegen\abstract_syntax_tree\operators\binary\logical\operator_conjunction_node.h">
+      <Filter>source\codegen\abstract_syntax_tree\operators\binary\logical</Filter>
+    </ClInclude>
+    <ClInclude Include="source\codegen\abstract_syntax_tree\operators\binary\logical\operator_disjunction_node.h">
+      <Filter>source\codegen\abstract_syntax_tree\operators\binary\logical</Filter>
+    </ClInclude>
+    <ClInclude Include="source\codegen\abstract_syntax_tree\operators\binary\logical\operator_equals_node.h">
+      <Filter>source\codegen\abstract_syntax_tree\operators\binary\logical</Filter>
+    </ClInclude>
+    <ClInclude Include="source\codegen\abstract_syntax_tree\operators\binary\logical\operator_greater_than_equal_to_node.h">
+      <Filter>source\codegen\abstract_syntax_tree\operators\binary\logical</Filter>
+    </ClInclude>
+    <ClInclude Include="source\codegen\abstract_syntax_tree\operators\binary\logical\operator_greater_than_node.h">
+      <Filter>source\codegen\abstract_syntax_tree\operators\binary\logical</Filter>
+    </ClInclude>
+    <ClInclude Include="source\codegen\abstract_syntax_tree\operators\binary\logical\operator_less_than_equal_to_node.h">
+      <Filter>source\codegen\abstract_syntax_tree\operators\binary\logical</Filter>
+    </ClInclude>
+    <ClInclude Include="source\codegen\abstract_syntax_tree\operators\binary\logical\operator_less_than_node.h">
+      <Filter>source\codegen\abstract_syntax_tree\operators\binary\logical</Filter>
+    </ClInclude>
+    <ClInclude Include="source\codegen\abstract_syntax_tree\operators\binary\logical\operator_not_equals_node.h">
+      <Filter>source\codegen\abstract_syntax_tree\operators\binary\logical</Filter>
+    </ClInclude>
+    <ClInclude Include="source\codegen\abstract_syntax_tree\operators\binary\operator_binary.h">
+      <Filter>source\codegen\abstract_syntax_tree\operators\binary</Filter>
+    </ClInclude>
+    <ClInclude Include="source\codegen\abstract_syntax_tree\operators\unary\arithmetic\operator_post_decrement.h">
+      <Filter>source\codegen\abstract_syntax_tree\operators\unary\arithmetic</Filter>
+    </ClInclude>
+    <ClInclude Include="source\codegen\abstract_syntax_tree\operators\unary\arithmetic\operator_post_increment.h">
+      <Filter>source\codegen\abstract_syntax_tree\operators\unary\arithmetic</Filter>
+    </ClInclude>
+    <ClInclude Include="source\codegen\abstract_syntax_tree\operators\unary\arithmetic\operator_pre_decrement.h">
+      <Filter>source\codegen\abstract_syntax_tree\operators\unary\arithmetic</Filter>
+    </ClInclude>
+    <ClInclude Include="source\codegen\abstract_syntax_tree\operators\unary\arithmetic\operator_pre_increment.h">
+      <Filter>source\codegen\abstract_syntax_tree\operators\unary\arithmetic</Filter>
+    </ClInclude>
+    <ClInclude Include="source\codegen\abstract_syntax_tree\operators\unary\operator_unary.h">
+      <Filter>source\codegen\abstract_syntax_tree\operators\unary</Filter>
+    </ClInclude>
+    <ClInclude Include="source\codegen\abstract_syntax_tree\translation_unit_node.h">
+      <Filter>source\codegen\abstract_syntax_tree</Filter>
+    </ClInclude>
+    <ClInclude Include="source\codegen\abstract_syntax_tree\variables\array\array_access_node.h">
+      <Filter>source\codegen\abstract_syntax_tree\variables\array</Filter>
+    </ClInclude>
+    <ClInclude Include="source\codegen\abstract_syntax_tree\variables\array\array_allocation_node.h">
+      <Filter>source\codegen\abstract_syntax_tree\variables\array</Filter>
+    </ClInclude>
+    <ClInclude Include="source\codegen\abstract_syntax_tree\variables\array\array_assignment_node.h">
+      <Filter>source\codegen\abstract_syntax_tree\variables\array</Filter>
     </ClInclude>
     <ClInclude Include="source\codegen\abstract_syntax_tree\variables\assignment_node.h">
       <Filter>source\codegen\abstract_syntax_tree\variables</Filter>
@@ -135,17 +231,20 @@
     <ClInclude Include="source\codegen\abstract_syntax_tree\variables\variable_access_node.h">
       <Filter>source\codegen\abstract_syntax_tree\variables</Filter>
     </ClInclude>
+    <ClInclude Include="source\codegen\abstract_syntax_tree\variables\variable_node.h">
+      <Filter>source\codegen\abstract_syntax_tree\variables</Filter>
+    </ClInclude>
     <ClInclude Include="source\codegen\llvm_wrappers\function.h">
+      <Filter>source\codegen\llvm_wrappers</Filter>
+    </ClInclude>
+    <ClInclude Include="source\codegen\llvm_wrappers\scope.h">
+      <Filter>source\codegen\llvm_wrappers</Filter>
+    </ClInclude>
+    <ClInclude Include="source\codegen\llvm_wrappers\type.h">
       <Filter>source\codegen\llvm_wrappers</Filter>
     </ClInclude>
     <ClInclude Include="source\codegen\llvm_wrappers\value.h">
       <Filter>source\codegen\llvm_wrappers</Filter>
-    </ClInclude>
-    <ClInclude Include="source\codegen\llvm_wrappers\scope.h">
-      <Filter>source\codegen</Filter>
-    </ClInclude>
-    <ClInclude Include="source\codegen\llvm_wrappers\type.h">
-      <Filter>source\codegen</Filter>
     </ClInclude>
     <ClInclude Include="source\codegen\visitor\codegen_visitor.h">
       <Filter>source\codegen\visitor</Filter>
@@ -186,43 +285,35 @@
     <ClInclude Include="source\utility\types.h">
       <Filter>source\utility</Filter>
     </ClInclude>
-    <ClInclude Include="source\codegen\abstract_syntax_tree\variables\array\array_allocation_node.h" />
-    <ClInclude Include="source\codegen\abstract_syntax_tree\variables\array\array_access_node.h" />
-    <ClInclude Include="source\codegen\abstract_syntax_tree\variables\array\array_assignment_node.h" />
-    <ClInclude Include="source\codegen\abstract_syntax_tree\keywords\types\text\char_node.h" />
-    <ClInclude Include="source\codegen\abstract_syntax_tree\keywords\types\text\string_node.h" />
-    <ClInclude Include="source\codegen\abstract_syntax_tree\keywords\types\bool_node.h" />
-    <ClInclude Include="source\codegen\abstract_syntax_tree\variables\variable_node.h" />
-    <ClInclude Include="source\codegen\abstract_syntax_tree\keywords\flow_control\if_else_node.h" />
-    <ClInclude Include="source\codegen\abstract_syntax_tree\operators\binary\logical\operator_disjunction_node.h" />
-    <ClInclude Include="source\codegen\abstract_syntax_tree\operators\binary\logical\operator_conjunction_node.h" />
-    <ClInclude Include="source\codegen\abstract_syntax_tree\operators\binary\logical\operator_greater_than_node.h" />
-    <ClInclude Include="source\codegen\abstract_syntax_tree\operators\binary\logical\operator_greater_than_equal_to_node.h" />
-    <ClInclude Include="source\codegen\abstract_syntax_tree\operators\binary\logical\operator_less_than_node.h" />
-    <ClInclude Include="source\codegen\abstract_syntax_tree\operators\binary\logical\operator_less_than_equal_to_node.h" />
-    <ClInclude Include="source\codegen\abstract_syntax_tree\operators\binary\logical\operator_equals_node.h" />
-    <ClInclude Include="source\codegen\abstract_syntax_tree\operators\binary\logical\operator_not_equals_node.h" />
-    <ClInclude Include="source\codegen\abstract_syntax_tree\operators\unary\operator_unary.h" />
-    <ClInclude Include="source\codegen\abstract_syntax_tree\operators\unary\arithmetic\operator_post_increment.h" />
-    <ClInclude Include="source\codegen\abstract_syntax_tree\operators\unary\arithmetic\operator_post_decrement.h" />
-    <ClInclude Include="source\codegen\abstract_syntax_tree\operators\unary\arithmetic\operator_pre_increment.h" />
-    <ClInclude Include="source\codegen\abstract_syntax_tree\operators\unary\arithmetic\operator_pre_decrement.h" />
-    <ClInclude Include="source\codegen\abstract_syntax_tree\keywords\flow_control\while_node.h" />
-    <ClInclude Include="source\codegen\abstract_syntax_tree\keywords\flow_control\for_node.h" />
-    <ClInclude Include="source\codegen\abstract_syntax_tree\keywords\flow_control\break_node.h" />
-    <ClInclude Include="source\codegen\abstract_syntax_tree\abstract_syntax_tree.h" />
-    <ClInclude Include="source\codegen\abstract_syntax_tree\translation_unit_node.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="source\codegen\abstract_syntax_tree\abstract_syntax_tree.cpp">
+      <Filter>source\codegen\abstract_syntax_tree</Filter>
+    </ClCompile>
     <ClCompile Include="source\codegen\abstract_syntax_tree\functions\function_call_node.cpp">
       <Filter>source\codegen\abstract_syntax_tree\functions</Filter>
     </ClCompile>
     <ClCompile Include="source\codegen\abstract_syntax_tree\functions\function_node.cpp">
       <Filter>source\codegen\abstract_syntax_tree\functions</Filter>
     </ClCompile>
+    <ClCompile Include="source\codegen\abstract_syntax_tree\keywords\flow_control\break_node.cpp">
+      <Filter>source\codegen\abstract_syntax_tree\keywords\flow_control</Filter>
+    </ClCompile>
+    <ClCompile Include="source\codegen\abstract_syntax_tree\keywords\flow_control\for_node.cpp">
+      <Filter>source\codegen\abstract_syntax_tree\keywords\flow_control</Filter>
+    </ClCompile>
+    <ClCompile Include="source\codegen\abstract_syntax_tree\keywords\flow_control\if_else_node.cpp">
+      <Filter>source\codegen\abstract_syntax_tree\keywords\flow_control</Filter>
+    </ClCompile>
     <ClCompile Include="source\codegen\abstract_syntax_tree\keywords\flow_control\return_node.cpp">
       <Filter>source\codegen\abstract_syntax_tree\keywords\flow_control</Filter>
+    </ClCompile>
+    <ClCompile Include="source\codegen\abstract_syntax_tree\keywords\flow_control\while_node.cpp">
+      <Filter>source\codegen\abstract_syntax_tree\keywords\flow_control</Filter>
+    </ClCompile>
+    <ClCompile Include="source\codegen\abstract_syntax_tree\keywords\types\bool_node.cpp">
+      <Filter>source\codegen\abstract_syntax_tree\keywords\types</Filter>
     </ClCompile>
     <ClCompile Include="source\codegen\abstract_syntax_tree\keywords\types\floating_point\f32_node.cpp">
       <Filter>source\codegen\abstract_syntax_tree\keywords\types\floating_point</Filter>
@@ -242,6 +333,12 @@
     <ClCompile Include="source\codegen\abstract_syntax_tree\keywords\types\signed_int\i8_node.cpp">
       <Filter>source\codegen\abstract_syntax_tree\keywords\types\signed_int</Filter>
     </ClCompile>
+    <ClCompile Include="source\codegen\abstract_syntax_tree\keywords\types\text\char_node.cpp">
+      <Filter>source\codegen\abstract_syntax_tree\keywords\types\text</Filter>
+    </ClCompile>
+    <ClCompile Include="source\codegen\abstract_syntax_tree\keywords\types\text\string_node.cpp">
+      <Filter>source\codegen\abstract_syntax_tree\keywords\types\text</Filter>
+    </ClCompile>
     <ClCompile Include="source\codegen\abstract_syntax_tree\keywords\types\unsigned_int\u16_node.cpp">
       <Filter>source\codegen\abstract_syntax_tree\keywords\types\unsigned_int</Filter>
     </ClCompile>
@@ -258,22 +355,73 @@
       <Filter>source\codegen\abstract_syntax_tree</Filter>
     </ClCompile>
     <ClCompile Include="source\codegen\abstract_syntax_tree\operators\binary\arithmetic\operator_addition_node.cpp">
-      <Filter>source\codegen\abstract_syntax_tree\operators</Filter>
-    </ClCompile>
-    <ClCompile Include="source\codegen\abstract_syntax_tree\operators\binary\operator_binary.cpp">
-      <Filter>source\codegen\abstract_syntax_tree\operators</Filter>
+      <Filter>source\codegen\abstract_syntax_tree\operators\binary\arithmetic</Filter>
     </ClCompile>
     <ClCompile Include="source\codegen\abstract_syntax_tree\operators\binary\arithmetic\operator_division_node.cpp">
-      <Filter>source\codegen\abstract_syntax_tree\operators</Filter>
+      <Filter>source\codegen\abstract_syntax_tree\operators\binary\arithmetic</Filter>
     </ClCompile>
     <ClCompile Include="source\codegen\abstract_syntax_tree\operators\binary\arithmetic\operator_modulo_node.cpp">
-      <Filter>source\codegen\abstract_syntax_tree\operators</Filter>
+      <Filter>source\codegen\abstract_syntax_tree\operators\binary\arithmetic</Filter>
     </ClCompile>
     <ClCompile Include="source\codegen\abstract_syntax_tree\operators\binary\arithmetic\operator_multiplication_node.cpp">
-      <Filter>source\codegen\abstract_syntax_tree\operators</Filter>
+      <Filter>source\codegen\abstract_syntax_tree\operators\binary\arithmetic</Filter>
     </ClCompile>
     <ClCompile Include="source\codegen\abstract_syntax_tree\operators\binary\arithmetic\operator_subtraction_node.cpp">
-      <Filter>source\codegen\abstract_syntax_tree\operators</Filter>
+      <Filter>source\codegen\abstract_syntax_tree\operators\binary\arithmetic</Filter>
+    </ClCompile>
+    <ClCompile Include="source\codegen\abstract_syntax_tree\operators\binary\logical\operator_conjunction_node.cpp">
+      <Filter>source\codegen\abstract_syntax_tree\operators\binary\logical</Filter>
+    </ClCompile>
+    <ClCompile Include="source\codegen\abstract_syntax_tree\operators\binary\logical\operator_disjunction_node.cpp">
+      <Filter>source\codegen\abstract_syntax_tree\operators\binary\logical</Filter>
+    </ClCompile>
+    <ClCompile Include="source\codegen\abstract_syntax_tree\operators\binary\logical\operator_equals_node.cpp">
+      <Filter>source\codegen\abstract_syntax_tree\operators\binary\logical</Filter>
+    </ClCompile>
+    <ClCompile Include="source\codegen\abstract_syntax_tree\operators\binary\logical\operator_greater_than_equal_to_node.cpp">
+      <Filter>source\codegen\abstract_syntax_tree\operators\binary\logical</Filter>
+    </ClCompile>
+    <ClCompile Include="source\codegen\abstract_syntax_tree\operators\binary\logical\operator_greater_than_node.cpp">
+      <Filter>source\codegen\abstract_syntax_tree\operators\binary\logical</Filter>
+    </ClCompile>
+    <ClCompile Include="source\codegen\abstract_syntax_tree\operators\binary\logical\operator_less_than_equal_to_node.cpp">
+      <Filter>source\codegen\abstract_syntax_tree\operators\binary\logical</Filter>
+    </ClCompile>
+    <ClCompile Include="source\codegen\abstract_syntax_tree\operators\binary\logical\operator_less_than_node.cpp">
+      <Filter>source\codegen\abstract_syntax_tree\operators\binary\logical</Filter>
+    </ClCompile>
+    <ClCompile Include="source\codegen\abstract_syntax_tree\operators\binary\logical\operator_not_equals_node.cpp">
+      <Filter>source\codegen\abstract_syntax_tree\operators\binary\logical</Filter>
+    </ClCompile>
+    <ClCompile Include="source\codegen\abstract_syntax_tree\operators\binary\operator_binary.cpp">
+      <Filter>source\codegen\abstract_syntax_tree\operators\binary</Filter>
+    </ClCompile>
+    <ClCompile Include="source\codegen\abstract_syntax_tree\operators\unary\arithmetic\operator_post_decrement.cpp">
+      <Filter>source\codegen\abstract_syntax_tree\operators\unary\arithmetic</Filter>
+    </ClCompile>
+    <ClCompile Include="source\codegen\abstract_syntax_tree\operators\unary\arithmetic\operator_post_increment.cpp">
+      <Filter>source\codegen\abstract_syntax_tree\operators\unary\arithmetic</Filter>
+    </ClCompile>
+    <ClCompile Include="source\codegen\abstract_syntax_tree\operators\unary\arithmetic\operator_pre_decrement.cpp">
+      <Filter>source\codegen\abstract_syntax_tree\operators\unary\arithmetic</Filter>
+    </ClCompile>
+    <ClCompile Include="source\codegen\abstract_syntax_tree\operators\unary\arithmetic\operator_pre_increment.cpp">
+      <Filter>source\codegen\abstract_syntax_tree\operators\unary\arithmetic</Filter>
+    </ClCompile>
+    <ClCompile Include="source\codegen\abstract_syntax_tree\operators\unary\operator_unary.cpp">
+      <Filter>source\codegen\abstract_syntax_tree\operators\unary</Filter>
+    </ClCompile>
+    <ClCompile Include="source\codegen\abstract_syntax_tree\translation_unit_node.cpp">
+      <Filter>source\codegen\abstract_syntax_tree</Filter>
+    </ClCompile>
+    <ClCompile Include="source\codegen\abstract_syntax_tree\variables\array\array_access_node.cpp">
+      <Filter>source\codegen\abstract_syntax_tree\variables\array</Filter>
+    </ClCompile>
+    <ClCompile Include="source\codegen\abstract_syntax_tree\variables\array\array_allocation_node.cpp">
+      <Filter>source\codegen\abstract_syntax_tree\variables\array</Filter>
+    </ClCompile>
+    <ClCompile Include="source\codegen\abstract_syntax_tree\variables\array\array_assignment_node.cpp">
+      <Filter>source\codegen\abstract_syntax_tree\variables\array</Filter>
     </ClCompile>
     <ClCompile Include="source\codegen\abstract_syntax_tree\variables\assignment_node.cpp">
       <Filter>source\codegen\abstract_syntax_tree\variables</Filter>
@@ -290,17 +438,20 @@
     <ClCompile Include="source\codegen\abstract_syntax_tree\variables\variable_access_node.cpp">
       <Filter>source\codegen\abstract_syntax_tree\variables</Filter>
     </ClCompile>
+    <ClCompile Include="source\codegen\abstract_syntax_tree\variables\variable_node.cpp">
+      <Filter>source\codegen\abstract_syntax_tree\variables</Filter>
+    </ClCompile>
     <ClCompile Include="source\codegen\llvm_wrappers\function.cpp">
+      <Filter>source\codegen\llvm_wrappers</Filter>
+    </ClCompile>
+    <ClCompile Include="source\codegen\llvm_wrappers\scope.cpp">
+      <Filter>source\codegen\llvm_wrappers</Filter>
+    </ClCompile>
+    <ClCompile Include="source\codegen\llvm_wrappers\type.cpp">
       <Filter>source\codegen\llvm_wrappers</Filter>
     </ClCompile>
     <ClCompile Include="source\codegen\llvm_wrappers\value.cpp">
       <Filter>source\codegen\llvm_wrappers</Filter>
-    </ClCompile>
-    <ClCompile Include="source\codegen\llvm_wrappers\scope.cpp">
-      <Filter>source\codegen</Filter>
-    </ClCompile>
-    <ClCompile Include="source\codegen\llvm_wrappers\type.cpp">
-      <Filter>source\codegen</Filter>
     </ClCompile>
     <ClCompile Include="source\codegen\visitor\codegen_visitor.cpp">
       <Filter>source\codegen\visitor</Filter>
@@ -347,31 +498,5 @@
     <ClCompile Include="source\utility\timer.cpp">
       <Filter>source\utility</Filter>
     </ClCompile>
-    <ClCompile Include="source\codegen\abstract_syntax_tree\variables\array\array_allocation_node.cpp" />
-    <ClCompile Include="source\codegen\abstract_syntax_tree\variables\array\array_access_node.cpp" />
-    <ClCompile Include="source\codegen\abstract_syntax_tree\variables\array\array_assignment_node.cpp" />
-    <ClCompile Include="source\codegen\abstract_syntax_tree\keywords\types\text\char_node.cpp" />
-    <ClCompile Include="source\codegen\abstract_syntax_tree\keywords\types\text\string_node.cpp" />
-    <ClCompile Include="source\codegen\abstract_syntax_tree\keywords\types\bool_node.cpp" />
-    <ClCompile Include="source\codegen\abstract_syntax_tree\variables\variable_node.cpp" />
-    <ClCompile Include="source\codegen\abstract_syntax_tree\keywords\flow_control\if_else_node.cpp" />
-    <ClCompile Include="source\codegen\abstract_syntax_tree\operators\binary\logical\operator_disjunction_node.cpp" />
-    <ClCompile Include="source\codegen\abstract_syntax_tree\operators\binary\logical\operator_conjunction_node.cpp" />
-    <ClCompile Include="source\codegen\abstract_syntax_tree\operators\binary\logical\operator_greater_than_node.cpp" />
-    <ClCompile Include="source\codegen\abstract_syntax_tree\operators\binary\logical\operator_greater_than_equal_to_node.cpp" />
-    <ClCompile Include="source\codegen\abstract_syntax_tree\operators\binary\logical\operator_less_than_node.cpp" />
-    <ClCompile Include="source\codegen\abstract_syntax_tree\operators\binary\logical\operator_less_than_equal_to_node.cpp" />
-    <ClCompile Include="source\codegen\abstract_syntax_tree\operators\binary\logical\operator_equals_node.cpp" />
-    <ClCompile Include="source\codegen\abstract_syntax_tree\operators\binary\logical\operator_not_equals_node.cpp" />
-    <ClCompile Include="source\codegen\abstract_syntax_tree\operators\unary\operator_unary.cpp" />
-    <ClCompile Include="source\codegen\abstract_syntax_tree\operators\unary\arithmetic\operator_post_increment.cpp" />
-    <ClCompile Include="source\codegen\abstract_syntax_tree\operators\unary\arithmetic\operator_post_decrement.cpp" />
-    <ClCompile Include="source\codegen\abstract_syntax_tree\operators\unary\arithmetic\operator_pre_increment.cpp" />
-    <ClCompile Include="source\codegen\abstract_syntax_tree\operators\unary\arithmetic\operator_pre_decrement.cpp" />
-    <ClCompile Include="source\codegen\abstract_syntax_tree\keywords\flow_control\while_node.cpp" />
-    <ClCompile Include="source\codegen\abstract_syntax_tree\keywords\flow_control\for_node.cpp" />
-    <ClCompile Include="source\codegen\abstract_syntax_tree\keywords\flow_control\break_node.cpp" />
-    <ClCompile Include="source\codegen\abstract_syntax_tree\abstract_syntax_tree.cpp" />
-    <ClCompile Include="source\codegen\abstract_syntax_tree\translation_unit_node.cpp" />
   </ItemGroup>
 </Project>

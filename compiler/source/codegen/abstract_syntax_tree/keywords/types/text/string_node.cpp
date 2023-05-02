@@ -19,7 +19,10 @@ namespace channel {
 
 		console::out
 			<< AST_NODE_VARIABLE_COLOR
-			<< "'char[" 
+			<< '\''
+			<< "char"
+			<< color::white
+			<< '['
 			<< AST_NODE_NUMERICAL_LITERAL_COLOR
 			<< std::to_string(m_value.size())
 			<< color::white 

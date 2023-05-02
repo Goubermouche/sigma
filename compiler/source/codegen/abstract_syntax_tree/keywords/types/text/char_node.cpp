@@ -18,8 +18,11 @@ namespace channel {
 		);
 
 		console::out
+			<< '\''
 			<< AST_NODE_VARIABLE_COLOR
-			<< "'char' '"
+			<< "char"
+			<< color::white 
+			<< "' '"
 			<< AST_NODE_TEXT_LITERAL_COLOR
 			<< escape_string(std::to_string(m_value))
 			<< color::white

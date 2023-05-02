@@ -103,8 +103,9 @@ namespace channel {
                 }
             }
 
-            // create a branch to the end block
-            m_builder.CreateBr(end_block);
+            if(!m_builder.GetInsertBlock()->getTerminator()) {
+                m_builder.CreateBr(end_block);
+            }
         }
 
         // restore the previous scope and set the insert point to the end block
@@ -155,7 +156,12 @@ namespace channel {
 
         // restore the previous scope and set the insert point to the end block
         m_scope = prev_scope;
-        m_builder.CreateBr(condition_block);
+
+        // only add a terminator block if we don't have one
+        if (!m_builder.GetInsertBlock()->getTerminator()) {
+            m_builder.CreateBr(condition_block);
+        }
+
         m_builder.SetInsertPoint(end_block);
         out_value = nullptr;
         return true;
@@ -224,7 +230,12 @@ namespace channel {
 
         // restore the previous scope and set the insert point to the end block
         m_scope = prev_scope;
-        m_builder.CreateBr(increment_block);
+
+        // only add a terminator block if we don't have one
+        if (!m_builder.GetInsertBlock()->getTerminator()) {
+            m_builder.CreateBr(increment_block);
+		}
+
         m_builder.SetInsertPoint(end_block);
         out_value = nullptr;
         return true;
@@ -238,7 +249,10 @@ namespace channel {
             return false;
         }
 
-        m_builder.CreateBr(end_block);
+        // only add a terminator block if we don't have one
+        if (!m_builder.GetInsertBlock()->getTerminator()) {
+            m_builder.CreateBr(end_block);
+        }
 
         // create a new basic block for the remaining loop body and set it as the current insert point
         llvm::Function* parent_function = end_block->getParent();

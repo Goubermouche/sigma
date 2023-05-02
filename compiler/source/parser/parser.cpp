@@ -167,35 +167,9 @@ namespace channel {
 		else {
 			get_next_token(); // r_parenthesis (guaranteed)
 		}
-
-		if(!expect_next_token(token::l_brace)) {
-			return false;
-		}
 		
 		std::vector<node*> statements;
-
-		next_token = peek_next_token();
-		if(next_token != token::r_brace) {
-			while (true) {
-				if (peek_next_token() == token::r_brace) {
-					break;
-				}
-
-				node* statement;
-				if (!parse_local_statement(statement)) {
-					return false;
-				}
-
-				statements.push_back(statement);
-
-				next_token = peek_next_token();
-				if(next_token == token::r_brace) {
-					break;
-				}
-			}
-		}
-		
-		if (!expect_next_token(token::r_brace)) {
+		if(!parse_local_statements(statements)) {
 			return false;
 		}
 
@@ -229,6 +203,37 @@ namespace channel {
 		if (!expect_next_token(token::semicolon)) {
 			return false;
 		}
+
+		return true;
+	}
+
+	bool parser::parse_local_statements(std::vector<node*>& out_statements) {
+		if(!expect_next_token(token::l_brace)) {
+			return false;
+		}
+
+		bool met_block_break = false;
+		token next_token = peek_next_token();
+
+		// get all statements in the current scope
+		while (next_token != token::r_brace) {
+			node* statement;
+			if (!parse_local_statement(statement)) {
+				return false;
+			}
+
+			// check if we've met a block break token
+			if(met_block_break == false) {
+				met_block_break = is_token_block_break(next_token);
+				// if we haven't, we can add the statement to the vector
+				// this prevents us from adding unreachable nodes to the AST
+				out_statements.push_back(statement);
+			}
+
+			next_token = peek_next_token();
+		}
+
+		get_next_token(); // r_brace (guaranteed)
 
 		return true;
 	}
@@ -380,21 +385,12 @@ namespace channel {
 				break;
 			}
 
-			if (!expect_next_token(token::l_brace)) {
+			std::vector<node*> branch_statements;
+			if (!parse_local_statements(branch_statements)) {
 				return false;
 			}
 
-			std::vector<node*> branch_statements;
-			while (peek_next_token() != token::r_brace) {
-				node* statement;
-				if (!parse_local_statement(statement)) {
-					return false;
-				}
-
-				branch_statements.push_back(statement);
-			}
 			branches.push_back(branch_statements);
-			get_next_token(); // r_brace (guaranteed)
 
 			if (has_else) {
 				break;

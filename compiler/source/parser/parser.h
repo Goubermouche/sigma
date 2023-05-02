@@ -37,6 +37,8 @@ namespace channel {
 		 */
 		bool parse_global_statement(node*& out_node);
 
+		bool parse_local_statements(std::vector<node*>& out_statements);
+
 		/**
 		 * \brief Attempts to parse a local statement.
 		 * \param out_node Output AST node

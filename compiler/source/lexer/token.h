@@ -291,4 +291,14 @@ namespace channel {
 			token == token::keyword_type_u32 ||
 			token == token::keyword_type_u64;
 	}
+
+	inline bool is_token_block_break(token tok) {
+		switch (tok) {
+		case token::keyword_return:
+		case token::keyword_break:
+			return true;
+		default:
+			return false;
+		}
+	}
 }

@@ -1,14 +1,15 @@
 #pragma once
 
 #include "token.h"
-#include "../utility/string_accessor.h"
-#include "../compiler/compilation_logger.h"
+#include "../utility/containers/string_accessor.h"
+#include "../compiler/diagnostics/warning.h"
+#include "../compiler/diagnostics/error.h"
 
 namespace channel {
 	struct token_data {
 		token token;
 		std::string value;
-		u64 line_number;
+		token_position position;
 	};
 
 	class lexer {
@@ -61,7 +62,9 @@ namespace channel {
 
 		detail::string_accessor m_accessor;
 		char m_last_character = ' ';
-		u32 m_current_line = 1;
+
+		u64 m_current_line = 1;
+		u64 m_current_character = 1;
 
 		// tokens that are longer than one character 
 		const std::unordered_map<std::string, token> m_keyword_tokens = {

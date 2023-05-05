@@ -2,11 +2,11 @@
 
 namespace channel {
 	operator_disjunction_node::operator_disjunction_node(
-		u64 line_number,
+		const token_position& position,
 		const node_ptr& left_expression_node,
 		const node_ptr& right_expression_node
 	) : operator_binary(
-		line_number,
+		position,
 		left_expression_node,
 		right_expression_node
 	) {}

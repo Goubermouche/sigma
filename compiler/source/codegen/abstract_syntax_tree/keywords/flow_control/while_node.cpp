@@ -2,10 +2,10 @@
 
 namespace channel {
 	while_node::while_node(
-		u64 line_number, 
+		const token_position& position,
 		const node_ptr& loop_condition_node,
 		const std::vector<node_ptr>& statement_nodes
-	) : node(line_number),
+	) : node(position),
 	m_loop_condition_node(loop_condition_node),
 	m_loop_body_nodes(statement_nodes) {}
 

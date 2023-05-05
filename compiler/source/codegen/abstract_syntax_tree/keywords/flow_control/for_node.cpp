@@ -1,12 +1,13 @@
 #include "for_node.h"
 
 namespace channel {
-	for_node::for_node(u64 line_number,
+	for_node::for_node(
+		const token_position& position,
 		const node_ptr& loop_initialization_node,
 		const node_ptr& loop_condition_node,
 		const std::vector<node_ptr>& post_iteration_nodes,
 		const std::vector<node_ptr>& statement_nodes
-	) : node(line_number),
+	) : node(position),
 	m_loop_initialization_node(loop_initialization_node),
 	m_loop_condition_node(loop_condition_node),
 	m_post_iteration_nodes(post_iteration_nodes),

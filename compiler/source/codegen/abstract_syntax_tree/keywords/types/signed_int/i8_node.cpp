@@ -1,8 +1,11 @@
 #include "i8_node.h"
 
 namespace channel {
-	i8_node::i8_node(u64 line_number, i64 value)
-		:node(line_number), m_value(value) {}
+	i8_node::i8_node(
+		const token_position& position,
+		i64 value
+	) : node(position),
+	m_value(value) {}
 
 	bool i8_node::accept(visitor& visitor, value_ptr& out_value) {
 		LOG_NODE_NAME(keyword_i8_node);

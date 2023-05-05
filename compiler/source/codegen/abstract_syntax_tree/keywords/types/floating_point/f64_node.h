@@ -7,7 +7,10 @@ namespace channel {
 	 */
 	class f64_node : public node {
 	public:
-		f64_node(u64 line_number, f64 value);
+		f64_node(
+			const token_position& position,
+			f64 value
+		);
 
 		bool accept(visitor& visitor, value_ptr& out_value) override;
 		void print(int depth, const std::wstring& prefix, bool is_last) override;

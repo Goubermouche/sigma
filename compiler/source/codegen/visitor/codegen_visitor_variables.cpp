@@ -24,7 +24,7 @@ namespace channel {
 		}
 
 		llvm::Value* out_cast;
-		if(!cast_value(out_cast, out_value, variable->get_type(), node.get_declaration_line_number())) {
+		if(!cast_value(out_cast, out_value, variable->get_type(), node.get_declared_position())) {
 			return false;
 		}
 
@@ -56,7 +56,7 @@ namespace channel {
 		const value_ptr global_variable = m_global_named_values[node.get_variable_identifier()];
 		// check if the global variable exists
 		if (!global_variable) {
-			compilation_logger::emit_variable_not_found_error(node.get_declaration_line_number(), node.get_variable_identifier());
+			error::emit<4003>(node.get_declared_position(), node.get_variable_identifier()).print();
 			return false;
 		}
 
@@ -88,7 +88,7 @@ namespace channel {
 
 		// check if the variable already exists as a global
 		if (m_global_named_values[node.get_declaration_identifier()]) {
-			compilation_logger::emit_local_variable_already_defined_in_global_scope_error(node.get_declaration_line_number(), node.get_declaration_identifier());
+			error::emit<4004>(node.get_declared_position(), node.get_declaration_identifier()).print();
 			return false;
 		}
 
@@ -104,7 +104,7 @@ namespace channel {
 
 		// check if the active scope already contains the variable
 		if (!insertion_result.second) {
-			compilation_logger::emit_local_variable_already_defined_error(node.get_declaration_line_number(), node.get_declaration_identifier());
+			error::emit<4005>(node.get_declared_position(), node.get_declaration_identifier()).print();
 			return false;
 		}
 
@@ -117,7 +117,7 @@ namespace channel {
 		}
 
 		llvm::Value* cast_assigned_value;
-		if (!cast_value(cast_assigned_value, out_value, node.get_declaration_type(), node.get_declaration_line_number())) {
+		if (!cast_value(cast_assigned_value, out_value, node.get_declaration_type(), node.get_declared_position())) {
 			return false;
 		}
 
@@ -143,7 +143,7 @@ namespace channel {
 
 		// cast the right-hand side operator to the assigned type
 		llvm::Value* cast_assigned_value;
-		if(!cast_value(cast_assigned_value, assigned_value, node.get_declaration_type(), node.get_declaration_line_number())) {
+		if(!cast_value(cast_assigned_value, assigned_value, node.get_declaration_type(), node.get_declared_position())) {
 			return false;
 		}
 
@@ -164,7 +164,7 @@ namespace channel {
 		const auto insertion_result = m_global_named_values.insert({ node.get_declaration_identifier(),  out_value });
 		// check if a global with the same name already exists
 		if (!insertion_result.second) {
-			compilation_logger::emit_global_variable_already_defined_error(node.get_declaration_line_number(), node.get_declaration_identifier());
+			error::emit<4006>(node.get_declared_position(), node.get_declaration_identifier()).print();
 			return false;
 		}
 
@@ -195,7 +195,7 @@ namespace channel {
 
 		// cast the element count node to u64
 		llvm::Value* element_count_cast;
-		if (!cast_value(element_count_cast, element_count, type(type::base::u64, 0), node.get_array_element_count_node()->get_declaration_line_number())) {
+		if (!cast_value(element_count_cast, element_count, type(type::base::u64, 0), node.get_array_element_count_node()->get_declared_position())) {
 			return false;
 		}
 
@@ -254,7 +254,7 @@ namespace channel {
 
 			// cast the index value to u64
 			llvm::Value* index_value_cast;
-			if (!cast_value(index_value_cast, index_value, type(type::base::u64, 0), node.get_declaration_line_number())) {
+			if (!cast_value(index_value_cast, index_value, type(type::base::u64, 0), node.get_declared_position())) {
 				return false;
 			}
 
@@ -301,7 +301,7 @@ namespace channel {
 
 			// cast the index value to u64
 			llvm::Value* index_value_cast;
-			if (!cast_value(index_value_cast, index_value, type(type::base::u64, 0), node.get_declaration_line_number())) {
+			if (!cast_value(index_value_cast, index_value, type(type::base::u64, 0), node.get_declared_position())) {
 				return false;
 			}
 
@@ -329,7 +329,7 @@ namespace channel {
 
 		// cast the expression value to the array element type
 		llvm::Value* expression_llvm_value_cast;
-		if (!cast_value(expression_llvm_value_cast, expression_value, final_element_type, node.get_declaration_line_number())) {
+		if (!cast_value(expression_llvm_value_cast, expression_value, final_element_type, node.get_declared_position())) {
 			return false;
 		}
 
@@ -346,7 +346,7 @@ namespace channel {
 		// find the variable value in our named values
 		value_ptr var_value;
 		if (!get_named_value(var_value, node.get_variable_identifier())) {
-			compilation_logger::emit_variable_not_found_error(node.get_declaration_line_number(), node.get_variable_identifier());
+			error::emit<4003>(node.get_declared_position(), node.get_variable_identifier()).print();
 			return false;
 		}
 

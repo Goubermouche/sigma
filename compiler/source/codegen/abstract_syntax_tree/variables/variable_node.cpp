@@ -2,9 +2,9 @@
 
 namespace channel {
 	variable_node::variable_node(
-		u64 line_number, 
+		const token_position& position,
 		const std::string& variable_identifier
-	) : node(line_number),
+	) : node(position),
 	m_variable_identifier(variable_identifier) {}
 
 	bool variable_node::accept(visitor& visitor, value_ptr& out_value) {

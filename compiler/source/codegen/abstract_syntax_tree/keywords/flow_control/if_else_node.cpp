@@ -2,10 +2,10 @@
 
 namespace channel {
 	if_else_node::if_else_node(
-		u64 line_number,
+		const token_position& position,
 		const std::vector<node_ptr>& condition_nodes,
 		const std::vector<std::vector<node_ptr>>& branch_nodes
-	) : node(line_number),
+	) : node(position),
 	m_condition_nodes(condition_nodes),
 	m_branch_nodes(branch_nodes) {}
 

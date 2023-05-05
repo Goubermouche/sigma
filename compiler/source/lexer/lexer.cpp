@@ -1,4 +1,5 @@
 #include "lexer.h"
+#include "utility/filesystem.h"
 
 namespace channel {
 	lexer::lexer(const std::string& source_file)
@@ -12,7 +13,7 @@ namespace channel {
 			m_accessor = detail::string_accessor(source);
 		}
 		else {
-			compilation_logger::emit_cannot_open_file_error(m_source_file);
+			error::emit<1000>(m_source_file).print();
 			return false;
 		}
 
@@ -23,10 +24,15 @@ namespace channel {
 				return false;
 			}
 
-			m_tokens.push_back({ tok, m_value_string, m_current_line });
+			m_tokens.push_back({ 
+				tok,
+				m_value_string,
+				token_position{
+					m_current_line,
+					m_current_character
+				}
+			});
 		}
-
-		// print_tokens();
 
 		return true;
 	}
@@ -63,6 +69,7 @@ namespace channel {
 		}
 
 		m_last_character = m_accessor.get_advance();
+		m_current_character++;
 	}
 
 	bool lexer::extract_next_token(token& tok) {
@@ -95,7 +102,7 @@ namespace channel {
 		// prevent '.' characters from being located at the beginning of a token
 		// note: we may want to allow this in some cases (ie. when calling member functions)
 		if (m_last_character == '.') {
-			compilation_logger::emit_invalid_dot_character_at_token_start_error();
+			error::emit<2000>().print();
 			tok = token::unknown;
 			return false;
 		}
@@ -163,7 +170,7 @@ namespace channel {
 		while ((isalnum(m_last_character) || m_last_character == '_') && !m_accessor.end()) {
 			// prevent two underscore characters from being right next to each other
 			if (m_last_character == '_' && last_char_was_underscore) {
-				compilation_logger::emit_invalid_double_underscore_error();
+				error::emit<2001>().print();
 				return false;
 			}
 
@@ -198,7 +205,7 @@ namespace channel {
 		while (!isspace(m_last_character) && !m_accessor.end()) {
 			if (m_last_character == '.') {
 				if (dot_met) {
-					compilation_logger::emit_invalid_number_format_only_one_dot_allowed_error();
+					error::emit<2002>().print();
 					return false;
 				}
 
@@ -212,7 +219,7 @@ namespace channel {
 					return true;
 				}
 
-				compilation_logger::emit_invalid_number_format_unsigned_number_may_not_contain_dot_characters_error();
+				error::emit<2003>().print();
 				return false;
 			}
 			else if (m_last_character == 'f') {
@@ -223,7 +230,7 @@ namespace channel {
 					return true;
 				}
 
-				compilation_logger::emit_invalid_number_format_floating_point_must_contain_dot_character_error();
+				error::emit<2004>().print();
 				return false;
 			}
 			// break early if we have a non-special and non-digit character
@@ -275,7 +282,7 @@ namespace channel {
 			return true;
 		}
 
-		compilation_logger::emit_unterminated_character_literal_error();
+		error::emit<2005>().print();
 		return false;
 	}
 
@@ -304,17 +311,6 @@ namespace channel {
 					m_value_string += static_cast<char>(hex_value);
 					break;
 				}
-				case 'X': { // handle uppercase 'X' as well
-					char hex_chars[3] = { 0 };
-					read_char();
-					hex_chars[0] = m_last_character;
-					read_char();
-					hex_chars[1] = m_last_character;
-					unsigned int hex_value;
-					sscanf(hex_chars, "%x", &hex_value);
-					m_value_string += static_cast<char>(hex_value);
-					break;
-				}
 				default: m_value_string += '\\'; m_value_string += m_last_character; break;
 				}
 			}
@@ -325,13 +321,11 @@ namespace channel {
 			read_char();
 		}
 
-		console::out << m_value_string << '\n';
-
 		if (m_last_character == '"') {
 			read_char();
 		}
 		else {
-			compilation_logger::emit_unterminated_string_literal_error();
+			error::emit<2006>().print();
 			return false;
 		}
 

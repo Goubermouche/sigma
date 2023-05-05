@@ -9,7 +9,7 @@ namespace channel {
 	class function_node : public node {
 	public:
 		function_node(
-			u64 line_number, 
+			const token_position& position,
 			const type& function_return_type,
 			const std::string& function_identifier,
 			const std::vector<std::pair<std::string, type>>& function_arguments,

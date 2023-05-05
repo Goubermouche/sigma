@@ -8,7 +8,7 @@ namespace channel {
 	class operator_binary : public node	{
     public:
         operator_binary(
-            u64 line_number,
+            const token_position& position,
             const node_ptr& left_expression_node,
             const node_ptr& right_expression_node
         );

@@ -2,9 +2,9 @@
 
 namespace channel {
 	operator_post_decrement::operator_post_decrement(
-		u64 line_number, 
+		const token_position& position,
 		const node_ptr& expression_node
-	) : operator_unary(line_number, expression_node) {}
+	) : operator_unary(position, expression_node) {}
 
 	bool operator_post_decrement::accept(visitor& visitor, value_ptr& out_value) {
 		LOG_NODE_NAME(operator_post_decrement);

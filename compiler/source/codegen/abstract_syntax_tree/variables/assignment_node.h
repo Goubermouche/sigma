@@ -8,7 +8,7 @@ namespace channel {
 	class assignment_node : public node {
 	public:
 		assignment_node(
-			u64 line_number,
+			const token_position& position,
 			const node_ptr& variable,
 			const node_ptr& expression_node
 		);

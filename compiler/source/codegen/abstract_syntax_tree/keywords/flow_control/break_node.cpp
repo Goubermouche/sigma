@@ -1,8 +1,8 @@
 #include "break_node.h"
 
 namespace channel {
-	break_node::break_node(u64 line_number)
-		: node(line_number) {}
+	break_node::break_node(const token_position& position)
+		: node(position) {}
 
 	bool break_node::accept(visitor& visitor, value_ptr& out_value) {
 		LOG_NODE_NAME(break_node);

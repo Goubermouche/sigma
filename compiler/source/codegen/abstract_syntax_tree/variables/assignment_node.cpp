@@ -2,10 +2,10 @@
 
 namespace channel {
 	assignment_node::assignment_node(
-		u64 line_number,
+		const token_position& position,
 		const node_ptr& variable,
 		const node_ptr& expression_node
-	) : node(line_number),
+	) : node(position),
 	m_variable_node(variable),
 	m_expression_node(expression_node) {}
 

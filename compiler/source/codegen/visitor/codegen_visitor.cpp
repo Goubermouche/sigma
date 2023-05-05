@@ -147,20 +147,20 @@ namespace channel {
 
 		// check if we have a main entry point
 		if(it == m_functions.end()) {
-			compilation_logger::emit_main_entry_point_missing_error();
+			error::emit<4012>().print();
 			return false;
 		}
 
 		// check if the main entry point's return type is an i32
 		if(it->second->get_return_type().get_base() != type::base::i32) {
-			compilation_logger::emit_main_entry_point_has_to_be_i32(it->second->get_return_type());
+			error::emit<4013>(it->second->get_return_type()).print();
 			return false;
 		}
 
 		return true;
 	}
 
-	bool codegen_visitor::cast_value(llvm::Value*& out_value, const value_ptr source_value, type target_type, u64 line_number) {
+	bool codegen_visitor::cast_value(llvm::Value*& out_value, const value_ptr source_value, type target_type, const token_position& position) {
 		// both types are the same
 		if (source_value->get_type() == target_type) {
 			out_value = source_value->get_value();
@@ -184,7 +184,7 @@ namespace channel {
 			//	return false;
 			//}
 
-			compilation_logger::emit_function_return_type_cast_warning(line_number, function_return_type, target_type);
+			warning::emit<3001>(position, function_return_type, target_type).print();
 
 			llvm::Value* function_call_result = source_value->get_value();
 			llvm::Type* target_llvm_type = target_type.get_llvm_type(function_call_result->getContext());
@@ -220,7 +220,7 @@ namespace channel {
 		//	return false;
 		//}
 
-		compilation_logger::emit_cast_warning(line_number, source_value->get_type(), target_type);
+		warning::emit<3002>(position, source_value->get_type(), target_type).print();
 
 		// get the LLVM value and type for source and target
 		llvm::Value* source_llvm_value = source_value->get_value();

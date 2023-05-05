@@ -2,9 +2,9 @@
 
 namespace channel {
 	operator_pre_decrement::operator_pre_decrement(
-		u64 line_number,
+		const token_position& position,
 		const node_ptr& expression_node
-	) : operator_unary(line_number, expression_node) {}
+	) : operator_unary(position, expression_node) {}
 
 	bool operator_pre_decrement::accept(visitor& visitor, value_ptr& out_value) {
 		LOG_NODE_NAME(operator_pre_decrement);

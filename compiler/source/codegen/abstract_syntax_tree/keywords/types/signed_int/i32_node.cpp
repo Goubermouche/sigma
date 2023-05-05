@@ -1,8 +1,11 @@
 #include "i32_node.h"
 
 namespace channel {
-	i32_node::i32_node(u64 line_number, i64 value)
-		: node(line_number), m_value(value) {}
+	i32_node::i32_node(
+		const token_position& position,
+		i64 value
+	) : node(position),
+	m_value(value) {}
 
 	bool i32_node::accept(visitor& visitor, value_ptr& out_value)	{
 		LOG_NODE_NAME(keyword_i32_node);

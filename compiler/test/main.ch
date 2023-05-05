@@ -27,11 +27,11 @@ i32 main() {
 	char* b = new char[1760];
 	char* brightness = ".,-~:;=!*#$@";
     print("\x1b[2J");
-
+	
 	while(true) {
-		memset(b, 32, 1760);
+		memxset(b, 32, 1760);
 		memset(z, 0, 7040);
-
+	
 		for(j = 0; j < 6.28; j = j + 0.07) {
 			for(i = 0; i < 6.28; i = i + 0.02) {
 				f32 c = sin(i);
@@ -49,10 +49,10 @@ i32 main() {
                 i32 y = 12 + 15 * D * (l * h * n + t * m);
                 i32 o = x + 80 * y;
 				i32 N = 8 * ((f * e - c * d * g) * m - c * d * e - f * g - l * d * n);
-
+	
 				if(1760 > o && o > 0 && D > z[o]) {
 					z[o] = D;
-
+	
 					if(N > 0) {
 						b[o] = brightness[N];
 					}
@@ -62,8 +62,9 @@ i32 main() {
 				}
 			}
 		}
+	
+		print("\x1b[H");
 
-		print("\x1b[2J");
 		for(k = 0; k < 1760; k++) {
 			if(k % 80 != 0) {
 				printc(b[k]);
@@ -72,10 +73,10 @@ i32 main() {
 				printc(10);
 			}
 		}
-
-		A = A + 0.04;
-		B = B + 0.08;
+	
+		A = A + 0.1;
+		B = B + 0.2;
 	}
-
+	
 	return 0;
 }

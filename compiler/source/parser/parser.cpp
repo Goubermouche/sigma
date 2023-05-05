@@ -116,7 +116,7 @@ namespace channel {
 			return true;
 		}
 
-		compilation_logger::emit_unexpected_token_error(m_current_token.line_number, token, m_current_token.token);
+		error::emit<3000>(m_current_token.position, token, m_current_token.token).print();
 		return false; // return on failure
 	}
 
@@ -126,7 +126,7 @@ namespace channel {
 			return false;
 		}
 
-		const u64 line_number = m_current_token.line_number;
+		const token_position position = m_current_token.position;
 		get_next_token(); // identifier (guaranteed)
 		const std::string identifier = m_current_token.value;
 		get_next_token(); // l_parenthesis (guaranteed)
@@ -155,7 +155,7 @@ namespace channel {
 					get_next_token(); // comma (guaranteed)
 				}
 				else if (next_token != token::r_parenthesis) {
-					compilation_logger::emit_unexpected_token_error(m_current_token.line_number, token::r_parenthesis, m_current_token.token);
+					error::emit<3000>(m_current_token.position, token::r_parenthesis, m_current_token.token).print();
 					return false;
 				}
 				else {
@@ -173,7 +173,7 @@ namespace channel {
 			return false;
 		}
 
-		out_node = new function_node(line_number, return_type, identifier, arguments, statements);
+		out_node = new function_node(position, return_type, identifier, arguments, statements);
 		return true;
 	}
 
@@ -195,7 +195,7 @@ namespace channel {
 				}
 				break;
 			default:
-				compilation_logger::emit_unhandled_token_error(m_current_token.line_number, token);
+				error::emit<3001>(m_current_token.position, token).print();
 				return false; // return on failure
 			}
 		}
@@ -280,7 +280,7 @@ namespace channel {
 					}
 				}
 				else {
-					compilation_logger::emit_cannot_apply_unary_function_to_non_identifier_error(m_current_token.line_number);
+					error::emit<3004>(m_current_token.position).print();
 					return false;
 				}
 				break;
@@ -304,7 +304,7 @@ namespace channel {
 				// return right away since we don't want to check for a semicolon at the end of the statement
 				return parse_for_loop(out_node);
 			default:
-				compilation_logger::emit_unhandled_token_error(m_current_token.line_number, next_token);
+				error::emit<3001>(m_current_token.position, next_token).print();
 				return false; // return on failure
 			}
 		}
@@ -338,7 +338,7 @@ namespace channel {
 		else {
 			// create a simple access node
 			get_next_token(); // identifier (guaranteed)
-			out_node = new variable_access_node(m_current_token.line_number, m_current_token.value);
+			out_node = new variable_access_node(m_current_token.position, m_current_token.value);
 		}
 
 		// check for post unary operators after identifier, deep expression, or array index access
@@ -397,13 +397,13 @@ namespace channel {
 			}
 		}
 
-		out_node = new if_else_node(m_current_token.line_number, conditions, branches);
+		out_node = new if_else_node(m_current_token.position, conditions, branches);
 		return true;
 	}
 
 	bool parser::parse_while_loop(node*& out_node) {
 		get_next_token(); // keyword_while (guaranteed)
-		const u64 line_number = m_current_token.line_number;
+		const token_position position = m_current_token.position;
 
 		if(!expect_next_token(token::l_parenthesis)) {
 			return false;
@@ -433,7 +433,7 @@ namespace channel {
 		}
 
 		get_next_token(); // r_brace (guaranteed)
-		out_node = new while_node(line_number, loop_condition_node, loop_statements);
+		out_node = new while_node(position, loop_condition_node, loop_statements);
 		return true;
 	}
 
@@ -456,14 +456,14 @@ namespace channel {
 				}
 			}
 			else {
-				compilation_logger::emit_cannot_apply_unary_function_to_non_identifier_error(m_current_token.line_number);
+				error::emit<3004>(m_current_token.position).print();
 				return false;
 			}
 			break;
 		case token::r_parenthesis:
 			break;
 		default:
-			compilation_logger::emit_unhandled_token_error(m_current_token.line_number, next_token);
+			error::emit<3001>(m_current_token.position, next_token).print();
 			return false;
 		}
 
@@ -472,7 +472,7 @@ namespace channel {
 
 	bool parser::parse_for_loop(node*& out_node) {
 		get_next_token(); // keyword_for (guaranteed)
-		const u64 line_number = m_current_token.line_number;
+		const token_position position = m_current_token.position;
 
 		if (!expect_next_token(token::l_parenthesis)) {
 			return false;
@@ -496,7 +496,7 @@ namespace channel {
 				}
 				break;
 			default:
-				compilation_logger::emit_unhandled_token_error(m_current_token.line_number, next_token);
+				error::emit<3001>(m_current_token.position, next_token).print();
 				return false;
 			}
 		}
@@ -558,7 +558,7 @@ namespace channel {
 		}
 
 		get_next_token(); // r_brace (guaranteed)
-	 	out_node = new for_node(line_number, loop_initialization_node, loop_condition_node, post_iteration_nodes, loop_statements);
+	 	out_node = new for_node(position, loop_initialization_node, loop_condition_node, post_iteration_nodes, loop_statements);
 		return true;
 	}
 
@@ -598,12 +598,12 @@ namespace channel {
 				}
 			}
 
-			node* array_node = new variable_node(m_current_token.line_number, identifier);
-			out_node = new array_assignment_node(m_current_token.line_number, array_node, index_nodes, value);
+			node* array_node = new variable_node(m_current_token.position, identifier);
+			out_node = new array_assignment_node(m_current_token.position, array_node, index_nodes, value);
 		}
 		else if(next_token == token::operator_increment || next_token == token::operator_decrement) {
-			node* array_node = new variable_node(m_current_token.line_number, identifier);
-			out_node = new array_access_node(m_current_token.line_number, array_node, index_nodes);
+			node* array_node = new variable_node(m_current_token.position, identifier);
+			out_node = new array_access_node(m_current_token.position, array_node, index_nodes);
 
 			if (!parse_post_operator(out_node, out_node)) {
 				return false;
@@ -615,7 +615,7 @@ namespace channel {
 
 	bool parser::parse_assignment(node*& out_node) {
 		get_next_token(); // identifier (guaranteed)
-		node* variable = new variable_node(m_current_token.line_number, m_current_token.value);
+		node* variable = new variable_node(m_current_token.position, m_current_token.value);
 
 		if (!expect_next_token(token::operator_assignment)) {
 			return false; 
@@ -634,7 +634,7 @@ namespace channel {
 			}
 		}
 
-		out_node = new assignment_node(m_current_token.line_number, variable, value);
+		out_node = new assignment_node(m_current_token.position, variable, value);
 		return true;
 	}
 
@@ -642,7 +642,7 @@ namespace channel {
 		get_next_token(); // identifier (guaranteed)
 		const std::string identifier = m_current_token.value;
 
-		node* array_node = new variable_node(m_current_token.line_number, identifier);
+		node* array_node = new variable_node(m_current_token.position, identifier);
 		std::vector<node*> index_nodes;
 
 		get_next_token(); // l_bracket (guaranteed)
@@ -667,7 +667,7 @@ namespace channel {
 			get_next_token(); // l_bracket(guaranteed)
 		}
 
-		out_node = new array_access_node(m_current_token.line_number, array_node, index_nodes);
+		out_node = new array_access_node(m_current_token.position, array_node, index_nodes);
 		return true;
 	}
 
@@ -698,7 +698,7 @@ namespace channel {
 					break;
 				}
 				else {
-					compilation_logger::emit_unhandled_token_error(m_current_token.line_number, m_current_token.token);
+					error::emit<3001>(m_current_token.position, m_current_token.token).print();
 					return false; 
 				}
 			}
@@ -708,7 +708,7 @@ namespace channel {
 			return false;
 		}
 
-		out_node = new function_call_node(m_current_token.line_number, identifier, arguments);
+		out_node = new function_call_node(m_current_token.position, identifier, arguments);
 		return true;
 	}
 
@@ -720,7 +720,7 @@ namespace channel {
 			return false;
 		}
 
-		out_node = new return_node(m_current_token.line_number, expression);
+		out_node = new return_node(m_current_token.position, expression);
 		return true;
 	}
 
@@ -745,11 +745,11 @@ namespace channel {
 		}
 
 		if(is_global) {
-			out_node = new global_declaration_node(m_current_token.line_number, declaration_type, identifier, value);
+			out_node = new global_declaration_node(m_current_token.position, declaration_type, identifier, value);
 			return true;
 		}
 
-		out_node = new local_declaration_node(m_current_token.line_number, declaration_type, identifier, value);
+		out_node = new local_declaration_node(m_current_token.position, declaration_type, identifier, value);
 		return true;
 	}
 
@@ -773,7 +773,7 @@ namespace channel {
 				return false;
 			}
 
-			left = new operator_conjunction_node(op.line_number, left, right);
+			left = new operator_conjunction_node(op.position, left, right);
 		}
 
 		out_node = left;
@@ -795,7 +795,7 @@ namespace channel {
 				return false;
 			}
 
-			left = new operator_disjunction_node(op.line_number, left, right);
+			left = new operator_disjunction_node(op.position, left, right);
 		}
 
 		out_node = left;
@@ -825,22 +825,22 @@ namespace channel {
 
 			switch(op.token) {
 			case token::operator_greater_than:
-				left = new operator_greater_than_node(m_current_token.line_number, left, right);
+				left = new operator_greater_than_node(m_current_token.position, left, right);
 				break;
 			case token::operator_greater_than_equal_to:
-				left = new operator_greater_than_equal_to_node(m_current_token.line_number, left, right);
+				left = new operator_greater_than_equal_to_node(m_current_token.position, left, right);
 				break;
 			case token::operator_less_than:
-				left = new operator_less_than_node(m_current_token.line_number, left, right);
+				left = new operator_less_than_node(m_current_token.position, left, right);
 				break;
 			case token::operator_less_than_equal_to:
-				left = new operator_less_than_equal_to_node(m_current_token.line_number, left, right);
+				left = new operator_less_than_equal_to_node(m_current_token.position, left, right);
 				break;
 			case token::operator_equals:
-				left = new operator_equals_node(m_current_token.line_number, left, right);
+				left = new operator_equals_node(m_current_token.position, left, right);
 				break;
 			case token::operator_not_equals:
-				left = new operator_not_equals_node(m_current_token.line_number, left, right);
+				left = new operator_not_equals_node(m_current_token.position, left, right);
 				break;
 			}
 		}
@@ -868,10 +868,10 @@ namespace channel {
 
 			switch (op.token) {
 			case token::operator_addition:
-				left = new operator_addition_node(op.line_number, left, right);
+				left = new operator_addition_node(op.position, left, right);
 				break;
 			case token::operator_subtraction:
-				left = new operator_subtraction_node(op.line_number, left, right);
+				left = new operator_subtraction_node(op.position, left, right);
 				break;
 			}
 		}
@@ -901,13 +901,13 @@ namespace channel {
 
 			switch (op.token) {
 			case token::operator_multiplication:
-				left = new operator_multiplication_node(op.line_number, left, right);
+				left = new operator_multiplication_node(op.position, left, right);
 				break;
 			case token::operator_division:
-				left = new operator_division_node(op.line_number, left, right);
+				left = new operator_division_node(op.position, left, right);
 				break;
 			case token::operator_modulo:
-				left = new operator_modulo_node(op.line_number, left, right);
+				left = new operator_modulo_node(op.position, left, right);
 				break;
 			}
 		}
@@ -937,7 +937,7 @@ namespace channel {
 				return parse_pre_operator(out_node);
 			}
 
-			compilation_logger::emit_cannot_apply_unary_function_to_non_identifier_error(m_current_token.line_number);
+			error::emit<3004>(m_current_token.position).print();
 			return false;
 		case token::identifier:
 			// parse a function call or an assignment
@@ -960,7 +960,7 @@ namespace channel {
 			return parse_bool(out_node);
 		}
 
-		compilation_logger::emit_unhandled_token_error(m_current_token.line_number, m_current_token.token);
+		error::emit<3001>(m_current_token.position, m_current_token.token).print();
 		return false;
 	}
 
@@ -971,47 +971,47 @@ namespace channel {
 
 		switch (ty.get_base()) {
 		// signed
-		case type::base::i8:  out_node = new i8_node(m_current_token.line_number, std::stoll(str_value)); return true;
-		case type::base::i16: out_node = new i16_node(m_current_token.line_number, std::stoll(str_value)); return true;
-		case type::base::i32: out_node = new i32_node(m_current_token.line_number, std::stoll(str_value)); return true;
-		case type::base::i64: out_node = new i64_node(m_current_token.line_number, std::stoll(str_value)); return true;
+		case type::base::i8:  out_node = new i8_node(m_current_token.position, std::stoll(str_value)); return true;
+		case type::base::i16: out_node = new i16_node(m_current_token.position, std::stoll(str_value)); return true;
+		case type::base::i32: out_node = new i32_node(m_current_token.position, std::stoll(str_value)); return true;
+		case type::base::i64: out_node = new i64_node(m_current_token.position, std::stoll(str_value)); return true;
 		 // unsigned
-		case type::base::u8:  out_node = new u8_node(m_current_token.line_number, std::stoull(str_value)); return true;
-		case type::base::u16: out_node = new u16_node(m_current_token.line_number, std::stoull(str_value)); return true;
-		case type::base::u32: out_node = new u32_node(m_current_token.line_number, std::stoull(str_value)); return true;
-		case type::base::u64: out_node = new u64_node(m_current_token.line_number, std::stoull(str_value)); return true;
+		case type::base::u8:  out_node = new u8_node(m_current_token.position, std::stoull(str_value)); return true;
+		case type::base::u16: out_node = new u16_node(m_current_token.position, std::stoull(str_value)); return true;
+		case type::base::u32: out_node = new u32_node(m_current_token.position, std::stoull(str_value)); return true;
+		case type::base::u64: out_node = new u64_node(m_current_token.position, std::stoull(str_value)); return true;
 		// floating point
-		case type::base::f32: out_node = new f32_node(m_current_token.line_number, std::stof(str_value)); return true;
-		case type::base::f64: out_node = new f64_node(m_current_token.line_number, std::stod(str_value)); return true;
+		case type::base::f32: out_node = new f32_node(m_current_token.position, std::stof(str_value)); return true;
+		case type::base::f64: out_node = new f64_node(m_current_token.position, std::stod(str_value)); return true;
 		// bool
-		case type::base::boolean: out_node = new bool_node(m_current_token.line_number, std::stoi(str_value)); return true;
+		case type::base::boolean: out_node = new bool_node(m_current_token.position, std::stoi(str_value)); return true;
 		default:
-			compilation_logger::emit_unhandled_number_format_error(m_current_token.line_number, ty);
+			error::emit<3002>(m_current_token.position, ty).print();
 			return false; // return on failure
 		}
 	}
 
 	bool parser::parse_char(node*& out_node) {
 		get_next_token(); // char_literal (guaranteed)
-		out_node = new char_node(m_current_token.line_number, m_current_token.value[0]);
+		out_node = new char_node(m_current_token.position, m_current_token.value[0]);
 		return true;
 	}
 
 	bool parser::parse_string(node*& out_node) {
 		get_next_token(); // string_literal (guaranteed)
-		out_node = new string_node(m_current_token.line_number, m_current_token.value);
+		out_node = new string_node(m_current_token.position, m_current_token.value);
 		return true;
 	}
 
 	bool parser::parse_bool(node*& out_node) {
 		get_next_token(); // bool_literal_true || bool_literal_false (guaranteed)
-		out_node = new bool_node(m_current_token.line_number, m_current_token.token == token::bool_literal_true);
+		out_node = new bool_node(m_current_token.position, m_current_token.token == token::bool_literal_true);
 		return true;
 	}
 
 	bool parser::parse_break_keyword(node*& out_node) {
 		get_next_token(); // keyword_break (guaranteed)
-		out_node = new break_node(m_current_token.line_number);
+		out_node = new break_node(m_current_token.position);
 		return true;
 	}
 
@@ -1019,10 +1019,10 @@ namespace channel {
 		get_next_token();
 
 		if(m_current_token.token == token::operator_increment) {
-			out_node = new operator_post_increment(m_current_token.line_number, operand);
+			out_node = new operator_post_increment(m_current_token.position, operand);
 		}
 		else {
-			out_node = new operator_post_decrement(m_current_token.line_number, operand);
+			out_node = new operator_post_decrement(m_current_token.position, operand);
 		}
 
 		return true;
@@ -1038,10 +1038,10 @@ namespace channel {
 		}
 
 		if(op.token == token::operator_increment) {
-			out_node = new operator_pre_increment(op.line_number, operand);
+			out_node = new operator_pre_increment(op.position, operand);
 		}
 		else {
-			out_node = new operator_pre_decrement(op.line_number, operand);
+			out_node = new operator_pre_decrement(op.position, operand);
 		}
 
 		return true;
@@ -1058,14 +1058,13 @@ namespace channel {
 			return false;
 		}
 
-		out_node = new operator_subtraction_node(m_current_token.line_number, zero_node, number);
+		out_node = new operator_subtraction_node(m_current_token.position, zero_node, number);
 		return true;
 	}
 
 	bool parser::parse_new_allocation(node*& out_node) {
 		get_next_token(); // keyword_new (guaranteed)
-
-		const u64 line_number = m_current_token.line_number;
+		const token_position position = m_current_token.position;
 
 		type allocation_type;
 		if(!parse_type(allocation_type)) {
@@ -1088,7 +1087,7 @@ namespace channel {
 			return false;
 		}
 
-		out_node = new array_allocation_node(line_number, allocation_type, array_size);
+		out_node = new array_allocation_node(position, allocation_type, array_size);
 		return true;
 	}
 
@@ -1107,7 +1106,7 @@ namespace channel {
 			// parse an assignment
 			get_next_token();
 			const std::string identifier = m_current_token.value;
-			out_node = new variable_access_node(m_current_token.line_number, identifier);
+			out_node = new variable_access_node(m_current_token.position, identifier);
 		}
 		
 		// post increment
@@ -1226,16 +1225,16 @@ namespace channel {
 
 	node* parser::create_zero_node(type expression_type) const {
 		switch (expression_type.get_base()) {
-		case type::base::i8:  return new i8_node(m_current_token.line_number, 0);
-		case type::base::i16: return new i16_node(m_current_token.line_number, 0);
-		case type::base::i32: return new i32_node(m_current_token.line_number, 0);
-		case type::base::i64: return new i64_node(m_current_token.line_number, 0);
-		case type::base::u8:  return new u8_node(m_current_token.line_number, 0);
-		case type::base::u16: return new u16_node(m_current_token.line_number, 0);
-		case type::base::u32: return new u32_node(m_current_token.line_number, 0);
-		case type::base::u64: return new u64_node(m_current_token.line_number, 0);
-		case type::base::f32: return new f32_node(m_current_token.line_number, 0.0f);
-		case type::base::f64: return new f64_node(m_current_token.line_number, 0.0);
+		case type::base::i8:  return new i8_node(m_current_token.position, 0);
+		case type::base::i16: return new i16_node(m_current_token.position, 0);
+		case type::base::i32: return new i32_node(m_current_token.position, 0);
+		case type::base::i64: return new i64_node(m_current_token.position, 0);
+		case type::base::u8:  return new u8_node(m_current_token.position, 0);
+		case type::base::u16: return new u16_node(m_current_token.position, 0);
+		case type::base::u32: return new u32_node(m_current_token.position, 0);
+		case type::base::u64: return new u64_node(m_current_token.position, 0);
+		case type::base::f32: return new f32_node(m_current_token.position, 0.0f);
+		case type::base::f64: return new f64_node(m_current_token.position, 0.0);
 		default:
 			ASSERT(false, "[parser]: cannot convert '" + expression_type.to_string() + "' to a type keyword");
 			return nullptr;
@@ -1246,7 +1245,7 @@ namespace channel {
 		get_next_token();
 
 		if(!is_token_type(m_current_token.token)) {
-			compilation_logger::emit_token_is_not_type_error(m_current_token.line_number, m_current_token.token);
+			error::emit<3003>(m_current_token.position, m_current_token.token).print();
 			return false;
 		}
 

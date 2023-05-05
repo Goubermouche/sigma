@@ -20,7 +20,7 @@ namespace channel {
 
 		// upcast the return value to match the function's return type
 		llvm::Value* upcasted_return_value;
-		if(!cast_value(upcasted_return_value, return_value, function_return_type, node.get_declaration_line_number())) {
+		if(!cast_value(upcasted_return_value, return_value, function_return_type, node.get_declared_position())) {
 			return false;
 		}
 
@@ -119,9 +119,9 @@ namespace channel {
         llvm::BasicBlock* entry_block = m_builder.GetInsertBlock();
         llvm::Function* parent_function = entry_block->getParent();
 
-        llvm::BasicBlock* end_block = llvm::BasicBlock::Create(m_context, "while_end", parent_function);
-        llvm::BasicBlock* condition_block = llvm::BasicBlock::Create(m_context, "while_cond", parent_function);
-        llvm::BasicBlock* loop_body_block = llvm::BasicBlock::Create(m_context, "while_body", parent_function);
+        llvm::BasicBlock* end_block = llvm::BasicBlock::Create(m_context, "", parent_function);
+        llvm::BasicBlock* condition_block = llvm::BasicBlock::Create(m_context, "", parent_function);
+        llvm::BasicBlock* loop_body_block = llvm::BasicBlock::Create(m_context, "", parent_function);
 
         m_builder.CreateBr(condition_block);
 
@@ -194,7 +194,7 @@ namespace channel {
 
         // check if the conditional operator evaluates to a boolean
         if(condition_value->get_type().get_base() != type::base::boolean || condition_value->get_type().is_pointer()) {
-            compilation_logger::emit_for_conditional_has_to_be_boolean(node.get_declaration_line_number(), condition_value->get_type());
+            error::emit<4010>(node.get_declared_position(), condition_value->get_type()).print();
             return false;
         }
 
@@ -245,7 +245,7 @@ namespace channel {
         llvm::BasicBlock* end_block = m_scope->get_loop_end_block();
         if (end_block == nullptr) {
             // emit an error if there's no enclosing loop to break from
-            compilation_logger::emit_break_outside_loop_error(node.get_declaration_line_number());
+            error::emit<4011>(node.get_declared_position()).print();
             return false;
         }
 

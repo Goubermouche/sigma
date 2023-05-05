@@ -2,12 +2,12 @@
 
 namespace channel {
 	function_node::function_node(
-		u64 line_number, 
+		const token_position& position,
 		const type& function_return_type, 
 		const std::string& function_identifier,
 		const std::vector<std::pair<std::string, type>>& function_arguments,
 		const std::vector<node_ptr>& function_statements
-	) : node(line_number),
+	) : node(position),
 	m_function_return_type(function_return_type),
 	m_function_identifier(function_identifier),
 	m_function_arguments(function_arguments),

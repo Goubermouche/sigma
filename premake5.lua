@@ -17,8 +17,8 @@ project "compiler"
     location "compiler"
     -- dependson "external_functions"
 
-    targetdir ("../bin/%{cfg.buildcfg}/%{prj.name}")
-    objdir ("../bin-int/%{cfg.buildcfg}/%{prj.name}")
+    targetdir ("bin/%{cfg.buildcfg}/%{prj.name}")
+    objdir ("bin-int/%{cfg.buildcfg}/%{prj.name}")
 
     externalanglebrackets "On"
     externalwarnings "Off"

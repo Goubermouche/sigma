@@ -8,7 +8,7 @@ namespace channel {
 	class if_else_node : public node {
 	public:
 		if_else_node(
-			u64 line_number, 
+			const token_position& position,
 			const std::vector<node_ptr>& condition_nodes,
 			const std::vector<std::vector<node_ptr>>& branch_nodes
 		);

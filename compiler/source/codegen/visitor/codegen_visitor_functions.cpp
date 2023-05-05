@@ -26,7 +26,7 @@ namespace channel {
 
 		// check for multiple definitions by checking if the function has already been added to our map
 		if (!insertion_result.second) {
-			compilation_logger::emit_function_already_defined_error(node.get_declaration_line_number(), node.get_function_identifier());
+			error::emit<4000>(node.get_declared_position(), node.get_function_identifier()).print();
 			return false;
 		}
 
@@ -73,7 +73,7 @@ namespace channel {
 
 		// add a return statement if the function does not have one
 		if (m_builder.GetInsertBlock()->getTerminator() == nullptr) {
-			compilation_logger::emit_function_return_auto_generate_warning(node.get_declaration_line_number(), node.get_function_identifier());
+			warning::emit<3000>(node.get_declared_position(), node.get_function_identifier()).print();
 
 			if (return_type->isVoidTy()) {
 				m_builder.CreateRetVoid();
@@ -94,7 +94,7 @@ namespace channel {
 
 		// check if it exists
 		if (!func) {
-			compilation_logger::emit_function_not_found_error(node.get_declaration_line_number(), node.get_function_identifier());
+			error::emit<4001>(node.get_declared_position(), node.get_function_identifier()).print();
 			return false;
 		}
 
@@ -102,7 +102,7 @@ namespace channel {
 		const std::vector<channel::node*>& given_arguments = node.get_function_arguments();
 
 		if(!func->is_variadic() && required_arguments.size() != given_arguments.size()) {
-			compilation_logger::emit_function_argument_count_mismatch_error(node.get_declaration_line_number(), node.get_function_identifier());
+			error::emit<4002>(node.get_declared_position(), node.get_function_identifier()).print();
 			return false;
 		}
 
@@ -116,7 +116,7 @@ namespace channel {
 			}
 
 			// cast the given argument to match the required argument's type, if necessary 
-			if(!cast_value(argument_values[i], argument_value, required_arguments[i].second, node.get_declaration_line_number())) {
+			if(!cast_value(argument_values[i], argument_value, required_arguments[i].second, node.get_declared_position())) {
 				return false;
 			}
 		}
@@ -133,7 +133,7 @@ namespace channel {
 			if(argument_type == type(type::base::f32, 0)) {
 				// f32 -> f64
 				llvm::Value* argument_value_cast;
-				if(!cast_value(argument_value_cast, argument_value, type(type::base::f64, 0), given_arguments[i]->get_declaration_line_number())) {
+				if(!cast_value(argument_value_cast, argument_value, type(type::base::f64, 0), given_arguments[i]->get_declared_position())) {
 					return false;
 				}
 
@@ -142,7 +142,7 @@ namespace channel {
 			else if(argument_type.get_bit_width() < type(type::base::i32, 0).get_bit_width()) {
 				// i1, i8, i16 -> i32
 				llvm::Value* argument_value_cast;
-				if (!cast_value(argument_value_cast, argument_value, type(type::base::i32, 0), given_arguments[i]->get_declaration_line_number())) {
+				if (!cast_value(argument_value_cast, argument_value, type(type::base::i32, 0), given_arguments[i]->get_declared_position())) {
 					return false;
 				}
 

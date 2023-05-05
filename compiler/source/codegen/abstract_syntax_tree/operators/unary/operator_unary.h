@@ -8,7 +8,7 @@ namespace channel {
     class operator_unary : public node {
     public:
         operator_unary(
-            u64 line_number,
+            const token_position& position,
             const node_ptr& expression_node
         );
 

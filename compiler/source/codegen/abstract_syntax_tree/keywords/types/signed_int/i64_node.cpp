@@ -1,8 +1,11 @@
 #include "i64_node.h"
 
 namespace channel {
-	i64_node::i64_node(u64 line_number, i64 value)
-		:node(line_number), m_value(value) {}
+	i64_node::i64_node(
+		const token_position& position,
+		i64 value
+	) : node(position),
+	m_value(value) {}
 
 	bool i64_node::accept(visitor& visitor, value_ptr& out_value) {
 		LOG_NODE_NAME(keyword_i64_node);

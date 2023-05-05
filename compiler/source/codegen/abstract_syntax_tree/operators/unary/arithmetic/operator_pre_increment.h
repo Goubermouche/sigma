@@ -8,7 +8,7 @@ namespace channel {
 	class operator_pre_increment : public operator_unary {
 	public:
 		operator_pre_increment(
-			u64 line_number, 
+			const token_position& position,
 			const node_ptr& expression_node
 		);
 

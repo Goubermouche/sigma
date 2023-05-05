@@ -1,8 +1,0 @@
-{
-    "files.associations": {
-        "memory": "cpp",
-        "tuple": "cpp",
-        "xutility": "cpp"
-    },
-    "C_Cpp.dimInactiveRegions": false
-}

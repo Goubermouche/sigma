@@ -8,7 +8,7 @@ namespace channel {
 	class array_allocation_node : public node {
 	public:
 		array_allocation_node(
-			u64 line_number, 
+			const token_position& position,
 			const type& array_element_type,
 			const node_ptr& array_element_count_node
 		);

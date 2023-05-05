@@ -8,7 +8,7 @@ namespace channel {
     class array_assignment_node : public node {
     public:
         array_assignment_node(
-            u64 line_number, 
+            const token_position& position,
             const node_ptr& array_base,
             const std::vector<node_ptr>& index_nodes,
             const node_ptr& expression_node

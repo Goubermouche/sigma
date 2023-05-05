@@ -8,7 +8,7 @@ namespace channel {
 	class variable_access_node : public node {
 	public:
 		variable_access_node(
-			u64 line_number,
+			const token_position& position,
 			const std::string& variable_identifier
 		);
 

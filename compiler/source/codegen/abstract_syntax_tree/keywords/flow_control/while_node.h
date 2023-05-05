@@ -8,7 +8,7 @@ namespace channel {
 	class while_node : public node {
 	public:
 		while_node(
-			u64 line_number,
+			const token_position& position,
 			const node_ptr& loop_condition_node,
 			const std::vector<node_ptr>& statement_nodes
 		);

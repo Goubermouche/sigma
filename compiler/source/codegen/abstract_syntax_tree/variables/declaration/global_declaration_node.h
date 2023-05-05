@@ -9,7 +9,7 @@ namespace channel {
 	class global_declaration_node : public declaration_node {
 	public:
 		global_declaration_node(
-			u64 line_number, 
+			const token_position& position,
 			const type& declaration_type,
 			const std::string& declaration_identifier, 
 			const node_ptr& expression_node = nullptr

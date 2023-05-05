@@ -1,8 +1,11 @@
 #include "f64_node.h"
 
 namespace channel {
-	f64_node::f64_node(u64 line_number, f64 value)
-		: node(line_number), m_value(value) {}
+	f64_node::f64_node(
+		const token_position& position,
+		f64 value
+	) : node(position),
+	m_value(value) {}
 
 	bool f64_node::accept(visitor& visitor, value_ptr& out_value) {
 		LOG_NODE_NAME(keyword_f64_node);

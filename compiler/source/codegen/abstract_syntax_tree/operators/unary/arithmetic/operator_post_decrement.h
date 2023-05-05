@@ -8,7 +8,7 @@ namespace channel {
 	class operator_post_decrement : public operator_unary {
 	public:
 		operator_post_decrement(
-			u64 line_number, 
+			const token_position& position,
 			const node_ptr& expression_node
 		);
 

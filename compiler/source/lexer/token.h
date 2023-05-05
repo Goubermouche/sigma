@@ -110,6 +110,23 @@ namespace channel {
 		unknown
 	};
 
+	struct token_position {
+		token_position() = default;
+		token_position(u64 line_number, u64 character_number)
+			: m_line_number(line_number), m_character_number(character_number) {}
+
+		u64 get_line_number() const {
+			return m_line_number;
+		}
+
+		u64 get_character_number() const {
+			return m_line_number;
+		}
+	private:
+		u64 m_line_number;
+		u64 m_character_number;
+	};
+
 	inline std::string token_to_string(token token) {
 		switch (token) {
 		case token::l_brace:

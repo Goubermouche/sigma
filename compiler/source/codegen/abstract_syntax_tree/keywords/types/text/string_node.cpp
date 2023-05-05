@@ -1,8 +1,11 @@
 #include "string_node.h"	
 
 namespace channel {
-	string_node::string_node(u64 line_number, const std::string& value)
-		: node(line_number), m_value(value) {}
+	string_node::string_node(
+		const token_position& position, 
+		const std::string& value
+	) : node(position),
+	m_value(value) {}
 
 	bool string_node::accept(visitor& visitor, value_ptr& out_value) {
 		LOG_NODE_NAME(string_node);

@@ -8,7 +8,7 @@ namespace channel {
 	class function_call_node : public node {
 	public:
 		function_call_node(
-			u64 line_number,
+			const token_position& position,
 			const std::string& function_identifier,
 			const std::vector<node_ptr>& function_arguments
 		);

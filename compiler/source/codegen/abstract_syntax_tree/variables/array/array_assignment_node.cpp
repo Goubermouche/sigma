@@ -2,11 +2,11 @@
 
 namespace channel {
 	array_assignment_node::array_assignment_node(
-		u64 line_number,
+		const token_position& position,
 		const node_ptr& array_base,
 		const std::vector<node_ptr>& index_nodes,
 		const node_ptr& expression_node
-	) : node(line_number),
+	) : node(position),
 	m_array_base_node(array_base),
 	m_array_element_index_nodes(index_nodes),
 	m_expression_node(expression_node) {}

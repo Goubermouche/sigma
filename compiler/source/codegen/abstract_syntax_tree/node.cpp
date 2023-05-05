@@ -2,11 +2,11 @@
 #include "../visitor/visitor.h"
 
 namespace channel {
-    node::node(u64 line_number)
-	    : m_line_number(line_number) {}
+    node::node(const token_position& position)
+	    : m_position(position) {}
 
-    u64 node::get_declaration_line_number() const {
-        return m_line_number;
+    const token_position& node::get_declared_position() const {
+        return m_position;
     }
 
     void node::print_value(

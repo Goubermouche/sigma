@@ -104,7 +104,7 @@ namespace channel {
 		bool visit_operator_not_equals_node(operator_not_equals_node& node, value_ptr& out_value) override;
 
 		// utility
-		bool cast_value(llvm::Value*& out_value, const value_ptr source_value, type target_type, u64 line_number);
+		bool cast_value(llvm::Value*& out_value, const value_ptr source_value, type target_type, const token_position& position);
 
 		bool verify_main_entry_point() const;
 		void initialize_global_variables();

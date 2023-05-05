@@ -1,8 +1,11 @@
 #include "i16_node.h"
 
 namespace channel {
-	i16_node::i16_node(u64 line_number, i64 value)
-		:node(line_number), m_value(value) {}
+	i16_node::i16_node(
+		const token_position& position,
+		i64 value
+	) : node(position),
+	m_value(value) {}
 
 	bool i16_node::accept(visitor& visitor, value_ptr& out_value) {
 		LOG_NODE_NAME(keyword_i16_node);

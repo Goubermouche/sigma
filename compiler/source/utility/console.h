@@ -52,7 +52,7 @@ namespace channel {
     inline std::string escape_string(const std::string& input) {
         std::string output;
         for (const char ch : input) {
-            if (ch == '\\' || ch == '\'' || ch == '\"' || ch == '\a' || ch == '\b' || ch == '\f' || ch == '\n' || ch == '\r' || ch == '\t' || ch == '\v') {
+            if (ch == '\\' || ch == '\'' || ch == '\"' || ch == '\a' || ch == '\b' || ch == '\f' || ch == '\n' || ch == '\r' || ch == '\t' || ch == '\v' || ch == '\x1b') {
                 output.push_back('\\');
                 switch (ch) {
                 case '\\': output.push_back('\\'); break;
@@ -65,6 +65,9 @@ namespace channel {
                 case '\r': output.push_back('r'); break;
                 case '\t': output.push_back('t'); break;
                 case '\v': output.push_back('v'); break;
+                case '\x1b':
+                    output.append("x1b");
+                    break;
                 }
             }
             else {

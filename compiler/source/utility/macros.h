@@ -17,7 +17,7 @@
     do {                                                            \
         if (cond) { /* contextually convertible to bool paranoia */ \
         } else {                                                    \
-            std::cout << mesg << '\n';                              \
+            console::out << mesg << '\n';                           \
             __debugbreak();                                         \
         }                                                           \
     } while (false)

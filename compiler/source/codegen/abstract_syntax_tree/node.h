@@ -21,7 +21,7 @@ namespace channel {
 	 */
 	class node {
 	public:
-		node(u64 line_number);
+		node(const token_position& position);
 		virtual ~node() = default;
 
 		/**
@@ -32,7 +32,7 @@ namespace channel {
 		 */
 		virtual bool accept(visitor& visitor, value_ptr& out_value) = 0;
 		virtual void print(int depth, const std::wstring& prefix, bool is_last) = 0;
-		u64 get_declaration_line_number() const;
+		const token_position& get_declared_position() const;
 	protected:
 		static void print_value(
 			int depth, 
@@ -47,7 +47,7 @@ namespace channel {
 			bool is_last
 		);
 	private:
-		u64 m_line_number = 0;
+		token_position m_position;
 	};
 }
 

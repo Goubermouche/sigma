@@ -47,7 +47,7 @@ namespace channel {
 
 		console::out << "parsing finished (" << parser_timer.elapsed() << "ms)\n";
 
-		parser.get_abstract_syntax_tree().print_nodes();
+		// parser.get_abstract_syntax_tree().print_nodes();
 
 		codegen_timer.start();
 		codegen_visitor visitor(parser);
@@ -59,7 +59,7 @@ namespace channel {
 		console::out << "codegen finished (" << codegen_timer.elapsed() << "ms)\n";
 		compile_timer.start();
 
-		visitor.print_intermediate_representation();
+		// visitor.print_intermediate_representation();
 
 		if (!visitor.verify_intermediate_representation()) {
 			// verification failure
@@ -151,7 +151,7 @@ namespace channel {
 
 		// delete the .o file
 		if(!detail::delete_file(o_file)) {
-			compilation_logger::emit_delete_file_failed_error(o_file);
+			error::emit<1001>(o_file).print();
 			return;
 		}
 

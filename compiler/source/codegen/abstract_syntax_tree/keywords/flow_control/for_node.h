@@ -8,7 +8,7 @@ namespace channel {
 	class for_node : public node {
 	public:
 		for_node(
-			u64 line_number,
+			const token_position& position,
 			const node_ptr& loop_initialization_node,
 			const node_ptr& loop_condition_node,
 			const std::vector<node_ptr>& post_iteration_nodes,

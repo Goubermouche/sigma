@@ -8,7 +8,7 @@ namespace channel {
     class array_access_node : public node {
     public:
         array_access_node(
-            u64 line_number,
+            const token_position& position,
             const node_ptr& array_base,
             const std::vector<node_ptr>& array_element_index_nodes
         );

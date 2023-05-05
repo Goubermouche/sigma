@@ -2,10 +2,10 @@
 
 namespace channel {
 	operator_binary::operator_binary(
-		u64 line_number,
+		const token_position& position,
 		const node_ptr& left_expression_node,
 		const node_ptr& right_expression_node
-	) : node(line_number),
+	) : node(position),
 	m_left_expression_node(left_expression_node),
 	m_right_expression_node(right_expression_node) {}
 

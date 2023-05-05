@@ -32,7 +32,7 @@ namespace channel {
 
 		// check if the expression is an integer or a floating-point value
 		if (!loaded_value->get_type().is_numerical()) {
-			compilation_logger::emit_unary_operation_expects_numerical(node.get_declaration_line_number(), loaded_value->get_type());
+			error::emit<4007>(node.get_declared_position(), loaded_value->get_type()).print();
 			return false;
 		}
 
@@ -64,7 +64,7 @@ namespace channel {
 
 		// check if the expression is an integer or a floating-point value
 		if (!loaded_value->get_type().is_numerical()) {
-			compilation_logger::emit_unary_operation_expects_numerical(node.get_declaration_line_number(), loaded_value->get_type());
+			error::emit<4007>(node.get_declared_position(), loaded_value->get_type()).print();
 			return false;
 		}
 
@@ -97,7 +97,7 @@ namespace channel {
 
 		// check if the expression is an integer or a floating-point value
 		if (!expression->get_type().is_numerical()) {
-			compilation_logger::emit_unary_operation_expects_numerical(node.get_declaration_line_number(), expression->get_type());
+			error::emit<4007>(node.get_declared_position(), expression->get_type()).print();
 			return false;
 		}
 
@@ -132,7 +132,7 @@ namespace channel {
 
 		// check if the expression is an integer or a floating-point value
 		if (!expression->get_type().is_numerical()) {
-			compilation_logger::emit_unary_operation_expects_numerical(node.get_declaration_line_number(), expression->get_type());
+			error::emit<4007>(node.get_declared_position(), expression->get_type()).print();
 			return false;
 		}
 
@@ -174,12 +174,12 @@ namespace channel {
 		// upcast both expressions
 		const type highest_precision = get_highest_precision_type(left->get_type(), right->get_type());
 		llvm::Value* left_value_upcasted;
-		if(!cast_value(left_value_upcasted, left, highest_precision, node.get_declaration_line_number())) {
+		if(!cast_value(left_value_upcasted, left, highest_precision, node.get_declared_position())) {
 			return false;
 		}
 
 		llvm::Value* right_value_upcasted;
-		if(!cast_value(right_value_upcasted, right, highest_precision, node.get_declaration_line_number())) {
+		if(!cast_value(right_value_upcasted, right, highest_precision, node.get_declared_position())) {
 			return false;
 		}
 
@@ -238,12 +238,12 @@ namespace channel {
 		// upcast both expressions
 		const type highest_precision = get_highest_precision_type(left->get_type(), right->get_type());
 		llvm::Value* left_value_upcasted;
-		if (!cast_value(left_value_upcasted, left, highest_precision, node.get_declaration_line_number())) {
+		if (!cast_value(left_value_upcasted, left, highest_precision, node.get_declared_position())) {
 			return false;
 		}
 
 		llvm::Value* right_value_upcasted;
-		if (!cast_value(right_value_upcasted, right, highest_precision, node.get_declaration_line_number())) {
+		if (!cast_value(right_value_upcasted, right, highest_precision, node.get_declared_position())) {
 			return false;
 		}
 
@@ -302,12 +302,12 @@ namespace channel {
 		// upcast both expressions
 		const type highest_precision = get_highest_precision_type(left->get_type(), right->get_type());
 		llvm::Value* left_value_upcasted;
-		if (!cast_value(left_value_upcasted, left, highest_precision, node.get_declaration_line_number())) {
+		if (!cast_value(left_value_upcasted, left, highest_precision, node.get_declared_position())) {
 			return false;
 		}
 
 		llvm::Value* right_value_upcasted;
-		if (!cast_value(right_value_upcasted, right, highest_precision, node.get_declaration_line_number())) {
+		if (!cast_value(right_value_upcasted, right, highest_precision, node.get_declared_position())) {
 			return false;
 		}
 
@@ -366,12 +366,12 @@ namespace channel {
 		// upcast both expressions
 		const type highest_precision = get_highest_precision_type(left->get_type(), right->get_type());
 		llvm::Value* left_value_upcasted;
-		if (!cast_value(left_value_upcasted, left, highest_precision, node.get_declaration_line_number())) {
+		if (!cast_value(left_value_upcasted, left, highest_precision, node.get_declared_position())) {
 			return false;
 		}
 
 		llvm::Value* right_value_upcasted;
-		if (!cast_value(right_value_upcasted, right, highest_precision, node.get_declaration_line_number())) {
+		if (!cast_value(right_value_upcasted, right, highest_precision, node.get_declared_position())) {
 			return false;
 		}
 
@@ -429,12 +429,12 @@ namespace channel {
 		// upcast both expressions
 		const type highest_precision = get_highest_precision_type(left->get_type(), right->get_type());
 		llvm::Value* left_value_upcasted;
-		if (!cast_value(left_value_upcasted, left, highest_precision, node.get_declaration_line_number())) {
+		if (!cast_value(left_value_upcasted, left, highest_precision, node.get_declared_position())) {
 			return false;
 		}
 
 		llvm::Value* right_value_upcasted;
-		if (!cast_value(right_value_upcasted, right, highest_precision, node.get_declaration_line_number())) {
+		if (!cast_value(right_value_upcasted, right, highest_precision, node.get_declared_position())) {
 			return false;
 		}
 
@@ -491,7 +491,7 @@ namespace channel {
 
 		// both expressions must be boolean
 		if (left->get_type().get_base() != type::base::boolean || right->get_type().get_base() != type::base::boolean) {
-			compilation_logger::emit_conjunction_operation_expects_booleans(node.get_declaration_line_number(), left->get_type(), right->get_type());
+			error::emit<4008>(node.get_declared_position(), left->get_type(), right->get_type()).print();
 			return false;
 		}
 
@@ -516,7 +516,7 @@ namespace channel {
 
 		// both expressions must be boolean
 		if (left->get_type().get_base() != type::base::boolean || right->get_type().get_base() != type::base::boolean) {
-			compilation_logger::emit_disjunction_operation_expects_booleans(node.get_declaration_line_number(), left->get_type(), right->get_type());
+			error::emit<4009>(node.get_declared_position(), left->get_type(), right->get_type()).print();
 			return false;
 		}
 
@@ -542,12 +542,12 @@ namespace channel {
 		// upcast both expressions
 		const type highest_precision = get_highest_precision_type(left->get_type(), right->get_type());
 		llvm::Value* left_value_upcasted;
-		if (!cast_value(left_value_upcasted, left, highest_precision, node.get_declaration_line_number())) {
+		if (!cast_value(left_value_upcasted, left, highest_precision, node.get_declared_position())) {
 			return false;
 		}
 
 		llvm::Value* right_value_upcasted;
-		if (!cast_value(right_value_upcasted, right, highest_precision, node.get_declaration_line_number())) {
+		if (!cast_value(right_value_upcasted, right, highest_precision, node.get_declared_position())) {
 			return false;
 		}
 
@@ -585,12 +585,12 @@ namespace channel {
 		// upcast both expressions
 		const type highest_precision = get_highest_precision_type(left->get_type(), right->get_type());
 		llvm::Value* left_value_upcasted;
-		if (!cast_value(left_value_upcasted, left, highest_precision, node.get_declaration_line_number())) {
+		if (!cast_value(left_value_upcasted, left, highest_precision, node.get_declared_position())) {
 			return false;
 		}
 
 		llvm::Value* right_value_upcasted;
-		if (!cast_value(right_value_upcasted, right, highest_precision, node.get_declaration_line_number())) {
+		if (!cast_value(right_value_upcasted, right, highest_precision, node.get_declared_position())) {
 			return false;
 		}
 
@@ -628,12 +628,12 @@ namespace channel {
 		// upcast both expressions
 		const type highest_precision = get_highest_precision_type(left->get_type(), right->get_type());
 		llvm::Value* left_value_upcasted;
-		if (!cast_value(left_value_upcasted, left, highest_precision, node.get_declaration_line_number())) {
+		if (!cast_value(left_value_upcasted, left, highest_precision, node.get_declared_position())) {
 			return false;
 		}
 
 		llvm::Value* right_value_upcasted;
-		if (!cast_value(right_value_upcasted, right, highest_precision, node.get_declaration_line_number())) {
+		if (!cast_value(right_value_upcasted, right, highest_precision, node.get_declared_position())) {
 			return false;
 		}
 
@@ -671,12 +671,12 @@ namespace channel {
 		// upcast both expressions
 		const type highest_precision = get_highest_precision_type(left->get_type(), right->get_type());
 		llvm::Value* left_value_upcasted;
-		if (!cast_value(left_value_upcasted, left, highest_precision, node.get_declaration_line_number())) {
+		if (!cast_value(left_value_upcasted, left, highest_precision, node.get_declared_position())) {
 			return false;
 		}
 
 		llvm::Value* right_value_upcasted;
-		if (!cast_value(right_value_upcasted, right, highest_precision, node.get_declaration_line_number())) {
+		if (!cast_value(right_value_upcasted, right, highest_precision, node.get_declared_position())) {
 			return false;
 		}
 
@@ -714,12 +714,12 @@ namespace channel {
 		// upcast both expressions
 		const type highest_precision = get_highest_precision_type(left->get_type(), right->get_type());
 		llvm::Value* left_value_upcasted;
-		if (!cast_value(left_value_upcasted, left, highest_precision, node.get_declaration_line_number())) {
+		if (!cast_value(left_value_upcasted, left, highest_precision, node.get_declared_position())) {
 			return false;
 		}
 
 		llvm::Value* right_value_upcasted;
-		if (!cast_value(right_value_upcasted, right, highest_precision, node.get_declaration_line_number())) {
+		if (!cast_value(right_value_upcasted, right, highest_precision, node.get_declared_position())) {
 			return false;
 		}
 
@@ -752,12 +752,12 @@ namespace channel {
 		// upcast both expressions
 		const type highest_precision = get_highest_precision_type(left->get_type(), right->get_type());
 		llvm::Value* left_value_upcasted;
-		if (!cast_value(left_value_upcasted, left, highest_precision, node.get_declaration_line_number())) {
+		if (!cast_value(left_value_upcasted, left, highest_precision, node.get_declared_position())) {
 			return false;
 		}
 
 		llvm::Value* right_value_upcasted;
-		if (!cast_value(right_value_upcasted, right, highest_precision, node.get_declaration_line_number())) {
+		if (!cast_value(right_value_upcasted, right, highest_precision, node.get_declared_position())) {
 			return false;
 		}
 

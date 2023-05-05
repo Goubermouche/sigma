@@ -8,7 +8,7 @@ namespace channel {
 	class return_node : public node {
 	public:
 		return_node(
-			u64 line_number,
+			const token_position& position,
 			const node_ptr& return_expression_node
 		);
 

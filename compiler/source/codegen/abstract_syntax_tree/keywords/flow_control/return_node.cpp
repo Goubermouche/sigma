@@ -2,9 +2,9 @@
 
 namespace channel {
 	return_node::return_node(
-		u64 line_number,
+		const token_position& position,
 		const node_ptr& return_expression_node
-	) : node(line_number),
+	) : node(position),
 	m_return_expression_node(return_expression_node) {}
 
 	bool return_node::accept(visitor& visitor, value_ptr& out_value) {

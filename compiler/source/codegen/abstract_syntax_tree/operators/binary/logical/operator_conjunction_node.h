@@ -8,7 +8,7 @@ namespace channel {
 	class operator_conjunction_node : public operator_binary {
 	public:
 		operator_conjunction_node(
-			u64 line_number,
+			const token_position& position,
 			const node_ptr& left_expression_node,
 			const node_ptr& right_expression_node
 		);

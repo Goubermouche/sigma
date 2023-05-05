@@ -2,12 +2,12 @@
 
 namespace channel {
 	local_declaration_node::local_declaration_node(
-		u64 line_number,
+		const token_position& position,
 		const type& declaration_type,
 		const std::string& declaration_identifier, 
 		const node_ptr& expression_node
 	) : declaration_node(
-		line_number, 
+		position, 
 		declaration_type,
 		declaration_identifier,
 		expression_node

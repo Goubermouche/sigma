@@ -252,9 +252,6 @@
     <ClInclude Include="source\codegen\visitor\visitor.h">
       <Filter>source\codegen\visitor</Filter>
     </ClInclude>
-    <ClInclude Include="source\compiler\compilation_logger.h">
-      <Filter>source\compiler</Filter>
-    </ClInclude>
     <ClInclude Include="source\compiler\compiler.h">
       <Filter>source\compiler</Filter>
     </ClInclude>
@@ -276,7 +273,7 @@
     <ClInclude Include="source\utility\macros.h">
       <Filter>source\utility</Filter>
     </ClInclude>
-    <ClInclude Include="source\utility\string_accessor.h">
+    <ClInclude Include="source\utility\containers\string_accessor.h">
       <Filter>source\utility</Filter>
     </ClInclude>
     <ClInclude Include="source\utility\timer.h">
@@ -285,6 +282,10 @@
     <ClInclude Include="source\utility\types.h">
       <Filter>source\utility</Filter>
     </ClInclude>
+    <ClInclude Include="source\compiler\diagnostics\diagnostic.h" />
+    <ClInclude Include="source\compiler\diagnostics\warning.h" />
+    <ClInclude Include="source\utility\containers\compile_time_hash_map.h" />
+    <ClInclude Include="source\compiler\diagnostics\error.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp" />
@@ -474,9 +475,6 @@
     <ClCompile Include="source\codegen\visitor\visitor.cpp">
       <Filter>source\codegen\visitor</Filter>
     </ClCompile>
-    <ClCompile Include="source\compiler\compilation_logger.cpp">
-      <Filter>source\compiler</Filter>
-    </ClCompile>
     <ClCompile Include="source\compiler\compiler.cpp">
       <Filter>source\compiler</Filter>
     </ClCompile>
@@ -492,11 +490,14 @@
     <ClCompile Include="source\utility\filesystem.cpp">
       <Filter>source\utility</Filter>
     </ClCompile>
-    <ClCompile Include="source\utility\string_accessor.cpp">
+    <ClCompile Include="source\utility\containers\string_accessor.cpp">
       <Filter>source\utility</Filter>
     </ClCompile>
     <ClCompile Include="source\utility\timer.cpp">
       <Filter>source\utility</Filter>
     </ClCompile>
+    <ClCompile Include="source\compiler\diagnostics\diagnostic.cpp" />
+    <ClCompile Include="source\compiler\diagnostics\warning.cpp" />
+    <ClCompile Include="source\compiler\diagnostics\error.cpp" />
   </ItemGroup>
 </Project>

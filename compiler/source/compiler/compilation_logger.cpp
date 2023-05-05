@@ -247,7 +247,7 @@ namespace channel {
 	}
 
 	void compilation_logger::emit_warning(u64 line_number, const std::string& message) {
-		console::out << color::cyan << "[warning:" << std::to_string(line_number) << "]: " << color::white << message << '\n';
+		console::out << color::blue << "[warning:" << std::to_string(line_number) << "]: " << color::white << message << '\n';
 	}
 
 	void compilation_logger::emit_error(u64 line_number, const std::string& message) {

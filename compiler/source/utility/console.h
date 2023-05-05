@@ -7,21 +7,15 @@
 namespace channel {
     class color {
     public:
-        static constexpr WORD red = FOREGROUND_RED;
-        static constexpr WORD green = FOREGROUND_GREEN;
-        static constexpr WORD yellow = FOREGROUND_RED | FOREGROUND_GREEN;
-        static constexpr WORD blue = FOREGROUND_BLUE;
-        static constexpr WORD magenta = FOREGROUND_RED | FOREGROUND_BLUE;
-        static constexpr WORD cyan = FOREGROUND_GREEN | FOREGROUND_BLUE;
-        static constexpr WORD white = FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE;
-        static constexpr WORD gray = 8;
-        static constexpr WORD light_red = FOREGROUND_RED | FOREGROUND_INTENSITY;
-        static constexpr WORD light_green = FOREGROUND_GREEN | FOREGROUND_INTENSITY;
-        static constexpr WORD light_yellow = FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_INTENSITY;
-        static constexpr WORD light_blue = FOREGROUND_BLUE | FOREGROUND_INTENSITY;
-        static constexpr WORD light_magenta = FOREGROUND_RED | FOREGROUND_BLUE | FOREGROUND_INTENSITY;
-        static constexpr WORD light_cyan = FOREGROUND_GREEN | FOREGROUND_BLUE | FOREGROUND_INTENSITY;
-        static constexpr WORD light_white = FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE | FOREGROUND_INTENSITY;
+        static constexpr WORD white = 1;
+        static constexpr WORD pink = 2;
+        static constexpr WORD magenta = 3;
+        static constexpr WORD blue = 4;
+        static constexpr WORD light_blue = 5;
+        static constexpr WORD green = 6;
+        static constexpr WORD light_green = 7;
+        static constexpr WORD orange = 8;
+        static constexpr WORD red = 9;
     };
 
     class console {
@@ -43,6 +37,16 @@ namespace channel {
     console& console::operator<<(const T& value) {
         std::wcout << value;
         return *this;
+    }
+
+    inline COLORREF hex_to_rgb(const std::string& hex) {
+        if (hex.size() != 6) {
+            throw std::invalid_argument("invalid hex color string");
+        }
+
+        int red, green, blue;
+        sscanf_s(hex.c_str(), "%02x%02x%02x", &red, &green, &blue);
+        return RGB(red, green, blue);
     }
 
     inline std::string escape_string(const std::string& input) {

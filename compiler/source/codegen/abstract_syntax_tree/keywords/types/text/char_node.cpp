@@ -24,7 +24,7 @@ namespace channel {
 			<< color::white 
 			<< "' '"
 			<< AST_NODE_TEXT_LITERAL_COLOR
-			<< escape_string(std::to_string(m_value))
+			<< escape_string(std::string(1, m_value))
 			<< color::white
 			<< "'\n";
 	}

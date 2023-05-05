@@ -119,9 +119,9 @@ namespace channel {
         llvm::BasicBlock* entry_block = m_builder.GetInsertBlock();
         llvm::Function* parent_function = entry_block->getParent();
 
-        llvm::BasicBlock* end_block = llvm::BasicBlock::Create(m_context, "", parent_function);
-        llvm::BasicBlock* condition_block = llvm::BasicBlock::Create(m_context, "", parent_function);
-        llvm::BasicBlock* loop_body_block = llvm::BasicBlock::Create(m_context, "", parent_function);
+        llvm::BasicBlock* end_block = llvm::BasicBlock::Create(m_context, "while_end", parent_function);
+        llvm::BasicBlock* condition_block = llvm::BasicBlock::Create(m_context, "while_cond", parent_function);
+        llvm::BasicBlock* loop_body_block = llvm::BasicBlock::Create(m_context, "while_body", parent_function);
 
         m_builder.CreateBr(condition_block);
 

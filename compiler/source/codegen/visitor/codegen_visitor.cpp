@@ -31,6 +31,60 @@ namespace channel {
 			llvm::Function* func = llvm::Function::Create(func_type, llvm::Function::ExternalLinkage, "malloc", m_module.get());
 			m_functions["malloc"] = new function(type(type::base::i8, 1), func, { {"size", type(type::base::u64, 0)} }, false);
 		}
+
+		// memset
+		{
+			const std::vector<llvm::Type*> arg_types = {
+				llvm::Type::getInt8PtrTy(m_context), // void *ptr
+				llvm::Type::getInt32Ty(m_context),   // int value
+				llvm::Type::getInt64Ty(m_context)    // size_t num (assuming 64-bit target)
+			};
+
+			llvm::FunctionType* func_type = llvm::FunctionType::get(llvm::Type::getInt8PtrTy(m_context), arg_types, false);
+			llvm::Function* func = llvm::Function::Create(func_type, llvm::Function::ExternalLinkage, "memset", m_module.get());
+
+			m_functions["memset"] = new function
+				(type(type::base::empty, 1),
+				func, {
+					{"a", type(type::base::character, 1)},
+					{"b", type(type::base::i32, 0)},
+					{"c", type(type::base::u64, 0)}
+				}, false);
+		}
+
+		// sin
+		{
+			const std::vector<llvm::Type*> arg_types = {
+				llvm::Type::getDoubleTy(m_context),
+			};
+
+			llvm::FunctionType* func_type = llvm::FunctionType::get(llvm::Type::getDoubleTy(m_context), arg_types, false);
+			llvm::Function* func = llvm::Function::Create(func_type, llvm::Function::ExternalLinkage, "sin", m_module.get());
+
+			m_functions["sin"] = new function
+			(type(type::base::f64, 0),
+				func, {
+					{"size", type(type::base::f64, 0)}
+				}, false);
+		}
+
+
+		// cos
+		{
+			const std::vector<llvm::Type*> arg_types = {
+				llvm::Type::getDoubleTy(m_context),
+			};
+
+			llvm::FunctionType* func_type = llvm::FunctionType::get(llvm::Type::getDoubleTy(m_context), arg_types, false);
+			llvm::Function* func = llvm::Function::Create(func_type, llvm::Function::ExternalLinkage, "cos", m_module.get());
+
+			m_functions["cos"] = new function
+			(type(type::base::f64, 0),
+				func, {
+					{"size", type(type::base::f64, 0)}
+				}, false);
+		}
+
 	}
 
 	bool codegen_visitor::generate() {
@@ -125,10 +179,10 @@ namespace channel {
 			}
 
 			// don't allow pointer casting for now
-			if (function_return_type.is_pointer() || target_type.is_pointer()) {
-				compilation_logger::emit_cannot_cast_pointer_type_error(line_number, source_value->get_type(), target_type);
-				return false;
-			}
+			//if (function_return_type.is_pointer() || target_type.is_pointer()) {
+			//	compilation_logger::emit_cannot_cast_pointer_type_error(line_number, source_value->get_type(), target_type);
+			//	return false;
+			//}
 
 			compilation_logger::emit_function_return_type_cast_warning(line_number, function_return_type, target_type);
 
@@ -161,10 +215,10 @@ namespace channel {
 		}
 
 		// don't allow pointer casting for now
-		if (source_value->get_type().is_pointer() || target_type.is_pointer()) {
-			compilation_logger::emit_cannot_cast_pointer_type_error(line_number, source_value->get_type(), target_type);
-			return false;
-		}
+		//if (source_value->get_type().is_pointer() || target_type.is_pointer()) {
+		//	compilation_logger::emit_cannot_cast_pointer_type_error(line_number, source_value->get_type(), target_type);
+		//	return false;
+		//}
 
 		compilation_logger::emit_cast_warning(line_number, source_value->get_type(), target_type);
 

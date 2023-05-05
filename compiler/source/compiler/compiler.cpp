@@ -155,6 +155,6 @@ namespace channel {
 			return;
 		}
 
-		console::out << "compilation finished (" << codegen_timer.elapsed() << "ms)\n";
+		console::out << color::green << "compilation finished (" << codegen_timer.elapsed() << "ms)\n" << color::white;
 	}
 }

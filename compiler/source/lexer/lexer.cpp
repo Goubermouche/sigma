@@ -283,17 +283,39 @@ namespace channel {
 		m_value_string = "";
 		read_char();
 
-		while(m_last_character != '"' && !m_accessor.end()) {
+		while (m_last_character != '"' && !m_accessor.end()) {
 			if (m_last_character == '\\') {
 				// handle escape sequences
 				read_char();
-				switch(m_last_character) {
+				switch (m_last_character) {
 				case '\\': m_value_string += '\\'; break;
 				case '\"': m_value_string += '\"'; break;
 				case 'n': m_value_string += '\n'; break;
 				case 't': m_value_string += '\t'; break;
 				case 'r': m_value_string += '\r'; break;
-				default: m_value_string += m_last_character; break;
+				case 'x': { // handle hexadecimal escape sequence
+					char hex_chars[3] = { 0 };
+					read_char();
+					hex_chars[0] = m_last_character;
+					read_char();
+					hex_chars[1] = m_last_character;
+					unsigned int hex_value;
+					sscanf(hex_chars, "%x", &hex_value);
+					m_value_string += static_cast<char>(hex_value);
+					break;
+				}
+				case 'X': { // handle uppercase 'X' as well
+					char hex_chars[3] = { 0 };
+					read_char();
+					hex_chars[0] = m_last_character;
+					read_char();
+					hex_chars[1] = m_last_character;
+					unsigned int hex_value;
+					sscanf(hex_chars, "%x", &hex_value);
+					m_value_string += static_cast<char>(hex_value);
+					break;
+				}
+				default: m_value_string += '\\'; m_value_string += m_last_character; break;
 				}
 			}
 			else {
@@ -303,7 +325,9 @@ namespace channel {
 			read_char();
 		}
 
-		if(m_last_character == '"') {
+		console::out << m_value_string << '\n';
+
+		if (m_last_character == '"') {
 			read_char();
 		}
 		else {

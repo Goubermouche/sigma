@@ -2,7 +2,7 @@
 
 using namespace channel::types;
 
-int main(int argc, char* argv[]) {
+int main(/*int argc, char* argv[]*/) {
 	channel::console::init();
 
 	// use the last argument for now

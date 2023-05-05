@@ -4,11 +4,11 @@
 #include "../../utility/macros.h"
 
 #define AST_NODE_NUMERICAL_LITERAL_COLOR color::blue
-#define AST_NODE_TEXT_LITERAL_COLOR		 color::red
 #define AST_NODE_BOOLEAN_LITERAL_COLOR	 color::blue
-#define AST_NODE_VARIABLE_COLOR			 color::green
-#define AST_NODE_TYPE_COLOR				 color::cyan
+#define AST_NODE_TEXT_LITERAL_COLOR		 color::orange
+#define AST_NODE_TYPE_COLOR				 color::light_blue
 #define AST_NODE_OPERATOR_COLOR			 color::magenta
+#define AST_NODE_VARIABLE_COLOR			 color::green
 
 namespace channel {
 	class visitor;

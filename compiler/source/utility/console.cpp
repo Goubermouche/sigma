@@ -5,30 +5,31 @@ namespace channel {
 
 	void console::init() {
 		_setmode(_fileno(stdout), _O_U16TEXT);
+		const HANDLE h_output = GetStdHandle(STD_OUTPUT_HANDLE);
 
-		//HANDLE hOutput = GetStdHandle(STD_OUTPUT_HANDLE);
-		//CONSOLE_SCREEN_BUFFER_INFOEX cInfo;
-		//cInfo.cbSize = sizeof(cInfo);
+		CONSOLE_SCREEN_BUFFER_INFOEX csbiInfo;
+		csbiInfo.cbSize = sizeof(csbiInfo);
+		GetConsoleScreenBufferInfoEx(h_output, &csbiInfo);
 
-		//// Get the current console screen buffer information
-		//if (!GetConsoleScreenBufferInfoEx(hOutput, &cInfo)) {
-		//	return;
-		//}
+		const std::string color_palette[10] = {
+			"0c0c0c", // background
+			"d0d0d0", // text
+			"ed94c0", // numeric, boolean
+			"c191ff", // name
+			"6c95eb", // keyword
+			"66c3cc", // member
+			"39cc8f", // function
+			"85c46c", // comment
+			"c9a26d", // string literal
+			"d43434", // red
+		};
 
-		//COLORREF customPalette[16] = {
-		//	 RGB(0, 0, 0),       RGB(34, 139, 34),   RGB(255, 99, 71),   RGB(218, 165, 32),
-		//	 RGB(95, 158, 160),  RGB(30, 144, 255),  RGB(255, 105, 180), RGB(192, 192, 192),
-		//	 RGB(128, 128, 128), RGB(0, 206, 209),   RGB(154, 205, 50),  RGB(255, 255, 0),
-		//	 RGB(255, 160, 122), RGB(199, 21, 133),  RGB(135, 206, 235), RGB(255, 255, 255)
-		//};
+		for (int i = 0; i < 10; ++i) {
+			csbiInfo.ColorTable[i] = hex_to_rgb(color_palette[i]);
+		}
 
-		//// Set the new color palette
-		//for (int i = 0; i < 16; i++) {
-		//	cInfo.ColorTable[i] = customPalette[i];
-		//}
-
-		//// Update the console screen buffer with the new palette
-		//SetConsoleScreenBufferInfoEx(hOutput, &cInfo);
+		SetConsoleScreenBufferInfoEx(h_output, &csbiInfo);
+		SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), color::white);
 	}
 
 	console& console::operator<<(WORD color) {

@@ -74,25 +74,17 @@ namespace channel {
 	}
 
 	bool codegen_visitor::visit_local_declaration_node(local_declaration_node& node, value_ptr& out_value) {
-		// evaluate the assigned value, if there is one
-		if (!get_declaration_value(node, out_value)) {
-			return false;
-		}
+		llvm::BasicBlock* original_entry_block = m_builder.GetInsertBlock();
+		llvm::Function* parent_function = original_entry_block->getParent();
+		llvm::BasicBlock* function_entry_block = &*parent_function->begin();
 
-		// cast the right-hand side operator to the assigned type
-		llvm::Value* cast_assigned_value;
-		if (!cast_value(cast_assigned_value, out_value, node.get_declaration_type(), node.get_declaration_line_number())) {
-			return false;
-		}
+		m_builder.SetInsertPoint(function_entry_block, function_entry_block->getFirstInsertionPt());
 
 		// store the initial value
 		llvm::AllocaInst* alloca = m_builder.CreateAlloca(
 			node.get_declaration_type().get_llvm_type(m_context),
 			nullptr
 		);
-
-		m_builder.CreateStore(cast_assigned_value, alloca);
-		out_value->set_pointer(alloca);
 
 		// check if the variable already exists as a global
 		if (m_global_named_values[node.get_declaration_identifier()]) {
@@ -101,13 +93,37 @@ namespace channel {
 		}
 
 		// add the variable to the active scope
-		const auto insertion_result = m_scope->add_named_value(node.get_declaration_identifier(), std::make_shared<value>(node.get_declaration_identifier(), node.get_declaration_type(), alloca));
+		const auto insertion_result = m_scope->add_named_value(
+			node.get_declaration_identifier(), 
+			std::make_shared<value>(
+				node.get_declaration_identifier(), 
+				node.get_declaration_type(),
+				alloca
+			)
+		);
+
 		// check if the active scope already contains the variable
 		if (!insertion_result.second) {
 			compilation_logger::emit_local_variable_already_defined_error(node.get_declaration_line_number(), node.get_declaration_identifier());
 			return false;
 		}
 
+		// assign the actual value
+		m_builder.SetInsertPoint(original_entry_block);
+
+		// evaluate the assigned value, if there is one
+		if (!get_declaration_value(node, out_value)) {
+			return false;
+		}
+
+		llvm::Value* cast_assigned_value;
+		if (!cast_value(cast_assigned_value, out_value, node.get_declaration_type(), node.get_declaration_line_number())) {
+			return false;
+		}
+
+		m_builder.CreateStore(cast_assigned_value, alloca);
+		out_value->set_pointer(alloca);
+		m_builder.SetInsertPoint(original_entry_block);
 		return true;
 	}
 

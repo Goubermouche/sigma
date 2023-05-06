@@ -7,13 +7,12 @@ namespace channel {
 	void error_message::print() const {
 		console::out
 			<< color::red
-			<< "error"
-			<< " ("
+			<< "warning "
 			<< m_code
-			<< "): "
-			<< color::white
+			<< ": "
 			<< m_message
-			<< '\n';
+			<< "\n"
+			<< color::white;
 	}
 
 	error_message_position::error_message_position(std::string message, u64 code, token_position position)
@@ -21,7 +20,8 @@ namespace channel {
 
 	void error_message_position::print() const {
 		console::out
-			<< "("
+			<< m_position.get_file()
+			<< " ("
 			<< m_position.get_line_number()
 			<< ", "
 			<< m_position.get_character_number()

@@ -7,9 +7,16 @@
 
 namespace channel {
 	struct token_data {
-		token token;
-		std::string value;
-		token_position position;
+		token_data() = default;
+		token_data(token tok, const std::string& value, const token_position& position);
+
+		token get_token() const;
+		const std::string& get_value() const;
+		const token_position& get_token_position() const;
+	private:
+		token m_token;
+		std::string m_value;
+		token_position m_position;
 	};
 
 	class lexer {

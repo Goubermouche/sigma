@@ -27,7 +27,8 @@ namespace channel {
 			m_tokens.push_back({ 
 				tok,
 				m_value_string,
-				token_position{
+				token_position {
+					m_source_file,
 					m_current_line,
 					m_current_character
 				}
@@ -39,11 +40,11 @@ namespace channel {
 
 	void lexer::print_tokens() const {
 		for(const token_data& t : m_tokens) {
-			console::out << std::left << std::setw(40) << token_to_string(t.token);
+			console::out << std::left << std::setw(40) << token_to_string(t.get_token());
 
-			if(!t.value.empty()) {
+			if(!t.get_value().empty()) {
 				// the value string may contain escape sequences 
-				console::out << escape_string(t.value);
+				console::out << escape_string(t.get_value());
 			}
 
 			console::out << '\n';
@@ -66,6 +67,7 @@ namespace channel {
 	void lexer::read_char() {
 		if (m_last_character == '\n') {
 			m_current_line++;
+			m_current_character = 1;
 		}
 
 		m_last_character = m_accessor.get_advance();
@@ -331,5 +333,20 @@ namespace channel {
 
 		tok = token::string_literal;
 		return true;
+	}
+
+	token_data::token_data(token tok, const std::string& value, const token_position& position)
+		: m_token(tok), m_value(value), m_position(position) {}
+
+	token token_data::get_token() const	{
+		return m_token;
+	}
+
+	const std::string& token_data::get_value() const {
+		return m_value;
+	}
+
+	const token_position& token_data::get_token_position() const {
+		return m_position;
 	}
 }

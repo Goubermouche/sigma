@@ -29,7 +29,7 @@ i32 main() {
     print("\x1b[2J");
 	
 	while(true) {
-		memxset(b, 32, 1760);
+		memset(b, 32, 1760);
 		memset(z, 0, 7040);
 	
 		for(j = 0; j < 6.28; j = j + 0.07) {

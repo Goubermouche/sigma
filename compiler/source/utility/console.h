@@ -15,7 +15,8 @@ namespace channel {
         static constexpr WORD green = 6;
         static constexpr WORD light_green = 7;
         static constexpr WORD orange = 8;
-        static constexpr WORD red = 9;
+        static constexpr WORD yellow = 9;
+        static constexpr WORD red = 10;
     };
 
     class console {

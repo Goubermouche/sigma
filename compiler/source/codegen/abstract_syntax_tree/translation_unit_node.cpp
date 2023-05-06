@@ -3,7 +3,7 @@
 namespace channel {
 	translation_unit_node::translation_unit_node(
 		const std::vector<node_ptr>& nodes
-	) : node({ 0, 0 }),
+	) : node({ "x", 0, 0}),
 	m_nodes(nodes) {}
 
 	bool translation_unit_node::accept(visitor& visitor, value_ptr& out_value) {

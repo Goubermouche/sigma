@@ -112,17 +112,22 @@ namespace channel {
 
 	struct token_position {
 		token_position() = default;
-		token_position(u64 line_number, u64 character_number)
-			: m_line_number(line_number), m_character_number(character_number) {}
+		token_position(const std::string& file, u64 line_number, u64 character_number)
+			: m_file(file), m_line_number(line_number), m_character_number(character_number) {}
+
+		const std::string& get_file() const {
+			return m_file;
+		}
 
 		u64 get_line_number() const {
 			return m_line_number;
 		}
 
 		u64 get_character_number() const {
-			return m_line_number;
+			return m_character_number;
 		}
 	private:
+		std::string m_file;
 		u64 m_line_number;
 		u64 m_character_number;
 	};

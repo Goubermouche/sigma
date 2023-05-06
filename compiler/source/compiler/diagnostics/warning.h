@@ -4,9 +4,9 @@
 namespace channel {
 	constexpr auto warning_templates = make_hash_map(
 		// codegen
-		std::pair{ 3000, "implicit function return generated for function '{}'" },
-		std::pair{ 3001, "implicit function type cast ('{}' to '{}')" },
-		std::pair{ 3002, "implicit type cast ('{}' to '{}')" }
+		std::pair{ 3000, "'{}': implicit function return generated" },
+		std::pair{ 3001, "'initializing': implicit function type cast '{}' to '{}'" },
+		std::pair{ 3002, "'initializing': implicit type cast '{}' to '{}'" }
 	);
 
 	class warning_message : public diagnostic_message {

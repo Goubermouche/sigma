@@ -1,7 +1,8 @@
 #pragma once
-#include "../lexer/lexer.h"
-#include "../codegen/llvm_wrappers/type.h"
-#include "../codegen/abstract_syntax_tree/abstract_syntax_tree.h"
+#include "lexer/lexer.h"
+#include "codegen/llvm_wrappers/type.h"
+#include "codegen/abstract_syntax_tree/abstract_syntax_tree.h"
+#include "codegen/llvm_wrappers/functions/function_registry.h"
 
 namespace channel {
 	class parser {
@@ -9,7 +10,8 @@ namespace channel {
 		parser(const lexer& lexer);
 		bool parse();
 
-		const abstract_syntax_tree& get_abstract_syntax_tree();
+		const abstract_syntax_tree& get_abstract_syntax_tree() const;
+		const function_registry& get_function_registry() const;
 	private:
 		/**
 		 * \brief Retrieves the next token from the lexer.
@@ -270,5 +272,6 @@ namespace channel {
 		lexer m_lexer;
 		token_data m_current_token;
 		abstract_syntax_tree m_abstract_syntax_tree;
+		function_registry m_function_registry;
 	};
 }

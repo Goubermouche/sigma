@@ -2,6 +2,7 @@
 
 #include "../../parser/parser.h"
 #include "../llvm_wrappers/scope.h"
+#include "../llvm_wrappers/functions/function_registry.h"
 #include "visitor.h"
 
 #define CTOR_STRUCT_TYPE                 \
@@ -123,8 +124,7 @@ namespace channel {
 		// ctor initialization priority 
 		i32 m_global_initialization_priority = 0;
 
-		// list of all existing functions
-		std::unordered_map<std::string, function*> m_functions;
+		function_registry m_function_registry;
 
 		// llvm boilerplate
 		llvm::LLVMContext m_context;

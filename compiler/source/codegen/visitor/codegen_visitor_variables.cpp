@@ -199,7 +199,7 @@ namespace channel {
 			return false;
 		}
 
-		const llvm::FunctionCallee malloc_func = m_functions["malloc"]->get_function();
+		const llvm::FunctionCallee malloc_func = m_function_registry.get_function("malloc")->get_function();
 
 		// calculate the total size
 		const type array_element_type = node.get_array_element_type();

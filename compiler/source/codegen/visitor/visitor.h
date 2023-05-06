@@ -71,7 +71,7 @@ namespace channel {
 }
 
 #include "../llvm_wrappers/value.h"
-#include "../llvm_wrappers/function.h"
+#include "../llvm_wrappers/functions/function.h"
 
 namespace channel {
     /**

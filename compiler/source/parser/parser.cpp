@@ -101,8 +101,12 @@ namespace channel {
 		}
 	}
 
-	const abstract_syntax_tree& parser::get_abstract_syntax_tree() {
+	const abstract_syntax_tree& parser::get_abstract_syntax_tree() const {
 		return m_abstract_syntax_tree;
+	}
+
+	const function_registry& parser::get_function_registry() const {
+		return m_function_registry;
 	}
 
 	void parser::get_next_token() {
@@ -373,7 +377,7 @@ namespace channel {
 				node* condition = nullptr;
 				if (!has_else) {
 					if (!expect_next_token(token::l_parenthesis) ||
-						!parse_expression(condition) ||
+						!parse_expression(condition) || //  type(type::base::boolean, 0)
 						!expect_next_token(token::r_parenthesis)) {
 						return false; // return on failure
 					}
@@ -1080,7 +1084,7 @@ namespace channel {
 
 		// parse array size
 		node* array_size;
-		if(!parse_expression(array_size)) {
+		if(!parse_expression(array_size, type(type::base::u64, 0))) {
 			return false; // return on failure
 		}
 

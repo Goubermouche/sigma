@@ -58,6 +58,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="source\codegen\llvm_wrappers\functions\function_registry.h" />
     <ClInclude Include="source\compiler\diagnostics\error.h" />
     <ClInclude Include="source\compiler\diagnostics\diagnostic.h" />
     <ClInclude Include="source\codegen\abstract_syntax_tree\abstract_syntax_tree.h" />
@@ -111,7 +112,7 @@
     <ClInclude Include="source\codegen\abstract_syntax_tree\variables\declaration\local_declaration_node.h" />
     <ClInclude Include="source\codegen\abstract_syntax_tree\variables\variable_access_node.h" />
     <ClInclude Include="source\codegen\abstract_syntax_tree\variables\variable_node.h" />
-    <ClInclude Include="source\codegen\llvm_wrappers\function.h" />
+    <ClInclude Include="source\codegen\llvm_wrappers\functions\function.h" />
     <ClInclude Include="source\codegen\llvm_wrappers\scope.h" />
     <ClInclude Include="source\codegen\llvm_wrappers\type.h" />
     <ClInclude Include="source\codegen\llvm_wrappers\value.h" />
@@ -131,6 +132,7 @@
     <ClInclude Include="source\compiler\diagnostics\warning.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="source\codegen\llvm_wrappers\functions\function_registry.cpp" />
     <ClCompile Include="source\compiler\diagnostics\error.cpp" />
     <ClCompile Include="source\compiler\diagnostics\diagnostic.cpp" />
     <ClCompile Include="main.cpp" />
@@ -185,7 +187,7 @@
     <ClCompile Include="source\codegen\abstract_syntax_tree\variables\declaration\local_declaration_node.cpp" />
     <ClCompile Include="source\codegen\abstract_syntax_tree\variables\variable_access_node.cpp" />
     <ClCompile Include="source\codegen\abstract_syntax_tree\variables\variable_node.cpp" />
-    <ClCompile Include="source\codegen\llvm_wrappers\function.cpp" />
+    <ClCompile Include="source\codegen\llvm_wrappers\functions\function.cpp" />
     <ClCompile Include="source\codegen\llvm_wrappers\scope.cpp" />
     <ClCompile Include="source\codegen\llvm_wrappers\type.cpp" />
     <ClCompile Include="source\codegen\llvm_wrappers\value.cpp" />

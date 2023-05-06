@@ -1,10 +1,10 @@
 #include "codegen_visitor.h"
 
-#include "../abstract_syntax_tree/keywords/flow_control/return_node.h"
-#include "../abstract_syntax_tree/keywords/flow_control/if_else_node.h"
-#include "../abstract_syntax_tree/keywords/flow_control/while_node.h"
-#include "../abstract_syntax_tree/keywords/flow_control/for_node.h"
-#include "../abstract_syntax_tree/keywords/flow_control/break_node.h"
+#include "codegen/abstract_syntax_tree/keywords/flow_control/return_node.h"
+#include "codegen/abstract_syntax_tree/keywords/flow_control/if_else_node.h"
+#include "codegen/abstract_syntax_tree/keywords/flow_control/while_node.h"
+#include "codegen/abstract_syntax_tree/keywords/flow_control/for_node.h"
+#include "codegen/abstract_syntax_tree/keywords/flow_control/break_node.h"
 
 namespace channel {
 	bool codegen_visitor::visit_return_node(return_node& node, value_ptr& out_value) {
@@ -16,7 +16,7 @@ namespace channel {
 
 		// get the return type of the current function
 		const llvm::Function* parent_function = m_builder.GetInsertBlock()->getParent();
-		const type function_return_type = m_functions[parent_function->getName().str()]->get_return_type();
+		const type function_return_type = m_function_registry.get_function(parent_function->getName().str())->get_return_type();
 
 		// upcast the return value to match the function's return type
 		llvm::Value* upcasted_return_value;

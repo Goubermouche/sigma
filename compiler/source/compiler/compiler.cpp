@@ -94,9 +94,6 @@ namespace channel {
 		const std::string o_file = "test/out.o";
 		const std::string exe_file = "test/out.exe";
 
-		int a = 10;
-		float b = a * 10.0;
-
 		// generate the .o file
 		{
 			std::error_code error_code;

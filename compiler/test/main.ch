@@ -17,6 +17,10 @@
 //  - todo: allow returns in the middle of a basic block
 //  - pointer casts between same-width pointers 
 
+//  - create a structure for storing predefined functions 
+//  - allow for storage of new functions upon declaration
+//  - pass to the codegen
+
 i32 main() {
 	f32 A = 0;
 	f32 B = 0;

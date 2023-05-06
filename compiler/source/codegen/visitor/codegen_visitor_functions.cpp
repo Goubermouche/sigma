@@ -18,17 +18,22 @@ namespace channel {
 		llvm::FunctionType* func_type = llvm::FunctionType::get(return_type, param_types, false);
 		llvm::Function* func = llvm::Function::Create(func_type, llvm::Function::ExternalLinkage, node.get_function_identifier(), m_module.get());
 
-		// add it to our function map
-		const auto insertion_result = m_functions.insert({
-			node.get_function_identifier(),
-			new function(node.get_function_return_type(), func, node.get_function_arguments(), false)
-		});
-
 		// check for multiple definitions by checking if the function has already been added to our map
-		if (!insertion_result.second) {
+		if(m_function_registry.contains_function(node.get_function_identifier())) {
 			error::emit<4000>(node.get_declared_position(), node.get_function_identifier()).print();
 			return false;
 		}
+
+		// add it to our function map
+		m_function_registry.insert_function(
+			node.get_function_identifier(),
+			std::make_shared<function>(
+				node.get_function_return_type(),
+				func,
+				node.get_function_arguments(),
+				false
+			)
+		);
 
 		// create and use a new entry block
 		llvm::BasicBlock* entry_block = llvm::BasicBlock::Create(m_context, "", func);
@@ -90,7 +95,7 @@ namespace channel {
 
 	bool codegen_visitor::visit_function_call_node(function_call_node& node, value_ptr& out_value) {
 		// get a reference to the function
-		const function* func = m_functions[node.get_function_identifier()];
+		const function_ptr func = m_function_registry.get_function(node.get_function_identifier());
 
 		// check if it exists
 		if (!func) {

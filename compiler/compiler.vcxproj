@@ -130,6 +130,7 @@
     <ClInclude Include="source\utility\timer.h" />
     <ClInclude Include="source\utility\types.h" />
     <ClInclude Include="source\compiler\diagnostics\warning.h" />
+    <ClInclude Include="source\parser\type_info\variable_type_scope.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="source\codegen\llvm_wrappers\functions\function_registry.cpp" />
@@ -206,6 +207,7 @@
     <ClCompile Include="source\utility\containers\string_accessor.cpp" />
     <ClCompile Include="source\utility\timer.cpp" />
     <ClCompile Include="source\compiler\diagnostics\warning.cpp" />
+    <ClCompile Include="source\parser\type_info\variable_type_scope.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

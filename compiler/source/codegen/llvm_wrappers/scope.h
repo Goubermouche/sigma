@@ -1,5 +1,4 @@
 #pragma once
-#include "../../utility/macros.h"
 #include "value.h"
 
 namespace channel {

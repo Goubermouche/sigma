@@ -234,9 +234,6 @@
     <ClInclude Include="source\codegen\abstract_syntax_tree\variables\variable_node.h">
       <Filter>source\codegen\abstract_syntax_tree\variables</Filter>
     </ClInclude>
-    <ClInclude Include="source\codegen\llvm_wrappers\function.h">
-      <Filter>source\codegen\llvm_wrappers</Filter>
-    </ClInclude>
     <ClInclude Include="source\codegen\llvm_wrappers\scope.h">
       <Filter>source\codegen\llvm_wrappers</Filter>
     </ClInclude>
@@ -286,6 +283,9 @@
     <ClInclude Include="source\compiler\diagnostics\warning.h" />
     <ClInclude Include="source\utility\containers\compile_time_hash_map.h" />
     <ClInclude Include="source\compiler\diagnostics\error.h" />
+    <ClInclude Include="source\codegen\llvm_wrappers\functions\function_registry.h" />
+    <ClInclude Include="source\codegen\llvm_wrappers\functions\function.h" />
+    <ClInclude Include="source\parser\type_info\variable_type_scope.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp" />
@@ -442,9 +442,6 @@
     <ClCompile Include="source\codegen\abstract_syntax_tree\variables\variable_node.cpp">
       <Filter>source\codegen\abstract_syntax_tree\variables</Filter>
     </ClCompile>
-    <ClCompile Include="source\codegen\llvm_wrappers\function.cpp">
-      <Filter>source\codegen\llvm_wrappers</Filter>
-    </ClCompile>
     <ClCompile Include="source\codegen\llvm_wrappers\scope.cpp">
       <Filter>source\codegen\llvm_wrappers</Filter>
     </ClCompile>
@@ -499,5 +496,8 @@
     <ClCompile Include="source\compiler\diagnostics\diagnostic.cpp" />
     <ClCompile Include="source\compiler\diagnostics\warning.cpp" />
     <ClCompile Include="source\compiler\diagnostics\error.cpp" />
+    <ClCompile Include="source\codegen\llvm_wrappers\functions\function_registry.cpp" />
+    <ClCompile Include="source\codegen\llvm_wrappers\functions\function.cpp" />
+    <ClCompile Include="source\parser\type_info\variable_type_scope.cpp" />
   </ItemGroup>
 </Project>

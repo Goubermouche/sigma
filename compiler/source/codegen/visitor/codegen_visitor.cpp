@@ -8,114 +8,39 @@ namespace channel {
 		: m_parser(parser), m_scope(new scope(nullptr, nullptr)), m_function_registry(parser.get_function_registry()), m_builder(m_context) {
 		m_module = std::make_unique<llvm::Module>("channel", m_context);
 
-		// printf
-		{
-			const std::vector<llvm::Type*> arg_types = { llvm::Type::getInt8PtrTy(m_context) };
-			llvm::FunctionType* func_type = llvm::FunctionType::get(llvm::Type::getInt32Ty(m_context), arg_types, true);
-			llvm::Function* func = llvm::Function::Create(func_type, llvm::Function::ExternalLinkage, "printf", m_module.get());
+		// initialize function declarations
+		for(const auto& [function_identifier, function_declaration] : m_function_registry.get_external_function_declarations()) {
+			const std::vector<std::pair<std::string, type>>& arguments = function_declaration->get_arguments();
+			std::vector<llvm::Type*> argument_types(arguments.size());
 
-			m_function_registry.insert_function("print", std::make_shared<function>(
-				type(type::base::i32, 0),
-				func,
-				std::vector<std::pair<std::string, type>>{
-					{ "print", type(type::base::character, 1) }
-				},
-				true
-			));
-		}
+			// initialize argument types
+			for (u64 i = 0; i < arguments.size(); i++) {
+				argument_types[i] = arguments[i].second.get_llvm_type(m_context);
+			}
 
-		// putchar
-		{
-			const std::vector<llvm::Type*> arg_types = { llvm::Type::getInt8Ty(m_context) };
-			llvm::FunctionType* func_type = llvm::FunctionType::get(llvm::Type::getVoidTy(m_context), arg_types, false);
-			llvm::Function* func = llvm::Function::Create(func_type, llvm::Function::ExternalLinkage, "putchar", m_module.get());
+			llvm::FunctionType* function_type = llvm::FunctionType::get(
+				function_declaration->get_return_type().get_llvm_type(m_context),
+				argument_types,
+				function_declaration->is_variadic()
+			);
 
-			m_function_registry.insert_function("printc", std::make_shared<function>(
-				type(type::base::empty, 0),
-				func,
-				std::vector<std::pair<std::string, type>>{
-					{ "character", type(type::base::character, 0) }
-				},
-				false
-			));
-		}
+			llvm::Function* func = llvm::Function::Create(
+				function_type,
+				llvm::Function::ExternalLinkage,
+				function_declaration->get_external_function_name(),
+				m_module.get()
+			);
 
-		// malloc
-		{
-			const std::vector<llvm::Type*> arg_types = { llvm::Type::getInt64Ty(m_context) };
-			llvm::FunctionType* func_type = llvm::FunctionType::get(llvm::Type::getInt8PtrTy(m_context), arg_types, false);
-			llvm::Function* func = llvm::Function::Create(func_type, llvm::Function::ExternalLinkage, "malloc", m_module.get());
-
-			m_function_registry.insert_function("malloc", std::make_shared<function>(
-				type(type::base::i8, 1),
-				func,
-				std::vector<std::pair<std::string, type>>{
-					{ "size", type(type::base::u64, 0) }
-				},
-				false
-			));
-		}
-
-		// memset
-		{
-			const std::vector<llvm::Type*> arg_types = {
-				llvm::Type::getInt8PtrTy(m_context), // void *ptr
-				llvm::Type::getInt32Ty(m_context),   // int value
-				llvm::Type::getInt64Ty(m_context)    // size_t num (assuming 64-bit target)
-			};
-
-			llvm::FunctionType* func_type = llvm::FunctionType::get(llvm::Type::getInt8PtrTy(m_context), arg_types, false);
-			llvm::Function* func = llvm::Function::Create(func_type, llvm::Function::ExternalLinkage, "memset", m_module.get());
-
-			m_function_registry.insert_function("memset", std::make_shared<function>(
-				type(type::base::empty, 1),
-				func,
-				std::vector<std::pair<std::string, type>>{
-					{ "a", type(type::base::character, 1)},
-					{ "b", type(type::base::i32, 0) },
-					{ "c", type(type::base::u64, 0) }
-				},
-				false
-			));
-		}
-
-		// sin
-		{
-			const std::vector<llvm::Type*> arg_types = {
-				llvm::Type::getDoubleTy(m_context),
-			};
-
-			llvm::FunctionType* func_type = llvm::FunctionType::get(llvm::Type::getDoubleTy(m_context), arg_types, false);
-			llvm::Function* func = llvm::Function::Create(func_type, llvm::Function::ExternalLinkage, "sin", m_module.get());
-
-			m_function_registry.insert_function("sin", std::make_shared<function>(
-				type(type::base::f64, 0),
-				func,
-				std::vector<std::pair<std::string, type>>{
-					{ "size", type(type::base::f64, 0)}
-				},
-				false
-			));
-		}
-
-
-		// cos
-		{
-			const std::vector<llvm::Type*> arg_types = {
-				llvm::Type::getDoubleTy(m_context),
-			};
-
-			llvm::FunctionType* func_type = llvm::FunctionType::get(llvm::Type::getDoubleTy(m_context), arg_types, false);
-			llvm::Function* func = llvm::Function::Create(func_type, llvm::Function::ExternalLinkage, "cos", m_module.get());
-
-			m_function_registry.insert_function("cos", std::make_shared<function>(
-				type(type::base::f64, 0),
-				func,
-				std::vector<std::pair<std::string, type>>{
-					{ "size", type(type::base::f64, 0)}
-				},
-				false
-			));
+			// insert the function declaration and treat it like a regular function
+			m_function_registry.insert_function(
+				function_identifier,
+				std::make_shared<function>(
+					function_declaration->get_return_type(),
+					func,
+					arguments,
+					function_declaration->is_variadic()
+				)
+			);
 		}
 	}
 

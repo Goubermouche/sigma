@@ -59,7 +59,7 @@ namespace channel {
 		console::out << "codegen finished (" << codegen_timer.elapsed() << "ms)\n";
 		compile_timer.start();
 
-		// visitor.print_intermediate_representation();
+		visitor.print_intermediate_representation();
 
 		if (!visitor.verify_intermediate_representation()) {
 			// verification failure

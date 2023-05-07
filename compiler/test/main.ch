@@ -13,13 +13,12 @@
 // todo: major cleanup (!!!)
 //  - documentation
 //  - tests
-//  - numerical literals should always be cast to the desired type, as long as it is not a boolean
-//  - todo: allow returns in the middle of a basic block
-//  - pointer casts between same-width pointers 
 
-//  - create a structure for storing predefined functions 
-//  - allow for storage of new functions upon declaration
-//  - pass to the codegen
+
+//  - numerical literals should always be cast to the desired type, as long as it is not a boolean
+//    - create a temporary buffer for storing functions and variables
+//    - parse_return_statement
+//    - parse unary 
 
 i32 main() {
 	f32 A = 0;
@@ -74,7 +73,7 @@ i32 main() {
 				printc(b[k]);
 			}
 			else {
-				printc(10);
+				printc('\n');
 			}
 		}
 	

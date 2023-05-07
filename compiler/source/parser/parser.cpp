@@ -67,11 +67,11 @@
 #include "../codegen/abstract_syntax_tree/operators/binary/logical/operator_less_than_equal_to_node.h"
 #include "../codegen/abstract_syntax_tree/operators/binary/logical/operator_equals_node.h"
 #include "../codegen/abstract_syntax_tree/operators/binary/logical/operator_not_equals_node.h"
-#include "codegen/abstract_syntax_tree/keywords/flow_control/break_node.h"
 
 namespace channel {
 	parser::parser(const lexer& lexer)
-		: m_lexer(lexer) {}
+		: m_lexer(lexer),
+	m_type_scope(std::make_shared<variable_type_scope>(nullptr)) {}
 
 	bool parser::parse() {
 		std::vector<node*> nodes;
@@ -85,8 +85,8 @@ namespace channel {
 			node* node;
 
 			if(peek_is_function_definition()) {
-				// parse a top-level function definition
-				if(!parse_function_definition(node)) {
+				// parse a top-level function declaration
+				if(!parse_function_declaration(node)) {
 					return false;
 				}
 			}
@@ -109,6 +109,16 @@ namespace channel {
 		return m_function_registry;
 	}
 
+	bool parser::get_variable_type(type& out_type, const std::string& identifier) const {
+		if(!m_type_scope->contains_variable_type(identifier)) {
+			error::emit<4003>(m_current_token.get_token_position(), identifier).print();
+			return false;
+		}
+
+		out_type = m_type_scope->get_variable_type(identifier);
+		return true;
+	}
+
 	void parser::get_next_token() {
 		m_current_token = m_lexer.get_token();
 	}
@@ -124,7 +134,11 @@ namespace channel {
 		return false; // return on failure
 	}
 
-	bool parser::parse_function_definition(node*& out_node)	{
+	bool parser::parse_function_declaration(node*& out_node)	{
+		// create a new type scope
+		variable_type_scope_ptr prev_scope = m_type_scope;
+		m_type_scope = std::make_shared<variable_type_scope>(prev_scope);
+
 		type return_type;
 		if (!parse_type(return_type)) {
 			return false; // return on failure
@@ -176,6 +190,21 @@ namespace channel {
 		if(!parse_local_statements(statements)) {
 			return false; // return on failure
 		}
+
+		// insert the function into the function registry
+		if(identifier != "main") {
+			m_function_registry.insert_function_declaration(
+				identifier,
+				std::make_shared<function_declaration>(
+					return_type,
+					arguments,
+					false
+				)
+			);
+		}
+
+		// restore the previous scope
+		m_type_scope = prev_scope;
 
 		out_node = new function_node(position, return_type, identifier, arguments, statements);
 		return true;
@@ -389,10 +418,17 @@ namespace channel {
 				break;
 			}
 
+			// create a new type scope
+			variable_type_scope_ptr prev_scope = m_type_scope;
+			m_type_scope = std::make_shared<variable_type_scope>(prev_scope);
+
 			std::vector<node*> branch_statements;
 			if (!parse_local_statements(branch_statements)) {
 				return false; // return on failure
 			}
+
+			// restore the previous scope
+			m_type_scope = prev_scope;
 
 			branches.push_back(branch_statements);
 
@@ -426,6 +462,10 @@ namespace channel {
 			return false; // return on failure
 		}
 
+		// create a new type scope
+		variable_type_scope_ptr prev_scope = m_type_scope;
+		m_type_scope = std::make_shared<variable_type_scope>(prev_scope);
+
 		std::vector<node*> loop_statements;
 		while (peek_next_token() != token::r_brace) {
 			node* statement;
@@ -435,6 +475,9 @@ namespace channel {
 
 			loop_statements.push_back(statement);
 		}
+
+		// restore the previous scope
+		m_type_scope = prev_scope;
 
 		get_next_token(); // r_brace (guaranteed)
 		out_node = new while_node(position, loop_condition_node, loop_statements);
@@ -550,6 +593,10 @@ namespace channel {
 			return false; // return on failure
 		}
 
+		// create a new type scope
+		variable_type_scope_ptr prev_scope = m_type_scope;
+		m_type_scope = std::make_shared<variable_type_scope>(prev_scope);
+
 		// parse body statements
 		std::vector<node*> loop_statements;
 		while (peek_next_token() != token::r_brace) {
@@ -560,6 +607,9 @@ namespace channel {
 
 			loop_statements.push_back(statement);
 		}
+
+		// restore the previous scope
+		m_type_scope = prev_scope;
 
 		get_next_token(); // r_brace (guaranteed)
 	 	out_node = new for_node(position, loop_initialization_node, loop_condition_node, post_iteration_nodes, loop_statements);
@@ -599,7 +649,12 @@ namespace channel {
 				}
 			}
 			else {
-				if (!parse_expression(value)) {
+				type variable_type;
+				if(!get_variable_type(variable_type, identifier)) {
+					return false;
+				}
+
+				if (!parse_expression(value, variable_type)) {
 					return false; // return on failure
 				}
 			}
@@ -621,7 +676,8 @@ namespace channel {
 
 	bool parser::parse_assignment(node*& out_node) {
 		get_next_token(); // identifier (guaranteed)
-		node* variable = new variable_node(m_current_token.get_token_position(), m_current_token.get_value());
+		const std::string identifier = m_current_token.get_value();
+		node* variable = new variable_node(m_current_token.get_token_position(), identifier);
 
 		if (!expect_next_token(token::operator_assignment)) {
 			return false;  // return on failure
@@ -635,7 +691,12 @@ namespace channel {
 			}
 		}
 		else {
-			if (!parse_expression(value)) {
+			type variable_type;
+			if (!get_variable_type(variable_type, identifier)) {
+				return false;
+			}
+
+			if (!parse_expression(value, variable_type)) {
 				return false; // return on failure
 			}
 		}
@@ -681,19 +742,31 @@ namespace channel {
 		get_next_token(); // identifier (guaranteed)
 		const std::string identifier = m_current_token.get_value();
 		get_next_token(); // l_parenthesis (guaranteed)
-		std::vector<node*> arguments;
 
+		// check if the function exists
+		if (!m_function_registry.contains_function(identifier)) {
+			// function does not exist
+			error::emit<4001>(m_current_token.get_token_position(), identifier).print();
+			return false; // return on failure
+		}
+
+		std::vector<node*> arguments;
+		const std::vector<std::pair<std::string, type>>& required_arguments = m_function_registry.get_function_declaration(identifier)->get_arguments();
+
+		// parse the given arguments 
 		token next_token = peek_next_token();
-		if(next_token != token::r_parenthesis) {
-			while(true) {
+		if (next_token != token::r_parenthesis) {
+			u64 argument_index = 0;
+			while (true) {
 				node* argument;
-				if (!parse_expression(argument)) {
+				if (!parse_expression(argument, required_arguments[argument_index].second)) {
 					return false; // return on failure
 				}
 
 				arguments.push_back(argument);
 
 				next_token = peek_next_token(); // comma || r_parenthesis || other
+				argument_index++;
 
 				if (next_token == token::comma) {
 					get_next_token(); // comma (guaranteed)
@@ -708,7 +781,7 @@ namespace channel {
 			}
 		}
 
-		if(!expect_next_token(token::r_parenthesis)) {
+		if (!expect_next_token(token::r_parenthesis)) {
 			return false; // return on failure
 		}
 
@@ -750,6 +823,9 @@ namespace channel {
 				return false; // return on failure
 			}
 		}
+
+		// insert the type into the type map
+		m_type_scope->insert_variable_type(identifier, declaration_type);
 
 		if(is_global) {
 			out_node = new global_declaration_node(position, declaration_type, identifier, value);
@@ -991,6 +1067,8 @@ namespace channel {
 		case type::base::f64: out_node = new f64_node(m_current_token.get_token_position(), std::stod(str_value)); return true;
 		// bool
 		case type::base::boolean: out_node = new bool_node(m_current_token.get_token_position(), std::stoi(str_value)); return true;
+		// char
+		case type::base::character: out_node = new char_node(m_current_token.get_token_position(), static_cast<char>(std::stoi(str_value))); return true;
 		default:
 			error::emit<3002>(m_current_token.get_token_position(), ty).print();
 			return false; // return on failure

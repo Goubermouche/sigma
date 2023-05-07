@@ -51,7 +51,7 @@ namespace channel {
 			return m_parent->contains_named_value(name);
 		}
 
-		// value does not exist in the current scope
+		// variable does not exist in the current scope
 		return false;
 	}
 

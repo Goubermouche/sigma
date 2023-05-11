@@ -163,7 +163,7 @@ namespace channel {
         }
 
         m_builder.SetInsertPoint(end_block);
-        out_value = nullptr;
+        return nullptr;
         return true;
     }
 

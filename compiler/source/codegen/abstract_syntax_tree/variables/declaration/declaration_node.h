@@ -1,6 +1,6 @@
 #pragma once
-#include "../../node.h"
-#include "../../../llvm_wrappers/type.h"
+#include "codegen/abstract_syntax_tree/node.h"
+#include "codegen/llvm_wrappers/type.h"
 
 namespace channel {
 	/**

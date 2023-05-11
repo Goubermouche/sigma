@@ -11,9 +11,8 @@ namespace channel {
 	m_array_element_index_nodes(index_nodes),
 	m_expression_node(expression_node) {}
 
-	bool array_assignment_node::accept(visitor& visitor, value_ptr& out_value) {
-		LOG_NODE_NAME(array_assignment_node);
-		return visitor.visit_array_assignment_node(*this, out_value);
+	bool array_assignment_node::accept(visitor& visitor, value_ptr& out_value, codegen_context context) {
+		return visitor.visit_array_assignment_node(*this, out_value, context);
 	}
 
 	void array_assignment_node::print(int depth, const std::wstring& prefix, bool is_last) {

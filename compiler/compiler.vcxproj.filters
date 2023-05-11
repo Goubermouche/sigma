@@ -108,41 +108,11 @@
     <ClInclude Include="source\codegen\abstract_syntax_tree\keywords\types\bool_node.h">
       <Filter>source\codegen\abstract_syntax_tree\keywords\types</Filter>
     </ClInclude>
-    <ClInclude Include="source\codegen\abstract_syntax_tree\keywords\types\floating_point\f32_node.h">
-      <Filter>source\codegen\abstract_syntax_tree\keywords\types\floating_point</Filter>
-    </ClInclude>
-    <ClInclude Include="source\codegen\abstract_syntax_tree\keywords\types\floating_point\f64_node.h">
-      <Filter>source\codegen\abstract_syntax_tree\keywords\types\floating_point</Filter>
-    </ClInclude>
-    <ClInclude Include="source\codegen\abstract_syntax_tree\keywords\types\signed_int\i16_node.h">
-      <Filter>source\codegen\abstract_syntax_tree\keywords\types\signed_int</Filter>
-    </ClInclude>
-    <ClInclude Include="source\codegen\abstract_syntax_tree\keywords\types\signed_int\i32_node.h">
-      <Filter>source\codegen\abstract_syntax_tree\keywords\types\signed_int</Filter>
-    </ClInclude>
-    <ClInclude Include="source\codegen\abstract_syntax_tree\keywords\types\signed_int\i64_node.h">
-      <Filter>source\codegen\abstract_syntax_tree\keywords\types\signed_int</Filter>
-    </ClInclude>
-    <ClInclude Include="source\codegen\abstract_syntax_tree\keywords\types\signed_int\i8_node.h">
-      <Filter>source\codegen\abstract_syntax_tree\keywords\types\signed_int</Filter>
-    </ClInclude>
-    <ClInclude Include="source\codegen\abstract_syntax_tree\keywords\types\text\char_node.h">
+    <ClInclude Include="source\codegen\abstract_syntax_tree\keywords\types\char_node.h">
       <Filter>source\codegen\abstract_syntax_tree\keywords\types\text</Filter>
     </ClInclude>
-    <ClInclude Include="source\codegen\abstract_syntax_tree\keywords\types\text\string_node.h">
+    <ClInclude Include="source\codegen\abstract_syntax_tree\keywords\types\string_node.h">
       <Filter>source\codegen\abstract_syntax_tree\keywords\types\text</Filter>
-    </ClInclude>
-    <ClInclude Include="source\codegen\abstract_syntax_tree\keywords\types\unsigned_int\u16_node.h">
-      <Filter>source\codegen\abstract_syntax_tree\keywords\types\unsigned_int</Filter>
-    </ClInclude>
-    <ClInclude Include="source\codegen\abstract_syntax_tree\keywords\types\unsigned_int\u32_node.h">
-      <Filter>source\codegen\abstract_syntax_tree\keywords\types\unsigned_int</Filter>
-    </ClInclude>
-    <ClInclude Include="source\codegen\abstract_syntax_tree\keywords\types\unsigned_int\u64_node.h">
-      <Filter>source\codegen\abstract_syntax_tree\keywords\types\unsigned_int</Filter>
-    </ClInclude>
-    <ClInclude Include="source\codegen\abstract_syntax_tree\keywords\types\unsigned_int\u8_node.h">
-      <Filter>source\codegen\abstract_syntax_tree\keywords\types\unsigned_int</Filter>
     </ClInclude>
     <ClInclude Include="source\codegen\abstract_syntax_tree\node.h">
       <Filter>source\codegen\abstract_syntax_tree</Filter>
@@ -285,7 +255,8 @@
     <ClInclude Include="source\compiler\diagnostics\error.h" />
     <ClInclude Include="source\codegen\llvm_wrappers\functions\function_registry.h" />
     <ClInclude Include="source\codegen\llvm_wrappers\functions\function.h" />
-    <ClInclude Include="source\parser\type_info\variable_type_scope.h" />
+    <ClInclude Include="source\codegen\abstract_syntax_tree\keywords\types\numerical_literal_node.h" />
+    <ClInclude Include="source\codegen\llvm_wrappers\codegen_context.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp" />
@@ -316,41 +287,11 @@
     <ClCompile Include="source\codegen\abstract_syntax_tree\keywords\types\bool_node.cpp">
       <Filter>source\codegen\abstract_syntax_tree\keywords\types</Filter>
     </ClCompile>
-    <ClCompile Include="source\codegen\abstract_syntax_tree\keywords\types\floating_point\f32_node.cpp">
-      <Filter>source\codegen\abstract_syntax_tree\keywords\types\floating_point</Filter>
-    </ClCompile>
-    <ClCompile Include="source\codegen\abstract_syntax_tree\keywords\types\floating_point\f64_node.cpp">
-      <Filter>source\codegen\abstract_syntax_tree\keywords\types\floating_point</Filter>
-    </ClCompile>
-    <ClCompile Include="source\codegen\abstract_syntax_tree\keywords\types\signed_int\i16_node.cpp">
-      <Filter>source\codegen\abstract_syntax_tree\keywords\types\signed_int</Filter>
-    </ClCompile>
-    <ClCompile Include="source\codegen\abstract_syntax_tree\keywords\types\signed_int\i32_node.cpp">
-      <Filter>source\codegen\abstract_syntax_tree\keywords\types\signed_int</Filter>
-    </ClCompile>
-    <ClCompile Include="source\codegen\abstract_syntax_tree\keywords\types\signed_int\i64_node.cpp">
-      <Filter>source\codegen\abstract_syntax_tree\keywords\types\signed_int</Filter>
-    </ClCompile>
-    <ClCompile Include="source\codegen\abstract_syntax_tree\keywords\types\signed_int\i8_node.cpp">
-      <Filter>source\codegen\abstract_syntax_tree\keywords\types\signed_int</Filter>
-    </ClCompile>
-    <ClCompile Include="source\codegen\abstract_syntax_tree\keywords\types\text\char_node.cpp">
+    <ClCompile Include="source\codegen\abstract_syntax_tree\keywords\types\char_node.cpp">
       <Filter>source\codegen\abstract_syntax_tree\keywords\types\text</Filter>
     </ClCompile>
-    <ClCompile Include="source\codegen\abstract_syntax_tree\keywords\types\text\string_node.cpp">
+    <ClCompile Include="source\codegen\abstract_syntax_tree\keywords\types\string_node.cpp">
       <Filter>source\codegen\abstract_syntax_tree\keywords\types\text</Filter>
-    </ClCompile>
-    <ClCompile Include="source\codegen\abstract_syntax_tree\keywords\types\unsigned_int\u16_node.cpp">
-      <Filter>source\codegen\abstract_syntax_tree\keywords\types\unsigned_int</Filter>
-    </ClCompile>
-    <ClCompile Include="source\codegen\abstract_syntax_tree\keywords\types\unsigned_int\u32_node.cpp">
-      <Filter>source\codegen\abstract_syntax_tree\keywords\types\unsigned_int</Filter>
-    </ClCompile>
-    <ClCompile Include="source\codegen\abstract_syntax_tree\keywords\types\unsigned_int\u64_node.cpp">
-      <Filter>source\codegen\abstract_syntax_tree\keywords\types\unsigned_int</Filter>
-    </ClCompile>
-    <ClCompile Include="source\codegen\abstract_syntax_tree\keywords\types\unsigned_int\u8_node.cpp">
-      <Filter>source\codegen\abstract_syntax_tree\keywords\types\unsigned_int</Filter>
     </ClCompile>
     <ClCompile Include="source\codegen\abstract_syntax_tree\node.cpp">
       <Filter>source\codegen\abstract_syntax_tree</Filter>
@@ -498,6 +439,7 @@
     <ClCompile Include="source\compiler\diagnostics\error.cpp" />
     <ClCompile Include="source\codegen\llvm_wrappers\functions\function_registry.cpp" />
     <ClCompile Include="source\codegen\llvm_wrappers\functions\function.cpp" />
-    <ClCompile Include="source\parser\type_info\variable_type_scope.cpp" />
+    <ClCompile Include="source\codegen\abstract_syntax_tree\keywords\types\numerical_literal_node.cpp" />
+    <ClCompile Include="source\codegen\llvm_wrappers\codegen_context.cpp" />
   </ItemGroup>
 </Project>

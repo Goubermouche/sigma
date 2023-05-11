@@ -1,5 +1,5 @@
 #pragma once
-#include "../utility/macros.h"
+#include "utility/macros.h"
 
 namespace channel {
 	enum class token {

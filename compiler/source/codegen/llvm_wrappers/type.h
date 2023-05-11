@@ -1,6 +1,6 @@
 #pragma once
 #include <llvm/IR/IRBuilder.h>
-#include "../../lexer/token.h"
+#include "lexer/token.h"
 
 namespace channel {
     struct type {
@@ -52,7 +52,7 @@ namespace channel {
 
         bool operator==(const type& other) const;
     private:
-        base m_base;
+        base m_base = base::unknown;
         u16 m_pointer_level;
     };
 

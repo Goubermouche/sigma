@@ -1,7 +1,6 @@
 #pragma once
-#include "../llvm_wrappers/value.h"
-#include <llvm/IR/Value.h>
-#include "../../utility/macros.h"
+#include "codegen/llvm_wrappers/value.h"
+#include "codegen/llvm_wrappers/codegen_context.h"
 
 #define AST_NODE_NUMERICAL_LITERAL_COLOR color::blue
 #define AST_NODE_BOOLEAN_LITERAL_COLOR	 color::blue
@@ -28,10 +27,21 @@ namespace channel {
 		 * \brief Accepts the given \a visitor and handles the given node.
 		 * \param visitor Visitor to accept
 		 * \param out_value Resulting value
+		 * \param context Acceptation context
 		 * \returns True if no error has been met, otherwise false
 		 */
-		virtual bool accept(visitor& visitor, value_ptr& out_value) = 0;
-		virtual void print(int depth, const std::wstring& prefix, bool is_last) = 0;
+		virtual bool accept(
+			visitor& visitor,
+			value_ptr& out_value,
+			codegen_context context
+		) = 0;
+
+		virtual void print(
+			int depth,
+			const std::wstring& prefix,
+			bool is_last
+		) = 0;
+
 		const token_position& get_declared_position() const;
 	protected:
 		static void print_value(

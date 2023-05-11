@@ -14,7 +14,6 @@ struct std::formatter<channel::type> {
     }
 };
 
-
 template<>
 struct std::formatter<channel::token> {
     static auto parse(format_parse_context& ctx) {

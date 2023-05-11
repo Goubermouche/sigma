@@ -13,9 +13,8 @@ namespace channel {
 		expression_node
 	) {}
 
-	bool local_declaration_node::accept(visitor& visitor, value_ptr& out_value) {
-		LOG_NODE_NAME(local_declaration_node);
-		return visitor.visit_local_declaration_node(*this, out_value);
+	bool local_declaration_node::accept(visitor& visitor, value_ptr& out_value, codegen_context context) {
+		return visitor.visit_local_declaration_node(*this, out_value, context);
 	}
 
 	void local_declaration_node::print(int depth, const std::wstring& prefix, bool is_last) {

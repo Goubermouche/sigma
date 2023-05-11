@@ -7,9 +7,8 @@ namespace channel {
 	) : node(position),
 	m_value(value) {}
 
-	bool string_node::accept(visitor& visitor, value_ptr& out_value) {
-		LOG_NODE_NAME(string_node);
-		return visitor.visit_keyword_string_node(*this, out_value);
+	bool string_node::accept(visitor& visitor, value_ptr& out_value, codegen_context context) {
+		return visitor.visit_keyword_string_node(*this, out_value, context);
 	}
 
 	void string_node::print(int depth, const std::wstring& prefix, bool is_last) {

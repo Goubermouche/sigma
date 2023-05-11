@@ -1,9 +1,9 @@
 #pragma once
 
 #include "token.h"
-#include "../utility/containers/string_accessor.h"
-#include "../compiler/diagnostics/warning.h"
-#include "../compiler/diagnostics/error.h"
+#include "utility/containers/string_accessor.h"
+#include "compiler/diagnostics/warning.h"
+#include "compiler/diagnostics/error.h"
 
 namespace channel {
 	struct token_data {

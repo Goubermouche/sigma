@@ -11,9 +11,8 @@ namespace channel {
 		right_expression_node
 	) {}
 
-	bool operator_subtraction_node::accept(visitor& visitor, value_ptr& out_value) {
-		LOG_NODE_NAME(operator_subtraction_node);
-		return visitor.visit_operator_subtraction_node(*this, out_value);
+	bool operator_subtraction_node::accept(visitor& visitor, value_ptr& out_value, codegen_context context) {
+		return visitor.visit_operator_subtraction_node(*this, out_value, context);
 	}
 
 	void operator_subtraction_node::print(int depth, const std::wstring& prefix, bool is_last) {

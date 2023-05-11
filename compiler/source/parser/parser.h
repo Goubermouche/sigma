@@ -2,22 +2,15 @@
 #include "lexer/lexer.h"
 #include "codegen/llvm_wrappers/type.h"
 #include "codegen/abstract_syntax_tree/abstract_syntax_tree.h"
-#include "codegen/llvm_wrappers/functions/function_registry.h"
-
-// basic type checking
-#include "parser/type_info/variable_type_scope.h"
 
 namespace channel {
 	class parser {
-	public: 
+	public:
 		parser(const lexer& lexer);
 		bool parse();
 
-		const abstract_syntax_tree& get_abstract_syntax_tree() const;
-		const function_registry& get_function_registry() const;
+		const abstract_syntax_tree& get_abstract_syntax_tree();
 	private:
-
-		bool get_variable_type(type& out_type, const std::string& identifier) const;
 		/**
 		 * \brief Retrieves the next token from the lexer.
 		 */
@@ -35,7 +28,7 @@ namespace channel {
 		 * \param out_node Output AST node
 		 * \return True if the expression is parsed successfully
 		 */
-		bool parse_function_declaration(node*& out_node);
+		bool parse_function_definition(node*& out_node);
 
 		/**
 		 * \brief Attempts to parse a global statement.
@@ -112,7 +105,7 @@ namespace channel {
 		bool parse_declaration(node*& out_node, bool is_global);
 
 		/**
-		 * \brief Attempts to parse an expression. 
+		 * \brief Attempts to parse an expression.
 		 * \param out_node Output AST node
 		 * \param expression_type Specified expression type
 		 * \return True if the expression is parsed successfully
@@ -224,7 +217,7 @@ namespace channel {
 		bool parse_primary_identifier(node*& out_node);
 
 		/**
-		 * \brief Parses a deep (nested) expression. The first expected token is a left parenthesis. 
+		 * \brief Parses a deep (nested) expression. The first expected token is a left parenthesis.
 		 * \param out_node Output AST node
 		 * \param expression_type Specified expression type
 		 * \return True if the expression is parsed successfully
@@ -272,14 +265,10 @@ namespace channel {
 		 * \brief Parses the next tokens as a type. The first expected token is a type.
 		 * \return Parsed type token
 		 */
-		bool parse_type(type& ty); 
+		bool parse_type(type& ty);
 	private:
 		lexer m_lexer;
 		token_data m_current_token;
 		abstract_syntax_tree m_abstract_syntax_tree;
-
-		// basic type checking
-		function_registry m_function_registry;
-		variable_type_scope_ptr m_type_scope;
 	};
 }

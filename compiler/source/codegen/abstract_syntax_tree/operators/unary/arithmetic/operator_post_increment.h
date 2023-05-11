@@ -1,5 +1,5 @@
 #pragma once
-#include "../operator_unary.h"
+#include "codegen/abstract_syntax_tree/operators/unary/operator_unary.h"
 
 namespace channel {
 	/**
@@ -12,7 +12,7 @@ namespace channel {
 			const node_ptr& expression_node
 		);
 
-		bool accept(visitor& visitor, value_ptr& out_value) override;
+		bool accept(visitor& visitor, value_ptr& out_value, codegen_context context) override;
 		void print(int depth, const std::wstring& prefix, bool is_last) override;
 	};
 }

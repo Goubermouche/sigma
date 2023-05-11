@@ -1,5 +1,5 @@
 #pragma once
-#include "value.h"
+#include "codegen/llvm_wrappers/value.h"
 
 namespace channel {
 	class scope	{

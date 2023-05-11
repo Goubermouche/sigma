@@ -1,98 +1,84 @@
 #include "parser.h"
 
-#include "../codegen/abstract_syntax_tree/translation_unit_node.h"
+#include "codegen/abstract_syntax_tree/translation_unit_node.h"
 
 // functions
-#include "../codegen/abstract_syntax_tree/functions/function_call_node.h"
-#include "../codegen/abstract_syntax_tree/functions/function_node.h"
+#include "codegen/abstract_syntax_tree/functions/function_call_node.h"
+#include "codegen/abstract_syntax_tree/functions/function_node.h"
 
 // variables
-#include "../codegen/abstract_syntax_tree/variables/assignment_node.h"
-#include "../codegen/abstract_syntax_tree/variables/variable_access_node.h"
-#include "../codegen/abstract_syntax_tree/variables/array/array_allocation_node.h"
-#include "../codegen/abstract_syntax_tree/variables/array/array_access_node.h"
-#include "../codegen/abstract_syntax_tree/variables/array/array_assignment_node.h"
-#include "../codegen/abstract_syntax_tree/variables/declaration/local_declaration_node.h"
-#include "../codegen/abstract_syntax_tree/variables/declaration/global_declaration_node.h"
-#include "../codegen/abstract_syntax_tree/variables/variable_node.h"
+#include "codegen/abstract_syntax_tree/variables/assignment_node.h"
+#include "codegen/abstract_syntax_tree/variables/variable_access_node.h"
+#include "codegen/abstract_syntax_tree/variables/array/array_allocation_node.h"
+#include "codegen/abstract_syntax_tree/variables/array/array_access_node.h"
+#include "codegen/abstract_syntax_tree/variables/array/array_assignment_node.h"
+#include "codegen/abstract_syntax_tree/variables/declaration/local_declaration_node.h"
+#include "codegen/abstract_syntax_tree/variables/declaration/global_declaration_node.h"
+#include "codegen/abstract_syntax_tree/variables/variable_node.h"
 
 // flow control
-#include "../codegen/abstract_syntax_tree/keywords/flow_control/return_node.h"
-#include "../codegen/abstract_syntax_tree/keywords/flow_control/if_else_node.h"
-#include "../codegen/abstract_syntax_tree/keywords/flow_control/while_node.h"
-#include "../codegen/abstract_syntax_tree/keywords/flow_control/for_node.h"
-#include "../codegen/abstract_syntax_tree/keywords/flow_control/break_node.h"
+#include "codegen/abstract_syntax_tree/keywords/flow_control/return_node.h"
+#include "codegen/abstract_syntax_tree/keywords/flow_control/if_else_node.h"
+#include "codegen/abstract_syntax_tree/keywords/flow_control/while_node.h"
+#include "codegen/abstract_syntax_tree/keywords/flow_control/for_node.h"
+#include "codegen/abstract_syntax_tree/keywords/flow_control/break_node.h"
 
 // types
-// signed integers
-#include "../codegen/abstract_syntax_tree/keywords/types/signed_int/i8_node.h"
-#include "../codegen/abstract_syntax_tree/keywords/types/signed_int/i16_node.h"
-#include "../codegen/abstract_syntax_tree/keywords/types/signed_int/i32_node.h"
-#include "../codegen/abstract_syntax_tree/keywords/types/signed_int/i64_node.h"
-// unsigned integers
-#include "../codegen/abstract_syntax_tree/keywords/types/unsigned_int/u8_node.h"
-#include "../codegen/abstract_syntax_tree/keywords/types/unsigned_int/u16_node.h"
-#include "../codegen/abstract_syntax_tree/keywords/types/unsigned_int/u32_node.h"
-#include "../codegen/abstract_syntax_tree/keywords/types/unsigned_int/u64_node.h"
-// floating point
-#include "../codegen/abstract_syntax_tree/keywords/types/floating_point/f32_node.h"
-#include "../codegen/abstract_syntax_tree/keywords/types/floating_point/f64_node.h"
-// text
-#include "../codegen/abstract_syntax_tree/keywords/types/text/char_node.h"
-#include "../codegen/abstract_syntax_tree/keywords/types/text/string_node.h"
-// other
+#include "codegen/abstract_syntax_tree/keywords/types/numerical_literal_node.h"
+#include "codegen/abstract_syntax_tree/keywords/types/char_node.h"
+#include "codegen/abstract_syntax_tree/keywords/types/string_node.h"
 #include "codegen/abstract_syntax_tree/keywords/types/bool_node.h"
 
 // operators
 // unary
 // arithmetic
-#include "../codegen/abstract_syntax_tree/operators/unary/arithmetic/operator_post_decrement.h"
-#include "../codegen/abstract_syntax_tree/operators/unary/arithmetic/operator_post_increment.h"
-#include "../codegen/abstract_syntax_tree/operators/unary/arithmetic/operator_pre_decrement.h"
-#include "../codegen/abstract_syntax_tree/operators/unary/arithmetic/operator_pre_increment.h"
+#include "codegen/abstract_syntax_tree/operators/unary/arithmetic/operator_post_decrement.h"
+#include "codegen/abstract_syntax_tree/operators/unary/arithmetic/operator_post_increment.h"
+#include "codegen/abstract_syntax_tree/operators/unary/arithmetic/operator_pre_decrement.h"
+#include "codegen/abstract_syntax_tree/operators/unary/arithmetic/operator_pre_increment.h"
 
 // binary
 // arithmetic
-#include "../codegen/abstract_syntax_tree/operators/binary/arithmetic/operator_addition_node.h"
-#include "../codegen/abstract_syntax_tree/operators/binary/arithmetic/operator_division_node.h"
-#include "../codegen/abstract_syntax_tree/operators/binary/arithmetic/operator_multiplication_node.h"
-#include "../codegen/abstract_syntax_tree/operators/binary/arithmetic/operator_subtraction_node.h"
-#include "../codegen/abstract_syntax_tree/operators/binary/arithmetic/operator_modulo_node.h"
+#include "codegen/abstract_syntax_tree/operators/binary/arithmetic/operator_addition_node.h"
+#include "codegen/abstract_syntax_tree/operators/binary/arithmetic/operator_division_node.h"
+#include "codegen/abstract_syntax_tree/operators/binary/arithmetic/operator_multiplication_node.h"
+#include "codegen/abstract_syntax_tree/operators/binary/arithmetic/operator_subtraction_node.h"
+#include "codegen/abstract_syntax_tree/operators/binary/arithmetic/operator_modulo_node.h"
 // logical
-#include "../codegen/abstract_syntax_tree/operators/binary/logical/operator_conjunction_node.h"
-#include "../codegen/abstract_syntax_tree/operators/binary/logical/operator_disjunction_node.h"
-#include "../codegen/abstract_syntax_tree/operators/binary/logical/operator_greater_than_node.h"
-#include "../codegen/abstract_syntax_tree/operators/binary/logical/operator_greater_than_equal_to_node.h"
-#include "../codegen/abstract_syntax_tree/operators/binary/logical/operator_less_than_node.h"
-#include "../codegen/abstract_syntax_tree/operators/binary/logical/operator_less_than_equal_to_node.h"
-#include "../codegen/abstract_syntax_tree/operators/binary/logical/operator_equals_node.h"
-#include "../codegen/abstract_syntax_tree/operators/binary/logical/operator_not_equals_node.h"
+#include "codegen/abstract_syntax_tree/operators/binary/logical/operator_conjunction_node.h"
+#include "codegen/abstract_syntax_tree/operators/binary/logical/operator_disjunction_node.h"
+#include "codegen/abstract_syntax_tree/operators/binary/logical/operator_greater_than_node.h"
+#include "codegen/abstract_syntax_tree/operators/binary/logical/operator_greater_than_equal_to_node.h"
+#include "codegen/abstract_syntax_tree/operators/binary/logical/operator_less_than_node.h"
+#include "codegen/abstract_syntax_tree/operators/binary/logical/operator_less_than_equal_to_node.h"
+#include "codegen/abstract_syntax_tree/operators/binary/logical/operator_equals_node.h"
+#include "codegen/abstract_syntax_tree/operators/binary/logical/operator_not_equals_node.h"
+#include "codegen/abstract_syntax_tree/keywords/flow_control/break_node.h"
 
 namespace channel {
 	parser::parser(const lexer& lexer)
-		: m_lexer(lexer),
-	m_type_scope(std::make_shared<variable_type_scope>(nullptr)) {}
+		: m_lexer(lexer) {}
 
 	bool parser::parse() {
 		std::vector<node*> nodes;
 
-		while(true) {
-			if(peek_next_token() == token::end_of_file) {
+		while (true) {
+			if (peek_next_token() == token::end_of_file) {
 				m_abstract_syntax_tree.add_node(new translation_unit_node(nodes));
 				return true;
 			}
 
 			node* node;
 
-			if(peek_is_function_definition()) {
-				// parse a top-level function declaration
-				if(!parse_function_declaration(node)) {
+			if (peek_is_function_definition()) {
+				// parse a top-level function definition
+				if (!parse_function_definition(node)) {
 					return false;
 				}
 			}
 			else {
 				// parse a global statement
-				if(!parse_global_statement(node)) {
+				if (!parse_global_statement(node)) {
 					return false;
 				}
 			}
@@ -101,22 +87,8 @@ namespace channel {
 		}
 	}
 
-	const abstract_syntax_tree& parser::get_abstract_syntax_tree() const {
+	const abstract_syntax_tree& parser::get_abstract_syntax_tree() {
 		return m_abstract_syntax_tree;
-	}
-
-	const function_registry& parser::get_function_registry() const {
-		return m_function_registry;
-	}
-
-	bool parser::get_variable_type(type& out_type, const std::string& identifier) const {
-		if(!m_type_scope->contains_variable_type(identifier)) {
-			error::emit<4003>(m_current_token.get_token_position(), identifier).print();
-			return false;
-		}
-
-		out_type = m_type_scope->get_variable_type(identifier);
-		return true;
 	}
 
 	void parser::get_next_token() {
@@ -134,11 +106,7 @@ namespace channel {
 		return false; // return on failure
 	}
 
-	bool parser::parse_function_declaration(node*& out_node)	{
-		// create a new type scope
-		variable_type_scope_ptr prev_scope = m_type_scope;
-		m_type_scope = std::make_shared<variable_type_scope>(prev_scope);
-
+	bool parser::parse_function_definition(node*& out_node) {
 		type return_type;
 		if (!parse_type(return_type)) {
 			return false; // return on failure
@@ -153,10 +121,10 @@ namespace channel {
 
 		// parse arguments
 		token next_token = peek_next_token();
-		if(next_token != token::r_parenthesis) {
+		if (next_token != token::r_parenthesis) {
 			while (true) {
 				type argument_type;
-				if(!parse_type(argument_type)) {
+				if (!parse_type(argument_type)) {
 					return false; // return on failure
 				}
 
@@ -185,26 +153,11 @@ namespace channel {
 		else {
 			get_next_token(); // r_parenthesis (guaranteed)
 		}
-		
+
 		std::vector<node*> statements;
-		if(!parse_local_statements(statements)) {
+		if (!parse_local_statements(statements)) {
 			return false; // return on failure
 		}
-
-		// insert the function into the function registry
-		if(identifier != "main") {
-			m_function_registry.insert_function_declaration(
-				identifier,
-				std::make_shared<function_declaration>(
-					return_type,
-					arguments,
-					false
-				)
-			);
-		}
-
-		// restore the previous scope
-		m_type_scope = prev_scope;
 
 		out_node = new function_node(position, return_type, identifier, arguments, statements);
 		return true;
@@ -241,7 +194,7 @@ namespace channel {
 	}
 
 	bool parser::parse_local_statements(std::vector<node*>& out_statements) {
-		if(!expect_next_token(token::l_brace)) {
+		if (!expect_next_token(token::l_brace)) {
 			return false;  // return on failure
 		}
 
@@ -256,7 +209,7 @@ namespace channel {
 			}
 
 			// check if we've met a block break token
-			if(met_block_break == false) {
+			if (met_block_break == false) {
 				met_block_break = is_token_block_break(next_token);
 				// if we haven't, we can add the statement to the vector
 				// this prevents us from adding unreachable nodes to the AST
@@ -270,7 +223,7 @@ namespace channel {
 		return true;
 	}
 
-	bool parser::parse_local_statement(node*& out_node)	{
+	bool parser::parse_local_statement(node*& out_node) {
 		const token next_token = peek_next_token(); // identifier || type || keyword
 
 		if (is_token_type(next_token)) {
@@ -282,7 +235,7 @@ namespace channel {
 		else {
 			switch (next_token) {
 			case token::identifier:
-				if(!parse_local_statement_identifier(out_node)) {
+				if (!parse_local_statement_identifier(out_node)) {
 					return false; // return on failure
 				}
 				break;
@@ -406,7 +359,7 @@ namespace channel {
 				node* condition = nullptr;
 				if (!has_else) {
 					if (!expect_next_token(token::l_parenthesis) ||
-						!parse_expression(condition) || //  type(type::base::boolean, 0)
+						!parse_expression(condition) ||
 						!expect_next_token(token::r_parenthesis)) {
 						return false; // return on failure
 					}
@@ -418,17 +371,10 @@ namespace channel {
 				break;
 			}
 
-			// create a new type scope
-			variable_type_scope_ptr prev_scope = m_type_scope;
-			m_type_scope = std::make_shared<variable_type_scope>(prev_scope);
-
 			std::vector<node*> branch_statements;
 			if (!parse_local_statements(branch_statements)) {
 				return false; // return on failure
 			}
-
-			// restore the previous scope
-			m_type_scope = prev_scope;
 
 			branches.push_back(branch_statements);
 
@@ -445,12 +391,12 @@ namespace channel {
 		get_next_token(); // keyword_while (guaranteed)
 		const token_position position = m_current_token.get_token_position();
 
-		if(!expect_next_token(token::l_parenthesis)) {
+		if (!expect_next_token(token::l_parenthesis)) {
 			return false; // return on failure
 		}
 
 		node* loop_condition_node;
-		if(!parse_expression(loop_condition_node)) {
+		if (!parse_expression(loop_condition_node)) {
 			return false; // return on failure
 		}
 
@@ -462,10 +408,6 @@ namespace channel {
 			return false; // return on failure
 		}
 
-		// create a new type scope
-		variable_type_scope_ptr prev_scope = m_type_scope;
-		m_type_scope = std::make_shared<variable_type_scope>(prev_scope);
-
 		std::vector<node*> loop_statements;
 		while (peek_next_token() != token::r_brace) {
 			node* statement;
@@ -475,9 +417,6 @@ namespace channel {
 
 			loop_statements.push_back(statement);
 		}
-
-		// restore the previous scope
-		m_type_scope = prev_scope;
 
 		get_next_token(); // r_brace (guaranteed)
 		out_node = new while_node(position, loop_condition_node, loop_statements);
@@ -548,13 +487,13 @@ namespace channel {
 			}
 		}
 
-		if(!expect_next_token(token::semicolon)) {
+		if (!expect_next_token(token::semicolon)) {
 			return false;
 		}
 
 		// parse the loop condition section
 		node* loop_condition_node;
-		if(!parse_expression(loop_condition_node)) {
+		if (!parse_expression(loop_condition_node)) {
 			return false; // return on failure
 		}
 
@@ -568,7 +507,7 @@ namespace channel {
 		while (true) {
 			node* post_iteration_node;
 
-			if(peek_next_token() == token::r_parenthesis) {
+			if (peek_next_token() == token::r_parenthesis) {
 				break;
 			}
 
@@ -585,17 +524,13 @@ namespace channel {
 			get_next_token(); // comma (guaranteed)
 		}
 
-		if(!expect_next_token(token::r_parenthesis)) {
+		if (!expect_next_token(token::r_parenthesis)) {
 			return false; // return on failure
 		}
 
 		if (!expect_next_token(token::l_brace)) {
 			return false; // return on failure
 		}
-
-		// create a new type scope
-		variable_type_scope_ptr prev_scope = m_type_scope;
-		m_type_scope = std::make_shared<variable_type_scope>(prev_scope);
 
 		// parse body statements
 		std::vector<node*> loop_statements;
@@ -608,11 +543,8 @@ namespace channel {
 			loop_statements.push_back(statement);
 		}
 
-		// restore the previous scope
-		m_type_scope = prev_scope;
-
 		get_next_token(); // r_brace (guaranteed)
-	 	out_node = new for_node(position, loop_initialization_node, loop_condition_node, post_iteration_nodes, loop_statements);
+		out_node = new for_node(position, loop_initialization_node, loop_condition_node, post_iteration_nodes, loop_statements);
 		return true;
 	}
 
@@ -638,7 +570,7 @@ namespace channel {
 		}
 
 		const token next_token = peek_next_token();
-		if(next_token == token::operator_assignment) {
+		if (next_token == token::operator_assignment) {
 			get_next_token();
 
 			// parse access-assignment
@@ -649,12 +581,7 @@ namespace channel {
 				}
 			}
 			else {
-				type variable_type;
-				if(!get_variable_type(variable_type, identifier)) {
-					return false;
-				}
-
-				if (!parse_expression(value, variable_type)) {
+				if (!parse_expression(value)) {
 					return false; // return on failure
 				}
 			}
@@ -662,7 +589,7 @@ namespace channel {
 			node* array_node = new variable_node(m_current_token.get_token_position(), identifier);
 			out_node = new array_assignment_node(position, array_node, index_nodes, value);
 		}
-		else if(next_token == token::operator_increment || next_token == token::operator_decrement) {
+		else if (next_token == token::operator_increment || next_token == token::operator_decrement) {
 			node* array_node = new variable_node(m_current_token.get_token_position(), identifier);
 			out_node = new array_access_node(position, array_node, index_nodes);
 
@@ -676,8 +603,7 @@ namespace channel {
 
 	bool parser::parse_assignment(node*& out_node) {
 		get_next_token(); // identifier (guaranteed)
-		const std::string identifier = m_current_token.get_value();
-		node* variable = new variable_node(m_current_token.get_token_position(), identifier);
+		node* variable = new variable_node(m_current_token.get_token_position(), m_current_token.get_value());
 
 		if (!expect_next_token(token::operator_assignment)) {
 			return false;  // return on failure
@@ -691,12 +617,7 @@ namespace channel {
 			}
 		}
 		else {
-			type variable_type;
-			if (!get_variable_type(variable_type, identifier)) {
-				return false;
-			}
-
-			if (!parse_expression(value, variable_type)) {
+			if (!parse_expression(value)) {
 				return false; // return on failure
 			}
 		}
@@ -723,11 +644,11 @@ namespace channel {
 			}
 			index_nodes.push_back(array_index);
 
-			if(!expect_next_token(token::r_bracket)) {
+			if (!expect_next_token(token::r_bracket)) {
 				return false; // return on failure
 			}
 
-			if(peek_next_token() != token::l_bracket) {
+			if (peek_next_token() != token::l_bracket) {
 				break;
 			}
 
@@ -742,31 +663,19 @@ namespace channel {
 		get_next_token(); // identifier (guaranteed)
 		const std::string identifier = m_current_token.get_value();
 		get_next_token(); // l_parenthesis (guaranteed)
-
-		// check if the function exists
-		if (!m_function_registry.contains_function(identifier)) {
-			// function does not exist
-			error::emit<4001>(m_current_token.get_token_position(), identifier).print();
-			return false; // return on failure
-		}
-
 		std::vector<node*> arguments;
-		const std::vector<std::pair<std::string, type>>& required_arguments = m_function_registry.get_function_declaration(identifier)->get_arguments();
 
-		// parse the given arguments 
 		token next_token = peek_next_token();
 		if (next_token != token::r_parenthesis) {
-			u64 argument_index = 0;
 			while (true) {
 				node* argument;
-				if (!parse_expression(argument, required_arguments[argument_index].second)) {
+				if (!parse_expression(argument)) {
 					return false; // return on failure
 				}
 
 				arguments.push_back(argument);
 
 				next_token = peek_next_token(); // comma || r_parenthesis || other
-				argument_index++;
 
 				if (next_token == token::comma) {
 					get_next_token(); // comma (guaranteed)
@@ -794,7 +703,7 @@ namespace channel {
 		get_next_token(); // keyword_return (guaranteed)
 
 		node* expression;
-		if(!parse_expression(expression)) {
+		if (!parse_expression(expression)) {
 			return false; // return on failure
 		}
 
@@ -806,28 +715,25 @@ namespace channel {
 		const token_position position = m_current_token.get_token_position();
 
 		type declaration_type;
-		if(!parse_type(declaration_type)) {
+		if (!parse_type(declaration_type)) {
 			return false; // return on failure
 		}
 
-		if(!expect_next_token(token::identifier)) {
+		if (!expect_next_token(token::identifier)) {
 			return false; // return on failure
 		}
 
 		const std::string identifier = m_current_token.get_value();
 
 		node* value = nullptr;
-		if(peek_next_token() == token::operator_assignment) {
+		if (peek_next_token() == token::operator_assignment) {
 			get_next_token(); // operator_assignment
-			if(!parse_expression(value, declaration_type)) {
+			if (!parse_expression(value, declaration_type)) {
 				return false; // return on failure
 			}
 		}
 
-		// insert the type into the type map
-		m_type_scope->insert_variable_type(identifier, declaration_type);
-
-		if(is_global) {
+		if (is_global) {
 			out_node = new global_declaration_node(position, declaration_type, identifier, value);
 			return true;
 		}
@@ -905,7 +811,7 @@ namespace channel {
 				return false; // return on failure
 			}
 
-			switch(op.get_token()) {
+			switch (op.get_token()) {
 			case token::operator_greater_than:
 				left = new operator_greater_than_node(m_current_token.get_token_position(), left, right);
 				break;
@@ -1050,29 +956,33 @@ namespace channel {
 		get_next_token(); // type
 		const std::string str_value = m_current_token.get_value();
 		const type ty = expression_type.is_unknown() ? type(m_current_token.get_token(), 0) : expression_type;
+		out_node = new numerical_literal_node(m_current_token.get_token_position(), str_value, ty);
+		return true;
 
-		switch (ty.get_base()) {
-		// signed
-		case type::base::i8:  out_node = new i8_node(m_current_token.get_token_position(), std::stoll(str_value)); return true;
-		case type::base::i16: out_node = new i16_node(m_current_token.get_token_position(), std::stoll(str_value)); return true;
-		case type::base::i32: out_node = new i32_node(m_current_token.get_token_position(), std::stoll(str_value)); return true;
-		case type::base::i64: out_node = new i64_node(m_current_token.get_token_position(), std::stoll(str_value)); return true;
-		 // unsigned
-		case type::base::u8:  out_node = new u8_node(m_current_token.get_token_position(), std::stoull(str_value)); return true;
-		case type::base::u16: out_node = new u16_node(m_current_token.get_token_position(), std::stoull(str_value)); return true;
-		case type::base::u32: out_node = new u32_node(m_current_token.get_token_position(), std::stoull(str_value)); return true;
-		case type::base::u64: out_node = new u64_node(m_current_token.get_token_position(), std::stoull(str_value)); return true;
-		// floating point
-		case type::base::f32: out_node = new f32_node(m_current_token.get_token_position(), std::stof(str_value)); return true;
-		case type::base::f64: out_node = new f64_node(m_current_token.get_token_position(), std::stod(str_value)); return true;
-		// bool
-		case type::base::boolean: out_node = new bool_node(m_current_token.get_token_position(), std::stoi(str_value)); return true;
-		// char
-		case type::base::character: out_node = new char_node(m_current_token.get_token_position(), static_cast<char>(std::stoi(str_value))); return true;
-		default:
-			error::emit<3002>(m_current_token.get_token_position(), ty).print();
-			return false; // return on failure
-		}
+		// get_next_token(); // type
+		// const std::string str_value = m_current_token.get_value();
+		// const type ty = expression_type.is_unknown() ? type(m_current_token.get_token(), 0) : expression_type;
+		// 
+		// switch (ty.get_base()) {
+		// 	// signed
+		// case type::base::i8:  out_node = new i8_node(m_current_token.get_token_position(), std::stoll(str_value)); return true;
+		// case type::base::i16: out_node = new i16_node(m_current_token.get_token_position(), std::stoll(str_value)); return true;
+		// case type::base::i32: out_node = new i32_node(m_current_token.get_token_position(), std::stoll(str_value)); return true;
+		// case type::base::i64: out_node = new i64_node(m_current_token.get_token_position(), std::stoll(str_value)); return true;
+		// 	// unsigned
+		// case type::base::u8:  out_node = new u8_node(m_current_token.get_token_position(), std::stoull(str_value)); return true;
+		// case type::base::u16: out_node = new u16_node(m_current_token.get_token_position(), std::stoull(str_value)); return true;
+		// case type::base::u32: out_node = new u32_node(m_current_token.get_token_position(), std::stoull(str_value)); return true;
+		// case type::base::u64: out_node = new u64_node(m_current_token.get_token_position(), std::stoull(str_value)); return true;
+		// 	// floating point
+		// case type::base::f32: out_node = new f32_node(m_current_token.get_token_position(), std::stof(str_value)); return true;
+		// case type::base::f64: out_node = new f64_node(m_current_token.get_token_position(), std::stod(str_value)); return true;
+		// 	// bool
+		// case type::base::boolean: out_node = new bool_node(m_current_token.get_token_position(), std::stoi(str_value)); return true;
+		// default:
+		// 	error::emit<3002>(m_current_token.get_token_position(), ty).print();
+		// 	return false; // return on failure
+		// }
 	}
 
 	bool parser::parse_char(node*& out_node) {
@@ -1102,7 +1012,7 @@ namespace channel {
 	bool parser::parse_post_operator(node* operand, node*& out_node) {
 		get_next_token();
 
-		if(m_current_token.get_token() == token::operator_increment) {
+		if (m_current_token.get_token() == token::operator_increment) {
 			out_node = new operator_post_increment(m_current_token.get_token_position(), operand);
 		}
 		else {
@@ -1121,7 +1031,7 @@ namespace channel {
 			return false; // return on failure
 		}
 
-		if(op.get_token() == token::operator_increment) {
+		if (op.get_token() == token::operator_increment) {
 			out_node = new operator_pre_increment(op.get_token_position(), operand);
 		}
 		else {
@@ -1151,7 +1061,7 @@ namespace channel {
 		const token_position position = m_current_token.get_token_position();
 
 		type allocation_type;
-		if(!parse_type(allocation_type)) {
+		if (!parse_type(allocation_type)) {
 			return false; // return on failure
 		}
 
@@ -1162,7 +1072,7 @@ namespace channel {
 
 		// parse array size
 		node* array_size;
-		if(!parse_expression(array_size, type(type::base::u64, 0))) {
+		if (!parse_expression(array_size, type(type::base::u64, 0))) {
 			return false; // return on failure
 		}
 
@@ -1181,8 +1091,8 @@ namespace channel {
 			return parse_function_call(out_node);
 		}
 
-		if(peek_is_array_index_access()) {
-			if(!parse_array_access(out_node)) {
+		if (peek_is_array_index_access()) {
+			if (!parse_array_access(out_node)) {
 				return false; // return on failure
 			}
 		}
@@ -1192,10 +1102,10 @@ namespace channel {
 			const std::string identifier = m_current_token.get_value();
 			out_node = new variable_access_node(m_current_token.get_token_position(), identifier);
 		}
-		
+
 		// post increment
 		const token next_token = peek_next_token();
-		if(next_token == token::operator_increment || next_token == token::operator_decrement) {
+		if (next_token == token::operator_increment || next_token == token::operator_decrement) {
 			return parse_post_operator(out_node, out_node);
 		}
 
@@ -1217,22 +1127,22 @@ namespace channel {
 
 		return true;
 	}
-	
+
 	bool parser::peek_is_function_definition() {
 		// type
-		if(!is_token_type(m_lexer.peek_token().get_token())) {
+		if (!is_token_type(m_lexer.peek_token().get_token())) {
 			m_lexer.synchronize_indices();
 			return false; // return on failure
 		}
 
 		// pointers?
 		token tok = m_lexer.peek_token().get_token();
-		while(tok == token::operator_multiplication) {
+		while (tok == token::operator_multiplication) {
 			tok = m_lexer.peek_token().get_token();
 		}
 
 		// identifier
-		if(tok != token::identifier) {
+		if (tok != token::identifier) {
 			m_lexer.synchronize_indices();
 			return false; // return on failure
 		}
@@ -1244,7 +1154,7 @@ namespace channel {
 
 	bool parser::peek_is_function_call() {
 		// identifier
-		if(m_lexer.peek_token().get_token() != token::identifier) {
+		if (m_lexer.peek_token().get_token() != token::identifier) {
 			m_lexer.synchronize_indices();
 			return false; // return on failure
 		}
@@ -1308,27 +1218,28 @@ namespace channel {
 	}
 
 	node* parser::create_zero_node(type expression_type) const {
-		switch (expression_type.get_base()) {
-		case type::base::i8:  return new i8_node(m_current_token.get_token_position(), 0);
-		case type::base::i16: return new i16_node(m_current_token.get_token_position(), 0);
-		case type::base::i32: return new i32_node(m_current_token.get_token_position(), 0);
-		case type::base::i64: return new i64_node(m_current_token.get_token_position(), 0);
-		case type::base::u8:  return new u8_node(m_current_token.get_token_position(), 0);
-		case type::base::u16: return new u16_node(m_current_token.get_token_position(), 0);
-		case type::base::u32: return new u32_node(m_current_token.get_token_position(), 0);
-		case type::base::u64: return new u64_node(m_current_token.get_token_position(), 0);
-		case type::base::f32: return new f32_node(m_current_token.get_token_position(), 0.0f);
-		case type::base::f64: return new f64_node(m_current_token.get_token_position(), 0.0);
-		default:
-			ASSERT(false, "[parser]: cannot convert '" + expression_type.to_string() + "' to a type keyword");
-			return nullptr;
-		}
+		return new numerical_literal_node(m_current_token.get_token_position(), "0", expression_type);
+		//switch (expression_type.get_base()) {
+		//case type::base::i8:  return new i8_node(m_current_token.get_token_position(), 0);
+		//case type::base::i16: return new i16_node(m_current_token.get_token_position(), 0);
+		//case type::base::i32: return new i32_node(m_current_token.get_token_position(), 0);
+		//case type::base::i64: return new i64_node(m_current_token.get_token_position(), 0);
+		//case type::base::u8:  return new u8_node(m_current_token.get_token_position(), 0);
+		//case type::base::u16: return new u16_node(m_current_token.get_token_position(), 0);
+		//case type::base::u32: return new u32_node(m_current_token.get_token_position(), 0);
+		//case type::base::u64: return new u64_node(m_current_token.get_token_position(), 0);
+		//case type::base::f32: return new f32_node(m_current_token.get_token_position(), 0.0f);
+		//case type::base::f64: return new f64_node(m_current_token.get_token_position(), 0.0);
+		//default:
+		//	ASSERT(false, "[parser]: cannot convert '" + expression_type.to_string() + "' to a type keyword");
+		//	return nullptr;
+		//}
 	}
 
 	bool parser::parse_type(type& ty) {
 		get_next_token();
 
-		if(!is_token_type(m_current_token.get_token())) {
+		if (!is_token_type(m_current_token.get_token())) {
 			error::emit<3003>(m_current_token.get_token_position(), m_current_token.get_token()).print();
 			return false; // return on failure
 		}
@@ -1336,7 +1247,7 @@ namespace channel {
 		ty = type(m_current_token.get_token(), 0);
 
 		// check if the next token is an asterisk
-		while(peek_next_token() == token::operator_multiplication) {
+		while (peek_next_token() == token::operator_multiplication) {
 			get_next_token(); // operator_multiplication (guaranteed)
 			ty.set_pointer_level(ty.get_pointer_level() + 1);
 		}

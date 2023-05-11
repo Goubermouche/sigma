@@ -1,5 +1,5 @@
 #pragma once
-#include "diagnostic.h"
+#include "compiler/diagnostics/diagnostic.h"
 
 namespace channel {
 	constexpr auto error_templates = make_hash_map(
@@ -34,7 +34,8 @@ namespace channel {
 		std::pair{ 4010, "for conditional operator has to be of type 'bool' (received '{}' instead)" },
 		std::pair{ 4011, "invalid break statement detected outside a valid loop body" },
 		std::pair{ 4012, "unable to locate the main entry point" },
-		std::pair{ 4013, "unable to declare a main entry point with the return type of '{}' (expecting 'i32')" }
+		std::pair{ 4013, "unable to declare a main entry point with the return type of '{}' (expecting 'i32')" },
+		std::pair{ 4014, "unable to declare a numerical literal with a pointer type" }
 	);
 
 	class error_message : public diagnostic_message {

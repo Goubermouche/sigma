@@ -1,5 +1,5 @@
 #pragma once
-#include "../node.h"
+#include "codegen/abstract_syntax_tree/node.h"
 
 namespace channel {
 	/**
@@ -13,7 +13,7 @@ namespace channel {
 			const std::vector<node_ptr>& function_arguments
 		);
 
-		bool accept(visitor& visitor, value_ptr& out_value) override;
+		bool accept(visitor& visitor, value_ptr& out_value, codegen_context context) override;
 		void print(int depth, const std::wstring& prefix, bool is_last) override;
 
 		const std::string& get_function_identifier() const;

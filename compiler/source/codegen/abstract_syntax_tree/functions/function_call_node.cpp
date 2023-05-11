@@ -9,9 +9,8 @@ namespace channel {
 	m_function_name(function_identifier),
 	m_function_arguments(function_arguments) {}
 
-	bool function_call_node::accept(visitor& visitor, value_ptr& out_value) {
-		LOG_NODE_NAME(function_call_node);
-		return visitor.visit_function_call_node(*this, out_value);
+	bool function_call_node::accept(visitor& visitor, value_ptr& out_value, codegen_context context) {
+		return visitor.visit_function_call_node(*this, out_value, context);
 	}
 
 	void function_call_node::print(int depth, const std::wstring& prefix, bool is_last) {

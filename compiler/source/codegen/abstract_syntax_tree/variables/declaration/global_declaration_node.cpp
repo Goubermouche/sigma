@@ -13,9 +13,8 @@ namespace channel {
 		expression_node
 	) {}
 
-	bool global_declaration_node::accept(visitor& visitor, value_ptr& out_value)	{
-		LOG_NODE_NAME(global_declaration_node);
-		return visitor.visit_global_declaration_node(*this, out_value);
+	bool global_declaration_node::accept(visitor& visitor, value_ptr& out_value, codegen_context context)	{
+		return visitor.visit_global_declaration_node(*this, out_value, context);
 	}
 
 	void global_declaration_node::print(int depth, const std::wstring& prefix, bool is_last) {

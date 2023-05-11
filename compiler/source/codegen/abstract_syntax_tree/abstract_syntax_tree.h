@@ -1,5 +1,5 @@
 #pragma once
-#include "node.h"
+#include "codegen/abstract_syntax_tree/node.h"
 
 namespace channel {
 	class abstract_syntax_tree {

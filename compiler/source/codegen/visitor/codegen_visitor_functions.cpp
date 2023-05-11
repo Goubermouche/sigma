@@ -1,10 +1,10 @@
 #include "codegen_visitor.h"
 
-#include "../abstract_syntax_tree/functions/function_call_node.h"
-#include "../abstract_syntax_tree/functions/function_node.h"
+#include "codegen/abstract_syntax_tree/functions/function_call_node.h"
+#include "codegen/abstract_syntax_tree/functions/function_node.h"
 
 namespace channel {
-	bool codegen_visitor::visit_function_node(function_node& node, value_ptr& out_value) {
+	bool codegen_visitor::visit_function_node(function_node& node, value_ptr& out_value, codegen_context context) {
 		// get the function return type
 		llvm::Type* return_type = node.get_function_return_type().get_llvm_type(m_context);
 
@@ -54,7 +54,6 @@ namespace channel {
 			llvm::AllocaInst* alloca = m_builder.CreateAlloca(arg_type.get_llvm_type(m_context), nullptr, arg_name);
 			m_builder.CreateStore(llvm_arg, alloca);
 
-
 			// add the alloca to the current scope
 			m_scope->add_named_value(arg_name, std::make_shared<value>(
 				arg_name,
@@ -68,7 +67,7 @@ namespace channel {
 		// accept all statements inside the function
 		for (const auto& statement : node.get_function_statements()) {
 			value_ptr temp_statement_value;
-			if (!statement->accept(*this, temp_statement_value)) {
+			if (!statement->accept(*this, temp_statement_value, {})) {
 				return false;
 			}
 		}
@@ -93,7 +92,7 @@ namespace channel {
 		return true;
 	}
 
-	bool codegen_visitor::visit_function_call_node(function_call_node& node, value_ptr& out_value) {
+	bool codegen_visitor::visit_function_call_node(function_call_node& node, value_ptr& out_value, codegen_context context) {
 		// get a reference to the function
 		const function_ptr func = m_function_registry.get_function(node.get_function_identifier());
 
@@ -116,7 +115,7 @@ namespace channel {
 		for (u64 i = 0; i < required_arguments.size(); i++) {
 			// get the argument value
 			value_ptr argument_value;
-			if(!given_arguments[i]->accept(*this, argument_value)) {
+			if(!given_arguments[i]->accept(*this, argument_value, codegen_context(required_arguments[i].second))) {
 				return false;
 			}
 
@@ -126,10 +125,11 @@ namespace channel {
 			}
 		}
 
+		// parse variadic arguments
 		for (u64 i = required_arguments.size(); i < given_arguments.size(); i++) {
 			// get the argument value
 			value_ptr argument_value;
-			if (!given_arguments[i]->accept(*this, argument_value)) {
+			if (!given_arguments[i]->accept(*this, argument_value, {})) {
 				return false;
 			}
 

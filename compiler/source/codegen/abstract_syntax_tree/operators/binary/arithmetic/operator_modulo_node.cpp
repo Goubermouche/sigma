@@ -11,9 +11,8 @@ namespace channel {
 		right_expression_node
 	) {}
 
-	bool operator_modulo_node::accept(visitor& visitor, value_ptr& out_value) {
-		LOG_NODE_NAME(operator_modulo_node);
-		return visitor.visit_operator_modulo_node(*this, out_value);
+	bool operator_modulo_node::accept(visitor& visitor, value_ptr& out_value, codegen_context context) {
+		return visitor.visit_operator_modulo_node(*this, out_value, context);
 	}
 
 	void operator_modulo_node::print(int depth, const std::wstring& prefix, bool is_last) {

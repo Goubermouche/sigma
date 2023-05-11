@@ -9,9 +9,8 @@ namespace channel {
 	m_condition_nodes(condition_nodes),
 	m_branch_nodes(branch_nodes) {}
 
-	bool if_else_node::accept(visitor& visitor, value_ptr& out_value) {
-		LOG_NODE_NAME(if_else_node);
-		return visitor.visit_if_else_node(*this, out_value);
+	bool if_else_node::accept(visitor& visitor, value_ptr& out_value, codegen_context context) {
+		return visitor.visit_if_else_node(*this, out_value, context);
 	}
 
 	void if_else_node::print(int depth, const std::wstring& prefix, bool is_last) {

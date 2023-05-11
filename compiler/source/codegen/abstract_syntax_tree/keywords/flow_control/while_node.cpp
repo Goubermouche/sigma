@@ -9,9 +9,8 @@ namespace channel {
 	m_loop_condition_node(loop_condition_node),
 	m_loop_body_nodes(statement_nodes) {}
 
-	bool while_node::accept(visitor& visitor, value_ptr& out_value) {
-		LOG_NODE_NAME(while_node);
-		return visitor.visit_while_node(*this, out_value);
+	bool while_node::accept(visitor& visitor, value_ptr& out_value, codegen_context context) {
+		return visitor.visit_while_node(*this, out_value, context);
 	}
 
 	void while_node::print(int depth, const std::wstring& prefix, bool is_last) {

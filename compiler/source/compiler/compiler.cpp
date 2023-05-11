@@ -1,5 +1,5 @@
 #include "compiler.h"
-#include "../codegen/visitor/codegen_visitor.h"
+#include "codegen/visitor/codegen_visitor.h"
 
 // llvm
 #include <llvm/Support/VirtualFileSystem.h>
@@ -47,7 +47,7 @@ namespace channel {
 
 		console::out << "parsing finished (" << parser_timer.elapsed() << "ms)\n";
 
-		// parser.get_abstract_syntax_tree().print_nodes();
+		parser.get_abstract_syntax_tree().print_nodes();
 
 		codegen_timer.start();
 		codegen_visitor visitor(parser);

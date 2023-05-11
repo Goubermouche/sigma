@@ -2,31 +2,31 @@
 
 // unary
 // arithmetic
-#include "../abstract_syntax_tree/operators/unary/arithmetic/operator_post_decrement.h"
-#include "../abstract_syntax_tree/operators/unary/arithmetic/operator_post_increment.h"
-#include "../abstract_syntax_tree/operators/unary/arithmetic/operator_pre_decrement.h"
-#include "../abstract_syntax_tree/operators/unary/arithmetic/operator_pre_increment.h"
+#include "codegen/abstract_syntax_tree/operators/unary/arithmetic/operator_post_decrement.h"
+#include "codegen/abstract_syntax_tree/operators/unary/arithmetic/operator_post_increment.h"
+#include "codegen/abstract_syntax_tree/operators/unary/arithmetic/operator_pre_decrement.h"
+#include "codegen/abstract_syntax_tree/operators/unary/arithmetic/operator_pre_increment.h"
 // binary
 // arithmetic
-#include "../abstract_syntax_tree/operators/binary/arithmetic/operator_addition_node.h"
-#include "../abstract_syntax_tree/operators/binary/arithmetic/operator_subtraction_node.h"
-#include "../abstract_syntax_tree/operators/binary/arithmetic/operator_multiplication_node.h"
-#include "../abstract_syntax_tree/operators/binary/arithmetic/operator_division_node.h"
-#include "../abstract_syntax_tree/operators/binary/arithmetic/operator_modulo_node.h"
+#include "codegen/abstract_syntax_tree/operators/binary/arithmetic/operator_addition_node.h"
+#include "codegen/abstract_syntax_tree/operators/binary/arithmetic/operator_subtraction_node.h"
+#include "codegen/abstract_syntax_tree/operators/binary/arithmetic/operator_multiplication_node.h"
+#include "codegen/abstract_syntax_tree/operators/binary/arithmetic/operator_division_node.h"
+#include "codegen/abstract_syntax_tree/operators/binary/arithmetic/operator_modulo_node.h"
 // logical
-#include "../abstract_syntax_tree/operators/binary/logical/operator_conjunction_node.h"
-#include "../abstract_syntax_tree/operators/binary/logical/operator_disjunction_node.h"
-#include "../abstract_syntax_tree/operators/binary/logical/operator_greater_than_node.h"
-#include "../abstract_syntax_tree/operators/binary/logical/operator_greater_than_equal_to_node.h"
-#include "../abstract_syntax_tree/operators/binary/logical/operator_less_than_node.h"
-#include "../abstract_syntax_tree/operators/binary/logical/operator_less_than_equal_to_node.h"
-#include "../abstract_syntax_tree/operators/binary/logical/operator_equals_node.h"
-#include "../abstract_syntax_tree/operators/binary/logical/operator_not_equals_node.h"
+#include "codegen/abstract_syntax_tree/operators/binary/logical/operator_conjunction_node.h"
+#include "codegen/abstract_syntax_tree/operators/binary/logical/operator_disjunction_node.h"
+#include "codegen/abstract_syntax_tree/operators/binary/logical/operator_greater_than_node.h"
+#include "codegen/abstract_syntax_tree/operators/binary/logical/operator_greater_than_equal_to_node.h"
+#include "codegen/abstract_syntax_tree/operators/binary/logical/operator_less_than_node.h"
+#include "codegen/abstract_syntax_tree/operators/binary/logical/operator_less_than_equal_to_node.h"
+#include "codegen/abstract_syntax_tree/operators/binary/logical/operator_equals_node.h"
+#include "codegen/abstract_syntax_tree/operators/binary/logical/operator_not_equals_node.h"
 
 namespace channel {
-	bool codegen_visitor::visit_operator_post_decrement_node(operator_post_decrement& node, value_ptr& out_value) {
+	bool codegen_visitor::visit_operator_post_decrement_node(operator_post_decrement& node, value_ptr& out_value, codegen_context context) {
 		value_ptr loaded_value;
-		if (!node.get_expression_node()->accept(*this, loaded_value)) {
+		if (!node.get_expression_node()->accept(*this, loaded_value, context)) {
 			return false;
 		}
 
@@ -56,9 +56,9 @@ namespace channel {
 		return true;
 	}
 
-	bool codegen_visitor::visit_operator_post_increment_node(operator_post_increment& node, value_ptr& out_value) {
+	bool codegen_visitor::visit_operator_post_increment_node(operator_post_increment& node, value_ptr& out_value, codegen_context context) {
 		value_ptr loaded_value;
-		if (!node.get_expression_node()->accept(*this, loaded_value)) {
+		if (!node.get_expression_node()->accept(*this, loaded_value, context)) {
 			return false;
 		}
 
@@ -88,10 +88,10 @@ namespace channel {
 		return true;
 	}
 
-	bool codegen_visitor::visit_operator_pre_decrement_node(operator_pre_decrement& node, value_ptr& out_value) {
+	bool codegen_visitor::visit_operator_pre_decrement_node(operator_pre_decrement& node, value_ptr& out_value, codegen_context context) {
 		// accept the expression
 		value_ptr expression;
-		if (!node.get_expression_node()->accept(*this, expression)) {
+		if (!node.get_expression_node()->accept(*this, expression, context)) {
 			return false;
 		}
 
@@ -123,10 +123,10 @@ namespace channel {
 		return true;
 	}
 
-	bool codegen_visitor::visit_operator_pre_increment_node(operator_pre_increment& node, value_ptr& out_value) {
+	bool codegen_visitor::visit_operator_pre_increment_node(operator_pre_increment& node, value_ptr& out_value, codegen_context context) {
 		// accept the expression
 		value_ptr expression;
-		if (!node.get_expression_node()->accept(*this, expression)) {
+		if (!node.get_expression_node()->accept(*this, expression, context)) {
 			return false;
 		}
 
@@ -158,16 +158,16 @@ namespace channel {
 		return true;
 	}
 
-	bool codegen_visitor::visit_operator_addition_node(operator_addition_node& node, value_ptr& out_value) {
+	bool codegen_visitor::visit_operator_addition_node(operator_addition_node& node, value_ptr& out_value, codegen_context context) {
 		// accept the left expression
 		value_ptr left;
-		if (!node.get_left_expression_node()->accept(*this, left)) {
+		if (!node.get_left_expression_node()->accept(*this, left, context)) {
 			return false;
 		}
 
 		// accept the right expression
 		value_ptr right;
-		if (!node.get_right_expression_node()->accept(*this, right)) {
+		if (!node.get_right_expression_node()->accept(*this, right, context)) {
 			return false;
 		}
 
@@ -222,16 +222,16 @@ namespace channel {
 		return true;
 	}
 
-	bool codegen_visitor::visit_operator_subtraction_node(operator_subtraction_node& node, value_ptr& out_value) {
+	bool codegen_visitor::visit_operator_subtraction_node(operator_subtraction_node& node, value_ptr& out_value, codegen_context context) {
 		// accept the left expression
 		value_ptr left;
-		if (!node.get_left_expression_node()->accept(*this, left)) {
+		if (!node.get_left_expression_node()->accept(*this, left, context)) {
 			return false;
 		}
 
 		// accept the right expression
 		value_ptr right;
-		if (!node.get_right_expression_node()->accept(*this, right)) {
+		if (!node.get_right_expression_node()->accept(*this, right, context)) {
 			return false;
 		}
 
@@ -286,16 +286,16 @@ namespace channel {
 		return true;
 	}
 
-	bool codegen_visitor::visit_operator_multiplication_node(operator_multiplication_node& node, value_ptr& out_value) {
+	bool codegen_visitor::visit_operator_multiplication_node(operator_multiplication_node& node, value_ptr& out_value, codegen_context context) {
 		// accept the left expression
 		value_ptr left;
-		if (!node.get_left_expression_node()->accept(*this, left)) {
+		if (!node.get_left_expression_node()->accept(*this, left, context)) {
 			return false;
 		}
 
 		// accept the right expression
 		value_ptr right;
-		if (!node.get_right_expression_node()->accept(*this, right)) {
+		if (!node.get_right_expression_node()->accept(*this, right, context)) {
 			return false;
 		}
 
@@ -350,16 +350,16 @@ namespace channel {
 		return true;
 	}
 
-	bool codegen_visitor::visit_operator_division_node(operator_division_node& node, value_ptr& out_value) {
+	bool codegen_visitor::visit_operator_division_node(operator_division_node& node, value_ptr& out_value, codegen_context context) {
 		// accept the left expression
 		value_ptr left;
-		if (!node.get_left_expression_node()->accept(*this, left)) {
+		if (!node.get_left_expression_node()->accept(*this, left, context)) {
 			return false;
 		}
 
 		// accept the right expression
 		value_ptr right;
-		if (!node.get_right_expression_node()->accept(*this, right)) {
+		if (!node.get_right_expression_node()->accept(*this, right, context)) {
 			return false;
 		}
 
@@ -413,16 +413,16 @@ namespace channel {
 		return true;
 	}
 
-	bool codegen_visitor::visit_operator_modulo_node(operator_modulo_node& node, value_ptr& out_value) {
+	bool codegen_visitor::visit_operator_modulo_node(operator_modulo_node& node, value_ptr& out_value, codegen_context context) {
 		// accept the left expression
 		value_ptr left;
-		if (!node.get_left_expression_node()->accept(*this, left)) {
+		if (!node.get_left_expression_node()->accept(*this, left, context)) {
 			return false;
 		}
 
 		// accept the right expression
 		value_ptr right;
-		if (!node.get_right_expression_node()->accept(*this, right)) {
+		if (!node.get_right_expression_node()->accept(*this, right, context)) {
 			return false;
 		}
 
@@ -476,16 +476,16 @@ namespace channel {
 		return true;
 	}
 
-	bool codegen_visitor::visit_operator_logical_conjunction_node(operator_conjunction_node& node, value_ptr& out_value) {
+	bool codegen_visitor::visit_operator_logical_conjunction_node(operator_conjunction_node& node, value_ptr& out_value, codegen_context context) {
 		// accept the left expression
 		value_ptr left;
-		if (!node.get_left_expression_node()->accept(*this, left)) {
+		if (!node.get_left_expression_node()->accept(*this, left, context)) {
 			return false;
 		}
 
 		// accept the right expression
 		value_ptr right;
-		if (!node.get_right_expression_node()->accept(*this, right)) {
+		if (!node.get_right_expression_node()->accept(*this, right, context)) {
 			return false;
 		}
 
@@ -501,16 +501,16 @@ namespace channel {
 		return true;
 	}
 
-	bool codegen_visitor::visit_operator_logical_disjunction_node(operator_disjunction_node& node, value_ptr& out_value) {
+	bool codegen_visitor::visit_operator_logical_disjunction_node(operator_disjunction_node& node, value_ptr& out_value, codegen_context context) {
 		// accept the left expression
 		value_ptr left;
-		if (!node.get_left_expression_node()->accept(*this, left)) {
+		if (!node.get_left_expression_node()->accept(*this, left, context)) {
 			return false;
 		}
 
 		// accept the right expression
 		value_ptr right;
-		if (!node.get_right_expression_node()->accept(*this, right)) {
+		if (!node.get_right_expression_node()->accept(*this, right, context)) {
 			return false;
 		}
 
@@ -526,16 +526,16 @@ namespace channel {
 		return true;
 	}
 
-	bool codegen_visitor::visit_operator_greater_than_node(operator_greater_than_node& node, value_ptr& out_value) {
+	bool codegen_visitor::visit_operator_greater_than_node(operator_greater_than_node& node, value_ptr& out_value, codegen_context context) {
 		// accept the left expression
 		value_ptr left;
-		if (!node.get_left_expression_node()->accept(*this, left)) {
+		if (!node.get_left_expression_node()->accept(*this, left, context)) {
 			return false;
 		}
 
 		// accept the right expression
 		value_ptr right;
-		if (!node.get_right_expression_node()->accept(*this, right)) {
+		if (!node.get_right_expression_node()->accept(*this, right, context)) {
 			return false;
 		}
 
@@ -569,16 +569,16 @@ namespace channel {
 		return true;
 	}
 
-	bool codegen_visitor::visit_operator_greater_than_equal_to_node(operator_greater_than_equal_to_node& node, value_ptr& out_value) {
+	bool codegen_visitor::visit_operator_greater_than_equal_to_node(operator_greater_than_equal_to_node& node, value_ptr& out_value, codegen_context context) {
 		// accept the left expression
 		value_ptr left;
-		if (!node.get_left_expression_node()->accept(*this, left)) {
+		if (!node.get_left_expression_node()->accept(*this, left, context)) {
 			return false;
 		}
 
 		// accept the right expression
 		value_ptr right;
-		if (!node.get_right_expression_node()->accept(*this, right)) {
+		if (!node.get_right_expression_node()->accept(*this, right, context)) {
 			return false;
 		}
 
@@ -612,16 +612,16 @@ namespace channel {
 		return true;
 	}
 
-	bool codegen_visitor::visit_operator_less_than_node(operator_less_than_node& node, value_ptr& out_value) {
+	bool codegen_visitor::visit_operator_less_than_node(operator_less_than_node& node, value_ptr& out_value, codegen_context context) {
 		// accept the left expression
 		value_ptr left;
-		if (!node.get_left_expression_node()->accept(*this, left)) {
+		if (!node.get_left_expression_node()->accept(*this, left, context)) {
 			return false;
 		}
 
 		// accept the right expression
 		value_ptr right;
-		if (!node.get_right_expression_node()->accept(*this, right)) {
+		if (!node.get_right_expression_node()->accept(*this, right, context)) {
 			return false;
 		}
 
@@ -655,16 +655,16 @@ namespace channel {
 		return true;
 	}
 
-	bool codegen_visitor::visit_operator_less_than_equal_to_node(operator_less_than_equal_to_node& node, value_ptr& out_value) {
+	bool codegen_visitor::visit_operator_less_than_equal_to_node(operator_less_than_equal_to_node& node, value_ptr& out_value, codegen_context context) {
 		// accept the left expression
 		value_ptr left;
-		if (!node.get_left_expression_node()->accept(*this, left)) {
+		if (!node.get_left_expression_node()->accept(*this, left, context)) {
 			return false;
 		}
 
 		// accept the right expression
 		value_ptr right;
-		if (!node.get_right_expression_node()->accept(*this, right)) {
+		if (!node.get_right_expression_node()->accept(*this, right, context)) {
 			return false;
 		}
 
@@ -698,16 +698,16 @@ namespace channel {
 		return true;
 	}
 
-	bool codegen_visitor::visit_operator_equals_node(operator_equals_node& node, value_ptr& out_value) {
+	bool codegen_visitor::visit_operator_equals_node(operator_equals_node& node, value_ptr& out_value, codegen_context context) {
 		// accept the left expression
 		value_ptr left;
-		if (!node.get_left_expression_node()->accept(*this, left)) {
+		if (!node.get_left_expression_node()->accept(*this, left, context)) {
 			return false;
 		}
 
 		// accept the right expression
 		value_ptr right;
-		if (!node.get_right_expression_node()->accept(*this, right)) {
+		if (!node.get_right_expression_node()->accept(*this, right, context)) {
 			return false;
 		}
 
@@ -736,16 +736,16 @@ namespace channel {
 		return true;
 	}
 
-	bool codegen_visitor::visit_operator_not_equals_node(operator_not_equals_node& node, value_ptr& out_value) {
+	bool codegen_visitor::visit_operator_not_equals_node(operator_not_equals_node& node, value_ptr& out_value, codegen_context context) {
 		// accept the left expression
 		value_ptr left;
-		if (!node.get_left_expression_node()->accept(*this, left)) {
+		if (!node.get_left_expression_node()->accept(*this, left, context)) {
 			return false;
 		}
 
 		// accept the right expression
 		value_ptr right;
-		if (!node.get_right_expression_node()->accept(*this, right)) {
+		if (!node.get_right_expression_node()->accept(*this, right, context)) {
 			return false;
 		}
 

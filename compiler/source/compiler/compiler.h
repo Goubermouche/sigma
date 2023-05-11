@@ -1,5 +1,5 @@
 #pragma once
-#include "../utility/timer.h"
+#include "utility/timer.h"
 
 namespace channel {
 	class compiler {

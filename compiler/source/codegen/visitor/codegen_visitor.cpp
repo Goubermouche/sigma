@@ -5,7 +5,7 @@
 
 namespace channel {
 	codegen_visitor::codegen_visitor(const parser& parser)
-		: m_parser(parser), m_scope(new scope(nullptr, nullptr)), m_function_registry(parser.get_function_registry()), m_builder(m_context) {
+		: m_parser(parser), m_scope(new scope(nullptr, nullptr)), m_builder(m_context) {
 		m_module = std::make_unique<llvm::Module>("channel", m_context);
 
 		// initialize function declarations
@@ -50,7 +50,7 @@ namespace channel {
 		abstract_syntax_tree tree = m_parser.get_abstract_syntax_tree();
 
 		for (node* n : tree) {
-			if(!n->accept(*this, tmp_value)) {
+			if(!n->accept(*this, tmp_value, {})) {
 				return false;
 			}
 		}
@@ -88,10 +88,10 @@ namespace channel {
 		return true;
 	}
 
-	bool codegen_visitor::visit_translation_unit_node(translation_unit_node& node, value_ptr& out_value) {
+	bool codegen_visitor::visit_translation_unit_node(translation_unit_node& node, value_ptr& out_value, codegen_context context) {
 		value_ptr temp_value;
 		for(const auto& n : node.get_nodes()) {
-			if(!n->accept(*this, temp_value)) {
+			if(!n->accept(*this, temp_value, context)) {
 				return false;
 			}
 		}

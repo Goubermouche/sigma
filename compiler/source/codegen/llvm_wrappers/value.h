@@ -1,5 +1,5 @@
 #pragma once
-#include "type.h"
+#include "codegen/llvm_wrappers/type.h"
 
 namespace channel {
 	class value;

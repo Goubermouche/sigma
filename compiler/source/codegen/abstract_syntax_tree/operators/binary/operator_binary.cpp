@@ -12,6 +12,7 @@ namespace channel {
 	const node_ptr& operator_binary::get_left_expression_node() const {
 		return m_left_expression_node;
 	}
+
 	const node_ptr& operator_binary::get_right_expression_node() const {
 		return m_right_expression_node;
 	}

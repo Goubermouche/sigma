@@ -1,5 +1,5 @@
 #pragma once
-#include "function.h"
+#include "codegen/llvm_wrappers/functions/function.h"
 
 namespace channel {
 	using function_ptr = std::shared_ptr<function>;

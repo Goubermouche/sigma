@@ -1,5 +1,5 @@
 #pragma once
-#include "../../node.h"
+#include "codegen/abstract_syntax_tree/node.h"
 
 namespace channel {
 	/**
@@ -13,7 +13,7 @@ namespace channel {
 			const node_ptr& array_element_count_node
 		);
 
-		bool accept(visitor& visitor, value_ptr& out_value) override;
+		bool accept(visitor& visitor, value_ptr& out_value, codegen_context context) override;
 		void print(int depth, const std::wstring& prefix, bool is_last) override;
 
 		const type& get_array_element_type() const;

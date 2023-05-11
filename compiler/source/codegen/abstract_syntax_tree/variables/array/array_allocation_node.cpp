@@ -9,9 +9,8 @@ namespace channel {
 	m_array_element_type(array_element_type),
 	m_array_element_count(array_element_count_node) {}
 
-	bool array_allocation_node::accept(visitor& visitor, value_ptr& out_value) {
-		LOG_NODE_NAME(allocation_node);
-		return visitor.visit_allocation_node(*this, out_value);
+	bool array_allocation_node::accept(visitor& visitor, value_ptr& out_value, codegen_context context) {
+		return visitor.visit_allocation_node(*this, out_value, context);
 	}
 
 	void array_allocation_node::print(int depth, const std::wstring& prefix, bool is_last) {

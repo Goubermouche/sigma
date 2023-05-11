@@ -1,25 +1,25 @@
 #include "codegen_visitor.h"
 
-#include "../abstract_syntax_tree/variables/assignment_node.h"
-#include "../abstract_syntax_tree/variables/variable_access_node.h"
-#include "../abstract_syntax_tree/variables/variable_node.h"
-#include "../abstract_syntax_tree/variables/array/array_allocation_node.h"
-#include "../abstract_syntax_tree/variables/array/array_assignment_node.h"
-#include "../abstract_syntax_tree/variables/array/array_access_node.h"
-#include "../abstract_syntax_tree/variables/declaration/local_declaration_node.h"
-#include "../abstract_syntax_tree/variables/declaration/global_declaration_node.h"
+#include "codegen/abstract_syntax_tree/variables/assignment_node.h"
+#include "codegen/abstract_syntax_tree/variables/variable_access_node.h"
+#include "codegen/abstract_syntax_tree/variables/variable_node.h"
+#include "codegen/abstract_syntax_tree/variables/array/array_allocation_node.h"
+#include "codegen/abstract_syntax_tree/variables/array/array_assignment_node.h"
+#include "codegen/abstract_syntax_tree/variables/array/array_access_node.h"
+#include "codegen/abstract_syntax_tree/variables/declaration/local_declaration_node.h"
+#include "codegen/abstract_syntax_tree/variables/declaration/global_declaration_node.h"
 
 namespace channel {
-	bool codegen_visitor::visit_assignment_node(assignment_node& node, value_ptr& out_value) {
-		// evaluate the expression on the right-hand side of the assignment
-		if (!node.get_expression_node()->accept(*this, out_value)) {
-			return false;
-		}
-
+	bool codegen_visitor::visit_assignment_node(assignment_node& node, value_ptr& out_value, codegen_context context) {
 		// assignment to a local variable
 		// look up the local variable in the active scope
 		value_ptr variable;
-		if(!node.get_variable_node()->accept(*this, variable)) {
+		if(!node.get_variable_node()->accept(*this, variable, {})) {
+			return false;
+		}
+
+		// evaluate the expression on the right-hand side of the assignment
+		if (!node.get_expression_node()->accept(*this, out_value, codegen_context(variable->get_type()))) {
 			return false;
 		}
 
@@ -33,7 +33,7 @@ namespace channel {
 		return true;
 	}
 
-	bool codegen_visitor::visit_variable_access_node(variable_access_node& node, value_ptr& out_value) {
+	bool codegen_visitor::visit_variable_access_node(variable_access_node& node, value_ptr& out_value, codegen_context context) {
 		// load a local variable
 		// look up the local variable in the active scope
 		if (const value_ptr variable_value = m_scope->get_named_value(node.get_variable_identifier())) {
@@ -73,7 +73,7 @@ namespace channel {
 		return true;
 	}
 
-	bool codegen_visitor::visit_local_declaration_node(local_declaration_node& node, value_ptr& out_value) {
+	bool codegen_visitor::visit_local_declaration_node(local_declaration_node& node, value_ptr& out_value, codegen_context context) {
 		llvm::BasicBlock* original_entry_block = m_builder.GetInsertBlock();
 		llvm::Function* parent_function = original_entry_block->getParent();
 		llvm::BasicBlock* function_entry_block = &*parent_function->begin();
@@ -112,7 +112,7 @@ namespace channel {
 		m_builder.SetInsertPoint(original_entry_block);
 
 		// evaluate the assigned value, if there is one
-		if (!get_declaration_value(node, out_value)) {
+		if (!get_declaration_value(node, out_value, codegen_context(node.get_declaration_type()))) {
 			return false;
 		}
 
@@ -127,7 +127,7 @@ namespace channel {
 		return true;
 	}
 
-	bool codegen_visitor::visit_global_declaration_node(global_declaration_node& node, value_ptr& out_value) {
+	bool codegen_visitor::visit_global_declaration_node(global_declaration_node& node, value_ptr& out_value, codegen_context context) {
 		// start creating the init function for our global ctor
 		const std::string init_func_name = "__global_init_" + node.get_declaration_identifier();
 		llvm::FunctionType* init_func_type = llvm::FunctionType::get(llvm::Type::getVoidTy(m_context), false);
@@ -137,7 +137,7 @@ namespace channel {
 
 		// evaluate the assigned value, if there is one
 		value_ptr assigned_value;
-		if (!get_declaration_value(node, assigned_value)) {
+		if (!get_declaration_value(node, assigned_value, codegen_context(node.get_declaration_type()))) {
 			return false;
 		}
 
@@ -186,10 +186,10 @@ namespace channel {
 		return true;
 	}
 
-	bool codegen_visitor::visit_allocation_node(array_allocation_node& node, value_ptr& out_value) {
+	bool codegen_visitor::visit_allocation_node(array_allocation_node& node, value_ptr& out_value, codegen_context context) {
 		// get the count of allocated elements
 		value_ptr element_count;
-		if (!node.get_array_element_count_node()->accept(*this, element_count)) {
+		if (!node.get_array_element_count_node()->accept(*this, element_count, {})) {
 			return false;
 		}
 
@@ -232,12 +232,12 @@ namespace channel {
 		return true;
 	}
 
-	bool codegen_visitor::visit_array_access_node(array_access_node& node, value_ptr& out_value) {
+	bool codegen_visitor::visit_array_access_node(array_access_node& node, value_ptr& out_value, codegen_context context) {
 		const std::vector<channel::node*>& index_nodes = node.get_array_element_index_nodes();
 		value_ptr array_ptr;
 
 		// evaluate the array base expression
-		if (!node.get_array_base_node()->accept(*this, array_ptr)) {
+		if (!node.get_array_base_node()->accept(*this, array_ptr, {})) {
 			return false;
 		}
 
@@ -248,7 +248,7 @@ namespace channel {
 		for (size_t i = 0; i < index_nodes.size(); ++i) {
 			value_ptr index_value;
 
-			if (!index_nodes[i]->accept(*this, index_value)) {
+			if (!index_nodes[i]->accept(*this, index_value, {})) {
 				return false;
 			}
 
@@ -279,12 +279,12 @@ namespace channel {
 		return true;
 	}
 
-	bool codegen_visitor::visit_array_assignment_node(array_assignment_node& node, value_ptr& out_value) {
+	bool codegen_visitor::visit_array_assignment_node(array_assignment_node& node, value_ptr& out_value, codegen_context context) {
 		const std::vector<channel::node*>& index_nodes = node.get_array_element_index_nodes();
 		value_ptr array_ptr;
 
 		// evaluate the array base expression
-		if (!node.get_array_base_node()->accept(*this, array_ptr)) {
+		if (!node.get_array_base_node()->accept(*this, array_ptr, {})) {
 			return false;
 		}
 
@@ -295,7 +295,7 @@ namespace channel {
 		for (size_t i = 0; i < index_nodes.size(); ++i) {
 			value_ptr index_value;
 
-			if (!index_nodes[i]->accept(*this, index_value)) {
+			if (!index_nodes[i]->accept(*this, index_value, {})) {
 				return false;
 			}
 
@@ -320,7 +320,7 @@ namespace channel {
 
 		// evaluate the right-hand side expression
 		value_ptr expression_value;
-		if (!node.get_expression_node()->accept(*this, expression_value)) {
+		if (!node.get_expression_node()->accept(*this, expression_value, {})) {
 			return false;
 		}
 
@@ -342,7 +342,7 @@ namespace channel {
 		return true;
 	}
 
-	bool codegen_visitor::visit_variable_node(variable_node& node, value_ptr& out_value) {
+	bool codegen_visitor::visit_variable_node(variable_node& node, value_ptr& out_value, codegen_context context) {
 		// find the variable value in our named values
 		value_ptr var_value;
 		if (!get_named_value(var_value, node.get_variable_identifier())) {
@@ -356,11 +356,11 @@ namespace channel {
 		return true;
 	}
 
-	bool codegen_visitor::get_declaration_value(const declaration_node& node, value_ptr& out_value) {
+	bool codegen_visitor::get_declaration_value(const declaration_node& node, value_ptr& out_value, codegen_context context) {
 		// evaluate the expression to get the initial value
 		if (channel::node* expression = node.get_expression_node()) {
 			// evaluate the assigned value
-			return expression->accept(*this, out_value);
+			return expression->accept(*this, out_value, context);
 		}
 
 		// declared without an assigned value, set it to 0

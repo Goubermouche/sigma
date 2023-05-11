@@ -38,14 +38,12 @@ namespace channel {
 			return std::make_shared<value>("__f32", type(type::base::f32, 0), llvm::ConstantFP::get(m_context, llvm::APFloat(std::stof(node.get_value()))));
 		case type::base::f64:
 			return std::make_shared<value>("__f64", type(type::base::f64, 0), llvm::ConstantFP::get(m_context, llvm::APFloat(std::stod(node.get_value()))));
-
+			// boolean
+		case type::base::boolean:
+			return  std::make_shared<value>("__bool", type(type::base::boolean, 0), llvm::ConstantInt::get(m_context, llvm::APInt(1, std::stoi(node.get_value()), false)));
 		default:
 			return std::unexpected(error::emit<4015>(node.get_declared_position(), literal_type));
 		}
-	}
-
-	acceptation_result codegen_visitor::visit_keyword_char_node(char_node& node, const codegen_context& context) {
-		return std::make_shared<value>("__char", type(type::base::character, 0), llvm::ConstantInt::get(m_context, llvm::APInt(8, static_cast<u64>(node.get_value()), false)));
 	}
 
 	acceptation_result codegen_visitor::visit_keyword_string_node(string_node& node, const codegen_context& context) {
@@ -63,6 +61,10 @@ namespace channel {
 		llvm::Value* string_literal_ptr = m_builder.CreateBitCast(global_string_literal, type(type::base::character, 1).get_llvm_type(m_context));
 
 		return std::make_shared<value>("__string", type(type::base::character, 1), string_literal_ptr);
+	}
+
+	acceptation_result codegen_visitor::visit_keyword_char_node(char_node& node, const codegen_context& context) {
+		return std::make_shared<value>("__char", type(type::base::character, 0), llvm::ConstantInt::get(m_context, llvm::APInt(8, static_cast<u64>(node.get_value()), false)));
 	}
 
 	acceptation_result codegen_visitor::visit_keyword_bool_node(bool_node& node, const codegen_context& context) {

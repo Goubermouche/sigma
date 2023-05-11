@@ -13,7 +13,7 @@ namespace channel {
 		return visitor.visit_numerical_literal_node(*this, context);
 	}
 
-	void numerical_literal_node::print(int depth, const std::wstring& prefix, bool is_last) {
+	void numerical_literal_node::print(u64 depth, const std::wstring& prefix, bool is_last) {
 		print_value(
 			depth,
 			prefix,
@@ -23,9 +23,9 @@ namespace channel {
 
 		console::out
 			<< AST_NODE_VARIABLE_COLOR
-			<< "'number' '"
+			<< "'"
 			<< m_preferred_type.to_string()
-			<< "'  '"
+			<< "' '"
 			<< AST_NODE_NUMERICAL_LITERAL_COLOR
 			<< m_value
 			<< color::white

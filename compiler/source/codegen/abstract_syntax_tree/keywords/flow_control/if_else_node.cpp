@@ -13,7 +13,7 @@ namespace channel {
 		return visitor.visit_if_else_node(*this, context);
 	}
 
-	void if_else_node::print(int depth, const std::wstring& prefix, bool is_last) {
+	void if_else_node::print(u64 depth, const std::wstring& prefix, bool is_last) {
 		print_value(depth, prefix, "if statement", is_last);
 		console::out << "\n";
 

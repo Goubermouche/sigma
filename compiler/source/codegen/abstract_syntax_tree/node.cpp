@@ -10,7 +10,7 @@ namespace channel {
     }
 
     void node::print_value(
-        int depth, 
+        u64 depth, 
         const std::wstring& prefix,
         const std::string& node_name, 
         bool is_last
@@ -23,7 +23,7 @@ namespace channel {
     }
 
     std::wstring node::get_new_prefix(
-        int depth, 
+        u64 depth, 
         const std::wstring& prefix,
         bool is_last
     ) {

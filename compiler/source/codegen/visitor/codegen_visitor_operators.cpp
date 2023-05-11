@@ -28,7 +28,7 @@ namespace channel {
 		operator_post_decrement& node,
 		const codegen_context& context
 	) {
-		acceptation_result expression_result = node.get_expression_node()->accept(*this, context);
+		acceptation_result expression_result = node.get_expression_node()->accept(*this, {});
 		if (!expression_result.has_value()) {
 			return expression_result;
 		}
@@ -61,7 +61,7 @@ namespace channel {
 		operator_post_increment& node,
 		const codegen_context& context
 	) {
-		acceptation_result expression_result = node.get_expression_node()->accept(*this, context);
+		acceptation_result expression_result = node.get_expression_node()->accept(*this, {});
 		if (!expression_result.has_value()) {
 			return expression_result;
 		}
@@ -95,7 +95,7 @@ namespace channel {
 		const codegen_context& context
 	) {
 		// accept the expression
-		acceptation_result expression_result = node.get_expression_node()->accept(*this, context);
+		acceptation_result expression_result = node.get_expression_node()->accept(*this, {});
 		if (!expression_result.has_value()) {
 			return expression_result;
 		}
@@ -131,7 +131,7 @@ namespace channel {
 		const codegen_context& context
 	) {
 		// accept the expression
-		acceptation_result expression_result = node.get_expression_node()->accept(*this, context);
+		acceptation_result expression_result = node.get_expression_node()->accept(*this, {});
 		if (!expression_result.has_value()) {
 			return expression_result;
 		}
@@ -167,13 +167,13 @@ namespace channel {
 		const codegen_context& context
 	) {
 		// accept the left operand
-		acceptation_result left_operand_result = node.get_left_expression_node()->accept(*this, context);
+		acceptation_result left_operand_result = node.get_left_expression_node()->accept(*this, {});
 		if (!left_operand_result.has_value()) {
 			return left_operand_result;
 		}
 
 		// accept the right operand
-		acceptation_result right_operand_result = node.get_right_expression_node()->accept(*this, context);
+		acceptation_result right_operand_result = node.get_right_expression_node()->accept(*this, {});
 		if (!right_operand_result.has_value()) {
 			return right_operand_result;
 		}
@@ -224,13 +224,13 @@ namespace channel {
 		const codegen_context& context
 	) {
 		// accept the left operand
-		acceptation_result left_operand_result = node.get_left_expression_node()->accept(*this, context);
+		acceptation_result left_operand_result = node.get_left_expression_node()->accept(*this, {});
 		if (!left_operand_result.has_value()) {
 			return left_operand_result;
 		}
 
 		// accept the right operand
-		acceptation_result right_operand_result = node.get_right_expression_node()->accept(*this, context);
+		acceptation_result right_operand_result = node.get_right_expression_node()->accept(*this, {});
 		if (!right_operand_result.has_value()) {
 			return right_operand_result;
 		}
@@ -281,13 +281,13 @@ namespace channel {
 		const codegen_context& context
 	) {
 		// accept the left operand
-		acceptation_result left_operand_result = node.get_left_expression_node()->accept(*this, context);
+		acceptation_result left_operand_result = node.get_left_expression_node()->accept(*this, {});
 		if (!left_operand_result.has_value()) {
 			return left_operand_result;
 		}
 
 		// accept the right operand
-		acceptation_result right_operand_result = node.get_right_expression_node()->accept(*this, context);
+		acceptation_result right_operand_result = node.get_right_expression_node()->accept(*this, {});
 		if (!right_operand_result.has_value()) {
 			return right_operand_result;
 		}
@@ -338,13 +338,13 @@ namespace channel {
 		const codegen_context& context
 	) {
 		// accept the left operand
-		acceptation_result left_operand_result = node.get_left_expression_node()->accept(*this, context);
+		acceptation_result left_operand_result = node.get_left_expression_node()->accept(*this, {});
 		if (!left_operand_result.has_value()) {
 			return left_operand_result;
 		}
 
 		// accept the right operand
-		acceptation_result right_operand_result = node.get_right_expression_node()->accept(*this, context);
+		acceptation_result right_operand_result = node.get_right_expression_node()->accept(*this, {});
 		if (!right_operand_result.has_value()) {
 			return right_operand_result;
 		}
@@ -394,13 +394,13 @@ namespace channel {
 		const codegen_context& context
 	) {
 		// accept the left operand
-		acceptation_result left_operand_result = node.get_left_expression_node()->accept(*this, context);
+		acceptation_result left_operand_result = node.get_left_expression_node()->accept(*this, {});
 		if (!left_operand_result.has_value()) {
 			return left_operand_result;
 		}
 
 		// accept the right operand
-		acceptation_result right_operand_result = node.get_right_expression_node()->accept(*this, context);
+		acceptation_result right_operand_result = node.get_right_expression_node()->accept(*this, {});
 		if (!right_operand_result.has_value()) {
 			return right_operand_result;
 		}
@@ -450,13 +450,13 @@ namespace channel {
 		const codegen_context& context
 	) {
 		// accept the left operand
-		acceptation_result left_operand_result = node.get_left_expression_node()->accept(*this, context);
+		acceptation_result left_operand_result = node.get_left_expression_node()->accept(*this, {});
 		if (!left_operand_result.has_value()) {
 			return left_operand_result;
 		}
 
 		// accept the right operand
-		acceptation_result right_operand_result = node.get_right_expression_node()->accept(*this, context);
+		acceptation_result right_operand_result = node.get_right_expression_node()->accept(*this, {});
 		if (!right_operand_result.has_value()) {
 			return right_operand_result;
 		}
@@ -476,13 +476,13 @@ namespace channel {
 		const codegen_context& context
 	) {
 		// accept the left operand
-		acceptation_result left_operand_result = node.get_left_expression_node()->accept(*this, context);
+		acceptation_result left_operand_result = node.get_left_expression_node()->accept(*this, {});
 		if (!left_operand_result.has_value()) {
 			return left_operand_result;
 		}
 
 		// accept the right operand
-		acceptation_result right_operand_result = node.get_right_expression_node()->accept(*this, context);
+		acceptation_result right_operand_result = node.get_right_expression_node()->accept(*this, {});
 		if (!right_operand_result.has_value()) {
 			return right_operand_result;
 		}
@@ -502,13 +502,13 @@ namespace channel {
 		const codegen_context& context
 	) {
 		// accept the left operand
-		acceptation_result left_operand_result = node.get_left_expression_node()->accept(*this, context);
+		acceptation_result left_operand_result = node.get_left_expression_node()->accept(*this, {});
 		if (!left_operand_result.has_value()) {
 			return left_operand_result;
 		}
 
 		// accept the right operand
-		acceptation_result right_operand_result = node.get_right_expression_node()->accept(*this, context);
+		acceptation_result right_operand_result = node.get_right_expression_node()->accept(*this, {});
 		if (!right_operand_result.has_value()) {
 			return right_operand_result;
 		}
@@ -540,13 +540,13 @@ namespace channel {
 		const codegen_context& context
 	) {
 		// accept the left operand
-		acceptation_result left_operand_result = node.get_left_expression_node()->accept(*this, context);
+		acceptation_result left_operand_result = node.get_left_expression_node()->accept(*this, {});
 		if (!left_operand_result.has_value()) {
 			return left_operand_result;
 		}
 
 		// accept the right operand
-		acceptation_result right_operand_result = node.get_right_expression_node()->accept(*this, context);
+		acceptation_result right_operand_result = node.get_right_expression_node()->accept(*this, {});
 		if (!right_operand_result.has_value()) {
 			return right_operand_result;
 		}
@@ -578,13 +578,13 @@ namespace channel {
 		const codegen_context& context
 	) {
 		// accept the left operand
-		acceptation_result left_operand_result = node.get_left_expression_node()->accept(*this, context);
+		acceptation_result left_operand_result = node.get_left_expression_node()->accept(*this, {});
 		if (!left_operand_result.has_value()) {
 			return left_operand_result;
 		}
 
 		// accept the right operand
-		acceptation_result right_operand_result = node.get_right_expression_node()->accept(*this, context);
+		acceptation_result right_operand_result = node.get_right_expression_node()->accept(*this, {});
 		if (!right_operand_result.has_value()) {
 			return right_operand_result;
 		}
@@ -616,13 +616,13 @@ namespace channel {
 		const codegen_context& context
 	) {
 		// accept the left operand
-		acceptation_result left_operand_result = node.get_left_expression_node()->accept(*this, context);
+		acceptation_result left_operand_result = node.get_left_expression_node()->accept(*this, {});
 		if (!left_operand_result.has_value()) {
 			return left_operand_result;
 		}
 
 		// accept the right operand
-		acceptation_result right_operand_result = node.get_right_expression_node()->accept(*this, context);
+		acceptation_result right_operand_result = node.get_right_expression_node()->accept(*this, {});
 		if (!right_operand_result.has_value()) {
 			return right_operand_result;
 		}
@@ -654,13 +654,13 @@ namespace channel {
 		const codegen_context& context
 	) {
 		// accept the left operand
-		acceptation_result left_operand_result = node.get_left_expression_node()->accept(*this, context);
+		acceptation_result left_operand_result = node.get_left_expression_node()->accept(*this, {});
 		if (!left_operand_result.has_value()) {
 			return left_operand_result;
 		}
 
 		// accept the right operand
-		acceptation_result right_operand_result = node.get_right_expression_node()->accept(*this, context);
+		acceptation_result right_operand_result = node.get_right_expression_node()->accept(*this, {});
 		if (!right_operand_result.has_value()) {
 			return right_operand_result;
 		}
@@ -687,13 +687,13 @@ namespace channel {
 		const codegen_context& context
 	) {
 		// accept the left operand
-		acceptation_result left_operand_result = node.get_left_expression_node()->accept(*this, context);
+		acceptation_result left_operand_result = node.get_left_expression_node()->accept(*this, {});
 		if (!left_operand_result.has_value()) {
 			return left_operand_result;
 		}
 
 		// accept the right operand
-		acceptation_result right_operand_result = node.get_right_expression_node()->accept(*this, context);
+		acceptation_result right_operand_result = node.get_right_expression_node()->accept(*this, {});
 		if (!right_operand_result.has_value()) {
 			return right_operand_result;
 		}

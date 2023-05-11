@@ -8,7 +8,7 @@ namespace channel {
 		return visitor.visit_break_node(*this, context);
 	}
 
-	void break_node::print(int depth, const std::wstring& prefix, bool is_last) {
+	void break_node::print(u64 depth, const std::wstring& prefix, bool is_last) {
 		print_value(depth, prefix, "break statement", is_last);
 		console::out << "\n";
 	}

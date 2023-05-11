@@ -11,7 +11,7 @@ namespace channel {
 		return visitor.visit_keyword_bool_node(*this, context);
 	}
 
-	void bool_node::print(int depth, const std::wstring& prefix, bool is_last) {
+	void bool_node::print(u64 depth, const std::wstring& prefix, bool is_last) {
 		const std::string value_string = m_value ? "true" : "false";
 
 		print_value(

@@ -31,7 +31,7 @@ namespace channel {
 		) = 0;
 
 		virtual void print(
-			int depth,
+			u64 depth,
 			const std::wstring& prefix,
 			bool is_last
 		) = 0;
@@ -39,14 +39,14 @@ namespace channel {
 		const token_position& get_declared_position() const;
 	protected:
 		static void print_value(
-			int depth, 
+			u64 depth, 
 			const std::wstring& prefix,
 			const std::string& node_name,
 			bool is_last
 		);
 
 		static std::wstring get_new_prefix(
-			int depth, 
+			u64 depth, 
 			const std::wstring& prefix,
 			bool is_last
 		);

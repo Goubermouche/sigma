@@ -10,7 +10,7 @@ namespace channel {
 		return visitor.visit_operator_pre_decrement_node(*this, context);
 	}
 
-	void operator_pre_decrement::print(int depth, const std::wstring& prefix, bool is_last) {
+	void operator_pre_decrement::print(u64 depth, const std::wstring& prefix, bool is_last) {
 		print_value(depth, prefix, "unary operator", is_last);
 		console::out
 			<< '\''

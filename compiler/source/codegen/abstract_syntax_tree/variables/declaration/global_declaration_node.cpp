@@ -17,7 +17,7 @@ namespace channel {
 		return visitor.visit_global_declaration_node(*this, context);
 	}
 
-	void global_declaration_node::print(int depth, const std::wstring& prefix, bool is_last) {
+	void global_declaration_node::print(u64 depth, const std::wstring& prefix, bool is_last) {
 		print_value(
 			depth, 
 			prefix, 

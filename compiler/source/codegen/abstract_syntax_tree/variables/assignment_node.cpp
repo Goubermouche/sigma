@@ -13,7 +13,7 @@ namespace channel {
 		return visitor.visit_assignment_node(*this, context);
 	}
 
-	void assignment_node::print(int depth, const std::wstring& prefix, bool is_last) {
+	void assignment_node::print(u64 depth, const std::wstring& prefix, bool is_last) {
 		print_value(depth, prefix, "variable assignment", is_last);
 		console::out << "\n";
 

@@ -17,7 +17,7 @@ namespace channel {
 		return visitor.visit_for_node(*this, context);
 	}
 
-	void for_node::print(int depth, const std::wstring& prefix, bool is_last) {
+	void for_node::print(u64 depth, const std::wstring& prefix, bool is_last) {
 		print_value(depth, prefix, "for statement", is_last);
 		console::out << "\n";
 

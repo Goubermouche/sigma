@@ -11,7 +11,7 @@ namespace channel {
 		return visitor.visit_keyword_string_node(*this, context);
 	}
 
-	void string_node::print(int depth, const std::wstring& prefix, bool is_last) {
+	void string_node::print(u64 depth, const std::wstring& prefix, bool is_last) {
 		print_value(
 			depth, 
 			prefix, 

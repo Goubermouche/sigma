@@ -13,7 +13,7 @@ namespace channel {
 		return visitor.visit_allocation_node(*this, context);
 	}
 
-	void array_allocation_node::print(int depth, const std::wstring& prefix, bool is_last) {
+	void array_allocation_node::print(u64 depth, const std::wstring& prefix, bool is_last) {
 		print_value(
 			depth, 
 			prefix, 

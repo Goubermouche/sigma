@@ -11,7 +11,7 @@ namespace channel {
 		return visitor.visit_return_node(*this, context);
 	}
 
-	void return_node::print(int depth, const std::wstring& prefix, bool is_last) {
+	void return_node::print(u64 depth, const std::wstring& prefix, bool is_last) {
 		print_value(depth, prefix, "return statement", is_last);
 		console::out << "\n";
 

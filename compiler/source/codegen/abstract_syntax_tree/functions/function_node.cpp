@@ -17,7 +17,7 @@ namespace channel {
 		return visitor.visit_function_node(*this, context);
 	}
 
-	void function_node::print(int depth, const std::wstring& prefix, bool is_last) {
+	void function_node::print(u64 depth, const std::wstring& prefix, bool is_last) {
 		// print the function name and return type
 		print_value(
 			depth,

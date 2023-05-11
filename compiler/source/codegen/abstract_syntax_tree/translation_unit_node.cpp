@@ -10,7 +10,7 @@ namespace channel {
 		return visitor.visit_translation_unit_node(*this, context);
 	}
 
-	void translation_unit_node::print(int depth, const std::wstring& prefix, bool is_last) {
+	void translation_unit_node::print(u64 depth, const std::wstring& prefix, bool is_last) {
 		print_value(depth, prefix, "translation unit", is_last);
 		console::out << "\n";
 

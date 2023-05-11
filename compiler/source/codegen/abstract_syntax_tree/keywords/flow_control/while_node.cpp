@@ -13,7 +13,7 @@ namespace channel {
 		return visitor.visit_while_node(*this, context);
 	}
 
-	void while_node::print(int depth, const std::wstring& prefix, bool is_last) {
+	void while_node::print(u64 depth, const std::wstring& prefix, bool is_last) {
 		print_value(depth, prefix, "while statement", is_last);
 		console::out << "\n";
 

@@ -15,7 +15,7 @@ namespace channel {
 		return visitor.visit_operator_not_equals_node(*this, context);
 	}
 
-	void operator_not_equals_node::print(int depth, const std::wstring& prefix, bool is_last) {
+	void operator_not_equals_node::print(u64 depth, const std::wstring& prefix, bool is_last) {
 		print_value(depth, prefix, "binary operator", is_last);
 		console::out
 			<< '\''

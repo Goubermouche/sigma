@@ -20,7 +20,7 @@ setx LLVM_ROOT path/to/llvm
 After building LLVM you'll have to link the necessary libraries and create the basic project structure. To do this, navigate to the root channel directory and run the [setup.bat](https://github.com/Goubermouche/channel-language/blob/1546a311f1e7280321ca556ac2f5c380e62bd97e/setup.bat) script. This will generate the necessary project files for VS 2022, note that if you want to build for something else you'll need to modify the [setup.bat](https://github.com/Goubermouche/channel-language/blob/1546a311f1e7280321ca556ac2f5c380e62bd97e/setup.bat) script. 
 
 ## Language example
-Below is a simple example for visualizing a slice of a [Mandelbrot set](https://en.wikipedia.org/wiki/Mandelbrot_set) using the Channel language.
+Below is a simple example for rendering a slice of a [Mandelbrot set](https://en.wikipedia.org/wiki/Mandelbrot_set) using the Channel language.
 ```cpp
 i32 WIDTH = 100;
 i32 HEIGHT = 30;

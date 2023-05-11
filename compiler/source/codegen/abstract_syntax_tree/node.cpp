@@ -9,7 +9,7 @@ namespace channel {
         return m_position;
     }
 
-    void node::print_value(
+    void node::print_node_name(
         u64 depth, 
         const std::wstring& prefix,
         const std::string& node_name, 

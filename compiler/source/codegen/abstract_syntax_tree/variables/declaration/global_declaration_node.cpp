@@ -18,7 +18,7 @@ namespace channel {
 	}
 
 	void global_declaration_node::print(u64 depth, const std::wstring& prefix, bool is_last) {
-		print_value(
+		print_node_name(
 			depth, 
 			prefix, 
 			"global declaration", 

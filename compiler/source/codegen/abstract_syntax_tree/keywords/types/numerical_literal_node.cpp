@@ -14,7 +14,7 @@ namespace channel {
 	}
 
 	void numerical_literal_node::print(u64 depth, const std::wstring& prefix, bool is_last) {
-		print_value(
+		print_node_name(
 			depth,
 			prefix,
 			"numerical literal",
@@ -22,9 +22,10 @@ namespace channel {
 		);
 
 		console::out
-			<< AST_NODE_VARIABLE_COLOR
 			<< "'"
+			<< AST_NODE_VARIABLE_COLOR
 			<< m_preferred_type.to_string()
+			<< color::white
 			<< "' '"
 			<< AST_NODE_NUMERICAL_LITERAL_COLOR
 			<< m_value

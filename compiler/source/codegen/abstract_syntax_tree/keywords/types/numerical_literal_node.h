@@ -2,6 +2,9 @@
 #include "codegen/abstract_syntax_tree/node.h"
 
 namespace channel {
+	/**
+	 * \brief AST node, represents a numerical literal.
+	 */
 	class numerical_literal_node : public node {
 	public:
 		numerical_literal_node(
@@ -15,7 +18,11 @@ namespace channel {
 			const codegen_context& context
 		) override;
 
-		void print(u64 depth, const std::wstring& prefix, bool is_last) override;
+		void print(
+			u64 depth, 
+			const std::wstring& prefix,
+			bool is_last
+		) override;
 
 		const std::string& get_value() const;
 		const type& get_preferred_type() const;

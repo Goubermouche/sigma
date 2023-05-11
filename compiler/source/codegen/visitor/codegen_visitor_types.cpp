@@ -6,7 +6,10 @@
 #include "codegen/abstract_syntax_tree/keywords/types/numerical_literal_node.h"
 
 namespace channel {
-	acceptation_result codegen_visitor::visit_numerical_literal_node(numerical_literal_node& node, const codegen_context& context) {
+	acceptation_result codegen_visitor::visit_numerical_literal_node(
+		numerical_literal_node& node,
+		const codegen_context& context
+	) {
 		const type contextually_derived_type = context.get_expected_type();
 		const type literal_type = contextually_derived_type == type::unknown() ? node.get_preferred_type() : contextually_derived_type;
 
@@ -46,7 +49,10 @@ namespace channel {
 		}
 	}
 
-	acceptation_result codegen_visitor::visit_keyword_string_node(string_node& node, const codegen_context& context) {
+	acceptation_result codegen_visitor::visit_keyword_string_node(
+		string_node& node,
+		const codegen_context& context
+	) {
 		// note: + 1 is for the null termination character
 		const u64 string_length = node.get_value().size() + 1;
 
@@ -63,11 +69,17 @@ namespace channel {
 		return std::make_shared<value>("__string", type(type::base::character, 1), string_literal_ptr);
 	}
 
-	acceptation_result codegen_visitor::visit_keyword_char_node(char_node& node, const codegen_context& context) {
+	acceptation_result codegen_visitor::visit_keyword_char_node(
+		char_node& node,
+		const codegen_context& context
+	) {
 		return std::make_shared<value>("__char", type(type::base::character, 0), llvm::ConstantInt::get(m_context, llvm::APInt(8, static_cast<u64>(node.get_value()), false)));
 	}
 
-	acceptation_result codegen_visitor::visit_keyword_bool_node(bool_node& node, const codegen_context& context) {
+	acceptation_result codegen_visitor::visit_keyword_bool_node(
+		bool_node& node, 
+		const codegen_context& context
+	) {
 		return std::make_shared<value>("__bool", type(type::base::boolean, 0), llvm::ConstantInt::get(m_context, llvm::APInt(1, node.get_value(), false)));
 	}
 }

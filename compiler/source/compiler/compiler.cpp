@@ -69,7 +69,7 @@ namespace channel {
 		// compile the file into an exe
 		// get the generated module
 		const std::shared_ptr<llvm::Module> module = visitor.get_module();
-        const std::string target_triple = llvm::sys::getDefaultTargetTriple();
+		const std::string target_triple = llvm::sys::getDefaultTargetTriple();
 
 		// initialize LLVM targets
 		llvm::InitializeAllTargetInfos();

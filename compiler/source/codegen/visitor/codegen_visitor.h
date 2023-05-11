@@ -11,7 +11,7 @@ llvm::StructType::get(m_context, {       \
 	llvm::Type::getInt32Ty(m_context),   \
 	llvm::Type::getInt8PtrTy(m_context), \
 	llvm::Type::getInt8PtrTy(m_context)  \
-})                                      
+})
 
 namespace channel {
 	class declaration_node;
@@ -29,70 +29,223 @@ namespace channel {
 		void print_intermediate_representation() const;
 		bool verify_intermediate_representation() const;
 	private:
-		acceptation_result visit_translation_unit_node(translation_unit_node& node, const codegen_context& context) override;
+		acceptation_result visit_translation_unit_node(
+			translation_unit_node& node, 
+			const codegen_context& context
+		) override;
 
 		// functions
 		// codegen_visitor_functions.cpp
-		acceptation_result visit_function_node(function_node& node, const codegen_context& context) override;
-		acceptation_result visit_function_call_node(function_call_node& node, const codegen_context& context) override;
+		acceptation_result visit_function_node(
+			function_node& node, 
+			const codegen_context& context
+		) override;
+
+		acceptation_result visit_function_call_node(
+			function_call_node& node, 
+			const codegen_context& context
+		) override;
 
 		// variables
 		// codegen_visitor_variables.cpp
-		acceptation_result visit_assignment_node(assignment_node& node, const codegen_context& context) override;
-		acceptation_result visit_variable_access_node(variable_access_node& node, const codegen_context& context) override;
-		acceptation_result visit_local_declaration_node(local_declaration_node& node, const codegen_context& context) override;
-		acceptation_result visit_global_declaration_node(global_declaration_node& node, const codegen_context& context) override;
-		acceptation_result visit_allocation_node(array_allocation_node& node, const codegen_context& context) override;
-		acceptation_result visit_array_access_node(array_access_node& node, const codegen_context& context) override;
-		acceptation_result visit_array_assignment_node(array_assignment_node& node, const codegen_context& context) override;
-		acceptation_result visit_variable_node(variable_node& node, const codegen_context& context) override;
+		acceptation_result visit_assignment_node(
+			assignment_node& node,
+			const codegen_context& context
+		) override;
+
+		acceptation_result visit_variable_access_node(
+			variable_access_node& node, 
+			const codegen_context& context
+		) override;
+
+		acceptation_result visit_local_declaration_node(
+			local_declaration_node& node,
+			const codegen_context& context
+		) override;
+
+		acceptation_result visit_global_declaration_node(
+			global_declaration_node& node,
+			const codegen_context& context
+		) override;
+
+		acceptation_result visit_allocation_node(
+			array_allocation_node& node, 
+			const codegen_context& context
+		) override;
+
+		acceptation_result visit_array_access_node(
+			array_access_node& node,
+			const codegen_context& context
+		) override;
+
+		acceptation_result visit_array_assignment_node(
+			array_assignment_node& node, 
+			const codegen_context& context
+		) override;
+
+		acceptation_result visit_variable_node(
+			variable_node& node, 
+			const codegen_context& context
+		) override;
 
 		// utility
-		acceptation_result get_declaration_value(const declaration_node& node, const codegen_context& context);
-		bool get_named_value(value_ptr& out_value, const std::string& variable_name);
+		acceptation_result get_declaration_value(
+			const declaration_node& node,
+			const codegen_context& context
+		);
+
+		bool get_named_value(
+			value_ptr& out_value,
+			const std::string& variable_name
+		);
 
 		// flow control
 		// codegen_visitor_flow_control.cpp
-		acceptation_result visit_return_node(return_node& node, const codegen_context& context) override;
-		acceptation_result visit_if_else_node(if_else_node& node, const codegen_context& context) override;
-		acceptation_result visit_while_node(while_node& node, const codegen_context& context) override;
-		acceptation_result visit_for_node(for_node& node, const codegen_context& context) override;
-		acceptation_result visit_break_node(break_node& node, const codegen_context& context) override;
+		acceptation_result visit_return_node(
+			return_node& node,
+			const codegen_context& context
+		) override;
+
+		acceptation_result visit_if_else_node(
+			if_else_node& node, 
+			const codegen_context& context
+		) override;
+
+		acceptation_result visit_while_node(
+			while_node& node, 
+			const codegen_context& context
+		) override;
+
+		acceptation_result visit_for_node(
+			for_node& node,
+			const codegen_context& context
+		) override;
+
+		acceptation_result visit_break_node(
+			break_node& node, 
+			const codegen_context& context
+		) override;
 
 		// types
 		// codegen_visitor_types.cpp
-		acceptation_result visit_numerical_literal_node(numerical_literal_node& node, const codegen_context& context) override;
-		acceptation_result visit_keyword_char_node(char_node& node, const codegen_context& context) override;
-		acceptation_result visit_keyword_string_node(string_node& node, const codegen_context& context) override;
-		acceptation_result visit_keyword_bool_node(bool_node& node, const codegen_context& context) override;
+		acceptation_result visit_numerical_literal_node(
+			numerical_literal_node& node, 
+			const codegen_context& context
+		) override;
+
+		acceptation_result visit_keyword_char_node(
+			char_node& node, 
+			const codegen_context& context
+		) override;
+
+		acceptation_result visit_keyword_string_node(
+			string_node& node,
+			const codegen_context& context
+		) override;
+
+		acceptation_result visit_keyword_bool_node(
+			bool_node& node, 
+			const codegen_context& context
+		) override;
 
 		// operators
 		// codegen_visitor_operators.cpp
 		// unary
 		// arithmetic
-		acceptation_result visit_operator_post_decrement_node(operator_post_decrement& node, const codegen_context& context) override;
-		acceptation_result visit_operator_post_increment_node(operator_post_increment& node, const codegen_context& context) override;
-		acceptation_result visit_operator_pre_decrement_node(operator_pre_decrement& node, const codegen_context& context) override;
-		acceptation_result visit_operator_pre_increment_node(operator_pre_increment& node, const codegen_context& context) override;
+		acceptation_result visit_operator_post_decrement_node(
+			operator_post_decrement& node,
+			const codegen_context& context
+		) override;
+
+		acceptation_result visit_operator_post_increment_node(
+			operator_post_increment& node, 
+			const codegen_context& context
+		) override;
+
+		acceptation_result visit_operator_pre_decrement_node(
+			operator_pre_decrement& node,
+			const codegen_context& context
+		) override;
+
+		acceptation_result visit_operator_pre_increment_node(
+			operator_pre_increment& node,
+			const codegen_context& context
+		) override;
+
 		// binary
 		// arithmetic
-		acceptation_result visit_operator_addition_node(operator_addition_node& node, const codegen_context& context) override;
-		acceptation_result visit_operator_subtraction_node(operator_subtraction_node& node, const codegen_context& context) override;
-		acceptation_result visit_operator_multiplication_node(operator_multiplication_node& node, const codegen_context& context) override;
-		acceptation_result visit_operator_division_node(operator_division_node& node, const codegen_context& context) override;
-		acceptation_result visit_operator_modulo_node(operator_modulo_node& node, const codegen_context& context) override;
+		acceptation_result visit_operator_addition_node(
+			operator_addition_node& node, 
+			const codegen_context& context
+		) override;
+
+		acceptation_result visit_operator_subtraction_node(
+			operator_subtraction_node& node, 
+			const codegen_context& context
+		) override;
+
+		acceptation_result visit_operator_multiplication_node(
+			operator_multiplication_node& node, 
+			const codegen_context& context
+		) override;
+
+		acceptation_result visit_operator_division_node(
+			operator_division_node& node, 
+			const codegen_context& context
+		) override;
+
+		acceptation_result visit_operator_modulo_node(
+			operator_modulo_node& node,
+			const codegen_context& context
+		) override;
+
 		// logical
-		acceptation_result visit_operator_logical_conjunction_node(operator_conjunction_node& node, const codegen_context& context) override;
-		acceptation_result visit_operator_logical_disjunction_node(operator_disjunction_node& node, const codegen_context& context) override;
-		acceptation_result visit_operator_greater_than_node(operator_greater_than_node& node, const codegen_context& context) override;
-		acceptation_result visit_operator_greater_than_equal_to_node(operator_greater_than_equal_to_node& node, const codegen_context& context) override;
-		acceptation_result visit_operator_less_than_node(operator_less_than_node& node, const codegen_context& context) override;
-		acceptation_result visit_operator_less_than_equal_to_node(operator_less_than_equal_to_node& node, const codegen_context& context) override;
-		acceptation_result visit_operator_equals_node(operator_equals_node& node, const codegen_context& context) override;
-		acceptation_result visit_operator_not_equals_node(operator_not_equals_node& node, const codegen_context& context) override;
+		acceptation_result visit_operator_logical_conjunction_node(
+			operator_conjunction_node& node, 
+			const codegen_context& context
+		) override;
+
+		acceptation_result visit_operator_logical_disjunction_node(
+			operator_disjunction_node& node,
+			const codegen_context& context
+		) override;
+
+		acceptation_result visit_operator_greater_than_node(
+			operator_greater_than_node& node,
+			const codegen_context& context
+		) override;
+
+		acceptation_result visit_operator_greater_than_equal_to_node(
+			operator_greater_than_equal_to_node& node,
+			const codegen_context& context
+		) override;
+
+		acceptation_result visit_operator_less_than_node(
+			operator_less_than_node& node, 
+			const codegen_context& context
+		) override;
+
+		acceptation_result visit_operator_less_than_equal_to_node(
+			operator_less_than_equal_to_node& node, 
+			const codegen_context& context
+		) override;
+
+		acceptation_result visit_operator_equals_node(
+			operator_equals_node& node,
+			const codegen_context& context
+		) override;
+
+		acceptation_result visit_operator_not_equals_node(
+			operator_not_equals_node& node, 
+			const codegen_context& context
+		) override;
 
 		// utility
-		llvm::Value* cast_value(value_ptr source_value, type target_type, const token_position& position);
+		llvm::Value* cast_value(
+			value_ptr source_value, 
+			type target_type, 
+			const token_position& position
+		);
 
 		bool verify_main_entry_point() const;
 		void initialize_global_variables();

@@ -14,7 +14,7 @@ namespace channel {
 	}
 
 	void function_call_node::print(u64 depth, const std::wstring& prefix, bool is_last) {
-		print_value(depth, prefix, "function call",	is_last);
+		print_node_name(depth, prefix, "function call",	is_last);
 		console::out
 			<< "'"
 			<< AST_NODE_VARIABLE_COLOR

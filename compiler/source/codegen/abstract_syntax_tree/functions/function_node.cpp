@@ -19,7 +19,7 @@ namespace channel {
 
 	void function_node::print(u64 depth, const std::wstring& prefix, bool is_last) {
 		// print the function name and return type
-		print_value(
+		print_node_name(
 			depth,
 			prefix,
 			"function declaration",

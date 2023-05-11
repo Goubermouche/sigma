@@ -14,7 +14,7 @@ namespace channel {
 	}
 
 	void while_node::print(u64 depth, const std::wstring& prefix, bool is_last) {
-		print_value(depth, prefix, "while statement", is_last);
+		print_node_name(depth, prefix, "while statement", is_last);
 		console::out << "\n";
 
 		const std::wstring new_prefix = get_new_prefix(depth, prefix, is_last);

@@ -17,7 +17,11 @@ namespace channel {
 			const codegen_context& context
 		) override;
 
-		void print(u64 depth, const std::wstring& prefix, bool is_last) override;
+		void print(
+			u64 depth, 
+			const std::wstring& prefix,
+			bool is_last
+		) override;
 
 		const std::string& get_value() const;
 	private:

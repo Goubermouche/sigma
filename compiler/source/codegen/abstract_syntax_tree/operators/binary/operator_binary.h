@@ -3,7 +3,7 @@
 
 namespace channel {
     /**
-     * \brief Base AST node, all binary operators derive from this node.
+     * \brief Base AST node, base for all binary operator nodes.
      */
 	class operator_binary : public node	{
     public:

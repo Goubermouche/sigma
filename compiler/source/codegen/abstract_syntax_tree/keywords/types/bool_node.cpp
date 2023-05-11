@@ -14,7 +14,7 @@ namespace channel {
 	void bool_node::print(u64 depth, const std::wstring& prefix, bool is_last) {
 		const std::string value_string = m_value ? "true" : "false";
 
-		print_value(
+		print_node_name(
 			depth,
 			prefix, 
 			"boolean literal",

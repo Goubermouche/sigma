@@ -14,7 +14,7 @@
 //  - documentation
 //  - tests
 
-i32 main() {
+void donut(f32 rot_speed) {
 	f32 A = 0;
 	f32 B = 0;
 	f32 i;
@@ -71,9 +71,12 @@ i32 main() {
 			}
 		}
 		
-		A = A + 0.01;
-		B = B + 0.02;
+		A = A + rot_speed;
+		B = B + rot_speed;
 	}
-	
+}
+
+i32 main() {
+	donut(0.1f);
 	return 0;
 }

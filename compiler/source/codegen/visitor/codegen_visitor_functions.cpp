@@ -4,7 +4,10 @@
 #include "codegen/abstract_syntax_tree/functions/function_node.h"
 
 namespace channel {
-	acceptation_result codegen_visitor::visit_function_node(function_node& node, const codegen_context& context) {
+	acceptation_result codegen_visitor::visit_function_node(
+		function_node& node, 
+		const codegen_context& context
+	) {
 		// get the function return type
 		llvm::Type* return_type = node.get_function_return_type().get_llvm_type(m_context);
 
@@ -76,7 +79,11 @@ namespace channel {
 
 		// add a return statement if the function does not have one
 		if (m_builder.GetInsertBlock()->getTerminator() == nullptr) {
-			warning::emit<3000>(node.get_declared_position(), node.get_function_identifier()).print();
+			// emit the relevant warning
+			// check if the return type is non-void
+			if(node.get_function_return_type() != type(type::base::empty, 0)) {
+				warning::emit<3000>(node.get_declared_position(), node.get_function_identifier()).print();
+			}
 
 			if (return_type->isVoidTy()) {
 				m_builder.CreateRetVoid();
@@ -90,7 +97,10 @@ namespace channel {
 		return std::make_shared<value>(node.get_function_identifier(), type(type::base::function, 0), func);
 	}
 
-	acceptation_result codegen_visitor::visit_function_call_node(function_call_node& node, const codegen_context& context) {
+	acceptation_result codegen_visitor::visit_function_call_node(
+		function_call_node& node, 
+		const codegen_context& context
+	) {
 		// get a reference to the function
 		const function_ptr func = m_function_registry.get_function(node.get_function_identifier());
 

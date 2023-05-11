@@ -16,7 +16,7 @@ namespace channel {
 	}
 
 	void operator_less_than_equal_to_node::print(u64 depth, const std::wstring& prefix, bool is_last) {
-		print_value(depth, prefix, "binary operator", is_last);
+		print_node_name(depth, prefix, "binary operator", is_last);
 		console::out
 			<< '\''
 			<< AST_NODE_OPERATOR_COLOR

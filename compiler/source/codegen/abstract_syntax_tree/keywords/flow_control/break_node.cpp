@@ -9,7 +9,7 @@ namespace channel {
 	}
 
 	void break_node::print(u64 depth, const std::wstring& prefix, bool is_last) {
-		print_value(depth, prefix, "break statement", is_last);
+		print_node_name(depth, prefix, "break statement", is_last);
 		console::out << "\n";
 	}
 }

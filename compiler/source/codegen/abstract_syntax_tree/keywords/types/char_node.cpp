@@ -12,7 +12,7 @@ namespace channel {
 	}
 
 	void char_node::print(u64 depth, const std::wstring& prefix, bool is_last) {
-		print_value(
+		print_node_name(
 			depth,
 			prefix, 
 			"character literal", 

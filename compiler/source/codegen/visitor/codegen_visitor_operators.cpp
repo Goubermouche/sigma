@@ -24,6 +24,8 @@
 #include "codegen/abstract_syntax_tree/operators/binary/logical/operator_not_equals_node.h"
 
 namespace channel {
+	// unary
+	// arithmetic
 	acceptation_result codegen_visitor::visit_operator_post_decrement_node(
 		operator_post_decrement& node,
 		const codegen_context& context
@@ -162,6 +164,8 @@ namespace channel {
 		return std::make_shared<value>("__pre_increment", expression_result.value()->get_type(), increment_result);
 	}
 
+	// binary
+	// arithmetic
 	acceptation_result codegen_visitor::visit_operator_addition_node(
 		operator_addition_node& node,
 		const codegen_context& context
@@ -445,6 +449,7 @@ namespace channel {
 		);
 	}
 
+	// logical
 	acceptation_result codegen_visitor::visit_operator_logical_conjunction_node(
 		operator_conjunction_node& node,
 		const codegen_context& context

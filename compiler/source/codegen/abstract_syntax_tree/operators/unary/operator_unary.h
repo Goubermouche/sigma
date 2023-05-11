@@ -3,7 +3,7 @@
 
 namespace channel {
     /**
-     * \brief Base AST node, all unary operators derive from this node.
+     * \brief Base AST node, base for all unary operator nodes.
      */
     class operator_unary : public node {
     public:

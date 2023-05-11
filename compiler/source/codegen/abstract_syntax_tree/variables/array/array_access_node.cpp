@@ -14,7 +14,7 @@ namespace channel {
 	}
 
 	void array_access_node::print(u64 depth, const std::wstring& prefix, bool is_last) {
-		print_value(depth, prefix, "array access", is_last);
+		print_node_name(depth, prefix, "array access", is_last);
 		console::out << "\n";
 
 		const std::wstring new_prefix = get_new_prefix(depth, prefix, is_last);

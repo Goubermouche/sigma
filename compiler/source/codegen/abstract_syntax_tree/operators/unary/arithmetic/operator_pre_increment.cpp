@@ -11,7 +11,7 @@ namespace channel {
 	}
 
 	void operator_pre_increment::print(u64 depth, const std::wstring& prefix, bool is_last) {
-		print_value(depth, prefix, "unary operator", is_last);
+		print_node_name(depth, prefix, "unary operator", is_last);
 		console::out
 			<< '\''
 			<< AST_NODE_OPERATOR_COLOR

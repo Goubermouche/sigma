@@ -10,7 +10,10 @@
 #include "codegen/abstract_syntax_tree/variables/declaration/global_declaration_node.h"
 
 namespace channel {
-	acceptation_result codegen_visitor::visit_assignment_node(assignment_node& node, const codegen_context& context) {
+	acceptation_result codegen_visitor::visit_assignment_node(
+		assignment_node& node, 
+		const codegen_context& context
+	) {
 		// assignment to a local variable
 		// look up the local variable in the active scope
 		acceptation_result variable_result = node.get_variable_node()->accept(*this, {});
@@ -32,7 +35,10 @@ namespace channel {
 		return expression_value;
 	}
 
-	acceptation_result codegen_visitor::visit_variable_access_node(variable_access_node& node, const codegen_context& context) {
+	acceptation_result codegen_visitor::visit_variable_access_node(
+		variable_access_node& node, 
+		const codegen_context& context
+	) {
 		// load a local variable
 		// look up the local variable in the active scope
 		if (const value_ptr variable_value = m_scope->get_named_value(node.get_variable_identifier())) {
@@ -70,7 +76,10 @@ namespace channel {
 		return std::make_shared<value>(node.get_variable_identifier(), global_variable->get_type(), load);
 	}
 
-	acceptation_result codegen_visitor::visit_local_declaration_node(local_declaration_node& node, const codegen_context& context) {
+	acceptation_result codegen_visitor::visit_local_declaration_node(
+		local_declaration_node& node, 
+		const codegen_context& context
+	) {
 		llvm::BasicBlock* original_entry_block = m_builder.GetInsertBlock();
 		llvm::Function* parent_function = original_entry_block->getParent();
 		llvm::BasicBlock* function_entry_block = &*parent_function->begin();
@@ -121,7 +130,10 @@ namespace channel {
 		return declaration_value;
 	}
 
-	acceptation_result codegen_visitor::visit_global_declaration_node(global_declaration_node& node, const codegen_context& context) {
+	acceptation_result codegen_visitor::visit_global_declaration_node(
+		global_declaration_node& node,
+		const codegen_context& context
+	) {
 		// start creating the init function for our global ctor
 		const std::string init_func_name = "__global_init_" + node.get_declaration_identifier();
 		llvm::FunctionType* init_func_type = llvm::FunctionType::get(llvm::Type::getVoidTy(m_context), false);
@@ -176,7 +188,10 @@ namespace channel {
 		return global_declaration;
 	}
 
-	acceptation_result codegen_visitor::visit_allocation_node(array_allocation_node& node, const codegen_context& context) {
+	acceptation_result codegen_visitor::visit_allocation_node(
+		array_allocation_node& node,
+		const codegen_context& context
+	) {
 		// get the count of allocated elements
 		acceptation_result element_count_result = node.get_array_element_count_node()->accept(*this, {});
 		if (!element_count_result.has_value()) {
@@ -219,7 +234,10 @@ namespace channel {
 		return array_value;
 	}
 
-	acceptation_result codegen_visitor::visit_array_access_node(array_access_node& node, const codegen_context& context) {
+	acceptation_result codegen_visitor::visit_array_access_node(
+		array_access_node& node, 
+		const codegen_context& context
+	) {
 		const std::vector<channel::node*>& index_nodes = node.get_array_element_index_nodes();
 
 		// evaluate the array base expression
@@ -261,7 +279,10 @@ namespace channel {
 		return element_value;
 	}
 
-	acceptation_result codegen_visitor::visit_array_assignment_node(array_assignment_node& node, const codegen_context& context) {
+	acceptation_result codegen_visitor::visit_array_assignment_node(
+		array_assignment_node& node,
+		const codegen_context& context
+	) {
 		const std::vector<channel::node*>& index_nodes = node.get_array_element_index_nodes();
 
 		// evaluate the array base expression
@@ -316,7 +337,10 @@ namespace channel {
 		return expression_value;
 	}
 
-	acceptation_result codegen_visitor::visit_variable_node(variable_node& node, const codegen_context& context) {
+	acceptation_result codegen_visitor::visit_variable_node(
+		variable_node& node, 
+		const codegen_context& context
+	) {
 		// find the variable value in our named values
 		value_ptr var_value;
 		if (!get_named_value(var_value, node.get_variable_identifier())) {
@@ -328,7 +352,10 @@ namespace channel {
 		return var_value;
 	}
 
-	acceptation_result codegen_visitor::get_declaration_value(const declaration_node& node, const codegen_context& context) {
+	acceptation_result codegen_visitor::get_declaration_value(
+		const declaration_node& node,
+		const codegen_context& context
+	) {
 		// evaluate the expression to get the initial value
 		if (channel::node* expression = node.get_expression_node()) {
 			// evaluate the assigned value

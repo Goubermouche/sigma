@@ -25,17 +25,6 @@ namespace channel {
 			"d43434", // red
 		};
 
-		// "0c0c0c" // background
-		// "d0d0d0"	// text
-		// "ed94c0"	// numeric, boolean
-		// "c191ff"	// name
-		// "6c95eb"	// keyword
-		// "66c3cc"	// member
-		// "39cc8f"	// function
-		// "85c46c"	// comment
-		// "c9a26d"	// string literal
-		// "d43434"	// red
-
 		for (int i = 0; i < 11; ++i) {
 			csbiInfo.ColorTable[i] = hex_to_rgb(color_palette[i]);
 		}

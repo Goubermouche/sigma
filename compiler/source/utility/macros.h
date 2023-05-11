@@ -14,13 +14,13 @@
 //} while (false)
 
 #define LANG_VERIFY(cond, mesg)                                     \
-    do {                                                            \
-        if (cond) { /* contextually convertible to bool paranoia */ \
-        } else {                                                    \
-            console::out << mesg << '\n';                           \
-            __debugbreak();                                         \
-        }                                                           \
-    } while (false)
+	do {                                                            \
+		if (cond) { /* contextually convertible to bool paranoia */ \
+		} else {                                                    \
+			console::out << mesg << '\n';                           \
+			__debugbreak();                                         \
+		}                                                           \
+	} while (false)
 
 /**
  * \brief Basic assertion macro, asserts whenever \a cond evaluates to false and prints \a message.

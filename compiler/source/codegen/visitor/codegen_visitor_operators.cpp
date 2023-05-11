@@ -24,168 +24,168 @@
 #include "codegen/abstract_syntax_tree/operators/binary/logical/operator_not_equals_node.h"
 
 namespace channel {
-	bool codegen_visitor::visit_operator_post_decrement_node(operator_post_decrement& node, value_ptr& out_value, codegen_context context) {
-		value_ptr loaded_value;
-		if (!node.get_expression_node()->accept(*this, loaded_value, context)) {
-			return false;
+	acceptation_result codegen_visitor::visit_operator_post_decrement_node(
+		operator_post_decrement& node,
+		const codegen_context& context
+	) {
+		acceptation_result expression_result = node.get_expression_node()->accept(*this, context);
+		if (!expression_result.has_value()) {
+			return expression_result;
 		}
 
 		// check if the expression is an integer or a floating-point value
-		if (!loaded_value->get_type().is_numerical()) {
-			error::emit<4007>(node.get_declared_position(), loaded_value->get_type()).print();
-			return false;
+		if (!expression_result.value()->get_type().is_numerical()) {
+			return std::unexpected(error::emit<4007>(node.get_declared_position(), expression_result.value()->get_type()));
 		}
 
 		llvm::Value* decrement_result;
-		if (loaded_value->get_type().is_floating_point()) {
-			decrement_result = m_builder.CreateFSub(loaded_value->get_value(), llvm::ConstantFP::get(loaded_value->get_type().get_llvm_type(m_context), 1.0));
+		if (expression_result.value()->get_type().is_floating_point()) {
+			decrement_result = m_builder.CreateFSub(expression_result.value()->get_value(), llvm::ConstantFP::get(expression_result.value()->get_type().get_llvm_type(m_context), 1.0));
 		}
 		else {
-			decrement_result = m_builder.CreateSub(loaded_value->get_value(), llvm::ConstantInt::get(loaded_value->get_type().get_llvm_type(m_context), 1));
+			decrement_result = m_builder.CreateSub(expression_result.value()->get_value(), llvm::ConstantInt::get(expression_result.value()->get_type().get_llvm_type(m_context), 1));
 		}
 
 		// assert that the pointer is not nullptr
-		ASSERT(loaded_value->get_pointer() != nullptr, "pointer is nullptr");
+		ASSERT(expression_result.value()->get_pointer() != nullptr, "pointer is nullptr");
 
 		m_builder.CreateStore(
 			decrement_result,
-			loaded_value->get_pointer()
+			expression_result.value()->get_pointer()
 		);
 
-		out_value = loaded_value;
-		return true;
+		return expression_result;
 	}
 
-	bool codegen_visitor::visit_operator_post_increment_node(operator_post_increment& node, value_ptr& out_value, codegen_context context) {
-		value_ptr loaded_value;
-		if (!node.get_expression_node()->accept(*this, loaded_value, context)) {
-			return false;
+	acceptation_result codegen_visitor::visit_operator_post_increment_node(
+		operator_post_increment& node,
+		const codegen_context& context
+	) {
+		acceptation_result expression_result = node.get_expression_node()->accept(*this, context);
+		if (!expression_result.has_value()) {
+			return expression_result;
 		}
 
 		// check if the expression is an integer or a floating-point value
-		if (!loaded_value->get_type().is_numerical()) {
-			error::emit<4007>(node.get_declared_position(), loaded_value->get_type()).print();
-			return false;
+		if (!expression_result.value()->get_type().is_numerical()) {
+			return std::unexpected(error::emit<4007>(node.get_declared_position(), expression_result.value()->get_type()));
 		}
 
 		llvm::Value* decrement_result;
-		if (loaded_value->get_type().is_floating_point()) {
-			decrement_result = m_builder.CreateFAdd(loaded_value->get_value(), llvm::ConstantFP::get(loaded_value->get_type().get_llvm_type(m_context), 1.0));
+		if (expression_result.value()->get_type().is_floating_point()) {
+			decrement_result = m_builder.CreateFAdd(expression_result.value()->get_value(), llvm::ConstantFP::get(expression_result.value()->get_type().get_llvm_type(m_context), 1.0));
 		}
 		else {
-			decrement_result = m_builder.CreateAdd(loaded_value->get_value(), llvm::ConstantInt::get(loaded_value->get_type().get_llvm_type(m_context), 1));
+			decrement_result = m_builder.CreateAdd(expression_result.value()->get_value(), llvm::ConstantInt::get(expression_result.value()->get_type().get_llvm_type(m_context), 1));
 		}
 
 		// assert that the pointer is not nullptr
-		ASSERT(loaded_value->get_pointer() != nullptr, "pointer is nullptr");
+		ASSERT(expression_result.value()->get_pointer() != nullptr, "pointer is nullptr");
 
 		m_builder.CreateStore(
 			decrement_result,
-			loaded_value->get_pointer()
+			expression_result.value()->get_pointer()
 		);
 
-		out_value = loaded_value;
-		return true;
+		return expression_result;
 	}
 
-	bool codegen_visitor::visit_operator_pre_decrement_node(operator_pre_decrement& node, value_ptr& out_value, codegen_context context) {
+	acceptation_result codegen_visitor::visit_operator_pre_decrement_node(
+		operator_pre_decrement& node, 
+		const codegen_context& context
+	) {
 		// accept the expression
-		value_ptr expression;
-		if (!node.get_expression_node()->accept(*this, expression, context)) {
-			return false;
+		acceptation_result expression_result = node.get_expression_node()->accept(*this, context);
+		if (!expression_result.has_value()) {
+			return expression_result;
 		}
 
 		// check if the expression is an integer or a floating-point value
-		if (!expression->get_type().is_numerical()) {
-			error::emit<4007>(node.get_declared_position(), expression->get_type()).print();
-			return false;
+		if (!expression_result.value()->get_type().is_numerical()) {
+			return std::unexpected(error::emit<4007>(node.get_declared_position(), expression_result.value()->get_type()));
 		}
 
 		// increment the expression
 		llvm::Value* increment_result;
-		if (expression->get_type().is_floating_point()) {
-			increment_result = m_builder.CreateFSub(expression->get_value(), llvm::ConstantFP::get(expression->get_type().get_llvm_type(m_context), 1.0));
+		if (expression_result.value()->get_type().is_floating_point()) {
+			increment_result = m_builder.CreateFSub(expression_result.value()->get_value(), llvm::ConstantFP::get(expression_result.value()->get_type().get_llvm_type(m_context), 1.0));
 		}
 		else {
-			increment_result = m_builder.CreateSub(expression->get_value(), llvm::ConstantInt::get(expression->get_type().get_llvm_type(m_context), 1));
+			increment_result = m_builder.CreateSub(expression_result.value()->get_value(), llvm::ConstantInt::get(expression_result.value()->get_type().get_llvm_type(m_context), 1));
 		}
 
 		// assert that the pointer is not nullptr
-		ASSERT(expression->get_pointer() != nullptr, "pointer is nullptr");
+		ASSERT(expression_result.value()->get_pointer() != nullptr, "pointer is nullptr");
 
 		// store the decremented value back to memory
 		m_builder.CreateStore(
 			increment_result,
-			expression->get_pointer()
+			expression_result.value()->get_pointer()
 		);
 
-		out_value = std::make_shared<value>("__pre_increment", expression->get_type(), increment_result);
-		return true;
+		return std::make_shared<value>("__pre_increment", expression_result.value()->get_type(), increment_result);
 	}
 
-	bool codegen_visitor::visit_operator_pre_increment_node(operator_pre_increment& node, value_ptr& out_value, codegen_context context) {
+	acceptation_result codegen_visitor::visit_operator_pre_increment_node(
+		operator_pre_increment& node, 
+		const codegen_context& context
+	) {
 		// accept the expression
-		value_ptr expression;
-		if (!node.get_expression_node()->accept(*this, expression, context)) {
-			return false;
+		acceptation_result expression_result = node.get_expression_node()->accept(*this, context);
+		if (!expression_result.has_value()) {
+			return expression_result;
 		}
 
 		// check if the expression is an integer or a floating-point value
-		if (!expression->get_type().is_numerical()) {
-			error::emit<4007>(node.get_declared_position(), expression->get_type()).print();
-			return false;
+		if (!expression_result.value()->get_type().is_numerical()) {
+			return std::unexpected(error::emit<4007>(node.get_declared_position(), expression_result.value()->get_type()));
 		}
 
 		// increment the expression
 		llvm::Value* increment_result;
-		if (expression->get_type().is_floating_point()) {
-			increment_result = m_builder.CreateFAdd(expression->get_value(), llvm::ConstantFP::get(expression->get_type().get_llvm_type(m_context), 1.0));
+		if (expression_result.value()->get_type().is_floating_point()) {
+			increment_result = m_builder.CreateFAdd(expression_result.value()->get_value(), llvm::ConstantFP::get(expression_result.value()->get_type().get_llvm_type(m_context), 1.0));
 		}
 		else {
-			increment_result = m_builder.CreateAdd(expression->get_value(), llvm::ConstantInt::get(expression->get_type().get_llvm_type(m_context), 1));
+			increment_result = m_builder.CreateAdd(expression_result.value()->get_value(), llvm::ConstantInt::get(expression_result.value()->get_type().get_llvm_type(m_context), 1));
 		}
 
 		// assert that the pointer is not nullptr
-		ASSERT(expression->get_pointer() != nullptr, "pointer is nullptr");
+		ASSERT(expression_result.value()->get_pointer() != nullptr, "pointer is nullptr");
 
 		// store the incremented value back to memory
 		m_builder.CreateStore(
 			increment_result,
-			expression->get_pointer()
+			expression_result.value()->get_pointer()
 		);
 
-		out_value = std::make_shared<value>("__pre_increment", expression->get_type(), increment_result);
-		return true;
+		return std::make_shared<value>("__pre_increment", expression_result.value()->get_type(), increment_result);
 	}
 
-	bool codegen_visitor::visit_operator_addition_node(operator_addition_node& node, value_ptr& out_value, codegen_context context) {
-		// accept the left expression
-		value_ptr left;
-		if (!node.get_left_expression_node()->accept(*this, left, context)) {
-			return false;
+	acceptation_result codegen_visitor::visit_operator_addition_node(
+		operator_addition_node& node,
+		const codegen_context& context
+	) {
+		// accept the left operand
+		acceptation_result left_operand_result = node.get_left_expression_node()->accept(*this, context);
+		if (!left_operand_result.has_value()) {
+			return left_operand_result;
 		}
 
-		// accept the right expression
-		value_ptr right;
-		if (!node.get_right_expression_node()->accept(*this, right, context)) {
-			return false;
+		// accept the right operand
+		acceptation_result right_operand_result = node.get_right_expression_node()->accept(*this, context);
+		if (!right_operand_result.has_value()) {
+			return right_operand_result;
 		}
 
 		// upcast both expressions
-		const type highest_precision = get_highest_precision_type(left->get_type(), right->get_type());
-		llvm::Value* left_value_upcasted;
-		if(!cast_value(left_value_upcasted, left, highest_precision, node.get_declared_position())) {
-			return false;
-		}
-
-		llvm::Value* right_value_upcasted;
-		if(!cast_value(right_value_upcasted, right, highest_precision, node.get_declared_position())) {
-			return false;
-		}
+		const type highest_precision = get_highest_precision_type(left_operand_result.value()->get_type(), right_operand_result.value()->get_type());
+		llvm::Value* left_value_upcasted = cast_value(left_operand_result.value(), highest_precision, node.get_declared_position());
+		llvm::Value* right_value_upcasted = cast_value(right_operand_result.value(), highest_precision, node.get_declared_position());
 
 		// both types are floating point
 		if (highest_precision.is_floating_point()) {
-			out_value = std::make_shared<value>(
+			return std::make_shared<value>(
 				"__fadd",
 				highest_precision,
 				m_builder.CreateFAdd(
@@ -193,12 +193,11 @@ namespace channel {
 					right_value_upcasted,
 					"fadd")
 			);
-			return true;
 		}
 
 		// both types are unsigned
 		if (highest_precision.is_unsigned()) {
-			out_value = std::make_shared<value>(
+			return std::make_shared<value>(
 				"__uadd",
 				highest_precision,
 				m_builder.CreateAdd(
@@ -207,11 +206,10 @@ namespace channel {
 					"uadd",
 					true)
 			);
-			return true;
 		}
 
 		// fallback to regular op
-		out_value = std::make_shared<value>(
+		return std::make_shared<value>(
 			"__add",
 			highest_precision,
 			m_builder.CreateAdd(
@@ -219,37 +217,32 @@ namespace channel {
 				right_value_upcasted,
 				"add")
 		);
-		return true;
 	}
 
-	bool codegen_visitor::visit_operator_subtraction_node(operator_subtraction_node& node, value_ptr& out_value, codegen_context context) {
-		// accept the left expression
-		value_ptr left;
-		if (!node.get_left_expression_node()->accept(*this, left, context)) {
-			return false;
+	acceptation_result codegen_visitor::visit_operator_subtraction_node(
+		operator_subtraction_node& node,
+		const codegen_context& context
+	) {
+		// accept the left operand
+		acceptation_result left_operand_result = node.get_left_expression_node()->accept(*this, context);
+		if (!left_operand_result.has_value()) {
+			return left_operand_result;
 		}
 
-		// accept the right expression
-		value_ptr right;
-		if (!node.get_right_expression_node()->accept(*this, right, context)) {
-			return false;
+		// accept the right operand
+		acceptation_result right_operand_result = node.get_right_expression_node()->accept(*this, context);
+		if (!right_operand_result.has_value()) {
+			return right_operand_result;
 		}
 
 		// upcast both expressions
-		const type highest_precision = get_highest_precision_type(left->get_type(), right->get_type());
-		llvm::Value* left_value_upcasted;
-		if (!cast_value(left_value_upcasted, left, highest_precision, node.get_declared_position())) {
-			return false;
-		}
-
-		llvm::Value* right_value_upcasted;
-		if (!cast_value(right_value_upcasted, right, highest_precision, node.get_declared_position())) {
-			return false;
-		}
+		const type highest_precision = get_highest_precision_type(left_operand_result.value()->get_type(), right_operand_result.value()->get_type());
+		llvm::Value* left_value_upcasted = cast_value(left_operand_result.value(), highest_precision, node.get_declared_position());
+		llvm::Value* right_value_upcasted = cast_value(right_operand_result.value(), highest_precision, node.get_declared_position());
 
 		// both types are floating point
 		if (highest_precision.is_floating_point()) {
-			out_value = std::make_shared<value>(
+			return std::make_shared<value>(
 				"__fsub",
 				highest_precision,
 				m_builder.CreateFSub(
@@ -257,12 +250,11 @@ namespace channel {
 					right_value_upcasted,
 					"fsub")
 			);
-			return true;
 		}
 
 		// both types are unsigned
 		if (highest_precision.is_unsigned()) {
-			out_value = std::make_shared<value>(
+			return std::make_shared<value>(
 				"__usub",
 				highest_precision,
 				m_builder.CreateSub(
@@ -271,11 +263,10 @@ namespace channel {
 					"usub",
 					true)
 			);
-			return true;
 		}
 
 		// fallback to regular op
-		out_value = std::make_shared<value>(
+		return std::make_shared<value>(
 			"__sub",
 			highest_precision,
 			m_builder.CreateSub(
@@ -283,37 +274,32 @@ namespace channel {
 				right_value_upcasted,
 				"sub")
 		);
-		return true;
 	}
 
-	bool codegen_visitor::visit_operator_multiplication_node(operator_multiplication_node& node, value_ptr& out_value, codegen_context context) {
-		// accept the left expression
-		value_ptr left;
-		if (!node.get_left_expression_node()->accept(*this, left, context)) {
-			return false;
+	acceptation_result codegen_visitor::visit_operator_multiplication_node(
+		operator_multiplication_node& node,
+		const codegen_context& context
+	) {
+		// accept the left operand
+		acceptation_result left_operand_result = node.get_left_expression_node()->accept(*this, context);
+		if (!left_operand_result.has_value()) {
+			return left_operand_result;
 		}
 
-		// accept the right expression
-		value_ptr right;
-		if (!node.get_right_expression_node()->accept(*this, right, context)) {
-			return false;
+		// accept the right operand
+		acceptation_result right_operand_result = node.get_right_expression_node()->accept(*this, context);
+		if (!right_operand_result.has_value()) {
+			return right_operand_result;
 		}
 
 		// upcast both expressions
-		const type highest_precision = get_highest_precision_type(left->get_type(), right->get_type());
-		llvm::Value* left_value_upcasted;
-		if (!cast_value(left_value_upcasted, left, highest_precision, node.get_declared_position())) {
-			return false;
-		}
-
-		llvm::Value* right_value_upcasted;
-		if (!cast_value(right_value_upcasted, right, highest_precision, node.get_declared_position())) {
-			return false;
-		}
+		const type highest_precision = get_highest_precision_type(left_operand_result.value()->get_type(), right_operand_result.value()->get_type());
+		llvm::Value* left_value_upcasted = cast_value(left_operand_result.value(), highest_precision, node.get_declared_position());
+		llvm::Value* right_value_upcasted = cast_value(right_operand_result.value(), highest_precision, node.get_declared_position());
 
 		// both types are floating point
 		if (highest_precision.is_floating_point()) {
-			out_value = std::make_shared<value>(
+			return std::make_shared<value>(
 				"__fmul",
 				highest_precision,
 				m_builder.CreateFMul(
@@ -321,12 +307,11 @@ namespace channel {
 					right_value_upcasted,
 					"fmul")
 			);
-			return true;
 		}
 
 		// both types are unsigned
 		if (highest_precision.is_unsigned()) {
-			out_value = std::make_shared<value>(
+			return std::make_shared<value>(
 				"__umul",
 				highest_precision,
 				m_builder.CreateMul(
@@ -335,11 +320,10 @@ namespace channel {
 					"umul",
 					true)
 			);
-			return true;
 		}
 
 		// fallback to regular op
-		out_value = std::make_shared<value>(
+		return std::make_shared<value>(
 			"__mul",
 			highest_precision,
 			m_builder.CreateMul(
@@ -347,37 +331,32 @@ namespace channel {
 				right_value_upcasted,
 				"mul")
 		);
-		return true;
 	}
 
-	bool codegen_visitor::visit_operator_division_node(operator_division_node& node, value_ptr& out_value, codegen_context context) {
-		// accept the left expression
-		value_ptr left;
-		if (!node.get_left_expression_node()->accept(*this, left, context)) {
-			return false;
+	acceptation_result codegen_visitor::visit_operator_division_node(
+		operator_division_node& node, 
+		const codegen_context& context
+	) {
+		// accept the left operand
+		acceptation_result left_operand_result = node.get_left_expression_node()->accept(*this, context);
+		if (!left_operand_result.has_value()) {
+			return left_operand_result;
 		}
 
-		// accept the right expression
-		value_ptr right;
-		if (!node.get_right_expression_node()->accept(*this, right, context)) {
-			return false;
+		// accept the right operand
+		acceptation_result right_operand_result = node.get_right_expression_node()->accept(*this, context);
+		if (!right_operand_result.has_value()) {
+			return right_operand_result;
 		}
 
 		// upcast both expressions
-		const type highest_precision = get_highest_precision_type(left->get_type(), right->get_type());
-		llvm::Value* left_value_upcasted;
-		if (!cast_value(left_value_upcasted, left, highest_precision, node.get_declared_position())) {
-			return false;
-		}
-
-		llvm::Value* right_value_upcasted;
-		if (!cast_value(right_value_upcasted, right, highest_precision, node.get_declared_position())) {
-			return false;
-		}
+		const type highest_precision = get_highest_precision_type(left_operand_result.value()->get_type(), right_operand_result.value()->get_type());
+		llvm::Value* left_value_upcasted = cast_value(left_operand_result.value(), highest_precision, node.get_declared_position());
+		llvm::Value* right_value_upcasted = cast_value(right_operand_result.value(), highest_precision, node.get_declared_position());
 
 		// both types are floating point
 		if (highest_precision.is_floating_point()) {
-			out_value = std::make_shared<value>(
+			return std::make_shared<value>(
 				"__fdiv",
 				highest_precision,
 				m_builder.CreateFDiv(
@@ -385,12 +364,11 @@ namespace channel {
 					right_value_upcasted,
 					"fdiv")
 			);
-			return true;
 		}
 
 		// both types are unsigned
 		if (highest_precision.is_unsigned()) {
-			out_value = std::make_shared<value>(
+			return std::make_shared<value>(
 				"__udiv",
 				highest_precision,
 				m_builder.CreateUDiv(
@@ -398,11 +376,10 @@ namespace channel {
 					right_value_upcasted,
 					"udiv")
 			);
-			return true;
 		}
 
 		// fallback to regular op
-		out_value = std::make_shared<value>(
+		return std::make_shared<value>(
 			"__div",
 			highest_precision,
 			m_builder.CreateSDiv(
@@ -410,37 +387,32 @@ namespace channel {
 				right_value_upcasted,
 				"div")
 		);
-		return true;
 	}
 
-	bool codegen_visitor::visit_operator_modulo_node(operator_modulo_node& node, value_ptr& out_value, codegen_context context) {
-		// accept the left expression
-		value_ptr left;
-		if (!node.get_left_expression_node()->accept(*this, left, context)) {
-			return false;
+	acceptation_result codegen_visitor::visit_operator_modulo_node(
+		operator_modulo_node& node,
+		const codegen_context& context
+	) {
+		// accept the left operand
+		acceptation_result left_operand_result = node.get_left_expression_node()->accept(*this, context);
+		if (!left_operand_result.has_value()) {
+			return left_operand_result;
 		}
 
-		// accept the right expression
-		value_ptr right;
-		if (!node.get_right_expression_node()->accept(*this, right, context)) {
-			return false;
+		// accept the right operand
+		acceptation_result right_operand_result = node.get_right_expression_node()->accept(*this, context);
+		if (!right_operand_result.has_value()) {
+			return right_operand_result;
 		}
 
 		// upcast both expressions
-		const type highest_precision = get_highest_precision_type(left->get_type(), right->get_type());
-		llvm::Value* left_value_upcasted;
-		if (!cast_value(left_value_upcasted, left, highest_precision, node.get_declared_position())) {
-			return false;
-		}
-
-		llvm::Value* right_value_upcasted;
-		if (!cast_value(right_value_upcasted, right, highest_precision, node.get_declared_position())) {
-			return false;
-		}
+		const type highest_precision = get_highest_precision_type(left_operand_result.value()->get_type(), right_operand_result.value()->get_type());
+		llvm::Value* left_value_upcasted = cast_value(left_operand_result.value(), highest_precision, node.get_declared_position());
+		llvm::Value* right_value_upcasted = cast_value(right_operand_result.value(), highest_precision, node.get_declared_position());
 
 		// both types are floating point
 		if (highest_precision.is_floating_point()) {
-			out_value = std::make_shared<value>(
+			return std::make_shared<value>(
 				"__frem",
 				highest_precision,
 				m_builder.CreateFRem(
@@ -448,12 +420,11 @@ namespace channel {
 					right_value_upcasted,
 					"frem")
 			);
-			return true;
 		}
 
 		// both types are unsigned
 		if (highest_precision.is_unsigned()) {
-			out_value = std::make_shared<value>(
+			return std::make_shared<value>(
 				"__urem",
 				highest_precision,
 				m_builder.CreateURem(
@@ -461,11 +432,10 @@ namespace channel {
 					right_value_upcasted,
 					"urem")
 			);
-			return true;
 		}
 
 		// fallback to regular op
-		out_value = std::make_shared<value>(
+		return std::make_shared<value>(
 			"__rem",
 			highest_precision,
 			m_builder.CreateSRem(
@@ -473,83 +443,80 @@ namespace channel {
 				right_value_upcasted,
 				"rem")
 		);
-		return true;
 	}
 
-	bool codegen_visitor::visit_operator_logical_conjunction_node(operator_conjunction_node& node, value_ptr& out_value, codegen_context context) {
-		// accept the left expression
-		value_ptr left;
-		if (!node.get_left_expression_node()->accept(*this, left, context)) {
-			return false;
+	acceptation_result codegen_visitor::visit_operator_logical_conjunction_node(
+		operator_conjunction_node& node,
+		const codegen_context& context
+	) {
+		// accept the left operand
+		acceptation_result left_operand_result = node.get_left_expression_node()->accept(*this, context);
+		if (!left_operand_result.has_value()) {
+			return left_operand_result;
 		}
 
-		// accept the right expression
-		value_ptr right;
-		if (!node.get_right_expression_node()->accept(*this, right, context)) {
-			return false;
+		// accept the right operand
+		acceptation_result right_operand_result = node.get_right_expression_node()->accept(*this, context);
+		if (!right_operand_result.has_value()) {
+			return right_operand_result;
 		}
 
 		// both expressions must be boolean
-		if (left->get_type().get_base() != type::base::boolean || right->get_type().get_base() != type::base::boolean) {
-			error::emit<4008>(node.get_declared_position(), left->get_type(), right->get_type()).print();
-			return false;
+		if (left_operand_result.value()->get_type().get_base() != type::base::boolean || right_operand_result.value()->get_type().get_base() != type::base::boolean) {
+			return std::unexpected(error::emit<4008>(node.get_declared_position(), left_operand_result.value()->get_type(), right_operand_result.value()->get_type()));
 		}
 
 		// create a logical AND operation
-		llvm::Value* and_result = m_builder.CreateAnd(left->get_value(), right->get_value(), "and");
-		out_value = std::make_shared<value>("__logical_conjunction", type(type::base::boolean, 0), and_result);
-		return true;
+		llvm::Value* and_result = m_builder.CreateAnd(left_operand_result.value()->get_value(), right_operand_result.value()->get_value(), "and");
+		return std::make_shared<value>("__logical_conjunction", type(type::base::boolean, 0), and_result);
 	}
 
-	bool codegen_visitor::visit_operator_logical_disjunction_node(operator_disjunction_node& node, value_ptr& out_value, codegen_context context) {
-		// accept the left expression
-		value_ptr left;
-		if (!node.get_left_expression_node()->accept(*this, left, context)) {
-			return false;
+	acceptation_result codegen_visitor::visit_operator_logical_disjunction_node(
+		operator_disjunction_node& node, 
+		const codegen_context& context
+	) {
+		// accept the left operand
+		acceptation_result left_operand_result = node.get_left_expression_node()->accept(*this, context);
+		if (!left_operand_result.has_value()) {
+			return left_operand_result;
 		}
 
-		// accept the right expression
-		value_ptr right;
-		if (!node.get_right_expression_node()->accept(*this, right, context)) {
-			return false;
+		// accept the right operand
+		acceptation_result right_operand_result = node.get_right_expression_node()->accept(*this, context);
+		if (!right_operand_result.has_value()) {
+			return right_operand_result;
 		}
 
 		// both expressions must be boolean
-		if (left->get_type().get_base() != type::base::boolean || right->get_type().get_base() != type::base::boolean) {
-			error::emit<4009>(node.get_declared_position(), left->get_type(), right->get_type()).print();
-			return false;
+		if (left_operand_result.value()->get_type().get_base() != type::base::boolean || right_operand_result.value()->get_type().get_base() != type::base::boolean) {
+			return std::unexpected(error::emit<4009>(node.get_declared_position(), left_operand_result.value()->get_type(), right_operand_result.value()->get_type()));
 		}
 
 		// create a logical OR operation
-		llvm::Value* or_result = m_builder.CreateOr(left->get_value(), right->get_value());
-		out_value = std::make_shared<value>("__logical_disjunction", type(type::base::boolean, 0), or_result);
-		return true;
+		llvm::Value* or_result = m_builder.CreateOr(left_operand_result.value()->get_value(), right_operand_result.value()->get_value());
+		return std::make_shared<value>("__logical_disjunction", type(type::base::boolean, 0), or_result);
 	}
 
-	bool codegen_visitor::visit_operator_greater_than_node(operator_greater_than_node& node, value_ptr& out_value, codegen_context context) {
-		// accept the left expression
-		value_ptr left;
-		if (!node.get_left_expression_node()->accept(*this, left, context)) {
-			return false;
+	acceptation_result codegen_visitor::visit_operator_greater_than_node(
+		operator_greater_than_node& node, 
+		const codegen_context& context
+	) {
+		// accept the left operand
+		acceptation_result left_operand_result = node.get_left_expression_node()->accept(*this, context);
+		if (!left_operand_result.has_value()) {
+			return left_operand_result;
 		}
 
-		// accept the right expression
-		value_ptr right;
-		if (!node.get_right_expression_node()->accept(*this, right, context)) {
-			return false;
+		// accept the right operand
+		acceptation_result right_operand_result = node.get_right_expression_node()->accept(*this, context);
+		if (!right_operand_result.has_value()) {
+			return right_operand_result;
 		}
 
 		// upcast both expressions
-		const type highest_precision = get_highest_precision_type(left->get_type(), right->get_type());
-		llvm::Value* left_value_upcasted;
-		if (!cast_value(left_value_upcasted, left, highest_precision, node.get_declared_position())) {
-			return false;
-		}
-
-		llvm::Value* right_value_upcasted;
-		if (!cast_value(right_value_upcasted, right, highest_precision, node.get_declared_position())) {
-			return false;
-		}
+		const type highest_precision = get_highest_precision_type(left_operand_result.value()->get_type(), right_operand_result.value()->get_type());
+		llvm::Value* left_value_upcasted = cast_value(left_operand_result.value(), highest_precision, node.get_declared_position());
+		llvm::Value* right_value_upcasted = cast_value(right_operand_result.value(), highest_precision, node.get_declared_position());
 
 		// create a greater than operation based on the highest_precision type
 		llvm::Value* greater_than_result;
@@ -565,34 +532,29 @@ namespace channel {
 			}
 		}
 
-		out_value = std::make_shared<value>("__greater_than", type(type::base::boolean, 0), greater_than_result);
-		return true;
+		return std::make_shared<value>("__greater_than", type(type::base::boolean, 0), greater_than_result);
 	}
 
-	bool codegen_visitor::visit_operator_greater_than_equal_to_node(operator_greater_than_equal_to_node& node, value_ptr& out_value, codegen_context context) {
-		// accept the left expression
-		value_ptr left;
-		if (!node.get_left_expression_node()->accept(*this, left, context)) {
-			return false;
+	acceptation_result codegen_visitor::visit_operator_greater_than_equal_to_node(
+		operator_greater_than_equal_to_node& node, 
+		const codegen_context& context
+	) {
+		// accept the left operand
+		acceptation_result left_operand_result = node.get_left_expression_node()->accept(*this, context);
+		if (!left_operand_result.has_value()) {
+			return left_operand_result;
 		}
 
-		// accept the right expression
-		value_ptr right;
-		if (!node.get_right_expression_node()->accept(*this, right, context)) {
-			return false;
+		// accept the right operand
+		acceptation_result right_operand_result = node.get_right_expression_node()->accept(*this, context);
+		if (!right_operand_result.has_value()) {
+			return right_operand_result;
 		}
 
 		// upcast both expressions
-		const type highest_precision = get_highest_precision_type(left->get_type(), right->get_type());
-		llvm::Value* left_value_upcasted;
-		if (!cast_value(left_value_upcasted, left, highest_precision, node.get_declared_position())) {
-			return false;
-		}
-
-		llvm::Value* right_value_upcasted;
-		if (!cast_value(right_value_upcasted, right, highest_precision, node.get_declared_position())) {
-			return false;
-		}
+		const type highest_precision = get_highest_precision_type(left_operand_result.value()->get_type(), right_operand_result.value()->get_type());
+		llvm::Value* left_value_upcasted = cast_value(left_operand_result.value(), highest_precision, node.get_declared_position());
+		llvm::Value* right_value_upcasted = cast_value(right_operand_result.value(), highest_precision, node.get_declared_position());
 
 		// create a greater than or equal to operation based on the highest_precision type
 		llvm::Value* greater_than_equal_result;
@@ -608,34 +570,29 @@ namespace channel {
 			}
 		}
 
-		out_value = std::make_shared<value>("__greater_than_equal_to", type(type::base::boolean, 0), greater_than_equal_result);
-		return true;
+		return std::make_shared<value>("__greater_than_equal_to", type(type::base::boolean, 0), greater_than_equal_result);
 	}
 
-	bool codegen_visitor::visit_operator_less_than_node(operator_less_than_node& node, value_ptr& out_value, codegen_context context) {
-		// accept the left expression
-		value_ptr left;
-		if (!node.get_left_expression_node()->accept(*this, left, context)) {
-			return false;
+	acceptation_result codegen_visitor::visit_operator_less_than_node(
+		operator_less_than_node& node, 
+		const codegen_context& context
+	) {
+		// accept the left operand
+		acceptation_result left_operand_result = node.get_left_expression_node()->accept(*this, context);
+		if (!left_operand_result.has_value()) {
+			return left_operand_result;
 		}
 
-		// accept the right expression
-		value_ptr right;
-		if (!node.get_right_expression_node()->accept(*this, right, context)) {
-			return false;
+		// accept the right operand
+		acceptation_result right_operand_result = node.get_right_expression_node()->accept(*this, context);
+		if (!right_operand_result.has_value()) {
+			return right_operand_result;
 		}
 
 		// upcast both expressions
-		const type highest_precision = get_highest_precision_type(left->get_type(), right->get_type());
-		llvm::Value* left_value_upcasted;
-		if (!cast_value(left_value_upcasted, left, highest_precision, node.get_declared_position())) {
-			return false;
-		}
-
-		llvm::Value* right_value_upcasted;
-		if (!cast_value(right_value_upcasted, right, highest_precision, node.get_declared_position())) {
-			return false;
-		}
+		const type highest_precision = get_highest_precision_type(left_operand_result.value()->get_type(), right_operand_result.value()->get_type());
+		llvm::Value* left_value_upcasted = cast_value(left_operand_result.value(), highest_precision, node.get_declared_position());
+		llvm::Value* right_value_upcasted = cast_value(right_operand_result.value(), highest_precision, node.get_declared_position());
 
 		// create a less than operation based on the highest_precision type
 		llvm::Value* less_than_result;
@@ -651,34 +608,29 @@ namespace channel {
 			}
 		}
 
-		out_value = std::make_shared<value>("__less_than", type(type::base::boolean, 0), less_than_result);
-		return true;
+		return std::make_shared<value>("__less_than", type(type::base::boolean, 0), less_than_result);
 	}
 
-	bool codegen_visitor::visit_operator_less_than_equal_to_node(operator_less_than_equal_to_node& node, value_ptr& out_value, codegen_context context) {
-		// accept the left expression
-		value_ptr left;
-		if (!node.get_left_expression_node()->accept(*this, left, context)) {
-			return false;
+	acceptation_result codegen_visitor::visit_operator_less_than_equal_to_node(
+		operator_less_than_equal_to_node& node,
+		const codegen_context& context
+	) {
+		// accept the left operand
+		acceptation_result left_operand_result = node.get_left_expression_node()->accept(*this, context);
+		if (!left_operand_result.has_value()) {
+			return left_operand_result;
 		}
 
-		// accept the right expression
-		value_ptr right;
-		if (!node.get_right_expression_node()->accept(*this, right, context)) {
-			return false;
+		// accept the right operand
+		acceptation_result right_operand_result = node.get_right_expression_node()->accept(*this, context);
+		if (!right_operand_result.has_value()) {
+			return right_operand_result;
 		}
 
 		// upcast both expressions
-		const type highest_precision = get_highest_precision_type(left->get_type(), right->get_type());
-		llvm::Value* left_value_upcasted;
-		if (!cast_value(left_value_upcasted, left, highest_precision, node.get_declared_position())) {
-			return false;
-		}
-
-		llvm::Value* right_value_upcasted;
-		if (!cast_value(right_value_upcasted, right, highest_precision, node.get_declared_position())) {
-			return false;
-		}
+		const type highest_precision = get_highest_precision_type(left_operand_result.value()->get_type(), right_operand_result.value()->get_type());
+		llvm::Value* left_value_upcasted = cast_value(left_operand_result.value(), highest_precision, node.get_declared_position());
+		llvm::Value* right_value_upcasted = cast_value(right_operand_result.value(), highest_precision, node.get_declared_position());
 
 		// create a less than or equal to operation based on the highest_precision type
 		llvm::Value* less_than_equal_result;
@@ -694,34 +646,29 @@ namespace channel {
 			}
 		}
 
-		out_value = std::make_shared<value>("__less_than_equal_to", type(type::base::boolean, 0), less_than_equal_result);
-		return true;
+		return std::make_shared<value>("__less_than_equal_to", type(type::base::boolean, 0), less_than_equal_result);
 	}
 
-	bool codegen_visitor::visit_operator_equals_node(operator_equals_node& node, value_ptr& out_value, codegen_context context) {
-		// accept the left expression
-		value_ptr left;
-		if (!node.get_left_expression_node()->accept(*this, left, context)) {
-			return false;
+	acceptation_result codegen_visitor::visit_operator_equals_node(
+		operator_equals_node& node, 
+		const codegen_context& context
+	) {
+		// accept the left operand
+		acceptation_result left_operand_result = node.get_left_expression_node()->accept(*this, context);
+		if (!left_operand_result.has_value()) {
+			return left_operand_result;
 		}
 
-		// accept the right expression
-		value_ptr right;
-		if (!node.get_right_expression_node()->accept(*this, right, context)) {
-			return false;
+		// accept the right operand
+		acceptation_result right_operand_result = node.get_right_expression_node()->accept(*this, context);
+		if (!right_operand_result.has_value()) {
+			return right_operand_result;
 		}
 
 		// upcast both expressions
-		const type highest_precision = get_highest_precision_type(left->get_type(), right->get_type());
-		llvm::Value* left_value_upcasted;
-		if (!cast_value(left_value_upcasted, left, highest_precision, node.get_declared_position())) {
-			return false;
-		}
-
-		llvm::Value* right_value_upcasted;
-		if (!cast_value(right_value_upcasted, right, highest_precision, node.get_declared_position())) {
-			return false;
-		}
+		const type highest_precision = get_highest_precision_type(left_operand_result.value()->get_type(), right_operand_result.value()->get_type());
+		llvm::Value* left_value_upcasted = cast_value(left_operand_result.value(), highest_precision, node.get_declared_position());
+		llvm::Value* right_value_upcasted = cast_value(right_operand_result.value(), highest_precision, node.get_declared_position());
 
 		// create an equals operation based on the highest_precision type
 		llvm::Value* equals_result;
@@ -732,34 +679,29 @@ namespace channel {
 			equals_result = m_builder.CreateICmpEQ(left_value_upcasted, right_value_upcasted);
 		}
 
-		out_value = std::make_shared<value>("__equals", type(type::base::boolean, 0), equals_result);
-		return true;
+		return std::make_shared<value>("__equals", type(type::base::boolean, 0), equals_result);
 	}
 
-	bool codegen_visitor::visit_operator_not_equals_node(operator_not_equals_node& node, value_ptr& out_value, codegen_context context) {
-		// accept the left expression
-		value_ptr left;
-		if (!node.get_left_expression_node()->accept(*this, left, context)) {
-			return false;
+	acceptation_result codegen_visitor::visit_operator_not_equals_node(
+		operator_not_equals_node& node, 
+		const codegen_context& context
+	) {
+		// accept the left operand
+		acceptation_result left_operand_result = node.get_left_expression_node()->accept(*this, context);
+		if (!left_operand_result.has_value()) {
+			return left_operand_result;
 		}
 
-		// accept the right expression
-		value_ptr right;
-		if (!node.get_right_expression_node()->accept(*this, right, context)) {
-			return false;
+		// accept the right operand
+		acceptation_result right_operand_result = node.get_right_expression_node()->accept(*this, context);
+		if (!right_operand_result.has_value()) {
+			return right_operand_result;
 		}
 
 		// upcast both expressions
-		const type highest_precision = get_highest_precision_type(left->get_type(), right->get_type());
-		llvm::Value* left_value_upcasted;
-		if (!cast_value(left_value_upcasted, left, highest_precision, node.get_declared_position())) {
-			return false;
-		}
-
-		llvm::Value* right_value_upcasted;
-		if (!cast_value(right_value_upcasted, right, highest_precision, node.get_declared_position())) {
-			return false;
-		}
+		const type highest_precision = get_highest_precision_type(left_operand_result.value()->get_type(), right_operand_result.value()->get_type());
+		llvm::Value* left_value_upcasted = cast_value(left_operand_result.value(), highest_precision, node.get_declared_position());
+		llvm::Value* right_value_upcasted = cast_value(right_operand_result.value(), highest_precision, node.get_declared_position());
 
 		// create a not equals operation based on the highest_precision type
 		llvm::Value* not_equals_result;
@@ -770,7 +712,6 @@ namespace channel {
 			not_equals_result = m_builder.CreateICmpNE(left_value_upcasted, right_value_upcasted);
 		}
 
-		out_value = std::make_shared<value>("__not_equals", type(type::base::boolean, 0), not_equals_result);
-		return true;
+		return std::make_shared<value>("__not_equals", type(type::base::boolean, 0), not_equals_result);
 	}
 }

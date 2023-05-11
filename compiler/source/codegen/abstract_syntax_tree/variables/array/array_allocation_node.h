@@ -13,7 +13,11 @@ namespace channel {
 			const node_ptr& array_element_count_node
 		);
 
-		bool accept(visitor& visitor, value_ptr& out_value, codegen_context context) override;
+		acceptation_result accept(
+			visitor& visitor,
+			const codegen_context& context
+		) override;
+
 		void print(int depth, const std::wstring& prefix, bool is_last) override;
 
 		const type& get_array_element_type() const;

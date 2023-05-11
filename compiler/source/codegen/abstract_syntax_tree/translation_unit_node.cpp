@@ -6,8 +6,8 @@ namespace channel {
 	) : node({ "x", 0, 0}),
 	m_nodes(nodes) {}
 
-	bool translation_unit_node::accept(visitor& visitor, value_ptr& out_value, codegen_context context) {
-		return visitor.visit_translation_unit_node(*this, out_value, context);
+	acceptation_result translation_unit_node::accept(visitor& visitor, const codegen_context& context) {
+		return visitor.visit_translation_unit_node(*this, context);
 	}
 
 	void translation_unit_node::print(int depth, const std::wstring& prefix, bool is_last) {

@@ -1,6 +1,7 @@
 #pragma once
 #include "codegen/llvm_wrappers/value.h"
 #include "codegen/llvm_wrappers/codegen_context.h"
+#include "compiler/diagnostics/error.h"
 
 #define AST_NODE_NUMERICAL_LITERAL_COLOR color::blue
 #define AST_NODE_BOOLEAN_LITERAL_COLOR	 color::blue
@@ -14,6 +15,7 @@ namespace channel {
 	class node;
 
 	using node_ptr = node*;
+	using acceptation_result = std::expected<value_ptr, error_message>;
 
 	/**
 	 * \brief base AST node.
@@ -23,17 +25,9 @@ namespace channel {
 		node(const token_position& position);
 		virtual ~node() = default;
 
-		/**
-		 * \brief Accepts the given \a visitor and handles the given node.
-		 * \param visitor Visitor to accept
-		 * \param out_value Resulting value
-		 * \param context Acceptation context
-		 * \returns True if no error has been met, otherwise false
-		 */
-		virtual bool accept(
+		virtual acceptation_result accept(
 			visitor& visitor,
-			value_ptr& out_value,
-			codegen_context context
+			const codegen_context& context
 		) = 0;
 
 		virtual void print(

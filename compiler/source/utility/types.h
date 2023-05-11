@@ -3,6 +3,7 @@
 #include <array>
 #include <cstddef>
 #include <codecvt>
+#include <expected>
 #include <filesystem>
 #include <fcntl.h>
 #include <format>

@@ -9,8 +9,8 @@ namespace channel {
 	m_array_base(array_base),
 	m_array_element_index_nodes(array_element_index_nodes) {}
 
-	bool array_access_node::accept(visitor& visitor, value_ptr& out_value, codegen_context context) {
-		return visitor.visit_array_access_node(*this, out_value, context);
+	acceptation_result array_access_node::accept(visitor& visitor, const codegen_context& context) {
+		return visitor.visit_array_access_node(*this, context);
 	}
 
 	void array_access_node::print(int depth, const std::wstring& prefix, bool is_last) {

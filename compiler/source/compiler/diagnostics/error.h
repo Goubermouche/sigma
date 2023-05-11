@@ -35,7 +35,8 @@ namespace channel {
 		std::pair{ 4011, "invalid break statement detected outside a valid loop body" },
 		std::pair{ 4012, "unable to locate the main entry point" },
 		std::pair{ 4013, "unable to declare a main entry point with the return type of '{}' (expecting 'i32')" },
-		std::pair{ 4014, "unable to declare a numerical literal with a pointer type" }
+		std::pair{ 4014, "unable to declare a numerical literal using a pointer type" },
+		std::pair{ 4015, "unable to declare a numerical literal using the given type '{}'" }
 	);
 
 	class error_message : public diagnostic_message {

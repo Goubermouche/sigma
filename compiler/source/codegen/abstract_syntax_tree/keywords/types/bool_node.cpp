@@ -7,8 +7,8 @@ namespace channel {
 	) : node(position),
 	m_value(value) {}
 
-	bool bool_node::accept(visitor& visitor, value_ptr& out_value, codegen_context context) {
-		return visitor.visit_keyword_bool_node(*this, out_value, context);
+	acceptation_result bool_node::accept(visitor& visitor, const codegen_context& context) {
+		return visitor.visit_keyword_bool_node(*this, context);
 	}
 
 	void bool_node::print(int depth, const std::wstring& prefix, bool is_last) {

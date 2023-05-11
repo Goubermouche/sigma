@@ -13,8 +13,8 @@ namespace channel {
 	m_post_iteration_nodes(post_iteration_nodes),
 	m_loop_body_nodes(statement_nodes) {}
 
-	bool for_node::accept(visitor& visitor, value_ptr& out_value, codegen_context context) {
-		return visitor.visit_for_node(*this, out_value, context);
+	acceptation_result for_node::accept(visitor& visitor, const codegen_context& context) {
+		return visitor.visit_for_node(*this, context);
 	}
 
 	void for_node::print(int depth, const std::wstring& prefix, bool is_last) {

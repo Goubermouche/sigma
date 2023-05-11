@@ -4,8 +4,8 @@ namespace channel {
 	break_node::break_node(const token_position& position)
 		: node(position) {}
 
-	bool break_node::accept(visitor& visitor, value_ptr& out_value, codegen_context context) {
-		return visitor.visit_break_node(*this, out_value, context);
+	acceptation_result break_node::accept(visitor& visitor, const codegen_context& context) {
+		return visitor.visit_break_node(*this, context);
 	}
 
 	void break_node::print(int depth, const std::wstring& prefix, bool is_last) {

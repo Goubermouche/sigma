@@ -7,8 +7,8 @@ namespace channel {
     ) : node(position),
 	m_variable_identifier(variable_identifier) {}
 
-    bool variable_access_node::accept(visitor& visitor, value_ptr& out_value, codegen_context context) {
-        return visitor.visit_variable_access_node(*this, out_value, context);
+    acceptation_result variable_access_node::accept(visitor& visitor, const codegen_context& context) {
+        return visitor.visit_variable_access_node(*this, context);
     }
 
     void variable_access_node::print(int depth, const std::wstring& prefix, bool is_last) {

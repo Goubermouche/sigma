@@ -9,8 +9,8 @@ namespace channel {
 	m_value(value),
 	m_preferred_type(preferred_type) {}
 
-	bool numerical_literal_node::accept(visitor& visitor, value_ptr& out_value, codegen_context context) {
-		return visitor.visit_numerical_literal_node(*this, out_value, context);
+	acceptation_result numerical_literal_node::accept(visitor& visitor, const codegen_context& context) {
+		return visitor.visit_numerical_literal_node(*this, context);
 	}
 
 	void numerical_literal_node::print(int depth, const std::wstring& prefix, bool is_last) {

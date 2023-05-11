@@ -15,7 +15,11 @@ namespace channel {
 			const std::vector<node_ptr>& statement_nodes
 		);
 
-		bool accept(visitor& visitor, value_ptr& out_value, codegen_context context) override;
+		acceptation_result accept(
+			visitor& visitor,
+			const codegen_context& context
+		) override;
+
 		void print(int depth, const std::wstring& prefix, bool is_last) override;
 
 		const node_ptr& get_loop_initialization_node() const;

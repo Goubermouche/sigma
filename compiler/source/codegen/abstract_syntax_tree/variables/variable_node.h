@@ -12,7 +12,11 @@ namespace channel {
 			const std::string& variable_identifier
 		);
 
-		bool accept(visitor& visitor, value_ptr& out_value, codegen_context context) override;
+		acceptation_result accept(
+			visitor& visitor,
+			const codegen_context& context
+		) override;
+
 		void print(int depth, const std::wstring& prefix, bool is_last) override;
 
 		const std::string& get_variable_identifier() const;

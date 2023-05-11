@@ -10,30 +10,29 @@
 #include "codegen/abstract_syntax_tree/variables/declaration/global_declaration_node.h"
 
 namespace channel {
-	bool codegen_visitor::visit_assignment_node(assignment_node& node, value_ptr& out_value, codegen_context context) {
+	acceptation_result codegen_visitor::visit_assignment_node(assignment_node& node, const codegen_context& context) {
 		// assignment to a local variable
 		// look up the local variable in the active scope
-		value_ptr variable;
-		if(!node.get_variable_node()->accept(*this, variable, {})) {
-			return false;
+		acceptation_result variable_result = node.get_variable_node()->accept(*this, {});
+		if(!variable_result.has_value()) {
+			return variable_result;
 		}
 
 		// evaluate the expression on the right-hand side of the assignment
-		if (!node.get_expression_node()->accept(*this, out_value, codegen_context(variable->get_type()))) {
-			return false;
+		acceptation_result expression_result = node.get_expression_node()->accept(*this, codegen_context(variable_result.value()->get_type()));
+		if (!expression_result.has_value()) {
+			return expression_result;
 		}
 
-		llvm::Value* out_cast;
-		if(!cast_value(out_cast, out_value, variable->get_type(), node.get_declared_position())) {
-			return false;
-		}
+		value_ptr expression_value = expression_result.value();
+		llvm::Value* out_cast = cast_value(expression_value, variable_result.value()->get_type(), node.get_declared_position());
 
-		out_value->set_value(out_cast);
-		m_builder.CreateStore(out_value->get_value(), variable->get_value());
-		return true;
+		expression_value->set_value(out_cast);
+		m_builder.CreateStore(expression_value->get_value(), variable_result.value()->get_value());
+		return expression_value;
 	}
 
-	bool codegen_visitor::visit_variable_access_node(variable_access_node& node, value_ptr& out_value, codegen_context context) {
+	acceptation_result codegen_visitor::visit_variable_access_node(variable_access_node& node, const codegen_context& context) {
 		// load a local variable
 		// look up the local variable in the active scope
 		if (const value_ptr variable_value = m_scope->get_named_value(node.get_variable_identifier())) {
@@ -45,9 +44,9 @@ namespace channel {
 			);
 
 			// return the load instruction as a value
-			out_value = std::make_shared<value>(node.get_variable_identifier(), variable_value->get_type(), load);
-			out_value->set_pointer(alloca);
-			return true;
+			value_ptr variable_load = std::make_shared<value>(node.get_variable_identifier(), variable_value->get_type(), load);
+			variable_load->set_pointer(alloca);
+			return variable_load;
 		}
 
 		// we haven't found a local variable, check if we're loading a global one
@@ -56,8 +55,7 @@ namespace channel {
 		const value_ptr global_variable = m_global_named_values[node.get_variable_identifier()];
 		// check if the global variable exists
 		if (!global_variable) {
-			error::emit<4003>(node.get_declared_position(), node.get_variable_identifier()).print();
-			return false;
+			return std::unexpected(error::emit<4003>(node.get_declared_position(), node.get_variable_identifier()));
 		}
 
 		// get the value from the global variable pointer
@@ -69,11 +67,10 @@ namespace channel {
 		);
 
 		// return the load instruction as a value
-		out_value = std::make_shared<value>(node.get_variable_identifier(), global_variable->get_type(), load);
-		return true;
+		return std::make_shared<value>(node.get_variable_identifier(), global_variable->get_type(), load);
 	}
 
-	bool codegen_visitor::visit_local_declaration_node(local_declaration_node& node, value_ptr& out_value, codegen_context context) {
+	acceptation_result codegen_visitor::visit_local_declaration_node(local_declaration_node& node, const codegen_context& context) {
 		llvm::BasicBlock* original_entry_block = m_builder.GetInsertBlock();
 		llvm::Function* parent_function = original_entry_block->getParent();
 		llvm::BasicBlock* function_entry_block = &*parent_function->begin();
@@ -88,8 +85,7 @@ namespace channel {
 
 		// check if the variable already exists as a global
 		if (m_global_named_values[node.get_declaration_identifier()]) {
-			error::emit<4004>(node.get_declared_position(), node.get_declaration_identifier()).print();
-			return false;
+			return std::unexpected(error::emit<4004>(node.get_declared_position(), node.get_declaration_identifier()));
 		}
 
 		// add the variable to the active scope
@@ -104,30 +100,28 @@ namespace channel {
 
 		// check if the active scope already contains the variable
 		if (!insertion_result.second) {
-			error::emit<4005>(node.get_declared_position(), node.get_declaration_identifier()).print();
-			return false;
+			return std::unexpected(error::emit<4005>(node.get_declared_position(), node.get_declaration_identifier()));
 		}
 
 		// assign the actual value
 		m_builder.SetInsertPoint(original_entry_block);
 
 		// evaluate the assigned value, if there is one
-		if (!get_declaration_value(node, out_value, codegen_context(node.get_declaration_type()))) {
-			return false;
+		acceptation_result declaration_value_result = get_declaration_value(node, codegen_context(node.get_declaration_type()));
+		if (!declaration_value_result.has_value()) {
+			return declaration_value_result;
 		}
 
-		llvm::Value* cast_assigned_value;
-		if (!cast_value(cast_assigned_value, out_value, node.get_declaration_type(), node.get_declared_position())) {
-			return false;
-		}
+		value_ptr declaration_value = declaration_value_result.value();
+		llvm::Value* cast_assigned_value = cast_value(declaration_value, node.get_declaration_type(), node.get_declared_position());
 
 		m_builder.CreateStore(cast_assigned_value, alloca);
-		out_value->set_pointer(alloca);
+		declaration_value->set_pointer(alloca);
 		m_builder.SetInsertPoint(original_entry_block);
-		return true;
+		return declaration_value;
 	}
 
-	bool codegen_visitor::visit_global_declaration_node(global_declaration_node& node, value_ptr& out_value, codegen_context context) {
+	acceptation_result codegen_visitor::visit_global_declaration_node(global_declaration_node& node, const codegen_context& context) {
 		// start creating the init function for our global ctor
 		const std::string init_func_name = "__global_init_" + node.get_declaration_identifier();
 		llvm::FunctionType* init_func_type = llvm::FunctionType::get(llvm::Type::getVoidTy(m_context), false);
@@ -136,19 +130,16 @@ namespace channel {
 		m_builder.SetInsertPoint(init_func_entry); // write to the init function
 
 		// evaluate the assigned value, if there is one
-		value_ptr assigned_value;
-		if (!get_declaration_value(node, assigned_value, codegen_context(node.get_declaration_type()))) {
-			return false;
+		acceptation_result declaration_value_result = get_declaration_value(node, codegen_context(node.get_declaration_type()));
+		if (!declaration_value_result.has_value()) {
+			return declaration_value_result;
 		}
 
 		// cast the right-hand side operator to the assigned type
-		llvm::Value* cast_assigned_value;
-		if(!cast_value(cast_assigned_value, assigned_value, node.get_declaration_type(), node.get_declared_position())) {
-			return false;
-		}
+		llvm::Value* cast_assigned_value = cast_value(declaration_value_result.value(), node.get_declaration_type(), node.get_declared_position());
 
 		// create a global variable
-		out_value = std::make_shared<value>(
+		value_ptr global_declaration = std::make_shared<value>(
 			node.get_declaration_identifier(),
 			node.get_declaration_type(),
 			new llvm::GlobalVariable(*m_module,
@@ -161,15 +152,14 @@ namespace channel {
 		);
 
 		// add the variable to the m_global_named_values map
-		const auto insertion_result = m_global_named_values.insert({ node.get_declaration_identifier(),  out_value });
+		const auto insertion_result = m_global_named_values.insert({ node.get_declaration_identifier(),  global_declaration });
 		// check if a global with the same name already exists
 		if (!insertion_result.second) {
-			error::emit<4006>(node.get_declared_position(), node.get_declaration_identifier()).print();
-			return false;
+			return std::unexpected(error::emit<4006>(node.get_declared_position(), node.get_declaration_identifier()));
 		}
 
-		m_builder.CreateStore(cast_assigned_value, out_value->get_value());
-		out_value->set_pointer(out_value->get_value());
+		m_builder.CreateStore(cast_assigned_value, global_declaration->get_value());
+		global_declaration->set_pointer(global_declaration->get_value());
 		m_builder.CreateRetVoid();
 
 		// create a new constructor with the given priority
@@ -183,21 +173,18 @@ namespace channel {
 
 		// push the constructor to the ctor list
 		m_global_ctors.push_back(new_ctor);
-		return true;
+		return global_declaration;
 	}
 
-	bool codegen_visitor::visit_allocation_node(array_allocation_node& node, value_ptr& out_value, codegen_context context) {
+	acceptation_result codegen_visitor::visit_allocation_node(array_allocation_node& node, const codegen_context& context) {
 		// get the count of allocated elements
-		value_ptr element_count;
-		if (!node.get_array_element_count_node()->accept(*this, element_count, {})) {
-			return false;
+		acceptation_result element_count_result = node.get_array_element_count_node()->accept(*this, {});
+		if (!element_count_result.has_value()) {
+			return element_count_result;
 		}
 
 		// cast the element count node to u64
-		llvm::Value* element_count_cast;
-		if (!cast_value(element_count_cast, element_count, type(type::base::u64, 0), node.get_array_element_count_node()->get_declared_position())) {
-			return false;
-		}
+		llvm::Value* element_count_cast = cast_value(element_count_result.value(), type(type::base::u64, 0), node.get_array_element_count_node()->get_declared_position());
 
 		const llvm::FunctionCallee malloc_func = m_function_registry.get_function("malloc")->get_function();
 
@@ -227,42 +214,37 @@ namespace channel {
 			m_builder.CreateStore(llvm::ConstantInt::get(m_context, llvm::APInt(8, 0)), null_terminator_ptr);
 		}
 
-		out_value = std::make_shared<value>("__alloca", array_element_type.get_pointer_type(), typed_ptr);
-		out_value->set_pointer(allocated_ptr);
-		return true;
+		value_ptr array_value = std::make_shared<value>("__alloca", array_element_type.get_pointer_type(), typed_ptr);
+		array_value->set_pointer(allocated_ptr);
+		return array_value;
 	}
 
-	bool codegen_visitor::visit_array_access_node(array_access_node& node, value_ptr& out_value, codegen_context context) {
+	acceptation_result codegen_visitor::visit_array_access_node(array_access_node& node, const codegen_context& context) {
 		const std::vector<channel::node*>& index_nodes = node.get_array_element_index_nodes();
-		value_ptr array_ptr;
 
 		// evaluate the array base expression
-		if (!node.get_array_base_node()->accept(*this, array_ptr, {})) {
-			return false;
+		acceptation_result array_ptr_result = node.get_array_base_node()->accept(*this, {});
+		if (!array_ptr_result.has_value()) {
+			return array_ptr_result;
 		}
 
 		// traverse the array indexes
-		type current_type = array_ptr->get_type();
-		llvm::Value* current_ptr = array_ptr->get_value();
+		type current_type = array_ptr_result.value()->get_type();
+		llvm::Value* current_ptr = array_ptr_result.value()->get_value();
 
 		for (size_t i = 0; i < index_nodes.size(); ++i) {
-			value_ptr index_value;
-
-			if (!index_nodes[i]->accept(*this, index_value, {})) {
-				return false;
+			acceptation_result index_value_result = index_nodes[i]->accept(*this, {});
+			if (!index_value_result.has_value()) {
+				return index_value_result;
 			}
 
 			// cast the index value to u64
-			llvm::Value* index_value_cast;
-			if (!cast_value(index_value_cast, index_value, type(type::base::u64, 0), node.get_declared_position())) {
-				return false;
-			}
+			llvm::Value* index_value_cast = cast_value(index_value_result.value(), type(type::base::u64, 0), node.get_declared_position());
 
 			// load the actual pointer value
 			current_ptr = m_builder.CreateLoad(current_type.get_llvm_type(m_context), current_ptr);
 
 			// get the next level pointer
-			// current_ptr = m_builder.CreateGEP(current_type.get_element_type().get_llvm_type(m_context), current_ptr, index_value_cast);
 			current_ptr = m_builder.CreateInBoundsGEP(current_type.get_element_type().get_llvm_type(m_context), current_ptr, index_value_cast);
 
 			// update the current_type for the next iteration
@@ -274,36 +256,32 @@ namespace channel {
 		// load the value at the final element address
 		llvm::Value* loaded_value = m_builder.CreateLoad(current_type.get_element_type().get_llvm_type(m_context), current_ptr);
 
-		out_value = std::make_shared<value>("__array_element", current_type.get_element_type(), loaded_value);
-		out_value->set_pointer(current_ptr);
-		return true;
+		value_ptr element_value = std::make_shared<value>("__array_element", current_type.get_element_type(), loaded_value);
+		element_value->set_pointer(current_ptr);
+		return element_value;
 	}
 
-	bool codegen_visitor::visit_array_assignment_node(array_assignment_node& node, value_ptr& out_value, codegen_context context) {
+	acceptation_result codegen_visitor::visit_array_assignment_node(array_assignment_node& node, const codegen_context& context) {
 		const std::vector<channel::node*>& index_nodes = node.get_array_element_index_nodes();
-		value_ptr array_ptr;
 
 		// evaluate the array base expression
-		if (!node.get_array_base_node()->accept(*this, array_ptr, {})) {
-			return false;
+		acceptation_result array_ptr_result = node.get_array_base_node()->accept(*this, {});
+		if (!array_ptr_result.has_value()) {
+			return array_ptr_result;
 		}
 
 		// traverse the array indexes
-		type current_type = array_ptr->get_type();
-		llvm::Value* current_ptr = array_ptr->get_value();
+		type current_type = array_ptr_result.value()->get_type();
+		llvm::Value* current_ptr = array_ptr_result.value()->get_value();
 
 		for (size_t i = 0; i < index_nodes.size(); ++i) {
-			value_ptr index_value;
-
-			if (!index_nodes[i]->accept(*this, index_value, {})) {
-				return false;
+			acceptation_result index_value_result = index_nodes[i]->accept(*this, {});
+			if (!index_value_result.has_value()) {
+				return index_value_result;
 			}
 
 			// cast the index value to u64
-			llvm::Value* index_value_cast;
-			if (!cast_value(index_value_cast, index_value, type(type::base::u64, 0), node.get_declared_position())) {
-				return false;
-			}
+			llvm::Value* index_value_cast = cast_value(index_value_result.value(), type(type::base::u64, 0), node.get_declared_position());
 
 			// load the actual pointer value
 			current_ptr = m_builder.CreateLoad(current_type.get_llvm_type(m_context), current_ptr);
@@ -319,53 +297,46 @@ namespace channel {
 		}
 
 		// evaluate the right-hand side expression
-		value_ptr expression_value;
-		if (!node.get_expression_node()->accept(*this, expression_value, {})) {
-			return false;
+		acceptation_result expression_value_result = node.get_expression_node()->accept(*this, codegen_context(current_type.get_element_type()));
+		if (!expression_value_result.value()) {
+			return expression_value_result;
 		}
 
 		// get the final element type for the assignment
 		const type final_element_type = current_type.get_element_type();
 
 		// cast the expression value to the array element type
-		llvm::Value* expression_llvm_value_cast;
-		if (!cast_value(expression_llvm_value_cast, expression_value, final_element_type, node.get_declared_position())) {
-			return false;
-		}
+		llvm::Value* expression_llvm_value_cast = cast_value(expression_value_result.value(), final_element_type, node.get_declared_position());
 
-		expression_value = std::make_shared<value>(expression_value->get_name(), final_element_type, expression_llvm_value_cast);
+		value_ptr expression_value = std::make_shared<value>(expression_value_result.value()->get_name(), final_element_type, expression_llvm_value_cast);
 
 		// store the result of the right-hand side expression in the array
-		m_builder.CreateStore(expression_value->get_value(), current_ptr);
-		out_value = expression_value;
-		out_value->set_pointer(current_ptr);
-		return true;
+		m_builder.CreateStore(expression_value_result.value()->get_value(), current_ptr);
+		expression_value->set_pointer(current_ptr);
+		return expression_value;
 	}
 
-	bool codegen_visitor::visit_variable_node(variable_node& node, value_ptr& out_value, codegen_context context) {
+	acceptation_result codegen_visitor::visit_variable_node(variable_node& node, const codegen_context& context) {
 		// find the variable value in our named values
 		value_ptr var_value;
 		if (!get_named_value(var_value, node.get_variable_identifier())) {
-			error::emit<4003>(node.get_declared_position(), node.get_variable_identifier()).print();
-			return false;
+			return std::unexpected(error::emit<4003>(node.get_declared_position(), node.get_variable_identifier()));
 		}
 
 		// since the variable_node represents an address, we do not need to load it
 		// just return the found value
-		out_value = var_value;
-		return true;
+		return var_value;
 	}
 
-	bool codegen_visitor::get_declaration_value(const declaration_node& node, value_ptr& out_value, codegen_context context) {
+	acceptation_result codegen_visitor::get_declaration_value(const declaration_node& node, const codegen_context& context) {
 		// evaluate the expression to get the initial value
 		if (channel::node* expression = node.get_expression_node()) {
 			// evaluate the assigned value
-			return expression->accept(*this, out_value, context);
+			return expression->accept(*this, context);
 		}
 
 		// declared without an assigned value, set it to 0
 		llvm::Type* value_type = node.get_declaration_type().get_llvm_type(m_context);
-		out_value = std::make_shared<value>(node.get_declaration_identifier(), node.get_declaration_type(), llvm::Constant::getNullValue(value_type));
-		return true;
+		return std::make_shared<value>(node.get_declaration_identifier(), node.get_declaration_type(), llvm::Constant::getNullValue(value_type));
 	}
 }

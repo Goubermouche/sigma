@@ -12,7 +12,7 @@ workspace "channel"
 project "compiler"
     kind "ConsoleApp"
     language "C++"
-    cppdialect "C++20"
+    cppdialect "C++latest"
 
     location "compiler"
     -- dependson "external_functions"

@@ -46,11 +46,12 @@ namespace channel {
 
 	bool codegen_visitor::generate() {
 		// walk the abstract syntax tree
-		value_ptr tmp_value;
 		abstract_syntax_tree tree = m_parser.get_abstract_syntax_tree();
 
 		for (node* n : tree) {
-			if(!n->accept(*this, tmp_value, {})) {
+			acceptation_result result = n->accept(*this, {});
+			if(!result.has_value()) {
+				result.error().print();
 				return false;
 			}
 		}
@@ -88,15 +89,15 @@ namespace channel {
 		return true;
 	}
 
-	bool codegen_visitor::visit_translation_unit_node(translation_unit_node& node, value_ptr& out_value, codegen_context context) {
-		value_ptr temp_value;
+	acceptation_result codegen_visitor::visit_translation_unit_node(translation_unit_node& node, const codegen_context& context) {
 		for(const auto& n : node.get_nodes()) {
-			if(!n->accept(*this, temp_value, context)) {
-				return false;
+			acceptation_result result = n->accept(*this, context);
+			if(!result.value()) {
+				return result;
 			}
 		}
 
-		return true;
+		return nullptr;
 	}
 
 	bool codegen_visitor::verify_main_entry_point() const {
@@ -116,11 +117,10 @@ namespace channel {
 		return true;
 	}
 
-	bool codegen_visitor::cast_value(llvm::Value*& out_value, const value_ptr source_value, type target_type, const token_position& position) {
+	llvm::Value* codegen_visitor::cast_value(value_ptr source_value, type target_type, const token_position& position) {
 		// both types are the same
 		if (source_value->get_type() == target_type) {
-			out_value = source_value->get_value();
-			return true;
+			return source_value->get_value();
 		}
 
 		// cast function call
@@ -130,8 +130,7 @@ namespace channel {
 
 			// both types are the same 
 			if (function_return_type == target_type) {
-				out_value = source_value->get_value();
-				return true;
+				return source_value->get_value();
 			}
 
 			// don't allow pointer casting for now
@@ -148,24 +147,20 @@ namespace channel {
 			// perform the cast op
 			if (function_return_type.is_floating_point()) {
 				if (target_type.is_integral()) {
-					out_value = m_builder.CreateFPToSI(function_call_result, target_llvm_type, "fptosi");
-					return true;
+					return m_builder.CreateFPToSI(function_call_result, target_llvm_type, "fptosi");
 				}
 
 				if (target_type.is_floating_point()) {
-					out_value = m_builder.CreateFPCast(function_call_result, target_llvm_type, "fpcast");
-					return true;
+					return m_builder.CreateFPCast(function_call_result, target_llvm_type, "fpcast");
 				}
 			}
 			else if (function_return_type.is_integral()) {
 				if (target_type.is_floating_point()) {
-					out_value = m_builder.CreateSIToFP(function_call_result, target_llvm_type, "sitofp");
-					return true;
+					return m_builder.CreateSIToFP(function_call_result, target_llvm_type, "sitofp");
 				}
 
 				if (target_type.is_integral()) {
-					out_value = m_builder.CreateIntCast(function_call_result, target_llvm_type, target_type.is_signed(), "intcast");
-					return true;
+					return m_builder.CreateIntCast(function_call_result, target_llvm_type, target_type.is_signed(), "intcast");
 				}
 			}
 		}
@@ -184,43 +179,36 @@ namespace channel {
 
 		// bool to i32
 		if (source_value->get_type().get_base() == type::base::boolean && target_type.get_base() == type::base::i32) {
-			out_value = m_builder.CreateZExt(source_llvm_value, target_llvm_type, "zext");
-			return true;
+			return m_builder.CreateZExt(source_llvm_value, target_llvm_type, "zext");
 		}
 
 		// floating-point to integer
 		if (source_value->get_type().is_floating_point() && target_type.is_integral()) {
-			out_value = m_builder.CreateFPToSI(source_llvm_value, target_llvm_type);
-			return true;
+			return m_builder.CreateFPToSI(source_llvm_value, target_llvm_type);
 		}
 
 		// integer to floating-point
 		if (source_value->get_type().is_integral() && target_type.is_floating_point()) {
-			out_value = m_builder.CreateSIToFP(source_llvm_value, target_llvm_type);
-			return true;
+			return m_builder.CreateSIToFP(source_llvm_value, target_llvm_type);
 		}
 
 		// floating-point upcast or downcast
 		if (source_value->get_type().is_floating_point() && target_type.is_floating_point()) {
-			out_value = m_builder.CreateFPCast(source_llvm_value, target_llvm_type, "fpcast");
-			return true;
+			return m_builder.CreateFPCast(source_llvm_value, target_llvm_type, "fpcast");
 		}
 
 		// other cases
 		if (source_value->get_type().get_bit_width() < target_type.get_bit_width()) {
 			// perform upcast
 			if (source_value->get_type().is_unsigned()) {
-				out_value = m_builder.CreateZExt(source_llvm_value, target_llvm_type, "zext");
-				return true;
+				return m_builder.CreateZExt(source_llvm_value, target_llvm_type, "zext");
 			}
 
-			out_value = m_builder.CreateSExt(source_llvm_value, target_llvm_type, "sext");
-			return true;
+			return m_builder.CreateSExt(source_llvm_value, target_llvm_type, "sext");
 		}
 
 		// downcast
-		out_value = m_builder.CreateTrunc(source_llvm_value, target_llvm_type, "trunc");
-		return true;
+		return m_builder.CreateTrunc(source_llvm_value, target_llvm_type, "trunc");
 	}
 
 	bool codegen_visitor::get_named_value(value_ptr& out_value, const std::string& variable_name) {

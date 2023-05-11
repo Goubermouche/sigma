@@ -10,7 +10,11 @@ namespace channel {
 			type preferred_type
 		);
 
-		bool accept(visitor& visitor, value_ptr& out_value, codegen_context context) override;
+		acceptation_result accept(
+			visitor& visitor,
+			const codegen_context& context
+		) override;
+
 		void print(int depth, const std::wstring& prefix, bool is_last) override;
 
 		const std::string& get_value() const;

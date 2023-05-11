@@ -46,10 +46,10 @@ i32 main() {
                 i32 y = 12 + 15 * D * (l * h * n + t * m);
                 i32 o = x + 80 * y;
 				i32 N = 8 * ((f * e - c * d * g) * m - c * d * e - f * g - l * d * n);
-	
+		
 				if(1760 > o && o > 0 && D > z[o]) {
 					z[o] = D;
-	
+		
 					if(N > 0) {
 						b[o] = brightness[N];
 					}
@@ -59,9 +59,9 @@ i32 main() {
 				}
 			}
 		}
-	
+		
 		print("\x1b[H");
-
+		
 		for(k = 0; k < 1760; k++) {
 			if(k % 80 != 0) {
 				printc(b[k]);
@@ -70,7 +70,7 @@ i32 main() {
 				printc('\n');
 			}
 		}
-	
+		
 		A = A + 0.1;
 		B = B + 0.2;
 	}

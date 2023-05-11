@@ -22,18 +22,6 @@
     <Filter Include="source\codegen\abstract_syntax_tree\keywords\types">
       <UniqueIdentifier>{DD3DD9F9-C9D1-CEA1-3296-28561E490994}</UniqueIdentifier>
     </Filter>
-    <Filter Include="source\codegen\abstract_syntax_tree\keywords\types\floating_point">
-      <UniqueIdentifier>{2918A3FA-9536-B7C7-DE03-BDD94A61F2D0}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="source\codegen\abstract_syntax_tree\keywords\types\signed_int">
-      <UniqueIdentifier>{90CC42E8-FC94-106C-C525-197E31AD40A7}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="source\codegen\abstract_syntax_tree\keywords\types\text">
-      <UniqueIdentifier>{31493F5B-9D30-2A51-A61E-2CCD1285CD13}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="source\codegen\abstract_syntax_tree\keywords\types\unsigned_int">
-      <UniqueIdentifier>{D336D5D2-3FCA-3681-48B1-A637B4C3CD48}</UniqueIdentifier>
-    </Filter>
     <Filter Include="source\codegen\abstract_syntax_tree\operators">
       <UniqueIdentifier>{C0C63842-2C37-3BBB-F555-B543618573BC}</UniqueIdentifier>
     </Filter>
@@ -64,11 +52,17 @@
     <Filter Include="source\codegen\llvm_wrappers">
       <UniqueIdentifier>{77160437-63D1-F3E2-0C89-6C2DF8223E73}</UniqueIdentifier>
     </Filter>
+    <Filter Include="source\codegen\llvm_wrappers\functions">
+      <UniqueIdentifier>{BF332FE6-AB85-06D6-94A4-43E680951FBF}</UniqueIdentifier>
+    </Filter>
     <Filter Include="source\codegen\visitor">
       <UniqueIdentifier>{B92BCE93-A525-F7E5-8E92-8DF67A2B5D52}</UniqueIdentifier>
     </Filter>
     <Filter Include="source\compiler">
       <UniqueIdentifier>{C09F1F08-2C2B-8DCC-353C-10C1A146E9CC}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="source\compiler\diagnostics">
+      <UniqueIdentifier>{E75280CA-5360-AEB0-DC46-AA9B48537A67}</UniqueIdentifier>
     </Filter>
     <Filter Include="source\lexer">
       <UniqueIdentifier>{257A1413-11DD-A3B7-BA62-DC6DA6A46F3A}</UniqueIdentifier>
@@ -78,6 +72,9 @@
     </Filter>
     <Filter Include="source\utility">
       <UniqueIdentifier>{D96BD900-C539-CD06-AECD-3D2D9A3AA96B}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="source\utility\containers">
+      <UniqueIdentifier>{DE98363B-4A5B-6AC5-930B-F951FF0C43A3}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -109,10 +106,13 @@
       <Filter>source\codegen\abstract_syntax_tree\keywords\types</Filter>
     </ClInclude>
     <ClInclude Include="source\codegen\abstract_syntax_tree\keywords\types\char_node.h">
-      <Filter>source\codegen\abstract_syntax_tree\keywords\types\text</Filter>
+      <Filter>source\codegen\abstract_syntax_tree\keywords\types</Filter>
+    </ClInclude>
+    <ClInclude Include="source\codegen\abstract_syntax_tree\keywords\types\numerical_literal_node.h">
+      <Filter>source\codegen\abstract_syntax_tree\keywords\types</Filter>
     </ClInclude>
     <ClInclude Include="source\codegen\abstract_syntax_tree\keywords\types\string_node.h">
-      <Filter>source\codegen\abstract_syntax_tree\keywords\types\text</Filter>
+      <Filter>source\codegen\abstract_syntax_tree\keywords\types</Filter>
     </ClInclude>
     <ClInclude Include="source\codegen\abstract_syntax_tree\node.h">
       <Filter>source\codegen\abstract_syntax_tree</Filter>
@@ -204,6 +204,15 @@
     <ClInclude Include="source\codegen\abstract_syntax_tree\variables\variable_node.h">
       <Filter>source\codegen\abstract_syntax_tree\variables</Filter>
     </ClInclude>
+    <ClInclude Include="source\codegen\llvm_wrappers\codegen_context.h">
+      <Filter>source\codegen\llvm_wrappers</Filter>
+    </ClInclude>
+    <ClInclude Include="source\codegen\llvm_wrappers\functions\function.h">
+      <Filter>source\codegen\llvm_wrappers\functions</Filter>
+    </ClInclude>
+    <ClInclude Include="source\codegen\llvm_wrappers\functions\function_registry.h">
+      <Filter>source\codegen\llvm_wrappers\functions</Filter>
+    </ClInclude>
     <ClInclude Include="source\codegen\llvm_wrappers\scope.h">
       <Filter>source\codegen\llvm_wrappers</Filter>
     </ClInclude>
@@ -222,6 +231,15 @@
     <ClInclude Include="source\compiler\compiler.h">
       <Filter>source\compiler</Filter>
     </ClInclude>
+    <ClInclude Include="source\compiler\diagnostics\diagnostic.h">
+      <Filter>source\compiler\diagnostics</Filter>
+    </ClInclude>
+    <ClInclude Include="source\compiler\diagnostics\error.h">
+      <Filter>source\compiler\diagnostics</Filter>
+    </ClInclude>
+    <ClInclude Include="source\compiler\diagnostics\warning.h">
+      <Filter>source\compiler\diagnostics</Filter>
+    </ClInclude>
     <ClInclude Include="source\lexer\lexer.h">
       <Filter>source\lexer</Filter>
     </ClInclude>
@@ -234,13 +252,16 @@
     <ClInclude Include="source\utility\console.h">
       <Filter>source\utility</Filter>
     </ClInclude>
+    <ClInclude Include="source\utility\containers\compile_time_hash_map.h">
+      <Filter>source\utility\containers</Filter>
+    </ClInclude>
+    <ClInclude Include="source\utility\containers\string_accessor.h">
+      <Filter>source\utility\containers</Filter>
+    </ClInclude>
     <ClInclude Include="source\utility\filesystem.h">
       <Filter>source\utility</Filter>
     </ClInclude>
     <ClInclude Include="source\utility\macros.h">
-      <Filter>source\utility</Filter>
-    </ClInclude>
-    <ClInclude Include="source\utility\containers\string_accessor.h">
       <Filter>source\utility</Filter>
     </ClInclude>
     <ClInclude Include="source\utility\timer.h">
@@ -249,14 +270,6 @@
     <ClInclude Include="source\utility\types.h">
       <Filter>source\utility</Filter>
     </ClInclude>
-    <ClInclude Include="source\compiler\diagnostics\diagnostic.h" />
-    <ClInclude Include="source\compiler\diagnostics\warning.h" />
-    <ClInclude Include="source\utility\containers\compile_time_hash_map.h" />
-    <ClInclude Include="source\compiler\diagnostics\error.h" />
-    <ClInclude Include="source\codegen\llvm_wrappers\functions\function_registry.h" />
-    <ClInclude Include="source\codegen\llvm_wrappers\functions\function.h" />
-    <ClInclude Include="source\codegen\abstract_syntax_tree\keywords\types\numerical_literal_node.h" />
-    <ClInclude Include="source\codegen\llvm_wrappers\codegen_context.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp" />
@@ -288,10 +301,13 @@
       <Filter>source\codegen\abstract_syntax_tree\keywords\types</Filter>
     </ClCompile>
     <ClCompile Include="source\codegen\abstract_syntax_tree\keywords\types\char_node.cpp">
-      <Filter>source\codegen\abstract_syntax_tree\keywords\types\text</Filter>
+      <Filter>source\codegen\abstract_syntax_tree\keywords\types</Filter>
+    </ClCompile>
+    <ClCompile Include="source\codegen\abstract_syntax_tree\keywords\types\numerical_literal_node.cpp">
+      <Filter>source\codegen\abstract_syntax_tree\keywords\types</Filter>
     </ClCompile>
     <ClCompile Include="source\codegen\abstract_syntax_tree\keywords\types\string_node.cpp">
-      <Filter>source\codegen\abstract_syntax_tree\keywords\types\text</Filter>
+      <Filter>source\codegen\abstract_syntax_tree\keywords\types</Filter>
     </ClCompile>
     <ClCompile Include="source\codegen\abstract_syntax_tree\node.cpp">
       <Filter>source\codegen\abstract_syntax_tree</Filter>
@@ -383,6 +399,15 @@
     <ClCompile Include="source\codegen\abstract_syntax_tree\variables\variable_node.cpp">
       <Filter>source\codegen\abstract_syntax_tree\variables</Filter>
     </ClCompile>
+    <ClCompile Include="source\codegen\llvm_wrappers\codegen_context.cpp">
+      <Filter>source\codegen\llvm_wrappers</Filter>
+    </ClCompile>
+    <ClCompile Include="source\codegen\llvm_wrappers\functions\function.cpp">
+      <Filter>source\codegen\llvm_wrappers\functions</Filter>
+    </ClCompile>
+    <ClCompile Include="source\codegen\llvm_wrappers\functions\function_registry.cpp">
+      <Filter>source\codegen\llvm_wrappers\functions</Filter>
+    </ClCompile>
     <ClCompile Include="source\codegen\llvm_wrappers\scope.cpp">
       <Filter>source\codegen\llvm_wrappers</Filter>
     </ClCompile>
@@ -416,6 +441,15 @@
     <ClCompile Include="source\compiler\compiler.cpp">
       <Filter>source\compiler</Filter>
     </ClCompile>
+    <ClCompile Include="source\compiler\diagnostics\diagnostic.cpp">
+      <Filter>source\compiler\diagnostics</Filter>
+    </ClCompile>
+    <ClCompile Include="source\compiler\diagnostics\error.cpp">
+      <Filter>source\compiler\diagnostics</Filter>
+    </ClCompile>
+    <ClCompile Include="source\compiler\diagnostics\warning.cpp">
+      <Filter>source\compiler\diagnostics</Filter>
+    </ClCompile>
     <ClCompile Include="source\lexer\lexer.cpp">
       <Filter>source\lexer</Filter>
     </ClCompile>
@@ -425,21 +459,14 @@
     <ClCompile Include="source\utility\console.cpp">
       <Filter>source\utility</Filter>
     </ClCompile>
-    <ClCompile Include="source\utility\filesystem.cpp">
-      <Filter>source\utility</Filter>
-    </ClCompile>
     <ClCompile Include="source\utility\containers\string_accessor.cpp">
+      <Filter>source\utility\containers</Filter>
+    </ClCompile>
+    <ClCompile Include="source\utility\filesystem.cpp">
       <Filter>source\utility</Filter>
     </ClCompile>
     <ClCompile Include="source\utility\timer.cpp">
       <Filter>source\utility</Filter>
     </ClCompile>
-    <ClCompile Include="source\compiler\diagnostics\diagnostic.cpp" />
-    <ClCompile Include="source\compiler\diagnostics\warning.cpp" />
-    <ClCompile Include="source\compiler\diagnostics\error.cpp" />
-    <ClCompile Include="source\codegen\llvm_wrappers\functions\function_registry.cpp" />
-    <ClCompile Include="source\codegen\llvm_wrappers\functions\function.cpp" />
-    <ClCompile Include="source\codegen\abstract_syntax_tree\keywords\types\numerical_literal_node.cpp" />
-    <ClCompile Include="source\codegen\llvm_wrappers\codegen_context.cpp" />
   </ItemGroup>
 </Project>

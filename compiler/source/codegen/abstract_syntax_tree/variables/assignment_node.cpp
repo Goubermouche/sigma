@@ -9,8 +9,8 @@ namespace channel {
 	m_variable_node(variable),
 	m_expression_node(expression_node) {}
 
-	bool assignment_node::accept(visitor& visitor, value_ptr& out_value, codegen_context context) {
-		return visitor.visit_assignment_node(*this, out_value, context);
+	acceptation_result assignment_node::accept(visitor& visitor, const codegen_context& context) {
+		return visitor.visit_assignment_node(*this, context);
 	}
 
 	void assignment_node::print(int depth, const std::wstring& prefix, bool is_last) {

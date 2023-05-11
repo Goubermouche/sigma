@@ -6,8 +6,8 @@ namespace channel {
 		const node_ptr& expression_node
 	) : operator_unary(position, expression_node) {}
 
-	bool operator_pre_decrement::accept(visitor& visitor, value_ptr& out_value, codegen_context context) {
-		return visitor.visit_operator_pre_decrement_node(*this, out_value, context);
+	acceptation_result operator_pre_decrement::accept(visitor& visitor, const codegen_context& context) {
+		return visitor.visit_operator_pre_decrement_node(*this, context);
 	}
 
 	void operator_pre_decrement::print(int depth, const std::wstring& prefix, bool is_last) {

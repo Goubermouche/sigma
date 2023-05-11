@@ -16,7 +16,11 @@ namespace channel {
 			const std::vector<node_ptr>& function_statements
 		);
 
-		bool accept(visitor& visitor, value_ptr& out_value, codegen_context context) override;
+		acceptation_result accept(
+			visitor& visitor,
+			const codegen_context& context
+		) override;
+
 		void print(int depth, const std::wstring& prefix, bool is_last) override;
 
 		const type& get_function_return_type() const;

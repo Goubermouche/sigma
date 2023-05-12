@@ -62,7 +62,7 @@ namespace channel {
 
 	u16 type::get_bit_width() const	{
 		if(m_pointer_level > 0) {
-			return sizeof(int*) * 8;
+			return sizeof(i32*) * 8;
 		}
 
 		// todo: get type bit widths when compiling

@@ -8,10 +8,15 @@
 #include "codegen/abstract_syntax_tree/operators/unary/arithmetic/operator_pre_increment.h"
 // binary
 // arithmetic
+#include "codegen/abstract_syntax_tree/operators/binary/arithmetic/operator_addition_assignment_node.h"
 #include "codegen/abstract_syntax_tree/operators/binary/arithmetic/operator_addition_node.h"
+#include "codegen/abstract_syntax_tree/operators/binary/arithmetic/operator_subtraction_assignment_node.h"
 #include "codegen/abstract_syntax_tree/operators/binary/arithmetic/operator_subtraction_node.h"
+#include "codegen/abstract_syntax_tree/operators/binary/arithmetic/operator_multiplication_assignment_node.h"
 #include "codegen/abstract_syntax_tree/operators/binary/arithmetic/operator_multiplication_node.h"
+#include "codegen/abstract_syntax_tree/operators/binary/arithmetic/operator_division_assignment_node.h"
 #include "codegen/abstract_syntax_tree/operators/binary/arithmetic/operator_division_node.h"
+#include "codegen/abstract_syntax_tree/operators/binary/arithmetic/operator_modulo_assignment_node.h"
 #include "codegen/abstract_syntax_tree/operators/binary/arithmetic/operator_modulo_node.h"
 // logical
 #include "codegen/abstract_syntax_tree/operators/binary/logical/operator_conjunction_node.h"
@@ -166,6 +171,66 @@ namespace channel {
 
 	// binary
 	// arithmetic
+	acceptation_result codegen_visitor::visit_operator_addition_assignment_node(
+		operator_addition_assignment_node& node,
+		const codegen_context& context
+	) {
+		// accept the left operand (variable to be assigned to)
+		acceptation_result left_operand_result = node.get_left_expression_node()->accept(*this, {});
+		if (!left_operand_result.has_value()) {
+			return left_operand_result;
+		}
+
+		// accept the right operand
+		acceptation_result right_operand_result = node.get_right_expression_node()->accept(*this, {});
+		if (!right_operand_result.has_value()) {
+			return right_operand_result;
+		}
+
+		// upcast both expressions
+		const type highest_precision = get_highest_precision_type(left_operand_result.value()->get_type(), right_operand_result.value()->get_type());
+		llvm::Value* left_value_upcasted = cast_value(left_operand_result.value(), highest_precision, node.get_declared_position());
+		llvm::Value* right_value_upcasted = cast_value(right_operand_result.value(), highest_precision, node.get_declared_position());
+		llvm::Value* result_value;
+
+		// both types are floating point
+		if (highest_precision.is_floating_point()) {
+			result_value = m_builder.CreateFAdd(
+				left_value_upcasted,
+				right_value_upcasted,
+				"fadd"
+			);
+		}
+		// both types are unsigned
+		else if (highest_precision.is_unsigned()) {
+			result_value = m_builder.CreateAdd(
+				left_value_upcasted,
+				right_value_upcasted,
+				"uadd",
+				true
+			);
+		}
+		// fallback to regular op
+		else {
+			result_value = m_builder.CreateAdd(
+				left_value_upcasted,
+				right_value_upcasted,
+				"add"
+			);
+		}
+
+		// create the assignment value
+		auto assignment_value = std::make_shared<value>(
+			"__add_assign",
+			highest_precision,
+			result_value
+		);
+
+		// store the result of the addition operation back into the variable
+		m_builder.CreateStore(assignment_value->get_value(), left_operand_result.value()->get_pointer());
+		return assignment_value;
+	}
+
 	acceptation_result codegen_visitor::visit_operator_addition_node(
 		operator_addition_node& node,
 		const codegen_context& context
@@ -221,6 +286,66 @@ namespace channel {
 				right_value_upcasted,
 				"add")
 		);
+	}
+
+	acceptation_result codegen_visitor::visit_operator_subtraction_assignment_node(
+		operator_subtraction_assignment_node& node,
+		const codegen_context& context
+	) {
+		// accept the left operand (variable to be assigned to)
+		acceptation_result left_operand_result = node.get_left_expression_node()->accept(*this, {});
+		if (!left_operand_result.has_value()) {
+			return left_operand_result;
+		}
+
+		// accept the right operand
+		acceptation_result right_operand_result = node.get_right_expression_node()->accept(*this, {});
+		if (!right_operand_result.has_value()) {
+			return right_operand_result;
+		}
+
+		// upcast both expressions
+		const type highest_precision = get_highest_precision_type(left_operand_result.value()->get_type(), right_operand_result.value()->get_type());
+		llvm::Value* left_value_upcasted = cast_value(left_operand_result.value(), highest_precision, node.get_declared_position());
+		llvm::Value* right_value_upcasted = cast_value(right_operand_result.value(), highest_precision, node.get_declared_position());
+		llvm::Value* result_value;
+
+		// both types are floating point
+		if (highest_precision.is_floating_point()) {
+			result_value = m_builder.CreateFSub(
+				left_value_upcasted,
+				right_value_upcasted,
+				"fsub"
+			);
+		}
+		// both types are unsigned
+		else if (highest_precision.is_unsigned()) {
+			result_value = m_builder.CreateSub(
+				left_value_upcasted,
+				right_value_upcasted,
+				"usub",
+				true
+			);
+		}
+		// fallback to regular op
+		else {
+			result_value = m_builder.CreateSub(
+				left_value_upcasted,
+				right_value_upcasted,
+				"sub"
+			);
+		}
+
+		// create the assignment value
+		auto assignment_value = std::make_shared<value>(
+			"__sub_assign",
+			highest_precision,
+			result_value
+		);
+
+		// store the result of the addition operation back into the variable
+		m_builder.CreateStore(assignment_value->get_value(), left_operand_result.value()->get_pointer());
+		return assignment_value;
 	}
 
 	acceptation_result codegen_visitor::visit_operator_subtraction_node(
@@ -280,6 +405,66 @@ namespace channel {
 		);
 	}
 
+	acceptation_result codegen_visitor::visit_operator_multiplication_assignment_node(
+		operator_multiplication_assignment_node& node, 
+		const codegen_context& context
+	) {
+		// accept the left operand (variable to be assigned to)
+		acceptation_result left_operand_result = node.get_left_expression_node()->accept(*this, {});
+		if (!left_operand_result.has_value()) {
+			return left_operand_result;
+		}
+
+		// accept the right operand
+		acceptation_result right_operand_result = node.get_right_expression_node()->accept(*this, {});
+		if (!right_operand_result.has_value()) {
+			return right_operand_result;
+		}
+
+		// upcast both expressions
+		const type highest_precision = get_highest_precision_type(left_operand_result.value()->get_type(), right_operand_result.value()->get_type());
+		llvm::Value* left_value_upcasted = cast_value(left_operand_result.value(), highest_precision, node.get_declared_position());
+		llvm::Value* right_value_upcasted = cast_value(right_operand_result.value(), highest_precision, node.get_declared_position());
+		llvm::Value* result_value;
+
+		// both types are floating point
+		if (highest_precision.is_floating_point()) {
+			result_value = m_builder.CreateFMul(
+				left_value_upcasted,
+				right_value_upcasted,
+				"fmul"
+			);
+		}
+		// both types are unsigned
+		else if (highest_precision.is_unsigned()) {
+			result_value = m_builder.CreateMul(
+				left_value_upcasted,
+				right_value_upcasted,
+				"umul",
+				true
+			);
+		}
+		// fallback to regular op
+		else {
+			result_value = m_builder.CreateMul(
+				left_value_upcasted,
+				right_value_upcasted,
+				"mul"
+			);
+		}
+
+		// create the assignment value
+		auto assignment_value = std::make_shared<value>(
+			"__mul_assign",
+			highest_precision,
+			result_value
+		);
+
+		// store the result of the addition operation back into the variable
+		m_builder.CreateStore(assignment_value->get_value(), left_operand_result.value()->get_pointer());
+		return assignment_value;
+	}
+
 	acceptation_result codegen_visitor::visit_operator_multiplication_node(
 		operator_multiplication_node& node,
 		const codegen_context& context
@@ -337,6 +522,66 @@ namespace channel {
 		);
 	}
 
+	acceptation_result codegen_visitor::visit_operator_division_assignment_node(
+		operator_division_assignment_node& node, 
+		const codegen_context& context
+	) {
+		// accept the left operand (variable to be assigned to)
+		acceptation_result left_operand_result = node.get_left_expression_node()->accept(*this, {});
+		if (!left_operand_result.has_value()) {
+			return left_operand_result;
+		}
+
+		// accept the right operand
+		acceptation_result right_operand_result = node.get_right_expression_node()->accept(*this, {});
+		if (!right_operand_result.has_value()) {
+			return right_operand_result;
+		}
+
+		// upcast both expressions
+		const type highest_precision = get_highest_precision_type(left_operand_result.value()->get_type(), right_operand_result.value()->get_type());
+		llvm::Value* left_value_upcasted = cast_value(left_operand_result.value(), highest_precision, node.get_declared_position());
+		llvm::Value* right_value_upcasted = cast_value(right_operand_result.value(), highest_precision, node.get_declared_position());
+		llvm::Value* result_value;
+
+		// both types are floating point
+		if (highest_precision.is_floating_point()) {
+			result_value = m_builder.CreateFDiv(
+				left_value_upcasted,
+				right_value_upcasted,
+				"fdiv"
+			);
+		}
+		// both types are unsigned
+		else if (highest_precision.is_unsigned()) {
+			result_value = m_builder.CreateUDiv(
+				left_value_upcasted,
+				right_value_upcasted,
+				"udiv",
+				true
+			);
+		}
+		// fallback to regular op
+		else {
+			result_value = m_builder.CreateSDiv(
+				left_value_upcasted,
+				right_value_upcasted,
+				"div"
+			);
+		}
+
+		// create the assignment value
+		auto assignment_value = std::make_shared<value>(
+			"__div_assign",
+			highest_precision,
+			result_value
+		);
+
+		// store the result of the addition operation back into the variable
+		m_builder.CreateStore(assignment_value->get_value(), left_operand_result.value()->get_pointer());
+		return assignment_value;
+	}
+
 	acceptation_result codegen_visitor::visit_operator_division_node(
 		operator_division_node& node, 
 		const codegen_context& context
@@ -391,6 +636,65 @@ namespace channel {
 				right_value_upcasted,
 				"div")
 		);
+	}
+
+	acceptation_result codegen_visitor::visit_operator_modulo_assignment_node(
+		operator_modulo_assignment_node& node,
+		const codegen_context& context
+	) {
+		// accept the left operand (variable to be assigned to)
+		acceptation_result left_operand_result = node.get_left_expression_node()->accept(*this, {});
+		if (!left_operand_result.has_value()) {
+			return left_operand_result;
+		}
+
+		// accept the right operand
+		acceptation_result right_operand_result = node.get_right_expression_node()->accept(*this, {});
+		if (!right_operand_result.has_value()) {
+			return right_operand_result;
+		}
+
+		// upcast both expressions
+		const type highest_precision = get_highest_precision_type(left_operand_result.value()->get_type(), right_operand_result.value()->get_type());
+		llvm::Value* left_value_upcasted = cast_value(left_operand_result.value(), highest_precision, node.get_declared_position());
+		llvm::Value* right_value_upcasted = cast_value(right_operand_result.value(), highest_precision, node.get_declared_position());
+		llvm::Value* result_value;
+
+		// both types are floating point
+		if (highest_precision.is_floating_point()) {
+			result_value = m_builder.CreateFRem(
+				left_value_upcasted,
+				right_value_upcasted,
+				"frem"
+			);
+		}
+		// both types are unsigned
+		else if (highest_precision.is_unsigned()) {
+			result_value = m_builder.CreateURem(
+				left_value_upcasted,
+				right_value_upcasted,
+				"urem"
+			);
+		}
+		// fallback to regular op
+		else {
+			result_value = m_builder.CreateSRem(
+				left_value_upcasted,
+				right_value_upcasted,
+				"rem"
+			);
+		}
+
+		// create the assignment value
+		auto assignment_value = std::make_shared<value>(
+			"__rem_assign",
+			highest_precision,
+			result_value
+		);
+
+		// store the result of the addition operation back into the variable
+		m_builder.CreateStore(assignment_value->get_value(), left_operand_result.value()->get_pointer());
+		return assignment_value;
 	}
 
 	acceptation_result codegen_visitor::visit_operator_modulo_node(

@@ -1,14 +1,16 @@
 #pragma once
-
-#include "token.h"
+#include "lexer/token.h"
 #include "utility/containers/string_accessor.h"
-#include "compiler/diagnostics/warning.h"
-#include "compiler/diagnostics/error.h"
 
 namespace channel {
 	struct token_data {
 		token_data() = default;
-		token_data(token tok, const std::string& value, const token_position& position);
+
+		token_data(
+			token tok, 
+			const std::string& value, 
+			const token_position& position
+		);
 
 		token get_token() const;
 		const std::string& get_value() const;

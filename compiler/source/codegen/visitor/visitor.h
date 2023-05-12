@@ -40,10 +40,15 @@ namespace channel {
 	class operator_pre_increment;
 	// binary
 	// arithmetic
+	class operator_addition_assignment_node;
 	class operator_addition_node;
+	class operator_subtraction_assignment_node;
 	class operator_subtraction_node;
+	class operator_multiplication_assignment_node;
 	class operator_multiplication_node;
+	class operator_division_assignment_node;
 	class operator_division_node;
+	class operator_modulo_assignment_node;
 	class operator_modulo_node;
 	// logical
 	class operator_conjunction_node;
@@ -196,8 +201,18 @@ namespace channel {
 		) = 0;
 		// binary
 		// arithmetic
+		virtual acceptation_result visit_operator_addition_assignment_node(
+			operator_addition_assignment_node& node,
+			const codegen_context& context
+		) = 0;
+
 		virtual acceptation_result visit_operator_addition_node(
 			operator_addition_node& node,
+			const codegen_context& context
+		) = 0;
+
+		virtual acceptation_result visit_operator_subtraction_assignment_node(
+			operator_subtraction_assignment_node& node,
 			const codegen_context& context
 		) = 0;
 
@@ -206,8 +221,18 @@ namespace channel {
 			const codegen_context& context
 		) = 0;
 
+		virtual acceptation_result visit_operator_multiplication_assignment_node(
+			operator_multiplication_assignment_node& node,
+			const codegen_context& context
+		) = 0;
+
 		virtual acceptation_result visit_operator_multiplication_node(
 			operator_multiplication_node& node,
+			const codegen_context& context
+		) = 0;
+
+		virtual acceptation_result visit_operator_division_assignment_node(
+			operator_division_assignment_node& node,
 			const codegen_context& context
 		) = 0;
 
@@ -216,10 +241,16 @@ namespace channel {
 			const codegen_context& context
 		) = 0;
 
+		virtual acceptation_result visit_operator_modulo_assignment_node(
+			operator_modulo_assignment_node& node,
+			const codegen_context& context
+		) = 0;
+
 		virtual acceptation_result visit_operator_modulo_node(
 			operator_modulo_node& node, 
 			const codegen_context& context
 		) = 0;
+
 		// logical
 		virtual acceptation_result visit_operator_logical_conjunction_node(
 			operator_conjunction_node& node, 

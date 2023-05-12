@@ -68,33 +68,33 @@ namespace channel {
 								        
 		// operators
 		// arithmetic operators
-		operator_addition,                  // + 
-		operator_increment,                 // ++
+		operator_addition,                  // +  implemented
+		operator_increment,                 // ++ implemented
 		operator_addition_assignment,       // +=
-		operator_subtraction,               // -
-		operator_decrement,                 // --
+		operator_subtraction,               // -  implemented
+		operator_decrement,                 // -- implemented
 		operator_subtraction_assignment,    // -=
-		operator_multiplication,            // *
+		operator_multiplication,            // *  implemented
 		operator_multiplication_assignment, // *=
-		operator_modulo,                    // %
+		operator_modulo,                    // %  implemented
 		operator_modulo_assignment,         // %=
-		operator_division,                  // /
+		operator_division,                  // /  implemented
 		operator_division_assignment,       // /=
-		operator_assignment,                // =
+		operator_assignment,                // =  implemented
 		// logical operators
-		operator_equals,                    // == x
-		operator_greater_than,              // >  x
+		operator_equals,                    // == implemented
+		operator_greater_than,              // >  implemented
 		operator_bitwise_right_shift,       // >> 
-		operator_greater_than_equal_to,     // >= x
-		operator_less_than,                 // <  x
+		operator_greater_than_equal_to,     // >= implemented
+		operator_less_than,                 // <  implemented
 		operator_bitwise_left_shift,        // << 
-		operator_less_than_equal_to,        // <= x
+		operator_less_than_equal_to,        // <= implemented
 		operator_not,                       // !  
-		operator_not_equals,                // != x
+		operator_not_equals,                // != implemented
 		operator_bitwise_and,               // &  
-		operator_logical_conjunction,       // && x
+		operator_logical_conjunction,       // && implemented
 		operator_bitwise_or,                // |  
-		operator_logical_disjunction,       // || x
+		operator_logical_disjunction,       // || implemented
 		operator_bitwise_not,               // ~  
 		operator_bitwise_xor,               // ^  
 
@@ -312,6 +312,14 @@ namespace channel {
 			token == token::keyword_type_u16 ||
 			token == token::keyword_type_u32 ||
 			token == token::keyword_type_u64;
+	}
+
+	inline bool is_token_compound_op(token token) {
+		return token == token::operator_addition_assignment    ||
+			token == token::operator_subtraction_assignment    ||
+			token == token::operator_multiplication_assignment ||
+			token == token::operator_modulo_assignment         ||
+			token == token::operator_division_assignment;
 	}
 
 	inline bool is_token_block_break(token tok) {

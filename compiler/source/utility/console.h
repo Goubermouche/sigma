@@ -45,7 +45,7 @@ namespace channel {
 			throw std::invalid_argument("invalid hex color string");
 		}
 
-		int red, green, blue;
+		i32 red, green, blue;
 		sscanf_s(hex.c_str(), "%02x%02x%02x", &red, &green, &blue);
 		return RGB(red, green, blue);
 	}

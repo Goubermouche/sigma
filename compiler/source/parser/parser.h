@@ -61,6 +61,8 @@ namespace channel {
 
 		bool parse_for_loop(node*& out_node);
 
+		bool parse_compound_operation(node*& out_node, node* left_operand);
+
 		/**
 		 * \brief Attempts to parse an assignment operation. The first expected token is an identifier.
 		 * \param out_node Output AST node

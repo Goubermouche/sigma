@@ -39,10 +39,15 @@
 
 // binary
 // arithmetic
+#include "codegen/abstract_syntax_tree/operators/binary/arithmetic/operator_addition_assignment_node.h"
 #include "codegen/abstract_syntax_tree/operators/binary/arithmetic/operator_addition_node.h"
-#include "codegen/abstract_syntax_tree/operators/binary/arithmetic/operator_division_node.h"
-#include "codegen/abstract_syntax_tree/operators/binary/arithmetic/operator_multiplication_node.h"
+#include "codegen/abstract_syntax_tree/operators/binary/arithmetic/operator_subtraction_assignment_node.h"
 #include "codegen/abstract_syntax_tree/operators/binary/arithmetic/operator_subtraction_node.h"
+#include "codegen/abstract_syntax_tree/operators/binary/arithmetic/operator_multiplication_assignment_node.h"
+#include "codegen/abstract_syntax_tree/operators/binary/arithmetic/operator_multiplication_node.h"
+#include "codegen/abstract_syntax_tree/operators/binary/arithmetic/operator_division_assignment_node.h"
+#include "codegen/abstract_syntax_tree/operators/binary/arithmetic/operator_division_node.h"
+#include "codegen/abstract_syntax_tree/operators/binary/arithmetic/operator_modulo_assignment_node.h"
 #include "codegen/abstract_syntax_tree/operators/binary/arithmetic/operator_modulo_node.h"
 // logical
 #include "codegen/abstract_syntax_tree/operators/binary/logical/operator_conjunction_node.h"
@@ -54,6 +59,7 @@
 #include "codegen/abstract_syntax_tree/operators/binary/logical/operator_equals_node.h"
 #include "codegen/abstract_syntax_tree/operators/binary/logical/operator_not_equals_node.h"
 #include "codegen/abstract_syntax_tree/keywords/flow_control/break_node.h"
+#include "codegen/abstract_syntax_tree/operators/binary/arithmetic/operator_addition_assignment_node.h"
 
 namespace channel {
 	parser::parser(const lexer& lexer)
@@ -327,11 +333,13 @@ namespace channel {
 		}
 
 		// check for post unary operators after identifier, deep expression, or array index access
-		if (peek_next_token() == token::operator_increment || peek_next_token() == token::operator_decrement) {
-			node* operand = out_node;
-			if (!parse_post_operator(operand, out_node)) {
-				return false; // return on failure
-			}
+		const token next_token = peek_next_token();
+		if (next_token == token::operator_increment || next_token == token::operator_decrement) {
+			return parse_post_operator(out_node, out_node);
+		}
+		// compound operation
+		if (is_token_compound_op(next_token)) {
+			return parse_compound_operation(out_node, out_node);
 		}
 
 		return true;
@@ -545,6 +553,62 @@ namespace channel {
 
 		get_next_token(); // r_brace (guaranteed)
 		out_node = new for_node(position, loop_initialization_node, loop_condition_node, post_iteration_nodes, loop_statements);
+		return true;
+	}
+
+	bool parser::parse_compound_operation(node*& out_node, node* left_operand) {
+		// operator_addition_assignment ||
+		// operator_subtraction_assignment || 
+		// operator_multiplication_assignment || 
+		// operator_modulo_assignment || 
+		// operator_division_assignment (guaranteed)
+		get_next_token();
+		const token op = m_current_token.get_token();
+
+		// rhs of the expression
+		node* expression;
+		if(!parse_expression(expression)) {
+			return false;
+		}
+
+		switch (op) {
+		case token::operator_addition_assignment:
+			out_node = new operator_addition_assignment_node(
+				m_current_token.get_token_position(),
+				left_operand,
+				expression
+			);
+			break;
+		case token::operator_subtraction_assignment:
+			out_node = new operator_subtraction_assignment_node(
+				m_current_token.get_token_position(),
+				left_operand,
+				expression
+			);
+			break;
+		case token::operator_multiplication_assignment:
+			out_node = new operator_multiplication_assignment_node(
+				m_current_token.get_token_position(),
+				left_operand,
+				expression
+			);
+			break;
+		case token::operator_division_assignment:
+			out_node = new operator_division_assignment_node(
+				m_current_token.get_token_position(), 
+				left_operand, 
+				expression
+			);
+			break;
+		case token::operator_modulo_assignment:
+			out_node = new operator_modulo_assignment_node(
+				m_current_token.get_token_position(), 
+				left_operand,
+				expression
+			);
+			break;
+		}
+
 		return true;
 	}
 
@@ -958,31 +1022,6 @@ namespace channel {
 		const type ty = expression_type.is_unknown() ? type(m_current_token.get_token(), 0) : expression_type;
 		out_node = new numerical_literal_node(m_current_token.get_token_position(), str_value, ty);
 		return true;
-
-		// get_next_token(); // type
-		// const std::string str_value = m_current_token.get_value();
-		// const type ty = expression_type.is_unknown() ? type(m_current_token.get_token(), 0) : expression_type;
-		// 
-		// switch (ty.get_base()) {
-		// 	// signed
-		// case type::base::i8:  out_node = new i8_node(m_current_token.get_token_position(), std::stoll(str_value)); return true;
-		// case type::base::i16: out_node = new i16_node(m_current_token.get_token_position(), std::stoll(str_value)); return true;
-		// case type::base::i32: out_node = new i32_node(m_current_token.get_token_position(), std::stoll(str_value)); return true;
-		// case type::base::i64: out_node = new i64_node(m_current_token.get_token_position(), std::stoll(str_value)); return true;
-		// 	// unsigned
-		// case type::base::u8:  out_node = new u8_node(m_current_token.get_token_position(), std::stoull(str_value)); return true;
-		// case type::base::u16: out_node = new u16_node(m_current_token.get_token_position(), std::stoull(str_value)); return true;
-		// case type::base::u32: out_node = new u32_node(m_current_token.get_token_position(), std::stoull(str_value)); return true;
-		// case type::base::u64: out_node = new u64_node(m_current_token.get_token_position(), std::stoull(str_value)); return true;
-		// 	// floating point
-		// case type::base::f32: out_node = new f32_node(m_current_token.get_token_position(), std::stof(str_value)); return true;
-		// case type::base::f64: out_node = new f64_node(m_current_token.get_token_position(), std::stod(str_value)); return true;
-		// 	// bool
-		// case type::base::boolean: out_node = new bool_node(m_current_token.get_token_position(), std::stoi(str_value)); return true;
-		// default:
-		// 	error::emit<3002>(m_current_token.get_token_position(), ty).print();
-		// 	return false; // return on failure
-		// }
 	}
 
 	bool parser::parse_char(node*& out_node) {
@@ -1018,6 +1057,8 @@ namespace channel {
 		else {
 			out_node = new operator_post_decrement(m_current_token.get_token_position(), operand);
 		}
+
+
 
 		return true;
 	}
@@ -1090,8 +1131,7 @@ namespace channel {
 			// parse a function call
 			return parse_function_call(out_node);
 		}
-
-		if (peek_is_array_index_access()) {
+		else if (peek_is_array_index_access()) {
 			if (!parse_array_access(out_node)) {
 				return false; // return on failure
 			}
@@ -1103,10 +1143,14 @@ namespace channel {
 			out_node = new variable_access_node(m_current_token.get_token_position(), identifier);
 		}
 
-		// post increment
 		const token next_token = peek_next_token();
+		// post increment
 		if (next_token == token::operator_increment || next_token == token::operator_decrement) {
 			return parse_post_operator(out_node, out_node);
+		}
+		// compound operation
+		if(is_token_compound_op(next_token)) {
+			return parse_compound_operation(out_node, out_node);
 		}
 
 		return true;

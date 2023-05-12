@@ -1,5 +1,6 @@
 #include "lexer.h"
 #include "utility/filesystem.h"
+#include "compiler/diagnostics/error.h"
 
 namespace channel {
 	lexer::lexer(const std::string& source_file)
@@ -308,7 +309,7 @@ namespace channel {
 					hex_chars[0] = m_last_character;
 					read_char();
 					hex_chars[1] = m_last_character;
-					unsigned int hex_value;
+					u64 hex_value;
 					sscanf(hex_chars, "%x", &hex_value);
 					m_value_string += static_cast<char>(hex_value);
 					break;

@@ -58,6 +58,11 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="source\codegen\abstract_syntax_tree\operators\binary\arithmetic\operator_addition_assignment_node.h" />
+    <ClInclude Include="source\codegen\abstract_syntax_tree\operators\binary\arithmetic\operator_division_assignment_node.h" />
+    <ClInclude Include="source\codegen\abstract_syntax_tree\operators\binary\arithmetic\operator_modulo_assignment_node.h" />
+    <ClInclude Include="source\codegen\abstract_syntax_tree\operators\binary\arithmetic\operator_multiplication_assignment_node.h" />
+    <ClInclude Include="source\codegen\abstract_syntax_tree\operators\binary\arithmetic\operator_subtraction_assignment_node.h" />
     <ClInclude Include="source\codegen\abstract_syntax_tree\abstract_syntax_tree.h" />
     <ClInclude Include="source\codegen\abstract_syntax_tree\functions\function_call_node.h" />
     <ClInclude Include="source\codegen\abstract_syntax_tree\functions\function_node.h" />
@@ -125,6 +130,11 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="source\codegen\abstract_syntax_tree\operators\binary\arithmetic\operator_addition_assignment_node.cpp" />
+    <ClCompile Include="source\codegen\abstract_syntax_tree\operators\binary\arithmetic\operator_division_assignment_node.cpp" />
+    <ClCompile Include="source\codegen\abstract_syntax_tree\operators\binary\arithmetic\operator_modulo_assignment_node.cpp" />
+    <ClCompile Include="source\codegen\abstract_syntax_tree\operators\binary\arithmetic\operator_multiplication_assignment_node.cpp" />
+    <ClCompile Include="source\codegen\abstract_syntax_tree\operators\binary\arithmetic\operator_subtraction_assignment_node.cpp" />
     <ClCompile Include="source\codegen\abstract_syntax_tree\abstract_syntax_tree.cpp" />
     <ClCompile Include="source\codegen\abstract_syntax_tree\functions\function_call_node.cpp" />
     <ClCompile Include="source\codegen\abstract_syntax_tree\functions\function_node.cpp" />

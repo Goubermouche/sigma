@@ -141,7 +141,7 @@ namespace channel {
 		// check for compilation errors
 		if (compilation) {
 			if(!compilation->containsError()) {
-				llvm::SmallVector<std::pair<int, const clang::driver::Command*>, 4> failing_commands;
+				llvm::SmallVector<std::pair<i32, const clang::driver::Command*>, 4> failing_commands;
 				driver.ExecuteCompilation(*compilation, failing_commands);
 			}
 			else {

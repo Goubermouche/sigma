@@ -13,6 +13,9 @@
 // todo: major cleanup (!!!)
 //  - documentation
 //  - tests
+//  - remove unnecessary code duplication
+//    - parser
+//    - operators
 
 void donut(f32 rot_speed) {
 	f32 A = 0;
@@ -29,8 +32,8 @@ void donut(f32 rot_speed) {
 		memset(b, 32, 1760);
 		memset(z, 0, 7040);
 
-		for(j = 0; j < 6.28; j = j + 0.07f) {
-			for(i = 0; i < 6.28; i = i + 0.02f) {
+		for(j = 0; j < 6.28; j += 0.07f) {
+			for(i = 0; i < 6.28; i += 0.02f) {
 				f32 c = sin(i);
 				f32 d = cos(j);
 				f32 e = sin(A);

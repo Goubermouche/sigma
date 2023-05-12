@@ -25,7 +25,7 @@ namespace channel {
 			"d43434", // red
 		};
 
-		for (int i = 0; i < 11; ++i) {
+		for (u64 i = 0; i < 11; ++i) {
 			csbiInfo.ColorTable[i] = hex_to_rgb(color_palette[i]);
 		}
 

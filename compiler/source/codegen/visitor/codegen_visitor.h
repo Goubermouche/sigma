@@ -174,8 +174,18 @@ namespace channel {
 
 		// binary
 		// arithmetic
+		acceptation_result visit_operator_addition_assignment_node(
+			operator_addition_assignment_node& node,
+			const codegen_context& context
+		) override;
+
 		acceptation_result visit_operator_addition_node(
 			operator_addition_node& node, 
+			const codegen_context& context
+		) override;
+
+		acceptation_result visit_operator_subtraction_assignment_node(
+			operator_subtraction_assignment_node& node,
 			const codegen_context& context
 		) override;
 
@@ -184,13 +194,28 @@ namespace channel {
 			const codegen_context& context
 		) override;
 
+		acceptation_result visit_operator_multiplication_assignment_node(
+			operator_multiplication_assignment_node& node,
+			const codegen_context& context
+		) override;
+
 		acceptation_result visit_operator_multiplication_node(
 			operator_multiplication_node& node, 
 			const codegen_context& context
 		) override;
 
+		acceptation_result visit_operator_division_assignment_node(
+			operator_division_assignment_node& node,
+			const codegen_context& context
+		) override;
+
 		acceptation_result visit_operator_division_node(
 			operator_division_node& node, 
+			const codegen_context& context
+		) override;
+
+		acceptation_result visit_operator_modulo_assignment_node(
+			operator_modulo_assignment_node& node, 
 			const codegen_context& context
 		) override;
 

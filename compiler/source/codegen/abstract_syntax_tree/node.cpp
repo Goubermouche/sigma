@@ -17,7 +17,7 @@ namespace channel {
 	) {
 		console::out
 			<< prefix
-			<< (depth == 0 ? L"" : (is_last ? L"╰─" : L"├─"))
+			<< (depth == 0 ? L"" : is_last ? L"╰─" : L"├─")
 			<< node_name
 			<< ' ';
 	}

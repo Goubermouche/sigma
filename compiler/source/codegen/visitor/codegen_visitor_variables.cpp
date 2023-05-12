@@ -164,7 +164,11 @@ namespace channel {
 		);
 
 		// add the variable to the m_global_named_values map
-		const auto insertion_result = m_global_named_values.insert({ node.get_declaration_identifier(),  global_declaration });
+		const auto insertion_result = m_global_named_values.insert({ 
+			node.get_declaration_identifier(),
+			global_declaration
+		});
+
 		// check if a global with the same name already exists
 		if (!insertion_result.second) {
 			return std::unexpected(error::emit<4006>(node.get_declared_position(), node.get_declaration_identifier()));

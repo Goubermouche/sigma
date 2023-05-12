@@ -175,49 +175,12 @@ namespace channel {
 		operator_addition_assignment_node& node,
 		const codegen_context& context
 	) {
-		// accept the left operand (variable to be assigned to)
-		acceptation_result left_operand_result = node.get_left_expression_node()->accept(*this, {});
-		if (!left_operand_result.has_value()) {
-			return left_operand_result;
+		auto operation_result = create_add_operation(node.get_left_expression_node(), node.get_right_expression_node());
+		if(!operation_result.has_value()) {
+			return std::unexpected(operation_result.error());
 		}
 
-		// accept the right operand
-		acceptation_result right_operand_result = node.get_right_expression_node()->accept(*this, {});
-		if (!right_operand_result.has_value()) {
-			return right_operand_result;
-		}
-
-		// upcast both expressions
-		const type highest_precision = get_highest_precision_type(left_operand_result.value()->get_type(), right_operand_result.value()->get_type());
-		llvm::Value* left_value_upcasted = cast_value(left_operand_result.value(), highest_precision, node.get_declared_position());
-		llvm::Value* right_value_upcasted = cast_value(right_operand_result.value(), highest_precision, node.get_declared_position());
-		llvm::Value* result_value;
-
-		// both types are floating point
-		if (highest_precision.is_floating_point()) {
-			result_value = m_builder.CreateFAdd(
-				left_value_upcasted,
-				right_value_upcasted,
-				"fadd"
-			);
-		}
-		// both types are unsigned
-		else if (highest_precision.is_unsigned()) {
-			result_value = m_builder.CreateAdd(
-				left_value_upcasted,
-				right_value_upcasted,
-				"uadd",
-				true
-			);
-		}
-		// fallback to regular op
-		else {
-			result_value = m_builder.CreateAdd(
-				left_value_upcasted,
-				right_value_upcasted,
-				"add"
-			);
-		}
+		const auto& [result_value, highest_precision, left_operand_result] = operation_result.value();
 
 		// create the assignment value
 		auto assignment_value = std::make_shared<value>(
@@ -227,7 +190,11 @@ namespace channel {
 		);
 
 		// store the result of the addition operation back into the variable
-		m_builder.CreateStore(assignment_value->get_value(), left_operand_result.value()->get_pointer());
+		m_builder.CreateStore(
+			assignment_value->get_value(), 
+			left_operand_result.value()->get_pointer()
+		);
+
 		return assignment_value;
 	}
 
@@ -235,56 +202,16 @@ namespace channel {
 		operator_addition_node& node,
 		const codegen_context& context
 	) {
-		// accept the left operand
-		acceptation_result left_operand_result = node.get_left_expression_node()->accept(*this, {});
-		if (!left_operand_result.has_value()) {
-			return left_operand_result;
+		auto operation_result = create_add_operation(node.get_left_expression_node(), node.get_right_expression_node());
+		if (!operation_result.has_value()) {
+			return std::unexpected(operation_result.error());
 		}
 
-		// accept the right operand
-		acceptation_result right_operand_result = node.get_right_expression_node()->accept(*this, {});
-		if (!right_operand_result.has_value()) {
-			return right_operand_result;
-		}
-
-		// upcast both expressions
-		const type highest_precision = get_highest_precision_type(left_operand_result.value()->get_type(), right_operand_result.value()->get_type());
-		llvm::Value* left_value_upcasted = cast_value(left_operand_result.value(), highest_precision, node.get_declared_position());
-		llvm::Value* right_value_upcasted = cast_value(right_operand_result.value(), highest_precision, node.get_declared_position());
-
-		// both types are floating point
-		if (highest_precision.is_floating_point()) {
-			return std::make_shared<value>(
-				"__fadd",
-				highest_precision,
-				m_builder.CreateFAdd(
-					left_value_upcasted,
-					right_value_upcasted,
-					"fadd")
-			);
-		}
-
-		// both types are unsigned
-		if (highest_precision.is_unsigned()) {
-			return std::make_shared<value>(
-				"__uadd",
-				highest_precision,
-				m_builder.CreateAdd(
-					left_value_upcasted,
-					right_value_upcasted,
-					"uadd",
-					true)
-			);
-		}
-
-		// fallback to regular op
+		const auto& [result_value, highest_precision, left_operand_result] = operation_result.value();
 		return std::make_shared<value>(
 			"__add",
 			highest_precision,
-			m_builder.CreateAdd(
-				left_value_upcasted,
-				right_value_upcasted,
-				"add")
+			result_value
 		);
 	}
 
@@ -292,49 +219,12 @@ namespace channel {
 		operator_subtraction_assignment_node& node,
 		const codegen_context& context
 	) {
-		// accept the left operand (variable to be assigned to)
-		acceptation_result left_operand_result = node.get_left_expression_node()->accept(*this, {});
-		if (!left_operand_result.has_value()) {
-			return left_operand_result;
+		auto operation_result = create_sub_operation(node.get_left_expression_node(), node.get_right_expression_node());
+		if (!operation_result.has_value()) {
+			return std::unexpected(operation_result.error());
 		}
 
-		// accept the right operand
-		acceptation_result right_operand_result = node.get_right_expression_node()->accept(*this, {});
-		if (!right_operand_result.has_value()) {
-			return right_operand_result;
-		}
-
-		// upcast both expressions
-		const type highest_precision = get_highest_precision_type(left_operand_result.value()->get_type(), right_operand_result.value()->get_type());
-		llvm::Value* left_value_upcasted = cast_value(left_operand_result.value(), highest_precision, node.get_declared_position());
-		llvm::Value* right_value_upcasted = cast_value(right_operand_result.value(), highest_precision, node.get_declared_position());
-		llvm::Value* result_value;
-
-		// both types are floating point
-		if (highest_precision.is_floating_point()) {
-			result_value = m_builder.CreateFSub(
-				left_value_upcasted,
-				right_value_upcasted,
-				"fsub"
-			);
-		}
-		// both types are unsigned
-		else if (highest_precision.is_unsigned()) {
-			result_value = m_builder.CreateSub(
-				left_value_upcasted,
-				right_value_upcasted,
-				"usub",
-				true
-			);
-		}
-		// fallback to regular op
-		else {
-			result_value = m_builder.CreateSub(
-				left_value_upcasted,
-				right_value_upcasted,
-				"sub"
-			);
-		}
+		const auto& [result_value, highest_precision, left_operand_result] = operation_result.value();
 
 		// create the assignment value
 		auto assignment_value = std::make_shared<value>(
@@ -343,8 +233,12 @@ namespace channel {
 			result_value
 		);
 
-		// store the result of the addition operation back into the variable
-		m_builder.CreateStore(assignment_value->get_value(), left_operand_result.value()->get_pointer());
+		// store the result of the subtraction operation back into the variable
+		m_builder.CreateStore(
+			assignment_value->get_value(),
+			left_operand_result.value()->get_pointer()
+		);
+
 		return assignment_value;
 	}
 
@@ -352,56 +246,16 @@ namespace channel {
 		operator_subtraction_node& node,
 		const codegen_context& context
 	) {
-		// accept the left operand
-		acceptation_result left_operand_result = node.get_left_expression_node()->accept(*this, {});
-		if (!left_operand_result.has_value()) {
-			return left_operand_result;
+		auto operation_result = create_sub_operation(node.get_left_expression_node(), node.get_right_expression_node());
+		if (!operation_result.has_value()) {
+			return std::unexpected(operation_result.error());
 		}
 
-		// accept the right operand
-		acceptation_result right_operand_result = node.get_right_expression_node()->accept(*this, {});
-		if (!right_operand_result.has_value()) {
-			return right_operand_result;
-		}
-
-		// upcast both expressions
-		const type highest_precision = get_highest_precision_type(left_operand_result.value()->get_type(), right_operand_result.value()->get_type());
-		llvm::Value* left_value_upcasted = cast_value(left_operand_result.value(), highest_precision, node.get_declared_position());
-		llvm::Value* right_value_upcasted = cast_value(right_operand_result.value(), highest_precision, node.get_declared_position());
-
-		// both types are floating point
-		if (highest_precision.is_floating_point()) {
-			return std::make_shared<value>(
-				"__fsub",
-				highest_precision,
-				m_builder.CreateFSub(
-					left_value_upcasted,
-					right_value_upcasted,
-					"fsub")
-			);
-		}
-
-		// both types are unsigned
-		if (highest_precision.is_unsigned()) {
-			return std::make_shared<value>(
-				"__usub",
-				highest_precision,
-				m_builder.CreateSub(
-					left_value_upcasted,
-					right_value_upcasted,
-					"usub",
-					true)
-			);
-		}
-
-		// fallback to regular op
+		const auto& [result_value, highest_precision, left_operand_result] = operation_result.value();
 		return std::make_shared<value>(
 			"__sub",
 			highest_precision,
-			m_builder.CreateSub(
-				left_value_upcasted,
-				right_value_upcasted,
-				"sub")
+			result_value
 		);
 	}
 
@@ -409,59 +263,26 @@ namespace channel {
 		operator_multiplication_assignment_node& node, 
 		const codegen_context& context
 	) {
-		// accept the left operand (variable to be assigned to)
-		acceptation_result left_operand_result = node.get_left_expression_node()->accept(*this, {});
-		if (!left_operand_result.has_value()) {
-			return left_operand_result;
+		auto operation_result = create_mul_operation(node.get_left_expression_node(), node.get_right_expression_node());
+		if (!operation_result.has_value()) {
+			return std::unexpected(operation_result.error());
 		}
 
-		// accept the right operand
-		acceptation_result right_operand_result = node.get_right_expression_node()->accept(*this, {});
-		if (!right_operand_result.has_value()) {
-			return right_operand_result;
-		}
-
-		// upcast both expressions
-		const type highest_precision = get_highest_precision_type(left_operand_result.value()->get_type(), right_operand_result.value()->get_type());
-		llvm::Value* left_value_upcasted = cast_value(left_operand_result.value(), highest_precision, node.get_declared_position());
-		llvm::Value* right_value_upcasted = cast_value(right_operand_result.value(), highest_precision, node.get_declared_position());
-		llvm::Value* result_value;
-
-		// both types are floating point
-		if (highest_precision.is_floating_point()) {
-			result_value = m_builder.CreateFMul(
-				left_value_upcasted,
-				right_value_upcasted,
-				"fmul"
-			);
-		}
-		// both types are unsigned
-		else if (highest_precision.is_unsigned()) {
-			result_value = m_builder.CreateMul(
-				left_value_upcasted,
-				right_value_upcasted,
-				"umul",
-				true
-			);
-		}
-		// fallback to regular op
-		else {
-			result_value = m_builder.CreateMul(
-				left_value_upcasted,
-				right_value_upcasted,
-				"mul"
-			);
-		}
+		const auto& [result_value, highest_precision, left_operand_result] = operation_result.value();
 
 		// create the assignment value
 		auto assignment_value = std::make_shared<value>(
-			"__mul_assign",
+			"__sub_assign",
 			highest_precision,
 			result_value
 		);
 
-		// store the result of the addition operation back into the variable
-		m_builder.CreateStore(assignment_value->get_value(), left_operand_result.value()->get_pointer());
+		// store the result of the multiplication operation back into the variable
+		m_builder.CreateStore(
+			assignment_value->get_value(),
+			left_operand_result.value()->get_pointer()
+		);
+
 		return assignment_value;
 	}
 
@@ -469,56 +290,16 @@ namespace channel {
 		operator_multiplication_node& node,
 		const codegen_context& context
 	) {
-		// accept the left operand
-		acceptation_result left_operand_result = node.get_left_expression_node()->accept(*this, {});
-		if (!left_operand_result.has_value()) {
-			return left_operand_result;
+		auto operation_result = create_mul_operation(node.get_left_expression_node(), node.get_right_expression_node());
+		if (!operation_result.has_value()) {
+			return std::unexpected(operation_result.error());
 		}
 
-		// accept the right operand
-		acceptation_result right_operand_result = node.get_right_expression_node()->accept(*this, {});
-		if (!right_operand_result.has_value()) {
-			return right_operand_result;
-		}
-
-		// upcast both expressions
-		const type highest_precision = get_highest_precision_type(left_operand_result.value()->get_type(), right_operand_result.value()->get_type());
-		llvm::Value* left_value_upcasted = cast_value(left_operand_result.value(), highest_precision, node.get_declared_position());
-		llvm::Value* right_value_upcasted = cast_value(right_operand_result.value(), highest_precision, node.get_declared_position());
-
-		// both types are floating point
-		if (highest_precision.is_floating_point()) {
-			return std::make_shared<value>(
-				"__fmul",
-				highest_precision,
-				m_builder.CreateFMul(
-					left_value_upcasted,
-					right_value_upcasted,
-					"fmul")
-			);
-		}
-
-		// both types are unsigned
-		if (highest_precision.is_unsigned()) {
-			return std::make_shared<value>(
-				"__umul",
-				highest_precision,
-				m_builder.CreateMul(
-					left_value_upcasted,
-					right_value_upcasted,
-					"umul",
-					true)
-			);
-		}
-
-		// fallback to regular op
+		const auto& [result_value, highest_precision, left_operand_result] = operation_result.value();
 		return std::make_shared<value>(
 			"__mul",
 			highest_precision,
-			m_builder.CreateMul(
-				left_value_upcasted,
-				right_value_upcasted,
-				"mul")
+			result_value
 		);
 	}
 
@@ -526,49 +307,12 @@ namespace channel {
 		operator_division_assignment_node& node, 
 		const codegen_context& context
 	) {
-		// accept the left operand (variable to be assigned to)
-		acceptation_result left_operand_result = node.get_left_expression_node()->accept(*this, {});
-		if (!left_operand_result.has_value()) {
-			return left_operand_result;
+		auto operation_result = create_div_operation(node.get_left_expression_node(), node.get_right_expression_node());
+		if (!operation_result.has_value()) {
+			return std::unexpected(operation_result.error());
 		}
 
-		// accept the right operand
-		acceptation_result right_operand_result = node.get_right_expression_node()->accept(*this, {});
-		if (!right_operand_result.has_value()) {
-			return right_operand_result;
-		}
-
-		// upcast both expressions
-		const type highest_precision = get_highest_precision_type(left_operand_result.value()->get_type(), right_operand_result.value()->get_type());
-		llvm::Value* left_value_upcasted = cast_value(left_operand_result.value(), highest_precision, node.get_declared_position());
-		llvm::Value* right_value_upcasted = cast_value(right_operand_result.value(), highest_precision, node.get_declared_position());
-		llvm::Value* result_value;
-
-		// both types are floating point
-		if (highest_precision.is_floating_point()) {
-			result_value = m_builder.CreateFDiv(
-				left_value_upcasted,
-				right_value_upcasted,
-				"fdiv"
-			);
-		}
-		// both types are unsigned
-		else if (highest_precision.is_unsigned()) {
-			result_value = m_builder.CreateUDiv(
-				left_value_upcasted,
-				right_value_upcasted,
-				"udiv",
-				true
-			);
-		}
-		// fallback to regular op
-		else {
-			result_value = m_builder.CreateSDiv(
-				left_value_upcasted,
-				right_value_upcasted,
-				"div"
-			);
-		}
+		const auto& [result_value, highest_precision, left_operand_result] = operation_result.value();
 
 		// create the assignment value
 		auto assignment_value = std::make_shared<value>(
@@ -577,8 +321,12 @@ namespace channel {
 			result_value
 		);
 
-		// store the result of the addition operation back into the variable
-		m_builder.CreateStore(assignment_value->get_value(), left_operand_result.value()->get_pointer());
+		// store the result of the division operation back into the variable
+		m_builder.CreateStore(
+			assignment_value->get_value(),
+			left_operand_result.value()->get_pointer()
+		);
+
 		return assignment_value;
 	}
 
@@ -586,55 +334,16 @@ namespace channel {
 		operator_division_node& node, 
 		const codegen_context& context
 	) {
-		// accept the left operand
-		acceptation_result left_operand_result = node.get_left_expression_node()->accept(*this, {});
-		if (!left_operand_result.has_value()) {
-			return left_operand_result;
+		auto operation_result = create_div_operation(node.get_left_expression_node(), node.get_right_expression_node());
+		if (!operation_result.has_value()) {
+			return std::unexpected(operation_result.error());
 		}
 
-		// accept the right operand
-		acceptation_result right_operand_result = node.get_right_expression_node()->accept(*this, {});
-		if (!right_operand_result.has_value()) {
-			return right_operand_result;
-		}
-
-		// upcast both expressions
-		const type highest_precision = get_highest_precision_type(left_operand_result.value()->get_type(), right_operand_result.value()->get_type());
-		llvm::Value* left_value_upcasted = cast_value(left_operand_result.value(), highest_precision, node.get_declared_position());
-		llvm::Value* right_value_upcasted = cast_value(right_operand_result.value(), highest_precision, node.get_declared_position());
-
-		// both types are floating point
-		if (highest_precision.is_floating_point()) {
-			return std::make_shared<value>(
-				"__fdiv",
-				highest_precision,
-				m_builder.CreateFDiv(
-					left_value_upcasted,
-					right_value_upcasted,
-					"fdiv")
-			);
-		}
-
-		// both types are unsigned
-		if (highest_precision.is_unsigned()) {
-			return std::make_shared<value>(
-				"__udiv",
-				highest_precision,
-				m_builder.CreateUDiv(
-					left_value_upcasted,
-					right_value_upcasted,
-					"udiv")
-			);
-		}
-
-		// fallback to regular op
+		const auto& [result_value, highest_precision, left_operand_result] = operation_result.value();
 		return std::make_shared<value>(
 			"__div",
 			highest_precision,
-			m_builder.CreateSDiv(
-				left_value_upcasted,
-				right_value_upcasted,
-				"div")
+			result_value
 		);
 	}
 
@@ -642,58 +351,26 @@ namespace channel {
 		operator_modulo_assignment_node& node,
 		const codegen_context& context
 	) {
-		// accept the left operand (variable to be assigned to)
-		acceptation_result left_operand_result = node.get_left_expression_node()->accept(*this, {});
-		if (!left_operand_result.has_value()) {
-			return left_operand_result;
+		auto operation_result = create_mod_operation(node.get_left_expression_node(), node.get_right_expression_node());
+		if (!operation_result.has_value()) {
+			return std::unexpected(operation_result.error());
 		}
 
-		// accept the right operand
-		acceptation_result right_operand_result = node.get_right_expression_node()->accept(*this, {});
-		if (!right_operand_result.has_value()) {
-			return right_operand_result;
-		}
-
-		// upcast both expressions
-		const type highest_precision = get_highest_precision_type(left_operand_result.value()->get_type(), right_operand_result.value()->get_type());
-		llvm::Value* left_value_upcasted = cast_value(left_operand_result.value(), highest_precision, node.get_declared_position());
-		llvm::Value* right_value_upcasted = cast_value(right_operand_result.value(), highest_precision, node.get_declared_position());
-		llvm::Value* result_value;
-
-		// both types are floating point
-		if (highest_precision.is_floating_point()) {
-			result_value = m_builder.CreateFRem(
-				left_value_upcasted,
-				right_value_upcasted,
-				"frem"
-			);
-		}
-		// both types are unsigned
-		else if (highest_precision.is_unsigned()) {
-			result_value = m_builder.CreateURem(
-				left_value_upcasted,
-				right_value_upcasted,
-				"urem"
-			);
-		}
-		// fallback to regular op
-		else {
-			result_value = m_builder.CreateSRem(
-				left_value_upcasted,
-				right_value_upcasted,
-				"rem"
-			);
-		}
+		const auto& [result_value, highest_precision, left_operand_result] = operation_result.value();
 
 		// create the assignment value
 		auto assignment_value = std::make_shared<value>(
-			"__rem_assign",
+			"__mod_assign",
 			highest_precision,
 			result_value
 		);
 
-		// store the result of the addition operation back into the variable
-		m_builder.CreateStore(assignment_value->get_value(), left_operand_result.value()->get_pointer());
+		// store the result of the modulo operation back into the variable
+		m_builder.CreateStore(
+			assignment_value->get_value(),
+			left_operand_result.value()->get_pointer()
+		);
+
 		return assignment_value;
 	}
 
@@ -701,55 +378,16 @@ namespace channel {
 		operator_modulo_node& node,
 		const codegen_context& context
 	) {
-		// accept the left operand
-		acceptation_result left_operand_result = node.get_left_expression_node()->accept(*this, {});
-		if (!left_operand_result.has_value()) {
-			return left_operand_result;
+		auto operation_result = create_mod_operation(node.get_left_expression_node(), node.get_right_expression_node());
+		if (!operation_result.has_value()) {
+			return std::unexpected(operation_result.error());
 		}
 
-		// accept the right operand
-		acceptation_result right_operand_result = node.get_right_expression_node()->accept(*this, {});
-		if (!right_operand_result.has_value()) {
-			return right_operand_result;
-		}
-
-		// upcast both expressions
-		const type highest_precision = get_highest_precision_type(left_operand_result.value()->get_type(), right_operand_result.value()->get_type());
-		llvm::Value* left_value_upcasted = cast_value(left_operand_result.value(), highest_precision, node.get_declared_position());
-		llvm::Value* right_value_upcasted = cast_value(right_operand_result.value(), highest_precision, node.get_declared_position());
-
-		// both types are floating point
-		if (highest_precision.is_floating_point()) {
-			return std::make_shared<value>(
-				"__frem",
-				highest_precision,
-				m_builder.CreateFRem(
-					left_value_upcasted,
-					right_value_upcasted,
-					"frem")
-			);
-		}
-
-		// both types are unsigned
-		if (highest_precision.is_unsigned()) {
-			return std::make_shared<value>(
-				"__urem",
-				highest_precision,
-				m_builder.CreateURem(
-					left_value_upcasted,
-					right_value_upcasted,
-					"urem")
-			);
-		}
-
-		// fallback to regular op
+		const auto& [result_value, highest_precision, left_operand_result] = operation_result.value();
 		return std::make_shared<value>(
-			"__rem",
+			"__mod",
 			highest_precision,
-			m_builder.CreateSRem(
-				left_value_upcasted,
-				right_value_upcasted,
-				"rem")
+			result_value
 		);
 	}
 
@@ -1022,5 +660,309 @@ namespace channel {
 		}
 
 		return std::make_shared<value>("__not_equals", type(type::base::boolean, 0), not_equals_result);
+	}
+
+	std::expected<std::tuple<llvm::Value*, type, acceptation_result>, error_message> codegen_visitor::create_add_operation(
+		node* left_operand,
+		node* right_operand
+	) {
+		// accept the left operand (variable to be assigned to)
+		acceptation_result left_operand_result = left_operand->accept(*this, {});
+		if (!left_operand_result.has_value()) {
+			return std::unexpected(left_operand_result.error());
+		}
+
+		// accept the right operand
+		acceptation_result right_operand_result = right_operand->accept(*this, {});
+		if (!right_operand_result.has_value()) {
+			return std::unexpected(right_operand_result.error());
+		}
+
+		// upcast both expressions
+		const type highest_precision = get_highest_precision_type(left_operand_result.value()->get_type(), right_operand_result.value()->get_type());
+		llvm::Value* left_value_upcasted = cast_value(left_operand_result.value(), highest_precision, left_operand->get_declared_position());
+		llvm::Value* right_value_upcasted = cast_value(right_operand_result.value(), highest_precision, right_operand->get_declared_position());
+		llvm::Value* result_value;
+
+		// both types are floating point
+		if (highest_precision.is_floating_point()) {
+			return std::make_tuple(
+				m_builder.CreateFAdd(
+					left_value_upcasted,
+					right_value_upcasted,
+					"fadd"
+				),
+				highest_precision,
+				left_operand_result
+			);
+		}
+
+		// both types are unsigned
+		if (highest_precision.is_unsigned()) {
+			return std::make_tuple(
+				m_builder.CreateAdd(
+					left_value_upcasted,
+					right_value_upcasted,
+					"uadd",
+					true
+				),
+				highest_precision,
+				left_operand_result
+			);
+		}
+
+		// fallback to regular op
+		return std::make_tuple(
+			m_builder.CreateAdd(
+				left_value_upcasted,
+				right_value_upcasted,
+				"add"
+			), 
+			highest_precision,
+			left_operand_result
+		);
+	}
+
+	std::expected<std::tuple<llvm::Value*, type, acceptation_result>, error_message> codegen_visitor::create_sub_operation(
+		node* left_operand, 
+		node* right_operand
+	) {
+		// accept the left operand (variable to be assigned to)
+		acceptation_result left_operand_result = left_operand->accept(*this, {});
+		if (!left_operand_result.has_value()) {
+			return std::unexpected(left_operand_result.error());
+		}
+
+		// accept the right operand
+		acceptation_result right_operand_result = right_operand->accept(*this, {});
+		if (!right_operand_result.has_value()) {
+			return std::unexpected(right_operand_result.error());
+		}
+
+		// upcast both expressions
+		const type highest_precision = get_highest_precision_type(left_operand_result.value()->get_type(), right_operand_result.value()->get_type());
+		llvm::Value* left_value_upcasted = cast_value(left_operand_result.value(), highest_precision, left_operand->get_declared_position());
+		llvm::Value* right_value_upcasted = cast_value(right_operand_result.value(), highest_precision, right_operand->get_declared_position());
+		llvm::Value* result_value;
+
+		// both types are floating point
+		if (highest_precision.is_floating_point()) {
+			return std::make_tuple(
+				m_builder.CreateFSub(
+					left_value_upcasted,
+					right_value_upcasted,
+					"fsub"
+				),
+				highest_precision,
+				left_operand_result
+			);
+		}
+
+		// both types are unsigned
+		if (highest_precision.is_unsigned()) {
+			return std::make_tuple(
+				m_builder.CreateSub(
+					left_value_upcasted,
+					right_value_upcasted,
+					"usub",
+					true
+				),
+				highest_precision,
+				left_operand_result
+			);
+		}
+
+		// fallback to regular op
+		return std::make_tuple(
+			m_builder.CreateSub(
+				left_value_upcasted,
+				right_value_upcasted,
+				"sub"
+			),
+			highest_precision,
+			left_operand_result
+		);
+	}
+
+	std::expected<std::tuple<llvm::Value*, type, acceptation_result>, error_message> codegen_visitor::create_mul_operation(
+		node* left_operand,
+		node* right_operand
+	) {
+		// accept the left operand (variable to be assigned to)
+		acceptation_result left_operand_result = left_operand->accept(*this, {});
+		if (!left_operand_result.has_value()) {
+			return std::unexpected(left_operand_result.error());
+		}
+
+		// accept the right operand
+		acceptation_result right_operand_result = right_operand->accept(*this, {});
+		if (!right_operand_result.has_value()) {
+			return std::unexpected(right_operand_result.error());
+		}
+
+		// upcast both expressions
+		const type highest_precision = get_highest_precision_type(left_operand_result.value()->get_type(), right_operand_result.value()->get_type());
+		llvm::Value* left_value_upcasted = cast_value(left_operand_result.value(), highest_precision, left_operand->get_declared_position());
+		llvm::Value* right_value_upcasted = cast_value(right_operand_result.value(), highest_precision, right_operand->get_declared_position());
+		llvm::Value* result_value;
+
+		// both types are floating point
+		if (highest_precision.is_floating_point()) {
+			return std::make_tuple(
+				m_builder.CreateFMul(
+					left_value_upcasted,
+					right_value_upcasted,
+					"fmul"
+				),
+				highest_precision,
+				left_operand_result
+			);
+		}
+
+		// both types are unsigned
+		if (highest_precision.is_unsigned()) {
+			return std::make_tuple(
+				m_builder.CreateMul(
+					left_value_upcasted,
+					right_value_upcasted,
+					"umul",
+					true
+				),
+				highest_precision,
+				left_operand_result
+			);
+		}
+
+		// fallback to regular op
+		return std::make_tuple(
+			m_builder.CreateMul(
+				left_value_upcasted,
+				right_value_upcasted,
+				"mul"
+			),
+			highest_precision,
+			left_operand_result
+		);
+	}
+
+	std::expected<std::tuple<llvm::Value*, type, acceptation_result>, error_message> codegen_visitor::create_div_operation(
+		node* left_operand,
+		node* right_operand
+	) {
+		// accept the left operand (variable to be assigned to)
+		acceptation_result left_operand_result = left_operand->accept(*this, {});
+		if (!left_operand_result.has_value()) {
+			return std::unexpected(left_operand_result.error());
+		}
+
+		// accept the right operand
+		acceptation_result right_operand_result = right_operand->accept(*this, {});
+		if (!right_operand_result.has_value()) {
+			return std::unexpected(right_operand_result.error());
+		}
+
+		// upcast both expressions
+		const type highest_precision = get_highest_precision_type(left_operand_result.value()->get_type(), right_operand_result.value()->get_type());
+		llvm::Value* left_value_upcasted = cast_value(left_operand_result.value(), highest_precision, left_operand->get_declared_position());
+		llvm::Value* right_value_upcasted = cast_value(right_operand_result.value(), highest_precision, right_operand->get_declared_position());
+		llvm::Value* result_value;
+
+		// both types are floating point
+		if (highest_precision.is_floating_point()) {
+			return std::make_tuple(
+				m_builder.CreateFDiv(
+					left_value_upcasted,
+					right_value_upcasted,
+					"fdiv"
+				),
+				highest_precision,
+				left_operand_result
+			);
+		}
+
+		// both types are unsigned
+		if (highest_precision.is_unsigned()) {
+			return std::make_tuple(
+				m_builder.CreateUDiv(
+					left_value_upcasted,
+					right_value_upcasted,
+					"udiv",
+					true
+				),
+				highest_precision,
+				left_operand_result
+			);
+		}
+
+		// fallback to regular op
+		return std::make_tuple(
+			m_builder.CreateSDiv(
+				left_value_upcasted,
+				right_value_upcasted,
+				"sdiv"
+			),
+			highest_precision,
+			left_operand_result
+		);
+	}
+
+	std::expected<std::tuple<llvm::Value*, type, acceptation_result>, error_message> codegen_visitor::create_mod_operation(
+		node* left_operand, 
+		node* right_operand
+	) {
+		// accept the left operand (variable to be assigned to)
+		acceptation_result left_operand_result = left_operand->accept(*this, {});
+		if (!left_operand_result.has_value()) {
+			return std::unexpected(left_operand_result.error());
+		}
+
+		// accept the right operand
+		acceptation_result right_operand_result = right_operand->accept(*this, {});
+		if (!right_operand_result.has_value()) {
+			return std::unexpected(right_operand_result.error());
+		}
+
+		// upcast both expressions
+		const type highest_precision = get_highest_precision_type(left_operand_result.value()->get_type(), right_operand_result.value()->get_type());
+		llvm::Value* left_value_upcasted = cast_value(left_operand_result.value(), highest_precision, left_operand->get_declared_position());
+		llvm::Value* right_value_upcasted = cast_value(right_operand_result.value(), highest_precision, right_operand->get_declared_position());
+		llvm::Value* result_value;
+
+		// both types are floating point
+		if (highest_precision.is_floating_point()) {
+			return std::make_tuple(
+				m_builder.CreateFRem(
+					left_value_upcasted,
+					right_value_upcasted,
+					"fmod"
+				),
+				highest_precision,
+				left_operand_result
+			);
+		}
+
+		// both types are unsigned
+		if (highest_precision.is_unsigned()) {
+			return std::make_tuple(
+				m_builder.CreateURem(
+					left_value_upcasted,
+					right_value_upcasted,
+					"umod"
+				),
+				highest_precision,
+				left_operand_result
+			);
+		}
+
+		// fallback to regular op
+		return std::make_tuple(
+			m_builder.CreateSRem(
+				left_value_upcasted,
+				right_value_upcasted,
+				"smod"
+			),
+			highest_precision,
+			left_operand_result
+		);
 	}
 }

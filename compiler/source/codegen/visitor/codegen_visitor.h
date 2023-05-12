@@ -94,6 +94,61 @@ namespace channel {
 			const codegen_context& context
 		);
 
+		/**
+		 * \brief Creates LLVM blocks for the \a add operation.
+		 * \param left_operand Left operand
+		 * \param right_operand Right operand
+		 * \return Expected - value(operation result, operation precision, left operand result), error received from inner accept invocations.
+		 */
+		std::expected<std::tuple<llvm::Value*, type, acceptation_result>, error_message> create_add_operation(
+			node* left_operand,
+			node* right_operand
+		);
+
+		/**
+		 * \brief Creates LLVM blocks for the \a sub operation.
+		 * \param left_operand Left operand
+		 * \param right_operand Right operand
+		 * \return Expected - value(operation result, operation precision, left operand result), error received from inner accept invocations.
+		 */
+		std::expected<std::tuple<llvm::Value*, type, acceptation_result>, error_message> create_sub_operation(
+			node* left_operand,
+			node* right_operand
+		);
+
+		/**
+		 * \brief Creates LLVM blocks for the \a mul operation.
+		 * \param left_operand Left operand
+		 * \param right_operand Right operand
+		 * \return Expected - value(operation result, operation precision, left operand result), error received from inner accept invocations.
+		 */
+		std::expected<std::tuple<llvm::Value*, type, acceptation_result>, error_message> create_mul_operation(
+			node* left_operand,
+			node* right_operand
+		);
+
+		/**
+		 * \brief Creates LLVM blocks for the \a div operation.
+		 * \param left_operand Left operand
+		 * \param right_operand Right operand
+		 * \return Expected - value(operation result, operation precision, left operand result), error received from inner accept invocations.
+		 */
+		std::expected<std::tuple<llvm::Value*, type, acceptation_result>, error_message> create_div_operation(
+			node* left_operand,
+			node* right_operand
+		);
+
+		/**
+		 * \brief Creates LLVM blocks for the \a mod operation.
+		 * \param left_operand Left operand
+		 * \param right_operand Right operand
+		 * \return Expected - value(operation result, operation precision, left operand result), error received from inner accept invocations.
+		 */
+		std::expected<std::tuple<llvm::Value*, type, acceptation_result>, error_message> create_mod_operation(
+			node* left_operand,
+			node* right_operand
+		);
+
 		bool get_named_value(
 			value_ptr& out_value,
 			const std::string& variable_name
@@ -277,18 +332,10 @@ namespace channel {
 	private:
 		parser m_parser;
 
-		// scope tree hierarchy
-		scope* m_scope;
-
-		// map of all global variables
+		scope_ptr m_scope;
 		std::unordered_map<std::string, value_ptr> m_global_named_values;
-
-		// global initialization ctors
 		std::vector<llvm::Constant*> m_global_ctors;
-
-		// ctor initialization priority 
 		i32 m_global_initialization_priority = 0;
-
 		function_registry m_function_registry;
 
 		// llvm boilerplate

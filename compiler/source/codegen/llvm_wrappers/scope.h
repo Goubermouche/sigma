@@ -2,10 +2,13 @@
 #include "codegen/llvm_wrappers/value.h"
 
 namespace channel {
+	class scope;
+	using scope_ptr = std::shared_ptr<scope>;
+
 	class scope	{
 	public:
 		scope(
-			scope* parent,
+			scope_ptr parent,
 			llvm::BasicBlock* loop_end_block
 		);
 
@@ -21,7 +24,7 @@ namespace channel {
 		value_ptr get_named_value(const std::string& name);
 		llvm::BasicBlock* get_loop_end_block() const;
 	private:
-		scope* m_parent = nullptr;
+		scope_ptr m_parent = nullptr;
 		llvm::BasicBlock* m_loop_end_block = nullptr;
 		std::unordered_map<std::string, value_ptr> m_named_values;
 	};

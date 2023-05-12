@@ -42,8 +42,8 @@ namespace channel {
 		m_builder.SetInsertPoint(entry_block);
 
 		// create a new nested scope for the function body
-		scope* prev_scope = m_scope;
-		m_scope = new scope(prev_scope, nullptr);
+		scope_ptr prev_scope = m_scope;
+		m_scope = std::make_shared<scope>(prev_scope, nullptr);
 
 		// create the given arguments 
 		u64 index = 0;

@@ -91,12 +91,12 @@ namespace channel {
 		}
 
 		// save the previous scope
-		scope* prev_scope = m_scope;
+		scope_ptr prev_scope = m_scope;
 
 		// process branch nodes and create appropriate inner statements
 		for (u64 i = 0; i < branch_nodes.size(); ++i) {
 			m_builder.SetInsertPoint(branch_blocks[i]);
-			m_scope = new scope(prev_scope, nullptr);
+			m_scope = std::make_unique<scope>(prev_scope, nullptr);
 
 			for (const auto& statement : branch_nodes[i]) {
 				acceptation_result statement_result = statement->accept(*this, {});
@@ -148,8 +148,8 @@ namespace channel {
 		m_builder.SetInsertPoint(loop_body_block);
 
 		// save the previous scope
-		scope* prev_scope = m_scope;
-		m_scope = new scope(prev_scope, end_block);
+		scope_ptr prev_scope = m_scope;
+		m_scope = std::make_shared<scope>(prev_scope, end_block);
 
 		for(channel::node* n : node.get_loop_body_nodes()) {
 			acceptation_result statement_result = n->accept(*this, {});
@@ -224,8 +224,8 @@ namespace channel {
 		m_builder.SetInsertPoint(loop_body_block);
 
 		// save the previous scope
-		scope* prev_scope = m_scope;
-		m_scope = new scope(prev_scope, end_block);
+		scope_ptr prev_scope = m_scope;
+		m_scope = std::make_shared<scope>(prev_scope, end_block);
 
 		// accept all inner statements
 		for (channel::node* n : node.get_loop_body_nodes()) {

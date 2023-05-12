@@ -2,7 +2,7 @@
 
 namespace channel {
 	scope::scope(
-		scope* parent,
+		scope_ptr parent,
 		llvm::BasicBlock* loop_end_block
 	) : m_parent(parent),
 	m_loop_end_block(loop_end_block) {}

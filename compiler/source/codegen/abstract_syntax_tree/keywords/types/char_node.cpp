@@ -21,7 +21,7 @@ namespace channel {
 
 		console::out
 			<< '\''
-			<< AST_NODE_VARIABLE_COLOR
+			<< AST_NODE_TYPE_COLOR
 			<< "char"
 			<< color::white 
 			<< "' '"

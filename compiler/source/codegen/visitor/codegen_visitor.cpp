@@ -4,10 +4,12 @@
 #include "codegen/abstract_syntax_tree/translation_unit_node.h"
 
 namespace channel {
-	codegen_visitor::codegen_visitor(const parser& parser)
-		: m_parser(parser), m_scope(new scope(nullptr, nullptr)), m_builder(m_context) {
-		m_module = std::make_unique<llvm::Module>("channel", m_context);
-
+	codegen_visitor::codegen_visitor(
+		const parser& parser
+	) : m_parser(parser),
+	m_scope(new scope(nullptr, nullptr)),
+	m_builder(m_context),
+	m_module(std::make_unique<llvm::Module>("channel", m_context)) {
 		// initialize function declarations
 		for(const auto& [function_identifier, function_declaration] : m_function_registry.get_external_function_declarations()) {
 			const std::vector<std::pair<std::string, type>>& arguments = function_declaration->get_arguments();
@@ -45,14 +47,15 @@ namespace channel {
 	}
 
 	bool codegen_visitor::generate() {
-		// walk the abstract syntax tree
 		abstract_syntax_tree tree = m_parser.get_abstract_syntax_tree();
 
+		// walk the abstract syntax tree
 		for (node* n : tree) {
 			acceptation_result result = n->accept(*this, {});
+
 			if(!result.has_value()) {
 				result.error().print();
-				return false;
+				return false; // return on failure
 			}
 		}
 
@@ -82,9 +85,12 @@ namespace channel {
 		}
 
 		// check for IR errors
+		console::out << color::red;
 		if (llvm::verifyModule(*m_module, &llvm::outs())) {
+			console::out << color::white;
 			return false;
 		}
+		console::out << color::white;
 
 		return true;
 	}
@@ -93,7 +99,7 @@ namespace channel {
 		for(const auto& n : node.get_nodes()) {
 			acceptation_result result = n->accept(*this, context);
 			if(!result.value()) {
-				return result;
+				return result; // return on failure
 			}
 		}
 
@@ -104,26 +110,26 @@ namespace channel {
 		// check if we have a main entry point
 		if(!m_function_registry.contains_function("main")) {
 			error::emit<4012>().print();
-			return false;
+			return false; // return on failure
 		}
 
 		// check if the main entry point's return type is an i32
 		const function_ptr func = m_function_registry.get_function("main");
 		if(func->get_return_type().get_base() != type::base::i32) {
 			error::emit<4013>(func->get_return_type()).print();
-			return false;
+			return false; // return on failure
 		}
 
 		return true;
 	}
 
-	llvm::Value* codegen_visitor::cast_value(value_ptr source_value, type target_type, const token_position& position) {
+	llvm::Value* codegen_visitor::cast_value(const value_ptr& source_value, type target_type, const token_position& position) {
 		// both types are the same
 		if (source_value->get_type() == target_type) {
 			return source_value->get_value();
 		}
 
-		// cast function call
+		// cast a function call
 		if (source_value->get_type() == type(type::base::function_call, 0)) {
 			// use the function return type as its type
 			const type function_return_type = m_function_registry.get_function(source_value->get_name())->get_return_type();
@@ -177,7 +183,7 @@ namespace channel {
 		llvm::Value* source_llvm_value = source_value->get_value();
 		llvm::Type* target_llvm_type = target_type.get_llvm_type(source_llvm_value->getContext());
 
-		// bool to i32
+		// boolean to i32
 		if (source_value->get_type().get_base() == type::base::boolean && target_type.get_base() == type::base::i32) {
 			return m_builder.CreateZExt(source_llvm_value, target_llvm_type, "zext");
 		}
@@ -214,13 +220,13 @@ namespace channel {
 	bool codegen_visitor::get_named_value(value_ptr& out_value, const std::string& variable_name) {
 		// check the local scope
 		out_value = m_scope->get_named_value(variable_name);
+
 		if (!out_value) {
 			// variable with the given name was not found in the local scope hierarchy, check global variables
 			out_value = m_global_named_values[variable_name];
 
 			if (!out_value) {
-				// variable not found
-				return false;
+				return false; // variable not found
 			}
 		}
 

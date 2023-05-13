@@ -141,7 +141,7 @@ namespace channel {
 			{ "*=", token::operator_multiplication_assignment },
 			{ "%" , token::operator_modulo                    },
 			{ "%=", token::operator_modulo_assignment         },
-			{ "/",  token::operator_division                  },
+			{ "/" , token::operator_division                  },
 			{ "/=", token::operator_division_assignment       },
 			{ "=" , token::operator_assignment                },
 			{ "==", token::operator_equals                    },

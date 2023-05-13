@@ -310,7 +310,7 @@ namespace channel {
 					read_char();
 					hex_chars[1] = m_last_character;
 					u64 hex_value;
-					sscanf(hex_chars, "%x", &hex_value);
+					sscanf_s(hex_chars, "%" SCNx64, &hex_value);
 					m_value_string += static_cast<char>(hex_value);
 					break;
 				}

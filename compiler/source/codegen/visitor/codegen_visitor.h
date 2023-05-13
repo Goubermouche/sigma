@@ -203,6 +203,11 @@ namespace channel {
 			const codegen_context& context
 		) override;
 
+		// utility
+		value_ptr create_boolean(bool value);
+
+		value_ptr create_character(char value);
+
 		// operators
 		// codegen_visitor_operators.cpp
 		// unary
@@ -322,7 +327,7 @@ namespace channel {
 
 		// utility
 		llvm::Value* cast_value(
-			value_ptr source_value, 
+			const value_ptr& source_value,
 			type target_type, 
 			const token_position& position
 		);
@@ -335,7 +340,7 @@ namespace channel {
 		scope_ptr m_scope;
 		std::unordered_map<std::string, value_ptr> m_global_named_values;
 		std::vector<llvm::Constant*> m_global_ctors;
-		i32 m_global_initialization_priority = 0;
+		u64 m_global_initialization_priority = 0;
 		function_registry m_function_registry;
 
 		// llvm boilerplate

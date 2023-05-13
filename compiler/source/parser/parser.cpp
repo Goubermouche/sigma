@@ -65,27 +65,27 @@ namespace channel {
 	parser::parser(const lexer& lexer)
 		: m_lexer(lexer) {}
 
-	bool parser::parse() {
+	std::optional<error_message> parser::parse() {
 		std::vector<node*> nodes;
 
 		while (true) {
 			if (peek_next_token() == token::end_of_file) {
 				m_abstract_syntax_tree.add_node(new translation_unit_node(nodes));
-				return true;
+				return {};
 			}
 
 			node* node;
 
 			if (peek_is_function_definition()) {
 				// parse a top-level function definition
-				if (!parse_function_definition(node)) {
-					return false;
+				if(auto function_parse_error = parse_function_definition(node)) {
+					return function_parse_error;
 				}
 			}
 			else {
 				// parse a global statement
-				if (!parse_global_statement(node)) {
-					return false;
+				if (auto global_statement_parse_error = parse_global_statement(node)) {
+					return global_statement_parse_error;
 				}
 			}
 
@@ -101,21 +101,24 @@ namespace channel {
 		m_current_token = m_lexer.get_token();
 	}
 
-	bool parser::expect_next_token(token token) {
+	std::optional<error_message> parser::expect_next_token(token token) {
 		get_next_token();
 
 		if (m_current_token.get_token() == token) {
-			return true;
+			return {};
 		}
 
-		error::emit<3000>(m_current_token.get_token_position(), token, m_current_token.get_token()).print();
-		return false; // return on failure
+		return error::emit<3000>(
+			m_current_token.get_token_position(),
+			token,
+			m_current_token.get_token()
+		);
 	}
 
-	bool parser::parse_function_definition(node*& out_node) {
+	std::optional<error_message> parser::parse_function_definition(node*& out_node) {
 		type return_type;
-		if (!parse_type(return_type)) {
-			return false; // return on failure
+		if (auto type_parse_error = parse_type(return_type)) {
+			return type_parse_error; // return on failure
 		}
 
 		const token_position position = m_current_token.get_token_position();
@@ -130,12 +133,12 @@ namespace channel {
 		if (next_token != token::r_parenthesis) {
 			while (true) {
 				type argument_type;
-				if (!parse_type(argument_type)) {
-					return false; // return on failure
+				if (auto type_parse_error = parse_type(argument_type)) {
+					return type_parse_error; // return on failure
 				}
 
-				if (!expect_next_token(token::identifier)) {
-					return false; // return on failure
+				if (auto type_parse_error = expect_next_token(token::identifier)) {
+					return type_parse_error; // return on failure
 				}
 
 				std::string argument_name = m_current_token.get_value();
@@ -147,8 +150,11 @@ namespace channel {
 					get_next_token(); // comma (guaranteed)
 				}
 				else if (next_token != token::r_parenthesis) {
-					error::emit<3000>(m_current_token.get_token_position(), token::r_parenthesis, m_current_token.get_token()).print();
-					return false; // return on failure
+					return error::emit<3000>(
+						m_current_token.get_token_position(), 
+						token::r_parenthesis, 
+						m_current_token.get_token()
+					); // return on failure
 				}
 				else {
 					get_next_token(); // r_parenthesis(guaranteed)
@@ -161,47 +167,49 @@ namespace channel {
 		}
 
 		std::vector<node*> statements;
-		if (!parse_local_statements(statements)) {
-			return false; // return on failure
+		if (auto local_statement_parse_error = parse_local_statements(statements)) {
+			return local_statement_parse_error; // return on failure
 		}
 
 		out_node = new function_node(position, return_type, identifier, arguments, statements);
-		return true;
+		return {};
 	}
 
-	bool parser::parse_global_statement(node*& out_node) {
+	std::optional<error_message> parser::parse_global_statement(node*& out_node) {
 		const token token = peek_next_token(); // identifier || type || keyword
 
 		if (is_token_type(token)) {
 			// statements beginning with a type keyword have to be variable declarations
-			if (!parse_declaration(out_node, true)) {
-				return false; // return on failure
+			if (auto declaration_parse_error = parse_declaration(out_node, true)) {
+				return declaration_parse_error; // return on failure
 			}
 		}
 		else {
 			switch (token) {
 			case token::identifier:
 				// assignment statement
-				if (!parse_assignment(out_node)) {
-					return false; // return on failure
+				if (auto assignment_parse_error = parse_assignment(out_node)) {
+					return assignment_parse_error; // return on failure
 				}
 				break;
 			default:
-				error::emit<3001>(m_current_token.get_token_position(), token).print();
-				return false; // return on failure
+				return error::emit<3001>(
+					m_current_token.get_token_position(),
+					token
+				);
 			}
 		}
 
-		if (!expect_next_token(token::semicolon)) {
-			return false; // return on failure
+		if (auto next_token_error = expect_next_token(token::semicolon)) {
+			return next_token_error; // return on failure
 		}
 
-		return true;
+		return {};
 	}
 
-	bool parser::parse_local_statements(std::vector<node*>& out_statements) {
-		if (!expect_next_token(token::l_brace)) {
-			return false;  // return on failure
+	std::optional<error_message> parser::parse_local_statements(std::vector<node*>& out_statements) {
+		if (auto next_token_error = expect_next_token(token::l_brace)) {
+			return next_token_error;  // return on failure
 		}
 
 		bool met_block_break = false;
@@ -210,8 +218,8 @@ namespace channel {
 		// get all statements in the current scope
 		while (next_token != token::r_brace) {
 			node* statement;
-			if (!parse_local_statement(statement)) {
-				return false;  // return on failure
+			if (auto local_statement_parse_error = parse_local_statement(statement)) {
+				return local_statement_parse_error; // return on failure
 			}
 
 			// check if we've met a block break token
@@ -226,36 +234,36 @@ namespace channel {
 		}
 
 		get_next_token(); // r_brace (guaranteed)
-		return true;
+		return {};
 	}
 
-	bool parser::parse_local_statement(node*& out_node) {
+	std::optional<error_message> parser::parse_local_statement(node*& out_node) {
 		const token next_token = peek_next_token(); // identifier || type || keyword
 
 		if (is_token_type(next_token)) {
 			// statements beginning with a type keyword have to be variable declarations
-			if (!parse_declaration(out_node, false)) {
-				return false;  // return on failure
+			if (auto declaration_parse_error = parse_declaration(out_node, false)) {
+				return declaration_parse_error;  // return on failure
 			}
 		}
 		else {
 			switch (next_token) {
 			case token::identifier:
-				if (!parse_local_statement_identifier(out_node)) {
-					return false; // return on failure
+				if (auto local_statement_identifier_parse_error = parse_local_statement_identifier(out_node)) {
+					return local_statement_identifier_parse_error; // return on failure
 				}
 				break;
 			case token::l_parenthesis:
 				// parse a deep expression (parenthesized expression)
-				if (!parse_deep_expression(out_node, type::unknown())) {
-					return false; // return on failure
+				if (auto deep_expression_parse_error = parse_deep_expression(out_node, type::unknown())) {
+					return deep_expression_parse_error; // return on failure
 				}
 
 				// check for post unary operators after deep expression
 				if (peek_next_token() == token::operator_increment || peek_next_token() == token::operator_decrement) {
 					node* operand = out_node;
-					if (!parse_post_operator(operand, out_node)) {
-						return false; // return on failure
+					if (auto post_operator_parse_error = parse_post_operator(operand, out_node)) {
+						return post_operator_parse_error; // return on failure
 					}
 				}
 				break;
@@ -266,23 +274,24 @@ namespace channel {
 				next_next_token = peek_nth_token(2);
 
 				if (next_next_token == token::identifier || next_next_token == token::l_parenthesis) {
-					if (!parse_pre_operator(out_node)) {
-						return false; // return on failure
+					if (auto pre_operator_parse_error = parse_pre_operator(out_node)) {
+						return pre_operator_parse_error; // return on failure
 					}
 				}
 				else {
-					error::emit<3004>(m_current_token.get_token_position()).print();
-					return false; // return on failure
+					return error::emit<3004>(
+						m_current_token.get_token_position()
+					); // return on failure
 				}
 				break;
 			case token::keyword_return:
-				if (!parse_return_statement(out_node)) {
-					return false;
+				if (auto return_statement_parse_error = parse_return_statement(out_node)) {
+					return return_statement_parse_error; // return on failure
 				}
 				break;
 			case token::keyword_break:
-				if (!parse_break_keyword(out_node)) {
-					return false; // return on failure
+				if (auto break_keyword_parse_error = parse_break_keyword(out_node)) {
+					return break_keyword_parse_error; // return on failure
 				}
 				break;
 			case token::keyword_if:
@@ -295,35 +304,37 @@ namespace channel {
 				// return right away since we don't want to check for a semicolon at the end of the statement
 				return parse_for_loop(out_node);
 			default:
-				error::emit<3001>(m_current_token.get_token_position(), next_token).print();
-				return false; // return on failure
+				return error::emit<3001>(
+					m_current_token.get_token_position(),
+					next_token
+				); // return on failure
 			}
 		}
 
-		if (!expect_next_token(token::semicolon)) {
-			return false; // return on failure
+		if (auto next_token_error = expect_next_token(token::semicolon)) {
+			return next_token_error; // return on failure
 		}
 
-		return true;
+		return {};
 	}
 
-	bool parser::parse_local_statement_identifier(node*& out_node) {
+	std::optional<error_message> parser::parse_local_statement_identifier(node*& out_node) {
 		if (peek_is_function_call()) {
 			// function call statement
-			if (!parse_function_call(out_node)) {
-				return false; // return on failure
+			if (auto function_call_parse_error = parse_function_call(out_node)) {
+				return function_call_parse_error; // return on failure
 			}
 		}
 		else if (peek_is_array_index_access()) {
 			// array assignment
-			if (!parse_array_assignment(out_node)) {
-				return false; // return on failure
+			if (auto array_assignment_parse_error = parse_array_assignment(out_node)) {
+				return array_assignment_parse_error; // return on failure
 			}
 		}
 		else if (peek_is_assignment()) {
 			// assignment statement
-			if (!parse_assignment(out_node)) {
-				return false; // return on failure
+			if(auto assignment_parse_error = parse_assignment(out_node)) {
+				return assignment_parse_error; // return on failure
 			}
 		}
 		else {
@@ -342,10 +353,10 @@ namespace channel {
 			return parse_compound_operation(out_node, out_node);
 		}
 
-		return true;
+		return {};
 	}
 
-	bool parser::parse_if_else_statement(node*& out_node) {
+	std::optional<error_message> parser::parse_if_else_statement(node*& out_node) {
 		std::vector<node*> conditions;
 		std::vector<std::vector<node*>> branches;
 		const token_position position = m_current_token.get_token_position();
@@ -366,10 +377,16 @@ namespace channel {
 
 				node* condition = nullptr;
 				if (!has_else) {
-					if (!expect_next_token(token::l_parenthesis) ||
-						!parse_expression(condition) ||
-						!expect_next_token(token::r_parenthesis)) {
-						return false; // return on failure
+					if(auto next_token_error = expect_next_token(token::l_parenthesis)) {
+						return next_token_error;
+					}
+
+					if (auto expression_parse_error = parse_expression(condition)) {
+						return expression_parse_error;
+					}
+
+					if(auto next_token_error = expect_next_token(token::r_parenthesis)) {
+						return next_token_error;
 					}
 				}
 
@@ -380,8 +397,8 @@ namespace channel {
 			}
 
 			std::vector<node*> branch_statements;
-			if (!parse_local_statements(branch_statements)) {
-				return false; // return on failure
+			if (auto local_statement_parse_error = parse_local_statements(branch_statements)) {
+				return local_statement_parse_error; // return on failure
 			}
 
 			branches.push_back(branch_statements);
@@ -392,35 +409,35 @@ namespace channel {
 		}
 
 		out_node = new if_else_node(position, conditions, branches);
-		return true;
+		return {};
 	}
 
-	bool parser::parse_while_loop(node*& out_node) {
+	std::optional<error_message> parser::parse_while_loop(node*& out_node) {
 		get_next_token(); // keyword_while (guaranteed)
 		const token_position position = m_current_token.get_token_position();
 
-		if (!expect_next_token(token::l_parenthesis)) {
-			return false; // return on failure
+		if (auto next_token_error = expect_next_token(token::l_parenthesis)) {
+			return next_token_error; // return on failure
 		}
 
 		node* loop_condition_node;
-		if (!parse_expression(loop_condition_node)) {
-			return false; // return on failure
+		if (auto expression_parse_error = parse_expression(loop_condition_node)) {
+			return expression_parse_error; // return on failure
 		}
 
-		if (!expect_next_token(token::r_parenthesis)) {
-			return false; // return on failure
+		if (auto next_token_error = expect_next_token(token::r_parenthesis)) {
+			return next_token_error; // return on failure
 		}
 
-		if (!expect_next_token(token::l_brace)) {
-			return false; // return on failure
+		if (auto next_token_error = expect_next_token(token::l_brace)) {
+			return next_token_error; // return on failure
 		}
 
 		std::vector<node*> loop_statements;
 		while (peek_next_token() != token::r_brace) {
 			node* statement;
-			if (!parse_local_statement(statement)) {
-				return false; // return on failure
+			if (auto local_statement_error = parse_local_statement(statement)) {
+				return local_statement_error; // return on failure
 			}
 
 			loop_statements.push_back(statement);
@@ -428,14 +445,14 @@ namespace channel {
 
 		get_next_token(); // r_brace (guaranteed)
 		out_node = new while_node(position, loop_condition_node, loop_statements);
-		return true;
+		return {};
 	}
 
-	bool parser::parse_loop_increment(node*& out_node) {
+	std::optional<error_message> parser::parse_loop_increment(node*& out_node) {
 		switch (const token next_token = peek_next_token()) {
 		case token::identifier:
-			if (!parse_local_statement_identifier(out_node)) {
-				return false; // return on failure
+			if (auto local_statement_identifier_parse_error = parse_local_statement_identifier(out_node)) {
+				return local_statement_identifier_parse_error; // return on failure
 			}
 			break;
 		case token::operator_increment:
@@ -445,31 +462,29 @@ namespace channel {
 			next_next_token = peek_nth_token(2);
 
 			if (next_next_token == token::identifier || next_next_token == token::l_parenthesis) {
-				if (!parse_pre_operator(out_node)) {
-					return false; // return on failure
+				if (auto pre_operator_parse_error =parse_pre_operator(out_node)) {
+					return pre_operator_parse_error; // return on failure
 				}
 			}
 			else {
-				error::emit<3004>(m_current_token.get_token_position()).print();
-				return false; // return on failure
+				return error::emit<3004>(m_current_token.get_token_position()); // return on failure
 			}
 			break;
 		case token::r_parenthesis:
 			break;
 		default:
-			error::emit<3001>(m_current_token.get_token_position(), next_token).print();
-			return false; // return on failure
+			return error::emit<3001>(m_current_token.get_token_position(), next_token); // return on failure
 		}
 
-		return true;
+		return {};
 	}
 
-	bool parser::parse_for_loop(node*& out_node) {
+	std::optional<error_message> parser::parse_for_loop(node*& out_node) {
 		get_next_token(); // keyword_for (guaranteed)
 		const token_position position = m_current_token.get_token_position();
 
-		if (!expect_next_token(token::l_parenthesis)) {
-			return false; // return on failure
+		if (auto next_token_error = expect_next_token(token::l_parenthesis)) {
+			return next_token_error; // return on failure
 		}
 
 		// parse the initialization section
@@ -478,35 +493,34 @@ namespace channel {
 
 		if (is_token_type(next_token)) {
 			// statements beginning with a type keyword have to be variable declarations
-			if (!parse_declaration(loop_initialization_node, false)) {
-				return false; // return on failure
+			if (auto declaration_parse_error = parse_declaration(loop_initialization_node, false)) {
+				return declaration_parse_error; // return on failure
 			}
 		}
 		else {
 			switch (next_token) {
 			case token::identifier:
-				if (!parse_local_statement_identifier(loop_initialization_node)) {
-					return false; // return on failure
+				if (auto local_statement_identifier_parse_error = parse_local_statement_identifier(loop_initialization_node)) {
+					return local_statement_identifier_parse_error; // return on failure
 				}
 				break;
 			default:
-				error::emit<3001>(m_current_token.get_token_position(), next_token).print();
-				return false; // return on failure
+				return error::emit<3001>(m_current_token.get_token_position(), next_token); // return on failure
 			}
 		}
 
-		if (!expect_next_token(token::semicolon)) {
-			return false;
+		if (auto next_token_error = expect_next_token(token::semicolon)) {
+			return next_token_error;
 		}
 
 		// parse the loop condition section
 		node* loop_condition_node;
-		if (!parse_expression(loop_condition_node)) {
-			return false; // return on failure
+		if (auto expression_parse_error = parse_expression(loop_condition_node)) {
+			return expression_parse_error; // return on failure
 		}
 
-		if (!expect_next_token(token::semicolon)) {
-			return false; // return on failure
+		if (auto next_token_error = expect_next_token(token::semicolon)) {
+			return next_token_error; // return on failure
 		}
 
 		// parse the increment section
@@ -519,8 +533,8 @@ namespace channel {
 				break;
 			}
 
-			if (!parse_loop_increment(post_iteration_node)) {
-				return false; // return on failure
+			if (auto loop_increment_parse_error = parse_loop_increment(post_iteration_node)) {
+				return loop_increment_parse_error; // return on failure
 			}
 
 			post_iteration_nodes.push_back(post_iteration_node);
@@ -532,20 +546,20 @@ namespace channel {
 			get_next_token(); // comma (guaranteed)
 		}
 
-		if (!expect_next_token(token::r_parenthesis)) {
-			return false; // return on failure
+		if (auto next_token_error = expect_next_token(token::r_parenthesis)) {
+			return next_token_error; // return on failure
 		}
 
-		if (!expect_next_token(token::l_brace)) {
-			return false; // return on failure
+		if (auto next_token_error = expect_next_token(token::l_brace)) {
+			return next_token_error; // return on failure
 		}
 
 		// parse body statements
 		std::vector<node*> loop_statements;
 		while (peek_next_token() != token::r_brace) {
 			node* statement;
-			if (!parse_local_statement(statement)) {
-				return false; // return on failure
+			if (auto local_statement_error = parse_local_statement(statement)) {
+				return local_statement_error; // return on failure
 			}
 
 			loop_statements.push_back(statement);
@@ -553,10 +567,10 @@ namespace channel {
 
 		get_next_token(); // r_brace (guaranteed)
 		out_node = new for_node(position, loop_initialization_node, loop_condition_node, post_iteration_nodes, loop_statements);
-		return true;
+		return {};
 	}
 
-	bool parser::parse_compound_operation(node*& out_node, node* left_operand) {
+	std::optional<error_message> parser::parse_compound_operation(node*& out_node, node* left_operand) {
 		// operator_addition_assignment ||
 		// operator_subtraction_assignment || 
 		// operator_multiplication_assignment || 
@@ -567,8 +581,8 @@ namespace channel {
 
 		// rhs of the expression
 		node* expression;
-		if(!parse_expression(expression)) {
-			return false;
+		if(auto expression_parse_error = parse_expression(expression)) {
+			return expression_parse_error;
 		}
 
 		switch (op) {
@@ -609,10 +623,10 @@ namespace channel {
 			break;
 		}
 
-		return true;
+		return {};
 	}
 
-	bool parser::parse_array_assignment(node*& out_node) {
+	std::optional<error_message> parser::parse_array_assignment(node*& out_node) {
 		get_next_token(); // identifier (guaranteed)
 		const std::string identifier = m_current_token.get_value();
 		const token_position position = m_current_token.get_token_position();
@@ -621,15 +635,15 @@ namespace channel {
 		while (peek_next_token() == token::l_bracket) {
 			get_next_token(); // l_bracket (guaranteed)
 			node* index_node;
-			if (!parse_expression(index_node, type(type::base::u64, 0))) {
-				return false; // return on failure
+			if (auto expression_error = parse_expression(index_node, type(type::base::u64, 0))) {
+				return expression_error; // return on failure
 			}
 
 			index_nodes.push_back(index_node);
 
 			// make sure the next token is a right square bracket
-			if (!expect_next_token(token::r_bracket)) {
-				return false; // return on failure
+			if (auto next_token_error = expect_next_token(token::r_bracket)) {
+				return next_token_error; // return on failure
 			}
 		}
 
@@ -640,13 +654,13 @@ namespace channel {
 			// parse access-assignment
 			node* value;
 			if (peek_is_function_call()) {
-				if (!parse_function_call(value)) {
-					return false; // return on failure
+				if (auto function_call_parse_error = parse_function_call(value)) {
+					return function_call_parse_error; // return on failure
 				}
 			}
 			else {
-				if (!parse_expression(value)) {
-					return false; // return on failure
+				if (auto expression_parse_error = parse_expression(value)) {
+					return expression_parse_error; // return on failure
 				}
 			}
 
@@ -657,40 +671,40 @@ namespace channel {
 			node* array_node = new variable_node(m_current_token.get_token_position(), identifier);
 			out_node = new array_access_node(position, array_node, index_nodes);
 
-			if (!parse_post_operator(out_node, out_node)) {
-				return false; // return on failure
+			if (auto post_operator_parse_error = parse_post_operator(out_node, out_node)) {
+				return post_operator_parse_error; // return on failure
 			}
 		}
 
-		return true;
+		return {};
 	}
 
-	bool parser::parse_assignment(node*& out_node) {
+	std::optional<error_message> parser::parse_assignment(node*& out_node) {
 		get_next_token(); // identifier (guaranteed)
 		node* variable = new variable_node(m_current_token.get_token_position(), m_current_token.get_value());
 
-		if (!expect_next_token(token::operator_assignment)) {
-			return false;  // return on failure
+		if (auto next_token_error = expect_next_token(token::operator_assignment)) {
+			return next_token_error;  // return on failure
 		}
 
 		// parse access-assignment
 		node* value;
 		if (peek_is_function_call()) {
-			if (!parse_function_call(value)) {
-				return false; // return on failure
+			if (auto function_call_parse_error = parse_function_call(value)) {
+				return function_call_parse_error; // return on failure
 			}
 		}
 		else {
-			if (!parse_expression(value)) {
-				return false; // return on failure
+			if (auto expression_parse_error = parse_expression(value)) {
+				return expression_parse_error; // return on failure
 			}
 		}
 
 		out_node = new assignment_node(m_current_token.get_token_position(), variable, value);
-		return true;
+		return {};
 	}
 
-	bool parser::parse_array_access(node*& out_node) {
+	std::optional<error_message> parser::parse_array_access(node*& out_node) {
 		get_next_token(); // identifier (guaranteed)
 		const std::string identifier = m_current_token.get_value();
 
@@ -703,13 +717,13 @@ namespace channel {
 		while (m_current_token.get_token() == token::l_bracket) {
 			// parse access index
 			node* array_index;
-			if (!parse_expression(array_index, type(type::base::u64, 0))) {
-				return false; // return on failure
+			if (auto expression_parse_error = parse_expression(array_index, type(type::base::u64, 0))) {
+				return expression_parse_error; // return on failure
 			}
 			index_nodes.push_back(array_index);
 
-			if (!expect_next_token(token::r_bracket)) {
-				return false; // return on failure
+			if (auto next_token_error = expect_next_token(token::r_bracket)) {
+				return next_token_error; // return on failure
 			}
 
 			if (peek_next_token() != token::l_bracket) {
@@ -720,10 +734,10 @@ namespace channel {
 		}
 
 		out_node = new array_access_node(m_current_token.get_token_position(), array_node, index_nodes);
-		return true;
+		return {};
 	}
 
-	bool parser::parse_function_call(node*& out_node) {
+	std::optional<error_message> parser::parse_function_call(node*& out_node) {
 		get_next_token(); // identifier (guaranteed)
 		const std::string identifier = m_current_token.get_value();
 		get_next_token(); // l_parenthesis (guaranteed)
@@ -733,8 +747,8 @@ namespace channel {
 		if (next_token != token::r_parenthesis) {
 			while (true) {
 				node* argument;
-				if (!parse_expression(argument)) {
-					return false; // return on failure
+				if (auto expression_parse_error = parse_expression(argument)) {
+					return expression_parse_error; // return on failure
 				}
 
 				arguments.push_back(argument);
@@ -748,43 +762,42 @@ namespace channel {
 					break;
 				}
 				else {
-					error::emit<3001>(m_current_token.get_token_position(), m_current_token.get_token()).print();
-					return false;  // return on failure
+					return error::emit<3001>(m_current_token.get_token_position(), m_current_token.get_token());  // return on failure
 				}
 			}
 		}
 
-		if (!expect_next_token(token::r_parenthesis)) {
-			return false; // return on failure
+		if (auto next_token_error = expect_next_token(token::r_parenthesis)) {
+			return next_token_error; // return on failure
 		}
 
 		out_node = new function_call_node(m_current_token.get_token_position(), identifier, arguments);
-		return true;
+		return  {};
 	}
 
-	bool parser::parse_return_statement(node*& out_node) {
+	std::optional<error_message> parser::parse_return_statement(node*& out_node) {
 		const token_position position = m_current_token.get_token_position();
 		get_next_token(); // keyword_return (guaranteed)
 
 		node* expression;
-		if (!parse_expression(expression)) {
-			return false; // return on failure
+		if (auto expression_parse_error = parse_expression(expression)) {
+			return expression_parse_error; // return on failure
 		}
 
 		out_node = new return_node(position, expression);
-		return true;
+		return {};
 	}
 
-	bool parser::parse_declaration(node*& out_node, bool is_global) {
+	std::optional<error_message> parser::parse_declaration(node*& out_node, bool is_global) {
 		const token_position position = m_current_token.get_token_position();
 
 		type declaration_type;
-		if (!parse_type(declaration_type)) {
-			return false; // return on failure
+		if (auto type_parse_error = parse_type(declaration_type)) {
+			return type_parse_error; // return on failure
 		}
 
-		if (!expect_next_token(token::identifier)) {
-			return false; // return on failure
+		if (auto next_token_error = expect_next_token(token::identifier)) {
+			return next_token_error; // return on failure
 		}
 
 		const std::string identifier = m_current_token.get_value();
@@ -792,28 +805,28 @@ namespace channel {
 		node* value = nullptr;
 		if (peek_next_token() == token::operator_assignment) {
 			get_next_token(); // operator_assignment
-			if (!parse_expression(value, declaration_type)) {
-				return false; // return on failure
+			if (auto expression_parse_error = parse_expression(value, declaration_type)) {
+				return expression_parse_error; // return on failure
 			}
 		}
 
 		if (is_global) {
 			out_node = new global_declaration_node(position, declaration_type, identifier, value);
-			return true;
+			return {};
 		}
 
 		out_node = new local_declaration_node(position, declaration_type, identifier, value);
-		return true;
+		return {};
 	}
 
-	bool parser::parse_expression(node*& out_node, type expression_type) {
+	std::optional<error_message> parser::parse_expression(node*& out_node, type expression_type) {
 		return parse_logical_conjunction(out_node, expression_type);
 	}
 
-	bool parser::parse_logical_conjunction(node*& out_node, type expression_type) {
+	std::optional<error_message> parser::parse_logical_conjunction(node*& out_node, type expression_type) {
 		node* left;
-		if (!parse_logical_disjunction(left, expression_type)) {
-			return false;  // return on failure
+		if (auto logical_disjunction_parse_error = parse_logical_disjunction(left, expression_type)) {
+			return logical_disjunction_parse_error;  // return on failure
 		}
 
 		while (peek_next_token() == token::operator_logical_conjunction) {
@@ -821,21 +834,21 @@ namespace channel {
 			const token_data op = m_current_token;
 
 			node* right;
-			if (!parse_logical_disjunction(right, expression_type)) {
-				return false; // return on failure
+			if (auto logical_disjunction_parse_error = parse_logical_disjunction(right, expression_type)) {
+				return logical_disjunction_parse_error; // return on failure
 			}
 
 			left = new operator_conjunction_node(op.get_token_position(), left, right);
 		}
 
 		out_node = left;
-		return true;
+		return {};
 	}
 
-	bool parser::parse_logical_disjunction(node*& out_node, type expression_type) {
+	std::optional<error_message> parser::parse_logical_disjunction(node*& out_node, type expression_type) {
 		node* left;
-		if (!parse_comparison(left, expression_type)) {
-			return false; // return on failure
+		if (auto comparison_parse_error = parse_comparison(left, expression_type)) {
+			return comparison_parse_error; // return on failure
 		}
 
 		while (peek_next_token() == token::operator_logical_disjunction) {
@@ -843,21 +856,21 @@ namespace channel {
 			const token_data op = m_current_token;
 
 			node* right;
-			if (!parse_comparison(right, expression_type)) {
-				return false; // return on failure
+			if (auto comparison_parse_error = parse_comparison(right, expression_type)) {
+				return comparison_parse_error; // return on failure
 			}
 
 			left = new operator_disjunction_node(op.get_token_position(), left, right);
 		}
 
 		out_node = left;
-		return true;
+		return {};
 	}
 
-	bool parser::parse_comparison(node*& out_node, type expression_type) {
+	std::optional<error_message> parser::parse_comparison(node*& out_node, type expression_type) {
 		node* left;
-		if (!parse_term(left, expression_type)) {
-			return false; // return on failure
+		if (auto term_parse_error = parse_term(left, expression_type)) {
+			return term_parse_error; // return on failure
 		}
 
 		while (
@@ -871,8 +884,8 @@ namespace channel {
 			const token_data op = m_current_token;
 
 			node* right;
-			if (!parse_term(right, expression_type)) {
-				return false; // return on failure
+			if (auto term_parse_error = parse_term(right, expression_type)) {
+				return term_parse_error; // return on failure
 			}
 
 			switch (op.get_token()) {
@@ -898,13 +911,13 @@ namespace channel {
 		}
 
 		out_node = left;
-		return true;
+		return {};
 	}
 
-	bool parser::parse_term(node*& out_node, type expression_type) {
+	std::optional<error_message> parser::parse_term(node*& out_node, type expression_type) {
 		node* left;
-		if (!parse_factor(left, expression_type)) {
-			return false; // return on failure
+		if (auto factor_parse_error = parse_factor(left, expression_type)) {
+			return factor_parse_error; // return on failure
 		}
 
 		while (
@@ -914,8 +927,8 @@ namespace channel {
 			const token_data op = m_current_token;
 
 			node* right;
-			if (!parse_factor(right, expression_type)) {
-				return false; // return on failure
+			if (auto factor_parse_error = parse_factor(right, expression_type)) {
+				return factor_parse_error; // return on failure
 			}
 
 			switch (op.get_token()) {
@@ -929,13 +942,13 @@ namespace channel {
 		}
 
 		out_node = left;
-		return true;
+		return {};
 	}
 
-	bool parser::parse_factor(node*& out_node, type expression_type) {
+	std::optional<error_message> parser::parse_factor(node*& out_node, type expression_type) {
 		node* left;
-		if (!parse_primary(left, expression_type)) {
-			return false; // return on failure
+		if (auto primary_parse_error = parse_primary(left, expression_type)) {
+			return primary_parse_error; // return on failure
 		}
 
 		while (
@@ -947,8 +960,8 @@ namespace channel {
 			const token_data op = m_current_token;
 
 			node* right;
-			if (!parse_primary(right, expression_type)) {
-				return false; // return on failure
+			if (auto primary_parse_error = parse_primary(right, expression_type)) {
+				return primary_parse_error; // return on failure
 			}
 
 			switch (op.get_token()) {
@@ -965,10 +978,10 @@ namespace channel {
 		}
 
 		out_node = left;
-		return true;
+		return {};
 	}
 
-	bool parser::parse_primary(node*& out_node, type expression_type) {
+	std::optional<error_message> parser::parse_primary(node*& out_node, type expression_type) {
 		const token next_token = peek_next_token();
 
 		if (is_token_numerical(next_token)) {
@@ -989,8 +1002,7 @@ namespace channel {
 				return parse_pre_operator(out_node);
 			}
 
-			error::emit<3004>(m_current_token.get_token_position()).print();
-			return false; // return on failure
+			return error::emit<3004>(m_current_token.get_token_position()); // return on failure
 		case token::identifier:
 			// parse a function call or an assignment
 			return parse_primary_identifier(out_node);
@@ -1012,43 +1024,42 @@ namespace channel {
 			return parse_bool(out_node);
 		}
 
-		error::emit<3001>(m_current_token.get_token_position(), m_current_token.get_token()).print();
-		return false; // return on failure
+		return error::emit<3001>(m_current_token.get_token_position(), m_current_token.get_token()); // return on failure
 	}
 
-	bool parser::parse_number(node*& out_node, type expression_type) {
+	std::optional<error_message> parser::parse_number(node*& out_node, type expression_type) {
 		get_next_token(); // type
 		const std::string str_value = m_current_token.get_value();
 		const type ty = expression_type.is_unknown() ? type(m_current_token.get_token(), 0) : expression_type;
 		out_node = new numerical_literal_node(m_current_token.get_token_position(), str_value, ty);
-		return true;
+		return {};
 	}
 
-	bool parser::parse_char(node*& out_node) {
+	std::optional<error_message> parser::parse_char(node*& out_node) {
 		get_next_token(); // char_literal (guaranteed)
 		out_node = new char_node(m_current_token.get_token_position(), m_current_token.get_value()[0]);
-		return true;
+		return {};
 	}
 
-	bool parser::parse_string(node*& out_node) {
+	std::optional<error_message> parser::parse_string(node*& out_node) {
 		get_next_token(); // string_literal (guaranteed)
 		out_node = new string_node(m_current_token.get_token_position(), m_current_token.get_value());
-		return true;
+		return {};
 	}
 
-	bool parser::parse_bool(node*& out_node) {
+	std::optional<error_message> parser::parse_bool(node*& out_node) {
 		get_next_token(); // bool_literal_true || bool_literal_false (guaranteed)
 		out_node = new bool_node(m_current_token.get_token_position(), m_current_token.get_token() == token::bool_literal_true);
-		return true;
+		return {};
 	}
 
-	bool parser::parse_break_keyword(node*& out_node) {
+	std::optional<error_message> parser::parse_break_keyword(node*& out_node) {
 		get_next_token(); // keyword_break (guaranteed)
 		out_node = new break_node(m_current_token.get_token_position());
-		return true;
+		return {};
 	}
 
-	bool parser::parse_post_operator(node* operand, node*& out_node) {
+	std::optional<error_message> parser::parse_post_operator(node* operand, node*& out_node) {
 		get_next_token();
 
 		if (m_current_token.get_token() == token::operator_increment) {
@@ -1058,18 +1069,16 @@ namespace channel {
 			out_node = new operator_post_decrement(m_current_token.get_token_position(), operand);
 		}
 
-
-
-		return true;
+		return {};
 	}
 
-	bool parser::parse_pre_operator(node*& out_node) {
+	std::optional<error_message> parser::parse_pre_operator(node*& out_node) {
 		get_next_token();
 		const token_data op = m_current_token;
 		node* operand;
 
-		if (!parse_primary(operand, type::unknown())) {
-			return false; // return on failure
+		if (auto primary_parse_error = parse_primary(operand, type::unknown())) {
+			return primary_parse_error; // return on failure
 		}
 
 		if (op.get_token() == token::operator_increment) {
@@ -1079,61 +1088,61 @@ namespace channel {
 			out_node = new operator_pre_decrement(op.get_token_position(), operand);
 		}
 
-		return true;
+		return {};
 	}
 
-	bool parser::parse_negative_number(node*& out_node, type expression_type) {
+	std::optional<error_message> parser::parse_negative_number(node*& out_node, type expression_type) {
 		get_next_token(); // operator_subtraction (guaranteed)
 
 		// negate the number by subtracting it from 0
 		node* zero_node = create_zero_node(expression_type);
 		node* number;
 
-		if (!parse_number(number, expression_type)) {
-			return false; // return on failure
+		if (auto number_parse_error = parse_number(number, expression_type)) {
+			return number_parse_error; // return on failure
 		}
 
 		out_node = new operator_subtraction_node(m_current_token.get_token_position(), zero_node, number);
-		return true;
+		return {};
 	}
 
-	bool parser::parse_new_allocation(node*& out_node) {
+	std::optional<error_message> parser::parse_new_allocation(node*& out_node) {
 		get_next_token(); // keyword_new (guaranteed)
 		const token_position position = m_current_token.get_token_position();
 
 		type allocation_type;
-		if (!parse_type(allocation_type)) {
-			return false; // return on failure
+		if (auto type_parse_error = parse_type(allocation_type)) {
+			return type_parse_error; // return on failure
 		}
 
 		// l_bracket
-		if (!expect_next_token(token::l_bracket)) {
-			return false; // return on failure
+		if (auto next_token_error = expect_next_token(token::l_bracket)) {
+			return next_token_error; // return on failure
 		}
 
 		// parse array size
 		node* array_size;
-		if (!parse_expression(array_size, type(type::base::u64, 0))) {
-			return false; // return on failure
+		if (auto expression_parse_error = parse_expression(array_size, type(type::base::u64, 0))) {
+			return expression_parse_error; // return on failure
 		}
 
 		// r_bracket
-		if (!expect_next_token(token::r_bracket)) {
-			return false; // return on failure
+		if (auto next_token_error = expect_next_token(token::r_bracket)) {
+			return next_token_error; // return on failure
 		}
 
 		out_node = new array_allocation_node(position, allocation_type, array_size);
-		return true;
+		return {};
 	}
 
-	bool parser::parse_primary_identifier(node*& out_node) {
+	std::optional<error_message> parser::parse_primary_identifier(node*& out_node) {
 		if (peek_is_function_call()) {
 			// parse a function call
 			return parse_function_call(out_node);
 		}
 		else if (peek_is_array_index_access()) {
-			if (!parse_array_access(out_node)) {
-				return false; // return on failure
+			if (auto array_access_parse_error = parse_array_access(out_node)) {
+				return array_access_parse_error; // return on failure
 			}
 		}
 		else {
@@ -1153,23 +1162,23 @@ namespace channel {
 			return parse_compound_operation(out_node, out_node);
 		}
 
-		return true;
+		return {};
 	}
 
-	bool parser::parse_deep_expression(node*& out_node, type expression_type) {
+	std::optional<error_message> parser::parse_deep_expression(node*& out_node, type expression_type) {
 		get_next_token(); // l_parenthesis (guaranteed)
 
 		// nested expression
-		if (!parse_expression(out_node, expression_type)) {
-			return false; // return on failure
+		if (auto expression_parse_error = parse_expression(out_node, expression_type)) {
+			return expression_parse_error; // return on failure
 		}
 
 		// r_parenthesis
-		if (!expect_next_token(token::r_parenthesis)) {
-			return false; // return on failure
+		if (auto next_token_error = expect_next_token(token::r_parenthesis)) {
+			return next_token_error; // return on failure
 		}
 
-		return true;
+		return {};
 	}
 
 	bool parser::peek_is_function_definition() {
@@ -1263,29 +1272,13 @@ namespace channel {
 
 	node* parser::create_zero_node(type expression_type) const {
 		return new numerical_literal_node(m_current_token.get_token_position(), "0", expression_type);
-		//switch (expression_type.get_base()) {
-		//case type::base::i8:  return new i8_node(m_current_token.get_token_position(), 0);
-		//case type::base::i16: return new i16_node(m_current_token.get_token_position(), 0);
-		//case type::base::i32: return new i32_node(m_current_token.get_token_position(), 0);
-		//case type::base::i64: return new i64_node(m_current_token.get_token_position(), 0);
-		//case type::base::u8:  return new u8_node(m_current_token.get_token_position(), 0);
-		//case type::base::u16: return new u16_node(m_current_token.get_token_position(), 0);
-		//case type::base::u32: return new u32_node(m_current_token.get_token_position(), 0);
-		//case type::base::u64: return new u64_node(m_current_token.get_token_position(), 0);
-		//case type::base::f32: return new f32_node(m_current_token.get_token_position(), 0.0f);
-		//case type::base::f64: return new f64_node(m_current_token.get_token_position(), 0.0);
-		//default:
-		//	ASSERT(false, "[parser]: cannot convert '" + expression_type.to_string() + "' to a type keyword");
-		//	return nullptr;
-		//}
 	}
 
-	bool parser::parse_type(type& ty) {
+	std::optional<error_message> parser::parse_type(type& ty) {
 		get_next_token();
 
 		if (!is_token_type(m_current_token.get_token())) {
-			error::emit<3003>(m_current_token.get_token_position(), m_current_token.get_token()).print();
-			return false; // return on failure
+			return error::emit<3003>(m_current_token.get_token_position(), m_current_token.get_token()); // return on failure
 		}
 
 		ty = type(m_current_token.get_token(), 0);
@@ -1296,6 +1289,6 @@ namespace channel {
 			ty.set_pointer_level(ty.get_pointer_level() + 1);
 		}
 
-		return true;
+		return {};
 	}
 }

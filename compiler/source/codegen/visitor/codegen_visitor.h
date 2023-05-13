@@ -21,13 +21,14 @@ namespace channel {
 	 */
 	class codegen_visitor : public visitor {
 	public:
+		codegen_visitor() = default;
 		codegen_visitor(const parser& parser);
 
-		bool generate();
+		std::optional<error_message> generate();
 		std::shared_ptr<llvm::Module> get_module();
 
 		void print_intermediate_representation() const;
-		bool verify_intermediate_representation() const;
+		std::optional<error_message> verify_intermediate_representation() const;
 	private:
 		acceptation_result visit_translation_unit_node(
 			translation_unit_node& node, 
@@ -332,7 +333,7 @@ namespace channel {
 			const token_position& position
 		);
 
-		bool verify_main_entry_point() const;
+		std::optional<error_message> verify_main_entry_point() const;
 		void initialize_global_variables();
 	private:
 		parser m_parser;

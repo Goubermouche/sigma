@@ -8,7 +8,32 @@ namespace channel::detail {
 	 * \param out Output file data
 	 * \return False when there is an issue when reading the file, otherwise True
 	 */
-	bool read_file(const std::string& file_path, std::string& out);
+	bool read_file(
+		const std::string& file_path,
+		std::string& out
+	);
 
-	bool delete_file(const std::string& file_path);
+	bool delete_file(
+		const std::string& file_path
+	);
+
+	std::string extract_directory_from_filepath(
+		const std::string& filepath
+	);
+
+	std::string extract_filename_from_filepath(
+		const std::string& filepath
+	);
+
+	bool is_file(
+		const std::string& filepath
+	);
+
+	bool is_directory(
+		const std::string& filepath
+	);
+
+	std::string extract_extension_from_filepath(
+		const std::string& filepath
+	);
 }

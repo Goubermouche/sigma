@@ -1,6 +1,7 @@
 #pragma once
 #include "lexer/token.h"
 #include "utility/containers/string_accessor.h"
+#include "compiler/diagnostics/error.h"
 
 namespace channel {
 	struct token_data {
@@ -25,7 +26,7 @@ namespace channel {
 	public:
 		lexer(const std::string& source_file);
 
-		bool tokenize();
+		std::optional<error_message> tokenize();
 
 		void print_tokens() const;
 
@@ -44,23 +45,23 @@ namespace channel {
 		 * \brief Extracts the next token from the given source file and returns it.
 		 * \return Extracted token
 		 */
-		bool extract_next_token(token& tok);
+		std::optional<error_message> extract_next_token(token& tok);
 
 		/**
 		 * \brief Extracts the next numerical token from the source accessor.
 		 * \return Keyword/identifier token, depending on the format and keyword availability
 		 */
-		bool get_identifier_token(token& tok);
+		std::optional<error_message> get_identifier_token(token& tok);
 
 		/**
 		 * \brief Extracts the next numerical token from the source accessor.
 		 * \return Best-fitting numerical token
 		 */
-		bool get_numerical_token(token& tok);
+		std::optional<error_message> get_numerical_token(token& tok);
 
-		bool get_char_literal_token(token& tok);
+		std::optional<error_message> get_char_literal_token(token& tok);
 
-		bool get_string_literal_token(token& tok);
+		std::optional<error_message> get_string_literal_token(token& tok);
 	private:
 		std::vector<token_data> m_tokens;
 		u64 m_token_index = 0;

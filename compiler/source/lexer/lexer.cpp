@@ -1,12 +1,11 @@
 #include "lexer.h"
 #include "utility/filesystem.h"
-#include "compiler/diagnostics/error.h"
 
 namespace channel {
 	lexer::lexer(const std::string& source_file)
 		: m_source_file(source_file) {}
 
-	bool lexer::tokenize() {
+	std::optional<error_message> lexer::tokenize() {
 		std::string source;
 
 		// check if the file exists, and if it has been opened successfully
@@ -14,15 +13,14 @@ namespace channel {
 			m_accessor = detail::string_accessor(source);
 		}
 		else {
-			error::emit<1000>(m_source_file).print();
-			return false;
+			return error::emit<1000>(m_source_file);
 		}
 
 		// tokenize
 		token tok = token::unknown;
 		while(tok != token::end_of_file) {
-			if(!extract_next_token(tok)) {
-				return false;
+			if(auto next_token_error_message = extract_next_token(tok)) {
+				return next_token_error_message; // return on failure
 			}
 
 			m_tokens.push_back({ 
@@ -36,7 +34,7 @@ namespace channel {
 			});
 		}
 
-		return true;
+		return {};
 	}
 
 	void lexer::print_tokens() const {
@@ -75,7 +73,7 @@ namespace channel {
 		m_current_character++;
 	}
 
-	bool lexer::extract_next_token(token& tok) {
+	std::optional<error_message> lexer::extract_next_token(token& tok) {
 		m_value_string.clear();
 
 		// ignore spaces between tokens 
@@ -105,15 +103,13 @@ namespace channel {
 		// prevent '.' characters from being located at the beginning of a token
 		// note: we may want to allow this in some cases (ie. when calling member functions)
 		if (m_last_character == '.') {
-			error::emit<2000>().print();
-			tok = token::unknown;
-			return false;
+			return error::emit<2000>();
 		}
 
 		// check for EOF so we don't have to do it in the individual brace checks 
 		if(m_accessor.end()) {
 			tok = token::end_of_file;
-			return true;
+			return {};
 		}
 
 		// extract special tokens
@@ -137,7 +133,7 @@ namespace channel {
 				if(operator_token_long != m_special_tokens.end()) {
 					read_char();
 					tok = operator_token_long->second;
-					return true;
+					return {};
 				}
 
 				// since we don't have the "//" token in our token table we check for it separately, and if we find
@@ -154,16 +150,16 @@ namespace channel {
 			}
 
 			tok = operator_token_short->second;
-			return true;
+			return {};
 		}
 
 		// not a token, return an identifier
 		m_value_string = m_last_character;
 		tok = token::identifier;
-		return true;
+		return {};
     }
 
-	bool lexer::get_identifier_token(token& tok)	{
+	std::optional<error_message> lexer::get_identifier_token(token& tok)	{
 		bool last_char_was_underscore = false;
 		m_value_string = m_last_character;
 
@@ -173,8 +169,7 @@ namespace channel {
 		while ((isalnum(m_last_character) || m_last_character == '_') && !m_accessor.end()) {
 			// prevent two underscore characters from being right next to each other
 			if (m_last_character == '_' && last_char_was_underscore) {
-				error::emit<2001>().print();
-				return false;
+				return error::emit<2001>();
 			}
 
 			last_char_was_underscore = (m_last_character == '_');
@@ -189,15 +184,15 @@ namespace channel {
 			// return the appropriate token
 			m_value_string.clear(); // clear the value string since we don't want our token value to be equal to the token type
 			tok = token->second;
-			return true;
+			return {};
 		}
 
 		// the identifier is not a keyword
 		tok = token::identifier;
-		return true;
+		return {};
 	}
 
-	bool lexer::get_numerical_token(token& tok) {
+	std::optional<error_message> lexer::get_numerical_token(token& tok) {
 		m_value_string = m_last_character;
 		// keep track of whether we've met the '.' character
 		bool dot_met = false;
@@ -208,8 +203,7 @@ namespace channel {
 		while (!isspace(m_last_character) && !m_accessor.end()) {
 			if (m_last_character == '.') {
 				if (dot_met) {
-					error::emit<2002>().print();
-					return false;
+					return error::emit<2002>();
 				}
 
 				dot_met = true;
@@ -219,22 +213,20 @@ namespace channel {
 					read_char();
 					// 0u format
 					tok = token::number_unsigned;
-					return true;
+					return {};
 				}
 
-				error::emit<2003>().print();
-				return false;
+				return error::emit<2003>();
 			}
 			else if (m_last_character == 'f') {
 				if (dot_met) {
 					read_char();
 					// 0.0f format
 					tok = token::number_f32;
-					return true;
+					return {};
 				}
 
-				error::emit<2004>().print();
-				return false;
+				return error::emit<2004>();
 			}
 			// break early if we have a non-special and non-digit character
 			else if (!isdigit(m_last_character)) {
@@ -248,15 +240,15 @@ namespace channel {
 		// 0.0 format
 		if (dot_met) {
 			tok = token::number_f64;
-			return true;
+			return {};
 		}
 
 		// 0 format
 		tok = token::number_signed;
-		return true;
+		return {};
 	}
 
-	bool lexer::get_char_literal_token(token& tok) {
+	std::optional<error_message> lexer::get_char_literal_token(token& tok) {
 		m_value_string = "";
 		read_char(); // read the character after the opening quote
 
@@ -282,14 +274,13 @@ namespace channel {
 		if (m_last_character == '\'') {
 			read_char(); // read the character after the closing quote
 			tok = token::char_literal;
-			return true;
+			return {};
 		}
 
-		error::emit<2005>().print();
-		return false;
+		return error::emit<2005>();
 	}
 
-	bool lexer::get_string_literal_token(token& tok) {
+	std::optional<error_message> lexer::get_string_literal_token(token& tok) {
 		m_value_string = "";
 		read_char();
 
@@ -328,12 +319,11 @@ namespace channel {
 			read_char();
 		}
 		else {
-			error::emit<2006>().print();
-			return false;
+			return error::emit<2006>();
 		}
 
 		tok = token::string_literal;
-		return true;
+		return {};
 	}
 
 	token_data::token_data(token tok, const std::string& value, const token_position& position)

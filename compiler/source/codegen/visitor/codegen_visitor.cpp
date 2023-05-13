@@ -46,7 +46,7 @@ namespace channel {
 		}
 	}
 
-	bool codegen_visitor::generate() {
+	std::optional<error_message> codegen_visitor::generate() {
 		abstract_syntax_tree tree = m_parser.get_abstract_syntax_tree();
 
 		// walk the abstract syntax tree
@@ -54,13 +54,12 @@ namespace channel {
 			acceptation_result result = n->accept(*this, {});
 
 			if(!result.has_value()) {
-				result.error().print();
-				return false; // return on failure
+				return result.error(); // return on failure
 			}
 		}
 
 		initialize_global_variables();
-		return true;
+		return {};
 	}
 
 	std::shared_ptr<llvm::Module> codegen_visitor::get_module() {
@@ -78,21 +77,22 @@ namespace channel {
 		m_module->print(llvm::outs(), nullptr);
 	}
 
-	bool codegen_visitor::verify_intermediate_representation() const {
+	std::optional<error_message> codegen_visitor::verify_intermediate_representation() const {
 		// check if we have a valid 'main' function
-		if(!verify_main_entry_point()) {
-			return false;
+		if(auto main_entry_point_error = verify_main_entry_point()) {
+			return main_entry_point_error; // return on failure
 		}
-
+		
 		// check for IR errors
 		console::out << color::red;
 		if (llvm::verifyModule(*m_module, &llvm::outs())) {
 			console::out << color::white;
-			return false;
+			return error::emit<4016>();
 		}
+		
 		console::out << color::white;
 
-		return true;
+		return {};
 	}
 
 	acceptation_result codegen_visitor::visit_translation_unit_node(translation_unit_node& node, const codegen_context& context) {
@@ -106,21 +106,19 @@ namespace channel {
 		return nullptr;
 	}
 
-	bool codegen_visitor::verify_main_entry_point() const {
+	std::optional<error_message> codegen_visitor::verify_main_entry_point() const {
 		// check if we have a main entry point
 		if(!m_function_registry.contains_function("main")) {
-			error::emit<4012>().print();
-			return false; // return on failure
+			return error::emit<4012>(); // return on failure
 		}
 
 		// check if the main entry point's return type is an i32
 		const function_ptr func = m_function_registry.get_function("main");
 		if(func->get_return_type().get_base() != type::base::i32) {
-			error::emit<4013>(func->get_return_type()).print();
-			return false; // return on failure
+			return error::emit<4013>(func->get_return_type()); // return on failure
 		}
 
-		return true;
+		return {};
 	}
 
 	llvm::Value* codegen_visitor::cast_value(const value_ptr& source_value, type target_type, const token_position& position) {

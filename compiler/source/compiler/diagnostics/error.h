@@ -4,8 +4,11 @@
 namespace channel {
 	constexpr auto error_templates = make_hash_map(
 		// system errors
-		std::pair{ 1000, "'{}' cannot open file" },
-		std::pair{ 1001, "'{}' cannot delete file" },
+		std::pair{ 1000, "'{}': cannot open file" },
+		std::pair{ 1001, "'{}': cannot delete file" },
+		std::pair{ 1002, "'{}': file does not exist" },
+		std::pair{ 1003, "'{}': directory was not expected (expected a file)" },
+		std::pair{ 1004, "'{}': file was not expected (expected a directory)" },
 		// lexer errors
 		std::pair{ 2000, "'lexer': invalid '.' character detected at token start" },
 		std::pair{ 2001, "'lexer': two '_' characters immediately one after another are not allowed" },
@@ -36,7 +39,12 @@ namespace channel {
 		std::pair{ 4012, "unable to locate the main entry point" },
 		std::pair{ 4013, "unable to declare a main entry point with the return type of '{}' (expecting 'i32')" },
 		std::pair{ 4014, "unable to declare a numerical literal using a pointer type" },
-		std::pair{ 4015, "unable to declare a numerical literal using the given type '{}'" }
+		std::pair{ 4015, "unable to declare a numerical literal using the given type '{}'" },
+		std::pair{ 4016, "IR module contains errors" },
+		// compiler errors
+		std::pair{ 5000, "the target machine cannot emit a file of this type" },
+		std::pair{ 5001, "clang compilation contains errors" },
+		std::pair{ 5002, "'{}': invalid file extension (expected '.ch')" }
 	);
 
 	class error_message : public diagnostic_message {

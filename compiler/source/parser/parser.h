@@ -7,7 +7,7 @@ namespace channel {
 	class parser {
 	public:
 		parser(const lexer& lexer);
-		std::optional<error_message> parse();
+		error_result parse();
 
 		const abstract_syntax_tree& get_abstract_syntax_tree();
 	private:
@@ -21,82 +21,82 @@ namespace channel {
 		 * \param token Expected token type
 		 * \return True if the two tokens match
 		 */
-		std::optional<error_message> expect_next_token(token token);
+		error_result expect_next_token(token token);
 
 		/**
 		 * \brief Attempts to parse a function definition. The first expected token is a type.
 		 * \param out_node Output AST node
 		 * \return True if the expression is parsed successfully
 		 */
-		std::optional<error_message> parse_function_definition(node*& out_node);
+		error_result parse_function_definition(node*& out_node);
 
 		/**
 		 * \brief Attempts to parse a global statement.
 		 * \param out_node Output AST node
 		 * \return True if the expression is parsed successfully
 		 */
-		std::optional<error_message> parse_global_statement(node*& out_node);
+		error_result parse_global_statement(node*& out_node);
 
-		std::optional<error_message> parse_local_statements(std::vector<node*>& out_statements);
+		error_result parse_local_statements(std::vector<node*>& out_statements);
 
 		/**
 		 * \brief Attempts to parse a local statement.
 		 * \param out_node Output AST node
 		 * \return True if the expression is parsed successfully
 		 */
-		std::optional<error_message> parse_local_statement(node*& out_node);
+		error_result parse_local_statement(node*& out_node);
 
-		std::optional<error_message> parse_local_statement_identifier(node*& out_node);
+		error_result parse_local_statement_identifier(node*& out_node);
 
 		/**
 		 * \brief Attempts to parse an if else chain. The first expected token is the keyword_if token.
 		 * \param out_node Output AST node
 		 * \return True if the expression is parsed successfully
 		 */
-		std::optional<error_message> parse_if_else_statement(node*& out_node);
+		error_result parse_if_else_statement(node*& out_node);
 
-		std::optional<error_message> parse_while_loop(node*& out_node);
+		error_result parse_while_loop(node*& out_node);
 
-		std::optional<error_message> parse_loop_increment(node*& out_node);
+		error_result parse_loop_increment(node*& out_node);
 
-		std::optional<error_message> parse_for_loop(node*& out_node);
+		error_result parse_for_loop(node*& out_node);
 
-		std::optional<error_message> parse_compound_operation(node*& out_node, node* left_operand);
+		error_result parse_compound_operation(node*& out_node, node* left_operand);
 
 		/**
 		 * \brief Attempts to parse an assignment operation. The first expected token is an identifier.
 		 * \param out_node Output AST node
 		 * \return True if the expression is parsed successfully
 		 */
-		std::optional<error_message> parse_assignment(node*& out_node);
+		error_result parse_assignment(node*& out_node);
 
 		/**
 		 * \brief Attempts to parse an array assignment. The first expected token is an identifier.
 		 * \param out_node Output AST node
 		 * \return True if the expression is parsed successfully
 		 */
-		std::optional<error_message> parse_array_assignment(node*& out_node);
+		error_result parse_array_assignment(node*& out_node);
 
 		/**
 		 * \brief Attempts to parse an array access. The first expected token is an identifier.
 		 * \param out_node Output AST node
 		 * \return True if the expression is parsed successfully
 		 */
-		std::optional<error_message> parse_array_access(node*& out_node);
+		error_result parse_array_access(node*& out_node);
 
 		/**
 		 * \brief Attempts to parse a function call. The first expected token is an identifier.
 		 * \param out_node Output AST node
 		 * \return True if the expression is parsed successfully
 		 */
-		std::optional<error_message> parse_function_call(node*& out_node);
+		error_result parse_function_call(node*& out_node);
 
 		/**
 		 * \brief Attempts to parse a return statement. The first expected token is a return keyword.
 		 * \param out_node Output AST node
 		 * \return True if the expression is parsed successfully
 		 */
-		std::optional<error_message> parse_return_statement(node*& out_node);
+		error_result parse_return_statement(node*& out_node);
 
 		/**
 		 * \brief Attempts to parse a variable declaration. The first expected token is a type.
@@ -104,7 +104,7 @@ namespace channel {
 		 * \param is_global Global setting of the declaration (global vs. local declaration)
 		 * \return True if the expression is parsed successfully
 		 */
-		std::optional<error_message> parse_declaration(node*& out_node, bool is_global);
+		error_result parse_declaration(node*& out_node, bool is_global);
 
 		/**
 		 * \brief Attempts to parse an expression.
@@ -112,7 +112,7 @@ namespace channel {
 		 * \param expression_type Specified expression type
 		 * \return True if the expression is parsed successfully
 		 */
-		std::optional<error_message> parse_expression(node*& out_node, type expression_type = type::unknown());
+		error_result parse_expression(node*& out_node, type expression_type = type::unknown());
 
 		/**
 		 * \brief Attempts to parse a conjunction expression node.
@@ -120,7 +120,7 @@ namespace channel {
 		 * \param expression_type Specified expression type
 		 * \return True if the expression is parsed successfully
 		 */
-		std::optional<error_message> parse_logical_conjunction(node*& out_node, type expression_type);
+		error_result parse_logical_conjunction(node*& out_node, type expression_type);
 
 		/**
 		 * \brief Attempts to parse a disjunction expression node.
@@ -128,7 +128,7 @@ namespace channel {
 		 * \param expression_type Specified expression type
 		 * \return True if the expression is parsed successfully
 		 */
-		std::optional<error_message> parse_logical_disjunction(node*& out_node, type expression_type);
+		error_result parse_logical_disjunction(node*& out_node, type expression_type);
 
 		/**
 		 * \brief Attempts to parse a comparison expression node.
@@ -136,7 +136,7 @@ namespace channel {
 		 * \param expression_type Specified expression type
 		 * \return True if the expression is parsed successfully
 		 */
-		std::optional<error_message> parse_comparison(node*& out_node, type expression_type);
+		error_result parse_comparison(node*& out_node, type expression_type);
 
 		/**
 		 * \brief Attempts to parse a term expression node.
@@ -144,7 +144,7 @@ namespace channel {
 		 * \param expression_type Specified expression type
 		 * \return True if the expression is parsed successfully
 		 */
-		std::optional<error_message> parse_term(node*& out_node, type expression_type);
+		error_result parse_term(node*& out_node, type expression_type);
 
 		/**
 		 * \brief Attempts to parse a factor expression node.
@@ -152,10 +152,10 @@ namespace channel {
 		 * \param expression_type Specified expression type
 		 * \return True if the expression is parsed successfully
 		 */
-		std::optional<error_message> parse_factor(node*& out_node, type expression_type);
+		error_result parse_factor(node*& out_node, type expression_type);
 
-		std::optional<error_message> parse_pre_operator(node*& out_node);
-		std::optional<error_message> parse_post_operator(node* operand, node*& out_node);
+		error_result parse_pre_operator(node*& out_node);
+		error_result parse_post_operator(node* operand, node*& out_node);
 
 		/**
 		 * \brief Attempts to parse a primary expression node.
@@ -163,7 +163,7 @@ namespace channel {
 		 * \param expression_type Specified expression type
 		 * \return True if the expression is parsed successfully
 		 */
-		std::optional<error_message> parse_primary(node*& out_node, type expression_type);
+		error_result parse_primary(node*& out_node, type expression_type);
 
 		/**
 		 * \brief Attempts to parse a number token. The first expected token is a numerical type.
@@ -171,30 +171,30 @@ namespace channel {
 		 * \param expression_type Specified expression type
 		 * \return True if the expression is parsed successfully
 		 */
-		std::optional<error_message> parse_number(node*& out_node, type expression_type = type::unknown());
+		error_result parse_number(node*& out_node, type expression_type = type::unknown());
 
 		/**
 		 * \brief Attempts to parse a char literal. The first expected token is a char_literal.
 		 * \param out_node Output AST node
 		 * \return True if the expression is parsed successfully
 		 */
-		std::optional<error_message> parse_char(node*& out_node);
+		error_result parse_char(node*& out_node);
 
 		/**
 		 * \brief Attempts to parse a string literal. The first expected token is a string_literal.
 		 * \param out_node Output AST node
 		 * \return True if the expression is parsed successfully
 		 */
-		std::optional<error_message> parse_string(node*& out_node);
+		error_result parse_string(node*& out_node);
 
 		/**
 		 * \brief Attempts to parse a boolean value. The first expected token is either a bool_literal_true or a bool_literal_false.
 		 * \param out_node Output AST node
 		 * \return True if the expression is parsed successfully
 		 */
-		std::optional<error_message> parse_bool(node*& out_node);
+		error_result parse_bool(node*& out_node);
 
-		std::optional<error_message> parse_break_keyword(node*& out_node);
+		error_result parse_break_keyword(node*& out_node);
 
 		/**
 		 * \brief Parses a negative number. The first expected token is a minus operator.
@@ -202,21 +202,21 @@ namespace channel {
 		 * \param expression_type Specified expression type
 		 * \return True if the expression is parsed successfully
 		 */
-		std::optional<error_message> parse_negative_number(node*& out_node, type expression_type = type::unknown());
+		error_result parse_negative_number(node*& out_node, type expression_type = type::unknown());
 
 		/**
 		 * \brief Parses a new allocation. The first expected token is the 'new' keyword.
 		 * \param out_node Output AST node
 		 * \return True if the expression is parsed successfully
 		 */
-		std::optional<error_message> parse_new_allocation(node*& out_node);
+		error_result parse_new_allocation(node*& out_node);
 
 		/**
 		 * \brief Parses either a function call or a variable assignment. The first expected token is an identifier.
 		 * \param out_node Output AST node
 		 * \return True if the expression is parsed successfully
 		 */
-		std::optional<error_message> parse_primary_identifier(node*& out_node);
+		error_result parse_primary_identifier(node*& out_node);
 
 		/**
 		 * \brief Parses a deep (nested) expression. The first expected token is a left parenthesis.
@@ -224,7 +224,7 @@ namespace channel {
 		 * \param expression_type Specified expression type
 		 * \return True if the expression is parsed successfully
 		 */
-		std::optional<error_message> parse_deep_expression(node*& out_node, type expression_type);
+		error_result parse_deep_expression(node*& out_node, type expression_type);
 
 		/**
 		 * \brief Checks if a statement is a function definition. The first expected token is a type.
@@ -267,7 +267,7 @@ namespace channel {
 		 * \brief Parses the next tokens as a type. The first expected token is a type.
 		 * \return Parsed type token
 		 */
-		std::optional<error_message> parse_type(type& ty);
+		error_result parse_type(type& ty);
 	private:
 		lexer m_lexer;
 		token_data m_current_token;

@@ -18,9 +18,7 @@ i32 main(i32 argc, char* argv[]) {
 	}
 
 	// initialize the compiler 
-	channel::compiler_description description;
-	description.root_source_file = argv[1];
-	description.executable_location = argv[2];
+	channel::compiler_settings description;
 	description.optimization_level = channel::optimization_level::high;
 	description.size_optimization_level = channel::size_optimization_level::high;
 	description.vectorize = true;
@@ -28,7 +26,7 @@ i32 main(i32 argc, char* argv[]) {
 	channel::compiler compiler(description);
 
 	// check for compilation errors
-	if(const auto compilation_result = compiler.compile()) {
+	if(const auto compilation_result = compiler.compile(argv[1], argv[2])) {
 		compilation_result->print();
 	}
 

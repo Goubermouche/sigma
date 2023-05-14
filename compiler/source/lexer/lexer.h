@@ -4,6 +4,9 @@
 #include "compiler/diagnostics/error.h"
 
 namespace channel {
+	/**
+	 * \brief Set of information related to a specific token, at a specific position.
+	 */
 	struct token_data {
 		token_data() = default;
 
@@ -17,23 +20,51 @@ namespace channel {
 		const std::string& get_value() const;
 		const token_position& get_token_position() const;
 	private:
+		// token type representation of the given token
 		token m_token;
+		// token value of the given token (ie. the identifier value of an identifier token)
 		std::string m_value;
+		// position of the given token
 		token_position m_position;
 	};
 
+	/**
+	 * \brief Base tokenizer class, used for separating strings into a set of tokens with relevant values. 
+	 */
 	class lexer {
 	public:
+		/**
+		 * \brief Constructs a new lexer instance using the given filepath to a specific source file. 
+		 * \param source_file Filepath to the relevant source file
+		 */
 		lexer(const std::string& source_file);
 
-		std::optional<error_message> tokenize();
+		/**
+		 * \brief Traverses the entire file and generates a list of tokens which can be traversed later.
+		 * \return Potentially erroneous result.
+		 */
+		error_result tokenize();
 
+		/**
+		 * \brief Prints all the contained tokens, if there are any.
+		 */
 		void print_tokens() const;
 
+		/**
+		 * \brief Accesses the next token and advances all indices. 
+		 * \return Last token.
+		 */
 		const token_data& get_token();
 
+		/**
+		 * \brief Accesses the next token and advances the peek index (while leaving the main index same).
+		 * \return Last token.
+		 */
 		const token_data& peek_token();
 
+		/**
+		 * \brief Synchronizes the peek and main indices.
+		 */
 		void synchronize_indices();
 	private:
 		/**
@@ -45,34 +76,34 @@ namespace channel {
 		 * \brief Extracts the next token from the given source file and returns it.
 		 * \return Extracted token
 		 */
-		std::optional<error_message> extract_next_token(token& tok);
+		error_result extract_next_token(token& tok);
 
 		/**
 		 * \brief Extracts the next numerical token from the source accessor.
 		 * \return Keyword/identifier token, depending on the format and keyword availability
 		 */
-		std::optional<error_message> get_identifier_token(token& tok);
+		error_result get_identifier_token(token& tok);
 
 		/**
 		 * \brief Extracts the next numerical token from the source accessor.
 		 * \return Best-fitting numerical token
 		 */
-		std::optional<error_message> get_numerical_token(token& tok);
+		error_result get_numerical_token(token& tok);
 
-		std::optional<error_message> get_char_literal_token(token& tok);
+		error_result get_char_literal_token(token& tok);
 
-		std::optional<error_message> get_string_literal_token(token& tok);
+		error_result get_string_literal_token(token& tok);
 	private:
 		std::vector<token_data> m_tokens;
-		u64 m_token_index = 0;
-		u64 m_token_peek_index = 0;
+		detail::string_accessor m_accessor;
+
+		u64 m_main_token_index = 0;
+		u64 m_peek_token_index = 0;
 
 		std::string m_source_file;
 		std::string m_value_string; 
 
-		detail::string_accessor m_accessor;
 		char m_last_character = ' ';
-
 		u64 m_current_line = 1;
 		u64 m_current_character = 1;
 

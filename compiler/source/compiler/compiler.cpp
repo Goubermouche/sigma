@@ -20,33 +20,39 @@
 
 namespace channel {
 	compiler::compiler(
-		compiler_description description
-	) : m_description(std::move(description)) {}
+		compiler_settings settings
+	) : m_settings(std::move(settings)) {}
 
-	std::optional<error_message> compiler::compile() {
+	error_result compiler::compile(
+		const std::string& root_source_file_filepath, 
+		const std::string& target_executable_directory
+	) {
+		m_root_source_file_filepath = root_source_file_filepath;
+		m_target_executable_directory = target_executable_directory;
+
 		timer m_compilation_timer;
 		m_compilation_timer.start();
 
 		// verify the root source file
-		if(auto source_file_error = verify_source_file(m_description.root_source_file)) {
+		if (auto source_file_error = verify_source_file(m_root_source_file_filepath)) {
 			return source_file_error; // return on failure
 		}
 
-		console::out << "compiling file '" << m_description.root_source_file << "'\n";
+		console::out << "compiling file '" << m_root_source_file_filepath << "'\n";
 
 		// generate the module
-		auto module_generation_result = generate_module(m_description.root_source_file);
-		if(!module_generation_result.has_value()) {
+		auto module_generation_result = generate_module(m_root_source_file_filepath);
+		if (!module_generation_result.has_value()) {
 			return module_generation_result.error(); // return on failure
 		}
 
 		// verify the executable directory
-		if(auto executable_directory_error = verify_folder(m_description.executable_location)) {
+		if (auto executable_directory_error = verify_folder(m_target_executable_directory)) {
 			return executable_directory_error; // return on failure
 		}
 
 		// compile the module into an executable
-		if(auto compilation_error = compile_module(module_generation_result.value())) {
+		if (auto compilation_error = compile_module(module_generation_result.value())) {
 			return compilation_error; // return on failure
 		}
 
@@ -96,7 +102,7 @@ namespace channel {
 		return m_active_visitor->get_module();
 	}
 
-	std::optional<error_message> compiler::compile_module(
+	error_result compiler::compile_module(
 		const std::shared_ptr<llvm::Module>& module
 	) const {
 		const std::string target_triple = llvm::sys::getDefaultTargetTriple();
@@ -121,8 +127,8 @@ namespace channel {
 		module->setDataLayout(target_machine->createDataLayout());
 		module->setTargetTriple(target_triple);
 
-		const std::string o_file = m_description.executable_location + "a.o";
-		const std::string exe_file = m_description.executable_location + "a.exe";
+		const std::string o_file = m_target_executable_directory + "a.o";
+		const std::string exe_file = m_target_executable_directory + "a.exe";
 
 		// generate the .o file
 		{
@@ -132,11 +138,11 @@ namespace channel {
 			llvm::PassManagerBuilder builder;
 
 			// add optimization passes
-			builder.OptLevel = static_cast<u32>(m_description.optimization_level);
-			builder.SizeLevel = static_cast<u32>(m_description.size_optimization_level);
+			builder.OptLevel = static_cast<u32>(m_settings.optimization_level);
+			builder.SizeLevel = static_cast<u32>(m_settings.size_optimization_level);
 			builder.Inliner = llvm::createFunctionInliningPass(builder.OptLevel, builder.SizeLevel, false);
-			builder.LoopVectorize = m_description.vectorize;
-			builder.SLPVectorize = m_description.vectorize;
+			builder.LoopVectorize = m_settings.vectorize;
+			builder.SLPVectorize = m_settings.vectorize;
 			builder.populateModulePassManager(pass_manager);
 
 			if (target_machine->addPassesToEmitFile(pass_manager, dest, nullptr, llvm::CGFT_ObjectFile)) {
@@ -185,7 +191,7 @@ namespace channel {
 		return {};
 	}
 
-	std::optional<error_message> compiler::verify_source_file(
+	error_result compiler::verify_source_file(
 		const std::string& filepath
 	) {
 		if (!std::filesystem::exists(filepath)) {
@@ -203,7 +209,7 @@ namespace channel {
 		return {};
 	}
 
-	std::optional<error_message> compiler::verify_folder(
+	error_result compiler::verify_folder(
 		const std::string& folder_filepath
 	) {
 		if (!std::filesystem::exists(folder_filepath)) {

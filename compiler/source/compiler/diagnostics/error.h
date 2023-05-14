@@ -4,11 +4,17 @@
 namespace channel {
 	constexpr auto error_templates = make_hash_map(
 		// system errors
-		std::pair{ 1000, "'{}': cannot open file" },
-		std::pair{ 1001, "'{}': cannot delete file" },
+		std::pair{ 1000, "'{}': unable to open file" },
+		std::pair{ 1001, "'{}': unable to delete file" },
 		std::pair{ 1002, "'{}': file does not exist" },
 		std::pair{ 1003, "'{}': directory was not expected (expected a file)" },
 		std::pair{ 1004, "'{}': file was not expected (expected a directory)" },
+		std::pair{ 1005, "'{}': unable to seek end of file" },
+		std::pair{ 1006, "'{}': unable to read file" },
+		std::pair{ 1007, "" },
+		std::pair{ 1008, "" },
+		std::pair{ 1009, "" },
+
 		// lexer errors
 		std::pair{ 2000, "'lexer': invalid '.' character detected at token start" },
 		std::pair{ 2001, "'lexer': two '_' characters immediately one after another are not allowed" },
@@ -88,4 +94,9 @@ namespace channel {
 			position
 		};
 	}
+
+	/**
+	 * \brief Potential (optional) erroneous result.
+	 */
+	using error_result = std::optional<error_message>;
 }

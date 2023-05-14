@@ -1,27 +1,51 @@
 #include "filesystem.h"
 
-#include <llvm/Support/Path.h>
-
 namespace channel::detail {
-	bool read_file(
-		const std::string& file_path,
-		std::string& out
+	std::expected<std::string, error_message> read_file(
+		const std::string& filepath
 	) {
-		std::ifstream file(file_path);
+		std::ifstream file(filepath, std::ios::in | std::ios::binary);
 
-		if (file.good()) {
-			// note: keep the additional parentheses around the first
-			//       argument for std::string, this is required if we
-			//       want to compile everything successfully.
-			out = std::string((std::istreambuf_iterator(file)), std::istreambuf_iterator<char>());
-			return true;
+		if (!file.is_open()) {
+			return std::unexpected(
+				error::emit<1000>(filepath)
+			);
 		}
 
-		return false;
+		std::string contents;
+		file.seekg(0, std::ios::end);
+
+		if (file.fail()) {
+			// clear the error state
+			file.clear();
+			file.close();
+
+			return std::unexpected(
+				error::emit<1005>(filepath)
+			);
+		}
+
+		contents.resize(file.tellg());
+		file.seekg(0, std::ios::beg);
+		file.read(&contents[0], contents.size());
+
+		if (file.fail()) {
+			// clear the error state
+			file.clear();
+			file.close();
+
+			return std::unexpected(
+				error::emit<1006>(filepath)
+			);
+		}
+
+		file.close();
+
+		return { std::move(contents) };
 	}
 
-	bool delete_file(const std::string& file_path) {
-		return std::remove(file_path.c_str()) == 0;
+	bool delete_file(const std::string& filepath) {
+		return std::remove(filepath.c_str()) == 0;
 	}
 
 	std::string extract_directory_from_filepath(

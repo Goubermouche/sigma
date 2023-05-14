@@ -46,7 +46,7 @@ namespace channel {
 		}
 	}
 
-	std::optional<error_message> codegen_visitor::generate() {
+	error_result codegen_visitor::generate() {
 		abstract_syntax_tree tree = m_parser.get_abstract_syntax_tree();
 
 		// walk the abstract syntax tree
@@ -77,7 +77,7 @@ namespace channel {
 		m_module->print(llvm::outs(), nullptr);
 	}
 
-	std::optional<error_message> codegen_visitor::verify_intermediate_representation() const {
+	error_result codegen_visitor::verify_intermediate_representation() const {
 		// check if we have a valid 'main' function
 		if(auto main_entry_point_error = verify_main_entry_point()) {
 			return main_entry_point_error; // return on failure
@@ -106,7 +106,7 @@ namespace channel {
 		return nullptr;
 	}
 
-	std::optional<error_message> codegen_visitor::verify_main_entry_point() const {
+	error_result codegen_visitor::verify_main_entry_point() const {
 		// check if we have a main entry point
 		if(!m_function_registry.contains_function("main")) {
 			return error::emit<4012>(); // return on failure

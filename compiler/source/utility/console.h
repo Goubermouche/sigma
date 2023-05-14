@@ -50,6 +50,11 @@ namespace channel {
 		return RGB(red, green, blue);
 	}
 
+	/**
+	 * \brief Creates a backslash-escaped version of the \a input string. 
+	 * \param input String to escape.
+	 * \return Escaped version of the given string. 
+	 */
 	inline std::string escape_string(const std::string& input) {
 		std::string output;
 		for (const char ch : input) {

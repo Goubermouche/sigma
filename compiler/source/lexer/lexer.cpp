@@ -5,15 +5,14 @@ namespace channel {
 	lexer::lexer(const std::string& source_file)
 		: m_source_file(source_file) {}
 
-	std::optional<error_message> lexer::tokenize() {
-		std::string source;
-
+	error_result lexer::tokenize() {
 		// check if the file exists, and if it has been opened successfully
-		if (detail::read_file(m_source_file, source)) {
-			m_accessor = detail::string_accessor(source);
+		auto file_read_result = detail::read_file(m_source_file);
+		if (file_read_result.has_value()) {
+			m_accessor = detail::string_accessor(file_read_result.value());
 		}
 		else {
-			return error::emit<1000>(m_source_file);
+			return file_read_result.error();
 		}
 
 		// tokenize
@@ -51,16 +50,16 @@ namespace channel {
 	}
 
 	const token_data& lexer::get_token() {
-		m_token_peek_index++;
-		return  m_tokens[m_token_index++];
+		m_peek_token_index++;
+		return  m_tokens[m_main_token_index++];
 	}
 
 	const token_data& lexer::peek_token() {
-		return m_tokens[m_token_peek_index++];
+		return m_tokens[m_peek_token_index++];
 	}
 
 	void lexer::synchronize_indices() {
-		m_token_peek_index = m_token_index;
+		m_peek_token_index = m_main_token_index;
 	}
 
 	void lexer::read_char() {
@@ -73,7 +72,7 @@ namespace channel {
 		m_current_character++;
 	}
 
-	std::optional<error_message> lexer::extract_next_token(token& tok) {
+	error_result lexer::extract_next_token(token& tok) {
 		m_value_string.clear();
 
 		// ignore spaces between tokens 
@@ -159,7 +158,7 @@ namespace channel {
 		return {};
     }
 
-	std::optional<error_message> lexer::get_identifier_token(token& tok)	{
+	error_result lexer::get_identifier_token(token& tok)	{
 		bool last_char_was_underscore = false;
 		m_value_string = m_last_character;
 
@@ -192,7 +191,7 @@ namespace channel {
 		return {};
 	}
 
-	std::optional<error_message> lexer::get_numerical_token(token& tok) {
+	error_result lexer::get_numerical_token(token& tok) {
 		m_value_string = m_last_character;
 		// keep track of whether we've met the '.' character
 		bool dot_met = false;
@@ -248,7 +247,7 @@ namespace channel {
 		return {};
 	}
 
-	std::optional<error_message> lexer::get_char_literal_token(token& tok) {
+	error_result lexer::get_char_literal_token(token& tok) {
 		m_value_string = "";
 		read_char(); // read the character after the opening quote
 
@@ -280,7 +279,7 @@ namespace channel {
 		return error::emit<2005>();
 	}
 
-	std::optional<error_message> lexer::get_string_literal_token(token& tok) {
+	error_result lexer::get_string_literal_token(token& tok) {
 		m_value_string = "";
 		read_char();
 

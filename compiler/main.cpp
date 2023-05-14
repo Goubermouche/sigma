@@ -13,7 +13,7 @@ i32 main(i32 argc, char* argv[]) {
 
 	// account for the first argument being the path to the executable
 	if(argc != 3) {
-		channel::console::out << channel::color::red << "invalid argument count\n";
+		channel::console::out << channel::color::red << "invalid argument count\n" << channel::color::white;
 		return EINVAL;
 	}
 
@@ -21,6 +21,9 @@ i32 main(i32 argc, char* argv[]) {
 	channel::compiler_description description;
 	description.root_source_file = argv[1];
 	description.executable_location = argv[2];
+	description.optimization_level = channel::optimization_level::high;
+	description.size_optimization_level = channel::size_optimization_level::high;
+	description.vectorize = true;
 
 	channel::compiler compiler(description);
 

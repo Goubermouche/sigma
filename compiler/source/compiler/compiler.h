@@ -2,13 +2,26 @@
 #include "diagnostics/error.h"
 #include "codegen/visitor/codegen_visitor.h"
 
-
 namespace channel {
+	enum class optimization_level {
+		none = 0,
+		low = 1,
+		medium = 2,
+		high = 3
+	};
+
+	enum class size_optimization_level {
+		none = 0,
+		medium = 1,
+		high = 2
+	};
+
 	struct compiler_description {
 		std::string root_source_file;
 		std::string executable_location;
-		u8 optimization_level; // performance optimization level (0 - 3)
-		u8 size_optimization_level; // size optimization level (0 - 2)
+		optimization_level optimization_level = optimization_level::none;
+		size_optimization_level size_optimization_level = size_optimization_level::none;
+		bool vectorize = false;
 	};
 
 	class compiler {

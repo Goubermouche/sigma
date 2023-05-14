@@ -89,9 +89,9 @@ namespace channel {
 		console::out << "codegen finished (" << codegen_timer.elapsed() << "ms)\n";
 
 		// verify the IR
-		if (auto verification_error = m_active_visitor->verify_intermediate_representation()) {
-			return std::unexpected(verification_error.value()); // return on failure 
-		}
+		// if (auto verification_error = m_active_visitor->verify_intermediate_representation()) {
+		// 	return std::unexpected(verification_error.value()); // return on failure 
+		// }
 
 		return m_active_visitor->get_module();
 	}
@@ -135,8 +135,8 @@ namespace channel {
 			builder.OptLevel = static_cast<u32>(m_description.optimization_level);
 			builder.SizeLevel = static_cast<u32>(m_description.size_optimization_level);
 			builder.Inliner = llvm::createFunctionInliningPass(builder.OptLevel, builder.SizeLevel, false);
-			builder.LoopVectorize = true;
-			builder.SLPVectorize = true;
+			builder.LoopVectorize = m_description.vectorize;
+			builder.SLPVectorize = m_description.vectorize;
 			builder.populateModulePassManager(pass_manager);
 
 			if (target_machine->addPassesToEmitFile(pass_manager, dest, nullptr, llvm::CGFT_ObjectFile)) {

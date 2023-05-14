@@ -7,16 +7,16 @@
 namespace channel {
 	class color {
 	public:
-		static constexpr WORD white = 1;
-		static constexpr WORD pink = 2;
+		static constexpr WORD white = 7;
+		static constexpr WORD pink = 2; // 
 		static constexpr WORD magenta = 3;
-		static constexpr WORD blue = 4;
-		static constexpr WORD light_blue = 5;
-		static constexpr WORD green = 6;
-		static constexpr WORD light_green = 7;
-		static constexpr WORD orange = 8;
-		static constexpr WORD yellow = 9;
-		static constexpr WORD red = 10;
+		static constexpr WORD blue = 1;
+		static constexpr WORD light_blue = 9;
+		static constexpr WORD green = 2;
+		static constexpr WORD light_green = 10;
+		static constexpr WORD orange = 14; // 
+		static constexpr WORD yellow = 6;
+		static constexpr WORD red = 4;
 	};
 
 	class console {

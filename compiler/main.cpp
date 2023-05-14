@@ -1,3 +1,4 @@
+
 #include "source/compiler/compiler.h"
 
 using namespace channel::types;
@@ -11,23 +12,27 @@ using namespace channel::types;
 i32 main(i32 argc, char* argv[]) {
 	channel::console::init();
 
-	// account for the first argument being the path to the executable
+	// required arguments:
+	// executable path (automatic)
+	// source file path
+	// target executable directory
 	if(argc != 3) {
 		channel::console::out << channel::color::red << "invalid argument count\n" << channel::color::white;
-		return EINVAL;
+		return 1;
 	}
 
 	// initialize the compiler 
-	channel::compiler_settings description;
-	description.optimization_level = channel::optimization_level::high;
-	description.size_optimization_level = channel::size_optimization_level::high;
-	description.vectorize = true;
+	channel::compiler_settings settings;
+	settings.optimization_level = channel::optimization_level::high;
+	settings.size_optimization_level = channel::size_optimization_level::high;
+	settings.vectorize = true;
 
-	channel::compiler compiler(description);
+	channel::compiler compiler(settings);
 
 	// check for compilation errors
 	if(const auto compilation_result = compiler.compile(argv[1], argv[2])) {
 		compilation_result->print();
+		return 1;
 	}
 
 	return 0;

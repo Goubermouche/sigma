@@ -5,8 +5,8 @@
 
 namespace channel {
 	codegen_visitor::codegen_visitor(
-		const parser& parser
-	) : m_parser(parser),
+		const abstract_syntax_tree& abstract_syntax_tree
+	) : m_abstract_syntax_tree(abstract_syntax_tree),
 	m_scope(new scope(nullptr, nullptr)),
 	m_builder(m_context),
 	m_module(std::make_unique<llvm::Module>("channel", m_context)) {
@@ -47,10 +47,8 @@ namespace channel {
 	}
 
 	error_result codegen_visitor::generate() {
-		abstract_syntax_tree tree = m_parser.get_abstract_syntax_tree();
-
 		// walk the abstract syntax tree
-		for (node* n : tree) {
+		for (node* n : m_abstract_syntax_tree) {
 			acceptation_result result = n->accept(*this, {});
 
 			if(!result.has_value()) {

@@ -11,7 +11,7 @@ namespace channel {
 		std::pair{ 1004, "'{}': file was not expected (expected a directory)" },
 		std::pair{ 1005, "'{}': unable to seek end of file" },
 		std::pair{ 1006, "'{}': unable to read file" },
-		std::pair{ 1007, "" },
+		std::pair{ 1007, "'{}': invalid file extension (expected '{}')" },
 		std::pair{ 1008, "" },
 		std::pair{ 1009, "" },
 
@@ -50,7 +50,9 @@ namespace channel {
 		// compiler errors
 		std::pair{ 5000, "the target machine cannot emit a file of this type" },
 		std::pair{ 5001, "clang compilation contains errors" },
-		std::pair{ 5002, "'{}': invalid file extension (expected '.ch')" }
+		std::pair{ 5002, "" },
+		std::pair{ 5003, "unable to compile: provided lexer is invalid" },
+		std::pair{ 5004, "unable to compile: provided parser is invalid" }
 	);
 
 	class error_message : public diagnostic_message {

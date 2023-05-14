@@ -58,6 +58,8 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="source\lexer\lexer.h" />
+    <ClInclude Include="source\parser\parser.h" />
     <ClInclude Include="source\codegen\abstract_syntax_tree\operators\binary\arithmetic\operator_addition_assignment_node.h" />
     <ClInclude Include="source\codegen\abstract_syntax_tree\operators\binary\arithmetic\operator_division_assignment_node.h" />
     <ClInclude Include="source\codegen\abstract_syntax_tree\operators\binary\arithmetic\operator_modulo_assignment_node.h" />
@@ -117,9 +119,9 @@
     <ClInclude Include="source\compiler\diagnostics\diagnostic.h" />
     <ClInclude Include="source\compiler\diagnostics\error.h" />
     <ClInclude Include="source\compiler\diagnostics\warning.h" />
-    <ClInclude Include="source\lexer\lexer.h" />
+    <ClInclude Include="source\lexer\char_by_char_lexer\char_by_char_lexer.h" />
     <ClInclude Include="source\lexer\token.h" />
-    <ClInclude Include="source\parser\parser.h" />
+    <ClInclude Include="source\parser\recursive_descent_parser\recursive_descent_parser.h" />
     <ClInclude Include="source\utility\console.h" />
     <ClInclude Include="source\utility\containers\compile_time_hash_map.h" />
     <ClInclude Include="source\utility\containers\string_accessor.h" />
@@ -129,7 +131,9 @@
     <ClInclude Include="source\utility\types.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="source\lexer\lexer.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="source\parser\parser.cpp" />
     <ClCompile Include="source\codegen\abstract_syntax_tree\operators\binary\arithmetic\operator_addition_assignment_node.cpp" />
     <ClCompile Include="source\codegen\abstract_syntax_tree\operators\binary\arithmetic\operator_division_assignment_node.cpp" />
     <ClCompile Include="source\codegen\abstract_syntax_tree\operators\binary\arithmetic\operator_modulo_assignment_node.cpp" />
@@ -194,8 +198,8 @@
     <ClCompile Include="source\compiler\diagnostics\diagnostic.cpp" />
     <ClCompile Include="source\compiler\diagnostics\error.cpp" />
     <ClCompile Include="source\compiler\diagnostics\warning.cpp" />
-    <ClCompile Include="source\lexer\lexer.cpp" />
-    <ClCompile Include="source\parser\parser.cpp" />
+    <ClCompile Include="source\lexer\char_by_char_lexer\char_by_char_lexer.cpp" />
+    <ClCompile Include="source\parser\recursive_descent_parser\recursive_descent_parser.cpp" />
     <ClCompile Include="source\utility\console.cpp" />
     <ClCompile Include="source\utility\containers\string_accessor.cpp" />
     <ClCompile Include="source\utility\filesystem.cpp" />

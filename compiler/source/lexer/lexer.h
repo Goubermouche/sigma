@@ -1,18 +1,18 @@
 #pragma once
 #include "lexer/token.h"
-#include "utility/containers/string_accessor.h"
 #include "compiler/diagnostics/error.h"
+#include "utility/containers/string_accessor.h"
 
 namespace channel {
 	/**
-	 * \brief Set of information related to a specific token, at a specific position.
-	 */
+ * \brief Set of information related to a specific token, at a specific position.
+ */
 	struct token_data {
 		token_data() = default;
 
 		token_data(
-			token tok, 
-			const std::string& value, 
+			token tok,
+			const std::string& value,
 			const token_position& position
 		);
 
@@ -28,22 +28,10 @@ namespace channel {
 		token_position m_position;
 	};
 
-	/**
-	 * \brief Base tokenizer class, used for separating strings into a set of tokens with relevant values. 
-	 */
-	class lexer {
+	class token_list {
 	public:
-		/**
-		 * \brief Constructs a new lexer instance using the given filepath to a specific source file. 
-		 * \param source_file Filepath to the relevant source file
-		 */
-		lexer(const std::string& source_file);
-
-		/**
-		 * \brief Traverses the entire file and generates a list of tokens which can be traversed later.
-		 * \return Potentially erroneous result.
-		 */
-		error_result tokenize();
+		token_list() = default;
+		token_list(std::vector<token_data> tokens);
 
 		/**
 		 * \brief Prints all the contained tokens, if there are any.
@@ -51,7 +39,7 @@ namespace channel {
 		void print_tokens() const;
 
 		/**
-		 * \brief Accesses the next token and advances all indices. 
+		 * \brief Accesses the next token and advances all indices.
 		 * \return Last token.
 		 */
 		const token_data& get_token();
@@ -67,45 +55,29 @@ namespace channel {
 		 */
 		void synchronize_indices();
 	private:
-		/**
-		 * \brief Helper function that reads the next char in the provided source file and advances the accessor caret.
-		 */
-		void read_char();
-
-		/**
-		 * \brief Extracts the next token from the given source file and returns it.
-		 * \return Extracted token
-		 */
-		error_result extract_next_token(token& tok);
-
-		/**
-		 * \brief Extracts the next numerical token from the source accessor.
-		 * \return Keyword/identifier token, depending on the format and keyword availability
-		 */
-		error_result get_identifier_token(token& tok);
-
-		/**
-		 * \brief Extracts the next numerical token from the source accessor.
-		 * \return Best-fitting numerical token
-		 */
-		error_result get_numerical_token(token& tok);
-
-		error_result get_char_literal_token(token& tok);
-
-		error_result get_string_literal_token(token& tok);
-	private:
 		std::vector<token_data> m_tokens;
-		detail::string_accessor m_accessor;
 
 		u64 m_main_token_index = 0;
 		u64 m_peek_token_index = 0;
+	};
 
-		std::string m_source_file;
-		std::string m_value_string; 
+	/**
+	 * \brief Base lexer class, used for separating strings into a set of tokens with relevant values.
+	 */
+	class lexer {
+	public:
+		/**
+		 * \brief Traverses the entire file and generates a list of tokens which can be traversed later.
+		 * \return Potentially erroneous result.
+		 */
+		virtual error_result tokenize() = 0;
 
-		char m_last_character = ' ';
-		u64 m_current_line = 1;
-		u64 m_current_character = 1;
+		error_result set_source_filepath(const std::string& filepath);
+		const std::vector<token_data>& get_token_list() const;
+	protected:
+		std::vector<token_data> m_tokens;
+		std::string m_source_filepath;
+		detail::string_accessor m_accessor;
 
 		// tokens that are longer than one character 
 		const std::unordered_map<std::string, token> m_keyword_tokens = {
@@ -140,16 +112,13 @@ namespace channel {
 			{ "while" , token::keyword_while      },
 			{ "for"   , token::keyword_for        },
 			{ "break" , token::keyword_break      },
-			
+
 			{ "new"   , token::keyword_new        },
 		};
 
 		// tokens that consist of special chars (non-alphabetical and non-digit chars), note that the "//"
 		// combination is not included here because it is being handled as a comment and thus needs different
 		// logic.
-
-		// note: 2-letter tokens need their first token to exist, otherwise the longer version doesn't get
-		//       selected and an identifier is returned.
 		const std::unordered_map<std::string, token> m_special_tokens = {
 			{ "(" , token::l_parenthesis                      },
 			{ ")" , token::r_parenthesis                      },

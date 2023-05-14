@@ -22,7 +22,9 @@ namespace channel {
 	class codegen_visitor : public visitor {
 	public:
 		codegen_visitor() = default;
-		codegen_visitor(const parser& parser);
+		codegen_visitor(
+			const abstract_syntax_tree& abstract_syntax_tree
+		);
 
 		error_result generate();
 		std::shared_ptr<llvm::Module> get_module();
@@ -336,7 +338,7 @@ namespace channel {
 		error_result verify_main_entry_point() const;
 		void initialize_global_variables();
 	private:
-		parser m_parser;
+		abstract_syntax_tree m_abstract_syntax_tree;
 
 		scope_ptr m_scope;
 		std::unordered_map<std::string, value_ptr> m_global_named_values;

@@ -21,7 +21,29 @@
 namespace channel {
 	compiler::compiler(
 		compiler_settings settings
-	) : m_settings(std::move(settings)) {}
+	) : m_settings(settings){}
+
+	error_result compiler::set_lexer(
+		std::unique_ptr<lexer> lexer
+	) {
+		if(!lexer) {
+			return error::emit<5003>();
+		}
+
+		m_lexer = std::move(lexer);
+		return {};
+	}
+
+	error_result compiler::set_parser(
+		std::unique_ptr<parser> parser
+	) {
+		if (!parser) {
+			return error::emit<5004>();
+		}
+
+		m_parser = std::move(parser);
+		return {};
+	}
 
 	error_result compiler::compile(
 		const std::string& root_source_file_filepath, 
@@ -63,12 +85,16 @@ namespace channel {
 	std::expected<std::shared_ptr<llvm::Module>, error_message> compiler::generate_module(
 		const std::string& source_filepath
 	) {
-		// tokenize the source fil
+		// tokenize the source file
 		timer lexer_timer;
 		lexer_timer.start();
-		lexer lexer(source_filepath);
-		if (auto lexer_error_message = lexer.tokenize()) {
-			return std::unexpected(lexer_error_message.value()); // return on failure 
+
+		if(auto set_source_error = m_lexer->set_source_filepath(source_filepath)) {
+			return std::unexpected(set_source_error.value());
+		}
+
+		if (auto tokenization_error = m_lexer->tokenize()) {
+			return std::unexpected(tokenization_error.value()); // return on failure 
 		}
 
 		console::out << "lexing finished (" << lexer_timer.elapsed() << "ms)\n";
@@ -76,9 +102,8 @@ namespace channel {
 		// generate the AST
 		timer parser_timer;
 		parser_timer.start();
-		parser parser(lexer);
-
-		if (auto parser_error = parser.parse()) {
+		m_parser->set_token_list(m_lexer->get_token_list());
+		if (auto parser_error = m_parser->parse()) {
 			return std::unexpected(parser_error.value()); // return on failure 
 		}
 
@@ -87,17 +112,16 @@ namespace channel {
 		// generate the module
 		timer codegen_timer;
 		codegen_timer.start();
-		m_active_visitor = std::make_shared<codegen_visitor>(parser);
+		m_active_visitor = std::make_shared<codegen_visitor>(m_parser->get_abstract_syntax_tree());
 		if (auto visitor_error_message = m_active_visitor->generate()) {
 			return std::unexpected(visitor_error_message.value()); // return on failure 
 		}
 
 		console::out << "codegen finished (" << codegen_timer.elapsed() << "ms)\n";
 
-		// verify the IR
-		// if (auto verification_error = m_active_visitor->verify_intermediate_representation()) {
-		// 	return std::unexpected(verification_error.value()); // return on failure 
-		// }
+		if (auto verification_error = m_active_visitor->verify_intermediate_representation()) {
+			return std::unexpected(verification_error.value()); // return on failure 
+		}
 
 		return m_active_visitor->get_module();
 	}
@@ -203,7 +227,7 @@ namespace channel {
 		}
 
 		if (detail::extract_extension_from_filepath(filepath) != ".ch") {
-			return error::emit<5002>(filepath);
+			return error::emit<1007>(filepath, ".ch");
 		}
 
 		return {};

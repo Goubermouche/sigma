@@ -240,13 +240,13 @@
     <ClInclude Include="source\compiler\diagnostics\warning.h">
       <Filter>source\compiler\diagnostics</Filter>
     </ClInclude>
-    <ClInclude Include="source\lexer\lexer.h">
+    <ClInclude Include="source\lexer\char_by_char_lexer\char_by_char_lexer.h">
       <Filter>source\lexer</Filter>
     </ClInclude>
     <ClInclude Include="source\lexer\token.h">
       <Filter>source\lexer</Filter>
     </ClInclude>
-    <ClInclude Include="source\parser\parser.h">
+    <ClInclude Include="source\parser\recursive_descent_parser\recursive_descent_parser.h">
       <Filter>source\parser</Filter>
     </ClInclude>
     <ClInclude Include="source\utility\console.h">
@@ -275,6 +275,8 @@
     <ClInclude Include="source\codegen\abstract_syntax_tree\operators\binary\arithmetic\operator_multiplication_assignment_node.h" />
     <ClInclude Include="source\codegen\abstract_syntax_tree\operators\binary\arithmetic\operator_modulo_assignment_node.h" />
     <ClInclude Include="source\codegen\abstract_syntax_tree\operators\binary\arithmetic\operator_division_assignment_node.h" />
+    <ClInclude Include="source\parser\parser.h" />
+    <ClInclude Include="source\lexer\lexer.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp" />
@@ -455,10 +457,10 @@
     <ClCompile Include="source\compiler\diagnostics\warning.cpp">
       <Filter>source\compiler\diagnostics</Filter>
     </ClCompile>
-    <ClCompile Include="source\lexer\lexer.cpp">
+    <ClCompile Include="source\lexer\char_by_char_lexer\char_by_char_lexer.cpp">
       <Filter>source\lexer</Filter>
     </ClCompile>
-    <ClCompile Include="source\parser\parser.cpp">
+    <ClCompile Include="source\parser\recursive_descent_parser\recursive_descent_parser.cpp">
       <Filter>source\parser</Filter>
     </ClCompile>
     <ClCompile Include="source\utility\console.cpp">
@@ -478,5 +480,7 @@
     <ClCompile Include="source\codegen\abstract_syntax_tree\operators\binary\arithmetic\operator_multiplication_assignment_node.cpp" />
     <ClCompile Include="source\codegen\abstract_syntax_tree\operators\binary\arithmetic\operator_modulo_assignment_node.cpp" />
     <ClCompile Include="source\codegen\abstract_syntax_tree\operators\binary\arithmetic\operator_division_assignment_node.cpp" />
+    <ClCompile Include="source\parser\parser.cpp" />
+    <ClCompile Include="source\lexer\lexer.cpp" />
   </ItemGroup>
 </Project>

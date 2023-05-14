@@ -1,5 +1,6 @@
 #pragma once
-#include "diagnostics/error.h"
+#include "lexer/char_by_char_lexer/char_by_char_lexer.h"
+#include "parser/recursive_descent_parser/recursive_descent_parser.h"
 #include "codegen/visitor/codegen_visitor.h"
 
 namespace channel {
@@ -38,6 +39,14 @@ namespace channel {
 			compiler_settings settings
 		);
 
+		error_result set_lexer(
+			std::unique_ptr<lexer> lexer
+		);
+
+		error_result set_parser(
+			std::unique_ptr<parser> parser
+		);
+
 		/**
 		 * \brief Compiles the given \a root_source_file_filepath using the underlying compiler settings and outputs an executable at the given \a target_executable_directory.
 		 * \param root_source_file_filepath Path to the file to be compiled
@@ -66,6 +75,10 @@ namespace channel {
 		);
 	private:
 		compiler_settings m_settings;
+		// lexer to use for tokenization of the source file
+		std::unique_ptr<lexer> m_lexer = std::make_unique<char_by_char_lexer>();
+		// parser to use for generating the AST
+		std::unique_ptr<parser> m_parser = std::make_unique<recursive_descent_parser>();
 
 		// compilation specific 
 		std::shared_ptr<codegen_visitor> m_active_visitor;

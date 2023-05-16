@@ -1,7 +1,6 @@
 #pragma once
-#include "codegen/llvm_wrappers/value.h"
-#include "codegen/llvm_wrappers/codegen_context.h"
-#include "compiler/diagnostics/error.h"
+#include "code_generator/llvm_wrappers/value.h"
+#include "code_generator/llvm_wrappers/codegen_context.h"
 #include "compiler/diagnostics/warning.h"
 
 #define AST_NODE_NUMERICAL_LITERAL_COLOR color::blue

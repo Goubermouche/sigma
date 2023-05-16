@@ -1,7 +1,8 @@
 #pragma once
-#include "lexer/char_by_char_lexer/char_by_char_lexer.h"
-#include "parser/recursive_descent_parser/recursive_descent_parser.h"
-#include "codegen/visitor/codegen_visitor.h"
+
+#include "lexer/lexer.h"
+#include "parser/parser.h"
+#include "code_generator/code_generator.h"
 
 namespace channel {
 	enum class optimization_level {
@@ -39,13 +40,14 @@ namespace channel {
 			compiler_settings settings
 		);
 
-		error_result set_lexer(
-			std::unique_ptr<lexer> lexer
-		);
+		template <typename lexer>
+		void set_lexer();
 
-		error_result set_parser(
-			std::unique_ptr<parser> parser
-		);
+		template <typename parser>
+		void set_parser();
+
+		template <typename code_generator>
+		void set_code_generator();
 
 		/**
 		 * \brief Compiles the given \a root_source_file_filepath using the underlying compiler settings and outputs an executable at the given \a target_executable_directory.
@@ -75,14 +77,38 @@ namespace channel {
 		);
 	private:
 		compiler_settings m_settings;
+
 		// lexer to use for tokenization of the source file
-		std::unique_ptr<lexer> m_lexer = std::make_unique<char_by_char_lexer>();
+		std::function<std::shared_ptr<lexer>()> m_lexer_generator;
 		// parser to use for generating the AST
-		std::unique_ptr<parser> m_parser = std::make_unique<recursive_descent_parser>();
+		std::function<std::shared_ptr<parser>()> m_parser_generator;
+		// code generator used for generating LLVM IR
+		std::function<std::shared_ptr<code_generator>()> m_code_generator_generator;
 
 		// compilation specific 
-		std::shared_ptr<codegen_visitor> m_active_visitor;
+		std::shared_ptr<code_generator> m_active_visitor;
 		std::string m_root_source_file_filepath;
 		std::string m_target_executable_directory;
 	};
+
+	template<typename lexer>
+	void compiler::set_lexer() {
+		m_lexer_generator = [] {
+			return std::make_shared<lexer>();
+		};
+	}
+
+	template<typename parser>
+	void compiler::set_parser() {
+		m_parser_generator = [] {
+			return std::make_shared<parser>();
+		};
+	}
+
+	template<typename code_generator>
+	void compiler::set_code_generator() {
+		m_code_generator_generator = [] {
+			return std::make_shared<code_generator>();
+		};
+	}
 }

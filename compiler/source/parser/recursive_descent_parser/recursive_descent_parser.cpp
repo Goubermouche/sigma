@@ -1,65 +1,65 @@
 #include "recursive_descent_parser.h"
 
-#include "codegen/abstract_syntax_tree/translation_unit_node.h"
+#include "code_generator/abstract_syntax_tree/translation_unit_node.h"
 
 // functions
-#include "codegen/abstract_syntax_tree/functions/function_call_node.h"
-#include "codegen/abstract_syntax_tree/functions/function_node.h"
+#include "code_generator/abstract_syntax_tree/functions/function_call_node.h"
+#include "code_generator/abstract_syntax_tree/functions/function_node.h"
 
 // variables
-#include "codegen/abstract_syntax_tree/variables/assignment_node.h"
-#include "codegen/abstract_syntax_tree/variables/variable_access_node.h"
-#include "codegen/abstract_syntax_tree/variables/array/array_allocation_node.h"
-#include "codegen/abstract_syntax_tree/variables/array/array_access_node.h"
-#include "codegen/abstract_syntax_tree/variables/array/array_assignment_node.h"
-#include "codegen/abstract_syntax_tree/variables/declaration/local_declaration_node.h"
-#include "codegen/abstract_syntax_tree/variables/declaration/global_declaration_node.h"
-#include "codegen/abstract_syntax_tree/variables/variable_node.h"
+#include "code_generator/abstract_syntax_tree/variables/assignment_node.h"
+#include "code_generator/abstract_syntax_tree/variables/variable_access_node.h"
+#include "code_generator/abstract_syntax_tree/variables/array/array_allocation_node.h"
+#include "code_generator/abstract_syntax_tree/variables/array/array_access_node.h"
+#include "code_generator/abstract_syntax_tree/variables/array/array_assignment_node.h"
+#include "code_generator/abstract_syntax_tree/variables/declaration/local_declaration_node.h"
+#include "code_generator/abstract_syntax_tree/variables/declaration/global_declaration_node.h"
+#include "code_generator/abstract_syntax_tree/variables/variable_node.h"
 
 // flow control
-#include "codegen/abstract_syntax_tree/keywords/flow_control/return_node.h"
-#include "codegen/abstract_syntax_tree/keywords/flow_control/if_else_node.h"
-#include "codegen/abstract_syntax_tree/keywords/flow_control/while_node.h"
-#include "codegen/abstract_syntax_tree/keywords/flow_control/for_node.h"
-#include "codegen/abstract_syntax_tree/keywords/flow_control/break_node.h"
+#include "code_generator/abstract_syntax_tree/keywords/flow_control/return_node.h"
+#include "code_generator/abstract_syntax_tree/keywords/flow_control/if_else_node.h"
+#include "code_generator/abstract_syntax_tree/keywords/flow_control/while_node.h"
+#include "code_generator/abstract_syntax_tree/keywords/flow_control/for_node.h"
+#include "code_generator/abstract_syntax_tree/keywords/flow_control/break_node.h"
 
 // types
-#include "codegen/abstract_syntax_tree/keywords/types/numerical_literal_node.h"
-#include "codegen/abstract_syntax_tree/keywords/types/char_node.h"
-#include "codegen/abstract_syntax_tree/keywords/types/string_node.h"
-#include "codegen/abstract_syntax_tree/keywords/types/bool_node.h"
+#include "code_generator/abstract_syntax_tree/keywords/types/numerical_literal_node.h"
+#include "code_generator/abstract_syntax_tree/keywords/types/char_node.h"
+#include "code_generator/abstract_syntax_tree/keywords/types/string_node.h"
+#include "code_generator/abstract_syntax_tree/keywords/types/bool_node.h"
 
 // operators
 // unary
 // arithmetic
-#include "codegen/abstract_syntax_tree/operators/unary/arithmetic/operator_post_decrement.h"
-#include "codegen/abstract_syntax_tree/operators/unary/arithmetic/operator_post_increment.h"
-#include "codegen/abstract_syntax_tree/operators/unary/arithmetic/operator_pre_decrement.h"
-#include "codegen/abstract_syntax_tree/operators/unary/arithmetic/operator_pre_increment.h"
+#include "code_generator/abstract_syntax_tree/operators/unary/arithmetic/operator_post_decrement.h"
+#include "code_generator/abstract_syntax_tree/operators/unary/arithmetic/operator_post_increment.h"
+#include "code_generator/abstract_syntax_tree/operators/unary/arithmetic/operator_pre_decrement.h"
+#include "code_generator/abstract_syntax_tree/operators/unary/arithmetic/operator_pre_increment.h"
 
 // binary
 // arithmetic
-#include "codegen/abstract_syntax_tree/operators/binary/arithmetic/operator_addition_assignment_node.h"
-#include "codegen/abstract_syntax_tree/operators/binary/arithmetic/operator_addition_node.h"
-#include "codegen/abstract_syntax_tree/operators/binary/arithmetic/operator_subtraction_assignment_node.h"
-#include "codegen/abstract_syntax_tree/operators/binary/arithmetic/operator_subtraction_node.h"
-#include "codegen/abstract_syntax_tree/operators/binary/arithmetic/operator_multiplication_assignment_node.h"
-#include "codegen/abstract_syntax_tree/operators/binary/arithmetic/operator_multiplication_node.h"
-#include "codegen/abstract_syntax_tree/operators/binary/arithmetic/operator_division_assignment_node.h"
-#include "codegen/abstract_syntax_tree/operators/binary/arithmetic/operator_division_node.h"
-#include "codegen/abstract_syntax_tree/operators/binary/arithmetic/operator_modulo_assignment_node.h"
-#include "codegen/abstract_syntax_tree/operators/binary/arithmetic/operator_modulo_node.h"
+#include "code_generator/abstract_syntax_tree/operators/binary/arithmetic/operator_addition_assignment_node.h"
+#include "code_generator/abstract_syntax_tree/operators/binary/arithmetic/operator_addition_node.h"
+#include "code_generator/abstract_syntax_tree/operators/binary/arithmetic/operator_subtraction_assignment_node.h"
+#include "code_generator/abstract_syntax_tree/operators/binary/arithmetic/operator_subtraction_node.h"
+#include "code_generator/abstract_syntax_tree/operators/binary/arithmetic/operator_multiplication_assignment_node.h"
+#include "code_generator/abstract_syntax_tree/operators/binary/arithmetic/operator_multiplication_node.h"
+#include "code_generator/abstract_syntax_tree/operators/binary/arithmetic/operator_division_assignment_node.h"
+#include "code_generator/abstract_syntax_tree/operators/binary/arithmetic/operator_division_node.h"
+#include "code_generator/abstract_syntax_tree/operators/binary/arithmetic/operator_modulo_assignment_node.h"
+#include "code_generator/abstract_syntax_tree/operators/binary/arithmetic/operator_modulo_node.h"
 // logical
-#include "codegen/abstract_syntax_tree/operators/binary/logical/operator_conjunction_node.h"
-#include "codegen/abstract_syntax_tree/operators/binary/logical/operator_disjunction_node.h"
-#include "codegen/abstract_syntax_tree/operators/binary/logical/operator_greater_than_node.h"
-#include "codegen/abstract_syntax_tree/operators/binary/logical/operator_greater_than_equal_to_node.h"
-#include "codegen/abstract_syntax_tree/operators/binary/logical/operator_less_than_node.h"
-#include "codegen/abstract_syntax_tree/operators/binary/logical/operator_less_than_equal_to_node.h"
-#include "codegen/abstract_syntax_tree/operators/binary/logical/operator_equals_node.h"
-#include "codegen/abstract_syntax_tree/operators/binary/logical/operator_not_equals_node.h"
-#include "codegen/abstract_syntax_tree/keywords/flow_control/break_node.h"
-#include "codegen/abstract_syntax_tree/operators/binary/arithmetic/operator_addition_assignment_node.h"
+#include "code_generator/abstract_syntax_tree/operators/binary/logical/operator_conjunction_node.h"
+#include "code_generator/abstract_syntax_tree/operators/binary/logical/operator_disjunction_node.h"
+#include "code_generator/abstract_syntax_tree/operators/binary/logical/operator_greater_than_node.h"
+#include "code_generator/abstract_syntax_tree/operators/binary/logical/operator_greater_than_equal_to_node.h"
+#include "code_generator/abstract_syntax_tree/operators/binary/logical/operator_less_than_node.h"
+#include "code_generator/abstract_syntax_tree/operators/binary/logical/operator_less_than_equal_to_node.h"
+#include "code_generator/abstract_syntax_tree/operators/binary/logical/operator_equals_node.h"
+#include "code_generator/abstract_syntax_tree/operators/binary/logical/operator_not_equals_node.h"
+#include "code_generator/abstract_syntax_tree/keywords/flow_control/break_node.h"
+#include "code_generator/abstract_syntax_tree/operators/binary/arithmetic/operator_addition_assignment_node.h"
 
 namespace channel {
 	recursive_descent_parser::recursive_descent_parser() {}
@@ -69,7 +69,7 @@ namespace channel {
 
 		while (true) {
 			if (peek_next_token() == token::end_of_file) {
-				m_abstract_syntax_tree.add_node(new translation_unit_node(nodes));
+				m_abstract_syntax_tree->add_node(new translation_unit_node(nodes));
 				return {};
 			}
 

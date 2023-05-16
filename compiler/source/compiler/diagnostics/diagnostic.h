@@ -1,6 +1,6 @@
 #pragma once
 #include "utility/macros.h"
-#include "codegen/llvm_wrappers/type.h"
+#include "llvm_wrappers/type.h"
 #include "utility/containers/compile_time_hash_map.h"
 
 template<>

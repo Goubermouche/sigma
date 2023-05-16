@@ -1,0 +1,29 @@
+#pragma once
+#include "code_generator/abstract_syntax_tree/node.h"
+
+namespace channel {
+	/**
+	 * \brief AST node, represents a call to a given function. 
+	 */
+	class function_call_node : public node {
+	public:
+		function_call_node(
+			const token_position& position,
+			const std::string& function_identifier,
+			const std::vector<node_ptr>& function_arguments
+		);
+
+		acceptation_result accept(
+			code_generator& visitor,
+			const codegen_context& context
+		) override;
+
+		void print(u64 depth, const std::wstring& prefix, bool is_last) override;
+
+		const std::string& get_function_identifier() const;
+		const std::vector<node_ptr>& get_function_arguments() const;
+	private:
+		std::string m_function_name;
+		std::vector<node_ptr> m_function_arguments;
+	};
+}

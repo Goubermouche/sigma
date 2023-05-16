@@ -23,28 +23,6 @@ namespace channel {
 		compiler_settings settings
 	) : m_settings(settings){}
 
-	error_result compiler::set_lexer(
-		std::unique_ptr<lexer> lexer
-	) {
-		if(!lexer) {
-			return error::emit<5003>();
-		}
-
-		m_lexer = std::move(lexer);
-		return {};
-	}
-
-	error_result compiler::set_parser(
-		std::unique_ptr<parser> parser
-	) {
-		if (!parser) {
-			return error::emit<5004>();
-		}
-
-		m_parser = std::move(parser);
-		return {};
-	}
-
 	error_result compiler::compile(
 		const std::string& root_source_file_filepath, 
 		const std::string& target_executable_directory
@@ -89,11 +67,12 @@ namespace channel {
 		timer lexer_timer;
 		lexer_timer.start();
 
-		if(auto set_source_error = m_lexer->set_source_filepath(source_filepath)) {
+		const std::shared_ptr<lexer> lexer = m_lexer_generator();
+		if(auto set_source_error = lexer->set_source_filepath(source_filepath)) {
 			return std::unexpected(set_source_error.value());
 		}
 
-		if (auto tokenization_error = m_lexer->tokenize()) {
+		if (auto tokenization_error = lexer->tokenize()) {
 			return std::unexpected(tokenization_error.value()); // return on failure 
 		}
 
@@ -102,8 +81,10 @@ namespace channel {
 		// generate the AST
 		timer parser_timer;
 		parser_timer.start();
-		m_parser->set_token_list(m_lexer->get_token_list());
-		if (auto parser_error = m_parser->parse()) {
+
+		const std::shared_ptr<parser> parser = m_parser_generator();
+		parser->set_token_list(lexer->get_token_list());
+		if (auto parser_error = parser->parse()) {
 			return std::unexpected(parser_error.value()); // return on failure 
 		}
 
@@ -112,18 +93,17 @@ namespace channel {
 		// generate the module
 		timer codegen_timer;
 		codegen_timer.start();
-		m_active_visitor = std::make_shared<codegen_visitor>(m_parser->get_abstract_syntax_tree());
-		if (auto visitor_error_message = m_active_visitor->generate()) {
+		const std::shared_ptr<code_generator> visitor = m_code_generator_generator();
+		visitor->set_abstract_syntax_tree(parser->get_abstract_syntax_tree());
+
+		if (auto visitor_error_message = visitor->generate()) {
 			return std::unexpected(visitor_error_message.value()); // return on failure 
 		}
 
 		console::out << "codegen finished (" << codegen_timer.elapsed() << "ms)\n";
+		m_active_visitor = visitor;
 
-		if (auto verification_error = m_active_visitor->verify_intermediate_representation()) {
-			return std::unexpected(verification_error.value()); // return on failure 
-		}
-
-		return m_active_visitor->get_module();
+		return visitor->get_llvm_module();
 	}
 
 	error_result compiler::compile_module(

@@ -1,3 +1,6 @@
+#include "lexer/char_by_char_lexer/char_by_char_lexer.h"
+#include "parser/recursive_descent_parser/recursive_descent_parser.h"
+#include "code_generator/basic_code_generator/basic_code_generator.h"
 
 #include "source/compiler/compiler.h"
 
@@ -28,6 +31,10 @@ i32 main(i32 argc, char* argv[]) {
 	settings.vectorize = true;
 
 	channel::compiler compiler(settings);
+
+	compiler.set_lexer<channel::char_by_char_lexer>();
+	compiler.set_parser<channel::recursive_descent_parser>();
+	compiler.set_code_generator<channel::basic_code_generator>();
 
 	// check for compilation errors
 	if(const auto compilation_result = compiler.compile(argv[1], argv[2])) {

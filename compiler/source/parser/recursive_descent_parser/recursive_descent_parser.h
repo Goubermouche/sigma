@@ -1,6 +1,6 @@
 #pragma once
 #include "parser/parser.h"
-#include "codegen/llvm_wrappers/type.h"
+#include "llvm_wrappers/type.h"
 
 namespace channel {
 	class recursive_descent_parser : public parser {

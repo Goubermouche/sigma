@@ -1,4 +1,9 @@
 #include "compiler.h"
+
+#include "lexer/char_by_char_lexer/char_by_char_lexer.h"
+#include "parser/recursive_descent_parser/recursive_descent_parser.h"
+#include "code_generator/basic_code_generator/basic_code_generator.h"
+
 #include "utility/timer.h"
 
 // llvm
@@ -21,7 +26,12 @@
 namespace channel {
 	compiler::compiler(
 		compiler_settings settings
-	) : m_settings(settings){}
+	) : m_settings(settings) {
+		// initialize the default compilation step generators 
+		set_lexer<char_by_char_lexer>();
+		set_parser<recursive_descent_parser>();
+		set_code_generator<basic_code_generator>();
+	}
 
 	error_result compiler::compile(
 		const std::string& root_source_file_filepath, 
@@ -52,7 +62,7 @@ namespace channel {
 		}
 
 		// compile the module into an executable
-		if (auto compilation_error = compile_module(module_generation_result.value())) {
+		if (auto compilation_error = compile_module(std::move(module_generation_result.value()))) {
 			return compilation_error; // return on failure
 		}
 
@@ -60,9 +70,9 @@ namespace channel {
 		return {};
 	}
 
-	std::expected<std::shared_ptr<llvm::Module>, error_message> compiler::generate_module(
+	std::expected<std::unique_ptr<llvm_context>, error_message> compiler::generate_module(
 		const std::string& source_filepath
-	) {
+	) const {
 		// tokenize the source file
 		timer lexer_timer;
 		lexer_timer.start();
@@ -93,21 +103,19 @@ namespace channel {
 		// generate the module
 		timer codegen_timer;
 		codegen_timer.start();
-		const std::shared_ptr<code_generator> visitor = m_code_generator_generator();
-		visitor->set_abstract_syntax_tree(parser->get_abstract_syntax_tree());
+		const std::shared_ptr<code_generator> code_generator = m_code_generator_generator();
+		code_generator->set_abstract_syntax_tree(parser->get_abstract_syntax_tree());
 
-		if (auto visitor_error_message = visitor->generate()) {
+		if (auto visitor_error_message = code_generator->generate()) {
 			return std::unexpected(visitor_error_message.value()); // return on failure 
 		}
 
 		console::out << "codegen finished (" << codegen_timer.elapsed() << "ms)\n";
-		m_active_visitor = visitor;
-
-		return visitor->get_llvm_module();
+		return std::move(code_generator->get_llvm_context());
 	}
 
 	error_result compiler::compile_module(
-		const std::shared_ptr<llvm::Module>& module
+		std::unique_ptr<llvm_context> llvm_context
 	) const {
 		const std::string target_triple = llvm::sys::getDefaultTargetTriple();
 
@@ -128,8 +136,8 @@ namespace channel {
 		constexpr auto relocation_model = llvm::Optional<llvm::Reloc::Model>();
 		const auto target_machine = target->createTargetMachine(target_triple, cpu, features, target_options, relocation_model);
 
-		module->setDataLayout(target_machine->createDataLayout());
-		module->setTargetTriple(target_triple);
+		llvm_context->get_module()->setDataLayout(target_machine->createDataLayout());
+		llvm_context->get_module()->setTargetTriple(target_triple);
 
 		const std::string o_file = m_target_executable_directory + "a.o";
 		const std::string exe_file = m_target_executable_directory + "a.exe";
@@ -153,7 +161,7 @@ namespace channel {
 				return error::emit<5000>();
 			}
 
-			pass_manager.run(*module);
+			pass_manager.run(*llvm_context->get_module());
 			dest.flush();
 		}
 

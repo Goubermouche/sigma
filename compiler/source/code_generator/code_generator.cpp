@@ -2,14 +2,13 @@
 
 namespace channel {
     code_generator::code_generator()
-	    : m_builder(m_context),
-        m_module(std::make_unique<llvm::Module>("channel", m_context)) {}
+	    : m_llvm_context(std::make_unique<llvm_context>()) {} 
 
     void code_generator::set_abstract_syntax_tree(std::shared_ptr<abstract_syntax_tree> abstract_syntax_tree) {
         m_abstract_syntax_tree = abstract_syntax_tree;
     }
 
-    std::shared_ptr<llvm::Module> code_generator::get_llvm_module() const {
-        return m_module;
+    std::unique_ptr<llvm_context> code_generator::get_llvm_context() {
+        return std::move(m_llvm_context);
     }
 }

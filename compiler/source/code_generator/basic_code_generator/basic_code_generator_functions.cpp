@@ -11,7 +11,7 @@ namespace channel {
 		(void)context; // suppress C4100
 		// get the function return type
 		llvm::Type* return_type = node.get_function_return_type().get_llvm_type(
-			m_context
+			m_llvm_context->get_context()
 		);
 
 		// convert the argument types to LLVM types and store them in a vector
@@ -19,7 +19,7 @@ namespace channel {
 		for (const auto& [arg_name, arg_type] : node.get_function_arguments()) {
 			param_types.push_back(
 				arg_type.get_llvm_type(
-					m_context
+					m_llvm_context->get_context()
 				)
 			);
 		}
@@ -35,7 +35,7 @@ namespace channel {
 			func_type, 
 			llvm::Function::ExternalLinkage,
 			node.get_function_identifier(), 
-			m_module.get()
+			m_llvm_context->get_module().get()
 		);
 
 		// check for multiple definitions by checking if the function has already been added to our map
@@ -63,12 +63,12 @@ namespace channel {
 
 		// create and use a new entry block
 		llvm::BasicBlock* entry_block = llvm::BasicBlock::Create(
-			m_context,
+			m_llvm_context->get_context(),
 			"",
 			func
 		);
 
-		m_builder.SetInsertPoint(entry_block);
+		m_llvm_context->get_builder().SetInsertPoint(entry_block);
 
 		// create a new nested scope for the function body
 		scope_ptr prev_scope = m_scope;
@@ -82,13 +82,13 @@ namespace channel {
 			llvm_arg->setName(arg_name);
 
 			// create an alloca instruction for the argument and store the incoming value into it
-			llvm::AllocaInst* alloca = m_builder.CreateAlloca(
-				arg_type.get_llvm_type(m_context), 
+			llvm::AllocaInst* alloca = m_llvm_context->get_builder().CreateAlloca(
+				arg_type.get_llvm_type(m_llvm_context->get_context()), 
 				nullptr, 
 				arg_name
 			);
 
-			m_builder.CreateStore(llvm_arg, alloca);
+			m_llvm_context->get_builder().CreateStore(llvm_arg, alloca);
 
 			// add the alloca to the current scope
 			m_scope->add_named_value(arg_name, std::make_shared<value>(
@@ -116,7 +116,7 @@ namespace channel {
 		m_scope = prev_scope;
 
 		// add a return statement if the function does not have one
-		if (m_builder.GetInsertBlock()->getTerminator() == nullptr) {
+		if (m_llvm_context->get_builder().GetInsertBlock()->getTerminator() == nullptr) {
 			// emit the relevant warning
 			// check if the return type is non-void
 			if(node.get_function_return_type() != type(type::base::empty, 0)) {
@@ -127,10 +127,10 @@ namespace channel {
 			}
 
 			if (return_type->isVoidTy()) {
-				m_builder.CreateRetVoid();
+				m_llvm_context->get_builder().CreateRetVoid();
 			}
 			else {
-				m_builder.CreateRet(
+				m_llvm_context->get_builder().CreateRet(
 					llvm::Constant::getNullValue(
 						return_type
 					)
@@ -249,7 +249,7 @@ namespace channel {
 		}
 
 		// return the function call as the value
-		llvm::CallInst* call_inst = m_builder.CreateCall(
+		llvm::CallInst* call_inst = m_llvm_context->get_builder().CreateCall(
 			func->get_function(),
 			argument_values
 		);

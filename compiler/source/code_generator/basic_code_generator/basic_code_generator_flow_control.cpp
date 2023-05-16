@@ -24,7 +24,7 @@ namespace channel {
 		}
 
 		// get the return type of the current function
-		const llvm::Function* parent_function = m_builder.GetInsertBlock()->getParent();
+		const llvm::Function* parent_function = m_llvm_context->get_builder().GetInsertBlock()->getParent();
 		const type function_return_type = m_function_registry.get_function(
 			parent_function->getName().str()
 		)->get_return_type();
@@ -37,7 +37,7 @@ namespace channel {
 		);
 
 		// generate the LLVM return instruction with the upcasted value
-		m_builder.CreateRet(
+		m_llvm_context->get_builder().CreateRet(
 			upcasted_return_value
 		);
 
@@ -55,10 +55,10 @@ namespace channel {
 	) {
 		(void)context; // suppress C4100
 
-		llvm::BasicBlock* entry_block = m_builder.GetInsertBlock();
+		llvm::BasicBlock* entry_block = m_llvm_context->get_builder().GetInsertBlock();
 		llvm::Function* parent_function = entry_block->getParent();
 		llvm::BasicBlock* end_block = llvm::BasicBlock::Create(
-			m_context,
+			m_llvm_context->get_context(),
 			"", 
 			parent_function
 		);
@@ -78,7 +78,7 @@ namespace channel {
 		// create condition blocks
 		for (u64 i = 0; i < condition_node_count; ++i) {
 			condition_blocks[i] = llvm::BasicBlock::Create(
-				m_context,
+				m_llvm_context->get_context(),
 				"",
 				parent_function
 			);
@@ -87,7 +87,7 @@ namespace channel {
 		// create branch blocks
 		for (u64 i = 0; i < branch_nodes.size(); ++i) {
 			branch_blocks[i] = llvm::BasicBlock::Create(
-				m_context, 
+				m_llvm_context->get_context(), 
 				"", 
 				parent_function
 			);
@@ -104,7 +104,7 @@ namespace channel {
 		}
 
 		// create a conditional branch based on the first condition
-		m_builder.CreateCondBr(
+		m_llvm_context->get_builder().CreateCondBr(
 			condition_value_result.value()->get_value(),
 			branch_blocks[0],
 			condition_blocks.empty() ? (has_trailing_else ? branch_blocks.back() : end_block) : condition_blocks[0]
@@ -112,7 +112,7 @@ namespace channel {
 
 		// process remaining conditions and create appropriate branches
 		for (u64 i = 0; i < condition_node_count; ++i) {
-			m_builder.SetInsertPoint(condition_blocks[i]);
+			m_llvm_context->get_builder().SetInsertPoint(condition_blocks[i]);
 
 			condition_value_result = condition_nodes[i + 1]->accept(
 				*this,
@@ -123,7 +123,7 @@ namespace channel {
 				return condition_value_result; // return on failure
 			}
 
-			m_builder.CreateCondBr(
+			m_llvm_context->get_builder().CreateCondBr(
 				condition_value_result.value()->get_value(),
 				branch_blocks[i + 1],
 				i < condition_node_count - 1 ? condition_blocks[i + 1] : branch_blocks.back()
@@ -135,7 +135,7 @@ namespace channel {
 
 		// process branch nodes and create appropriate inner statements
 		for (u64 i = 0; i < branch_nodes.size(); ++i) {
-			m_builder.SetInsertPoint(branch_blocks[i]);
+			m_llvm_context->get_builder().SetInsertPoint(branch_blocks[i]);
 			m_scope = std::make_unique<scope>(prev_scope, nullptr);
 
 			for (const auto& statement : branch_nodes[i]) {
@@ -149,14 +149,14 @@ namespace channel {
 				}
 			}
 
-			if(!m_builder.GetInsertBlock()->getTerminator()) {
-				m_builder.CreateBr(end_block);
+			if(!m_llvm_context->get_builder().GetInsertBlock()->getTerminator()) {
+				m_llvm_context->get_builder().CreateBr(end_block);
 			}
 		}
 
 		// restore the previous scope and set the insert point to the end block
 		m_scope = prev_scope;
-		m_builder.SetInsertPoint(end_block);
+		m_llvm_context->get_builder().SetInsertPoint(end_block);
 		return nullptr;
 	}
 
@@ -166,31 +166,31 @@ namespace channel {
 	) {
 		(void)context; // suppress C4100
 
-		llvm::BasicBlock* entry_block = m_builder.GetInsertBlock();
+		llvm::BasicBlock* entry_block = m_llvm_context->get_builder().GetInsertBlock();
 		llvm::Function* parent_function = entry_block->getParent();
 
 		llvm::BasicBlock* end_block = llvm::BasicBlock::Create(
-			m_context,
+			m_llvm_context->get_context(),
 			"",
 			parent_function
 		);
 
 		llvm::BasicBlock* condition_block = llvm::BasicBlock::Create(
-			m_context, 
+			m_llvm_context->get_context(), 
 			"", 
 			parent_function
 		);
 
 		llvm::BasicBlock* loop_body_block = llvm::BasicBlock::Create(
-			m_context,
+			m_llvm_context->get_context(),
 			"", 
 			parent_function
 		);
 
-		m_builder.CreateBr(condition_block);
+		m_llvm_context->get_builder().CreateBr(condition_block);
 
 		// condition block
-		m_builder.SetInsertPoint(condition_block);
+		m_llvm_context->get_builder().SetInsertPoint(condition_block);
 
 		// accept the condition node
 		acceptation_result condition_value_result = node.get_loop_condition_node()->accept(
@@ -202,14 +202,14 @@ namespace channel {
 			return condition_value_result; // return on failure
 		}
 
-		m_builder.CreateCondBr(
+		m_llvm_context->get_builder().CreateCondBr(
 			condition_value_result.value()->get_value(),
 			loop_body_block,
 			end_block
 		);
 
 		// accept all statements in the loop body
-		m_builder.SetInsertPoint(loop_body_block);
+		m_llvm_context->get_builder().SetInsertPoint(loop_body_block);
 
 		// save the previous scope
 		scope_ptr prev_scope = m_scope;
@@ -230,11 +230,11 @@ namespace channel {
 		m_scope = prev_scope;
 
 		// only add a terminator block if we don't have one
-		if (!m_builder.GetInsertBlock()->getTerminator()) {
-			m_builder.CreateBr(condition_block);
+		if (!m_llvm_context->get_builder().GetInsertBlock()->getTerminator()) {
+			m_llvm_context->get_builder().CreateBr(condition_block);
 		}
 
-		m_builder.SetInsertPoint(end_block);
+		m_llvm_context->get_builder().SetInsertPoint(end_block);
 		return nullptr;
 	}
 
@@ -244,29 +244,29 @@ namespace channel {
 	) {
 		(void)context; // suppress C4100
 
-		llvm::BasicBlock* entry_block = m_builder.GetInsertBlock();
+		llvm::BasicBlock* entry_block = m_llvm_context->get_builder().GetInsertBlock();
 		llvm::Function* parent_function = entry_block->getParent();
 
 		llvm::BasicBlock* end_block = llvm::BasicBlock::Create(
-			m_context, 
+			m_llvm_context->get_context(), 
 			"", 
 			parent_function
 		);
 
 		llvm::BasicBlock* condition_block = llvm::BasicBlock::Create(
-			m_context,
+			m_llvm_context->get_context(),
 			"",
 			parent_function
 		);
 
 		llvm::BasicBlock* increment_block = llvm::BasicBlock::Create(
-			m_context, 
+			m_llvm_context->get_context(), 
 			"", 
 			parent_function
 		);
 
 		llvm::BasicBlock* loop_body_block = llvm::BasicBlock::Create(
-			m_context, 
+			m_llvm_context->get_context(), 
 			"", 
 			parent_function
 		);
@@ -281,10 +281,10 @@ namespace channel {
 			return index_expression_result; // return on failure
 		}
 
-		m_builder.CreateBr(condition_block);
+		m_llvm_context->get_builder().CreateBr(condition_block);
 
 		// accept the condition block
-		m_builder.SetInsertPoint(condition_block);
+		m_llvm_context->get_builder().SetInsertPoint(condition_block);
 
 		acceptation_result condition_value_result = node.get_loop_condition_node()->accept(
 			*this, 
@@ -306,14 +306,14 @@ namespace channel {
 			);
 		}
 
-		m_builder.CreateCondBr(
+		m_llvm_context->get_builder().CreateCondBr(
 			condition_value_result.value()->get_value(),
 			loop_body_block,
 			end_block
 		);
 
 		// create the increment block
-		m_builder.SetInsertPoint(increment_block);
+		m_llvm_context->get_builder().SetInsertPoint(increment_block);
 		for (channel::node* n : node.get_post_iteration_nodes()) {
 			acceptation_result statement_result = n->accept(*this, {});
 			if (!statement_result.has_value()) {
@@ -321,10 +321,10 @@ namespace channel {
 			}
 		}
 
-		m_builder.CreateBr(condition_block);
+		m_llvm_context->get_builder().CreateBr(condition_block);
 
 		// create the loop body block
-		m_builder.SetInsertPoint(loop_body_block);
+		m_llvm_context->get_builder().SetInsertPoint(loop_body_block);
 
 		// save the previous scope
 		scope_ptr prev_scope = m_scope;
@@ -342,11 +342,11 @@ namespace channel {
 		m_scope = prev_scope;
 
 		// only add a terminator block if we don't have one
-		if (!m_builder.GetInsertBlock()->getTerminator()) {
-			m_builder.CreateBr(increment_block);
+		if (!m_llvm_context->get_builder().GetInsertBlock()->getTerminator()) {
+			m_llvm_context->get_builder().CreateBr(increment_block);
 		}
 
-		m_builder.SetInsertPoint(end_block);
+		m_llvm_context->get_builder().SetInsertPoint(end_block);
 		return nullptr;
 	}
 
@@ -367,19 +367,19 @@ namespace channel {
 		}
 
 		// only add a terminator block if we don't have one
-		if (!m_builder.GetInsertBlock()->getTerminator()) {
-			m_builder.CreateBr(end_block);
+		if (!m_llvm_context->get_builder().GetInsertBlock()->getTerminator()) {
+			m_llvm_context->get_builder().CreateBr(end_block);
 		}
 
 		// create a new basic block for the remaining loop body and set it as the current insert point
 		llvm::Function* parent_function = end_block->getParent();
 		llvm::BasicBlock* continue_block = llvm::BasicBlock::Create(
-			m_context, 
+			m_llvm_context->get_context(), 
 			"", 
 			parent_function
 		);
 
-		m_builder.SetInsertPoint(continue_block);
+		m_llvm_context->get_builder().SetInsertPoint(continue_block);
 		return nullptr;
 	}
 }

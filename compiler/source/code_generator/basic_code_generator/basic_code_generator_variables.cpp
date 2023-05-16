@@ -45,7 +45,7 @@ namespace channel {
 
 		expression_value->set_value(out_cast);
 
-		m_builder.CreateStore(
+		m_llvm_context->get_builder().CreateStore(
 			expression_value->get_value(), 
 			variable_result.value()->get_value()
 		);
@@ -67,7 +67,7 @@ namespace channel {
 				variable_value->get_value()
 			);
 
-			llvm::Value* load = m_builder.CreateLoad(
+			llvm::Value* load = m_llvm_context->get_builder().CreateLoad(
 				alloca->getAllocatedType(),
 				variable_value->get_value()
 			);
@@ -103,7 +103,7 @@ namespace channel {
 		);
 
 		// load the value from the memory location
-		llvm::Value* load = m_builder.CreateLoad(
+		llvm::Value* load = m_llvm_context->get_builder().CreateLoad(
 			global_variable_value->getValueType(),
 			global_variable->get_value()
 		);
@@ -121,18 +121,18 @@ namespace channel {
 		const codegen_context& context
 	) {
 		(void)context; // suppress C4100
-		llvm::BasicBlock* original_entry_block = m_builder.GetInsertBlock();
+		llvm::BasicBlock* original_entry_block = m_llvm_context->get_builder().GetInsertBlock();
 		llvm::Function* parent_function = original_entry_block->getParent();
 		llvm::BasicBlock* function_entry_block = &*parent_function->begin();
 
-		m_builder.SetInsertPoint(
+		m_llvm_context->get_builder().SetInsertPoint(
 			function_entry_block,
 			function_entry_block->getFirstInsertionPt()
 		);
 
 		// store the initial value
-		llvm::AllocaInst* alloca = m_builder.CreateAlloca(
-			node.get_declaration_type().get_llvm_type(m_context),
+		llvm::AllocaInst* alloca = m_llvm_context->get_builder().CreateAlloca(
+			node.get_declaration_type().get_llvm_type(m_llvm_context->get_context()),
 			nullptr
 		);
 
@@ -167,7 +167,7 @@ namespace channel {
 		}
 
 		// assign the actual value
-		m_builder.SetInsertPoint(original_entry_block);
+		m_llvm_context->get_builder().SetInsertPoint(original_entry_block);
 
 		// evaluate the assigned value, if there is one
 		acceptation_result declaration_value_result = get_declaration_value(
@@ -186,9 +186,9 @@ namespace channel {
 			node.get_declared_position()
 		);
 
-		m_builder.CreateStore(cast_assigned_value, alloca);
+		m_llvm_context->get_builder().CreateStore(cast_assigned_value, alloca);
 		declaration_value->set_pointer(alloca);
-		m_builder.SetInsertPoint(original_entry_block);
+		m_llvm_context->get_builder().SetInsertPoint(original_entry_block);
 		return declaration_value;
 	}
 
@@ -200,7 +200,7 @@ namespace channel {
 		// start creating the init function for our global ctor
 		const std::string init_func_name = "__global_init_" + node.get_declaration_identifier();
 		llvm::FunctionType* init_func_type = llvm::FunctionType::get(
-			llvm::Type::getVoidTy(m_context),
+			llvm::Type::getVoidTy(m_llvm_context->get_context()),
 			false
 		);
 
@@ -208,16 +208,16 @@ namespace channel {
 			init_func_type,
 			llvm::Function::InternalLinkage,
 			init_func_name, 
-			m_module.get()
+			m_llvm_context->get_module().get()
 		);
 
 		llvm::BasicBlock* init_func_entry = llvm::BasicBlock::Create(
-			m_context, 
+			m_llvm_context->get_context(), 
 			"", 
 			init_func
 		);
 
-		m_builder.SetInsertPoint(init_func_entry); // write to the init function
+		m_llvm_context->get_builder().SetInsertPoint(init_func_entry); // write to the init function
 
 		// evaluate the assigned value, if there is one
 		acceptation_result declaration_value_result = get_declaration_value(
@@ -240,12 +240,12 @@ namespace channel {
 		value_ptr global_declaration = std::make_shared<value>(
 			node.get_declaration_identifier(),
 			node.get_declaration_type(),
-			new llvm::GlobalVariable(*m_module,
-				node.get_declaration_type().get_llvm_type(m_context),
+			new llvm::GlobalVariable(*m_llvm_context->get_module(),
+				node.get_declaration_type().get_llvm_type(m_llvm_context->get_context()),
 				false,
 				llvm::GlobalValue::ExternalLinkage,
 				llvm::Constant::getNullValue(
-					node.get_declaration_type().get_llvm_type(m_context)
+					node.get_declaration_type().get_llvm_type(m_llvm_context->get_context())
 				), // default initializer
 				node.get_declaration_identifier()
 			)
@@ -267,7 +267,7 @@ namespace channel {
 			); // return on failure
 		}
 
-		m_builder.CreateStore(
+		m_llvm_context->get_builder().CreateStore(
 			cast_assigned_value, 
 			global_declaration->get_value()
 		);
@@ -276,23 +276,23 @@ namespace channel {
 			global_declaration->get_value()
 		);
 
-		m_builder.CreateRetVoid();
+		m_llvm_context->get_builder().CreateRetVoid();
 
 		// create a new constructor with the given priority
 		llvm::ConstantInt* priority = llvm::ConstantInt::get(
-			llvm::Type::getInt32Ty(m_context),
+			llvm::Type::getInt32Ty(m_llvm_context->get_context()),
 			m_global_initialization_priority++
 		);
 
 		llvm::Constant* initializer_cast = llvm::ConstantExpr::getBitCast(
 			init_func, 
-			llvm::Type::getInt8PtrTy(m_context)
+			llvm::Type::getInt8PtrTy(m_llvm_context->get_context())
 		);
 
 		llvm::Constant* new_ctor = llvm::ConstantStruct::get(CTOR_STRUCT_TYPE, {
 			priority,
 			initializer_cast,
-			llvm::Constant::getNullValue(llvm::Type::getInt8PtrTy(m_context))
+			llvm::Constant::getNullValue(llvm::Type::getInt8PtrTy(m_llvm_context->get_context()))
 		});
 
 		// push the constructor to the ctor list
@@ -327,15 +327,15 @@ namespace channel {
 		// calculate the total size
 		const type array_element_type = node.get_array_element_type();
 		llvm::Type* element_type = array_element_type.get_llvm_type(
-			m_context
+			m_llvm_context->get_context()
 		);
 
 		llvm::Value* element_size = llvm::ConstantInt::get(
-			m_context, 
+			m_llvm_context->get_context(), 
 			llvm::APInt(64, (node.get_array_element_type().get_bit_width() + 7) / 8)
 		);
 
-		llvm::Value* total_size = m_builder.CreateMul(
+		llvm::Value* total_size = m_llvm_context->get_builder().CreateMul(
 			element_count_cast,
 			element_size
 		);
@@ -346,37 +346,37 @@ namespace channel {
 		// add space for a null terminator if the element type is a character
 		if (is_char_pointer) {
 			llvm::Value* extra_size = llvm::ConstantInt::get(
-				m_context, 
+				m_llvm_context->get_context(), 
 				llvm::APInt(64, 1)
 			); // space for a null terminator
 
-			total_size = m_builder.CreateAdd(
+			total_size = m_llvm_context->get_builder().CreateAdd(
 				total_size, 
 				extra_size
 			);
 		}
 
 		// allocate the array
-		llvm::Value* allocated_ptr = m_builder.CreateCall(
+		llvm::Value* allocated_ptr = m_llvm_context->get_builder().CreateCall(
 			malloc_func, 
 			total_size
 		);
 
 		// cast the result to the correct pointer type
-		llvm::Value* typed_ptr = m_builder.CreateBitCast(
+		llvm::Value* typed_ptr = m_llvm_context->get_builder().CreateBitCast(
 			allocated_ptr,
 			llvm::PointerType::getUnqual(element_type)
 		);
 
 		// add null terminator if the element type is a character
 		if (is_char_pointer) {
-			llvm::Value* null_terminator_ptr = m_builder.CreateGEP(
+			llvm::Value* null_terminator_ptr = m_llvm_context->get_builder().CreateGEP(
 				element_type,
 				typed_ptr, 
 				element_count_cast
 			);
 
-			m_builder.CreateStore(llvm::ConstantInt::get(m_context, llvm::APInt(8, 0)), null_terminator_ptr);
+			m_llvm_context->get_builder().CreateStore(llvm::ConstantInt::get(m_llvm_context->get_context(), llvm::APInt(8, 0)), null_terminator_ptr);
 		}
 
 		value_ptr array_value = std::make_shared<value>(
@@ -431,14 +431,14 @@ namespace channel {
 			);
 
 			// load the actual pointer value
-			current_ptr = m_builder.CreateLoad(
-				current_type.get_llvm_type(m_context), 
+			current_ptr = m_llvm_context->get_builder().CreateLoad(
+				current_type.get_llvm_type(m_llvm_context->get_context()), 
 				current_ptr
 			);
 
 			// get the next level pointer
-			current_ptr = m_builder.CreateInBoundsGEP(
-				current_type.get_element_type().get_llvm_type(m_context),
+			current_ptr = m_llvm_context->get_builder().CreateInBoundsGEP(
+				current_type.get_element_type().get_llvm_type(m_llvm_context->get_context()),
 				current_ptr,
 				index_value_cast
 			);
@@ -450,8 +450,8 @@ namespace channel {
 		}
 
 		// load the value at the final element address
-		llvm::Value* loaded_value = m_builder.CreateLoad(
-			current_type.get_element_type().get_llvm_type(m_context), 
+		llvm::Value* loaded_value = m_llvm_context->get_builder().CreateLoad(
+			current_type.get_element_type().get_llvm_type(m_llvm_context->get_context()), 
 			current_ptr
 		);
 
@@ -504,15 +504,15 @@ namespace channel {
 			);
 
 			// load the actual pointer value
-			current_ptr = m_builder.CreateLoad(
-				current_type.get_llvm_type(m_context), 
+			current_ptr = m_llvm_context->get_builder().CreateLoad(
+				current_type.get_llvm_type(m_llvm_context->get_context()), 
 				current_ptr
 			);
 
 			// get the next level pointer
-			// current_ptr = m_builder.CreateGEP(current_type.get_element_type().get_llvm_type(m_context), current_ptr, index_value_cast);
-			current_ptr = m_builder.CreateInBoundsGEP(
-				current_type.get_element_type().get_llvm_type(m_context),
+			// current_ptr = m_llvm_handler->get_builder().CreateGEP(current_type.get_element_type().get_llvm_type(m_llvm_handler->get_context()), current_ptr, index_value_cast);
+			current_ptr = m_llvm_context->get_builder().CreateInBoundsGEP(
+				current_type.get_element_type().get_llvm_type(m_llvm_context->get_context()),
 				current_ptr, 
 				index_value_cast
 			);
@@ -550,7 +550,7 @@ namespace channel {
 		);
 
 		// store the result of the right-hand side expression in the array
-		m_builder.CreateStore(
+		m_llvm_context->get_builder().CreateStore(
 			expression_value_result.value()->get_value(), 
 			current_ptr
 		);
@@ -592,7 +592,7 @@ namespace channel {
 
 		// declared without an assigned value, set it to 0
 		llvm::Type* value_type = node.get_declaration_type().get_llvm_type(
-			m_context
+			m_llvm_context->get_context()
 		);
 
 		return std::make_shared<value>(

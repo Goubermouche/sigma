@@ -58,6 +58,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="source\llvm_wrappers\llvm_context.h" />
     <ClInclude Include="source\code_generator\abstract_syntax_tree\abstract_syntax_tree.h" />
     <ClInclude Include="source\code_generator\abstract_syntax_tree\functions\function_call_node.h" />
     <ClInclude Include="source\code_generator\abstract_syntax_tree\functions\function_node.h" />
@@ -131,6 +132,7 @@
     <ClInclude Include="source\utility\types.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="source\llvm_wrappers\llvm_context.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="source\code_generator\abstract_syntax_tree\abstract_syntax_tree.cpp" />
     <ClCompile Include="source\code_generator\abstract_syntax_tree\functions\function_call_node.cpp" />

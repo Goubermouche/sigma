@@ -57,21 +57,21 @@ namespace channel {
 
 		llvm::Value* decrement_result;
 		if (expression_result.value()->get_type().is_floating_point()) {
-			decrement_result = m_builder.CreateFSub(
+			decrement_result = m_llvm_context->get_builder().CreateFSub(
 				expression_result.value()->get_value(),
 				llvm::ConstantFP::get(
 					expression_result.value()->get_type().get_llvm_type(
-						m_context
+						m_llvm_context->get_context()
 					), 
 					1.0
 				)
 			);
 		}
 		else {
-			decrement_result = m_builder.CreateSub(
+			decrement_result = m_llvm_context->get_builder().CreateSub(
 				expression_result.value()->get_value(),
 				llvm::ConstantInt::get(
-					expression_result.value()->get_type().get_llvm_type(m_context),
+					expression_result.value()->get_type().get_llvm_type(m_llvm_context->get_context()),
 					1
 				)
 			);
@@ -80,7 +80,7 @@ namespace channel {
 		// assert that the pointer is not nullptr
 		ASSERT(expression_result.value()->get_pointer() != nullptr, "pointer is nullptr");
 
-		m_builder.CreateStore(
+		m_llvm_context->get_builder().CreateStore(
 			decrement_result,
 			expression_result.value()->get_pointer()
 		);
@@ -114,19 +114,19 @@ namespace channel {
 
 		llvm::Value* decrement_result;
 		if (expression_result.value()->get_type().is_floating_point()) {
-			decrement_result = m_builder.CreateFAdd(
+			decrement_result = m_llvm_context->get_builder().CreateFAdd(
 				expression_result.value()->get_value(),
 				llvm::ConstantFP::get(
-					expression_result.value()->get_type().get_llvm_type(m_context),
+					expression_result.value()->get_type().get_llvm_type(m_llvm_context->get_context()),
 					1.0
 				)
 			);
 		}
 		else {
-			decrement_result = m_builder.CreateAdd(
+			decrement_result = m_llvm_context->get_builder().CreateAdd(
 				expression_result.value()->get_value(), 
 				llvm::ConstantInt::get(
-					expression_result.value()->get_type().get_llvm_type(m_context),
+					expression_result.value()->get_type().get_llvm_type(m_llvm_context->get_context()),
 					1
 				)
 			);
@@ -135,7 +135,7 @@ namespace channel {
 		// assert that the pointer is not nullptr
 		ASSERT(expression_result.value()->get_pointer() != nullptr, "pointer is nullptr");
 
-		m_builder.CreateStore(
+		m_llvm_context->get_builder().CreateStore(
 			decrement_result,
 			expression_result.value()->get_pointer()
 		);
@@ -171,19 +171,19 @@ namespace channel {
 		// increment the expression
 		llvm::Value* increment_result;
 		if (expression_result.value()->get_type().is_floating_point()) {
-			increment_result = m_builder.CreateFSub(
+			increment_result = m_llvm_context->get_builder().CreateFSub(
 				expression_result.value()->get_value(),
 				llvm::ConstantFP::get(
-					expression_result.value()->get_type().get_llvm_type(m_context), 
+					expression_result.value()->get_type().get_llvm_type(m_llvm_context->get_context()), 
 					1.0
 				)
 			);
 		}
 		else {
-			increment_result = m_builder.CreateSub(
+			increment_result = m_llvm_context->get_builder().CreateSub(
 				expression_result.value()->get_value(),
 				llvm::ConstantInt::get(
-					expression_result.value()->get_type().get_llvm_type(m_context),
+					expression_result.value()->get_type().get_llvm_type(m_llvm_context->get_context()),
 					1
 				)
 			);
@@ -193,7 +193,7 @@ namespace channel {
 		ASSERT(expression_result.value()->get_pointer() != nullptr, "pointer is nullptr");
 
 		// store the decremented value back to memory
-		m_builder.CreateStore(
+		m_llvm_context->get_builder().CreateStore(
 			increment_result,
 			expression_result.value()->get_pointer()
 		);
@@ -233,19 +233,19 @@ namespace channel {
 		// increment the expression
 		llvm::Value* increment_result;
 		if (expression_result.value()->get_type().is_floating_point()) {
-			increment_result = m_builder.CreateFAdd(
+			increment_result = m_llvm_context->get_builder().CreateFAdd(
 				expression_result.value()->get_value(), 
 				llvm::ConstantFP::get(
-					expression_result.value()->get_type().get_llvm_type(m_context),
+					expression_result.value()->get_type().get_llvm_type(m_llvm_context->get_context()),
 					1.0
 				)
 			);
 		}
 		else {
-			increment_result = m_builder.CreateAdd(
+			increment_result = m_llvm_context->get_builder().CreateAdd(
 				expression_result.value()->get_value(),
 				llvm::ConstantInt::get(
-					expression_result.value()->get_type().get_llvm_type(m_context),
+					expression_result.value()->get_type().get_llvm_type(m_llvm_context->get_context()),
 					1
 				)
 			);
@@ -255,7 +255,7 @@ namespace channel {
 		ASSERT(expression_result.value()->get_pointer() != nullptr, "pointer is nullptr");
 
 		// store the incremented value back to memory
-		m_builder.CreateStore(
+		m_llvm_context->get_builder().CreateStore(
 			increment_result,
 			expression_result.value()->get_pointer()
 		);
@@ -299,7 +299,7 @@ namespace channel {
 		);
 
 		// store the result of the addition operation back into the variable
-		m_builder.CreateStore(
+		m_llvm_context->get_builder().CreateStore(
 			assignment_value->get_value(), 
 			left_operand_result.value()->get_pointer()
 		);
@@ -366,7 +366,7 @@ namespace channel {
 		);
 
 		// store the result of the subtraction operation back into the variable
-		m_builder.CreateStore(
+		m_llvm_context->get_builder().CreateStore(
 			assignment_value->get_value(),
 			left_operand_result.value()->get_pointer()
 		);
@@ -433,7 +433,7 @@ namespace channel {
 		);
 
 		// store the result of the multiplication operation back into the variable
-		m_builder.CreateStore(
+		m_llvm_context->get_builder().CreateStore(
 			assignment_value->get_value(),
 			left_operand_result.value()->get_pointer()
 		);
@@ -500,7 +500,7 @@ namespace channel {
 		);
 
 		// store the result of the division operation back into the variable
-		m_builder.CreateStore(
+		m_llvm_context->get_builder().CreateStore(
 			assignment_value->get_value(),
 			left_operand_result.value()->get_pointer()
 		);
@@ -567,7 +567,7 @@ namespace channel {
 		);
 
 		// store the result of the modulo operation back into the variable
-		m_builder.CreateStore(
+		m_llvm_context->get_builder().CreateStore(
 			assignment_value->get_value(),
 			left_operand_result.value()->get_pointer()
 		);
@@ -643,7 +643,7 @@ namespace channel {
 		}
 
 		// create a logical AND operation
-		llvm::Value* and_result = m_builder.CreateAnd(
+		llvm::Value* and_result = m_llvm_context->get_builder().CreateAnd(
 			left_operand_result.value()->get_value(),
 			right_operand_result.value()->get_value(),
 			"and"
@@ -693,7 +693,7 @@ namespace channel {
 		}
 
 		// create a logical OR operation
-		llvm::Value* or_result = m_builder.CreateOr(
+		llvm::Value* or_result = m_llvm_context->get_builder().CreateOr(
 			left_operand_result.value()->get_value(),
 			right_operand_result.value()->get_value()
 		);
@@ -751,20 +751,20 @@ namespace channel {
 		// create a greater than operation based on the highest_precision type
 		llvm::Value* greater_than_result;
 		if (highest_precision.is_floating_point()) {
-			greater_than_result = m_builder.CreateFCmpOGT(
+			greater_than_result = m_llvm_context->get_builder().CreateFCmpOGT(
 				left_value_upcasted,
 				right_value_upcasted
 			);
 		}
 		else {
 			if (highest_precision.is_unsigned()) {
-				greater_than_result = m_builder.CreateICmpUGT(
+				greater_than_result = m_llvm_context->get_builder().CreateICmpUGT(
 					left_value_upcasted, 
 					right_value_upcasted
 				);
 			}
 			else {
-				greater_than_result = m_builder.CreateICmpSGT(
+				greater_than_result = m_llvm_context->get_builder().CreateICmpSGT(
 					left_value_upcasted,
 					right_value_upcasted
 				);
@@ -824,20 +824,20 @@ namespace channel {
 		// create a greater than or equal to operation based on the highest_precision type
 		llvm::Value* greater_than_equal_result;
 		if (highest_precision.is_floating_point()) {
-			greater_than_equal_result = m_builder.CreateFCmpOGE(
+			greater_than_equal_result = m_llvm_context->get_builder().CreateFCmpOGE(
 				left_value_upcasted, 
 				right_value_upcasted
 			);
 		}
 		else {
 			if (highest_precision.is_unsigned()) {
-				greater_than_equal_result = m_builder.CreateICmpUGE(
+				greater_than_equal_result = m_llvm_context->get_builder().CreateICmpUGE(
 					left_value_upcasted, 
 					right_value_upcasted
 				);
 			}
 			else {
-				greater_than_equal_result = m_builder.CreateICmpSGE(
+				greater_than_equal_result = m_llvm_context->get_builder().CreateICmpSGE(
 					left_value_upcasted, 
 					right_value_upcasted
 				);
@@ -897,20 +897,20 @@ namespace channel {
 		// create a less than operation based on the highest_precision type
 		llvm::Value* less_than_result;
 		if (highest_precision.is_floating_point()) {
-			less_than_result = m_builder.CreateFCmpOLT(
+			less_than_result = m_llvm_context->get_builder().CreateFCmpOLT(
 				left_value_upcasted, 
 				right_value_upcasted
 			);
 		}
 		else {
 			if (highest_precision.is_unsigned()) {
-				less_than_result = m_builder.CreateICmpULT(
+				less_than_result = m_llvm_context->get_builder().CreateICmpULT(
 					left_value_upcasted,
 					right_value_upcasted
 				);
 			}
 			else {
-				less_than_result = m_builder.CreateICmpSLT(
+				less_than_result = m_llvm_context->get_builder().CreateICmpSLT(
 					left_value_upcasted,
 					right_value_upcasted
 				);
@@ -970,20 +970,20 @@ namespace channel {
 		// create a less than or equal to operation based on the highest_precision type
 		llvm::Value* less_than_equal_result;
 		if (highest_precision.is_floating_point()) {
-			less_than_equal_result = m_builder.CreateFCmpOLE(
+			less_than_equal_result = m_llvm_context->get_builder().CreateFCmpOLE(
 				left_value_upcasted,
 				right_value_upcasted
 			);
 		}
 		else {
 			if (highest_precision.is_unsigned()) {
-				less_than_equal_result = m_builder.CreateICmpULE(
+				less_than_equal_result = m_llvm_context->get_builder().CreateICmpULE(
 					left_value_upcasted,
 					right_value_upcasted
 				);
 			}
 			else {
-				less_than_equal_result = m_builder.CreateICmpSLE(
+				less_than_equal_result = m_llvm_context->get_builder().CreateICmpSLE(
 					left_value_upcasted, 
 					right_value_upcasted
 				);
@@ -1043,13 +1043,13 @@ namespace channel {
 		// create an equals operation based on the highest_precision type
 		llvm::Value* equals_result;
 		if (highest_precision.is_floating_point()) {
-			equals_result = m_builder.CreateFCmpOEQ(
+			equals_result = m_llvm_context->get_builder().CreateFCmpOEQ(
 				left_value_upcasted, 
 				right_value_upcasted
 			);
 		}
 		else {
-			equals_result = m_builder.CreateICmpEQ(
+			equals_result = m_llvm_context->get_builder().CreateICmpEQ(
 				left_value_upcasted, 
 				right_value_upcasted
 			);
@@ -1108,13 +1108,13 @@ namespace channel {
 		// create a not equals operation based on the highest_precision type
 		llvm::Value* not_equals_result;
 		if (highest_precision.is_floating_point()) {
-			not_equals_result = m_builder.CreateFCmpONE(
+			not_equals_result = m_llvm_context->get_builder().CreateFCmpONE(
 				left_value_upcasted, 
 				right_value_upcasted
 			);
 		}
 		else {
-			not_equals_result = m_builder.CreateICmpNE(
+			not_equals_result = m_llvm_context->get_builder().CreateICmpNE(
 				left_value_upcasted,
 				right_value_upcasted
 			);
@@ -1176,7 +1176,7 @@ namespace channel {
 		// both types are floating point
 		if (highest_precision.is_floating_point()) {
 			return std::make_tuple(
-				m_builder.CreateFAdd(
+				m_llvm_context->get_builder().CreateFAdd(
 					left_value_upcasted,
 					right_value_upcasted,
 					"fadd"
@@ -1189,7 +1189,7 @@ namespace channel {
 		// both types are unsigned
 		if (highest_precision.is_unsigned()) {
 			return std::make_tuple(
-				m_builder.CreateAdd(
+				m_llvm_context->get_builder().CreateAdd(
 					left_value_upcasted,
 					right_value_upcasted,
 					"uadd",
@@ -1202,7 +1202,7 @@ namespace channel {
 
 		// fallback to regular op
 		return std::make_tuple(
-			m_builder.CreateAdd(
+			m_llvm_context->get_builder().CreateAdd(
 				left_value_upcasted,
 				right_value_upcasted,
 				"add"
@@ -1261,7 +1261,7 @@ namespace channel {
 		// both types are floating point
 		if (highest_precision.is_floating_point()) {
 			return std::make_tuple(
-				m_builder.CreateFSub(
+				m_llvm_context->get_builder().CreateFSub(
 					left_value_upcasted,
 					right_value_upcasted,
 					"fsub"
@@ -1274,7 +1274,7 @@ namespace channel {
 		// both types are unsigned
 		if (highest_precision.is_unsigned()) {
 			return std::make_tuple(
-				m_builder.CreateSub(
+				m_llvm_context->get_builder().CreateSub(
 					left_value_upcasted,
 					right_value_upcasted,
 					"usub",
@@ -1287,7 +1287,7 @@ namespace channel {
 
 		// fallback to regular op
 		return std::make_tuple(
-			m_builder.CreateSub(
+			m_llvm_context->get_builder().CreateSub(
 				left_value_upcasted,
 				right_value_upcasted,
 				"sub"
@@ -1346,7 +1346,7 @@ namespace channel {
 		// both types are floating point
 		if (highest_precision.is_floating_point()) {
 			return std::make_tuple(
-				m_builder.CreateFMul(
+				m_llvm_context->get_builder().CreateFMul(
 					left_value_upcasted,
 					right_value_upcasted,
 					"fmul"
@@ -1359,7 +1359,7 @@ namespace channel {
 		// both types are unsigned
 		if (highest_precision.is_unsigned()) {
 			return std::make_tuple(
-				m_builder.CreateMul(
+				m_llvm_context->get_builder().CreateMul(
 					left_value_upcasted,
 					right_value_upcasted,
 					"umul",
@@ -1372,7 +1372,7 @@ namespace channel {
 
 		// fallback to regular op
 		return std::make_tuple(
-			m_builder.CreateMul(
+			m_llvm_context->get_builder().CreateMul(
 				left_value_upcasted,
 				right_value_upcasted,
 				"mul"
@@ -1431,7 +1431,7 @@ namespace channel {
 		// both types are floating point
 		if (highest_precision.is_floating_point()) {
 			return std::make_tuple(
-				m_builder.CreateFDiv(
+				m_llvm_context->get_builder().CreateFDiv(
 					left_value_upcasted,
 					right_value_upcasted,
 					"fdiv"
@@ -1444,7 +1444,7 @@ namespace channel {
 		// both types are unsigned
 		if (highest_precision.is_unsigned()) {
 			return std::make_tuple(
-				m_builder.CreateUDiv(
+				m_llvm_context->get_builder().CreateUDiv(
 					left_value_upcasted,
 					right_value_upcasted,
 					"udiv",
@@ -1457,7 +1457,7 @@ namespace channel {
 
 		// fallback to regular op
 		return std::make_tuple(
-			m_builder.CreateSDiv(
+			m_llvm_context->get_builder().CreateSDiv(
 				left_value_upcasted,
 				right_value_upcasted,
 				"sdiv"
@@ -1516,7 +1516,7 @@ namespace channel {
 		// both types are floating point
 		if (highest_precision.is_floating_point()) {
 			return std::make_tuple(
-				m_builder.CreateFRem(
+				m_llvm_context->get_builder().CreateFRem(
 					left_value_upcasted,
 					right_value_upcasted,
 					"fmod"
@@ -1529,7 +1529,7 @@ namespace channel {
 		// both types are unsigned
 		if (highest_precision.is_unsigned()) {
 			return std::make_tuple(
-				m_builder.CreateURem(
+				m_llvm_context->get_builder().CreateURem(
 					left_value_upcasted,
 					right_value_upcasted,
 					"umod"
@@ -1541,7 +1541,7 @@ namespace channel {
 
 		// fallback to regular op
 		return std::make_tuple(
-			m_builder.CreateSRem(
+			m_llvm_context->get_builder().CreateSRem(
 				left_value_upcasted,
 				right_value_upcasted,
 				"smod"

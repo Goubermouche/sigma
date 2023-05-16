@@ -6,11 +6,11 @@
 #include "llvm_wrappers/codegen_context.h"
 #include "llvm_wrappers/functions/function_registry.h"
 
-#define CTOR_STRUCT_TYPE                 \
-llvm::StructType::get(m_context, {       \
-	llvm::Type::getInt32Ty(m_context),   \
-	llvm::Type::getInt8PtrTy(m_context), \
-	llvm::Type::getInt8PtrTy(m_context)  \
+#define CTOR_STRUCT_TYPE                                     \
+llvm::StructType::get(m_llvm_context->get_context(), {       \
+	llvm::Type::getInt32Ty(m_llvm_context->get_context()),   \
+	llvm::Type::getInt8PtrTy(m_llvm_context->get_context()), \
+	llvm::Type::getInt8PtrTy(m_llvm_context->get_context())  \
 })
 
 namespace channel {

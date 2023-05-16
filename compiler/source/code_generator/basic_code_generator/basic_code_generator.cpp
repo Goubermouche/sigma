@@ -14,11 +14,13 @@ namespace channel {
 
 			// initialize argument types
 			for (u64 i = 0; i < arguments.size(); i++) {
-				argument_types[i] = arguments[i].second.get_llvm_type(m_context);
+				argument_types[i] = arguments[i].second.get_llvm_type(
+					m_llvm_context->get_context()
+				);
 			}
 
 			llvm::FunctionType* function_type = llvm::FunctionType::get(
-				function_declaration->get_return_type().get_llvm_type(m_context),
+				function_declaration->get_return_type().get_llvm_type(m_llvm_context->get_context()),
 				argument_types,
 				function_declaration->is_variadic()
 			);
@@ -27,7 +29,7 @@ namespace channel {
 				function_type,
 				llvm::Function::ExternalLinkage,
 				function_declaration->get_external_function_name(),
-				m_module.get()
+				m_llvm_context->get_module().get()
 			);
 
 			// insert the function declaration and treat it like a regular function
@@ -64,18 +66,18 @@ namespace channel {
 	}
 
 	std::shared_ptr<llvm::Module> basic_code_generator::get_module() {
-		return m_module;
+		return m_llvm_context->get_module();
 	}
 
 	void basic_code_generator::initialize_global_variables() {
 		// create the global ctors array
 		llvm::ArrayType* updated_ctor_array_type = llvm::ArrayType::get(CTOR_STRUCT_TYPE, m_global_ctors.size());
 		llvm::Constant* updated_ctors = llvm::ConstantArray::get(updated_ctor_array_type, m_global_ctors);
-		new llvm::GlobalVariable(*m_module, updated_ctor_array_type, false, llvm::GlobalValue::AppendingLinkage, updated_ctors, "llvm.global_ctors");
+		new llvm::GlobalVariable(*m_llvm_context->get_module(), updated_ctor_array_type, false, llvm::GlobalValue::AppendingLinkage, updated_ctors, "llvm.global_ctors");
 	}
 
 	void basic_code_generator::print_intermediate_representation() const {
-		m_module->print(llvm::outs(), nullptr);
+		m_llvm_context->get_module()->print(llvm::outs(), nullptr);
 	}
 
 	error_result basic_code_generator::verify_intermediate_representation() const {
@@ -86,10 +88,10 @@ namespace channel {
 		
 		// check for IR errors
 		console::out << color::red;
-		if (llvm::verifyModule(*m_module, &llvm::outs())) {
-			console::out << color::white;
-			return error::emit<4016>();
-		}
+		// if (llvm::verifyModule(*m_llvm_handler->get_module(), &llvm::outs())) {
+		// 	console::out << color::white;
+		// 	return error::emit<4016>();
+		// }
 		
 		console::out << color::white;
 
@@ -152,20 +154,20 @@ namespace channel {
 			// perform the cast op
 			if (function_return_type.is_floating_point()) {
 				if (target_type.is_integral()) {
-					return m_builder.CreateFPToSI(function_call_result, target_llvm_type, "fptosi");
+					return m_llvm_context->get_builder().CreateFPToSI(function_call_result, target_llvm_type, "fptosi");
 				}
 
 				if (target_type.is_floating_point()) {
-					return m_builder.CreateFPCast(function_call_result, target_llvm_type, "fpcast");
+					return m_llvm_context->get_builder().CreateFPCast(function_call_result, target_llvm_type, "fpcast");
 				}
 			}
 			else if (function_return_type.is_integral()) {
 				if (target_type.is_floating_point()) {
-					return m_builder.CreateSIToFP(function_call_result, target_llvm_type, "sitofp");
+					return m_llvm_context->get_builder().CreateSIToFP(function_call_result, target_llvm_type, "sitofp");
 				}
 
 				if (target_type.is_integral()) {
-					return m_builder.CreateIntCast(function_call_result, target_llvm_type, target_type.is_signed(), "intcast");
+					return m_llvm_context->get_builder().CreateIntCast(function_call_result, target_llvm_type, target_type.is_signed(), "intcast");
 				}
 			}
 		}
@@ -184,36 +186,36 @@ namespace channel {
 
 		// boolean to i32
 		if (source_value->get_type().get_base() == type::base::boolean && target_type.get_base() == type::base::i32) {
-			return m_builder.CreateZExt(source_llvm_value, target_llvm_type, "zext");
+			return m_llvm_context->get_builder().CreateZExt(source_llvm_value, target_llvm_type, "zext");
 		}
 
 		// floating-point to integer
 		if (source_value->get_type().is_floating_point() && target_type.is_integral()) {
-			return m_builder.CreateFPToSI(source_llvm_value, target_llvm_type);
+			return m_llvm_context->get_builder().CreateFPToSI(source_llvm_value, target_llvm_type);
 		}
 
 		// integer to floating-point
 		if (source_value->get_type().is_integral() && target_type.is_floating_point()) {
-			return m_builder.CreateSIToFP(source_llvm_value, target_llvm_type);
+			return m_llvm_context->get_builder().CreateSIToFP(source_llvm_value, target_llvm_type);
 		}
 
 		// floating-point upcast or downcast
 		if (source_value->get_type().is_floating_point() && target_type.is_floating_point()) {
-			return m_builder.CreateFPCast(source_llvm_value, target_llvm_type, "fpcast");
+			return m_llvm_context->get_builder().CreateFPCast(source_llvm_value, target_llvm_type, "fpcast");
 		}
 
 		// other cases
 		if (source_value->get_type().get_bit_width() < target_type.get_bit_width()) {
 			// perform upcast
 			if (source_value->get_type().is_unsigned()) {
-				return m_builder.CreateZExt(source_llvm_value, target_llvm_type, "zext");
+				return m_llvm_context->get_builder().CreateZExt(source_llvm_value, target_llvm_type, "zext");
 			}
 
-			return m_builder.CreateSExt(source_llvm_value, target_llvm_type, "sext");
+			return m_llvm_context->get_builder().CreateSExt(source_llvm_value, target_llvm_type, "sext");
 		}
 
 		// downcast
-		return m_builder.CreateTrunc(source_llvm_value, target_llvm_type, "trunc");
+		return m_llvm_context->get_builder().CreateTrunc(source_llvm_value, target_llvm_type, "trunc");
 	}
 
 	bool basic_code_generator::get_named_value(value_ptr& out_value, const std::string& variable_name) {

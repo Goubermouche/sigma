@@ -61,9 +61,8 @@ namespace channel {
 	class operator_not_equals_node;
 }
 
-#include "llvm_wrappers/value.h"
-#include "llvm_wrappers/functions/function.h"
 #include "llvm_wrappers/codegen_context.h"
+#include "llvm_wrappers/llvm_context.h"
 
 namespace channel {
 	class abstract_syntax_tree;
@@ -77,8 +76,12 @@ namespace channel {
 		virtual ~code_generator() = default;
 
 		virtual error_result generate() = 0;
-		void set_abstract_syntax_tree(std::shared_ptr<abstract_syntax_tree> abstract_syntax_tree);
-		std::shared_ptr<llvm::Module> get_llvm_module() const;
+
+		void set_abstract_syntax_tree(
+			std::shared_ptr<abstract_syntax_tree> abstract_syntax_tree
+		);
+
+		std::unique_ptr<llvm_context> get_llvm_context();
 
 		virtual acceptation_result visit_translation_unit_node(
 			translation_unit_node& node,
@@ -298,13 +301,8 @@ namespace channel {
 			operator_not_equals_node& node, 
 			const codegen_context& context
 		) = 0;
-
 	protected:
 		std::shared_ptr<abstract_syntax_tree> m_abstract_syntax_tree;
-
-		// llvm boilerplate
-		llvm::LLVMContext m_context;
-		llvm::IRBuilder<> m_builder;
-		std::shared_ptr<llvm::Module> m_module;
+		std::unique_ptr<llvm_context> m_llvm_context;
 	};
 }

@@ -297,6 +297,7 @@
     <ClInclude Include="source\utility\types.h">
       <Filter>source\utility</Filter>
     </ClInclude>
+    <ClInclude Include="source\llvm_wrappers\llvm_context.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp" />
@@ -516,5 +517,6 @@
     <ClCompile Include="source\utility\timer.cpp">
       <Filter>source\utility</Filter>
     </ClCompile>
+    <ClCompile Include="source\llvm_wrappers\llvm_context.cpp" />
   </ItemGroup>
 </Project>

@@ -40,12 +40,24 @@ namespace channel {
 			compiler_settings settings
 		);
 
+		/**
+		 * \brief Sets the new lexer the compiler will use for tokenizing the source code.
+		 * \tparam lexer Lexer to use
+		 */
 		template <typename lexer>
 		void set_lexer();
 
+		/**
+		 * \brief Sets the new parser the compiler will use for generating the AST. 
+		 * \tparam parser Parser to use
+		 */
 		template <typename parser>
 		void set_parser();
 
+		/**
+		 * \brief Sets the new code generator the compiler will use for generating LLVM IR.
+		 * \tparam code_generator Code generator to use 
+		 */
 		template <typename code_generator>
 		void set_code_generator();
 
@@ -60,12 +72,12 @@ namespace channel {
 			const std::string& target_executable_directory
 		);
 	private:
-		std::expected<std::shared_ptr<llvm::Module>, error_message> generate_module(
+		std::expected<std::unique_ptr<llvm_context>, error_message> generate_module(
 			const std::string& source_filepath
-		);
+		) const;
 
 		error_result compile_module(
-			const std::shared_ptr<llvm::Module>& module
+			std::unique_ptr<llvm_context> llvm_context
 		) const;
 
 		static error_result verify_source_file(
@@ -86,7 +98,6 @@ namespace channel {
 		std::function<std::shared_ptr<code_generator>()> m_code_generator_generator;
 
 		// compilation specific 
-		std::shared_ptr<code_generator> m_active_visitor;
 		std::string m_root_source_file_filepath;
 		std::string m_target_executable_directory;
 	};

@@ -9,7 +9,7 @@ namespace channel {
 	m_loop_condition_node(loop_condition_node),
 	m_loop_body_nodes(statement_nodes) {}
 
-	acceptation_result while_node::accept(code_generator& visitor, const codegen_context& context) {
+	acceptation_result while_node::accept(code_generator& visitor, const code_generation_context& context) {
 		return visitor.visit_while_node(*this, context);
 	}
 

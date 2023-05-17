@@ -13,7 +13,7 @@ namespace channel {
 		expression_node
 	) {}
 
-	acceptation_result local_declaration_node::accept(code_generator& visitor, const codegen_context& context) {
+	acceptation_result local_declaration_node::accept(code_generator& visitor, const code_generation_context& context) {
 		return visitor.visit_local_declaration_node(*this, context);
 	}
 

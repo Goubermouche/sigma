@@ -1,6 +1,6 @@
 #pragma once
 #include "llvm_wrappers/value.h"
-#include "llvm_wrappers/codegen_context.h"
+#include "llvm_wrappers/code_generation_context.h"
 #include "compiler/diagnostics/error.h"
 #include "compiler/diagnostics/warning.h"
 
@@ -38,7 +38,7 @@ namespace channel {
 		 */
 		virtual acceptation_result accept(
 			code_generator& visitor,
-			const codegen_context& context
+			const code_generation_context& context
 		) = 0;
 
 		/**

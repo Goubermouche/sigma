@@ -14,8 +14,6 @@
 //  - documentation
 //  - tests
 
-// different lexer and parser implementations 
-
 // numerical literal auto upcasts 
 //  - handle upcasts for numerical literals 
 //  - 2 * double_var etc

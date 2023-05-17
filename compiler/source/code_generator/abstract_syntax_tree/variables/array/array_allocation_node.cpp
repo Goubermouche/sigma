@@ -9,7 +9,7 @@ namespace channel {
 	m_array_element_type(array_element_type),
 	m_array_element_count(array_element_count_node) {}
 
-	acceptation_result array_allocation_node::accept(code_generator& visitor, const codegen_context& context) {
+	acceptation_result array_allocation_node::accept(code_generator& visitor, const code_generation_context& context) {
 		return visitor.visit_allocation_node(*this, context);
 	}
 

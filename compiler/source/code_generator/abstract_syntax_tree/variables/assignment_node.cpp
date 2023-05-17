@@ -9,7 +9,7 @@ namespace channel {
 	m_variable_node(variable),
 	m_expression_node(expression_node) {}
 
-	acceptation_result assignment_node::accept(code_generator& visitor, const codegen_context& context) {
+	acceptation_result assignment_node::accept(code_generator& visitor, const code_generation_context& context) {
 		return visitor.visit_assignment_node(*this, context);
 	}
 

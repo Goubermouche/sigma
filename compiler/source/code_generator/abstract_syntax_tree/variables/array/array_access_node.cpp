@@ -9,7 +9,7 @@ namespace channel {
 	m_array_base(array_base),
 	m_array_element_index_nodes(array_element_index_nodes) {}
 
-	acceptation_result array_access_node::accept(code_generator& visitor, const codegen_context& context) {
+	acceptation_result array_access_node::accept(code_generator& visitor, const code_generation_context& context) {
 		return visitor.visit_array_access_node(*this, context);
 	}
 

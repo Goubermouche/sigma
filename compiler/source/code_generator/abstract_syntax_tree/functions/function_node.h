@@ -18,7 +18,7 @@ namespace channel {
 
 		acceptation_result accept(
 			code_generator& visitor,
-			const codegen_context& context
+			const code_generation_context& context
 		) override;
 
 		void print(u64 depth, const std::wstring& prefix, bool is_last) override;

@@ -7,7 +7,7 @@ namespace channel {
 	) : node(position),
 	m_value(value) {}
 
-	acceptation_result bool_node::accept(code_generator& visitor, const codegen_context& context) {
+	acceptation_result bool_node::accept(code_generator& visitor, const code_generation_context& context) {
 		return visitor.visit_keyword_bool_node(*this, context);
 	}
 

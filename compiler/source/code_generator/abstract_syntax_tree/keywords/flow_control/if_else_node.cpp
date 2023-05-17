@@ -9,7 +9,7 @@ namespace channel {
 	m_condition_nodes(condition_nodes),
 	m_branch_nodes(branch_nodes) {}
 
-	acceptation_result if_else_node::accept(code_generator& visitor, const codegen_context& context) {
+	acceptation_result if_else_node::accept(code_generator& visitor, const code_generation_context& context) {
 		return visitor.visit_if_else_node(*this, context);
 	}
 

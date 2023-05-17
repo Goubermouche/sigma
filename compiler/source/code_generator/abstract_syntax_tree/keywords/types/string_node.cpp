@@ -7,7 +7,7 @@ namespace channel {
 	) : node(position),
 	m_value(value) {}
 
-	acceptation_result string_node::accept(code_generator& visitor, const codegen_context& context) {
+	acceptation_result string_node::accept(code_generator& visitor, const code_generation_context& context) {
 		return visitor.visit_keyword_string_node(*this, context);
 	}
 

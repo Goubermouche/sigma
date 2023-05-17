@@ -9,7 +9,7 @@
 namespace channel {
 	acceptation_result basic_code_generator::visit_return_node(
 		return_node& node, 
-		const codegen_context& context
+		const code_generation_context& context
 	) {
 		(void)context; // suppress C4100
 
@@ -51,7 +51,7 @@ namespace channel {
 
 	acceptation_result basic_code_generator::visit_if_else_node(
 		if_else_node& node, 
-		const codegen_context& context
+		const code_generation_context& context
 	) {
 		(void)context; // suppress C4100
 
@@ -96,7 +96,7 @@ namespace channel {
 		// accept the first condition
 		acceptation_result condition_value_result = condition_nodes[0]->accept(
 			*this,
-			codegen_context(type(type::base::boolean, 0))
+			code_generation_context(type(type::base::boolean, 0))
 		);
 
 		if(!condition_value_result.has_value()) {
@@ -116,7 +116,7 @@ namespace channel {
 
 			condition_value_result = condition_nodes[i + 1]->accept(
 				*this,
-				codegen_context(type(type::base::boolean, 0))
+				code_generation_context(type(type::base::boolean, 0))
 			);
 
 			if(!condition_value_result.has_value()) {
@@ -136,7 +136,7 @@ namespace channel {
 		// process branch nodes and create appropriate inner statements
 		for (u64 i = 0; i < branch_nodes.size(); ++i) {
 			m_llvm_context->get_builder().SetInsertPoint(branch_blocks[i]);
-			m_scope = std::make_unique<scope>(prev_scope, nullptr);
+			m_scope = std::make_unique<scope>(prev_scope);
 
 			for (const auto& statement : branch_nodes[i]) {
 				acceptation_result statement_result = statement->accept(
@@ -162,7 +162,7 @@ namespace channel {
 
 	acceptation_result basic_code_generator::visit_while_node(
 		while_node& node, 
-		const codegen_context& context
+		const code_generation_context& context
 	) {
 		(void)context; // suppress C4100
 
@@ -195,7 +195,7 @@ namespace channel {
 		// accept the condition node
 		acceptation_result condition_value_result = node.get_loop_condition_node()->accept(
 			*this,
-			codegen_context(type(type::base::boolean, 0))
+			code_generation_context(type(type::base::boolean, 0))
 		);
 
 		if(!condition_value_result.has_value()) {
@@ -240,7 +240,7 @@ namespace channel {
 
 	acceptation_result basic_code_generator::visit_for_node(
 		for_node& node,
-		const codegen_context& context
+		const code_generation_context& context
 	) {
 		(void)context; // suppress C4100
 
@@ -352,7 +352,7 @@ namespace channel {
 
 	acceptation_result basic_code_generator::visit_break_node(
 		break_node& node, 
-		const codegen_context& context
+		const code_generation_context& context
 	) {
 		(void)context; // suppress C4100
 

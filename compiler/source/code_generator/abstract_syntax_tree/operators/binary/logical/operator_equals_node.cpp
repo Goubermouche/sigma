@@ -11,7 +11,7 @@ namespace channel {
 		right_expression_node
 	) {}
 
-	acceptation_result operator_equals_node::accept(code_generator& visitor, const codegen_context& context) {
+	acceptation_result operator_equals_node::accept(code_generator& visitor, const code_generation_context& context) {
 		return visitor.visit_operator_equals_node(*this, context);
 	}
 

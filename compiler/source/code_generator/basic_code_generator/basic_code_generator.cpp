@@ -98,7 +98,7 @@ namespace channel {
 		return {};
 	}
 
-	acceptation_result basic_code_generator::visit_translation_unit_node(translation_unit_node& node, const codegen_context& context) {
+	acceptation_result basic_code_generator::visit_translation_unit_node(translation_unit_node& node, const code_generation_context& context) {
 		for(const auto& n : node.get_nodes()) {
 			acceptation_result result = n->accept(*this, context);
 			if(!result.value()) {

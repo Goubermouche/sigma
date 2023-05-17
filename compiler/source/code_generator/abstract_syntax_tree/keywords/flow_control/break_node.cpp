@@ -4,7 +4,7 @@ namespace channel {
 	break_node::break_node(const token_position& position)
 		: node(position) {}
 
-	acceptation_result break_node::accept(code_generator& visitor, const codegen_context& context) {
+	acceptation_result break_node::accept(code_generator& visitor, const code_generation_context& context) {
 		return visitor.visit_break_node(*this, context);
 	}
 

@@ -106,7 +106,7 @@
     <ClInclude Include="source\code_generator\abstract_syntax_tree\variables\declaration\local_declaration_node.h" />
     <ClInclude Include="source\code_generator\abstract_syntax_tree\variables\variable_access_node.h" />
     <ClInclude Include="source\code_generator\abstract_syntax_tree\variables\variable_node.h" />
-    <ClInclude Include="source\llvm_wrappers\codegen_context.h" />
+    <ClInclude Include="source\llvm_wrappers\code_generation_context.h" />
     <ClInclude Include="source\llvm_wrappers\functions\function.h" />
     <ClInclude Include="source\llvm_wrappers\functions\function_registry.h" />
     <ClInclude Include="source\llvm_wrappers\scope.h" />
@@ -181,7 +181,7 @@
     <ClCompile Include="source\code_generator\abstract_syntax_tree\variables\declaration\local_declaration_node.cpp" />
     <ClCompile Include="source\code_generator\abstract_syntax_tree\variables\variable_access_node.cpp" />
     <ClCompile Include="source\code_generator\abstract_syntax_tree\variables\variable_node.cpp" />
-    <ClCompile Include="source\llvm_wrappers\codegen_context.cpp" />
+    <ClCompile Include="source\llvm_wrappers\code_generation_context.cpp" />
     <ClCompile Include="source\llvm_wrappers\functions\function.cpp" />
     <ClCompile Include="source\llvm_wrappers\functions\function_registry.cpp" />
     <ClCompile Include="source\llvm_wrappers\scope.cpp" />

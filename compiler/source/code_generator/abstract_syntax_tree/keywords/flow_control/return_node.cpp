@@ -7,7 +7,7 @@ namespace channel {
 	) : node(position),
 	m_return_expression_node(return_expression_node) {}
 
-	acceptation_result return_node::accept(code_generator& visitor, const codegen_context& context) {
+	acceptation_result return_node::accept(code_generator& visitor, const code_generation_context& context) {
 		return visitor.visit_return_node(*this, context);
 	}
 

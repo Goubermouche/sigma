@@ -225,7 +225,7 @@
     <ClInclude Include="source\code_generator\abstract_syntax_tree\variables\variable_node.h">
       <Filter>source\codegen\abstract_syntax_tree\variables</Filter>
     </ClInclude>
-    <ClInclude Include="source\llvm_wrappers\codegen_context.h">
+    <ClInclude Include="source\llvm_wrappers\code_generation_context.h">
       <Filter>source\codegen\llvm_wrappers</Filter>
     </ClInclude>
     <ClInclude Include="source\llvm_wrappers\functions\function.h">
@@ -442,7 +442,7 @@
     <ClCompile Include="source\code_generator\abstract_syntax_tree\variables\variable_node.cpp">
       <Filter>source\codegen\abstract_syntax_tree\variables</Filter>
     </ClCompile>
-    <ClCompile Include="source\llvm_wrappers\codegen_context.cpp">
+    <ClCompile Include="source\llvm_wrappers\code_generation_context.cpp">
       <Filter>source\codegen\llvm_wrappers</Filter>
     </ClCompile>
     <ClCompile Include="source\llvm_wrappers\functions\function.cpp">

@@ -33,7 +33,7 @@ namespace channel {
 	// arithmetic
 	acceptation_result basic_code_generator::visit_operator_post_decrement_node(
 		operator_post_decrement& node,
-		const codegen_context& context
+		const code_generation_context& context
 	) {
 		(void)context; // suppress C4100
 		acceptation_result expression_result = node.get_expression_node()->accept(
@@ -90,7 +90,7 @@ namespace channel {
 
 	acceptation_result basic_code_generator::visit_operator_post_increment_node(
 		operator_post_increment& node,
-		const codegen_context& context
+		const code_generation_context& context
 	) {
 		(void)context; // suppress C4100
 		acceptation_result expression_result = node.get_expression_node()->accept(
@@ -145,7 +145,7 @@ namespace channel {
 
 	acceptation_result basic_code_generator::visit_operator_pre_decrement_node(
 		operator_pre_decrement& node, 
-		const codegen_context& context
+		const code_generation_context& context
 	) {
 		(void)context; // suppress C4100
 		// accept the expression
@@ -207,7 +207,7 @@ namespace channel {
 
 	acceptation_result basic_code_generator::visit_operator_pre_increment_node(
 		operator_pre_increment& node, 
-		const codegen_context& context
+		const code_generation_context& context
 	) {
 		(void)context; // suppress C4100
 		// accept the expression
@@ -271,7 +271,7 @@ namespace channel {
 	// arithmetic
 	acceptation_result basic_code_generator::visit_operator_addition_assignment_node(
 		operator_addition_assignment_node& node,
-		const codegen_context& context
+		const code_generation_context& context
 	) {
 		(void)context; // suppress C4100
 		auto operation_result = create_add_operation(
@@ -309,7 +309,7 @@ namespace channel {
 
 	acceptation_result basic_code_generator::visit_operator_addition_node(
 		operator_addition_node& node,
-		const codegen_context& context
+		const code_generation_context& context
 	) {
 		(void)context; // suppress C4100
 		auto operation_result = create_add_operation(
@@ -338,7 +338,7 @@ namespace channel {
 
 	acceptation_result basic_code_generator::visit_operator_subtraction_assignment_node(
 		operator_subtraction_assignment_node& node,
-		const codegen_context& context
+		const code_generation_context& context
 	) {
 		(void)context; // suppress C4100
 		auto operation_result = create_sub_operation(
@@ -376,7 +376,7 @@ namespace channel {
 
 	acceptation_result basic_code_generator::visit_operator_subtraction_node(
 		operator_subtraction_node& node,
-		const codegen_context& context
+		const code_generation_context& context
 	) {
 		(void)context; // suppress C4100
 		auto operation_result = create_sub_operation(
@@ -405,7 +405,7 @@ namespace channel {
 
 	acceptation_result basic_code_generator::visit_operator_multiplication_assignment_node(
 		operator_multiplication_assignment_node& node, 
-		const codegen_context& context
+		const code_generation_context& context
 	) {
 		(void)context; // suppress C4100
 		auto operation_result = create_mul_operation(
@@ -443,7 +443,7 @@ namespace channel {
 
 	acceptation_result basic_code_generator::visit_operator_multiplication_node(
 		operator_multiplication_node& node,
-		const codegen_context& context
+		const code_generation_context& context
 	) {
 		(void)context; // suppress C4100
 		auto operation_result = create_mul_operation(
@@ -472,7 +472,7 @@ namespace channel {
 
 	acceptation_result basic_code_generator::visit_operator_division_assignment_node(
 		operator_division_assignment_node& node, 
-		const codegen_context& context
+		const code_generation_context& context
 	) {
 		(void)context; // suppress C4100
 		auto operation_result = create_div_operation(
@@ -510,7 +510,7 @@ namespace channel {
 
 	acceptation_result basic_code_generator::visit_operator_division_node(
 		operator_division_node& node, 
-		const codegen_context& context
+		const code_generation_context& context
 	) {
 		(void)context; // suppress C4100
 		auto operation_result = create_div_operation(
@@ -539,7 +539,7 @@ namespace channel {
 
 	acceptation_result basic_code_generator::visit_operator_modulo_assignment_node(
 		operator_modulo_assignment_node& node,
-		const codegen_context& context
+		const code_generation_context& context
 	) {
 		(void)context; // suppress C4100
 		auto operation_result = create_mod_operation(
@@ -577,7 +577,7 @@ namespace channel {
 
 	acceptation_result basic_code_generator::visit_operator_modulo_node(
 		operator_modulo_node& node,
-		const codegen_context& context
+		const code_generation_context& context
 	) {
 		(void)context; // suppress C4100
 		auto operation_result = create_mod_operation(
@@ -607,7 +607,7 @@ namespace channel {
 	// logical
 	acceptation_result basic_code_generator::visit_operator_logical_conjunction_node(
 		operator_conjunction_node& node,
-		const codegen_context& context
+		const code_generation_context& context
 	) {
 		(void)context; // suppress C4100
 		// accept the left operand
@@ -658,7 +658,7 @@ namespace channel {
 
 	acceptation_result basic_code_generator::visit_operator_logical_disjunction_node(
 		operator_disjunction_node& node, 
-		const codegen_context& context
+		const code_generation_context& context
 	) {
 		(void)context; // suppress C4100
 		// accept the left operand
@@ -707,7 +707,7 @@ namespace channel {
 
 	acceptation_result basic_code_generator::visit_operator_greater_than_node(
 		operator_greater_than_node& node, 
-		const codegen_context& context
+		const code_generation_context& context
 	) {
 		(void)context; // suppress C4100
 		// accept the left operand
@@ -780,7 +780,7 @@ namespace channel {
 
 	acceptation_result basic_code_generator::visit_operator_greater_than_equal_to_node(
 		operator_greater_than_equal_to_node& node, 
-		const codegen_context& context
+		const code_generation_context& context
 	) {
 		(void)context; // suppress C4100
 		// accept the left operand
@@ -853,7 +853,7 @@ namespace channel {
 
 	acceptation_result basic_code_generator::visit_operator_less_than_node(
 		operator_less_than_node& node, 
-		const codegen_context& context
+		const code_generation_context& context
 	) {
 		(void)context; // suppress C4100
 		// accept the left operand
@@ -926,7 +926,7 @@ namespace channel {
 
 	acceptation_result basic_code_generator::visit_operator_less_than_equal_to_node(
 		operator_less_than_equal_to_node& node,
-		const codegen_context& context
+		const code_generation_context& context
 	) {
 		(void)context; // suppress C4100
 		// accept the left operand
@@ -999,7 +999,7 @@ namespace channel {
 
 	acceptation_result basic_code_generator::visit_operator_equals_node(
 		operator_equals_node& node, 
-		const codegen_context& context
+		const code_generation_context& context
 	) {
 		(void)context; // suppress C4100
 		// accept the left operand
@@ -1064,7 +1064,7 @@ namespace channel {
 
 	acceptation_result basic_code_generator::visit_operator_not_equals_node(
 		operator_not_equals_node& node, 
-		const codegen_context& context
+		const code_generation_context& context
 	) {
 		(void)context; // suppress C4100
 		// accept the left operand

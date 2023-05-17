@@ -6,7 +6,7 @@
 namespace channel {
 	acceptation_result basic_code_generator::visit_function_node(
 		function_node& node, 
-		const codegen_context& context
+		const code_generation_context& context
 	) {
 		(void)context; // suppress C4100
 		// get the function return type
@@ -72,7 +72,7 @@ namespace channel {
 
 		// create a new nested scope for the function body
 		scope_ptr prev_scope = m_scope;
-		m_scope = std::make_shared<scope>(prev_scope, nullptr);
+		m_scope = std::make_shared<scope>(prev_scope);
 
 		// create the given arguments 
 		u64 index = 0;
@@ -148,7 +148,7 @@ namespace channel {
 
 	acceptation_result basic_code_generator::visit_function_call_node(
 		function_call_node& node, 
-		const codegen_context& context
+		const code_generation_context& context
 	) {
 		(void)context; // suppress C4100
 		// get a reference to the function
@@ -184,7 +184,7 @@ namespace channel {
 			// get the argument value
 			acceptation_result argument_result = given_arguments[i]->accept(
 				*this,
-				codegen_context(required_arguments[i].second)
+				code_generation_context(required_arguments[i].second)
 			);
 
 			if(!argument_result.has_value()) {

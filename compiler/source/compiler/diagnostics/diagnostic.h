@@ -21,7 +21,7 @@ struct std::formatter<channel::token> {
 	}
 
 	static auto format(channel::token e, format_context& ctx) {
-		return format_to(ctx.out(), "{}", channel::token_to_string(e));
+		return format_to(ctx.out(), "{}", token_to_string(e));
 	}
 };
 

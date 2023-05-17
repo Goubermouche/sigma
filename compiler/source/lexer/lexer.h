@@ -5,8 +5,8 @@
 
 namespace channel {
 	/**
- * \brief Set of information related to a specific token, at a specific position.
- */
+	 * \brief Set of information related to a specific token, at a specific position.
+	 */
 	struct token_data {
 		token_data() = default;
 
@@ -72,7 +72,12 @@ namespace channel {
 		 */
 		virtual error_result tokenize() = 0;
 
-		error_result set_source_filepath(const std::string& filepath);
+		/**
+		 * \brief Sets the \a source \a filepath for the next lexing operation.
+		 * \param filepath Filepath to use
+		 * \return Potentially erroneous result.
+		 */
+		 error_result set_source_filepath(const std::string& filepath);
 		const std::vector<token_data>& get_token_list() const;
 	protected:
 		std::vector<token_data> m_tokens;

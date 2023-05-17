@@ -9,7 +9,7 @@ namespace channel {
 	m_function_name(function_identifier),
 	m_function_arguments(function_arguments) {}
 
-	acceptation_result function_call_node::accept(code_generator& visitor, const codegen_context& context) {
+	acceptation_result function_call_node::accept(code_generator& visitor, const code_generation_context& context) {
 		return visitor.visit_function_call_node(*this, context);
 	}
 

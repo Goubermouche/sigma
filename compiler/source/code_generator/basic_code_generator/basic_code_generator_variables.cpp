@@ -12,7 +12,7 @@
 namespace channel {
 	acceptation_result basic_code_generator::visit_assignment_node(
 		assignment_node& node, 
-		const codegen_context& context
+		const code_generation_context& context
 	) {
 		(void)context; // suppress C4100
 		// assignment to a local variable
@@ -29,7 +29,7 @@ namespace channel {
 		// evaluate the expression on the right-hand side of the assignment
 		acceptation_result expression_result = node.get_expression_node()->accept(
 			*this, 
-			codegen_context(variable_result.value()->get_type())
+			code_generation_context(variable_result.value()->get_type())
 		);
 
 		if (!expression_result.has_value()) {
@@ -55,7 +55,7 @@ namespace channel {
 
 	acceptation_result basic_code_generator::visit_variable_access_node(
 		variable_access_node& node, 
-		const codegen_context& context
+		const code_generation_context& context
 	) {
 		(void)context; // suppress C4100
 		// load a local variable
@@ -118,7 +118,7 @@ namespace channel {
 
 	acceptation_result basic_code_generator::visit_local_declaration_node(
 		local_declaration_node& node, 
-		const codegen_context& context
+		const code_generation_context& context
 	) {
 		(void)context; // suppress C4100
 		llvm::BasicBlock* original_entry_block = m_llvm_context->get_builder().GetInsertBlock();
@@ -172,7 +172,7 @@ namespace channel {
 		// evaluate the assigned value, if there is one
 		acceptation_result declaration_value_result = get_declaration_value(
 			node,
-			codegen_context(node.get_declaration_type())
+			code_generation_context(node.get_declaration_type())
 		);
 
 		if (!declaration_value_result.has_value()) {
@@ -194,7 +194,7 @@ namespace channel {
 
 	acceptation_result basic_code_generator::visit_global_declaration_node(
 		global_declaration_node& node,
-		const codegen_context& context
+		const code_generation_context& context
 	) {
 		(void)context; // suppress C4100
 		// start creating the init function for our global ctor
@@ -222,7 +222,7 @@ namespace channel {
 		// evaluate the assigned value, if there is one
 		acceptation_result declaration_value_result = get_declaration_value(
 			node, 
-			codegen_context(node.get_declaration_type())
+			code_generation_context(node.get_declaration_type())
 		);
 
 		if (!declaration_value_result.has_value()) {
@@ -302,7 +302,7 @@ namespace channel {
 
 	acceptation_result basic_code_generator::visit_allocation_node(
 		array_allocation_node& node,
-		const codegen_context& context
+		const code_generation_context& context
 	) {
 		(void)context; // suppress C4100
 		// get the count of allocated elements
@@ -394,7 +394,7 @@ namespace channel {
 
 	acceptation_result basic_code_generator::visit_array_access_node(
 		array_access_node& node, 
-		const codegen_context& context
+		const code_generation_context& context
 	) {
 		(void)context; // suppress C4100
 		const std::vector<channel::node*>& index_nodes = node.get_array_element_index_nodes();
@@ -467,7 +467,7 @@ namespace channel {
 
 	acceptation_result basic_code_generator::visit_array_assignment_node(
 		array_assignment_node& node,
-		const codegen_context& context
+		const code_generation_context& context
 	) {
 		(void)context; // suppress C4100
 		const std::vector<channel::node*>& index_nodes = node.get_array_element_index_nodes();
@@ -526,7 +526,7 @@ namespace channel {
 		// evaluate the right-hand side expression
 		acceptation_result expression_value_result = node.get_expression_node()->accept(
 			*this, 
-			codegen_context(current_type.get_element_type())
+			code_generation_context(current_type.get_element_type())
 		);
 
 		if (!expression_value_result.value()) {
@@ -561,7 +561,7 @@ namespace channel {
 
 	acceptation_result basic_code_generator::visit_variable_node(
 		variable_node& node, 
-		const codegen_context& context
+		const code_generation_context& context
 	) {
 		(void)context; // suppress C4100
 		// find the variable value in our named values
@@ -582,7 +582,7 @@ namespace channel {
 
 	acceptation_result basic_code_generator::get_declaration_value(
 		const declaration_node& node,
-		const codegen_context& context
+		const code_generation_context& context
 	) {
 		// evaluate the expression to get the initial value
 		if (channel::node* expression = node.get_expression_node()) {

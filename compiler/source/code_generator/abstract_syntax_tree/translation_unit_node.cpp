@@ -6,7 +6,7 @@ namespace channel {
 	) : node({ "x", 0, 0}),
 	m_nodes(nodes) {}
 
-	acceptation_result translation_unit_node::accept(code_generator& visitor, const codegen_context& context) {
+	acceptation_result translation_unit_node::accept(code_generator& visitor, const code_generation_context& context) {
 		return visitor.visit_translation_unit_node(*this, context);
 	}
 

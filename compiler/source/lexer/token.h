@@ -70,16 +70,16 @@ namespace channel {
 		// arithmetic operators
 		operator_addition,                  // +  implemented
 		operator_increment,                 // ++ implemented
-		operator_addition_assignment,       // +=
+		operator_addition_assignment,       // += implemented
 		operator_subtraction,               // -  implemented
 		operator_decrement,                 // -- implemented
-		operator_subtraction_assignment,    // -=
+		operator_subtraction_assignment,    // -= implemented
 		operator_multiplication,            // *  implemented
-		operator_multiplication_assignment, // *=
+		operator_multiplication_assignment, // *= implemented
 		operator_modulo,                    // %  implemented
-		operator_modulo_assignment,         // %=
+		operator_modulo_assignment,         // %= implemented
 		operator_division,                  // /  implemented
-		operator_division_assignment,       // /=
+		operator_division_assignment,       // /= implemented
 		operator_assignment,                // =  implemented
 		// logical operators
 		operator_equals,                    // == implemented

@@ -8,7 +8,7 @@
 namespace channel {
 	acceptation_result basic_code_generator::visit_numerical_literal_node(
 		numerical_literal_node& node,
-		const codegen_context& context
+		const code_generation_context& context
 	) {
 		const type contextually_derived_type = context.get_expected_type();
 		const type literal_type = contextually_derived_type == type::unknown() ? node.get_preferred_type() : contextually_derived_type;
@@ -138,7 +138,7 @@ namespace channel {
 
 	acceptation_result basic_code_generator::visit_keyword_string_node(
 		string_node& node,
-		const codegen_context& context
+		const code_generation_context& context
 	) {
 		(void)context; // suppress C4100
 		// note: + 1 is for the null termination character
@@ -180,7 +180,7 @@ namespace channel {
 
 	acceptation_result basic_code_generator::visit_keyword_char_node(
 		char_node& node,
-		const codegen_context& context
+		const code_generation_context& context
 	) {
 		(void)context; // suppress C4100
 		return create_character(node.get_value());
@@ -188,7 +188,7 @@ namespace channel {
 
 	acceptation_result basic_code_generator::visit_keyword_bool_node(
 		bool_node& node, 
-		const codegen_context& context
+		const code_generation_context& context
 	) {
 		(void)context; // suppress C4100
 		return create_boolean(node.get_value());

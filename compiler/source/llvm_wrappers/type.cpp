@@ -45,11 +45,11 @@ namespace channel {
 
 	type type::get_element_type() const {
 		ASSERT(m_pointer_level > 0, "cannot get an element type of a non pointer type");
-		return type(m_base, m_pointer_level - 1);
+		return { m_base, static_cast<u16>(m_pointer_level - 1) };
 	}
 
 	type type::get_pointer_type() const	{
-		return type(m_base, m_pointer_level + 1);
+		return { m_base, static_cast<u16>(m_pointer_level + 1) };
 	}
 
 	void type::set_pointer_level(u16 pointer_level)	{

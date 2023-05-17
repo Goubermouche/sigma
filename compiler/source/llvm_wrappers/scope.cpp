@@ -2,16 +2,25 @@
 
 namespace channel {
 	scope::scope(
+		scope_ptr parent
+	) : m_parent(parent) {}
+
+	scope::scope(
 		scope_ptr parent,
 		llvm::BasicBlock* loop_end_block
 	) : m_parent(parent),
 	m_loop_end_block(loop_end_block) {}
 
-	void scope::insert_named_value(const std::string& name, value_ptr value) {
+	void scope::insert_named_value(
+		const std::string& name, 
+		value_ptr value
+	) {
 		m_named_values[name] = value;
 	}
 
-	value_ptr scope::get_named_value(const std::string& name) {
+	value_ptr scope::get_named_value(
+		const std::string& name
+	) {
 		const auto it = m_named_values.find(name); // try to find an llvm::Value in this scope
 
 		// if we've found a value in this scope, return it
@@ -40,7 +49,9 @@ namespace channel {
 		return nullptr;
 	}
 
-	bool scope::contains_named_value(const std::string& name) const	{
+	bool scope::contains_named_value(
+		const std::string& name
+	) const	{
 		// check in the current scopes
 		if (m_named_values.contains(name)) {
 			return true;

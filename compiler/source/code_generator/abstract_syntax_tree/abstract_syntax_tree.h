@@ -6,7 +6,10 @@ namespace channel {
 	public:
 		abstract_syntax_tree() = default;
 
-		void add_node(translation_unit_node* node);
+		void add_node(
+			translation_unit_node* node
+		);
+
 		void print_nodes() const;
 
 		std::vector<translation_unit_node*>::iterator begin();

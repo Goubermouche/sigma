@@ -11,7 +11,7 @@ namespace channel {
 	m_array_element_index_nodes(index_nodes),
 	m_expression_node(expression_node) {}
 
-	acceptation_result array_assignment_node::accept(code_generator& visitor, const codegen_context& context) {
+	acceptation_result array_assignment_node::accept(code_generator& visitor, const code_generation_context& context) {
 		return visitor.visit_array_assignment_node(*this, context);
 	}
 

@@ -13,7 +13,7 @@ namespace channel {
 	m_function_arguments(function_arguments),
 	m_function_statements(function_statements) {}
 
-	acceptation_result function_node::accept(code_generator& visitor, const codegen_context& context) {
+	acceptation_result function_node::accept(code_generator& visitor, const code_generation_context& context) {
 		return visitor.visit_function_node(*this, context);
 	}
 

@@ -6,7 +6,7 @@ namespace channel {
 		const node_ptr& expression_node
 	) : operator_unary(position, expression_node) {}
 
-	acceptation_result operator_post_increment::accept(code_generator& visitor, const codegen_context& context) {
+	acceptation_result operator_post_increment::accept(code_generator& visitor, const code_generation_context& context) {
 		return visitor.visit_operator_post_increment_node(*this, context);
 	}
 

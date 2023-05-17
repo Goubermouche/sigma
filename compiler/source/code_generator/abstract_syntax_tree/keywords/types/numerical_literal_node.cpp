@@ -9,7 +9,7 @@ namespace channel {
 	m_value(value),
 	m_preferred_type(preferred_type) {}
 
-	acceptation_result numerical_literal_node::accept(code_generator& visitor, const codegen_context& context) {
+	acceptation_result numerical_literal_node::accept(code_generator& visitor, const code_generation_context& context) {
 		return visitor.visit_numerical_literal_node(*this, context);
 	}
 

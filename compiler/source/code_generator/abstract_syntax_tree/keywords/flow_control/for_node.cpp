@@ -13,7 +13,7 @@ namespace channel {
 	m_post_iteration_nodes(post_iteration_nodes),
 	m_loop_body_nodes(statement_nodes) {}
 
-	acceptation_result for_node::accept(code_generator& visitor, const codegen_context& context) {
+	acceptation_result for_node::accept(code_generator& visitor, const code_generation_context& context) {
 		return visitor.visit_for_node(*this, context);
 	}
 

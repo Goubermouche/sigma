@@ -2,9 +2,12 @@
 #include "llvm_wrappers/type.h"
 
 namespace channel {
-	struct codegen_context {
-		codegen_context() = default;
-		codegen_context(
+	/**
+	 * \brief Code generation context, holds variables that may be used in the next accept call.
+	 */
+	struct code_generation_context {
+		code_generation_context() = default;
+		code_generation_context(
 			type expected_type
 		);
 

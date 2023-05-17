@@ -2,6 +2,9 @@
 #include <llvm/IR/IRBuilder.h>
 
 namespace channel {
+	/**
+	 * \brief LLVM context, holds LLVM variables that are relevant to the code generation process. 
+	 */
 	class llvm_context {
 	public:
 		llvm_context();

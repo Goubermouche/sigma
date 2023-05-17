@@ -112,6 +112,10 @@ The expected output, after running the generated .exe, looks like this:
 ,,,,,,,,-------~~~~~~~~~~~~~~~~~~~~~~~~~~::::::::::::;;;;=!!*#@*.#*!=;;::::::::~~~~~~~--------------
 ,,,,,,,,,--------~~~~~~~~~~~~~~~~~~~~~~~~~~~::::::::::;;;;==!#~$#@!=;:::::::~~~~~~~~----------------
 ```
+## Goals: 
+- [ ] Full C function toolset
+- [ ] Support for external files and linking
+- [ ] GPU support with kernels 
 ## Tooling
 - [Syntax highlighting](https://github.com/Goubermouche/channel-syntax-highlighter)
 

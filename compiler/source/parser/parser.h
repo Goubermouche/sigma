@@ -9,7 +9,7 @@ namespace channel {
 
 		virtual error_result parse() = 0;
 		void set_token_list(const token_list& token_list);
-		const std::shared_ptr<abstract_syntax_tree> get_abstract_syntax_tree() const;
+		std::shared_ptr<abstract_syntax_tree> get_abstract_syntax_tree() const;
 	protected:
 		// operation temporary
 		token_list m_token_list;

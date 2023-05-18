@@ -1,11 +1,11 @@
 #pragma once
-#include "code_generator/abstract_syntax_tree/operators/binary/operator_binary.h"
+#include "code_generator/abstract_syntax_tree/operators/binary/operator_binary_base.h"
 
 namespace channel {
 	/**
 	 * \brief AST node, represents the disjunction binary operator.
 	 */
-	class operator_disjunction_node : public operator_binary {
+	class operator_disjunction_node : public operator_binary_base {
 	public:
 		operator_disjunction_node(
 			const token_position& position,

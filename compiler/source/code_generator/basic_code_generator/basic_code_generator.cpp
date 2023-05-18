@@ -65,19 +65,11 @@ namespace channel {
 		return {};
 	}
 
-	std::shared_ptr<llvm::Module> basic_code_generator::get_module() {
-		return m_llvm_context->get_module();
-	}
-
 	void basic_code_generator::initialize_global_variables() {
 		// create the global ctors array
 		llvm::ArrayType* updated_ctor_array_type = llvm::ArrayType::get(CTOR_STRUCT_TYPE, m_global_ctors.size());
 		llvm::Constant* updated_ctors = llvm::ConstantArray::get(updated_ctor_array_type, m_global_ctors);
 		new llvm::GlobalVariable(*m_llvm_context->get_module(), updated_ctor_array_type, false, llvm::GlobalValue::AppendingLinkage, updated_ctors, "llvm.global_ctors");
-	}
-
-	void basic_code_generator::print_intermediate_representation() const {
-		m_llvm_context->get_module()->print(llvm::outs(), nullptr);
 	}
 
 	error_result basic_code_generator::verify_intermediate_representation() const {

@@ -8,6 +8,7 @@ namespace channel {
 	class llvm_context {
 	public:
 		llvm_context();
+		void print_intermediate_representation() const;
 
 		llvm::LLVMContext& get_context();
 		llvm::IRBuilder<>& get_builder();

@@ -24,9 +24,6 @@ namespace channel {
 		basic_code_generator();
 
 		error_result generate() override;
-		std::shared_ptr<llvm::Module> get_module();
-
-		void print_intermediate_representation() const;
 		error_result verify_intermediate_representation() const;
 	private:
 		acceptation_result visit_translation_unit_node(
@@ -213,22 +210,28 @@ namespace channel {
 		// unary
 		// arithmetic
 		acceptation_result visit_operator_post_decrement_node(
-			operator_post_decrement& node,
+			operator_post_decrement_node& node,
 			const code_generation_context& context
 		) override;
 
 		acceptation_result visit_operator_post_increment_node(
-			operator_post_increment& node, 
+			operator_post_increment_node& node, 
 			const code_generation_context& context
 		) override;
 
 		acceptation_result visit_operator_pre_decrement_node(
-			operator_pre_decrement& node,
+			operator_pre_decrement_node& node,
 			const code_generation_context& context
 		) override;
 
 		acceptation_result visit_operator_pre_increment_node(
-			operator_pre_increment& node,
+			operator_pre_increment_node& node,
+			const code_generation_context& context
+		) override;
+
+		// logical
+		acceptation_result visit_operator_not_node(
+			operator_not_node& node,
 			const code_generation_context& context
 		) override;
 

@@ -34,10 +34,12 @@ namespace channel {
 	// operators
 	// unary
 	// arithmetic
-	class operator_post_decrement;
-	class operator_post_increment;
-	class operator_pre_decrement;
-	class operator_pre_increment;
+	class operator_post_decrement_node;
+	class operator_post_increment_node;
+	class operator_pre_decrement_node;
+	class operator_pre_increment_node;
+	// logical
+	class operator_not_node;
 	// binary
 	// arithmetic
 	class operator_addition_assignment_node;
@@ -81,7 +83,7 @@ namespace channel {
 			std::shared_ptr<abstract_syntax_tree> abstract_syntax_tree
 		);
 
-		std::unique_ptr<llvm_context> get_llvm_context();
+		std::shared_ptr<llvm_context> get_llvm_context();
 
 		virtual acceptation_result visit_translation_unit_node(
 			translation_unit_node& node,
@@ -191,24 +193,31 @@ namespace channel {
 		// unary
 		// arithmetic
 		virtual acceptation_result visit_operator_post_decrement_node(
-			operator_post_decrement& node,
+			operator_post_decrement_node& node,
 			const code_generation_context& context
 		) = 0;
 
 		virtual acceptation_result visit_operator_post_increment_node(
-			operator_post_increment& node, 
+			operator_post_increment_node& node, 
 			const code_generation_context& context
 		) = 0;
 
 		virtual acceptation_result visit_operator_pre_decrement_node(
-			operator_pre_decrement& node,
+			operator_pre_decrement_node& node,
 			const code_generation_context& context
 		) = 0;
 
 		virtual acceptation_result visit_operator_pre_increment_node(
-			operator_pre_increment& node, 
+			operator_pre_increment_node& node, 
 			const code_generation_context& context
 		) = 0;
+
+		// logical
+		virtual acceptation_result visit_operator_not_node(
+			operator_not_node& node,
+			const code_generation_context& context
+		) = 0;
+		
 		// binary
 		// arithmetic
 		virtual acceptation_result visit_operator_addition_assignment_node(
@@ -303,6 +312,6 @@ namespace channel {
 		) = 0;
 	protected:
 		std::shared_ptr<abstract_syntax_tree> m_abstract_syntax_tree;
-		std::unique_ptr<llvm_context> m_llvm_context;
+		std::shared_ptr<llvm_context> m_llvm_context;
 	};
 }

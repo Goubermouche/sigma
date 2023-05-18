@@ -44,7 +44,7 @@ namespace channel {
 		return {};
 	}
 
-	const std::vector<token_data>& lexer::get_token_list() const {
-		return m_tokens;
+	token_list lexer::get_token_list() const {
+		return { m_tokens };
 	}
 }

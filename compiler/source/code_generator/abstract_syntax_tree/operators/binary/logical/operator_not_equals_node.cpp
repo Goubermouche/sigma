@@ -5,7 +5,7 @@ namespace channel {
 		const token_position& position,
 		const node_ptr& left_expression_node,
 		const node_ptr& right_expression_node
-	) : operator_binary(
+	) : operator_binary_base(
 		position,
 		left_expression_node,
 		right_expression_node

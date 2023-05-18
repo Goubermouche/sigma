@@ -1,13 +1,13 @@
 #pragma once
-#include "code_generator/abstract_syntax_tree/operators/unary/operator_unary.h"
+#include "code_generator/abstract_syntax_tree/operators/unary/operator_unary_base.h"
 
 namespace channel {
 	/**
-	 * \brief AST node, represents the post decrement binary operator.
+	 * \brief AST node, represents the post increment binary operator.
 	 */
-	class operator_post_decrement : public operator_unary {
+	class operator_post_increment_node : public operator_unary_base {
 	public:
-		operator_post_decrement(
+		operator_post_increment_node(
 			const token_position& position,
 			const node_ptr& expression_node
 		);
@@ -18,7 +18,7 @@ namespace channel {
 		) override;
 
 		void print(
-			u64 depth, 
+			u64 depth,
 			const std::wstring& prefix,
 			bool is_last
 		) override;

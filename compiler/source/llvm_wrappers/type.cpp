@@ -143,6 +143,11 @@ namespace channel {
 	}
 
 	bool type::is_numerical() const {
+		// consider pointer types as a numerical type
+		if(m_pointer_level > 0) {
+			return true;
+		}
+
 		switch (m_base) {
 		case base::i8:
 		case base::i16:

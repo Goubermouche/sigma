@@ -5,9 +5,9 @@ namespace channel {
 	/**
 	 * \brief Base AST node, base for all unary operator nodes.
 	 */
-	class operator_unary : public node {
+	class operator_unary_base : public node {
 	public:
-		operator_unary(
+		operator_unary_base(
 			const token_position& position,
 			const node_ptr& expression_node
 		);

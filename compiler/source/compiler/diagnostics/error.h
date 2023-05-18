@@ -50,9 +50,7 @@ namespace channel {
 		// compiler errors
 		std::pair{ 5000, "the target machine cannot emit a file of this type" },
 		std::pair{ 5001, "clang compilation contains errors" },
-		std::pair{ 5002, "" },
-		std::pair{ 5003, "unable to compile: provided lexer is invalid" },
-		std::pair{ 5004, "unable to compile: provided parser is invalid" }
+		std::pair{ 5002, "" }
 	);
 
 	class error_message : public diagnostic_message {

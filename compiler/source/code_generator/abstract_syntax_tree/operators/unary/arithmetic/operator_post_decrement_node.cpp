@@ -1,16 +1,16 @@
-#include "operator_post_decrement.h"
+#include "operator_post_decrement_node.h"
 
 namespace channel {
-	operator_post_decrement::operator_post_decrement(
+	operator_post_decrement_node::operator_post_decrement_node(
 		const token_position& position,
 		const node_ptr& expression_node
-	) : operator_unary(position, expression_node) {}
+	) : operator_unary_base(position, expression_node) {}
 
-	acceptation_result operator_post_decrement::accept(code_generator& visitor, const code_generation_context& context) {
+	acceptation_result operator_post_decrement_node::accept(code_generator& visitor, const code_generation_context& context) {
 		return visitor.visit_operator_post_decrement_node(*this, context);
 	}
 
-	void operator_post_decrement::print(u64 depth, const std::wstring& prefix, bool is_last) {
+	void operator_post_decrement_node::print(u64 depth, const std::wstring& prefix, bool is_last) {
 		print_node_name(depth, prefix, "unary operator", is_last);
 		console::out
 			<< '\''

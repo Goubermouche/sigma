@@ -2,10 +2,12 @@
 
 // unary
 // arithmetic
-#include "code_generator/abstract_syntax_tree/operators/unary/arithmetic/operator_post_decrement.h"
-#include "code_generator/abstract_syntax_tree/operators/unary/arithmetic/operator_post_increment.h"
-#include "code_generator/abstract_syntax_tree/operators/unary/arithmetic/operator_pre_decrement.h"
-#include "code_generator/abstract_syntax_tree/operators/unary/arithmetic/operator_pre_increment.h"
+#include "code_generator/abstract_syntax_tree/operators/unary/arithmetic/operator_post_decrement_node.h"
+#include "code_generator/abstract_syntax_tree/operators/unary/arithmetic/operator_post_increment_node.h"
+#include "code_generator/abstract_syntax_tree/operators/unary/arithmetic/operator_pre_decrement_node.h"
+#include "code_generator/abstract_syntax_tree/operators/unary/arithmetic/operator_pre_increment_node.h"
+// logical
+#include "code_generator/abstract_syntax_tree/operators/unary/logical/operator_not_node.h"
 // binary
 // arithmetic
 #include "code_generator/abstract_syntax_tree/operators/binary/arithmetic/operator_addition_assignment_node.h"
@@ -32,7 +34,7 @@ namespace channel {
 	// unary
 	// arithmetic
 	acceptation_result basic_code_generator::visit_operator_post_decrement_node(
-		operator_post_decrement& node,
+		operator_post_decrement_node& node,
 		const code_generation_context& context
 	) {
 		(void)context; // suppress C4100
@@ -89,7 +91,7 @@ namespace channel {
 	}
 
 	acceptation_result basic_code_generator::visit_operator_post_increment_node(
-		operator_post_increment& node,
+		operator_post_increment_node& node,
 		const code_generation_context& context
 	) {
 		(void)context; // suppress C4100
@@ -144,7 +146,7 @@ namespace channel {
 	}
 
 	acceptation_result basic_code_generator::visit_operator_pre_decrement_node(
-		operator_pre_decrement& node, 
+		operator_pre_decrement_node& node, 
 		const code_generation_context& context
 	) {
 		(void)context; // suppress C4100
@@ -206,7 +208,7 @@ namespace channel {
 	}
 
 	acceptation_result basic_code_generator::visit_operator_pre_increment_node(
-		operator_pre_increment& node, 
+		operator_pre_increment_node& node, 
 		const code_generation_context& context
 	) {
 		(void)context; // suppress C4100
@@ -264,6 +266,49 @@ namespace channel {
 			"__pre_increment", 
 			expression_result.value()->get_type(),
 			increment_result
+		);
+	}
+
+	// logical
+	acceptation_result basic_code_generator::visit_operator_not_node(
+		operator_not_node& node, 
+		const code_generation_context& context
+	) {
+		(void)context; // suppress C4100
+
+		// accept the operand
+		acceptation_result operand_result = node.get_expression_node()->accept(
+			*this,
+			{}
+		);
+
+		if (!operand_result.has_value()) {
+			return operand_result; // return on failure
+		}
+
+		if(!operand_result.value()->get_type().is_numerical() && 
+			operand_result.value()->get_type().get_base() != type::base::boolean) {
+			return std::unexpected(
+				error::emit<4007>(
+					node.get_declared_position(),
+					operand_result.value()->get_type()
+				)
+			); // return on failure
+		}
+
+		// create a not operation (i.e., compare the operand with true and use the result)
+		llvm::Value* not_result = m_llvm_context->get_builder().CreateICmpEQ(
+			operand_result.value()->get_value(),
+			llvm::ConstantInt::get(
+				llvm::Type::getInt1Ty(m_llvm_context->get_context()),
+				0
+			)
+		);
+
+		return std::make_shared<value>(
+			"__logical_not",
+			type(type::base::boolean, 0),
+			not_result
 		);
 	}
 

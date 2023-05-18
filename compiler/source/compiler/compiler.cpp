@@ -62,7 +62,7 @@ namespace channel {
 		}
 
 		// compile the module into an executable
-		if (auto compilation_error = compile_module(std::move(module_generation_result.value()))) {
+		if (auto compilation_error = compile_module(module_generation_result.value())) {
 			return compilation_error; // return on failure
 		}
 
@@ -70,7 +70,7 @@ namespace channel {
 		return {};
 	}
 
-	std::expected<std::unique_ptr<llvm_context>, error_message> compiler::generate_module(
+	std::expected<std::shared_ptr<llvm_context>, error_message> compiler::generate_module(
 		const std::string& source_filepath
 	) const {
 		// tokenize the source file
@@ -110,12 +110,14 @@ namespace channel {
 			return std::unexpected(visitor_error_message.value()); // return on failure 
 		}
 
+		code_generator->get_llvm_context()->print_intermediate_representation();
+
 		console::out << "codegen finished (" << codegen_timer.elapsed() << "ms)\n";
-		return std::move(code_generator->get_llvm_context());
+		return code_generator->get_llvm_context();
 	}
 
 	error_result compiler::compile_module(
-		std::unique_ptr<llvm_context> llvm_context
+		std::shared_ptr<llvm_context> llvm_context
 	) const {
 		const std::string target_triple = llvm::sys::getDefaultTargetTriple();
 

@@ -1,16 +1,16 @@
-#include "operator_pre_increment.h"
+#include "operator_pre_decrement_node.h"
 
 namespace channel {
-	operator_pre_increment::operator_pre_increment(
+	operator_pre_decrement_node::operator_pre_decrement_node(
 		const token_position& position,
 		const node_ptr& expression_node
-	) : operator_unary(position, expression_node) {}
+	) : operator_unary_base(position, expression_node) {}
 
-	acceptation_result operator_pre_increment::accept(code_generator& visitor, const code_generation_context& context) {
-		return visitor.visit_operator_pre_increment_node(*this, context);
+	acceptation_result operator_pre_decrement_node::accept(code_generator& visitor, const code_generation_context& context) {
+		return visitor.visit_operator_pre_decrement_node(*this, context);
 	}
 
-	void operator_pre_increment::print(u64 depth, const std::wstring& prefix, bool is_last) {
+	void operator_pre_decrement_node::print(u64 depth, const std::wstring& prefix, bool is_last) {
 		print_node_name(depth, prefix, "unary operator", is_last);
 		console::out
 			<< '\''
@@ -19,7 +19,7 @@ namespace channel {
 			<< color::white
 			<< "' '"
 			<< AST_NODE_OPERATOR_COLOR
-			<< "++"
+			<< "--"
 			<< color::white
 			<< "'\n";
 

@@ -5,9 +5,9 @@ namespace channel {
 	/**
 	 * \brief Base AST node, base for all binary operator nodes.
 	 */
-	class operator_binary : public node	{
+	class operator_binary_base : public node	{
 	public:
-		operator_binary(
+		operator_binary_base(
 			const token_position& position,
 			const node_ptr& left_expression_node,
 			const node_ptr& right_expression_node

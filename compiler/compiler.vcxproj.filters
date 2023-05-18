@@ -177,22 +177,22 @@
     <ClInclude Include="source\code_generator\abstract_syntax_tree\operators\binary\logical\operator_not_equals_node.h">
       <Filter>source\codegen\abstract_syntax_tree\operators\binary\logical</Filter>
     </ClInclude>
-    <ClInclude Include="source\code_generator\abstract_syntax_tree\operators\binary\operator_binary.h">
+    <ClInclude Include="source\code_generator\abstract_syntax_tree\operators\binary\operator_binary_base.h">
       <Filter>source\codegen\abstract_syntax_tree\operators\binary</Filter>
     </ClInclude>
-    <ClInclude Include="source\code_generator\abstract_syntax_tree\operators\unary\arithmetic\operator_post_decrement.h">
+    <ClInclude Include="source\code_generator\abstract_syntax_tree\operators\unary\arithmetic\operator_post_decrement_node.h">
       <Filter>source\codegen\abstract_syntax_tree\operators\unary\arithmetic</Filter>
     </ClInclude>
-    <ClInclude Include="source\code_generator\abstract_syntax_tree\operators\unary\arithmetic\operator_post_increment.h">
+    <ClInclude Include="source\code_generator\abstract_syntax_tree\operators\unary\arithmetic\operator_post_increment_node.h">
       <Filter>source\codegen\abstract_syntax_tree\operators\unary\arithmetic</Filter>
     </ClInclude>
-    <ClInclude Include="source\code_generator\abstract_syntax_tree\operators\unary\arithmetic\operator_pre_decrement.h">
+    <ClInclude Include="source\code_generator\abstract_syntax_tree\operators\unary\arithmetic\operator_pre_decrement_node.h">
       <Filter>source\codegen\abstract_syntax_tree\operators\unary\arithmetic</Filter>
     </ClInclude>
-    <ClInclude Include="source\code_generator\abstract_syntax_tree\operators\unary\arithmetic\operator_pre_increment.h">
+    <ClInclude Include="source\code_generator\abstract_syntax_tree\operators\unary\arithmetic\operator_pre_increment_node.h">
       <Filter>source\codegen\abstract_syntax_tree\operators\unary\arithmetic</Filter>
     </ClInclude>
-    <ClInclude Include="source\code_generator\abstract_syntax_tree\operators\unary\operator_unary.h">
+    <ClInclude Include="source\code_generator\abstract_syntax_tree\operators\unary\operator_unary_base.h">
       <Filter>source\codegen\abstract_syntax_tree\operators\unary</Filter>
     </ClInclude>
     <ClInclude Include="source\code_generator\abstract_syntax_tree\translation_unit_node.h">
@@ -298,6 +298,7 @@
       <Filter>source\utility</Filter>
     </ClInclude>
     <ClInclude Include="source\llvm_wrappers\llvm_context.h" />
+    <ClInclude Include="source\code_generator\abstract_syntax_tree\operators\unary\logical\operator_not_node.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp" />
@@ -394,22 +395,22 @@
     <ClCompile Include="source\code_generator\abstract_syntax_tree\operators\binary\logical\operator_not_equals_node.cpp">
       <Filter>source\codegen\abstract_syntax_tree\operators\binary\logical</Filter>
     </ClCompile>
-    <ClCompile Include="source\code_generator\abstract_syntax_tree\operators\binary\operator_binary.cpp">
+    <ClCompile Include="source\code_generator\abstract_syntax_tree\operators\binary\operator_binary_base.cpp">
       <Filter>source\codegen\abstract_syntax_tree\operators\binary</Filter>
     </ClCompile>
-    <ClCompile Include="source\code_generator\abstract_syntax_tree\operators\unary\arithmetic\operator_post_decrement.cpp">
+    <ClCompile Include="source\code_generator\abstract_syntax_tree\operators\unary\arithmetic\operator_post_decrement_node.cpp">
       <Filter>source\codegen\abstract_syntax_tree\operators\unary\arithmetic</Filter>
     </ClCompile>
-    <ClCompile Include="source\code_generator\abstract_syntax_tree\operators\unary\arithmetic\operator_post_increment.cpp">
+    <ClCompile Include="source\code_generator\abstract_syntax_tree\operators\unary\arithmetic\operator_post_increment_node.cpp">
       <Filter>source\codegen\abstract_syntax_tree\operators\unary\arithmetic</Filter>
     </ClCompile>
-    <ClCompile Include="source\code_generator\abstract_syntax_tree\operators\unary\arithmetic\operator_pre_decrement.cpp">
+    <ClCompile Include="source\code_generator\abstract_syntax_tree\operators\unary\arithmetic\operator_pre_decrement_node.cpp">
       <Filter>source\codegen\abstract_syntax_tree\operators\unary\arithmetic</Filter>
     </ClCompile>
-    <ClCompile Include="source\code_generator\abstract_syntax_tree\operators\unary\arithmetic\operator_pre_increment.cpp">
+    <ClCompile Include="source\code_generator\abstract_syntax_tree\operators\unary\arithmetic\operator_pre_increment_node.cpp">
       <Filter>source\codegen\abstract_syntax_tree\operators\unary\arithmetic</Filter>
     </ClCompile>
-    <ClCompile Include="source\code_generator\abstract_syntax_tree\operators\unary\operator_unary.cpp">
+    <ClCompile Include="source\code_generator\abstract_syntax_tree\operators\unary\operator_unary_base.cpp">
       <Filter>source\codegen\abstract_syntax_tree\operators\unary</Filter>
     </ClCompile>
     <ClCompile Include="source\code_generator\abstract_syntax_tree\translation_unit_node.cpp">
@@ -518,5 +519,6 @@
       <Filter>source\utility</Filter>
     </ClCompile>
     <ClCompile Include="source\llvm_wrappers\llvm_context.cpp" />
+    <ClCompile Include="source\code_generator\abstract_syntax_tree\operators\unary\logical\operator_not_node.cpp" />
   </ItemGroup>
 </Project>

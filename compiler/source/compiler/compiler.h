@@ -72,12 +72,12 @@ namespace channel {
 			const std::string& target_executable_directory
 		);
 	private:
-		std::expected<std::unique_ptr<llvm_context>, error_message> generate_module(
+		std::expected<std::shared_ptr<llvm_context>, error_message> generate_module(
 			const std::string& source_filepath
 		) const;
 
 		error_result compile_module(
-			std::unique_ptr<llvm_context> llvm_context
+			std::shared_ptr<llvm_context> llvm_context
 		) const;
 
 		static error_result verify_source_file(

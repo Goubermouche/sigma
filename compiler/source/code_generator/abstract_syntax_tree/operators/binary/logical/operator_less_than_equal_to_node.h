@@ -1,11 +1,11 @@
 #pragma once
-#include "code_generator/abstract_syntax_tree/operators/binary/operator_binary.h"
+#include "code_generator/abstract_syntax_tree/operators/binary/operator_binary_base.h"
 
 namespace channel {
 	/**
 	 * \brief AST node, represents the less than or equal to binary operator.
 	 */
-	class operator_less_than_equal_to_node : public operator_binary {
+	class operator_less_than_equal_to_node : public operator_binary_base {
 	public:
 		operator_less_than_equal_to_node(
 			const token_position& position,

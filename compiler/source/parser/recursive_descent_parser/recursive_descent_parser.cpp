@@ -32,10 +32,12 @@
 // operators
 // unary
 // arithmetic
-#include "code_generator/abstract_syntax_tree/operators/unary/arithmetic/operator_post_decrement.h"
-#include "code_generator/abstract_syntax_tree/operators/unary/arithmetic/operator_post_increment.h"
-#include "code_generator/abstract_syntax_tree/operators/unary/arithmetic/operator_pre_decrement.h"
-#include "code_generator/abstract_syntax_tree/operators/unary/arithmetic/operator_pre_increment.h"
+#include "code_generator/abstract_syntax_tree/operators/unary/arithmetic/operator_post_decrement_node.h"
+#include "code_generator/abstract_syntax_tree/operators/unary/arithmetic/operator_post_increment_node.h"
+#include "code_generator/abstract_syntax_tree/operators/unary/arithmetic/operator_pre_decrement_node.h"
+#include "code_generator/abstract_syntax_tree/operators/unary/arithmetic/operator_pre_increment_node.h"
+// logical
+#include "code_generator/abstract_syntax_tree/operators/unary/logical/operator_not_node.h"
 
 // binary
 // arithmetic
@@ -264,11 +266,13 @@ namespace channel {
 				break;
 			case token::operator_increment:
 			case token::operator_decrement:
+			case token::operator_not:
 				// check if the next token is an identifier or an opening parenthesis
 				token next_next_token;
 				next_next_token = peek_nth_token(2);
 
-				if (next_next_token == token::identifier || next_next_token == token::l_parenthesis) {
+				if (next_next_token == token::identifier ||
+					next_next_token == token::l_parenthesis) {
 					if (auto pre_operator_parse_error = parse_pre_operator(out_node)) {
 						return pre_operator_parse_error; // return on failure
 					}
@@ -452,12 +456,15 @@ namespace channel {
 			break;
 		case token::operator_increment:
 		case token::operator_decrement:
+		case token::operator_not:
 			// check if the next token is an identifier or an opening parenthesis
 			token next_next_token;
 			next_next_token = peek_nth_token(2);
 
-			if (next_next_token == token::identifier || next_next_token == token::l_parenthesis) {
-				if (auto pre_operator_parse_error =parse_pre_operator(out_node)) {
+			if (
+				next_next_token == token::identifier || 
+				next_next_token == token::l_parenthesis) {
+				if (auto pre_operator_parse_error = parse_pre_operator(out_node)) {
 					return pre_operator_parse_error; // return on failure
 				}
 			}
@@ -989,11 +996,14 @@ namespace channel {
 			return parse_negative_number(out_node, expression_type);
 		case token::operator_increment:
 		case token::operator_decrement:
+		case token::operator_not:
 			// check if the next token is an identifier or an opening parenthesis
 			token next_next_token;
 			next_next_token = peek_nth_token(2);
 
-			if (next_next_token == token::identifier || next_next_token == token::l_parenthesis) {
+			if (
+				next_next_token == token::identifier || 
+				next_next_token == token::l_parenthesis) {
 				return parse_pre_operator(out_node);
 			}
 
@@ -1058,10 +1068,10 @@ namespace channel {
 		get_next_token();
 
 		if (m_current_token.get_token() == token::operator_increment) {
-			out_node = new operator_post_increment(m_current_token.get_token_position(), operand);
+			out_node = new operator_post_increment_node(m_current_token.get_token_position(), operand);
 		}
 		else {
-			out_node = new operator_post_decrement(m_current_token.get_token_position(), operand);
+			out_node = new operator_post_decrement_node(m_current_token.get_token_position(), operand);
 		}
 
 		return {};
@@ -1076,11 +1086,16 @@ namespace channel {
 			return primary_parse_error; // return on failure
 		}
 
-		if (op.get_token() == token::operator_increment) {
-			out_node = new operator_pre_increment(op.get_token_position(), operand);
-		}
-		else {
-			out_node = new operator_pre_decrement(op.get_token_position(), operand);
+		switch (op.get_token()) {
+		case token::operator_increment:
+			out_node = new operator_pre_increment_node(op.get_token_position(), operand);
+			break;
+		case token::operator_decrement:
+			out_node = new operator_pre_decrement_node(op.get_token_position(), operand);
+			break;
+		case token::operator_not:
+			out_node = new operator_not_node(op.get_token_position(), operand);
+			break;
 		}
 
 		return {};

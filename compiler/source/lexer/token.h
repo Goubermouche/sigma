@@ -15,6 +15,7 @@ namespace channel {
 		double_quote,                       // "
 
 		// keywords
+		keyword_type_structure,             // struct
 		keyword_type_void,                  // void
 		keyword_type_bool,                  // bool
 		bool_literal_true,
@@ -157,6 +158,8 @@ namespace channel {
 
 		// keywords
 		// types
+		case token::keyword_type_structure:
+			return "keyword_type_structure";
 		case token::keyword_type_void:
 			return "keyword_type_void";
 		case token::keyword_type_bool:

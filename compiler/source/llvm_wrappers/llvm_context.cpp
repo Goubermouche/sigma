@@ -5,6 +5,10 @@ namespace channel {
 		: m_builder(m_context),
 	m_module(std::make_unique<llvm::Module>("channel", m_context)) {}
 
+	void llvm_context::print_intermediate_representation() const {
+		m_module->print(llvm::outs(), nullptr);
+	}
+
 	llvm::LLVMContext& llvm_context::get_context() {
 		return m_context;
 	}

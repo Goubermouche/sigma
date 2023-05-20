@@ -229,6 +229,12 @@ namespace channel {
 			const code_generation_context& context
 		) override;
 
+		// bitwise
+		acceptation_result visit_operator_bitwise_not_node(
+			operator_bitwise_not_node& node,
+			const code_generation_context& context
+		) override;
+
 		// logical
 		acceptation_result visit_operator_not_node(
 			operator_not_node& node,
@@ -284,6 +290,32 @@ namespace channel {
 
 		acceptation_result visit_operator_modulo_node(
 			operator_modulo_node& node,
+			const code_generation_context& context
+		) override;
+
+		// bitwise
+		acceptation_result visit_operator_bitwise_and_node(
+			operator_bitwise_and_node& node,
+			const code_generation_context& context
+		) override;
+
+		acceptation_result visit_operator_bitwise_or_node(
+			operator_bitwise_or_node& node,
+			const code_generation_context& context
+		) override;
+
+		acceptation_result visit_operator_bitwise_left_shift_node(
+			operator_bitwise_left_shift_node& node,
+			const code_generation_context& context
+		) override;
+
+		acceptation_result visit_operator_bitwise_right_shift_node(
+			operator_bitwise_right_shift_node& node,
+			const code_generation_context& context
+		) override;
+
+		acceptation_result visit_operator_bitwise_xor_node(
+			operator_bitwise_xor_node& node,
 			const code_generation_context& context
 		) override;
 

@@ -6,6 +6,8 @@
 #include "code_generator/abstract_syntax_tree/operators/unary/arithmetic/operator_post_increment_node.h"
 #include "code_generator/abstract_syntax_tree/operators/unary/arithmetic/operator_pre_decrement_node.h"
 #include "code_generator/abstract_syntax_tree/operators/unary/arithmetic/operator_pre_increment_node.h"
+// bitwise
+#include "code_generator/abstract_syntax_tree/operators/unary/bitwise/operator_bitwise_not_node.h"
 // logical
 #include "code_generator/abstract_syntax_tree/operators/unary/logical/operator_not_node.h"
 // binary
@@ -20,6 +22,12 @@
 #include "code_generator/abstract_syntax_tree/operators/binary/arithmetic/operator_division_node.h"
 #include "code_generator/abstract_syntax_tree/operators/binary/arithmetic/operator_modulo_assignment_node.h"
 #include "code_generator/abstract_syntax_tree/operators/binary/arithmetic/operator_modulo_node.h"
+// bitwise
+#include "code_generator/abstract_syntax_tree/operators/binary/bitwise/operator_bitwise_and_node.h"
+#include "code_generator/abstract_syntax_tree/operators/binary/bitwise/operator_bitwise_left_shift_node.h"
+#include "code_generator/abstract_syntax_tree/operators/binary/bitwise/operator_bitwise_or_node.h"
+#include "code_generator/abstract_syntax_tree/operators/binary/bitwise/operator_bitwise_right_shift_node.h"
+#include "code_generator/abstract_syntax_tree/operators/binary/bitwise/operator_bitwise_xor_node.h"
 // logical
 #include "code_generator/abstract_syntax_tree/operators/binary/logical/operator_conjunction_node.h"
 #include "code_generator/abstract_syntax_tree/operators/binary/logical/operator_disjunction_node.h"
@@ -50,7 +58,7 @@ namespace channel {
 		// check if the expression is an integer or a floating-point value
 		if (!expression_result.value()->get_type().is_numerical()) {
 			return std::unexpected(
-				error::emit<4007>(
+				error::emit<4100>(
 					node.get_declared_position(), 
 					expression_result.value()->get_type()
 				)
@@ -107,7 +115,7 @@ namespace channel {
 		// check if the expression is an integer or a floating-point value
 		if (!expression_result.value()->get_type().is_numerical()) {
 			return std::unexpected(
-				error::emit<4007>(
+				error::emit<4101>(
 					node.get_declared_position(),
 					expression_result.value()->get_type()
 				)
@@ -163,7 +171,7 @@ namespace channel {
 		// check if the expression is an integer or a floating-point value
 		if (!expression_result.value()->get_type().is_numerical()) {
 			return std::unexpected(
-				error::emit<4007>(
+				error::emit<4102>(
 					node.get_declared_position(), 
 					expression_result.value()->get_type()
 				)
@@ -225,7 +233,7 @@ namespace channel {
 		// check if the expression is an integer or a floating-point value
 		if (!expression_result.value()->get_type().is_numerical()) {
 			return std::unexpected(
-				error::emit<4007>(
+				error::emit<4103>(
 					node.get_declared_position(), 
 					expression_result.value()->get_type()
 				)
@@ -269,6 +277,45 @@ namespace channel {
 		);
 	}
 
+	// bitwise
+	acceptation_result basic_code_generator::visit_operator_bitwise_not_node(
+		operator_bitwise_not_node& node,
+		const code_generation_context& context
+	) {
+		(void)context; // suppress C4100
+
+		// accept the operand
+		acceptation_result operand_result = node.get_expression_node()->accept(
+			*this,
+			{}
+		);
+
+		if (!operand_result.has_value()) {
+			return operand_result; // return on failure
+		}
+
+		// the expression must be integral
+		if (!operand_result.value()->get_type().is_integral()) {
+			return std::unexpected(
+				error::emit<4105>(
+					node.get_declared_position(),
+					operand_result.value()->get_type()
+				)
+			); // return on failure
+		}
+
+		// create a bitwise NOT operation
+		llvm::Value* not_result = m_llvm_context->get_builder().CreateNot(
+			operand_result.value()->get_value()
+		);
+
+		return std::make_shared<value>(
+			"__bitwise_not",
+			operand_result.value()->get_type(),
+			not_result
+		);
+	}
+
 	// logical
 	acceptation_result basic_code_generator::visit_operator_not_node(
 		operator_not_node& node, 
@@ -289,7 +336,7 @@ namespace channel {
 		if(!operand_result.value()->get_type().is_numerical() && 
 			operand_result.value()->get_type().get_base() != type::base::boolean) {
 			return std::unexpected(
-				error::emit<4007>(
+				error::emit<4104>(
 					node.get_declared_position(),
 					operand_result.value()->get_type()
 				)
@@ -649,6 +696,261 @@ namespace channel {
 		);
 	}
 
+	acceptation_result basic_code_generator::visit_operator_bitwise_and_node(
+		operator_bitwise_and_node& node, 
+		const code_generation_context& context
+	) {
+		(void)context; // suppress C4100
+
+		// accept the left operand
+		acceptation_result left_operand_result = node.get_left_expression_node()->accept(
+			*this,
+			{}
+		);
+
+		if (!left_operand_result.has_value()) {
+			return left_operand_result; // return on failure
+		}
+
+		// accept the right operand
+		acceptation_result right_operand_result = node.get_right_expression_node()->accept(
+			*this,
+			{}
+		);
+
+		if (!right_operand_result.has_value()) {
+			return right_operand_result; // return on failure
+		}
+
+		// both expressions must be integral
+		if (!left_operand_result.value()->get_type().is_integral() ||
+			!right_operand_result.value()->get_type().is_integral()) {
+			return std::unexpected(
+				error::emit<4202>(
+					node.get_declared_position(),
+					left_operand_result.value()->get_type(),
+					right_operand_result.value()->get_type()
+				)
+			); // return on failure
+		}
+
+		// create a bitwise AND operation
+		llvm::Value* and_result = m_llvm_context->get_builder().CreateAnd(
+			left_operand_result.value()->get_value(),
+			right_operand_result.value()->get_value()
+		);
+
+		return std::make_shared<value>(
+			"__bitwise_and",
+			left_operand_result.value()->get_type(),
+			and_result
+		);
+	}
+
+	acceptation_result basic_code_generator::visit_operator_bitwise_or_node(
+		operator_bitwise_or_node& node,
+		const code_generation_context& context
+	) {
+		(void)context; // suppress C4100
+
+		// accept the left operand
+		acceptation_result left_operand_result = node.get_left_expression_node()->accept(
+			*this,
+			{}
+		);
+
+		if (!left_operand_result.has_value()) {
+			return left_operand_result; // return on failure
+		}
+
+		// accept the right operand
+		acceptation_result right_operand_result = node.get_right_expression_node()->accept(
+			*this,
+			{}
+		);
+
+		if (!right_operand_result.has_value()) {
+			return right_operand_result; // return on failure
+		}
+
+		// both expressions must be integral
+		if (!left_operand_result.value()->get_type().is_integral() ||
+			!right_operand_result.value()->get_type().is_integral()) {
+			return std::unexpected(
+				error::emit<4203>(
+					node.get_declared_position(),
+					left_operand_result.value()->get_type(),
+					right_operand_result.value()->get_type()
+				)
+			); // return on failure
+		}
+
+		// create a bitwise OR operation
+		llvm::Value* and_result = m_llvm_context->get_builder().CreateOr(
+			left_operand_result.value()->get_value(),
+			right_operand_result.value()->get_value()
+		);
+
+		return std::make_shared<value>(
+			"__bitwise_or",
+			left_operand_result.value()->get_type(),
+			and_result
+		);
+	}
+
+	acceptation_result basic_code_generator::visit_operator_bitwise_left_shift_node(
+		operator_bitwise_left_shift_node& node, 
+		const code_generation_context& context
+	) {
+		(void)context; // suppress C4100
+
+		// accept the left operand
+		acceptation_result left_operand_result = node.get_left_expression_node()->accept(
+			*this,
+			{}
+		);
+
+		if (!left_operand_result.has_value()) {
+			return left_operand_result; // return on failure
+		}
+
+		// accept the right operand
+		acceptation_result right_operand_result = node.get_right_expression_node()->accept(
+			*this,
+			{}
+		);
+
+		if (!right_operand_result.has_value()) {
+			return right_operand_result; // return on failure
+		}
+
+		// both expressions must be integral
+		if (!left_operand_result.value()->get_type().is_integral() ||
+			!right_operand_result.value()->get_type().is_integral()) {
+			return std::unexpected(
+				error::emit<4204>(
+					node.get_declared_position(),
+					left_operand_result.value()->get_type(),
+					right_operand_result.value()->get_type()
+				)
+			); // return on failure
+		}
+
+		// create a bitwise left shift operation
+		llvm::Value* left_shift_result = m_llvm_context->get_builder().CreateShl(
+			left_operand_result.value()->get_value(),
+			right_operand_result.value()->get_value()
+		);
+
+		return std::make_shared<value>(
+			"__bitwise_left_shift",
+			left_operand_result.value()->get_type(),
+			left_shift_result
+		);
+	}
+
+	acceptation_result basic_code_generator::visit_operator_bitwise_right_shift_node(
+		operator_bitwise_right_shift_node& node,
+		const code_generation_context& context
+	) {
+		(void)context; // suppress C4100
+
+		// accept the left operand
+		acceptation_result left_operand_result = node.get_left_expression_node()->accept(
+			*this,
+			{}
+		);
+
+		if (!left_operand_result.has_value()) {
+			return left_operand_result; // return on failure
+		}
+
+		// accept the right operand
+		acceptation_result right_operand_result = node.get_right_expression_node()->accept(
+			*this,
+			{}
+		);
+
+		if (!right_operand_result.has_value()) {
+			return right_operand_result; // return on failure
+		}
+
+		// both expressions must be integral
+		if (!left_operand_result.value()->get_type().is_integral() ||
+			!right_operand_result.value()->get_type().is_integral()) {
+			return std::unexpected(
+				error::emit<4205>(
+					node.get_declared_position(),
+					left_operand_result.value()->get_type(),
+					right_operand_result.value()->get_type()
+				)
+			); // return on failure
+		}
+
+		// create a bitwise right shift operation
+		llvm::Value* right_shift_result = m_llvm_context->get_builder().CreateLShr(
+			left_operand_result.value()->get_value(),
+			right_operand_result.value()->get_value()
+		);
+
+		return std::make_shared<value>(
+			"__bitwise_right_shift",
+			left_operand_result.value()->get_type(),
+			right_shift_result
+		);
+	}
+
+	acceptation_result basic_code_generator::visit_operator_bitwise_xor_node(
+		operator_bitwise_xor_node& node,
+		const code_generation_context& context
+	) {
+		(void)context; // suppress C4100
+
+		// accept the left operand
+		acceptation_result left_operand_result = node.get_left_expression_node()->accept(
+			*this,
+			{}
+		);
+
+		if (!left_operand_result.has_value()) {
+			return left_operand_result; // return on failure
+		}
+
+		// accept the right operand
+		acceptation_result right_operand_result = node.get_right_expression_node()->accept(
+			*this,
+			{}
+		);
+
+		if (!right_operand_result.has_value()) {
+			return right_operand_result; // return on failure
+		}
+
+		// both expressions must be integral
+		if (!left_operand_result.value()->get_type().is_integral() ||
+			!right_operand_result.value()->get_type().is_integral()) {
+			return std::unexpected(
+				error::emit<4206>(
+					node.get_declared_position(),
+					left_operand_result.value()->get_type(),
+					right_operand_result.value()->get_type()
+				)
+			); // return on failure
+		}
+
+		// create a bitwise XOR operation
+		llvm::Value* xor_result = m_llvm_context->get_builder().CreateXor(
+			left_operand_result.value()->get_value(),
+			right_operand_result.value()->get_value()
+		);
+
+		return std::make_shared<value>(
+			"__bitwise_xor",
+			left_operand_result.value()->get_type(),
+			xor_result
+		);
+	}
+
 	// logical
 	acceptation_result basic_code_generator::visit_operator_logical_conjunction_node(
 		operator_conjunction_node& node,
@@ -679,7 +981,7 @@ namespace channel {
 		if (left_operand_result.value()->get_type().get_base() != type::base::boolean || 
 			right_operand_result.value()->get_type().get_base() != type::base::boolean) {
 			return std::unexpected(
-				error::emit<4008>(
+				error::emit<4200>(
 					node.get_declared_position(),
 					left_operand_result.value()->get_type(),
 					right_operand_result.value()->get_type()
@@ -730,7 +1032,7 @@ namespace channel {
 		if (left_operand_result.value()->get_type().get_base() != type::base::boolean ||
 			right_operand_result.value()->get_type().get_base() != type::base::boolean) {
 			return std::unexpected(
-				error::emit<4009>(node.get_declared_position(),
+				error::emit<4201>(node.get_declared_position(),
 					left_operand_result.value()->get_type(), 
 					right_operand_result.value()->get_type()
 				)

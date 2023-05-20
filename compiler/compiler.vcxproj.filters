@@ -299,6 +299,12 @@
     </ClInclude>
     <ClInclude Include="source\llvm_wrappers\llvm_context.h" />
     <ClInclude Include="source\code_generator\abstract_syntax_tree\operators\unary\logical\operator_not_node.h" />
+    <ClInclude Include="source\code_generator\abstract_syntax_tree\operators\binary\bitwise\operator_bitwise_left_shift_node.h" />
+    <ClInclude Include="source\code_generator\abstract_syntax_tree\operators\binary\bitwise\operator_bitwise_right_shift_node.h" />
+    <ClInclude Include="source\code_generator\abstract_syntax_tree\operators\binary\bitwise\operator_bitwise_or_node.h" />
+    <ClInclude Include="source\code_generator\abstract_syntax_tree\operators\binary\bitwise\operator_bitwise_and_node.h" />
+    <ClInclude Include="source\code_generator\abstract_syntax_tree\operators\unary\bitwise\operator_bitwise_not_node.h" />
+    <ClInclude Include="source\code_generator\abstract_syntax_tree\operators\binary\bitwise\operator_bitwise_xor_node.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp" />
@@ -520,5 +526,11 @@
     </ClCompile>
     <ClCompile Include="source\llvm_wrappers\llvm_context.cpp" />
     <ClCompile Include="source\code_generator\abstract_syntax_tree\operators\unary\logical\operator_not_node.cpp" />
+    <ClCompile Include="source\code_generator\abstract_syntax_tree\operators\binary\bitwise\operator_bitwise_left_shift_node.cpp" />
+    <ClCompile Include="source\code_generator\abstract_syntax_tree\operators\binary\bitwise\operator_bitwise_right_shift_node.cpp" />
+    <ClCompile Include="source\code_generator\abstract_syntax_tree\operators\binary\bitwise\operator_bitwise_or_node.cpp" />
+    <ClCompile Include="source\code_generator\abstract_syntax_tree\operators\binary\bitwise\operator_bitwise_and_node.cpp" />
+    <ClCompile Include="source\code_generator\abstract_syntax_tree\operators\unary\bitwise\operator_bitwise_not_node.cpp" />
+    <ClCompile Include="source\code_generator\abstract_syntax_tree\operators\binary\bitwise\operator_bitwise_xor_node.cpp" />
   </ItemGroup>
 </Project>

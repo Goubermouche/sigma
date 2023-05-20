@@ -3,7 +3,7 @@
 
 namespace channel {
 	/**
-	 * \brief AST node, represents the pre decrement binary operator.
+	 * \brief AST node, represents the not unary operator.
 	 */
 	class operator_not_node : public operator_unary_base {
 	public:

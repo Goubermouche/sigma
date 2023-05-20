@@ -1,0 +1,8 @@
+{
+    "files.associations": {
+        "chrono": "cpp",
+        "expected": "cpp",
+        "optional": "cpp",
+        "system_error": "cpp"
+    }
+}

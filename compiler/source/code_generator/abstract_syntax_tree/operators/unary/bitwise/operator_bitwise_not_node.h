@@ -3,11 +3,11 @@
 
 namespace channel {
 	/**
-	 * \brief AST node, represents the post decrement unary operator.
+	 * \brief AST node, represents the bitwise not unary operator.
 	 */
-	class operator_post_decrement_node : public operator_unary_base {
+	class operator_bitwise_not_node : public operator_unary_base {
 	public:
-		operator_post_decrement_node(
+		operator_bitwise_not_node(
 			const token_position& position,
 			const node_ptr& expression_node
 		);
@@ -18,7 +18,7 @@ namespace channel {
 		) override;
 
 		void print(
-			u64 depth, 
+			u64 depth,
 			const std::wstring& prefix,
 			bool is_last
 		) override;

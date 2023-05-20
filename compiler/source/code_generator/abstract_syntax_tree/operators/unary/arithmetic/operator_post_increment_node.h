@@ -3,7 +3,7 @@
 
 namespace channel {
 	/**
-	 * \brief AST node, represents the post increment binary operator.
+	 * \brief AST node, represents the post increment unary operator.
 	 */
 	class operator_post_increment_node : public operator_unary_base {
 	public:

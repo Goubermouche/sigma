@@ -7,7 +7,7 @@ namespace channel {
 	void error_message::print() const {
 		console::out
 			<< color::red
-			<< "warning "
+			<< "error "
 			<< m_code
 			<< ": "
 			<< m_message

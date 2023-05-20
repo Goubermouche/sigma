@@ -3,12 +3,12 @@
 
 namespace channel {
 	enum class token {
-		l_parenthesis,                      // token identifier for the '(' character
-		r_parenthesis,                      // token identifier for the ')' character
-		l_brace,                            // token identifier for the '{' character
-		r_brace,                            // token identifier for the '}' character
-		l_bracket,                          // token identifier for the '[' character
-		r_bracket,                          // token identifier for the ']' character
+		l_parenthesis,                      // (
+		r_parenthesis,                      // )
+		l_brace,                            // {
+		r_brace,                            // }
+		l_bracket,                          // [
+		r_bracket,                          // ]
 		comma,                              // ,
 		semicolon,                          // ;
 		single_quote,                       // '
@@ -90,7 +90,7 @@ namespace channel {
 		operator_less_than,                 // <  implemented
 		operator_bitwise_left_shift,        // << 
 		operator_less_than_equal_to,        // <= implemented
-		operator_not,                       // !  
+		operator_not,                       // !  implemented
 		operator_not_equals,                // != implemented
 		operator_bitwise_and,               // &  
 		operator_logical_conjunction,       // && implemented

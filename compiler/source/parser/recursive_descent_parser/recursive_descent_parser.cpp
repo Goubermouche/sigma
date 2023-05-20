@@ -36,6 +36,8 @@
 #include "code_generator/abstract_syntax_tree/operators/unary/arithmetic/operator_post_increment_node.h"
 #include "code_generator/abstract_syntax_tree/operators/unary/arithmetic/operator_pre_decrement_node.h"
 #include "code_generator/abstract_syntax_tree/operators/unary/arithmetic/operator_pre_increment_node.h"
+// bitwise
+#include "code_generator/abstract_syntax_tree/operators/unary/bitwise/operator_bitwise_not_node.h"
 // logical
 #include "code_generator/abstract_syntax_tree/operators/unary/logical/operator_not_node.h"
 
@@ -51,6 +53,12 @@
 #include "code_generator/abstract_syntax_tree/operators/binary/arithmetic/operator_division_node.h"
 #include "code_generator/abstract_syntax_tree/operators/binary/arithmetic/operator_modulo_assignment_node.h"
 #include "code_generator/abstract_syntax_tree/operators/binary/arithmetic/operator_modulo_node.h"
+// bitwise
+#include "code_generator/abstract_syntax_tree/operators/binary/bitwise/operator_bitwise_and_node.h"
+#include "code_generator/abstract_syntax_tree/operators/binary/bitwise/operator_bitwise_left_shift_node.h"
+#include "code_generator/abstract_syntax_tree/operators/binary/bitwise/operator_bitwise_or_node.h"
+#include "code_generator/abstract_syntax_tree/operators/binary/bitwise/operator_bitwise_right_shift_node.h"
+#include "code_generator/abstract_syntax_tree/operators/binary/bitwise/operator_bitwise_xor_node.h"
 // logical
 #include "code_generator/abstract_syntax_tree/operators/binary/logical/operator_conjunction_node.h"
 #include "code_generator/abstract_syntax_tree/operators/binary/logical/operator_disjunction_node.h"
@@ -267,6 +275,7 @@ namespace channel {
 			case token::operator_increment:
 			case token::operator_decrement:
 			case token::operator_not:
+			case token::operator_bitwise_not:
 				// check if the next token is an identifier or an opening parenthesis
 				token next_next_token;
 				next_next_token = peek_nth_token(2);
@@ -303,8 +312,9 @@ namespace channel {
 				// return right away since we don't want to check for a semicolon at the end of the statement
 				return parse_for_loop(out_node);
 			default:
+				token_position p = m_current_token.get_token_position();
 				return error::emit<3001>(
-					m_current_token.get_token_position(),
+					p,
 					next_token
 				); // return on failure
 			}
@@ -457,6 +467,7 @@ namespace channel {
 		case token::operator_increment:
 		case token::operator_decrement:
 		case token::operator_not:
+		case token::operator_bitwise_not:
 			// check if the next token is an identifier or an opening parenthesis
 			token next_next_token;
 			next_next_token = peek_nth_token(2);
@@ -475,7 +486,10 @@ namespace channel {
 		case token::r_parenthesis:
 			break;
 		default:
-			return error::emit<3001>(m_current_token.get_token_position(), next_token); // return on failure
+			return error::emit<3001>(
+				m_current_token.get_token_position(), 
+				next_token
+			); // return on failure
 		}
 
 		return {};
@@ -507,7 +521,10 @@ namespace channel {
 				}
 				break;
 			default:
-				return error::emit<3001>(m_current_token.get_token_position(), next_token); // return on failure
+				return error::emit<3001>(
+					m_current_token.get_token_position(), 
+					next_token
+				); // return on failure
 			}
 		}
 
@@ -764,7 +781,10 @@ namespace channel {
 					break;
 				}
 				else {
-					return error::emit<3001>(m_current_token.get_token_position(), m_current_token.get_token());  // return on failure
+					return error::emit<3001>(
+						m_current_token.get_token_position(),
+						m_current_token.get_token()
+					);  // return on failure
 				}
 			}
 		}
@@ -956,7 +976,12 @@ namespace channel {
 		while (
 			peek_next_token() == token::operator_multiplication ||
 			peek_next_token() == token::operator_division ||
-			peek_next_token() == token::operator_modulo) {
+			peek_next_token() == token::operator_modulo ||
+			peek_next_token() == token::operator_bitwise_and ||
+			peek_next_token() == token::operator_bitwise_or ||
+			peek_next_token() == token::operator_bitwise_left_shift ||
+			peek_next_token() == token::operator_bitwise_right_shift ||
+			peek_next_token() == token::operator_bitwise_xor) {
 
 			get_next_token();
 			const token_data op = m_current_token;
@@ -975,6 +1000,21 @@ namespace channel {
 				break;
 			case token::operator_modulo:
 				left = new operator_modulo_node(op.get_token_position(), left, right);
+				break;
+			case token::operator_bitwise_and:
+				left = new operator_bitwise_and_node(op.get_token_position(), left, right);
+				break;
+			case token::operator_bitwise_or:
+				left = new operator_bitwise_or_node(op.get_token_position(), left, right);
+				break;
+			case token::operator_bitwise_left_shift:
+				left = new operator_bitwise_left_shift_node(op.get_token_position(), left, right);
+				break;
+			case token::operator_bitwise_right_shift:
+				left = new operator_bitwise_right_shift_node(op.get_token_position(), left, right);
+				break;
+			case token::operator_bitwise_xor:
+				left = new operator_bitwise_xor_node(op.get_token_position(), left, right);
 				break;
 			}
 		}
@@ -997,6 +1037,7 @@ namespace channel {
 		case token::operator_increment:
 		case token::operator_decrement:
 		case token::operator_not:
+		case token::operator_bitwise_not:
 			// check if the next token is an identifier or an opening parenthesis
 			token next_next_token;
 			next_next_token = peek_nth_token(2);
@@ -1029,7 +1070,10 @@ namespace channel {
 			return parse_bool(out_node);
 		}
 
-		return error::emit<3001>(m_current_token.get_token_position(), m_current_token.get_token()); // return on failure
+		return error::emit<3001>(
+			m_current_token.get_token_position(),
+			m_current_token.get_token()
+		); // return on failure
 	}
 
 	error_result recursive_descent_parser::parse_number(node*& out_node, type expression_type) {
@@ -1095,6 +1139,9 @@ namespace channel {
 			break;
 		case token::operator_not:
 			out_node = new operator_not_node(op.get_token_position(), operand);
+			break;
+		case token::operator_bitwise_not:
+			out_node = new operator_bitwise_not_node(op.get_token_position(), operand);
 			break;
 		}
 

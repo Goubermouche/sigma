@@ -38,6 +38,8 @@ namespace channel {
 	class operator_post_increment_node;
 	class operator_pre_decrement_node;
 	class operator_pre_increment_node;
+	// bitwise
+	class operator_bitwise_not_node;
 	// logical
 	class operator_not_node;
 	// binary
@@ -52,6 +54,12 @@ namespace channel {
 	class operator_division_node;
 	class operator_modulo_assignment_node;
 	class operator_modulo_node;
+	// bitwise
+	class operator_bitwise_and_node;
+	class operator_bitwise_or_node;
+	class operator_bitwise_left_shift_node;
+	class operator_bitwise_right_shift_node;
+	class operator_bitwise_xor_node;
 	// logical
 	class operator_conjunction_node;
 	class operator_disjunction_node;
@@ -267,6 +275,37 @@ namespace channel {
 
 		virtual acceptation_result visit_operator_modulo_node(
 			operator_modulo_node& node, 
+			const code_generation_context& context
+		) = 0;
+
+		// bitwise
+		virtual acceptation_result visit_operator_bitwise_and_node(
+			operator_bitwise_and_node& node,
+			const code_generation_context& context
+		) = 0;
+
+		virtual acceptation_result visit_operator_bitwise_or_node(
+			operator_bitwise_or_node& node,
+			const code_generation_context& context
+		) = 0;
+
+		virtual acceptation_result visit_operator_bitwise_not_node(
+			operator_bitwise_not_node& node,
+			const code_generation_context& context
+		) = 0;
+
+		virtual acceptation_result visit_operator_bitwise_left_shift_node(
+			operator_bitwise_left_shift_node& node,
+			const code_generation_context& context
+		) = 0;
+
+		virtual acceptation_result visit_operator_bitwise_right_shift_node(
+			operator_bitwise_right_shift_node& node,
+			const code_generation_context& context
+		) = 0;
+
+		virtual acceptation_result visit_operator_bitwise_xor_node(
+			operator_bitwise_xor_node& node,
 			const code_generation_context& context
 		) = 0;
 

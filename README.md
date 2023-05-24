@@ -1,5 +1,5 @@
 ## Channel language
-Channel is a compiled, statically typed, C-like, data oriented language with a focus on performance and low-level optimization, with special focus on GPU acceleration via kernels. 
+Channel is a compiled, statically typed, C-like, data oriented language with a focus on performance and low-level optimization using GPU acceleration via kernels.
 ## Getting up and running
 ### Windows 10
 <ins>**1. Downloading the repository:**</ins>   

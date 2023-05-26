@@ -3,13 +3,15 @@
 namespace channel {
 	function_node::function_node(
 		const token_position& position,
-		const type& function_return_type, 
+		const type& function_return_type,
+		bool is_var_arg,
 		const std::string& function_identifier,
 		const std::vector<std::pair<std::string, type>>& function_arguments,
 		const std::vector<node_ptr>& function_statements
 	) : node(position),
 	m_function_return_type(function_return_type),
 	m_function_identifier(function_identifier),
+	m_is_var_arg(is_var_arg),
 	m_function_arguments(function_arguments),
 	m_function_statements(function_statements) {}
 
@@ -62,6 +64,10 @@ namespace channel {
 
 	const std::string& function_node::get_function_identifier() const {
 		return m_function_identifier;
+	}
+
+	bool function_node::is_var_arg() const {
+		return m_is_var_arg;
 	}
 
 	const std::vector<node_ptr>& function_node::get_function_statements() const	{

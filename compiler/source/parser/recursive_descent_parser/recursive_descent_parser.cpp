@@ -176,7 +176,15 @@ namespace channel {
 			return local_statement_parse_error; // return on failure
 		}
 
-		out_node = new function_node(position, return_type, identifier, arguments, statements);
+		out_node = new function_node(
+			position, 
+			return_type, 
+			false, 
+			identifier, 
+			arguments, 
+			statements
+		);
+
 		return {};
 	}
 

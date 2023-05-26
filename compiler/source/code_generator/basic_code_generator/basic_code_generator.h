@@ -24,7 +24,7 @@ namespace channel {
 		basic_code_generator();
 
 		error_result generate() override;
-		error_result verify_intermediate_representation() const;
+		error_result verify_intermediate_representation();
 	private:
 		acceptation_result visit_translation_unit_node(
 			translation_unit_node& node, 
@@ -39,7 +39,7 @@ namespace channel {
 		) override;
 
 		acceptation_result visit_function_call_node(
-			function_call_node& node, 
+			function_call_node& node,
 			const code_generation_context& context
 		) override;
 
@@ -367,8 +367,9 @@ namespace channel {
 			const token_position& position
 		);
 
-		error_result verify_main_entry_point() const;
-		void initialize_global_variables();
+		error_result verify_main_entry_point();
+		void initialize_global_variables() const;
+		void initialize_used_external_functions() const;
 	private:
 		// variable utility 
 		scope_ptr m_scope;

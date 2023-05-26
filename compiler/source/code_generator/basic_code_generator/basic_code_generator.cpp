@@ -8,41 +8,41 @@ namespace channel {
 		: m_scope(new scope(nullptr, nullptr))
 	{
 		// initialize function declarations
-		for(const auto& [function_identifier, function_declaration] : m_function_registry.get_external_function_declarations()) {
-			const std::vector<std::pair<std::string, type>>& arguments = function_declaration->get_arguments();
-			std::vector<llvm::Type*> argument_types(arguments.size());
-
-			// initialize argument types
-			for (u64 i = 0; i < arguments.size(); i++) {
-				argument_types[i] = arguments[i].second.get_llvm_type(
-					m_llvm_context->get_context()
-				);
-			}
-
-			llvm::FunctionType* function_type = llvm::FunctionType::get(
-				function_declaration->get_return_type().get_llvm_type(m_llvm_context->get_context()),
-				argument_types,
-				function_declaration->is_variadic()
-			);
-
-			llvm::Function* func = llvm::Function::Create(
-				function_type,
-				llvm::Function::ExternalLinkage,
-				function_declaration->get_external_function_name(),
-				m_llvm_context->get_module().get()
-			);
-
-			// insert the function declaration and treat it like a regular function
-			m_function_registry.insert_function(
-				function_identifier,
-				std::make_shared<function>(
-					function_declaration->get_return_type(),
-					func,
-					arguments,
-					function_declaration->is_variadic()
-				)
-			);
-		}
+		// for (const auto& [function_identifier, function_declaration] : m_function_registry.get_external_function_declarations()) {
+		// 	const std::vector<std::pair<std::string, type>>& arguments = function_declaration->get_arguments();
+		// 	std::vector<llvm::Type*> argument_types(arguments.size());
+		// 
+		// 	// initialize argument types
+		// 	for (u64 i = 0; i < arguments.size(); i++) {
+		// 		argument_types[i] = arguments[i].second.get_llvm_type(
+		// 			m_llvm_context->get_context()
+		// 		);
+		// 	}
+		// 
+		// 	llvm::FunctionType* function_type = llvm::FunctionType::get(
+		// 		function_declaration->get_return_type().get_llvm_type(m_llvm_context->get_context()),
+		// 		argument_types,
+		// 		function_declaration->is_variadic()
+		// 	);
+		// 
+		// 	llvm::Function* func = llvm::Function::Create(
+		// 		function_type,
+		// 		llvm::Function::ExternalLinkage,
+		// 		function_declaration->get_external_function_name(),
+		// 		m_llvm_context->get_module().get()
+		// 	);
+		// 
+		// 	// insert the function declaration and treat it like a regular function
+		// 	m_function_registry.insert_function(
+		// 		function_identifier,
+		// 		std::make_shared<function>(
+		// 			function_declaration->get_return_type(),
+		// 			func,
+		// 			arguments,
+		// 			function_declaration->is_variadic()
+		// 		)
+		// 	);
+		// }
 	}
 
 	error_result basic_code_generator::generate() {
@@ -56,6 +56,7 @@ namespace channel {
 		}
 
 		initialize_global_variables();
+		initialize_used_external_functions();
 
 		// verify the generated IR
 		if (auto verification_error = verify_intermediate_representation()) {
@@ -65,14 +66,18 @@ namespace channel {
 		return {};
 	}
 
-	void basic_code_generator::initialize_global_variables() {
+	void basic_code_generator::initialize_global_variables() const {
 		// create the global ctors array
 		llvm::ArrayType* updated_ctor_array_type = llvm::ArrayType::get(CTOR_STRUCT_TYPE, m_global_ctors.size());
 		llvm::Constant* updated_ctors = llvm::ConstantArray::get(updated_ctor_array_type, m_global_ctors);
 		new llvm::GlobalVariable(*m_llvm_context->get_module(), updated_ctor_array_type, false, llvm::GlobalValue::AppendingLinkage, updated_ctors, "llvm.global_ctors");
 	}
 
-	error_result basic_code_generator::verify_intermediate_representation() const {
+	void basic_code_generator::initialize_used_external_functions() const {
+
+	}
+
+	error_result basic_code_generator::verify_intermediate_representation() {
 		// check if we have a valid 'main' function
 		if(auto main_entry_point_error = verify_main_entry_point()) {
 			return main_entry_point_error; // return on failure
@@ -102,14 +107,14 @@ namespace channel {
 		return nullptr;
 	}
 
-	error_result basic_code_generator::verify_main_entry_point() const {
+	error_result basic_code_generator::verify_main_entry_point() {
 		// check if we have a main entry point
 		if(!m_function_registry.contains_function("main")) {
 			return error::emit<4012>(); // return on failure
 		}
 
 		// check if the main entry point's return type is an i32
-		const function_ptr func = m_function_registry.get_function("main");
+		const function_ptr func = m_function_registry.get_function("main", m_llvm_context);
 		if(func->get_return_type().get_base() != type::base::i32) {
 			return error::emit<4013>(func->get_return_type()); // return on failure
 		}
@@ -126,7 +131,10 @@ namespace channel {
 		// cast a function call
 		if (source_value->get_type() == type(type::base::function_call, 0)) {
 			// use the function return type as its type
-			const type function_return_type = m_function_registry.get_function(source_value->get_name())->get_return_type();
+			const type function_return_type = m_function_registry.get_function(
+				source_value->get_name(),
+				m_llvm_context
+			)->get_return_type();
 
 			// both types are the same 
 			if (function_return_type == target_type) {

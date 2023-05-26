@@ -16,7 +16,10 @@ namespace channel {
 		// get the return type of the current function
 		const llvm::Function* parent_function_block = m_llvm_context->get_builder().GetInsertBlock()->getParent();
 		const std::string parent_function_identifier = parent_function_block->getName().str();
-		const function_ptr parent_function = m_function_registry.get_function(parent_function_identifier);
+		const function_ptr parent_function = m_function_registry.get_function(
+			parent_function_identifier,
+			m_llvm_context
+		);
 
 		// check if we have a return expression
 		if(node.get_return_expression_node()) {

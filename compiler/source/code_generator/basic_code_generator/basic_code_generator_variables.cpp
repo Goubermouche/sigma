@@ -322,7 +322,10 @@ namespace channel {
 			node.get_array_element_count_node()->get_declared_position()
 		);
 
-		const llvm::FunctionCallee malloc_func = m_function_registry.get_function("malloc")->get_function();
+		const llvm::FunctionCallee malloc_func = m_function_registry.get_function(
+			"malloc",
+			m_llvm_context
+		)->get_function();
 
 		// calculate the total size
 		const type array_element_type = node.get_array_element_type();

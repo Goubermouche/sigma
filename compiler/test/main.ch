@@ -29,7 +29,7 @@ void donut(f32 rot_speed) {
 	char* brightness = ".,-~:;=!*#$@";
 	print("\x1b[2J");
 	
-	while(1) {
+	while(true) {
 		memset(b, 32, 1760);
 		memset(z, 0, 7040);
 
@@ -79,10 +79,11 @@ void donut(f32 rot_speed) {
 		B = B + rot_speed;
 	}
 
-	return;
+	free(z);
+	free(b);
 }
 
 i32 main() {
-	donut(0.1f);
+	donut(0.3f);
 	return 0;
 }

@@ -28,7 +28,7 @@ namespace channel {
 		llvm::FunctionType* func_type = llvm::FunctionType::get(
 			return_type, 
 			param_types, 
-			false
+			node.is_var_arg()
 		);
 
 		llvm::Function* func = llvm::Function::Create(
@@ -151,13 +151,14 @@ namespace channel {
 		const code_generation_context& context
 	) {
 		(void)context; // suppress C4100
-		// get a reference to the function
+
 		const function_ptr func = m_function_registry.get_function(
-			node.get_function_identifier()
+			node.get_function_identifier(),
+			m_llvm_context
 		);
 
 		// check if it exists
-		if (!func) {
+		if(!func) {
 			return std::unexpected(
 				error::emit<4001>(
 					node.get_declared_position(),
@@ -169,6 +170,7 @@ namespace channel {
 		const std::vector<std::pair<std::string, type>>& required_arguments = func->get_arguments();
 		const std::vector<channel::node*>& given_arguments = node.get_function_arguments();
 
+		// check if the argument counts match
 		if(!func->is_variadic() && required_arguments.size() != given_arguments.size()) {
 			return std::unexpected(
 				error::emit<4002>(
@@ -178,8 +180,8 @@ namespace channel {
 			); // return on failure
 		}
 
+		// create LLVM IR for the argument values 
 		std::vector<llvm::Value*> argument_values(required_arguments.size());
-
 		for (u64 i = 0; i < required_arguments.size(); i++) {
 			// get the argument value
 			acceptation_result argument_result = given_arguments[i]->accept(

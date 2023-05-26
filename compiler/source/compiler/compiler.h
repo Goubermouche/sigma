@@ -77,7 +77,7 @@ namespace channel {
 		) const;
 
 		error_result compile_module(
-			std::shared_ptr<llvm_context> llvm_context
+			const std::shared_ptr<llvm_context>& llvm_context
 		) const;
 
 		static error_result verify_source_file(

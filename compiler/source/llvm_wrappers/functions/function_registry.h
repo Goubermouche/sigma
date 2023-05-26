@@ -1,6 +1,7 @@
 #pragma once
 #include "llvm_wrappers/type.h"
 #include "llvm_wrappers/functions/function.h"
+#include "llvm_wrappers/llvm_context.h"
 
 namespace channel {
 	using function_ptr = std::shared_ptr<function>;
@@ -10,16 +11,38 @@ namespace channel {
 	public:
 		function_registry() = default;
 
-		function_ptr get_function(const std::string& identifier) const;
-		function_declaration_ptr get_function_declaration(const std::string& identifier) const;
+		function_ptr get_function(
+			const std::string& identifier,
+			const std::shared_ptr<llvm_context>& context
+		);
+
+		function_declaration_ptr get_function_declaration(
+			const std::string& identifier
+		) const;
+
+		function_declaration_ptr get_external_function_declaration(
+			const std::string& identifier
+		) const;
 
 		const std::unordered_map<std::string, function_declaration_ptr>& get_external_function_declarations() const;
 
-		void insert_function(const std::string& identifier, function_ptr function);
-		void insert_function_declaration(const std::string& identifier, function_declaration_ptr function);
+		void insert_function(
+			const std::string& identifier,
+			function_ptr function
+		);
 
-		bool contains_function(const std::string& identifier) const;
-		bool contains_function_declaration(const std::string& identifier) const;
+		void insert_function_declaration(
+			const std::string& identifier,
+			function_declaration_ptr function
+		);
+
+		bool contains_function(
+			const std::string& identifier
+		) const;
+
+		bool contains_function_declaration(
+			const std::string& identifier
+		) const;
 	private:
 		// definitions
 		std::unordered_map<std::string, function_ptr> m_functions;

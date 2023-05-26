@@ -192,6 +192,9 @@ namespace channel {
 		// condition block
 		m_llvm_context->get_builder().SetInsertPoint(condition_block);
 
+		// accept all statements in the loop body
+		m_llvm_context->get_builder().SetInsertPoint(loop_body_block);
+
 		// accept the condition node
 		acceptation_result condition_value_result = node.get_loop_condition_node()->accept(
 			*this,
@@ -207,9 +210,6 @@ namespace channel {
 			loop_body_block,
 			end_block
 		);
-
-		// accept all statements in the loop body
-		m_llvm_context->get_builder().SetInsertPoint(loop_body_block);
 
 		// save the previous scope
 		scope_ptr prev_scope = m_scope;
@@ -271,6 +271,10 @@ namespace channel {
 			parent_function
 		);
 
+		// save the previous scope
+		scope_ptr prev_scope = m_scope;
+		m_scope = std::make_shared<scope>(prev_scope, end_block);
+
 		// create the index expression
 		acceptation_result index_expression_result = node.get_loop_initialization_node()->accept(
 			*this,
@@ -325,10 +329,6 @@ namespace channel {
 
 		// create the loop body block
 		m_llvm_context->get_builder().SetInsertPoint(loop_body_block);
-
-		// save the previous scope
-		scope_ptr prev_scope = m_scope;
-		m_scope = std::make_shared<scope>(prev_scope, end_block);
 
 		// accept all inner statements
 		for (channel::node* n : node.get_loop_body_nodes()) {

@@ -6,6 +6,7 @@ namespace channel {
 	class parser {
 	public:
 		parser();
+		virtual ~parser() = default;
 
 		virtual error_result parse() = 0;
 		void set_token_list(const token_list& token_list);

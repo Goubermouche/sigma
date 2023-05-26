@@ -41,21 +41,21 @@ namespace channel {
 		);
 
 		/**
-		 * \brief Sets the new lexer the compiler will use for tokenizing the source code.
+		 * \brief Sets the new lexer that the compiler will use for tokenizing the source code.
 		 * \tparam lexer Lexer to use
 		 */
 		template <typename lexer>
 		void set_lexer();
 
 		/**
-		 * \brief Sets the new parser the compiler will use for generating the AST. 
+		 * \brief Sets the new parser that the compiler will use for generating the AST. 
 		 * \tparam parser Parser to use
 		 */
 		template <typename parser>
 		void set_parser();
 
 		/**
-		 * \brief Sets the new code generator the compiler will use for generating LLVM IR.
+		 * \brief Sets the new code generator that the compiler will use for generating LLVM IR.
 		 * \tparam code_generator Code generator to use 
 		 */
 		template <typename code_generator>

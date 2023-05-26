@@ -28,6 +28,7 @@ struct std::formatter<channel::token> {
 namespace channel {
 	class diagnostic_message {
 	public:
+		virtual ~diagnostic_message() = default;
 		virtual void print() const = 0;
 
 		diagnostic_message(std::string message, u64 code);

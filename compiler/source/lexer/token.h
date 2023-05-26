@@ -18,8 +18,8 @@ namespace channel {
 		keyword_type_structure,             // struct
 		keyword_type_void,                  // void
 		keyword_type_bool,                  // bool
-		bool_literal_true,
-		bool_literal_false,
+		bool_literal_true,                  // true
+		bool_literal_false,                 // false
 
 		// signed integers	                
 		keyword_type_i8,                    // i8  0
@@ -39,8 +39,8 @@ namespace channel {
 
 		// text
 		keyword_type_char,                  // char
-		char_literal,
-		string_literal,
+		char_literal,                       // 'c'
+		string_literal,                     // "str"
 
 		// statements
 		// flow control
@@ -69,35 +69,35 @@ namespace channel {
 								        
 		// operators
 		// arithmetic operators
-		operator_addition,                  // +  implemented
-		operator_increment,                 // ++ implemented
-		operator_addition_assignment,       // += implemented
-		operator_subtraction,               // -  implemented
-		operator_decrement,                 // -- implemented
-		operator_subtraction_assignment,    // -= implemented
-		operator_multiplication,            // *  implemented
-		operator_multiplication_assignment, // *= implemented
-		operator_modulo,                    // %  implemented
-		operator_modulo_assignment,         // %= implemented
-		operator_division,                  // /  implemented
-		operator_division_assignment,       // /= implemented
-		operator_assignment,                // =  implemented
+		operator_addition,                  // +
+		operator_increment,                 // ++
+		operator_addition_assignment,       // +=
+		operator_subtraction,               // -
+		operator_decrement,                 // --
+		operator_subtraction_assignment,    // -=
+		operator_multiplication,            // *
+		operator_multiplication_assignment, // *=
+		operator_modulo,                    // %
+		operator_modulo_assignment,         // %=
+		operator_division,                  // /
+		operator_division_assignment,       // /=
+		operator_assignment,                // =
 		// logical operators
-		operator_equals,                    // == implemented
-		operator_greater_than,              // >  implemented
-		operator_bitwise_right_shift,       // >> 
-		operator_greater_than_equal_to,     // >= implemented
-		operator_less_than,                 // <  implemented
-		operator_bitwise_left_shift,        // << 
-		operator_less_than_equal_to,        // <= implemented
-		operator_not,                       // !  implemented
-		operator_not_equals,                // != implemented
-		operator_bitwise_and,               // &  
-		operator_logical_conjunction,       // && implemented
-		operator_bitwise_or,                // |  
-		operator_logical_disjunction,       // || implemented
-		operator_bitwise_not,               // ~  
-		operator_bitwise_xor,               // ^  
+		operator_equals,                    // ==
+		operator_greater_than,              // >
+		operator_bitwise_right_shift,       // >>
+		operator_greater_than_equal_to,     // >=
+		operator_less_than,                 // <
+		operator_bitwise_left_shift,        // <<
+		operator_less_than_equal_to,        // <=
+		operator_not,                       // !
+		operator_not_equals,                // !=
+		operator_bitwise_and,               // &
+		operator_logical_conjunction,       // &&
+		operator_bitwise_or,                // |
+		operator_logical_disjunction,       // ||
+		operator_bitwise_not,               // ~
+		operator_bitwise_xor,               // ^
 
 		// numbers
 		number_signed,                      // 0

@@ -1,4 +1,5 @@
 #pragma once
+#include "llvm_wrappers/type.h"
 #include "llvm_wrappers/functions/function.h"
 
 namespace channel {
@@ -54,6 +55,16 @@ namespace channel {
 					},
 					false,
 					"malloc"
+				)
+			}, {
+				"free",
+				std::make_shared<function_declaration>(
+					type(type::base::empty, 0),
+					std::vector<std::pair<std::string, type>>{
+						{ "ptr", type(type::base::empty, 1) }
+					},
+					false,
+					"free"
 				)
 			}, {
 				"memset",

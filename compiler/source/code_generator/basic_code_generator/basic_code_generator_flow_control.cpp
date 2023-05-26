@@ -176,14 +176,14 @@ namespace channel {
 		);
 
 		llvm::BasicBlock* condition_block = llvm::BasicBlock::Create(
-			m_llvm_context->get_context(), 
-			"", 
+			m_llvm_context->get_context(),
+			"",
 			parent_function
 		);
 
 		llvm::BasicBlock* loop_body_block = llvm::BasicBlock::Create(
 			m_llvm_context->get_context(),
-			"", 
+			"",
 			parent_function
 		);
 
@@ -192,8 +192,9 @@ namespace channel {
 		// condition block
 		m_llvm_context->get_builder().SetInsertPoint(condition_block);
 
-		// accept all statements in the loop body
-		m_llvm_context->get_builder().SetInsertPoint(loop_body_block);
+		// save the previous scope
+		scope_ptr prev_scope = m_scope;
+		m_scope = std::make_shared<scope>(prev_scope, end_block);
 
 		// accept the condition node
 		acceptation_result condition_value_result = node.get_loop_condition_node()->accept(
@@ -201,7 +202,7 @@ namespace channel {
 			code_generation_context(type(type::base::boolean, 0))
 		);
 
-		if(!condition_value_result.has_value()) {
+		if (!condition_value_result.has_value()) {
 			return condition_value_result; // return on failure
 		}
 
@@ -211,17 +212,16 @@ namespace channel {
 			end_block
 		);
 
-		// save the previous scope
-		scope_ptr prev_scope = m_scope;
-		m_scope = std::make_shared<scope>(prev_scope, end_block);
+		// accept all statements in the loop body
+		m_llvm_context->get_builder().SetInsertPoint(loop_body_block);
 
-		for(channel::node* n : node.get_loop_body_nodes()) {
+		for (channel::node* n : node.get_loop_body_nodes()) {
 			acceptation_result statement_result = n->accept(
-				*this, 
+				*this,
 				{}
 			);
 
-			if(!statement_result.has_value()) {
+			if (!statement_result.has_value()) {
 				return statement_result; // return on failure
 			}
 		}

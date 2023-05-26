@@ -21,13 +21,16 @@ namespace channel {
 		const token_position& get_token_position() const;
 	private:
 		// token type representation of the given token
-		token m_token;
+		token m_token = token::unknown;
 		// token value of the given token (ie. the identifier value of an identifier token)
 		std::string m_value;
 		// position of the given token
 		token_position m_position;
 	};
 
+	/**
+	 * \brief Represents a list of tokens. Implements various utility functions for token traversal.
+	 */
 	class token_list {
 	public:
 		token_list() = default;
@@ -71,6 +74,7 @@ namespace channel {
 		 * \return Potentially erroneous result.
 		 */
 		virtual error_result tokenize() = 0;
+		virtual ~lexer() = default;
 
 		/**
 		 * \brief Sets the \a source \a filepath for the next lexing operation.

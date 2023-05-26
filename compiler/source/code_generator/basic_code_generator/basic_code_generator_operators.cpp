@@ -51,7 +51,7 @@ namespace channel {
 			{}
 		);
 
-		if (!expression_result.has_value()) {
+		if (!expression_result) {
 			return expression_result;
 		}
 
@@ -108,7 +108,7 @@ namespace channel {
 			{}
 		);
 
-		if (!expression_result.has_value()) {
+		if (!expression_result) {
 			return expression_result;
 		}
 
@@ -164,7 +164,7 @@ namespace channel {
 			{}
 		);
 
-		if (!expression_result.has_value()) {
+		if (!expression_result) {
 			return expression_result;
 		}
 
@@ -226,7 +226,7 @@ namespace channel {
 			{}
 		);
 
-		if (!expression_result.has_value()) {
+		if (!expression_result) {
 			return expression_result;
 		}
 
@@ -290,7 +290,7 @@ namespace channel {
 			{}
 		);
 
-		if (!operand_result.has_value()) {
+		if (!operand_result) {
 			return operand_result; // return on failure
 		}
 
@@ -329,7 +329,7 @@ namespace channel {
 			{}
 		);
 
-		if (!operand_result.has_value()) {
+		if (!operand_result) {
 			return operand_result; // return on failure
 		}
 
@@ -371,7 +371,7 @@ namespace channel {
 			node.get_right_expression_node()
 		);
 
-		if(!operation_result.has_value()) {
+		if(!operation_result) {
 			return std::unexpected(
 				operation_result.error()
 			); // return on failure
@@ -409,7 +409,7 @@ namespace channel {
 			node.get_right_expression_node()
 		);
 
-		if (!operation_result.has_value()) {
+		if (!operation_result) {
 			return std::unexpected(
 				operation_result.error()
 			); // return on failure
@@ -438,7 +438,7 @@ namespace channel {
 			node.get_right_expression_node()
 		);
 
-		if (!operation_result.has_value()) {
+		if (!operation_result) {
 			return std::unexpected(
 				operation_result.error()
 			); // return on failure
@@ -476,7 +476,7 @@ namespace channel {
 			node.get_right_expression_node()
 		);
 
-		if (!operation_result.has_value()) {
+		if (!operation_result) {
 			return std::unexpected(
 				operation_result.error()
 			); // return on failure
@@ -505,7 +505,7 @@ namespace channel {
 			node.get_right_expression_node()
 		);
 
-		if (!operation_result.has_value()) {
+		if (!operation_result) {
 			return std::unexpected(
 				operation_result.error()
 			); // return on failure
@@ -543,7 +543,7 @@ namespace channel {
 			node.get_right_expression_node()
 		);
 
-		if (!operation_result.has_value()) {
+		if (!operation_result) {
 			return std::unexpected(
 				operation_result.error()
 			); // return on failure
@@ -572,7 +572,7 @@ namespace channel {
 			node.get_right_expression_node()
 		);
 
-		if (!operation_result.has_value()) {
+		if (!operation_result) {
 			return std::unexpected(
 				operation_result.error()
 			); // return on failure
@@ -610,7 +610,7 @@ namespace channel {
 			node.get_right_expression_node()
 		);
 
-		if (!operation_result.has_value()) {
+		if (!operation_result) {
 			return std::unexpected(
 				operation_result.error()
 			); // return on failure
@@ -639,7 +639,7 @@ namespace channel {
 			node.get_right_expression_node()
 		);
 
-		if (!operation_result.has_value()) {
+		if (!operation_result) {
 			return std::unexpected(
 				operation_result.error()
 			); // return on failure
@@ -677,7 +677,7 @@ namespace channel {
 			node.get_right_expression_node()
 		);
 
-		if (!operation_result.has_value()) {
+		if (!operation_result) {
 			return std::unexpected(
 				operation_result.error()
 			); // return on failure
@@ -708,7 +708,7 @@ namespace channel {
 			{}
 		);
 
-		if (!left_operand_result.has_value()) {
+		if (!left_operand_result) {
 			return left_operand_result; // return on failure
 		}
 
@@ -718,7 +718,7 @@ namespace channel {
 			{}
 		);
 
-		if (!right_operand_result.has_value()) {
+		if (!right_operand_result) {
 			return right_operand_result; // return on failure
 		}
 
@@ -759,7 +759,7 @@ namespace channel {
 			{}
 		);
 
-		if (!left_operand_result.has_value()) {
+		if (!left_operand_result) {
 			return left_operand_result; // return on failure
 		}
 
@@ -769,7 +769,7 @@ namespace channel {
 			{}
 		);
 
-		if (!right_operand_result.has_value()) {
+		if (!right_operand_result) {
 			return right_operand_result; // return on failure
 		}
 
@@ -810,7 +810,7 @@ namespace channel {
 			{}
 		);
 
-		if (!left_operand_result.has_value()) {
+		if (!left_operand_result) {
 			return left_operand_result; // return on failure
 		}
 
@@ -820,7 +820,7 @@ namespace channel {
 			{}
 		);
 
-		if (!right_operand_result.has_value()) {
+		if (!right_operand_result) {
 			return right_operand_result; // return on failure
 		}
 
@@ -861,7 +861,7 @@ namespace channel {
 			{}
 		);
 
-		if (!left_operand_result.has_value()) {
+		if (!left_operand_result) {
 			return left_operand_result; // return on failure
 		}
 
@@ -871,7 +871,7 @@ namespace channel {
 			{}
 		);
 
-		if (!right_operand_result.has_value()) {
+		if (!right_operand_result) {
 			return right_operand_result; // return on failure
 		}
 
@@ -912,7 +912,7 @@ namespace channel {
 			{}
 		);
 
-		if (!left_operand_result.has_value()) {
+		if (!left_operand_result) {
 			return left_operand_result; // return on failure
 		}
 
@@ -922,7 +922,7 @@ namespace channel {
 			{}
 		);
 
-		if (!right_operand_result.has_value()) {
+		if (!right_operand_result) {
 			return right_operand_result; // return on failure
 		}
 
@@ -963,7 +963,7 @@ namespace channel {
 			{}
 		);
 
-		if (!left_operand_result.has_value()) {
+		if (!left_operand_result) {
 			return left_operand_result; // return on failure
 		}
 
@@ -973,7 +973,7 @@ namespace channel {
 			{}
 		);
 
-		if (!right_operand_result.has_value()) {
+		if (!right_operand_result) {
 			return right_operand_result; // return on failure
 		}
 
@@ -1014,7 +1014,7 @@ namespace channel {
 			{}
 		);
 
-		if (!left_operand_result.has_value()) {
+		if (!left_operand_result) {
 			return left_operand_result; // return on failure
 		}
 
@@ -1024,7 +1024,7 @@ namespace channel {
 			{}
 		);
 
-		if (!right_operand_result.has_value()) {
+		if (!right_operand_result) {
 			return right_operand_result;
 		}
 
@@ -1063,7 +1063,7 @@ namespace channel {
 			{}
 		);
 
-		if (!left_operand_result.has_value()) {
+		if (!left_operand_result) {
 			return left_operand_result; // return on failure
 		}
 
@@ -1073,7 +1073,7 @@ namespace channel {
 			{}
 		);
 
-		if (!right_operand_result.has_value()) {
+		if (!right_operand_result) {
 			return right_operand_result; // return on failure
 		}
 
@@ -1136,7 +1136,7 @@ namespace channel {
 			{}
 		);
 
-		if (!left_operand_result.has_value()) {
+		if (!left_operand_result) {
 			return left_operand_result; // return on failure
 		}
 
@@ -1146,7 +1146,7 @@ namespace channel {
 			{}
 		);
 
-		if (!right_operand_result.has_value()) {
+		if (!right_operand_result) {
 			return right_operand_result; // return on failure
 		}
 
@@ -1209,7 +1209,7 @@ namespace channel {
 			{}
 		);
 
-		if (!left_operand_result.has_value()) {
+		if (!left_operand_result) {
 			return left_operand_result; // return on failure
 		}
 
@@ -1219,7 +1219,7 @@ namespace channel {
 			{}
 		);
 
-		if (!right_operand_result.has_value()) {
+		if (!right_operand_result) {
 			return right_operand_result; // return on failure
 		}
 
@@ -1282,7 +1282,7 @@ namespace channel {
 			{}
 		);
 
-		if (!left_operand_result.has_value()) {
+		if (!left_operand_result) {
 			return left_operand_result; // return on failure
 		}
 
@@ -1292,7 +1292,7 @@ namespace channel {
 			{}
 		);
 
-		if (!right_operand_result.has_value()) {
+		if (!right_operand_result) {
 			return right_operand_result; // return on failure
 		}
 
@@ -1355,7 +1355,7 @@ namespace channel {
 			{}
 		);
 
-		if (!left_operand_result.has_value()) {
+		if (!left_operand_result) {
 			return left_operand_result; // return on failure
 		}
 
@@ -1365,7 +1365,7 @@ namespace channel {
 			{}
 		);
 
-		if (!right_operand_result.has_value()) {
+		if (!right_operand_result) {
 			return right_operand_result; // return on failure
 		}
 
@@ -1420,7 +1420,7 @@ namespace channel {
 			{}
 		);
 
-		if (!left_operand_result.has_value()) {
+		if (!left_operand_result) {
 			return left_operand_result; // return on failure
 		}
 
@@ -1430,7 +1430,7 @@ namespace channel {
 			{}
 		);
 
-		if (!right_operand_result.has_value()) {
+		if (!right_operand_result) {
 			return right_operand_result; // return on failure
 		}
 
@@ -1484,7 +1484,7 @@ namespace channel {
 			{}
 		);
 
-		if (!left_operand_result.has_value()) {
+		if (!left_operand_result) {
 			return std::unexpected(
 				left_operand_result.error()
 			); // return on failure
@@ -1496,7 +1496,7 @@ namespace channel {
 			{}
 		);
 
-		if (!right_operand_result.has_value()) {
+		if (!right_operand_result) {
 			return std::unexpected(
 				right_operand_result.error()
 			); // return on failure
@@ -1569,7 +1569,7 @@ namespace channel {
 			{}
 		);
 
-		if (!left_operand_result.has_value()) {
+		if (!left_operand_result) {
 			return std::unexpected(
 				left_operand_result.error()
 			); // return on failure
@@ -1581,7 +1581,7 @@ namespace channel {
 			{}
 		);
 
-		if (!right_operand_result.has_value()) {
+		if (!right_operand_result) {
 			return std::unexpected(
 				right_operand_result.error()
 			); // return on failure
@@ -1654,7 +1654,7 @@ namespace channel {
 			{}
 		);
 
-		if (!left_operand_result.has_value()) {
+		if (!left_operand_result) {
 			return std::unexpected(
 				left_operand_result.error()
 			); // return on failure
@@ -1666,7 +1666,7 @@ namespace channel {
 			{}
 		);
 
-		if (!right_operand_result.has_value()) {
+		if (!right_operand_result) {
 			return std::unexpected(
 				right_operand_result.error()
 			); // return on failure
@@ -1739,7 +1739,7 @@ namespace channel {
 			{}
 		);
 
-		if (!left_operand_result.has_value()) {
+		if (!left_operand_result) {
 			return std::unexpected(
 				left_operand_result.error()
 			); // return on failure
@@ -1751,7 +1751,7 @@ namespace channel {
 			{}
 		);
 
-		if (!right_operand_result.has_value()) {
+		if (!right_operand_result) {
 			return std::unexpected(
 				right_operand_result.error()
 			); // return on failure
@@ -1824,7 +1824,7 @@ namespace channel {
 			{}
 		);
 
-		if (!left_operand_result.has_value()) {
+		if (!left_operand_result) {
 			return std::unexpected(
 				left_operand_result.error()
 			); // return on failure
@@ -1836,7 +1836,7 @@ namespace channel {
 			{}
 		);
 
-		if (!right_operand_result.has_value()) {
+		if (!right_operand_result) {
 			return std::unexpected(
 				right_operand_result.error()
 			); // return on failure

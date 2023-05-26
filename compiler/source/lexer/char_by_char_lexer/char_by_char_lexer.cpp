@@ -6,7 +6,7 @@ namespace channel {
 		token tok = token::unknown;
 		while(tok != token::end_of_file) {
 			if(auto next_token_error_message = extract_next_token(tok)) {
-				return std::move(next_token_error_message);
+				return next_token_error_message;
 			}
 
 			m_tokens.push_back({ 

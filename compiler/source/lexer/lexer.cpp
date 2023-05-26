@@ -3,7 +3,7 @@
 
 namespace channel {
 	token_list::token_list(std::vector<token_data> tokens)
-		: m_tokens(std::move(tokens)) {}
+		: m_tokens(tokens) {}
 
 
 	void token_list::print_tokens() const {

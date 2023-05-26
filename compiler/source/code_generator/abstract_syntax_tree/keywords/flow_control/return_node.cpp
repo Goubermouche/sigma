@@ -18,7 +18,9 @@ namespace channel {
 		const std::wstring new_prefix = get_new_prefix(depth, prefix, is_last);
 
 		// print the inner statement
-		m_return_expression_node->print(depth + 1, new_prefix, true);
+		if(m_return_expression_node) {
+			m_return_expression_node->print(depth + 1, new_prefix, true);
+		}
 	}
 
 	const node_ptr& return_node::get_return_expression_node() const {

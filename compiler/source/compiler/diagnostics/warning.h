@@ -37,7 +37,7 @@ namespace channel {
 	template<u64 code, typename ...Args>
 	warning_message warning::emit(Args && ...args) {
 		return {
-			std::move(std::format(warning_templates[code], std::forward<Args>(args)...)),
+			std::format(warning_templates[code], std::forward<Args>(args)...),
 			code
 		};
 	}
@@ -45,7 +45,7 @@ namespace channel {
 	template<u64 code, typename ...Args>
 	warning_message_position warning::emit(token_position position, Args && ...args) {
 		return {
-			std::move(std::format(warning_templates[code], std::forward<Args>(args)...)),
+			std::format(warning_templates[code], std::forward<Args>(args)...),
 			code,
 			position
 		};

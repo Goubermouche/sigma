@@ -52,7 +52,7 @@ namespace channel {
 
 		// generate the module
 		auto module_generation_result = generate_module(m_root_source_file_filepath);
-		if (!module_generation_result.has_value()) {
+		if (!module_generation_result) {
 			return module_generation_result.error(); // return on failure
 		}
 
@@ -101,8 +101,8 @@ namespace channel {
 		console::out << "parsing finished (" << parser_timer.elapsed() << "ms)\n";
 
 		// generate the module
-		timer codegen_timer;
-		codegen_timer.start();
+		timer code_generator_timer;
+		code_generator_timer.start();
 		const std::shared_ptr<code_generator> code_generator = m_code_generator_generator();
 		code_generator->set_abstract_syntax_tree(parser->get_abstract_syntax_tree());
 
@@ -110,9 +110,10 @@ namespace channel {
 			return std::unexpected(visitor_error_message.value()); // return on failure 
 		}
 
-		code_generator->get_llvm_context()->print_intermediate_representation();
+		console::out << "codegen finished (" << code_generator_timer.elapsed() << "ms)\n";
 
-		console::out << "codegen finished (" << codegen_timer.elapsed() << "ms)\n";
+		// code_generator->get_llvm_context()->print_intermediate_representation();
+		// parser->get_abstract_syntax_tree()->print_nodes();
 		return code_generator->get_llvm_context();
 	}
 

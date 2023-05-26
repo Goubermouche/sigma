@@ -107,7 +107,7 @@ namespace channel {
 				{}
 			);
 
-			if (!statement_result.has_value()) {
+			if (!statement_result) {
 				return statement_result; // return on failure
 			}
 		}
@@ -187,7 +187,7 @@ namespace channel {
 				code_generation_context(required_arguments[i].second)
 			);
 
-			if(!argument_result.has_value()) {
+			if(!argument_result) {
 				return argument_result; // return on failure
 			}
 
@@ -207,7 +207,7 @@ namespace channel {
 				{}
 			);
 
-			if (!argument_result.has_value()) {
+			if (!argument_result) {
 				return argument_result; // return on failure
 			}
 

@@ -78,6 +78,8 @@ void donut(f32 rot_speed) {
 		A = A + rot_speed;
 		B = B + rot_speed;
 	}
+
+	return;
 }
 
 i32 main() {

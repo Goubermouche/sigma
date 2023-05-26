@@ -50,7 +50,7 @@ namespace channel {
 		for (node* n : *m_abstract_syntax_tree) {
 			acceptation_result result = n->accept(*this, {});
 
-			if(!result.has_value()) {
+			if(!result) {
 				return result.error(); // return on failure
 			}
 		}
@@ -93,7 +93,8 @@ namespace channel {
 	acceptation_result basic_code_generator::visit_translation_unit_node(translation_unit_node& node, const code_generation_context& context) {
 		for(const auto& n : node.get_nodes()) {
 			acceptation_result result = n->accept(*this, context);
-			if(!result.value()) {
+
+			if(!result) {
 				return result; // return on failure
 			}
 		}

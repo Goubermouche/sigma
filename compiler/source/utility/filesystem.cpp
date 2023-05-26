@@ -41,7 +41,7 @@ namespace channel::detail {
 
 		file.close();
 
-		return { std::move(contents) };
+		return { (contents) };
 	}
 
 	bool delete_file(const std::string& filepath) {

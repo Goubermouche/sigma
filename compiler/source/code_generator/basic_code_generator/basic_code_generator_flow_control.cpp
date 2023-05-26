@@ -13,39 +13,61 @@ namespace channel {
 	) {
 		(void)context; // suppress C4100
 
-		// evaluate the expression of the return statement
-		acceptation_result return_value_result = node.get_return_expression_node()->accept(
-			*this, 
-			{}
-		);
+		// get the return type of the current function
+		const llvm::Function* parent_function_block = m_llvm_context->get_builder().GetInsertBlock()->getParent();
+		const std::string parent_function_identifier = parent_function_block->getName().str();
+		const function_ptr parent_function = m_function_registry.get_function(parent_function_identifier);
 
-		if (!return_value_result.has_value()) {
-			return return_value_result; // return on failure
+		// check if we have a return expression
+		if(node.get_return_expression_node()) {
+			// evaluate the expression of the return statement, if there is one
+			acceptation_result return_value_result = node.get_return_expression_node()->accept(
+				*this,
+				{}
+			);
+
+			if (!return_value_result) {
+				return return_value_result; // return on failure
+			}
+
+			// upcast the return value to match the function's return type
+			llvm::Value* upcasted_return_value = cast_value(
+				return_value_result.value(),
+				parent_function->get_return_type(),
+				node.get_declared_position()
+			);
+
+			// generate the LLVM return instruction with the upcasted value
+			m_llvm_context->get_builder().CreateRet(
+				upcasted_return_value
+			);
+
+			// return the value of the expression (use the upcasted value's type)
+			return std::make_shared<value>(
+				"__return",
+				parent_function->get_return_type(),
+				upcasted_return_value
+			);
 		}
 
-		// get the return type of the current function
-		const llvm::Function* parent_function = m_llvm_context->get_builder().GetInsertBlock()->getParent();
-		const type function_return_type = m_function_registry.get_function(
-			parent_function->getName().str()
-		)->get_return_type();
+		// if we don't we want to check for a void return expression
+		// check if the return type matches the expected return type
+		if(parent_function->get_return_type() != type(type::base::empty, 0)) {
+			return std::unexpected(
+				error::emit<4007>(
+					parent_function_identifier,
+					type(type::base::empty, 0),
+					parent_function->get_return_type()
+				)
+			); // return on error
+		}
 
-		// upcast the return value to match the function's return type
-		llvm::Value* upcasted_return_value = cast_value(
-			return_value_result.value(),
-			function_return_type, 
-			node.get_declared_position()
-		);
+		m_llvm_context->get_builder().CreateRetVoid();
 
-		// generate the LLVM return instruction with the upcasted value
-		m_llvm_context->get_builder().CreateRet(
-			upcasted_return_value
-		);
-
-		// return the value of the expression (use the upcasted value's type)
 		return std::make_shared<value>(
-			"__return", 
-			function_return_type, 
-			upcasted_return_value
+			"__return",
+			parent_function->get_return_type(),
+			nullptr
 		);
 	}
 
@@ -99,7 +121,7 @@ namespace channel {
 			code_generation_context(type(type::base::boolean, 0))
 		);
 
-		if(!condition_value_result.has_value()) {
+		if(!condition_value_result) {
 			return condition_value_result; // return on failure
 		}
 
@@ -119,7 +141,7 @@ namespace channel {
 				code_generation_context(type(type::base::boolean, 0))
 			);
 
-			if(!condition_value_result.has_value()) {
+			if(!condition_value_result) {
 				return condition_value_result; // return on failure
 			}
 
@@ -144,7 +166,7 @@ namespace channel {
 					{}
 				);
 
-				if(!statement_result.has_value()) {
+				if(!statement_result) {
 					return statement_result; // return on failure
 				}
 			}
@@ -202,7 +224,7 @@ namespace channel {
 			code_generation_context(type(type::base::boolean, 0))
 		);
 
-		if (!condition_value_result.has_value()) {
+		if (!condition_value_result) {
 			return condition_value_result; // return on failure
 		}
 
@@ -221,7 +243,7 @@ namespace channel {
 				{}
 			);
 
-			if (!statement_result.has_value()) {
+			if (!statement_result) {
 				return statement_result; // return on failure
 			}
 		}
@@ -281,7 +303,7 @@ namespace channel {
 			{}
 		);
 
-		if (!index_expression_result.has_value()) {
+		if (!index_expression_result) {
 			return index_expression_result; // return on failure
 		}
 
@@ -295,7 +317,7 @@ namespace channel {
 			{}
 		);
 
-		if (!condition_value_result.has_value()) {
+		if (!condition_value_result) {
 			return condition_value_result;
 		}
 
@@ -320,7 +342,7 @@ namespace channel {
 		m_llvm_context->get_builder().SetInsertPoint(increment_block);
 		for (channel::node* n : node.get_post_iteration_nodes()) {
 			acceptation_result statement_result = n->accept(*this, {});
-			if (!statement_result.has_value()) {
+			if (!statement_result) {
 				return statement_result; // return on failure
 			}
 		}
@@ -333,7 +355,7 @@ namespace channel {
 		// accept all inner statements
 		for (channel::node* n : node.get_loop_body_nodes()) {
 			acceptation_result statement_result = n->accept(*this, {});
-			if (!statement_result.has_value()) {
+			if (!statement_result) {
 				return statement_result; // return on failure
 			}
 		}

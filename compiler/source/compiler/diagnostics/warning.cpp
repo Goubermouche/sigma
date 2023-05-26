@@ -16,7 +16,7 @@ namespace channel {
 	}
 
 	warning_message_position::warning_message_position(std::string message, u64 code, token_position position)
-		: warning_message(std::move(message), code), m_position(position) {}
+		: warning_message(message, code), m_position(position) {}
 
 	void warning_message_position::print() const {
 		console::out

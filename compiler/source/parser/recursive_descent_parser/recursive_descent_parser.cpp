@@ -801,12 +801,19 @@ namespace channel {
 		const token_position position = m_current_token.get_token_position();
 		get_next_token(); // keyword_return (guaranteed)
 
-		node* expression;
-		if (auto expression_parse_error = parse_expression(expression)) {
-			return expression_parse_error; // return on failure
+		// allow return statements without any expressions
+		if(peek_next_token() == token::semicolon) {
+			out_node = new return_node(position, nullptr);
 		}
+		else {
+			node* expression;
+			if (auto expression_parse_error = parse_expression(expression)) {
+				return expression_parse_error; // return on failure
+			}
 
-		out_node = new return_node(position, expression);
+			out_node = new return_node(position, expression);
+		}
+	
 		return {};
 	}
 

@@ -44,6 +44,7 @@ namespace channel {
 		std::pair{ 4004, "'{}': local variable has already been defined in the global scope" },
 		std::pair{ 4005, "'{}': local variable has already been defined before" },
 		std::pair{ 4006, "'{}': global variable has already been defined before" },
+		std::pair{ 4007, "'{}': return statement type '{}' does not match the expected function return type '{}'" },
 		// unary errors (4100)
 		std::pair{ 4100, "'post decrement': operator expected a numerical value, but got '{}' instead" },
 		std::pair{ 4101, "'post increment': operator expected a numerical value, but got '{}' instead" },
@@ -103,7 +104,7 @@ namespace channel {
 	template<u64 code, typename ...Args>
 	error_message error::emit(Args&& ...args) {
 		return {
-			std::move(std::format(error_templates[code], std::forward<Args>(args)...)),
+			std::format(error_templates[code], std::forward<Args>(args)...),
 			code
 		};
 	}
@@ -111,7 +112,7 @@ namespace channel {
 	template<u64 code, typename ...Args>
 	error_message_position error::emit(token_position position, Args && ...args) {
 		return {
-			std::move(std::format(error_templates[code], std::forward<Args>(args)...)),
+			std::format(error_templates[code], std::forward<Args>(args)...),
 			code,
 			position
 		};

@@ -97,7 +97,11 @@ namespace channel {
 		 * \param right_operand Right operand
 		 * \return Expected - value(operation result, operation precision, left operand result), error received from inner accept invocations.
 		 */
-		std::expected<std::tuple<llvm::Value*, type, acceptation_result>, error_message> create_add_operation(
+		std::expected<std::tuple<
+			llvm::Value*,
+			type,
+			acceptation_result
+		>, std::shared_ptr<error_message>> create_add_operation(
 			node* left_operand,
 			node* right_operand
 		);
@@ -108,7 +112,11 @@ namespace channel {
 		 * \param right_operand Right operand
 		 * \return Expected - value(operation result, operation precision, left operand result), error received from inner accept invocations.
 		 */
-		std::expected<std::tuple<llvm::Value*, type, acceptation_result>, error_message> create_sub_operation(
+		std::expected<std::tuple<
+			llvm::Value*,
+			type,
+			acceptation_result
+		>, std::shared_ptr<error_message>> create_sub_operation(
 			node* left_operand,
 			node* right_operand
 		);
@@ -119,7 +127,11 @@ namespace channel {
 		 * \param right_operand Right operand
 		 * \return Expected - value(operation result, operation precision, left operand result), error received from inner accept invocations.
 		 */
-		std::expected<std::tuple<llvm::Value*, type, acceptation_result>, error_message> create_mul_operation(
+		std::expected<std::tuple<
+			llvm::Value*,
+			type,
+			acceptation_result
+		>, std::shared_ptr<error_message>> create_mul_operation(
 			node* left_operand,
 			node* right_operand
 		);
@@ -130,7 +142,11 @@ namespace channel {
 		 * \param right_operand Right operand
 		 * \return Expected - value(operation result, operation precision, left operand result), error received from inner accept invocations.
 		 */
-		std::expected<std::tuple<llvm::Value*, type, acceptation_result>, error_message> create_div_operation(
+		std::expected<std::tuple<
+			llvm::Value*,
+			type,
+			acceptation_result
+		>, std::shared_ptr<error_message>> create_div_operation(
 			node* left_operand,
 			node* right_operand
 		);
@@ -141,7 +157,11 @@ namespace channel {
 		 * \param right_operand Right operand
 		 * \return Expected - value(operation result, operation precision, left operand result), error received from inner accept invocations.
 		 */
-		std::expected<std::tuple<llvm::Value*, type, acceptation_result>, error_message> create_mod_operation(
+		std::expected<std::tuple<
+			llvm::Value*,
+			type,
+			acceptation_result
+		>, std::shared_ptr<error_message>> create_mod_operation(
 			node* left_operand,
 			node* right_operand
 		);

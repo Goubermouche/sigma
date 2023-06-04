@@ -95,31 +95,33 @@ namespace channel {
 	class error {
 	public:
 		template <u64 code, typename... Args>
-		static error_message emit(Args&&... args);
+		static std::shared_ptr<error_message> emit(Args&&... args);
 
 		template <u64 code, typename... Args>
-		static error_message_position emit(token_position position, Args&&... args);
+		static std::shared_ptr<error_message_position> emit(token_position position, Args&&... args);
 	};
 
 	template<u64 code, typename ...Args>
-	error_message error::emit(Args&& ...args) {
-		return {
-			std::format(error_templates[code], std::forward<Args>(args)...),
+	std::shared_ptr<error_message> error::emit(Args&& ...args) {
+		return std::make_shared< error_message>(
+			std::format(error_templates[code], 
+			std::forward<Args>(args)...),
 			code
-		};
+		);
 	}
 
 	template<u64 code, typename ...Args>
-	error_message_position error::emit(token_position position, Args && ...args) {
-		return {
-			std::format(error_templates[code], std::forward<Args>(args)...),
+	std::shared_ptr<error_message_position> error::emit(token_position position, Args && ...args) {
+		return std::make_shared<error_message_position>(
+			std::format(error_templates[code],
+			std::forward<Args>(args)...),
 			code,
 			position
-		};
+		);
 	}
 
 	/**
 	 * \brief Potential (optional) erroneous result.
 	 */
-	using error_result = std::optional<error_message>;
+	using error_result = std::optional<std::shared_ptr<error_message>>;
 }

@@ -16,7 +16,7 @@ namespace channel {
 	class node;
 
 	using node_ptr = node*;
-	using acceptation_result = std::expected<value_ptr, error_message>;
+	using acceptation_result = std::expected<value_ptr, std::shared_ptr<error_message>>;
 
 	/**
 	 * \brief base AST node.

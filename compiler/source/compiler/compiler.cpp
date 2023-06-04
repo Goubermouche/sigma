@@ -85,7 +85,7 @@ namespace channel {
 		return {};
 	}
 
-	std::expected<std::shared_ptr<llvm_context>, error_message> compiler::generate_module(
+	std::expected<std::shared_ptr<llvm_context>, std::shared_ptr<error_message>> compiler::generate_module(
 		const std::string& source_filepath
 	) const {
 		// tokenize the source file

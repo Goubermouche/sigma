@@ -17,7 +17,10 @@ i32 main(i32 argc, char* argv[]) {
 	// source file path
 	// target executable directory
 	if(argc != 3) {
-		channel::console::out << channel::color::red << "invalid argument count\n" << channel::color::white;
+		channel::console::out
+			<< channel::color::red
+			<< "invalid argument count\n"
+			<< channel::color::white;
 		return 1;
 	}
 
@@ -31,7 +34,7 @@ i32 main(i32 argc, char* argv[]) {
 
 	// check for compilation errors
 	if(const auto compilation_result = compiler.compile(argv[1], argv[2])) {
-		compilation_result->print();
+		compilation_result.value()->print();
 		return 1;
 	}
 

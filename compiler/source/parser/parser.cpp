@@ -3,9 +3,13 @@
 
 namespace channel {
 	parser::parser()
-		: m_abstract_syntax_tree(std::make_shared<abstract_syntax_tree>()) {}
+		: m_abstract_syntax_tree(
+			std::make_shared<abstract_syntax_tree>()
+		) {}
 
-	void parser::set_token_list(const token_list& token_list) {
+	void parser::set_token_list(
+		const token_list& token_list
+	) {
 		m_token_list = token_list;
 	}
 

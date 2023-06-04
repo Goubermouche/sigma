@@ -305,6 +305,7 @@
     <ClInclude Include="source\code_generator\abstract_syntax_tree\operators\binary\bitwise\operator_bitwise_and_node.h" />
     <ClInclude Include="source\code_generator\abstract_syntax_tree\operators\unary\bitwise\operator_bitwise_not_node.h" />
     <ClInclude Include="source\code_generator\abstract_syntax_tree\operators\binary\bitwise\operator_bitwise_xor_node.h" />
+    <ClInclude Include="source\utility\containers\expected.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp" />
@@ -532,5 +533,6 @@
     <ClCompile Include="source\code_generator\abstract_syntax_tree\operators\binary\bitwise\operator_bitwise_and_node.cpp" />
     <ClCompile Include="source\code_generator\abstract_syntax_tree\operators\unary\bitwise\operator_bitwise_not_node.cpp" />
     <ClCompile Include="source\code_generator\abstract_syntax_tree\operators\binary\bitwise\operator_bitwise_xor_node.cpp" />
+    <ClCompile Include="source\utility\containers\expected.cpp" />
   </ItemGroup>
 </Project>

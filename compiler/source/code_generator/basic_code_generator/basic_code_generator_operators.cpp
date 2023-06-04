@@ -1474,7 +1474,11 @@ namespace channel {
 		);
 	}
 
-	std::expected<std::tuple<llvm::Value*, type, acceptation_result>, error_message> basic_code_generator::create_add_operation(
+	std::expected<std::tuple<
+		llvm::Value*,
+		type,
+		acceptation_result
+	>, std::shared_ptr<error_message>> basic_code_generator::create_add_operation(
 		node* left_operand,
 		node* right_operand
 	) {
@@ -1559,7 +1563,11 @@ namespace channel {
 		);
 	}
 
-	std::expected<std::tuple<llvm::Value*, type, acceptation_result>, error_message> basic_code_generator::create_sub_operation(
+	std::expected<std::tuple<
+		llvm::Value*,
+		type,
+		acceptation_result
+	>, std::shared_ptr<error_message>> basic_code_generator::create_sub_operation(
 		node* left_operand, 
 		node* right_operand
 	) {
@@ -1644,7 +1652,11 @@ namespace channel {
 		);
 	}
 
-	std::expected<std::tuple<llvm::Value*, type, acceptation_result>, error_message> basic_code_generator::create_mul_operation(
+	std::expected<std::tuple<
+		llvm::Value*,
+		type,
+		acceptation_result
+	>, std::shared_ptr<error_message>> basic_code_generator::create_mul_operation(
 		node* left_operand,
 		node* right_operand
 	) {
@@ -1729,7 +1741,11 @@ namespace channel {
 		);
 	}
 
-	std::expected<std::tuple<llvm::Value*, type, acceptation_result>, error_message> basic_code_generator::create_div_operation(
+	std::expected<std::tuple<
+		llvm::Value*,
+		type,
+		acceptation_result
+	>, std::shared_ptr<error_message>> basic_code_generator::create_div_operation(
 		node* left_operand,
 		node* right_operand
 	) {
@@ -1814,7 +1830,11 @@ namespace channel {
 		);
 	}
 
-	std::expected<std::tuple<llvm::Value*, type, acceptation_result>, error_message> basic_code_generator::create_mod_operation(
+	std::expected<std::tuple<
+		llvm::Value*,
+		type,
+		acceptation_result
+	>, std::shared_ptr<error_message>> basic_code_generator::create_mod_operation(
 		node* left_operand, 
 		node* right_operand
 	) {

@@ -10,7 +10,7 @@
 // todo: major cleanup (!!!)
 //  - documentation
 //  - tests
-// error system truncates to error_message - broken position info for errors
+// error system truncates to error_message - broken location info for errors
 
 // numerical literal auto upcasts 
 //  - handle upcasts for numerical literals 
@@ -21,9 +21,6 @@
 void donut(f32 rot_speed) {
 	f32 A = 0;
 	f32 B = 0;
-	f32 i;
-	f32 j;
-	i32 k;
 	f32* z = new f32[1760];
 	char* b = new char[1760];
 	char* brightness = ".,-~:;=!*#$@";
@@ -33,8 +30,8 @@ void donut(f32 rot_speed) {
 		memset(b, 32, 1760);
 		memset(z, 0, 7040);
 
-		for(j = 0; j < 6.28; j = j + 0.07f) {
-			for(i = 0; i < 6.28; i = i + 0.02f) {
+		for(f32 j = 0; j < 6.28; j = j + 0.07f) {
+			for(f32 i = 0; i < 6.28; i = i + 0.02f) {
 				f32 c = sin(i);
 				f32 d = cos(j);
 				f32 e = sin(A);
@@ -66,7 +63,7 @@ void donut(f32 rot_speed) {
 		
 		print("\x1b[H");
 		
-		for(k = 0; k < 1760; k++) {
+		for(i32 k = 0; k < 1760; k++) {
 			if(k % 80 != 0) {
 				printc(b[k]);
 			}

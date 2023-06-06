@@ -26,67 +26,67 @@ namespace channel {
 		error_result generate() override;
 		error_result verify_intermediate_representation();
 	private:
-		acceptation_result visit_translation_unit_node(
+		expected_value visit_translation_unit_node(
 			translation_unit_node& node, 
 			const code_generation_context& context
 		) override;
 
 		// functions
 		// codegen_visitor_functions.cpp
-		acceptation_result visit_function_node(
+		expected_value visit_function_node(
 			function_node& node, 
 			const code_generation_context& context
 		) override;
 
-		acceptation_result visit_function_call_node(
+		expected_value visit_function_call_node(
 			function_call_node& node,
 			const code_generation_context& context
 		) override;
 
 		// variables
 		// codegen_visitor_variables.cpp
-		acceptation_result visit_assignment_node(
+		expected_value visit_assignment_node(
 			assignment_node& node,
 			const code_generation_context& context
 		) override;
 
-		acceptation_result visit_variable_access_node(
+		expected_value visit_variable_access_node(
 			variable_access_node& node, 
 			const code_generation_context& context
 		) override;
 
-		acceptation_result visit_local_declaration_node(
+		expected_value visit_local_declaration_node(
 			local_declaration_node& node,
 			const code_generation_context& context
 		) override;
 
-		acceptation_result visit_global_declaration_node(
+		expected_value visit_global_declaration_node(
 			global_declaration_node& node,
 			const code_generation_context& context
 		) override;
 
-		acceptation_result visit_allocation_node(
+		expected_value visit_allocation_node(
 			array_allocation_node& node, 
 			const code_generation_context& context
 		) override;
 
-		acceptation_result visit_array_access_node(
+		expected_value visit_array_access_node(
 			array_access_node& node,
 			const code_generation_context& context
 		) override;
 
-		acceptation_result visit_array_assignment_node(
+		expected_value visit_array_assignment_node(
 			array_assignment_node& node, 
 			const code_generation_context& context
 		) override;
 
-		acceptation_result visit_variable_node(
+		expected_value visit_variable_node(
 			variable_node& node, 
 			const code_generation_context& context
 		) override;
 
 		// utility
-		acceptation_result get_declaration_value(
+		expected_value get_declaration_value(
 			const declaration_node& node,
 			const code_generation_context& context
 		);
@@ -100,8 +100,8 @@ namespace channel {
 		std::expected<std::tuple<
 			llvm::Value*,
 			type,
-			acceptation_result
-		>, std::shared_ptr<error_message>> create_add_operation(
+			expected_value
+		>, error_msg> create_add_operation(
 			node* left_operand,
 			node* right_operand
 		);
@@ -115,8 +115,8 @@ namespace channel {
 		std::expected<std::tuple<
 			llvm::Value*,
 			type,
-			acceptation_result
-		>, std::shared_ptr<error_message>> create_sub_operation(
+			expected_value
+		>, error_msg> create_sub_operation(
 			node* left_operand,
 			node* right_operand
 		);
@@ -130,8 +130,8 @@ namespace channel {
 		std::expected<std::tuple<
 			llvm::Value*,
 			type,
-			acceptation_result
-		>, std::shared_ptr<error_message>> create_mul_operation(
+			expected_value
+		>, error_msg> create_mul_operation(
 			node* left_operand,
 			node* right_operand
 		);
@@ -145,8 +145,8 @@ namespace channel {
 		std::expected<std::tuple<
 			llvm::Value*,
 			type,
-			acceptation_result
-		>, std::shared_ptr<error_message>> create_div_operation(
+			expected_value
+		>, error_msg> create_div_operation(
 			node* left_operand,
 			node* right_operand
 		);
@@ -160,8 +160,8 @@ namespace channel {
 		std::expected<std::tuple<
 			llvm::Value*,
 			type,
-			acceptation_result
-		>, std::shared_ptr<error_message>> create_mod_operation(
+			expected_value
+		>, error_msg> create_mod_operation(
 			node* left_operand,
 			node* right_operand
 		);
@@ -173,49 +173,49 @@ namespace channel {
 
 		// flow control
 		// codegen_visitor_flow_control.cpp
-		acceptation_result visit_return_node(
+		expected_value visit_return_node(
 			return_node& node,
 			const code_generation_context& context
 		) override;
 
-		acceptation_result visit_if_else_node(
+		expected_value visit_if_else_node(
 			if_else_node& node, 
 			const code_generation_context& context
 		) override;
 
-		acceptation_result visit_while_node(
+		expected_value visit_while_node(
 			while_node& node, 
 			const code_generation_context& context
 		) override;
 
-		acceptation_result visit_for_node(
+		expected_value visit_for_node(
 			for_node& node,
 			const code_generation_context& context
 		) override;
 
-		acceptation_result visit_break_node(
+		expected_value visit_break_node(
 			break_node& node, 
 			const code_generation_context& context
 		) override;
 
 		// types
 		// codegen_visitor_types.cpp
-		acceptation_result visit_numerical_literal_node(
+		expected_value visit_numerical_literal_node(
 			numerical_literal_node& node, 
 			const code_generation_context& context
 		) override;
 
-		acceptation_result visit_keyword_char_node(
+		expected_value visit_keyword_char_node(
 			char_node& node, 
 			const code_generation_context& context
 		) override;
 
-		acceptation_result visit_keyword_string_node(
+		expected_value visit_keyword_string_node(
 			string_node& node,
 			const code_generation_context& context
 		) override;
 
-		acceptation_result visit_keyword_bool_node(
+		expected_value visit_keyword_bool_node(
 			bool_node& node, 
 			const code_generation_context& context
 		) override;
@@ -229,153 +229,153 @@ namespace channel {
 		// codegen_visitor_operators.cpp
 		// unary
 		// arithmetic
-		acceptation_result visit_operator_post_decrement_node(
+		expected_value visit_operator_post_decrement_node(
 			operator_post_decrement_node& node,
 			const code_generation_context& context
 		) override;
 
-		acceptation_result visit_operator_post_increment_node(
+		expected_value visit_operator_post_increment_node(
 			operator_post_increment_node& node, 
 			const code_generation_context& context
 		) override;
 
-		acceptation_result visit_operator_pre_decrement_node(
+		expected_value visit_operator_pre_decrement_node(
 			operator_pre_decrement_node& node,
 			const code_generation_context& context
 		) override;
 
-		acceptation_result visit_operator_pre_increment_node(
+		expected_value visit_operator_pre_increment_node(
 			operator_pre_increment_node& node,
 			const code_generation_context& context
 		) override;
 
 		// bitwise
-		acceptation_result visit_operator_bitwise_not_node(
+		expected_value visit_operator_bitwise_not_node(
 			operator_bitwise_not_node& node,
 			const code_generation_context& context
 		) override;
 
 		// logical
-		acceptation_result visit_operator_not_node(
+		expected_value visit_operator_not_node(
 			operator_not_node& node,
 			const code_generation_context& context
 		) override;
 
 		// binary
 		// arithmetic
-		acceptation_result visit_operator_addition_assignment_node(
+		expected_value visit_operator_addition_assignment_node(
 			operator_addition_assignment_node& node,
 			const code_generation_context& context
 		) override;
 
-		acceptation_result visit_operator_addition_node(
+		expected_value visit_operator_addition_node(
 			operator_addition_node& node, 
 			const code_generation_context& context
 		) override;
 
-		acceptation_result visit_operator_subtraction_assignment_node(
+		expected_value visit_operator_subtraction_assignment_node(
 			operator_subtraction_assignment_node& node,
 			const code_generation_context& context
 		) override;
 
-		acceptation_result visit_operator_subtraction_node(
+		expected_value visit_operator_subtraction_node(
 			operator_subtraction_node& node, 
 			const code_generation_context& context
 		) override;
 
-		acceptation_result visit_operator_multiplication_assignment_node(
+		expected_value visit_operator_multiplication_assignment_node(
 			operator_multiplication_assignment_node& node,
 			const code_generation_context& context
 		) override;
 
-		acceptation_result visit_operator_multiplication_node(
+		expected_value visit_operator_multiplication_node(
 			operator_multiplication_node& node, 
 			const code_generation_context& context
 		) override;
 
-		acceptation_result visit_operator_division_assignment_node(
+		expected_value visit_operator_division_assignment_node(
 			operator_division_assignment_node& node,
 			const code_generation_context& context
 		) override;
 
-		acceptation_result visit_operator_division_node(
+		expected_value visit_operator_division_node(
 			operator_division_node& node, 
 			const code_generation_context& context
 		) override;
 
-		acceptation_result visit_operator_modulo_assignment_node(
+		expected_value visit_operator_modulo_assignment_node(
 			operator_modulo_assignment_node& node, 
 			const code_generation_context& context
 		) override;
 
-		acceptation_result visit_operator_modulo_node(
+		expected_value visit_operator_modulo_node(
 			operator_modulo_node& node,
 			const code_generation_context& context
 		) override;
 
 		// bitwise
-		acceptation_result visit_operator_bitwise_and_node(
+		expected_value visit_operator_bitwise_and_node(
 			operator_bitwise_and_node& node,
 			const code_generation_context& context
 		) override;
 
-		acceptation_result visit_operator_bitwise_or_node(
+		expected_value visit_operator_bitwise_or_node(
 			operator_bitwise_or_node& node,
 			const code_generation_context& context
 		) override;
 
-		acceptation_result visit_operator_bitwise_left_shift_node(
+		expected_value visit_operator_bitwise_left_shift_node(
 			operator_bitwise_left_shift_node& node,
 			const code_generation_context& context
 		) override;
 
-		acceptation_result visit_operator_bitwise_right_shift_node(
+		expected_value visit_operator_bitwise_right_shift_node(
 			operator_bitwise_right_shift_node& node,
 			const code_generation_context& context
 		) override;
 
-		acceptation_result visit_operator_bitwise_xor_node(
+		expected_value visit_operator_bitwise_xor_node(
 			operator_bitwise_xor_node& node,
 			const code_generation_context& context
 		) override;
 
 		// logical
-		acceptation_result visit_operator_logical_conjunction_node(
+		expected_value visit_operator_logical_conjunction_node(
 			operator_conjunction_node& node, 
 			const code_generation_context& context
 		) override;
 
-		acceptation_result visit_operator_logical_disjunction_node(
+		expected_value visit_operator_logical_disjunction_node(
 			operator_disjunction_node& node,
 			const code_generation_context& context
 		) override;
 
-		acceptation_result visit_operator_greater_than_node(
+		expected_value visit_operator_greater_than_node(
 			operator_greater_than_node& node,
 			const code_generation_context& context
 		) override;
 
-		acceptation_result visit_operator_greater_than_equal_to_node(
+		expected_value visit_operator_greater_than_equal_to_node(
 			operator_greater_than_equal_to_node& node,
 			const code_generation_context& context
 		) override;
 
-		acceptation_result visit_operator_less_than_node(
+		expected_value visit_operator_less_than_node(
 			operator_less_than_node& node, 
 			const code_generation_context& context
 		) override;
 
-		acceptation_result visit_operator_less_than_equal_to_node(
+		expected_value visit_operator_less_than_equal_to_node(
 			operator_less_than_equal_to_node& node, 
 			const code_generation_context& context
 		) override;
 
-		acceptation_result visit_operator_equals_node(
+		expected_value visit_operator_equals_node(
 			operator_equals_node& node,
 			const code_generation_context& context
 		) override;
 
-		acceptation_result visit_operator_not_equals_node(
+		expected_value visit_operator_not_equals_node(
 			operator_not_equals_node& node, 
 			const code_generation_context& context
 		) override;
@@ -384,7 +384,7 @@ namespace channel {
 		llvm::Value* cast_value(
 			const value_ptr& source_value,
 			type target_type, 
-			const token_position& position
+			const token_location& location
 		);
 
 		error_result verify_main_entry_point();

@@ -12,7 +12,7 @@ namespace channel {
 			m_tokens.push_back({ 
 				tok,
 				m_value_string,
-				token_position {
+				token_location {
 					m_source_filepath,
 					m_current_line,
 					m_current_character
@@ -286,8 +286,8 @@ namespace channel {
 		return {};
 	}
 
-	token_data::token_data(token tok, const std::string& value, const token_position& position)
-		: m_token(tok), m_value(value), m_position(position) {}
+	token_data::token_data(token tok, const std::string& value, const token_location& location)
+		: m_token(tok), m_value(value), m_position(location) {}
 
 	token token_data::get_token() const	{
 		return m_token;
@@ -297,7 +297,7 @@ namespace channel {
 		return m_value;
 	}
 
-	const token_position& token_data::get_token_position() const {
+	const token_location& token_data::get_token_location() const {
 		return m_position;
 	}
 }

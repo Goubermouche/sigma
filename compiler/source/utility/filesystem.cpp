@@ -1,7 +1,7 @@
 #include "filesystem.h"
 
 namespace channel::detail {
-	std::expected<std::string, std::shared_ptr<error_message>> read_file(
+	std::expected<std::string, error_msg> read_file(
 		const std::string& filepath
 	) {
 		std::ifstream file(filepath, std::ios::in | std::ios::binary);

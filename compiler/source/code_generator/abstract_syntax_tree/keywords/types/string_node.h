@@ -8,11 +8,11 @@ namespace channel {
 	class string_node : public node {
 	public:
 		string_node(
-			const token_position& position,
+			const token_location& location,
 			const std::string& value
 		);
 
-		acceptation_result accept(
+		expected_value accept(
 			code_generator& visitor,
 			const code_generation_context& context
 		) override;

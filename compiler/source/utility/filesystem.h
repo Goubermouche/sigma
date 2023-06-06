@@ -8,7 +8,7 @@ namespace channel::detail {
 	 * \param filepath Source file path
 	 * \return Expected - contents of the file, or, in the case of an erroneous state, an error message.
 	 */
-	std::expected<std::string, std::shared_ptr<error_message>> read_file(
+	std::expected<std::string, error_msg> read_file(
 		const std::string& filepath
 	);
 

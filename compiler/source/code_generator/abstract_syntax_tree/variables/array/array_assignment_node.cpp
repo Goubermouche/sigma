@@ -2,16 +2,16 @@
 
 namespace channel {
 	array_assignment_node::array_assignment_node(
-		const token_position& position,
+		const token_location& location,
 		const node_ptr& array_base,
 		const std::vector<node_ptr>& index_nodes,
 		const node_ptr& expression_node
-	) : node(position),
+	) : node(location),
 	m_array_base_node(array_base),
 	m_array_element_index_nodes(index_nodes),
 	m_expression_node(expression_node) {}
 
-	acceptation_result array_assignment_node::accept(code_generator& visitor, const code_generation_context& context) {
+	expected_value array_assignment_node::accept(code_generator& visitor, const code_generation_context& context) {
 		return visitor.visit_array_assignment_node(*this, context);
 	}
 

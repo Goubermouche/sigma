@@ -8,11 +8,11 @@ namespace channel {
 	class operator_bitwise_not_node : public operator_unary_base {
 	public:
 		operator_bitwise_not_node(
-			const token_position& position,
+			const token_location& location,
 			const node_ptr& expression_node
 		);
 
-		acceptation_result accept(
+		expected_value accept(
 			code_generator& visitor,
 			const code_generation_context& context
 		) override;

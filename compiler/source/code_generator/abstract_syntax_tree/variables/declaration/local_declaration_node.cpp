@@ -2,18 +2,18 @@
 
 namespace channel {
 	local_declaration_node::local_declaration_node(
-		const token_position& position,
+		const token_location& location,
 		const type& declaration_type,
 		const std::string& declaration_identifier, 
 		const node_ptr& expression_node
 	) : declaration_node(
-		position, 
+		location, 
 		declaration_type,
 		declaration_identifier,
 		expression_node
 	) {}
 
-	acceptation_result local_declaration_node::accept(code_generator& visitor, const code_generation_context& context) {
+	expected_value local_declaration_node::accept(code_generator& visitor, const code_generation_context& context) {
 		return visitor.visit_local_declaration_node(*this, context);
 	}
 

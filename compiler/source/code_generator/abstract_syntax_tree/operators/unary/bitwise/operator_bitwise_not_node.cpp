@@ -2,11 +2,11 @@
 
 namespace channel {
 	operator_bitwise_not_node::operator_bitwise_not_node(
-		const token_position& position,
+		const token_location& location,
 		const node_ptr& expression_node
-	) : operator_unary_base(position, expression_node) {}
+	) : operator_unary_base(location, expression_node) {}
 
-	acceptation_result operator_bitwise_not_node::accept(code_generator& visitor, const code_generation_context& context) {
+	expected_value operator_bitwise_not_node::accept(code_generator& visitor, const code_generation_context& context) {
 		return visitor.visit_operator_bitwise_not_node(*this, context);
 	}
 

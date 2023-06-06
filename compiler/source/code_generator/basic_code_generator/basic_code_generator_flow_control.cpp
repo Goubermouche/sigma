@@ -7,12 +7,11 @@
 #include "code_generator/abstract_syntax_tree/keywords/flow_control/break_node.h"
 
 namespace channel {
-	acceptation_result basic_code_generator::visit_return_node(
+	expected_value basic_code_generator::visit_return_node(
 		return_node& node, 
 		const code_generation_context& context
 	) {
 		(void)context; // suppress C4100
-
 		// get the return type of the current function
 		const llvm::Function* parent_function_block = m_llvm_context->get_builder().GetInsertBlock()->getParent();
 		const std::string parent_function_identifier = parent_function_block->getName().str();
@@ -24,7 +23,7 @@ namespace channel {
 		// check if we have a return expression
 		if(node.get_return_expression_node()) {
 			// evaluate the expression of the return statement, if there is one
-			acceptation_result return_value_result = node.get_return_expression_node()->accept(
+			expected_value return_value_result = node.get_return_expression_node()->accept(
 				*this,
 				{}
 			);
@@ -37,7 +36,7 @@ namespace channel {
 			llvm::Value* upcasted_return_value = cast_value(
 				return_value_result.value(),
 				parent_function->get_return_type(),
-				node.get_declared_position()
+				node.get_declared_location()
 			);
 
 			// generate the LLVM return instruction with the upcasted value
@@ -74,7 +73,7 @@ namespace channel {
 		);
 	}
 
-	acceptation_result basic_code_generator::visit_if_else_node(
+	expected_value basic_code_generator::visit_if_else_node(
 		if_else_node& node, 
 		const code_generation_context& context
 	) {
@@ -119,7 +118,7 @@ namespace channel {
 		}
 
 		// accept the first condition
-		acceptation_result condition_value_result = condition_nodes[0]->accept(
+		expected_value condition_value_result = condition_nodes[0]->accept(
 			*this,
 			code_generation_context(type(type::base::boolean, 0))
 		);
@@ -164,7 +163,7 @@ namespace channel {
 			m_scope = std::make_unique<scope>(prev_scope);
 
 			for (const auto& statement : branch_nodes[i]) {
-				acceptation_result statement_result = statement->accept(
+				expected_value statement_result = statement->accept(
 					*this,
 					{}
 				);
@@ -185,7 +184,7 @@ namespace channel {
 		return nullptr;
 	}
 
-	acceptation_result basic_code_generator::visit_while_node(
+	expected_value basic_code_generator::visit_while_node(
 		while_node& node, 
 		const code_generation_context& context
 	) {
@@ -222,7 +221,7 @@ namespace channel {
 		m_scope = std::make_shared<scope>(prev_scope, end_block);
 
 		// accept the condition node
-		acceptation_result condition_value_result = node.get_loop_condition_node()->accept(
+		expected_value condition_value_result = node.get_loop_condition_node()->accept(
 			*this,
 			code_generation_context(type(type::base::boolean, 0))
 		);
@@ -241,7 +240,7 @@ namespace channel {
 		m_llvm_context->get_builder().SetInsertPoint(loop_body_block);
 
 		for (channel::node* n : node.get_loop_body_nodes()) {
-			acceptation_result statement_result = n->accept(
+			expected_value statement_result = n->accept(
 				*this,
 				{}
 			);
@@ -263,7 +262,7 @@ namespace channel {
 		return nullptr;
 	}
 
-	acceptation_result basic_code_generator::visit_for_node(
+	expected_value basic_code_generator::visit_for_node(
 		for_node& node,
 		const code_generation_context& context
 	) {
@@ -301,7 +300,7 @@ namespace channel {
 		m_scope = std::make_shared<scope>(prev_scope, end_block);
 
 		// create the index expression
-		acceptation_result index_expression_result = node.get_loop_initialization_node()->accept(
+		expected_value index_expression_result = node.get_loop_initialization_node()->accept(
 			*this,
 			{}
 		);
@@ -315,7 +314,7 @@ namespace channel {
 		// accept the condition block
 		m_llvm_context->get_builder().SetInsertPoint(condition_block);
 
-		acceptation_result condition_value_result = node.get_loop_condition_node()->accept(
+		expected_value condition_value_result = node.get_loop_condition_node()->accept(
 			*this, 
 			{}
 		);
@@ -329,7 +328,7 @@ namespace channel {
 			condition_value_result.value()->get_type().is_pointer()) {
 			return std::unexpected(
 				error::emit<4010>(
-					node.get_declared_position(),
+					std::move(node.get_declared_location()),
 					condition_value_result.value()->get_type()
 				)
 			);
@@ -344,7 +343,7 @@ namespace channel {
 		// create the increment block
 		m_llvm_context->get_builder().SetInsertPoint(increment_block);
 		for (channel::node* n : node.get_post_iteration_nodes()) {
-			acceptation_result statement_result = n->accept(*this, {});
+			expected_value statement_result = n->accept(*this, {});
 			if (!statement_result) {
 				return statement_result; // return on failure
 			}
@@ -357,7 +356,7 @@ namespace channel {
 
 		// accept all inner statements
 		for (channel::node* n : node.get_loop_body_nodes()) {
-			acceptation_result statement_result = n->accept(*this, {});
+			expected_value statement_result = n->accept(*this, {});
 			if (!statement_result) {
 				return statement_result; // return on failure
 			}
@@ -375,7 +374,7 @@ namespace channel {
 		return nullptr;
 	}
 
-	acceptation_result basic_code_generator::visit_break_node(
+	expected_value basic_code_generator::visit_break_node(
 		break_node& node, 
 		const code_generation_context& context
 	) {
@@ -386,7 +385,7 @@ namespace channel {
 			// emit an error if there's no enclosing loop to break from
 			return std::unexpected(
 				error::emit<4011>(
-					node.get_declared_position()
+					std::move(node.get_declared_location())
 				)
 			);
 		}

@@ -8,12 +8,12 @@ namespace channel {
 	class function_call_node : public node {
 	public:
 		function_call_node(
-			const token_position& position,
+			const token_location& location,
 			const std::string& function_identifier,
 			const std::vector<node_ptr>& function_arguments
 		);
 
-		acceptation_result accept(
+		expected_value accept(
 			code_generator& visitor,
 			const code_generation_context& context
 		) override;

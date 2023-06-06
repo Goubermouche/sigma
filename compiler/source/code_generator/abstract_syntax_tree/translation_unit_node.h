@@ -11,7 +11,7 @@ namespace channel {
 			const std::vector<node_ptr>& nodes
 		);
 
-		acceptation_result accept(
+		expected_value accept(
 			code_generator& visitor, 
 			const code_generation_context& context
 		) override;

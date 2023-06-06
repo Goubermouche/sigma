@@ -8,11 +8,11 @@ namespace channel {
 	class bool_node : public node {
 	public:
 		bool_node(
-			const token_position& position,
+			const token_location& location,
 			bool value
 		);
 
-		acceptation_result accept(
+		expected_value accept(
 			code_generator& visitor,
 			const code_generation_context& context
 		) override;

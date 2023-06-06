@@ -5,7 +5,7 @@
 
 namespace channel {
 	/**
-	 * \brief Set of information related to a specific token, at a specific position.
+	 * \brief Set of information related to a specific token, at a specific location.
 	 */
 	struct token_data {
 		token_data() = default;
@@ -13,19 +13,19 @@ namespace channel {
 		token_data(
 			token tok,
 			const std::string& value,
-			const token_position& position
+			const token_location& location
 		);
 
 		token get_token() const;
 		const std::string& get_value() const;
-		const token_position& get_token_position() const;
+		const token_location& get_token_location() const;
 	private:
 		// token type representation of the given token
 		token m_token = token::unknown;
 		// token value of the given token (ie. the identifier value of an identifier token)
 		std::string m_value;
-		// position of the given token
-		token_position m_position;
+		// location of the given token
+		token_location m_position;
 	};
 
 	/**

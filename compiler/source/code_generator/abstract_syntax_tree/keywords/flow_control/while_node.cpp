@@ -2,14 +2,14 @@
 
 namespace channel {
 	while_node::while_node(
-		const token_position& position,
+		const token_location& location,
 		const node_ptr& loop_condition_node,
 		const std::vector<node_ptr>& statement_nodes
-	) : node(position),
+	) : node(location),
 	m_loop_condition_node(loop_condition_node),
 	m_loop_body_nodes(statement_nodes) {}
 
-	acceptation_result while_node::accept(code_generator& visitor, const code_generation_context& context) {
+	expected_value while_node::accept(code_generator& visitor, const code_generation_context& context) {
 		return visitor.visit_while_node(*this, context);
 	}
 

@@ -2,14 +2,14 @@
 
 namespace channel {
 	assignment_node::assignment_node(
-		const token_position& position,
+		const token_location& location,
 		const node_ptr& variable,
 		const node_ptr& expression_node
-	) : node(position),
+	) : node(location),
 	m_variable_node(variable),
 	m_expression_node(expression_node) {}
 
-	acceptation_result assignment_node::accept(code_generator& visitor, const code_generation_context& context) {
+	expected_value assignment_node::accept(code_generator& visitor, const code_generation_context& context) {
 		return visitor.visit_assignment_node(*this, context);
 	}
 

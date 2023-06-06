@@ -50,7 +50,10 @@ namespace channel {
 			return source_file_error; // return on failure
 		}
 
-		console::out << "compiling file '" << m_root_source_file_filepath << "'\n";
+		console::out
+			<< "compiling file '"
+			<< m_root_source_file_filepath
+			<< "'\n";
 
 		// generate the module
 		auto module_generation_result = generate_module(
@@ -85,7 +88,10 @@ namespace channel {
 		return {};
 	}
 
-	std::expected<std::shared_ptr<llvm_context>, std::shared_ptr<error_message>> compiler::generate_module(
+	std::expected<
+		std::shared_ptr<llvm_context>,
+		error_msg
+	> compiler::generate_module(
 		const std::string& source_filepath
 	) const {
 		// tokenize the source file
@@ -129,6 +135,11 @@ namespace channel {
 			<< "parsing finished ("
 			<< parser_timer.elapsed()
 			<< "ms)\n";
+
+
+
+
+
 
 		// generate the module
 		timer code_generator_timer;

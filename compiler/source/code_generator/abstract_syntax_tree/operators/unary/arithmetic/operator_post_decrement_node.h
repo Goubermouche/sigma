@@ -8,11 +8,11 @@ namespace channel {
 	class operator_post_decrement_node : public operator_unary_base {
 	public:
 		operator_post_decrement_node(
-			const token_position& position,
+			const token_location& location,
 			const node_ptr& expression_node
 		);
 
-		acceptation_result accept(
+		expected_value accept(
 			code_generator& visitor,
 			const code_generation_context& context
 		) override;

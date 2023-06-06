@@ -2,12 +2,12 @@
 
 namespace channel {
 	return_node::return_node(
-		const token_position& position,
+		const token_location& location,
 		const node_ptr& return_expression_node
-	) : node(position),
+	) : node(location),
 	m_return_expression_node(return_expression_node) {}
 
-	acceptation_result return_node::accept(code_generator& visitor, const code_generation_context& context) {
+	expected_value return_node::accept(code_generator& visitor, const code_generation_context& context) {
 		return visitor.visit_return_node(*this, context);
 	}
 

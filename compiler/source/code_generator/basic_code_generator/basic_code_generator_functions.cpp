@@ -4,7 +4,7 @@
 #include "code_generator/abstract_syntax_tree/functions/function_node.h"
 
 namespace channel {
-	acceptation_result basic_code_generator::visit_function_node(
+	expected_value basic_code_generator::visit_function_node(
 		function_node& node, 
 		const code_generation_context& context
 	) {
@@ -44,7 +44,7 @@ namespace channel {
 		)) {
 			return std::unexpected(
 				error::emit<4000>(
-					node.get_declared_position(), 
+					std::move(node.get_declared_location()), 
 					node.get_function_identifier()
 				)
 			); // return on failure
@@ -102,7 +102,7 @@ namespace channel {
 
 		// accept all statements inside the function
 		for (const auto& statement : node.get_function_statements()) {
-			acceptation_result statement_result = statement->accept(
+			expected_value statement_result = statement->accept(
 				*this,
 				{}
 			);
@@ -121,9 +121,9 @@ namespace channel {
 			// check if the return type is non-void
 			if(node.get_function_return_type() != type(type::base::empty, 0)) {
 				warning::emit<3000>(
-					node.get_declared_position(), 
+					node.get_declared_location(),
 					node.get_function_identifier()
-				).print();
+				)->print();
 			}
 
 			if (return_type->isVoidTy()) {
@@ -146,7 +146,7 @@ namespace channel {
 		);
 	}
 
-	acceptation_result basic_code_generator::visit_function_call_node(
+	expected_value basic_code_generator::visit_function_call_node(
 		function_call_node& node, 
 		const code_generation_context& context
 	) {
@@ -161,7 +161,7 @@ namespace channel {
 		if(!func) {
 			return std::unexpected(
 				error::emit<4001>(
-					node.get_declared_position(),
+					std::move(node.get_declared_location()),
 					node.get_function_identifier()
 				)
 			); // return on failure
@@ -174,7 +174,7 @@ namespace channel {
 		if(!func->is_variadic() && required_arguments.size() != given_arguments.size()) {
 			return std::unexpected(
 				error::emit<4002>(
-					node.get_declared_position(),
+					std::move(node.get_declared_location()),
 					node.get_function_identifier()
 				)
 			); // return on failure
@@ -184,7 +184,7 @@ namespace channel {
 		std::vector<llvm::Value*> argument_values(required_arguments.size());
 		for (u64 i = 0; i < required_arguments.size(); i++) {
 			// get the argument value
-			acceptation_result argument_result = given_arguments[i]->accept(
+			expected_value argument_result = given_arguments[i]->accept(
 				*this,
 				code_generation_context(required_arguments[i].second)
 			);
@@ -197,14 +197,14 @@ namespace channel {
 			argument_values[i] = cast_value(
 				argument_result.value(), 
 				required_arguments[i].second, 
-				node.get_declared_position()
+				node.get_declared_location()
 			);
 		}
 
 		// parse variadic arguments
 		for (u64 i = required_arguments.size(); i < given_arguments.size(); i++) {
 			// get the argument value
-			acceptation_result argument_result = given_arguments[i]->accept(
+			expected_value argument_result = given_arguments[i]->accept(
 				*this,
 				{}
 			);
@@ -223,7 +223,7 @@ namespace channel {
 				llvm::Value* argument_value_cast = cast_value(
 					argument_value,
 					type(type::base::f64, 0),
-					given_arguments[i]->get_declared_position()
+					given_arguments[i]->get_declared_location()
 				);
 
 				argument_value = std::make_shared<value>(
@@ -237,7 +237,7 @@ namespace channel {
 				llvm::Value* argument_value_cast = cast_value(
 					argument_value,
 					type(type::base::i32, 0), 
-					given_arguments[i]->get_declared_position()
+					given_arguments[i]->get_declared_location()
 				);
 
 				argument_value = std::make_shared<value>(

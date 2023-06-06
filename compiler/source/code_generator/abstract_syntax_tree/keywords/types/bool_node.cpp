@@ -2,12 +2,12 @@
 
 namespace channel {
 	bool_node::bool_node(
-		const token_position& position, bool 
+		const token_location& location, bool 
 		value
-	) : node(position),
+	) : node(location),
 	m_value(value) {}
 
-	acceptation_result bool_node::accept(code_generator& visitor, const code_generation_context& context) {
+	expected_value bool_node::accept(code_generator& visitor, const code_generation_context& context) {
 		return visitor.visit_keyword_bool_node(*this, context);
 	}
 

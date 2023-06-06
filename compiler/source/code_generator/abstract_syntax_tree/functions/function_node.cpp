@@ -2,20 +2,20 @@
 
 namespace channel {
 	function_node::function_node(
-		const token_position& position,
+		const token_location& location,
 		const type& function_return_type,
 		bool is_var_arg,
 		const std::string& function_identifier,
 		const std::vector<std::pair<std::string, type>>& function_arguments,
 		const std::vector<node_ptr>& function_statements
-	) : node(position),
+	) : node(location),
 	m_function_return_type(function_return_type),
 	m_function_identifier(function_identifier),
 	m_is_var_arg(is_var_arg),
 	m_function_arguments(function_arguments),
 	m_function_statements(function_statements) {}
 
-	acceptation_result function_node::accept(code_generator& visitor, const code_generation_context& context) {
+	expected_value function_node::accept(code_generator& visitor, const code_generation_context& context) {
 		return visitor.visit_function_node(*this, context);
 	}
 

@@ -2,8 +2,11 @@
 #include "compiler/diagnostics/diagnostic.h"
 
 namespace channel {
+	namespace diagnostics {}
 	constexpr auto warning_templates = make_hash_map(
-		// codegen
+		// *********************************************************************************************************************
+		// codegen warnings
+		// *********************************************************************************************************************
 		std::pair{ 3000, "'{}': implicit function return generated" },
 		std::pair{ 3001, "'initializing': implicit function type cast '{}' to '{}'" },
 		std::pair{ 3002, "'initializing': implicit type cast '{}' to '{}'" }
@@ -16,38 +19,55 @@ namespace channel {
 		void print() const override;
 	};
 
+	using warning_msg = std::shared_ptr<warning_message>;
+
 	class warning_message_position : public warning_message {
 	public:
-		warning_message_position(std::string message, u64 code, token_position position);
+		warning_message_position(
+			std::string message,
+			u64 code, 
+			const token_location& location
+		);
 
 		void print() const override;
 	protected:
-		token_position m_position;
+		token_location m_position;
 	};
 
 	class warning {
 	public:
 		template <u64 code, typename... Args>
-		static warning_message emit(Args&&... args);
+		static warning_msg emit(
+			Args&&... args
+		);
 
 		template <u64 code, typename... Args>
-		static warning_message_position emit(token_position position, Args&&... args);
+		static std::shared_ptr<warning_message_position> emit(
+			token_location location,
+			Args&&... args
+		);
 	};
 
 	template<u64 code, typename ...Args>
-	warning_message warning::emit(Args && ...args) {
-		return {
-			std::format(warning_templates[code], std::forward<Args>(args)...),
+	warning_msg warning::emit(
+		Args && ...args
+	) {
+		return std::make_shared<warning_message>(
+			std::format(warning_templates[code],
+			std::forward<Args>(args)...),
 			code
-		};
+		);
 	}
 
 	template<u64 code, typename ...Args>
-	warning_message_position warning::emit(token_position position, Args && ...args) {
-		return {
-			std::format(warning_templates[code], std::forward<Args>(args)...),
+	std::shared_ptr<warning_message_position> warning::emit(
+		token_location location, Args && ...args
+	) {
+		return std::make_shared<warning_message_position>(
+			std::format(warning_templates[code],
+			std::forward<Args>(args)...),
 			code,
-			position
-		};
+			location
+		);
 	}
 }

@@ -2,14 +2,14 @@
 
 namespace channel {
 	array_access_node::array_access_node(
-		const token_position& position,
+		const token_location& location,
 		const node_ptr& array_base,
 		const std::vector<node_ptr>& array_element_index_nodes
-	) : node(position),
+	) : node(location),
 	m_array_base(array_base),
 	m_array_element_index_nodes(array_element_index_nodes) {}
 
-	acceptation_result array_access_node::accept(code_generator& visitor, const code_generation_context& context) {
+	expected_value array_access_node::accept(code_generator& visitor, const code_generation_context& context) {
 		return visitor.visit_array_access_node(*this, context);
 	}
 

@@ -10,14 +10,14 @@
 #include "code_generator/abstract_syntax_tree/variables/declaration/global_declaration_node.h"
 
 namespace channel {
-	acceptation_result basic_code_generator::visit_assignment_node(
+	expected_value basic_code_generator::visit_assignment_node(
 		assignment_node& node, 
 		const code_generation_context& context
 	) {
 		(void)context; // suppress C4100
 		// assignment to a local variable
 		// look up the local variable in the active scope
-		acceptation_result variable_result = node.get_variable_node()->accept(
+		expected_value variable_result = node.get_variable_node()->accept(
 			*this, 
 			{}
 		);
@@ -27,7 +27,7 @@ namespace channel {
 		}
 
 		// evaluate the expression on the right-hand side of the assignment
-		acceptation_result expression_result = node.get_expression_node()->accept(
+		expected_value expression_result = node.get_expression_node()->accept(
 			*this, 
 			code_generation_context(variable_result.value()->get_type())
 		);
@@ -40,7 +40,7 @@ namespace channel {
 		llvm::Value* out_cast = cast_value(
 			expression_value, 
 			variable_result.value()->get_type(), 
-			node.get_declared_position()
+			node.get_declared_location()
 		);
 
 		expression_value->set_value(out_cast);
@@ -53,7 +53,7 @@ namespace channel {
 		return expression_value;
 	}
 
-	acceptation_result basic_code_generator::visit_variable_access_node(
+	expected_value basic_code_generator::visit_variable_access_node(
 		variable_access_node& node, 
 		const code_generation_context& context
 	) {
@@ -91,7 +91,7 @@ namespace channel {
 		if (!global_variable) {
 			return std::unexpected(
 				error::emit<4003>(
-					node.get_declared_position(), 
+					std::move(node.get_declared_location()), 
 					node.get_variable_identifier()
 				)
 			); // return on failure
@@ -116,7 +116,7 @@ namespace channel {
 		);
 	}
 
-	acceptation_result basic_code_generator::visit_local_declaration_node(
+	expected_value basic_code_generator::visit_local_declaration_node(
 		local_declaration_node& node, 
 		const code_generation_context& context
 	) {
@@ -140,7 +140,7 @@ namespace channel {
 		if (m_global_named_values[node.get_declaration_identifier()]) {
 			return std::unexpected(
 				error::emit<4004>(
-					node.get_declared_position(),
+					std::move(node.get_declared_location()),
 					node.get_declaration_identifier()
 				)
 			);
@@ -160,7 +160,7 @@ namespace channel {
 		if (!insertion_result.second) {
 			return std::unexpected(
 				error::emit<4005>(
-					node.get_declared_position(),
+					std::move(node.get_declared_location()),
 					node.get_declaration_identifier()
 				)
 			); // return on failure
@@ -170,7 +170,7 @@ namespace channel {
 		m_llvm_context->get_builder().SetInsertPoint(original_entry_block);
 
 		// evaluate the assigned value, if there is one
-		acceptation_result declaration_value_result = get_declaration_value(
+		expected_value declaration_value_result = get_declaration_value(
 			node,
 			code_generation_context(node.get_declaration_type())
 		);
@@ -183,7 +183,7 @@ namespace channel {
 		llvm::Value* cast_assigned_value = cast_value(
 			declaration_value,
 			node.get_declaration_type(),
-			node.get_declared_position()
+			node.get_declared_location()
 		);
 
 		m_llvm_context->get_builder().CreateStore(cast_assigned_value, alloca);
@@ -192,7 +192,7 @@ namespace channel {
 		return declaration_value;
 	}
 
-	acceptation_result basic_code_generator::visit_global_declaration_node(
+	expected_value basic_code_generator::visit_global_declaration_node(
 		global_declaration_node& node,
 		const code_generation_context& context
 	) {
@@ -220,7 +220,7 @@ namespace channel {
 		m_llvm_context->get_builder().SetInsertPoint(init_func_entry); // write to the init function
 
 		// evaluate the assigned value, if there is one
-		acceptation_result declaration_value_result = get_declaration_value(
+		expected_value declaration_value_result = get_declaration_value(
 			node, 
 			code_generation_context(node.get_declaration_type())
 		);
@@ -233,7 +233,7 @@ namespace channel {
 		llvm::Value* cast_assigned_value = cast_value(
 			declaration_value_result.value(), 
 			node.get_declaration_type(), 
-			node.get_declared_position()
+			node.get_declared_location()
 		);
 
 		// create a global variable
@@ -261,7 +261,7 @@ namespace channel {
 		if (!insertion_result.second) {
 			return std::unexpected(
 				error::emit<4006>(
-					node.get_declared_position(), 
+					std::move(node.get_declared_location()), 
 					node.get_declaration_identifier()
 				)
 			); // return on failure
@@ -300,13 +300,13 @@ namespace channel {
 		return global_declaration;
 	}
 
-	acceptation_result basic_code_generator::visit_allocation_node(
+	expected_value basic_code_generator::visit_allocation_node(
 		array_allocation_node& node,
 		const code_generation_context& context
 	) {
 		(void)context; // suppress C4100
 		// get the count of allocated elements
-		acceptation_result element_count_result = node.get_array_element_count_node()->accept(
+		expected_value element_count_result = node.get_array_element_count_node()->accept(
 			*this, 
 			{}
 		);
@@ -319,7 +319,7 @@ namespace channel {
 		llvm::Value* element_count_cast = cast_value(
 			element_count_result.value(), 
 			type(type::base::u64, 0),
-			node.get_array_element_count_node()->get_declared_position()
+			node.get_array_element_count_node()->get_declared_location()
 		);
 
 		const llvm::FunctionCallee malloc_func = m_function_registry.get_function(
@@ -395,7 +395,7 @@ namespace channel {
 		return array_value;
 	}
 
-	acceptation_result basic_code_generator::visit_array_access_node(
+	expected_value basic_code_generator::visit_array_access_node(
 		array_access_node& node, 
 		const code_generation_context& context
 	) {
@@ -403,7 +403,7 @@ namespace channel {
 		const std::vector<channel::node*>& index_nodes = node.get_array_element_index_nodes();
 
 		// evaluate the array base expression
-		acceptation_result array_ptr_result = node.get_array_base_node()->accept(
+		expected_value array_ptr_result = node.get_array_base_node()->accept(
 			*this, 
 			{}
 		);
@@ -417,7 +417,7 @@ namespace channel {
 		llvm::Value* current_ptr = array_ptr_result.value()->get_value();
 
 		for (u64 i = 0; i < index_nodes.size(); ++i) {
-			acceptation_result index_value_result = index_nodes[i]->accept(
+			expected_value index_value_result = index_nodes[i]->accept(
 				*this, 
 				{}
 			);
@@ -430,7 +430,7 @@ namespace channel {
 			llvm::Value* index_value_cast = cast_value(
 				index_value_result.value(),
 				type(type::base::u64, 0),
-				node.get_declared_position()
+				node.get_declared_location()
 			);
 
 			// load the actual pointer value
@@ -468,7 +468,7 @@ namespace channel {
 		return element_value;
 	}
 
-	acceptation_result basic_code_generator::visit_array_assignment_node(
+	expected_value basic_code_generator::visit_array_assignment_node(
 		array_assignment_node& node,
 		const code_generation_context& context
 	) {
@@ -476,7 +476,7 @@ namespace channel {
 		const std::vector<channel::node*>& index_nodes = node.get_array_element_index_nodes();
 
 		// evaluate the array base expression
-		acceptation_result array_ptr_result = node.get_array_base_node()->accept(
+		expected_value array_ptr_result = node.get_array_base_node()->accept(
 			*this,
 			{}
 		);
@@ -490,7 +490,7 @@ namespace channel {
 		llvm::Value* current_ptr = array_ptr_result.value()->get_value();
 
 		for (u64 i = 0; i < index_nodes.size(); ++i) {
-			acceptation_result index_value_result = index_nodes[i]->accept(
+			expected_value index_value_result = index_nodes[i]->accept(
 				*this, 
 				{}
 			);
@@ -503,7 +503,7 @@ namespace channel {
 			llvm::Value* index_value_cast = cast_value(
 				index_value_result.value(),
 				type(type::base::u64, 0), 
-				node.get_declared_position()
+				node.get_declared_location()
 			);
 
 			// load the actual pointer value
@@ -527,7 +527,7 @@ namespace channel {
 		}
 
 		// evaluate the right-hand side expression
-		acceptation_result expression_value_result = node.get_expression_node()->accept(
+		expected_value expression_value_result = node.get_expression_node()->accept(
 			*this, 
 			code_generation_context(current_type.get_element_type())
 		);
@@ -543,7 +543,7 @@ namespace channel {
 		llvm::Value* expression_llvm_value_cast = cast_value(
 			expression_value_result.value(), 
 			final_element_type, 
-			node.get_declared_position()
+			node.get_declared_location()
 		);
 
 		value_ptr expression_value = std::make_shared<value>(
@@ -562,7 +562,7 @@ namespace channel {
 		return expression_value;
 	}
 
-	acceptation_result basic_code_generator::visit_variable_node(
+	expected_value basic_code_generator::visit_variable_node(
 		variable_node& node, 
 		const code_generation_context& context
 	) {
@@ -572,7 +572,7 @@ namespace channel {
 		if (!get_named_value(var_value, node.get_variable_identifier())) {
 			return std::unexpected(
 				error::emit<4003>(
-					node.get_declared_position(),
+					std::move(node.get_declared_location()),
 					node.get_variable_identifier()
 				)
 			); // return on failure
@@ -583,7 +583,7 @@ namespace channel {
 		return var_value;
 	}
 
-	acceptation_result basic_code_generator::get_declaration_value(
+	expected_value basic_code_generator::get_declaration_value(
 		const declaration_node& node,
 		const code_generation_context& context
 	) {

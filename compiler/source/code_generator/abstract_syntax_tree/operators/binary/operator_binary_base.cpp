@@ -2,10 +2,10 @@
 
 namespace channel {
 	operator_binary_base::operator_binary_base(
-		const token_position& position,
+		const token_location& location,
 		const node_ptr& left_expression_node,
 		const node_ptr& right_expression_node
-	) : node(position),
+	) : node(location),
 	m_left_expression_node(left_expression_node),
 	m_right_expression_node(right_expression_node) {}
 

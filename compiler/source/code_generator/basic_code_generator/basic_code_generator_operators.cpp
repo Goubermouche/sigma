@@ -41,12 +41,12 @@
 namespace channel {
 	// unary
 	// arithmetic
-	acceptation_result basic_code_generator::visit_operator_post_decrement_node(
+	expected_value basic_code_generator::visit_operator_post_decrement_node(
 		operator_post_decrement_node& node,
 		const code_generation_context& context
 	) {
 		(void)context; // suppress C4100
-		acceptation_result expression_result = node.get_expression_node()->accept(
+		expected_value expression_result = node.get_expression_node()->accept(
 			*this, 
 			{}
 		);
@@ -59,7 +59,7 @@ namespace channel {
 		if (!expression_result.value()->get_type().is_numerical()) {
 			return std::unexpected(
 				error::emit<4100>(
-					node.get_declared_position(), 
+					std::move(node.get_declared_location()), 
 					expression_result.value()->get_type()
 				)
 			); // return on failure
@@ -98,12 +98,12 @@ namespace channel {
 		return expression_result;
 	}
 
-	acceptation_result basic_code_generator::visit_operator_post_increment_node(
+	expected_value basic_code_generator::visit_operator_post_increment_node(
 		operator_post_increment_node& node,
 		const code_generation_context& context
 	) {
 		(void)context; // suppress C4100
-		acceptation_result expression_result = node.get_expression_node()->accept(
+		expected_value expression_result = node.get_expression_node()->accept(
 			*this,
 			{}
 		);
@@ -116,7 +116,7 @@ namespace channel {
 		if (!expression_result.value()->get_type().is_numerical()) {
 			return std::unexpected(
 				error::emit<4101>(
-					node.get_declared_position(),
+					std::move(node.get_declared_location()),
 					expression_result.value()->get_type()
 				)
 			); // return on failure
@@ -153,13 +153,13 @@ namespace channel {
 		return expression_result;
 	}
 
-	acceptation_result basic_code_generator::visit_operator_pre_decrement_node(
+	expected_value basic_code_generator::visit_operator_pre_decrement_node(
 		operator_pre_decrement_node& node, 
 		const code_generation_context& context
 	) {
 		(void)context; // suppress C4100
 		// accept the expression
-		acceptation_result expression_result = node.get_expression_node()->accept(
+		expected_value expression_result = node.get_expression_node()->accept(
 			*this,
 			{}
 		);
@@ -172,7 +172,7 @@ namespace channel {
 		if (!expression_result.value()->get_type().is_numerical()) {
 			return std::unexpected(
 				error::emit<4102>(
-					node.get_declared_position(), 
+					std::move(node.get_declared_location()), 
 					expression_result.value()->get_type()
 				)
 			); // return on failure
@@ -215,13 +215,13 @@ namespace channel {
 		);
 	}
 
-	acceptation_result basic_code_generator::visit_operator_pre_increment_node(
+	expected_value basic_code_generator::visit_operator_pre_increment_node(
 		operator_pre_increment_node& node, 
 		const code_generation_context& context
 	) {
 		(void)context; // suppress C4100
 		// accept the expression
-		acceptation_result expression_result = node.get_expression_node()->accept(
+		expected_value expression_result = node.get_expression_node()->accept(
 			*this,
 			{}
 		);
@@ -234,7 +234,7 @@ namespace channel {
 		if (!expression_result.value()->get_type().is_numerical()) {
 			return std::unexpected(
 				error::emit<4103>(
-					node.get_declared_position(), 
+					std::move(node.get_declared_location()), 
 					expression_result.value()->get_type()
 				)
 			); // return on failure
@@ -278,14 +278,14 @@ namespace channel {
 	}
 
 	// bitwise
-	acceptation_result basic_code_generator::visit_operator_bitwise_not_node(
+	expected_value basic_code_generator::visit_operator_bitwise_not_node(
 		operator_bitwise_not_node& node,
 		const code_generation_context& context
 	) {
 		(void)context; // suppress C4100
 
 		// accept the operand
-		acceptation_result operand_result = node.get_expression_node()->accept(
+		expected_value operand_result = node.get_expression_node()->accept(
 			*this,
 			{}
 		);
@@ -298,7 +298,7 @@ namespace channel {
 		if (!operand_result.value()->get_type().is_integral()) {
 			return std::unexpected(
 				error::emit<4105>(
-					node.get_declared_position(),
+					std::move(node.get_declared_location()),
 					operand_result.value()->get_type()
 				)
 			); // return on failure
@@ -317,14 +317,14 @@ namespace channel {
 	}
 
 	// logical
-	acceptation_result basic_code_generator::visit_operator_not_node(
+	expected_value basic_code_generator::visit_operator_not_node(
 		operator_not_node& node, 
 		const code_generation_context& context
 	) {
 		(void)context; // suppress C4100
 
 		// accept the operand
-		acceptation_result operand_result = node.get_expression_node()->accept(
+		expected_value operand_result = node.get_expression_node()->accept(
 			*this,
 			{}
 		);
@@ -337,7 +337,7 @@ namespace channel {
 			operand_result.value()->get_type().get_base() != type::base::boolean) {
 			return std::unexpected(
 				error::emit<4104>(
-					node.get_declared_position(),
+					std::move(node.get_declared_location()),
 					operand_result.value()->get_type()
 				)
 			); // return on failure
@@ -361,7 +361,7 @@ namespace channel {
 
 	// binary
 	// arithmetic
-	acceptation_result basic_code_generator::visit_operator_addition_assignment_node(
+	expected_value basic_code_generator::visit_operator_addition_assignment_node(
 		operator_addition_assignment_node& node,
 		const code_generation_context& context
 	) {
@@ -399,7 +399,7 @@ namespace channel {
 		return assignment_value;
 	}
 
-	acceptation_result basic_code_generator::visit_operator_addition_node(
+	expected_value basic_code_generator::visit_operator_addition_node(
 		operator_addition_node& node,
 		const code_generation_context& context
 	) {
@@ -428,7 +428,7 @@ namespace channel {
 		);
 	}
 
-	acceptation_result basic_code_generator::visit_operator_subtraction_assignment_node(
+	expected_value basic_code_generator::visit_operator_subtraction_assignment_node(
 		operator_subtraction_assignment_node& node,
 		const code_generation_context& context
 	) {
@@ -466,7 +466,7 @@ namespace channel {
 		return assignment_value;
 	}
 
-	acceptation_result basic_code_generator::visit_operator_subtraction_node(
+	expected_value basic_code_generator::visit_operator_subtraction_node(
 		operator_subtraction_node& node,
 		const code_generation_context& context
 	) {
@@ -495,7 +495,7 @@ namespace channel {
 		);
 	}
 
-	acceptation_result basic_code_generator::visit_operator_multiplication_assignment_node(
+	expected_value basic_code_generator::visit_operator_multiplication_assignment_node(
 		operator_multiplication_assignment_node& node, 
 		const code_generation_context& context
 	) {
@@ -533,7 +533,7 @@ namespace channel {
 		return assignment_value;
 	}
 
-	acceptation_result basic_code_generator::visit_operator_multiplication_node(
+	expected_value basic_code_generator::visit_operator_multiplication_node(
 		operator_multiplication_node& node,
 		const code_generation_context& context
 	) {
@@ -562,7 +562,7 @@ namespace channel {
 		);
 	}
 
-	acceptation_result basic_code_generator::visit_operator_division_assignment_node(
+	expected_value basic_code_generator::visit_operator_division_assignment_node(
 		operator_division_assignment_node& node, 
 		const code_generation_context& context
 	) {
@@ -600,7 +600,7 @@ namespace channel {
 		return assignment_value;
 	}
 
-	acceptation_result basic_code_generator::visit_operator_division_node(
+	expected_value basic_code_generator::visit_operator_division_node(
 		operator_division_node& node, 
 		const code_generation_context& context
 	) {
@@ -629,7 +629,7 @@ namespace channel {
 		);
 	}
 
-	acceptation_result basic_code_generator::visit_operator_modulo_assignment_node(
+	expected_value basic_code_generator::visit_operator_modulo_assignment_node(
 		operator_modulo_assignment_node& node,
 		const code_generation_context& context
 	) {
@@ -667,7 +667,7 @@ namespace channel {
 		return assignment_value;
 	}
 
-	acceptation_result basic_code_generator::visit_operator_modulo_node(
+	expected_value basic_code_generator::visit_operator_modulo_node(
 		operator_modulo_node& node,
 		const code_generation_context& context
 	) {
@@ -696,14 +696,14 @@ namespace channel {
 		);
 	}
 
-	acceptation_result basic_code_generator::visit_operator_bitwise_and_node(
+	expected_value basic_code_generator::visit_operator_bitwise_and_node(
 		operator_bitwise_and_node& node, 
 		const code_generation_context& context
 	) {
 		(void)context; // suppress C4100
 
 		// accept the left operand
-		acceptation_result left_operand_result = node.get_left_expression_node()->accept(
+		expected_value left_operand_result = node.get_left_expression_node()->accept(
 			*this,
 			{}
 		);
@@ -713,7 +713,7 @@ namespace channel {
 		}
 
 		// accept the right operand
-		acceptation_result right_operand_result = node.get_right_expression_node()->accept(
+		expected_value right_operand_result = node.get_right_expression_node()->accept(
 			*this,
 			{}
 		);
@@ -727,7 +727,7 @@ namespace channel {
 			!right_operand_result.value()->get_type().is_integral()) {
 			return std::unexpected(
 				error::emit<4202>(
-					node.get_declared_position(),
+					std::move(node.get_declared_location()),
 					left_operand_result.value()->get_type(),
 					right_operand_result.value()->get_type()
 				)
@@ -747,14 +747,14 @@ namespace channel {
 		);
 	}
 
-	acceptation_result basic_code_generator::visit_operator_bitwise_or_node(
+	expected_value basic_code_generator::visit_operator_bitwise_or_node(
 		operator_bitwise_or_node& node,
 		const code_generation_context& context
 	) {
 		(void)context; // suppress C4100
 
 		// accept the left operand
-		acceptation_result left_operand_result = node.get_left_expression_node()->accept(
+		expected_value left_operand_result = node.get_left_expression_node()->accept(
 			*this,
 			{}
 		);
@@ -764,7 +764,7 @@ namespace channel {
 		}
 
 		// accept the right operand
-		acceptation_result right_operand_result = node.get_right_expression_node()->accept(
+		expected_value right_operand_result = node.get_right_expression_node()->accept(
 			*this,
 			{}
 		);
@@ -778,7 +778,7 @@ namespace channel {
 			!right_operand_result.value()->get_type().is_integral()) {
 			return std::unexpected(
 				error::emit<4203>(
-					node.get_declared_position(),
+					std::move(node.get_declared_location()),
 					left_operand_result.value()->get_type(),
 					right_operand_result.value()->get_type()
 				)
@@ -798,14 +798,14 @@ namespace channel {
 		);
 	}
 
-	acceptation_result basic_code_generator::visit_operator_bitwise_left_shift_node(
+	expected_value basic_code_generator::visit_operator_bitwise_left_shift_node(
 		operator_bitwise_left_shift_node& node, 
 		const code_generation_context& context
 	) {
 		(void)context; // suppress C4100
 
 		// accept the left operand
-		acceptation_result left_operand_result = node.get_left_expression_node()->accept(
+		expected_value left_operand_result = node.get_left_expression_node()->accept(
 			*this,
 			{}
 		);
@@ -815,7 +815,7 @@ namespace channel {
 		}
 
 		// accept the right operand
-		acceptation_result right_operand_result = node.get_right_expression_node()->accept(
+		expected_value right_operand_result = node.get_right_expression_node()->accept(
 			*this,
 			{}
 		);
@@ -829,7 +829,7 @@ namespace channel {
 			!right_operand_result.value()->get_type().is_integral()) {
 			return std::unexpected(
 				error::emit<4204>(
-					node.get_declared_position(),
+					std::move(node.get_declared_location()),
 					left_operand_result.value()->get_type(),
 					right_operand_result.value()->get_type()
 				)
@@ -849,14 +849,14 @@ namespace channel {
 		);
 	}
 
-	acceptation_result basic_code_generator::visit_operator_bitwise_right_shift_node(
+	expected_value basic_code_generator::visit_operator_bitwise_right_shift_node(
 		operator_bitwise_right_shift_node& node,
 		const code_generation_context& context
 	) {
 		(void)context; // suppress C4100
 
 		// accept the left operand
-		acceptation_result left_operand_result = node.get_left_expression_node()->accept(
+		expected_value left_operand_result = node.get_left_expression_node()->accept(
 			*this,
 			{}
 		);
@@ -866,7 +866,7 @@ namespace channel {
 		}
 
 		// accept the right operand
-		acceptation_result right_operand_result = node.get_right_expression_node()->accept(
+		expected_value right_operand_result = node.get_right_expression_node()->accept(
 			*this,
 			{}
 		);
@@ -880,7 +880,7 @@ namespace channel {
 			!right_operand_result.value()->get_type().is_integral()) {
 			return std::unexpected(
 				error::emit<4205>(
-					node.get_declared_position(),
+					std::move(node.get_declared_location()),
 					left_operand_result.value()->get_type(),
 					right_operand_result.value()->get_type()
 				)
@@ -900,14 +900,14 @@ namespace channel {
 		);
 	}
 
-	acceptation_result basic_code_generator::visit_operator_bitwise_xor_node(
+	expected_value basic_code_generator::visit_operator_bitwise_xor_node(
 		operator_bitwise_xor_node& node,
 		const code_generation_context& context
 	) {
 		(void)context; // suppress C4100
 
 		// accept the left operand
-		acceptation_result left_operand_result = node.get_left_expression_node()->accept(
+		expected_value left_operand_result = node.get_left_expression_node()->accept(
 			*this,
 			{}
 		);
@@ -917,7 +917,7 @@ namespace channel {
 		}
 
 		// accept the right operand
-		acceptation_result right_operand_result = node.get_right_expression_node()->accept(
+		expected_value right_operand_result = node.get_right_expression_node()->accept(
 			*this,
 			{}
 		);
@@ -931,7 +931,7 @@ namespace channel {
 			!right_operand_result.value()->get_type().is_integral()) {
 			return std::unexpected(
 				error::emit<4206>(
-					node.get_declared_position(),
+					std::move(node.get_declared_location()),
 					left_operand_result.value()->get_type(),
 					right_operand_result.value()->get_type()
 				)
@@ -952,13 +952,13 @@ namespace channel {
 	}
 
 	// logical
-	acceptation_result basic_code_generator::visit_operator_logical_conjunction_node(
+	expected_value basic_code_generator::visit_operator_logical_conjunction_node(
 		operator_conjunction_node& node,
 		const code_generation_context& context
 	) {
 		(void)context; // suppress C4100
 		// accept the left operand
-		acceptation_result left_operand_result = node.get_left_expression_node()->accept(
+		expected_value left_operand_result = node.get_left_expression_node()->accept(
 			*this,
 			{}
 		);
@@ -968,7 +968,7 @@ namespace channel {
 		}
 
 		// accept the right operand
-		acceptation_result right_operand_result = node.get_right_expression_node()->accept(
+		expected_value right_operand_result = node.get_right_expression_node()->accept(
 			*this,
 			{}
 		);
@@ -982,7 +982,7 @@ namespace channel {
 			right_operand_result.value()->get_type().get_base() != type::base::boolean) {
 			return std::unexpected(
 				error::emit<4200>(
-					node.get_declared_position(),
+					std::move(node.get_declared_location()),
 					left_operand_result.value()->get_type(),
 					right_operand_result.value()->get_type()
 				)
@@ -1003,13 +1003,13 @@ namespace channel {
 		);
 	}
 
-	acceptation_result basic_code_generator::visit_operator_logical_disjunction_node(
+	expected_value basic_code_generator::visit_operator_logical_disjunction_node(
 		operator_disjunction_node& node, 
 		const code_generation_context& context
 	) {
 		(void)context; // suppress C4100
 		// accept the left operand
-		acceptation_result left_operand_result = node.get_left_expression_node()->accept(
+		expected_value left_operand_result = node.get_left_expression_node()->accept(
 			*this, 
 			{}
 		);
@@ -1019,7 +1019,7 @@ namespace channel {
 		}
 
 		// accept the right operand
-		acceptation_result right_operand_result = node.get_right_expression_node()->accept(
+		expected_value right_operand_result = node.get_right_expression_node()->accept(
 			*this,
 			{}
 		);
@@ -1032,7 +1032,8 @@ namespace channel {
 		if (left_operand_result.value()->get_type().get_base() != type::base::boolean ||
 			right_operand_result.value()->get_type().get_base() != type::base::boolean) {
 			return std::unexpected(
-				error::emit<4201>(node.get_declared_position(),
+				error::emit<4201>(
+					std::move(node.get_declared_location()),
 					left_operand_result.value()->get_type(), 
 					right_operand_result.value()->get_type()
 				)
@@ -1052,13 +1053,13 @@ namespace channel {
 		);
 	}
 
-	acceptation_result basic_code_generator::visit_operator_greater_than_node(
+	expected_value basic_code_generator::visit_operator_greater_than_node(
 		operator_greater_than_node& node, 
 		const code_generation_context& context
 	) {
 		(void)context; // suppress C4100
 		// accept the left operand
-		acceptation_result left_operand_result = node.get_left_expression_node()->accept(
+		expected_value left_operand_result = node.get_left_expression_node()->accept(
 			*this,
 			{}
 		);
@@ -1068,7 +1069,7 @@ namespace channel {
 		}
 
 		// accept the right operand
-		acceptation_result right_operand_result = node.get_right_expression_node()->accept(
+		expected_value right_operand_result = node.get_right_expression_node()->accept(
 			*this,
 			{}
 		);
@@ -1086,13 +1087,13 @@ namespace channel {
 		llvm::Value* left_value_upcasted = cast_value(
 			left_operand_result.value(),
 			highest_precision,
-			node.get_declared_position()
+			node.get_declared_location()
 		);
 
 		llvm::Value* right_value_upcasted = cast_value(
 			right_operand_result.value(), 
 			highest_precision, 
-			node.get_declared_position()
+			node.get_declared_location()
 		);
 
 		// create a greater than operation based on the highest_precision type
@@ -1125,13 +1126,13 @@ namespace channel {
 		);
 	}
 
-	acceptation_result basic_code_generator::visit_operator_greater_than_equal_to_node(
+	expected_value basic_code_generator::visit_operator_greater_than_equal_to_node(
 		operator_greater_than_equal_to_node& node, 
 		const code_generation_context& context
 	) {
 		(void)context; // suppress C4100
 		// accept the left operand
-		acceptation_result left_operand_result = node.get_left_expression_node()->accept(
+		expected_value left_operand_result = node.get_left_expression_node()->accept(
 			*this,
 			{}
 		);
@@ -1141,7 +1142,7 @@ namespace channel {
 		}
 
 		// accept the right operand
-		acceptation_result right_operand_result = node.get_right_expression_node()->accept(
+		expected_value right_operand_result = node.get_right_expression_node()->accept(
 			*this,
 			{}
 		);
@@ -1159,13 +1160,13 @@ namespace channel {
 		llvm::Value* left_value_upcasted = cast_value(
 			left_operand_result.value(),
 			highest_precision,
-			node.get_declared_position()
+			node.get_declared_location()
 		);
 
 		llvm::Value* right_value_upcasted = cast_value(
 			right_operand_result.value(), 
 			highest_precision,
-			node.get_declared_position()
+			node.get_declared_location()
 		);
 
 		// create a greater than or equal to operation based on the highest_precision type
@@ -1198,13 +1199,13 @@ namespace channel {
 		);
 	}
 
-	acceptation_result basic_code_generator::visit_operator_less_than_node(
+	expected_value basic_code_generator::visit_operator_less_than_node(
 		operator_less_than_node& node, 
 		const code_generation_context& context
 	) {
 		(void)context; // suppress C4100
 		// accept the left operand
-		acceptation_result left_operand_result = node.get_left_expression_node()->accept(
+		expected_value left_operand_result = node.get_left_expression_node()->accept(
 			*this, 
 			{}
 		);
@@ -1214,7 +1215,7 @@ namespace channel {
 		}
 
 		// accept the right operand
-		acceptation_result right_operand_result = node.get_right_expression_node()->accept(
+		expected_value right_operand_result = node.get_right_expression_node()->accept(
 			*this,
 			{}
 		);
@@ -1232,13 +1233,13 @@ namespace channel {
 		llvm::Value* left_value_upcasted = cast_value(
 			left_operand_result.value(),
 			highest_precision,
-			node.get_declared_position()
+			node.get_declared_location()
 		);
 
 		llvm::Value* right_value_upcasted = cast_value(
 			right_operand_result.value(), 
 			highest_precision,
-			node.get_declared_position()
+			node.get_declared_location()
 		);
 
 		// create a less than operation based on the highest_precision type
@@ -1271,13 +1272,13 @@ namespace channel {
 		);
 	}
 
-	acceptation_result basic_code_generator::visit_operator_less_than_equal_to_node(
+	expected_value basic_code_generator::visit_operator_less_than_equal_to_node(
 		operator_less_than_equal_to_node& node,
 		const code_generation_context& context
 	) {
 		(void)context; // suppress C4100
 		// accept the left operand
-		acceptation_result left_operand_result = node.get_left_expression_node()->accept(
+		expected_value left_operand_result = node.get_left_expression_node()->accept(
 			*this,
 			{}
 		);
@@ -1287,7 +1288,7 @@ namespace channel {
 		}
 
 		// accept the right operand
-		acceptation_result right_operand_result = node.get_right_expression_node()->accept(
+		expected_value right_operand_result = node.get_right_expression_node()->accept(
 			*this,
 			{}
 		);
@@ -1305,13 +1306,13 @@ namespace channel {
 		llvm::Value* left_value_upcasted = cast_value(
 			left_operand_result.value(),
 			highest_precision,
-			node.get_declared_position()
+			node.get_declared_location()
 		);
 
 		llvm::Value* right_value_upcasted = cast_value(
 			right_operand_result.value(), 
 			highest_precision, 
-			node.get_declared_position()
+			node.get_declared_location()
 		);
 
 		// create a less than or equal to operation based on the highest_precision type
@@ -1344,13 +1345,13 @@ namespace channel {
 		);
 	}
 
-	acceptation_result basic_code_generator::visit_operator_equals_node(
+	expected_value basic_code_generator::visit_operator_equals_node(
 		operator_equals_node& node, 
 		const code_generation_context& context
 	) {
 		(void)context; // suppress C4100
 		// accept the left operand
-		acceptation_result left_operand_result = node.get_left_expression_node()->accept(
+		expected_value left_operand_result = node.get_left_expression_node()->accept(
 			*this, 
 			{}
 		);
@@ -1360,7 +1361,7 @@ namespace channel {
 		}
 
 		// accept the right operand
-		acceptation_result right_operand_result = node.get_right_expression_node()->accept(
+		expected_value right_operand_result = node.get_right_expression_node()->accept(
 			*this,
 			{}
 		);
@@ -1378,13 +1379,13 @@ namespace channel {
 		llvm::Value* left_value_upcasted = cast_value(
 			left_operand_result.value(),
 			highest_precision,
-			node.get_declared_position()
+			node.get_declared_location()
 		);
 
 		llvm::Value* right_value_upcasted = cast_value(
 			right_operand_result.value(),
 			highest_precision,
-			node.get_declared_position()
+			node.get_declared_location()
 		);
 
 		// create an equals operation based on the highest_precision type
@@ -1409,13 +1410,13 @@ namespace channel {
 		);
 	}
 
-	acceptation_result basic_code_generator::visit_operator_not_equals_node(
+	expected_value basic_code_generator::visit_operator_not_equals_node(
 		operator_not_equals_node& node, 
 		const code_generation_context& context
 	) {
 		(void)context; // suppress C4100
 		// accept the left operand
-		acceptation_result left_operand_result = node.get_left_expression_node()->accept(
+		expected_value left_operand_result = node.get_left_expression_node()->accept(
 			*this, 
 			{}
 		);
@@ -1425,7 +1426,7 @@ namespace channel {
 		}
 
 		// accept the right operand
-		acceptation_result right_operand_result = node.get_right_expression_node()->accept(
+		expected_value right_operand_result = node.get_right_expression_node()->accept(
 			*this, 
 			{}
 		);
@@ -1443,13 +1444,13 @@ namespace channel {
 		llvm::Value* left_value_upcasted = cast_value(
 			left_operand_result.value(), 
 			highest_precision,
-			node.get_declared_position()
+			node.get_declared_location()
 		);
 
 		llvm::Value* right_value_upcasted = cast_value(
 			right_operand_result.value(), 
 			highest_precision, 
-			node.get_declared_position()
+			node.get_declared_location()
 		);
 
 		// create a not equals operation based on the highest_precision type
@@ -1477,13 +1478,13 @@ namespace channel {
 	std::expected<std::tuple<
 		llvm::Value*,
 		type,
-		acceptation_result
-	>, std::shared_ptr<error_message>> basic_code_generator::create_add_operation(
+		expected_value
+	>, error_msg> basic_code_generator::create_add_operation(
 		node* left_operand,
 		node* right_operand
 	) {
 		// accept the left operand (variable to be assigned to)
-		acceptation_result left_operand_result = left_operand->accept(
+		expected_value left_operand_result = left_operand->accept(
 			*this, 
 			{}
 		);
@@ -1495,7 +1496,7 @@ namespace channel {
 		}
 
 		// accept the right operand
-		acceptation_result right_operand_result = right_operand->accept(
+		expected_value right_operand_result = right_operand->accept(
 			*this, 
 			{}
 		);
@@ -1515,13 +1516,13 @@ namespace channel {
 		llvm::Value* left_value_upcasted = cast_value(
 			left_operand_result.value(), 
 			highest_precision, 
-			left_operand->get_declared_position()
+			left_operand->get_declared_location()
 		);
 
 		llvm::Value* right_value_upcasted = cast_value(
 			right_operand_result.value(),
 			highest_precision, 
-			right_operand->get_declared_position()
+			right_operand->get_declared_location()
 		);
 
 		// both types are floating point
@@ -1566,13 +1567,13 @@ namespace channel {
 	std::expected<std::tuple<
 		llvm::Value*,
 		type,
-		acceptation_result
-	>, std::shared_ptr<error_message>> basic_code_generator::create_sub_operation(
+		expected_value
+	>, error_msg> basic_code_generator::create_sub_operation(
 		node* left_operand, 
 		node* right_operand
 	) {
 		// accept the left operand (variable to be assigned to)
-		acceptation_result left_operand_result = left_operand->accept(
+		expected_value left_operand_result = left_operand->accept(
 			*this,
 			{}
 		);
@@ -1584,7 +1585,7 @@ namespace channel {
 		}
 
 		// accept the right operand
-		acceptation_result right_operand_result = right_operand->accept(
+		expected_value right_operand_result = right_operand->accept(
 			*this, 
 			{}
 		);
@@ -1604,13 +1605,13 @@ namespace channel {
 		llvm::Value* left_value_upcasted = cast_value(
 			left_operand_result.value(), 
 			highest_precision, 
-			left_operand->get_declared_position()
+			left_operand->get_declared_location()
 		);
 
 		llvm::Value* right_value_upcasted = cast_value(
 			right_operand_result.value(),
 			highest_precision, 
-			right_operand->get_declared_position()
+			right_operand->get_declared_location()
 		);
 
 		// both types are floating point
@@ -1655,13 +1656,13 @@ namespace channel {
 	std::expected<std::tuple<
 		llvm::Value*,
 		type,
-		acceptation_result
-	>, std::shared_ptr<error_message>> basic_code_generator::create_mul_operation(
+		expected_value
+	>, error_msg> basic_code_generator::create_mul_operation(
 		node* left_operand,
 		node* right_operand
 	) {
 		// accept the left operand (variable to be assigned to)
-		acceptation_result left_operand_result = left_operand->accept(
+		expected_value left_operand_result = left_operand->accept(
 			*this, 
 			{}
 		);
@@ -1673,7 +1674,7 @@ namespace channel {
 		}
 
 		// accept the right operand
-		acceptation_result right_operand_result = right_operand->accept(
+		expected_value right_operand_result = right_operand->accept(
 			*this,
 			{}
 		);
@@ -1693,13 +1694,13 @@ namespace channel {
 		llvm::Value* left_value_upcasted = cast_value(
 			left_operand_result.value(), 
 			highest_precision,
-			left_operand->get_declared_position()
+			left_operand->get_declared_location()
 		);
 
 		llvm::Value* right_value_upcasted = cast_value(
 			right_operand_result.value(), 
 			highest_precision,
-			right_operand->get_declared_position()
+			right_operand->get_declared_location()
 		);
 
 		// both types are floating point
@@ -1744,13 +1745,13 @@ namespace channel {
 	std::expected<std::tuple<
 		llvm::Value*,
 		type,
-		acceptation_result
-	>, std::shared_ptr<error_message>> basic_code_generator::create_div_operation(
+		expected_value
+	>, error_msg> basic_code_generator::create_div_operation(
 		node* left_operand,
 		node* right_operand
 	) {
 		// accept the left operand (variable to be assigned to)
-		acceptation_result left_operand_result = left_operand->accept(
+		expected_value left_operand_result = left_operand->accept(
 			*this,
 			{}
 		);
@@ -1762,7 +1763,7 @@ namespace channel {
 		}
 
 		// accept the right operand
-		acceptation_result right_operand_result = right_operand->accept(
+		expected_value right_operand_result = right_operand->accept(
 			*this, 
 			{}
 		);
@@ -1782,13 +1783,13 @@ namespace channel {
 		llvm::Value* left_value_upcasted = cast_value(
 			left_operand_result.value(),
 			highest_precision,
-			left_operand->get_declared_position()
+			left_operand->get_declared_location()
 		);
 
 		llvm::Value* right_value_upcasted = cast_value(
 			right_operand_result.value(),
 			highest_precision,
-			right_operand->get_declared_position()
+			right_operand->get_declared_location()
 		);
 
 		// both types are floating point
@@ -1833,13 +1834,13 @@ namespace channel {
 	std::expected<std::tuple<
 		llvm::Value*,
 		type,
-		acceptation_result
-	>, std::shared_ptr<error_message>> basic_code_generator::create_mod_operation(
+		expected_value
+	>, error_msg> basic_code_generator::create_mod_operation(
 		node* left_operand, 
 		node* right_operand
 	) {
 		// accept the left operand (variable to be assigned to)
-		acceptation_result left_operand_result = left_operand->accept(
+		expected_value left_operand_result = left_operand->accept(
 			*this,
 			{}
 		);
@@ -1851,7 +1852,7 @@ namespace channel {
 		}
 
 		// accept the right operand
-		acceptation_result right_operand_result = right_operand->accept(
+		expected_value right_operand_result = right_operand->accept(
 			*this,
 			{}
 		);
@@ -1871,13 +1872,13 @@ namespace channel {
 		llvm::Value* left_value_upcasted = cast_value(
 			left_operand_result.value(), 
 			highest_precision,
-			left_operand->get_declared_position()
+			left_operand->get_declared_location()
 		);
 
 		llvm::Value* right_value_upcasted = cast_value(
 			right_operand_result.value(),
 			highest_precision, 
-			right_operand->get_declared_position()
+			right_operand->get_declared_location()
 		);
 
 		// both types are floating point

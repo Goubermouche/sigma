@@ -2,18 +2,18 @@
 
 namespace channel {
 	for_node::for_node(
-		const token_position& position,
+		const token_location& location,
 		const node_ptr& loop_initialization_node,
 		const node_ptr& loop_condition_node,
 		const std::vector<node_ptr>& post_iteration_nodes,
 		const std::vector<node_ptr>& statement_nodes
-	) : node(position),
+	) : node(location),
 	m_loop_initialization_node(loop_initialization_node),
 	m_loop_condition_node(loop_condition_node),
 	m_post_iteration_nodes(post_iteration_nodes),
 	m_loop_body_nodes(statement_nodes) {}
 
-	acceptation_result for_node::accept(code_generator& visitor, const code_generation_context& context) {
+	expected_value for_node::accept(code_generator& visitor, const code_generation_context& context) {
 		return visitor.visit_for_node(*this, context);
 	}
 

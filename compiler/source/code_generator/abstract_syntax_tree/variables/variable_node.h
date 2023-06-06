@@ -8,11 +8,11 @@ namespace channel {
 	class variable_node : public node {
 	public:
 		variable_node(
-			const token_position& position,
+			const token_location& location,
 			const std::string& variable_identifier
 		);
 
-		acceptation_result accept(
+		expected_value accept(
 			code_generator& visitor,
 			const code_generation_context& context
 		) override;

@@ -2,14 +2,14 @@
 
 namespace channel {
 	numerical_literal_node::numerical_literal_node(
-		const token_position& position,
+		const token_location& location,
 		const std::string& value,
 		type preferred_type
-	) : node(position),
+	) : node(location),
 	m_value(value),
 	m_preferred_type(preferred_type) {}
 
-	acceptation_result numerical_literal_node::accept(code_generator& visitor, const code_generation_context& context) {
+	expected_value numerical_literal_node::accept(code_generator& visitor, const code_generation_context& context) {
 		return visitor.visit_numerical_literal_node(*this, context);
 	}
 

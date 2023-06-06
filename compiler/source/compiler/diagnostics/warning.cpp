@@ -1,8 +1,10 @@
 #include "warning.h"
 
 namespace channel {
-	warning_message::warning_message(std::string message, u64 code)
-		: diagnostic_message(message, code) {}
+	warning_message::warning_message(
+		std::string message,
+		u64 code
+	) : diagnostic_message(std::move(message), code) {}
 
 	void warning_message::print() const {
 		console::out
@@ -15,8 +17,12 @@ namespace channel {
 			<< color::white;
 	}
 
-	warning_message_position::warning_message_position(std::string message, u64 code, token_position position)
-		: warning_message(message, code), m_position(position) {}
+	warning_message_position::warning_message_position(
+		std::string message,
+		u64 code,
+		const token_location& location
+	) : warning_message(std::move(message), code),
+	m_position(location) {}
 
 	void warning_message_position::print() const {
 		console::out

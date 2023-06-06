@@ -8,13 +8,13 @@ namespace channel {
 	class array_assignment_node : public node {
 	public:
 		array_assignment_node(
-			const token_position& position,
+			const token_location& location,
 			const node_ptr& array_base,
 			const std::vector<node_ptr>& index_nodes,
 			const node_ptr& expression_node
 		);
 
-		acceptation_result accept(
+		expected_value accept(
 			code_generator& visitor,
 			const code_generation_context& context
 		) override;

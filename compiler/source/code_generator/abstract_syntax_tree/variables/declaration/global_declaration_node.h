@@ -8,13 +8,13 @@ namespace channel {
 	class global_declaration_node : public declaration_node {
 	public:
 		global_declaration_node(
-			const token_position& position,
+			const token_location& location,
 			const type& declaration_type,
 			const std::string& declaration_identifier, 
 			const node_ptr& expression_node = nullptr
 		);
 
-		acceptation_result accept(
+		expected_value accept(
 			code_generator& visitor,
 			const code_generation_context& context
 		) override;

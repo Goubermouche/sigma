@@ -7,9 +7,9 @@ namespace channel {
 	 */
 	class break_node : public node {
 	public:
-		break_node(const token_position& position);
+		break_node(const token_location& location);
 
-		acceptation_result accept(
+		expected_value accept(
 			code_generator& visitor,
 			const code_generation_context& context
 		) override;

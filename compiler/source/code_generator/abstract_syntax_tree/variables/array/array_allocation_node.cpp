@@ -2,14 +2,14 @@
 
 namespace channel {
 	array_allocation_node::array_allocation_node(
-		const token_position& position,
+		const token_location& location,
 		const type& array_element_type, 
 		const node_ptr& array_element_count_node
-	) : node(position),
+	) : node(location),
 	m_array_element_type(array_element_type),
 	m_array_element_count(array_element_count_node) {}
 
-	acceptation_result array_allocation_node::accept(code_generator& visitor, const code_generation_context& context) {
+	expected_value array_allocation_node::accept(code_generator& visitor, const code_generation_context& context) {
 		return visitor.visit_allocation_node(*this, context);
 	}
 

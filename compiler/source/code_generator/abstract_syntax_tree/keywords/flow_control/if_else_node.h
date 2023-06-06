@@ -8,12 +8,12 @@ namespace channel {
 	class if_else_node : public node {
 	public:
 		if_else_node(
-			const token_position& position,
+			const token_location& location,
 			const std::vector<node_ptr>& condition_nodes,
 			const std::vector<std::vector<node_ptr>>& branch_nodes
 		);
 
-		acceptation_result accept(
+		expected_value accept(
 			code_generator& visitor,
 			const code_generation_context& context
 		) override;

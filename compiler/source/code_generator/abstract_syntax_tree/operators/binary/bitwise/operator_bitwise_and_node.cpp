@@ -2,16 +2,16 @@
 
 namespace channel {
 	operator_bitwise_and_node::operator_bitwise_and_node(
-		const token_position& position,
+		const token_location& location,
 		const node_ptr& left_expression_node,
 		const node_ptr& right_expression_node
 	) : operator_binary_base(
-		position,
+		location,
 		left_expression_node,
 		right_expression_node
 	) {}
 
-	acceptation_result operator_bitwise_and_node::accept(code_generator& visitor, const code_generation_context& context) {
+	expected_value operator_bitwise_and_node::accept(code_generator& visitor, const code_generation_context& context) {
 		return visitor.visit_operator_bitwise_and_node(*this, context);
 	}
 

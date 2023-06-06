@@ -8,12 +8,12 @@ namespace channel {
 	class operator_less_than_equal_to_node : public operator_binary_base {
 	public:
 		operator_less_than_equal_to_node(
-			const token_position& position,
+			const token_location& location,
 			const node_ptr& left_expression_node,
 			const node_ptr& right_expression_node
 		);
 
-		acceptation_result accept(
+		expected_value accept(
 			code_generator& visitor,
 			const code_generation_context& context
 		) override;

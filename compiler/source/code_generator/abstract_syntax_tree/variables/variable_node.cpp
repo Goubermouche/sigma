@@ -2,12 +2,12 @@
 
 namespace channel {
 	variable_node::variable_node(
-		const token_position& position,
+		const token_location& location,
 		const std::string& variable_identifier
-	) : node(position),
+	) : node(location),
 	m_variable_identifier(variable_identifier) {}
 
-	acceptation_result variable_node::accept(code_generator& visitor, const code_generation_context& context) {
+	expected_value variable_node::accept(code_generator& visitor, const code_generation_context& context) {
 		return visitor.visit_variable_node(*this, context);
 	}
 

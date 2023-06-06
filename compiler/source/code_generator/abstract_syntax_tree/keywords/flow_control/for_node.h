@@ -8,14 +8,14 @@ namespace channel {
 	class for_node : public node {
 	public:
 		for_node(
-			const token_position& position,
+			const token_location& location,
 			const node_ptr& loop_initialization_node,
 			const node_ptr& loop_condition_node,
 			const std::vector<node_ptr>& post_iteration_nodes,
 			const std::vector<node_ptr>& statement_nodes
 		);
 
-		acceptation_result accept(
+		expected_value accept(
 			code_generator& visitor,
 			const code_generation_context& context
 		) override;

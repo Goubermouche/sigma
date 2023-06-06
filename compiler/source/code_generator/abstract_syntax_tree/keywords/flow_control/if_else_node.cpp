@@ -2,14 +2,14 @@
 
 namespace channel {
 	if_else_node::if_else_node(
-		const token_position& position,
+		const token_location& location,
 		const std::vector<node_ptr>& condition_nodes,
 		const std::vector<std::vector<node_ptr>>& branch_nodes
-	) : node(position),
+	) : node(location),
 	m_condition_nodes(condition_nodes),
 	m_branch_nodes(branch_nodes) {}
 
-	acceptation_result if_else_node::accept(code_generator& visitor, const code_generation_context& context) {
+	expected_value if_else_node::accept(code_generator& visitor, const code_generation_context& context) {
 		return visitor.visit_if_else_node(*this, context);
 	}
 

@@ -2,12 +2,12 @@
 
 namespace channel {
 	char_node::char_node(
-		const token_position& position,
+		const token_location& location,
 		char value
-	) : node(position),
+	) : node(location),
 	m_value(value)	{}
 
-	acceptation_result char_node::accept(code_generator& visitor, const code_generation_context& context)	{
+	expected_value char_node::accept(code_generator& visitor, const code_generation_context& context)	{
 		return visitor.visit_keyword_char_node(*this, context);
 	}
 

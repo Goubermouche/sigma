@@ -111,9 +111,9 @@ namespace channel {
 		unknown
 	};
 
-	struct token_position {
-		token_position() = default;
-		token_position(const std::string& file, u64 line_number, u64 character_number)
+	struct token_location {
+		token_location() = default;
+		token_location(const std::string& file, u64 line_number, u64 character_number)
 			: m_file(file), m_line_number(line_number), m_character_number(character_number) {}
 
 		const std::string& get_file() const {

@@ -8,12 +8,12 @@ namespace channel {
 	class numerical_literal_node : public node {
 	public:
 		numerical_literal_node(
-			const token_position& position,
+			const token_location& location,
 			const std::string& value,
 			type preferred_type
 		);
 
-		acceptation_result accept(
+		expected_value accept(
 			code_generator& visitor,
 			const code_generation_context& context
 		) override;

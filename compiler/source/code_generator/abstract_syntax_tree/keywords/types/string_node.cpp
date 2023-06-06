@@ -2,12 +2,12 @@
 
 namespace channel {
 	string_node::string_node(
-		const token_position& position, 
+		const token_location& location, 
 		const std::string& value
-	) : node(position),
+	) : node(location),
 	m_value(value) {}
 
-	acceptation_result string_node::accept(code_generator& visitor, const code_generation_context& context) {
+	expected_value string_node::accept(code_generator& visitor, const code_generation_context& context) {
 		return visitor.visit_keyword_string_node(*this, context);
 	}
 

@@ -6,7 +6,7 @@
 #include "code_generator/abstract_syntax_tree/keywords/types/numerical_literal_node.h"
 
 namespace channel {
-	acceptation_result basic_code_generator::visit_numerical_literal_node(
+	expected_value basic_code_generator::visit_numerical_literal_node(
 		numerical_literal_node& node,
 		const code_generation_context& context
 	) {
@@ -16,7 +16,7 @@ namespace channel {
 		if (literal_type.get_pointer_level() > 0) {
 			return std::unexpected(
 				error::emit<4014>(
-					node.get_declared_position()
+					std::move(node.get_declared_location())
 				)
 			); // return on failure
 		}
@@ -129,14 +129,14 @@ namespace channel {
 		default:
 			return std::unexpected(
 				error::emit<4015>(
-					node.get_declared_position(), 
+					std::move(node.get_declared_location()), 
 					literal_type
 				)
 			); // return on failure
 		}
 	}
 
-	acceptation_result basic_code_generator::visit_keyword_string_node(
+	expected_value basic_code_generator::visit_keyword_string_node(
 		string_node& node,
 		const code_generation_context& context
 	) {
@@ -178,7 +178,7 @@ namespace channel {
 		);
 	}
 
-	acceptation_result basic_code_generator::visit_keyword_char_node(
+	expected_value basic_code_generator::visit_keyword_char_node(
 		char_node& node,
 		const code_generation_context& context
 	) {
@@ -186,7 +186,7 @@ namespace channel {
 		return create_character(node.get_value());
 	}
 
-	acceptation_result basic_code_generator::visit_keyword_bool_node(
+	expected_value basic_code_generator::visit_keyword_bool_node(
 		bool_node& node, 
 		const code_generation_context& context
 	) {

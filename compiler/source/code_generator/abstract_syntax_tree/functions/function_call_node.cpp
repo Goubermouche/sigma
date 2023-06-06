@@ -2,14 +2,14 @@
 
 namespace channel {
 	function_call_node::function_call_node(
-		const token_position& position,
+		const token_location& location,
 		const std::string& function_identifier,
 		const std::vector<node_ptr>& function_arguments
-	) : node(position),
+	) : node(location),
 	m_function_name(function_identifier),
 	m_function_arguments(function_arguments) {}
 
-	acceptation_result function_call_node::accept(code_generator& visitor, const code_generation_context& context) {
+	expected_value function_call_node::accept(code_generator& visitor, const code_generation_context& context) {
 		return visitor.visit_function_call_node(*this, context);
 	}
 

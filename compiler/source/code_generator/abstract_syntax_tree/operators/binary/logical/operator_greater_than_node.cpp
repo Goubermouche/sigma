@@ -2,16 +2,16 @@
 
 namespace channel {
 	operator_greater_than_node::operator_greater_than_node(
-		const token_position& position,
+		const token_location& location,
 		const node_ptr& left_expression_node,
 		const node_ptr& right_expression_node
 	) : operator_binary_base(
-		position,
+		location,
 		left_expression_node,
 		right_expression_node
 	) {}
 
-	acceptation_result operator_greater_than_node::accept(code_generator& visitor, const code_generation_context& context) {
+	expected_value operator_greater_than_node::accept(code_generator& visitor, const code_generation_context& context) {
 		return visitor.visit_operator_greater_than_node(*this, context);
 	}
 

@@ -2,11 +2,11 @@
 #include "code_generator/code_generator.h"
 
 namespace channel {
-	node::node(const token_position& position)
-		: m_position(position) {}
+	node::node(const token_location& location)
+		: m_location(location) {}
 
-	const token_position& node::get_declared_position() const {
-		return m_position;
+	const token_location& node::get_declared_location() const {
+		return m_location;
 	}
 
 	void node::print_node_name(

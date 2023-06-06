@@ -8,12 +8,12 @@ namespace channel {
 	class array_allocation_node : public node {
 	public:
 		array_allocation_node(
-			const token_position& position,
+			const token_location& location,
 			const type& array_element_type,
 			const node_ptr& array_element_count_node
 		);
 
-		acceptation_result accept(
+		expected_value accept(
 			code_generator& visitor,
 			const code_generation_context& context
 		) override;

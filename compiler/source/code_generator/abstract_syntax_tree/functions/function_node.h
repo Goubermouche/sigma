@@ -9,7 +9,7 @@ namespace channel {
 	class function_node : public node {
 	public:
 		function_node(
-			const token_position& position,
+			const token_location& location,
 			const type& function_return_type,
 			bool is_var_arg,
 			const std::string& function_identifier,
@@ -17,7 +17,7 @@ namespace channel {
 			const std::vector<node_ptr>& function_statements
 		);
 
-		acceptation_result accept(
+		expected_value accept(
 			code_generator& visitor,
 			const code_generation_context& context
 		) override;

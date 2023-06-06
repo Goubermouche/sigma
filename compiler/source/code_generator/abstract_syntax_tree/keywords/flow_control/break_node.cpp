@@ -1,10 +1,10 @@
 #include "break_node.h"
 
 namespace channel {
-	break_node::break_node(const token_position& position)
-		: node(position) {}
+	break_node::break_node(const token_location& location)
+		: node(location) {}
 
-	acceptation_result break_node::accept(code_generator& visitor, const code_generation_context& context) {
+	expected_value break_node::accept(code_generator& visitor, const code_generation_context& context) {
 		return visitor.visit_break_node(*this, context);
 	}
 

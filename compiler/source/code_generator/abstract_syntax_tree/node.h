@@ -16,7 +16,7 @@ namespace channel {
 	class node;
 
 	using node_ptr = node*;
-	using acceptation_result = std::expected<value_ptr, std::shared_ptr<error_message>>;
+	using expected_value = std::expected<value_ptr, error_msg>;
 
 	/**
 	 * \brief base AST node.
@@ -24,10 +24,10 @@ namespace channel {
 	class node {
 	public:
 		/**
-		 * \brief Constructs a node with using data about the node's position.
-		 * \param position Token position of the node. 
+		 * \brief Constructs a node with using data about the node's location.
+		 * \param location Token location of the node. 
 		 */
-		node(const token_position& position);
+		node(const token_location& location);
 		virtual ~node() = default;
 
 		/**
@@ -36,7 +36,7 @@ namespace channel {
 		 * \param context Context provided by the previous accept call
 		 * \return Result of the acceptation operation, either an error or a pointer to the generated value.
 		 */
-		virtual acceptation_result accept(
+		virtual expected_value accept(
 			code_generator& visitor,
 			const code_generation_context& context
 		) = 0;
@@ -54,10 +54,10 @@ namespace channel {
 		) = 0;
 
 		/**
-		 * \brief Gets the declared node position.
-		 * \return Declared node position
+		 * \brief Gets the declared node location.
+		 * \return Declared node location
 		 */
-		const token_position& get_declared_position() const;
+		const token_location& get_declared_location() const;
 	protected:
 		/**
 		 * \brief Prints a node name with additional formatting relevant to the tree hierarchy.
@@ -86,7 +86,7 @@ namespace channel {
 			bool is_last
 		);
 	private:
-		token_position m_position;
+		token_location m_location;
 	};
 }
 

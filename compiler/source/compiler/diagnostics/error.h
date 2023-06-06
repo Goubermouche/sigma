@@ -83,26 +83,39 @@ namespace channel {
 		void print() const override;
 	};
 
+	using error_msg = std::shared_ptr<error_message>;
+
 	class error_message_position : public error_message {
 	public:
-		error_message_position(std::string message, u64 code, token_position position);
+		error_message_position(
+			std::string message,
+			u64 code,
+			token_location location
+		);
 
 		void print() const override;
 	protected:
-		token_position m_position;
+		token_location m_position;
 	};
 
 	class error {
 	public:
 		template <u64 code, typename... Args>
-		static std::shared_ptr<error_message> emit(Args&&... args);
+		static error_msg emit(
+			Args&&... args
+		);
 
 		template <u64 code, typename... Args>
-		static std::shared_ptr<error_message_position> emit(token_position position, Args&&... args);
+		static std::shared_ptr<error_message_position> emit(
+			token_location location, 
+			Args&&... args
+		);
 	};
 
 	template<u64 code, typename ...Args>
-	std::shared_ptr<error_message> error::emit(Args&& ...args) {
+	error_msg error::emit(
+		Args&& ...args
+	) {
 		return std::make_shared< error_message>(
 			std::format(error_templates[code], 
 			std::forward<Args>(args)...),
@@ -111,17 +124,20 @@ namespace channel {
 	}
 
 	template<u64 code, typename ...Args>
-	std::shared_ptr<error_message_position> error::emit(token_position position, Args && ...args) {
+	std::shared_ptr<error_message_position> error::emit(
+		token_location location, 
+		Args && ...args
+	) {
 		return std::make_shared<error_message_position>(
 			std::format(error_templates[code],
 			std::forward<Args>(args)...),
 			code,
-			position
+			std::move(location)
 		);
 	}
 
 	/**
 	 * \brief Potential (optional) erroneous result.
 	 */
-	using error_result = std::optional<std::shared_ptr<error_message>>;
+	using error_result = std::optional<error_msg>;
 }

@@ -114,7 +114,7 @@ namespace channel {
 		}
 
 		return error::emit<3000>(
-			m_current_token.get_token_position(),
+			m_current_token.get_token_location(),
 			token,
 			m_current_token.get_token()
 		);
@@ -126,7 +126,7 @@ namespace channel {
 			return type_parse_error; // return on failure
 		}
 
-		const token_position position = m_current_token.get_token_position();
+		const token_location location = m_current_token.get_token_location();
 		get_next_token(); // identifier (guaranteed)
 		const std::string identifier = m_current_token.get_value();
 		get_next_token(); // l_parenthesis (guaranteed)
@@ -156,7 +156,7 @@ namespace channel {
 				}
 				else if (next_token != token::r_parenthesis) {
 					return error::emit<3000>(
-						m_current_token.get_token_position(), 
+						m_current_token.get_token_location(), 
 						token::r_parenthesis, 
 						m_current_token.get_token()
 					); // return on failure
@@ -177,7 +177,7 @@ namespace channel {
 		}
 
 		out_node = new function_node(
-			position, 
+			location,
 			return_type, 
 			false, 
 			identifier, 
@@ -207,7 +207,7 @@ namespace channel {
 				break;
 			default:
 				return error::emit<3001>(
-					m_current_token.get_token_position(),
+					m_current_token.get_token_location(),
 					token
 				);
 			}
@@ -296,7 +296,7 @@ namespace channel {
 				}
 				else {
 					return error::emit<3004>(
-						m_current_token.get_token_position()
+						m_current_token.get_token_location()
 					); // return on failure
 				}
 				break;
@@ -320,7 +320,7 @@ namespace channel {
 				// return right away since we don't want to check for a semicolon at the end of the statement
 				return parse_for_loop(out_node);
 			default:
-				token_position p = m_current_token.get_token_position();
+				token_location p = m_current_token.get_token_location();
 				return error::emit<3001>(
 					p,
 					next_token
@@ -357,7 +357,7 @@ namespace channel {
 		else {
 			// create a simple access node
 			get_next_token(); // identifier (guaranteed)
-			out_node = new variable_access_node(m_current_token.get_token_position(), m_current_token.get_value());
+			out_node = new variable_access_node(m_current_token.get_token_location(), m_current_token.get_value());
 		}
 
 		// check for post unary operators after identifier, deep expression, or array index access
@@ -376,7 +376,7 @@ namespace channel {
 	error_result recursive_descent_parser::parse_if_else_statement(node*& out_node) {
 		std::vector<node*> conditions;
 		std::vector<std::vector<node*>> branches;
-		const token_position position = m_current_token.get_token_position();
+		const token_location location = m_current_token.get_token_location();
 		bool has_else = false;
 
 		while (true) {
@@ -425,13 +425,13 @@ namespace channel {
 			}
 		}
 
-		out_node = new if_else_node(position, conditions, branches);
+		out_node = new if_else_node(location, conditions, branches);
 		return {};
 	}
 
 	error_result recursive_descent_parser::parse_while_loop(node*& out_node) {
 		get_next_token(); // keyword_while (guaranteed)
-		const token_position position = m_current_token.get_token_position();
+		const token_location location = m_current_token.get_token_location();
 
 		if (auto next_token_error = expect_next_token(token::l_parenthesis)) {
 			return next_token_error; // return on failure
@@ -461,7 +461,7 @@ namespace channel {
 		}
 
 		get_next_token(); // r_brace (guaranteed)
-		out_node = new while_node(position, loop_condition_node, loop_statements);
+		out_node = new while_node(location, loop_condition_node, loop_statements);
 		return {};
 	}
 
@@ -488,14 +488,16 @@ namespace channel {
 				}
 			}
 			else {
-				return error::emit<3004>(m_current_token.get_token_position()); // return on failure
+				return error::emit<3004>(
+					std::move(m_current_token.get_token_location())
+					); // return on failure
 			}
 			break;
 		case token::r_parenthesis:
 			break;
 		default:
 			return error::emit<3001>(
-				m_current_token.get_token_position(), 
+				std::move(m_current_token.get_token_location()), 
 				next_token
 			); // return on failure
 		}
@@ -505,7 +507,7 @@ namespace channel {
 
 	error_result recursive_descent_parser::parse_for_loop(node*& out_node) {
 		get_next_token(); // keyword_for (guaranteed)
-		const token_position position = m_current_token.get_token_position();
+		const token_location location = m_current_token.get_token_location();
 
 		if (auto next_token_error = expect_next_token(token::l_parenthesis)) {
 			return next_token_error; // return on failure
@@ -530,7 +532,7 @@ namespace channel {
 				break;
 			default:
 				return error::emit<3001>(
-					m_current_token.get_token_position(), 
+					std::move(m_current_token.get_token_location()), 
 					next_token
 				); // return on failure
 			}
@@ -593,7 +595,7 @@ namespace channel {
 		}
 
 		get_next_token(); // r_brace (guaranteed)
-		out_node = new for_node(position, loop_initialization_node, loop_condition_node, post_iteration_nodes, loop_statements);
+		out_node = new for_node(location, loop_initialization_node, loop_condition_node, post_iteration_nodes, loop_statements);
 		return {};
 	}
 
@@ -615,35 +617,35 @@ namespace channel {
 		switch (op) {
 		case token::operator_addition_assignment:
 			out_node = new operator_addition_assignment_node(
-				m_current_token.get_token_position(),
+				m_current_token.get_token_location(),
 				left_operand,
 				expression
 			);
 			break;
 		case token::operator_subtraction_assignment:
 			out_node = new operator_subtraction_assignment_node(
-				m_current_token.get_token_position(),
+				m_current_token.get_token_location(),
 				left_operand,
 				expression
 			);
 			break;
 		case token::operator_multiplication_assignment:
 			out_node = new operator_multiplication_assignment_node(
-				m_current_token.get_token_position(),
+				m_current_token.get_token_location(),
 				left_operand,
 				expression
 			);
 			break;
 		case token::operator_division_assignment:
 			out_node = new operator_division_assignment_node(
-				m_current_token.get_token_position(), 
+				m_current_token.get_token_location(), 
 				left_operand, 
 				expression
 			);
 			break;
 		case token::operator_modulo_assignment:
 			out_node = new operator_modulo_assignment_node(
-				m_current_token.get_token_position(), 
+				m_current_token.get_token_location(), 
 				left_operand,
 				expression
 			);
@@ -656,7 +658,7 @@ namespace channel {
 	error_result recursive_descent_parser::parse_array_assignment(node*& out_node) {
 		get_next_token(); // identifier (guaranteed)
 		const std::string identifier = m_current_token.get_value();
-		const token_position position = m_current_token.get_token_position();
+		const token_location location = m_current_token.get_token_location();
 
 		std::vector<node*> index_nodes;
 		while (peek_next_token() == token::l_bracket) {
@@ -691,12 +693,12 @@ namespace channel {
 				}
 			}
 
-			node* array_node = new variable_node(m_current_token.get_token_position(), identifier);
-			out_node = new array_assignment_node(position, array_node, index_nodes, value);
+			node* array_node = new variable_node(m_current_token.get_token_location(), identifier);
+			out_node = new array_assignment_node(location, array_node, index_nodes, value);
 		}
 		else if (next_token == token::operator_increment || next_token == token::operator_decrement) {
-			node* array_node = new variable_node(m_current_token.get_token_position(), identifier);
-			out_node = new array_access_node(position, array_node, index_nodes);
+			node* array_node = new variable_node(m_current_token.get_token_location(), identifier);
+			out_node = new array_access_node(location, array_node, index_nodes);
 
 			if (auto post_operator_parse_error = parse_post_operator(out_node, out_node)) {
 				return post_operator_parse_error; // return on failure
@@ -708,7 +710,7 @@ namespace channel {
 
 	error_result recursive_descent_parser::parse_assignment(node*& out_node) {
 		get_next_token(); // identifier (guaranteed)
-		node* variable = new variable_node(m_current_token.get_token_position(), m_current_token.get_value());
+		node* variable = new variable_node(m_current_token.get_token_location(), m_current_token.get_value());
 
 		if (auto next_token_error = expect_next_token(token::operator_assignment)) {
 			return next_token_error;  // return on failure
@@ -727,7 +729,7 @@ namespace channel {
 			}
 		}
 
-		out_node = new assignment_node(m_current_token.get_token_position(), variable, value);
+		out_node = new assignment_node(m_current_token.get_token_location(), variable, value);
 		return {};
 	}
 
@@ -735,7 +737,7 @@ namespace channel {
 		get_next_token(); // identifier (guaranteed)
 		const std::string identifier = m_current_token.get_value();
 
-		node* array_node = new variable_node(m_current_token.get_token_position(), identifier);
+		node* array_node = new variable_node(m_current_token.get_token_location(), identifier);
 		std::vector<node*> index_nodes;
 
 		get_next_token(); // l_bracket (guaranteed)
@@ -760,7 +762,7 @@ namespace channel {
 			get_next_token(); // l_bracket(guaranteed)
 		}
 
-		out_node = new array_access_node(m_current_token.get_token_position(), array_node, index_nodes);
+		out_node = new array_access_node(m_current_token.get_token_location(), array_node, index_nodes);
 		return {};
 	}
 
@@ -790,7 +792,7 @@ namespace channel {
 				}
 				else {
 					return error::emit<3001>(
-						m_current_token.get_token_position(),
+						std::move(m_current_token.get_token_location()),
 						m_current_token.get_token()
 					);  // return on failure
 				}
@@ -801,17 +803,17 @@ namespace channel {
 			return next_token_error; // return on failure
 		}
 
-		out_node = new function_call_node(m_current_token.get_token_position(), identifier, arguments);
+		out_node = new function_call_node(m_current_token.get_token_location(), identifier, arguments);
 		return  {};
 	}
 
 	error_result recursive_descent_parser::parse_return_statement(node*& out_node) {
-		const token_position position = m_current_token.get_token_position();
+		const token_location location = m_current_token.get_token_location();
 		get_next_token(); // keyword_return (guaranteed)
 
 		// allow return statements without any expressions
 		if(peek_next_token() == token::semicolon) {
-			out_node = new return_node(position, nullptr);
+			out_node = new return_node(location, nullptr);
 		}
 		else {
 			node* expression;
@@ -819,14 +821,14 @@ namespace channel {
 				return expression_parse_error; // return on failure
 			}
 
-			out_node = new return_node(position, expression);
+			out_node = new return_node(location, expression);
 		}
 	
 		return {};
 	}
 
 	error_result recursive_descent_parser::parse_declaration(node*& out_node, bool is_global) {
-		const token_position position = m_current_token.get_token_position();
+		const token_location location = m_current_token.get_token_location();
 
 		type declaration_type;
 		if (auto type_parse_error = parse_type(declaration_type)) {
@@ -848,11 +850,11 @@ namespace channel {
 		}
 
 		if (is_global) {
-			out_node = new global_declaration_node(position, declaration_type, identifier, value);
+			out_node = new global_declaration_node(location, declaration_type, identifier, value);
 			return {};
 		}
 
-		out_node = new local_declaration_node(position, declaration_type, identifier, value);
+		out_node = new local_declaration_node(location, declaration_type, identifier, value);
 		return {};
 	}
 
@@ -875,7 +877,7 @@ namespace channel {
 				return logical_disjunction_parse_error; // return on failure
 			}
 
-			left = new operator_conjunction_node(op.get_token_position(), left, right);
+			left = new operator_conjunction_node(op.get_token_location(), left, right);
 		}
 
 		out_node = left;
@@ -897,7 +899,7 @@ namespace channel {
 				return comparison_parse_error; // return on failure
 			}
 
-			left = new operator_disjunction_node(op.get_token_position(), left, right);
+			left = new operator_disjunction_node(op.get_token_location(), left, right);
 		}
 
 		out_node = left;
@@ -927,22 +929,22 @@ namespace channel {
 
 			switch (op.get_token()) {
 			case token::operator_greater_than:
-				left = new operator_greater_than_node(m_current_token.get_token_position(), left, right);
+				left = new operator_greater_than_node(m_current_token.get_token_location(), left, right);
 				break;
 			case token::operator_greater_than_equal_to:
-				left = new operator_greater_than_equal_to_node(m_current_token.get_token_position(), left, right);
+				left = new operator_greater_than_equal_to_node(m_current_token.get_token_location(), left, right);
 				break;
 			case token::operator_less_than:
-				left = new operator_less_than_node(m_current_token.get_token_position(), left, right);
+				left = new operator_less_than_node(m_current_token.get_token_location(), left, right);
 				break;
 			case token::operator_less_than_equal_to:
-				left = new operator_less_than_equal_to_node(m_current_token.get_token_position(), left, right);
+				left = new operator_less_than_equal_to_node(m_current_token.get_token_location(), left, right);
 				break;
 			case token::operator_equals:
-				left = new operator_equals_node(m_current_token.get_token_position(), left, right);
+				left = new operator_equals_node(m_current_token.get_token_location(), left, right);
 				break;
 			case token::operator_not_equals:
-				left = new operator_not_equals_node(m_current_token.get_token_position(), left, right);
+				left = new operator_not_equals_node(m_current_token.get_token_location(), left, right);
 				break;
 			}
 		}
@@ -970,10 +972,10 @@ namespace channel {
 
 			switch (op.get_token()) {
 			case token::operator_addition:
-				left = new operator_addition_node(op.get_token_position(), left, right);
+				left = new operator_addition_node(op.get_token_location(), left, right);
 				break;
 			case token::operator_subtraction:
-				left = new operator_subtraction_node(op.get_token_position(), left, right);
+				left = new operator_subtraction_node(op.get_token_location(), left, right);
 				break;
 			}
 		}
@@ -1008,28 +1010,28 @@ namespace channel {
 
 			switch (op.get_token()) {
 			case token::operator_multiplication:
-				left = new operator_multiplication_node(op.get_token_position(), left, right);
+				left = new operator_multiplication_node(op.get_token_location(), left, right);
 				break;
 			case token::operator_division:
-				left = new operator_division_node(op.get_token_position(), left, right);
+				left = new operator_division_node(op.get_token_location(), left, right);
 				break;
 			case token::operator_modulo:
-				left = new operator_modulo_node(op.get_token_position(), left, right);
+				left = new operator_modulo_node(op.get_token_location(), left, right);
 				break;
 			case token::operator_bitwise_and:
-				left = new operator_bitwise_and_node(op.get_token_position(), left, right);
+				left = new operator_bitwise_and_node(op.get_token_location(), left, right);
 				break;
 			case token::operator_bitwise_or:
-				left = new operator_bitwise_or_node(op.get_token_position(), left, right);
+				left = new operator_bitwise_or_node(op.get_token_location(), left, right);
 				break;
 			case token::operator_bitwise_left_shift:
-				left = new operator_bitwise_left_shift_node(op.get_token_position(), left, right);
+				left = new operator_bitwise_left_shift_node(op.get_token_location(), left, right);
 				break;
 			case token::operator_bitwise_right_shift:
-				left = new operator_bitwise_right_shift_node(op.get_token_position(), left, right);
+				left = new operator_bitwise_right_shift_node(op.get_token_location(), left, right);
 				break;
 			case token::operator_bitwise_xor:
-				left = new operator_bitwise_xor_node(op.get_token_position(), left, right);
+				left = new operator_bitwise_xor_node(op.get_token_location(), left, right);
 				break;
 			}
 		}
@@ -1063,7 +1065,9 @@ namespace channel {
 				return parse_pre_operator(out_node);
 			}
 
-			return error::emit<3004>(m_current_token.get_token_position()); // return on failure
+			return error::emit<3004>(
+				std::move(m_current_token.get_token_location())
+			); // return on failure
 		case token::identifier:
 			// parse a function call or an assignment
 			return parse_primary_identifier(out_node);
@@ -1086,7 +1090,7 @@ namespace channel {
 		}
 
 		return error::emit<3001>(
-			m_current_token.get_token_position(),
+			m_current_token.get_token_location(),
 			m_current_token.get_token()
 		); // return on failure
 	}
@@ -1095,31 +1099,31 @@ namespace channel {
 		get_next_token(); // type
 		const std::string str_value = m_current_token.get_value();
 		const type ty = expression_type.is_unknown() ? type(m_current_token.get_token(), 0) : expression_type;
-		out_node = new numerical_literal_node(m_current_token.get_token_position(), str_value, ty);
+		out_node = new numerical_literal_node(m_current_token.get_token_location(), str_value, ty);
 		return {};
 	}
 
 	error_result recursive_descent_parser::parse_char(node*& out_node) {
 		get_next_token(); // char_literal (guaranteed)
-		out_node = new char_node(m_current_token.get_token_position(), m_current_token.get_value()[0]);
+		out_node = new char_node(m_current_token.get_token_location(), m_current_token.get_value()[0]);
 		return {};
 	}
 
 	error_result recursive_descent_parser::parse_string(node*& out_node) {
 		get_next_token(); // string_literal (guaranteed)
-		out_node = new string_node(m_current_token.get_token_position(), m_current_token.get_value());
+		out_node = new string_node(m_current_token.get_token_location(), m_current_token.get_value());
 		return {};
 	}
 
 	error_result recursive_descent_parser::parse_bool(node*& out_node) {
 		get_next_token(); // bool_literal_true || bool_literal_false (guaranteed)
-		out_node = new bool_node(m_current_token.get_token_position(), m_current_token.get_token() == token::bool_literal_true);
+		out_node = new bool_node(m_current_token.get_token_location(), m_current_token.get_token() == token::bool_literal_true);
 		return {};
 	}
 
 	error_result recursive_descent_parser::parse_break_keyword(node*& out_node) {
 		get_next_token(); // keyword_break (guaranteed)
-		out_node = new break_node(m_current_token.get_token_position());
+		out_node = new break_node(m_current_token.get_token_location());
 		return {};
 	}
 
@@ -1127,10 +1131,10 @@ namespace channel {
 		get_next_token();
 
 		if (m_current_token.get_token() == token::operator_increment) {
-			out_node = new operator_post_increment_node(m_current_token.get_token_position(), operand);
+			out_node = new operator_post_increment_node(m_current_token.get_token_location(), operand);
 		}
 		else {
-			out_node = new operator_post_decrement_node(m_current_token.get_token_position(), operand);
+			out_node = new operator_post_decrement_node(m_current_token.get_token_location(), operand);
 		}
 
 		return {};
@@ -1147,16 +1151,16 @@ namespace channel {
 
 		switch (op.get_token()) {
 		case token::operator_increment:
-			out_node = new operator_pre_increment_node(op.get_token_position(), operand);
+			out_node = new operator_pre_increment_node(op.get_token_location(), operand);
 			break;
 		case token::operator_decrement:
-			out_node = new operator_pre_decrement_node(op.get_token_position(), operand);
+			out_node = new operator_pre_decrement_node(op.get_token_location(), operand);
 			break;
 		case token::operator_not:
-			out_node = new operator_not_node(op.get_token_position(), operand);
+			out_node = new operator_not_node(op.get_token_location(), operand);
 			break;
 		case token::operator_bitwise_not:
-			out_node = new operator_bitwise_not_node(op.get_token_position(), operand);
+			out_node = new operator_bitwise_not_node(op.get_token_location(), operand);
 			break;
 		}
 
@@ -1174,13 +1178,13 @@ namespace channel {
 			return number_parse_error; // return on failure
 		}
 
-		out_node = new operator_subtraction_node(m_current_token.get_token_position(), zero_node, number);
+		out_node = new operator_subtraction_node(m_current_token.get_token_location(), zero_node, number);
 		return {};
 	}
 
 	error_result recursive_descent_parser::parse_new_allocation(node*& out_node) {
 		get_next_token(); // keyword_new (guaranteed)
-		const token_position position = m_current_token.get_token_position();
+		const token_location location = m_current_token.get_token_location();
 
 		type allocation_type;
 		if (auto type_parse_error = parse_type(allocation_type)) {
@@ -1203,7 +1207,7 @@ namespace channel {
 			return next_token_error; // return on failure
 		}
 
-		out_node = new array_allocation_node(position, allocation_type, array_size);
+		out_node = new array_allocation_node(location, allocation_type, array_size);
 		return {};
 	}
 
@@ -1221,7 +1225,7 @@ namespace channel {
 			// parse an assignment
 			get_next_token();
 			const std::string identifier = m_current_token.get_value();
-			out_node = new variable_access_node(m_current_token.get_token_position(), identifier);
+			out_node = new variable_access_node(m_current_token.get_token_location(), identifier);
 		}
 
 		const token next_token = peek_next_token();
@@ -1343,14 +1347,17 @@ namespace channel {
 	}
 
 	node* recursive_descent_parser::create_zero_node(type expression_type) const {
-		return new numerical_literal_node(m_current_token.get_token_position(), "0", expression_type);
+		return new numerical_literal_node(m_current_token.get_token_location(), "0", expression_type);
 	}
 
 	error_result recursive_descent_parser::parse_type(type& ty) {
 		get_next_token();
 
 		if (!is_token_type(m_current_token.get_token())) {
-			return error::emit<3003>(m_current_token.get_token_position(), m_current_token.get_token()); // return on failure
+			return error::emit<3003>(
+				std::move(m_current_token.get_token_location()),
+				m_current_token.get_token()
+			); // return on failure
 		}
 
 		ty = type(m_current_token.get_token(), 0);

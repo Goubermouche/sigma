@@ -32,9 +32,9 @@ namespace channel::detail {
 		return m_position;
 	}
 
-	void string_accessor::set_position(u64 position) {
+	void string_accessor::set_position(u64 location) {
 		// check if we are inside of our strings' bounds
-		ASSERT(position <= m_string.size(), "accessor out of range! (set)");
-		m_position = position;
+		ASSERT(location <= m_string.size(), "accessor out of range! (set)");
+		m_position = location;
 	}
 }

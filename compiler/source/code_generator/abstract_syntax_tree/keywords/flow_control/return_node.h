@@ -8,11 +8,11 @@ namespace channel {
 	class return_node : public node {
 	public:
 		return_node(
-			const token_position& position,
+			const token_location& location,
 			const node_ptr& return_expression_node
 		);
 
-		acceptation_result accept(
+		expected_value accept(
 			code_generator& visitor,
 			const code_generation_context& context
 		) override;

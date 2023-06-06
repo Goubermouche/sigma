@@ -195,9 +195,6 @@
     <ClInclude Include="source\code_generator\abstract_syntax_tree\operators\unary\operator_unary_base.h">
       <Filter>source\codegen\abstract_syntax_tree\operators\unary</Filter>
     </ClInclude>
-    <ClInclude Include="source\code_generator\abstract_syntax_tree\translation_unit_node.h">
-      <Filter>source\codegen\abstract_syntax_tree</Filter>
-    </ClInclude>
     <ClInclude Include="source\code_generator\abstract_syntax_tree\variables\array\array_access_node.h">
       <Filter>source\codegen\abstract_syntax_tree\variables\array</Filter>
     </ClInclude>
@@ -305,7 +302,7 @@
     <ClInclude Include="source\code_generator\abstract_syntax_tree\operators\binary\bitwise\operator_bitwise_and_node.h" />
     <ClInclude Include="source\code_generator\abstract_syntax_tree\operators\unary\bitwise\operator_bitwise_not_node.h" />
     <ClInclude Include="source\code_generator\abstract_syntax_tree\operators\binary\bitwise\operator_bitwise_xor_node.h" />
-    <ClInclude Include="source\utility\containers\expected.h" />
+    <ClInclude Include="source\code_generator\abstract_syntax_tree\keywords\file_include_node.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp" />
@@ -420,9 +417,6 @@
     <ClCompile Include="source\code_generator\abstract_syntax_tree\operators\unary\operator_unary_base.cpp">
       <Filter>source\codegen\abstract_syntax_tree\operators\unary</Filter>
     </ClCompile>
-    <ClCompile Include="source\code_generator\abstract_syntax_tree\translation_unit_node.cpp">
-      <Filter>source\codegen\abstract_syntax_tree</Filter>
-    </ClCompile>
     <ClCompile Include="source\code_generator\abstract_syntax_tree\variables\array\array_access_node.cpp">
       <Filter>source\codegen\abstract_syntax_tree\variables\array</Filter>
     </ClCompile>
@@ -533,6 +527,7 @@
     <ClCompile Include="source\code_generator\abstract_syntax_tree\operators\binary\bitwise\operator_bitwise_and_node.cpp" />
     <ClCompile Include="source\code_generator\abstract_syntax_tree\operators\unary\bitwise\operator_bitwise_not_node.cpp" />
     <ClCompile Include="source\code_generator\abstract_syntax_tree\operators\binary\bitwise\operator_bitwise_xor_node.cpp" />
-    <ClCompile Include="source\utility\containers\expected.cpp" />
+    <ClCompile Include="source\code_generator\abstract_syntax_tree\keywords\file_include_node.cpp" />
+    <ClCompile Include="source\code_generator\basic_code_generator\codegen_visitor_keywords.cpp" />
   </ItemGroup>
 </Project>

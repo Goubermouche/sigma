@@ -26,11 +26,6 @@ namespace channel {
 		error_result generate() override;
 		error_result verify_intermediate_representation();
 	private:
-		expected_value visit_translation_unit_node(
-			translation_unit_node& node, 
-			const code_generation_context& context
-		) override;
-
 		// functions
 		// codegen_visitor_functions.cpp
 		expected_value visit_function_node(
@@ -40,6 +35,13 @@ namespace channel {
 
 		expected_value visit_function_call_node(
 			function_call_node& node,
+			const code_generation_context& context
+		) override;
+
+		// keywords
+		// codegen_visitor_keywords.cpp
+		virtual expected_value visit_file_include_node(
+			file_include_node& node,
 			const code_generation_context& context
 		) override;
 

@@ -27,6 +27,8 @@ namespace channel {
 		 */
 		error_result parse_function_definition(node*& out_node);
 
+		error_result parse_file_include(node*& out_node);
+
 		/**
 		 * \brief Attempts to parse a global statement.
 		 * \param out_node Output AST node
@@ -228,6 +230,8 @@ namespace channel {
 		 * \return True if the statement is a function definition
 		 */
 		bool peek_is_function_definition();
+
+		bool peek_is_file_include();
 
 		/**
 		 * \brief Checks if the next statement is a function call.

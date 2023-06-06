@@ -1,10 +1,11 @@
 #include "recursive_descent_parser.h"
 
-#include "code_generator/abstract_syntax_tree/translation_unit_node.h"
-
 // functions
 #include "code_generator/abstract_syntax_tree/functions/function_call_node.h"
 #include "code_generator/abstract_syntax_tree/functions/function_node.h"
+
+// keywords
+#include "code_generator/abstract_syntax_tree/keywords/file_include_node.h"
 
 // variables
 #include "code_generator/abstract_syntax_tree/variables/assignment_node.h"
@@ -75,11 +76,8 @@ namespace channel {
 	recursive_descent_parser::recursive_descent_parser() {}
 
 	error_result recursive_descent_parser::parse() {
-		std::vector<node*> nodes;
-
 		while (true) {
 			if (peek_next_token() == token::end_of_file) {
-				m_abstract_syntax_tree->add_node(new translation_unit_node(nodes));
 				return {};
 			}
 
@@ -91,6 +89,11 @@ namespace channel {
 					return function_parse_error; // return on failure
 				}
 			}
+			else if(peek_is_file_include()) {
+				if(auto include_parse_error = parse_file_include(node)) {
+					return include_parse_error;
+				}
+			}
 			else {
 				// parse a global statement
 				if (auto global_statement_parse_error = parse_global_statement(node)) {
@@ -98,7 +101,7 @@ namespace channel {
 				}
 			}
 
-			nodes.push_back(node);
+			m_abstract_syntax_tree->add_node(node);
 		}
 	}
 
@@ -185,6 +188,27 @@ namespace channel {
 			statements
 		);
 
+		return {};
+	}
+
+	error_result recursive_descent_parser::parse_file_include(node*& out_node) {
+		// #
+		if(auto next_token_error = expect_next_token(token::hash)) {
+			return next_token_error; // return on failure
+		}
+
+		// include
+		if (auto next_token_error = expect_next_token(token::keyword_include)) {
+			return next_token_error; // return on failure
+		}
+
+		// string literal
+		if (auto next_token_error = expect_next_token(token::string_literal)) {
+			return next_token_error; // return on failure
+		}
+
+		const token_data file_token = m_current_token;
+		out_node = new file_include_node(m_current_token.get_token_location(), m_current_token.get_value());
 		return {};
 	}
 
@@ -1279,6 +1303,23 @@ namespace channel {
 		const bool result = m_token_list.peek_token().get_token() == token::l_parenthesis;
 		m_token_list.synchronize_indices();
 		return result;
+	}
+
+	bool recursive_descent_parser::peek_is_file_include() {
+		// hash
+		if (m_token_list.peek_token().get_token() != token::hash) {
+			m_token_list.synchronize_indices();
+			return false;
+		}
+
+		// include
+		if (m_token_list.peek_token().get_token() != token::keyword_include) {
+			m_token_list.synchronize_indices();
+			return false;
+		}
+
+		m_token_list.synchronize_indices();
+		return true;
 	}
 
 	bool recursive_descent_parser::peek_is_function_call() {

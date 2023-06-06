@@ -1,8 +1,6 @@
 #include "basic_code_generator.h"
 #include <llvm/IR/Verifier.h>
 
-#include "code_generator/abstract_syntax_tree/translation_unit_node.h"
-
 namespace channel {
 	basic_code_generator::basic_code_generator()
 		: m_scope(new scope(nullptr, nullptr))
@@ -93,18 +91,6 @@ namespace channel {
 		console::out << color::white;
 
 		return {};
-	}
-
-	expected_value basic_code_generator::visit_translation_unit_node(translation_unit_node& node, const code_generation_context& context) {
-		for(const auto& n : node.get_nodes()) {
-			expected_value result = n->accept(*this, context);
-
-			if(!result) {
-				return result; // return on failure
-			}
-		}
-
-		return nullptr;
 	}
 
 	error_result basic_code_generator::verify_main_entry_point() {

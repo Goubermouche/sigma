@@ -23,6 +23,8 @@
 #include <clang/Driver/Compilation.h>
 #include <clang/Frontend/TextDiagnosticPrinter.h>
 
+#include "code_generator/abstract_syntax_tree/keywords/file_include_node.h"
+
 namespace channel {
 	compiler::compiler(
 		compiler_settings settings
@@ -136,10 +138,18 @@ namespace channel {
 			<< parser_timer.elapsed()
 			<< "ms)\n";
 
+		// 
+		for(node* n : *parser->get_abstract_syntax_tree()) {
+			if(const auto* include = dynamic_cast<file_include_node*>(n)) {
+				console::out
+					<< color::red
+					<< include->get_filepath()
+					<< color::white
+					<< '\n';
+			}
+		}
 
-
-
-
+		parser->get_abstract_syntax_tree()->print_nodes();
 
 		// generate the module
 		timer code_generator_timer;
@@ -161,7 +171,6 @@ namespace channel {
 			<< "ms)\n";
 
 		// code_generator->get_llvm_context()->print_intermediate_representation();
-		// parser->get_abstract_syntax_tree()->print_nodes();
 		return code_generator->get_llvm_context();
 	}
 

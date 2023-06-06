@@ -2,11 +2,12 @@
 #include "code_generator/abstract_syntax_tree/keywords/flow_control/if_else_node.h"
 
 namespace channel {
-	class translation_unit_node;
-
 	// functions
 	class function_node;
 	class function_call_node;
+
+	// keywords
+	class file_include_node;
 
 	// variables
 	class assignment_node;
@@ -92,11 +93,7 @@ namespace channel {
 		);
 
 		std::shared_ptr<llvm_context> get_llvm_context();
-
-		virtual expected_value visit_translation_unit_node(
-			translation_unit_node& node,
-			const code_generation_context& context
-		) = 0;
+		
 
 		// functions
 		virtual expected_value visit_function_node(
@@ -106,6 +103,12 @@ namespace channel {
 
 		virtual expected_value visit_function_call_node(
 			function_call_node& node, 
+			const code_generation_context& context
+		) = 0;
+
+		// keywords
+		virtual expected_value visit_file_include_node(
+			file_include_node& node,
 			const code_generation_context& context
 		) = 0;
 

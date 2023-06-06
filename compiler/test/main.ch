@@ -1,22 +1,19 @@
 // todo: explicit cast (!)
 //  - cast<i32>(value)
-
 // todo: references (!!)
 //  - add support for references (&)
-
 // todo: general
 //  - continue (!!)
-
 // todo: major cleanup (!!!)
 //  - documentation
 //  - tests
-// error system truncates to error_message - broken location info for errors
-
-// numerical literal auto upcasts 
+// todo: numerical literal auto upcasts 
 //  - handle upcasts for numerical literals 
 //  - 2 * double_var etc
+// todo: includes
 
-// loops should use custom scopes for variable declarations 
+#include "first.ch"
+#include "second.ch"
 
 void donut(f32 rot_speed) {
 	f32 A = 0;
@@ -81,6 +78,6 @@ void donut(f32 rot_speed) {
 }
 
 i32 main() {
-	donut(0.3f);
+	donut(0.1f);
 	return 0;
 }

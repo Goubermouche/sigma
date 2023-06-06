@@ -3,16 +3,17 @@
 
 namespace channel {
 	/**
-	 * \brief AST node, represents a top level translation unit node.
+	 * \brief AST node, represents a top level file include node.
 	 */
-	class translation_unit_node : public node {
+	class file_include_node : public node {
 	public:
-		translation_unit_node(
-			const std::vector<node_ptr>& nodes
+		file_include_node(
+			const token_location& location,
+			const std::string& filepath
 		);
 
 		expected_value accept(
-			code_generator& visitor, 
+			code_generator& visitor,
 			const code_generation_context& context
 		) override;
 
@@ -22,8 +23,8 @@ namespace channel {
 			bool is_last
 		) override;
 
-		const std::vector<node_ptr>& get_nodes() const;
+		const std::string& get_filepath() const;
 	private:
-		std::vector<node_ptr> m_nodes;
+		std::string m_filepath;
 	};
 }

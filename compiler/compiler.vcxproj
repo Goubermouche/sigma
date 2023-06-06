@@ -58,6 +58,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="source\code_generator\abstract_syntax_tree\keywords\file_include_node.h" />
     <ClInclude Include="source\code_generator\abstract_syntax_tree\operators\binary\bitwise\operator_bitwise_and_node.h" />
     <ClInclude Include="source\code_generator\abstract_syntax_tree\operators\binary\bitwise\operator_bitwise_left_shift_node.h" />
     <ClInclude Include="source\code_generator\abstract_syntax_tree\operators\unary\bitwise\operator_bitwise_not_node.h" />
@@ -103,7 +104,6 @@
     <ClInclude Include="source\code_generator\abstract_syntax_tree\operators\unary\arithmetic\operator_pre_decrement_node.h" />
     <ClInclude Include="source\code_generator\abstract_syntax_tree\operators\unary\arithmetic\operator_pre_increment_node.h" />
     <ClInclude Include="source\code_generator\abstract_syntax_tree\operators\unary\operator_unary_base.h" />
-    <ClInclude Include="source\code_generator\abstract_syntax_tree\translation_unit_node.h" />
     <ClInclude Include="source\code_generator\abstract_syntax_tree\variables\array\array_access_node.h" />
     <ClInclude Include="source\code_generator\abstract_syntax_tree\variables\array\array_allocation_node.h" />
     <ClInclude Include="source\code_generator\abstract_syntax_tree\variables\array\array_assignment_node.h" />
@@ -139,6 +139,7 @@
     <ClInclude Include="source\utility\types.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="source\code_generator\abstract_syntax_tree\keywords\file_include_node.cpp" />
     <ClCompile Include="source\code_generator\abstract_syntax_tree\operators\binary\bitwise\operator_bitwise_and_node.cpp" />
     <ClCompile Include="source\code_generator\abstract_syntax_tree\operators\binary\bitwise\operator_bitwise_left_shift_node.cpp" />
     <ClCompile Include="source\code_generator\abstract_syntax_tree\operators\unary\bitwise\operator_bitwise_not_node.cpp" />
@@ -146,6 +147,7 @@
     <ClCompile Include="source\code_generator\abstract_syntax_tree\operators\binary\bitwise\operator_bitwise_right_shift_node.cpp" />
     <ClCompile Include="source\code_generator\abstract_syntax_tree\operators\binary\bitwise\operator_bitwise_xor_node.cpp" />
     <ClCompile Include="source\code_generator\abstract_syntax_tree\operators\unary\logical\operator_not_node.cpp" />
+    <ClCompile Include="source\code_generator\basic_code_generator\codegen_visitor_keywords.cpp" />
     <ClCompile Include="source\llvm_wrappers\llvm_context.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="source\code_generator\abstract_syntax_tree\abstract_syntax_tree.cpp" />
@@ -185,7 +187,6 @@
     <ClCompile Include="source\code_generator\abstract_syntax_tree\operators\unary\arithmetic\operator_pre_decrement_node.cpp" />
     <ClCompile Include="source\code_generator\abstract_syntax_tree\operators\unary\arithmetic\operator_pre_increment_node.cpp" />
     <ClCompile Include="source\code_generator\abstract_syntax_tree\operators\unary\operator_unary_base.cpp" />
-    <ClCompile Include="source\code_generator\abstract_syntax_tree\translation_unit_node.cpp" />
     <ClCompile Include="source\code_generator\abstract_syntax_tree\variables\array\array_access_node.cpp" />
     <ClCompile Include="source\code_generator\abstract_syntax_tree\variables\array\array_allocation_node.cpp" />
     <ClCompile Include="source\code_generator\abstract_syntax_tree\variables\array\array_assignment_node.cpp" />

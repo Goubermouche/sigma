@@ -7,14 +7,14 @@ namespace channel {
 		abstract_syntax_tree() = default;
 
 		void add_node(
-			translation_unit_node* node
+			node* node
 		);
 
 		void print_nodes() const;
 
-		std::vector<translation_unit_node*>::iterator begin();
-		std::vector<translation_unit_node*>::iterator end();
+		std::vector<node*>::iterator begin();
+		std::vector<node*>::iterator end();
 	private:
-		std::vector<translation_unit_node*> m_nodes;
+		std::vector<node*> m_nodes;
 	};
 }

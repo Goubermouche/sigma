@@ -13,11 +13,14 @@ namespace channel {
 		semicolon,                          // ;
 		single_quote,                       // '
 		double_quote,                       // "
+		hash,                               // #
 
 		// keywords
 		keyword_type_structure,             // struct
 		keyword_type_void,                  // void
 		keyword_type_bool,                  // bool
+		keyword_include,                    // include
+
 		bool_literal_true,                  // true
 		bool_literal_false,                 // false
 
@@ -155,6 +158,8 @@ namespace channel {
 			return "single_quote";
 		case token::double_quote:
 			return "double_quote";
+		case token::hash:
+			return "hash";
 
 		// keywords
 		// types
@@ -164,6 +169,8 @@ namespace channel {
 			return "keyword_type_void";
 		case token::keyword_type_bool:
 			return "keyword_type_bool";
+		case token::keyword_include:
+			return "keyword_include";
 		case token::bool_literal_true:
 			return "bool_literal_true";
 		case token::bool_literal_false:

@@ -31,7 +31,7 @@ namespace channel {
 					last = has_body_statements ? false : !(has_trailing_else && !m_branch_nodes[i + 1].empty());
 				}
 				else {
-					last = !has_body_statements && (i == m_condition_nodes.size() - 1);
+					last = !has_body_statements && i == m_condition_nodes.size() - 1;
 				}
 
 				m_condition_nodes[i]->print(depth + 1, new_prefix, last);
@@ -43,7 +43,7 @@ namespace channel {
 			for (u64 j = 0; j < m_branch_nodes[i].size(); ++j) {
 
 				if (i == m_condition_nodes.size() - 2 && has_trailing_else && m_branch_nodes[i + 1].empty()) {
-					last = (j == m_branch_nodes[i].size() - 1) || m_branch_nodes[i].empty();
+					last = j == m_branch_nodes[i].size() - 1 || m_branch_nodes[i].empty();
 				}
 				else if (i == m_condition_nodes.size() - 1 && j == m_branch_nodes[i].size() - 1) {
 					last = true;

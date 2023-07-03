@@ -129,7 +129,7 @@ The expected output, after running the generated .exe, looks like this:
 - [ ] Support for external files and linking
 - [ ] GPU support with kernels 
 ## Tooling
-- [Syntax highlighting](https://github.com/Goubermouche/channel-syntax-highlighter)
+- [Syntax highlighting](https://github.com/Goubermouche/sigma-syntax-highlighter)
 
 ### Dependencies 
 - [LLVM 16.0.0](https://github.com/llvm/llvm-project/tree/release/16.x)

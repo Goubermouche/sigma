@@ -1,4 +1,8 @@
-## Channel language
+<p align="center">
+ <a href="https://github.com/Goubermouche/channel-language">
+    <img src="https://github.com/Goubermouche/channel-language/blob/fb9146e410b9ca79613a9cbcd0f338d4b165606f/images/banner.png" alt="gputil logo">
+   </a>
+</p>
 Channel is a compiled, statically typed, C-like, data oriented language with a focus on performance and low-level optimization using GPU acceleration via kernels.
 ## Getting up and running
 ### Windows 10

@@ -3,9 +3,12 @@
     <img src="https://github.com/Goubermouche/channel-language/blob/3993a0c5c84eeb64d01f3185c3a0b7aa7d470dec/images/banner2.png" alt="channel logo">
    </a>
 </p>
-Channel is a compiled, statically typed, C-like, data oriented language with a focus on performance and low-level optimization using GPU acceleration via kernels.
-## Getting up and running
-### Windows 10   
+Channel is a compiled, statically typed, C-like, data oriented language with a focus on performance and low-level optimization using GPU acceleration via kernels.  
+
+## Getting up and running      
+
+### Windows 10       
+
 <ins>**1. Downloading the repository:**</ins>   
 Clone the repository with `git clone https://github.com/Goubermouche/channel-language.git`.
 

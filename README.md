@@ -1,16 +1,16 @@
 <p align="center">
- <a href="https://github.com/Goubermouche/channel-language">
-    <img src="https://github.com/Goubermouche/channel-language/blob/3993a0c5c84eeb64d01f3185c3a0b7aa7d470dec/images/banner2.png" alt="channel logo">
+ <a href="https://github.com/Goubermouche/sigma">
+    <img src="https://github.com/Goubermouche/sigma/blob/3993a0c5c84eeb64d01f3185c3a0b7aa7d470dec/images/banner2.png" alt="sigma logo">
    </a>
 </p>
-Channel is a compiled, statically typed, C-like, data oriented language with a focus on performance and low-level optimization using GPU acceleration via kernels.  
+Sigma is a compiled, statically typed, C-like, data oriented language with a focus on performance and low-level optimization using GPU acceleration via kernels.  
 
 ## Getting up and running      
 
 ### Windows 10       
 
 <ins>**1. Downloading the repository:**</ins>   
-Clone the repository with `git clone https://github.com/Goubermouche/channel-language.git`.
+Clone the repository with `git clone https://github.com/Goubermouche/sigma.git`.
 
 <ins>**2. Building LLVM:**</ins>   
 In order to build the project you will need to build [LLVM](https://github.com/llvm/llvm-project/tree/release/16.x) from source. After downloading the [repository](https://github.com/llvm/llvm-project/tree/release/16.x) navigate to the installed directory and create a new out-of-source directory, and navigate into it. Open CMD and run the following commands: 
@@ -24,15 +24,15 @@ setx LLVM_ROOT path/to/llvm
 ```
 
 <ins>**3. Project configuration**</ins>   
-After building LLVM you'll have to link the necessary libraries and create the basic project structure. To do this, navigate to the root channel directory and run the [setup.bat](https://github.com/Goubermouche/channel-language/blob/1546a311f1e7280321ca556ac2f5c380e62bd97e/setup.bat) script. This will generate the necessary project files for VS 2022, note that if you want to build for something else you'll need to modify the [setup.bat](https://github.com/Goubermouche/channel-language/blob/1546a311f1e7280321ca556ac2f5c380e62bd97e/setup.bat) script. 
+After building LLVM you'll have to link the necessary libraries and create the basic project structure. To do this, navigate to the root sigma directory and run the [setup.bat](https://github.com/Goubermouche/sigma/blob/1546a311f1e7280321ca556ac2f5c380e62bd97e/setup.bat) script. This will generate the necessary project files for VS 2022, note that if you want to build for something else you'll need to modify the [setup.bat](https://github.com/Goubermouche/sigma/blob/1546a311f1e7280321ca556ac2f5c380e62bd97e/setup.bat) script. 
 
-<ins>**4. Compiling a channel file**</ins>   
-After building the Channel solution, you can find the generated compiler executable in the `/bin/Release/` folder. To run the executable, use a terminal of your choice. Provide it with a path to a `.ch` file and specify the directory where the compiled executable should be output. An example compilation call may look something like this: 
+<ins>**4. Compiling a Sigma file**</ins>   
+After building the Sigma solution, you can find the generated compiler executable in the `/bin/Release/` folder. To run the executable, use a terminal of your choice. Provide it with a path to a `.ch` file and specify the directory where the compiled executable should be output. An example compilation call may look something like this: 
 ```cmd
 compiler.exe path\to\your\source\file.ch path\to\your\executable\directory
 ```
 ## Language example
-Below is a simple example for rendering a slice of a [Mandelbrot set](https://en.wikipedia.org/wiki/Mandelbrot_set) using the Channel language.
+Below is a simple example for rendering a slice of a [Mandelbrot set](https://en.wikipedia.org/wiki/Mandelbrot_set) using the Sigma language.
 ```cpp
 i32 WIDTH = 100;
 i32 HEIGHT = 30;

@@ -1,6 +1,6 @@
 #include "operator_greater_than_node.h"
 
-namespace channel {
+namespace sigma {
 	operator_greater_than_node::operator_greater_than_node(
 		const token_location& location,
 		const node_ptr& left_expression_node,

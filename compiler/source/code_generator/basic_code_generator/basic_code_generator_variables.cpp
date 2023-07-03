@@ -9,7 +9,7 @@
 #include "code_generator/abstract_syntax_tree/variables/declaration/local_declaration_node.h"
 #include "code_generator/abstract_syntax_tree/variables/declaration/global_declaration_node.h"
 
-namespace channel {
+namespace sigma {
 	expected_value basic_code_generator::visit_assignment_node(
 		assignment_node& node, 
 		const code_generation_context& context
@@ -400,7 +400,7 @@ namespace channel {
 		const code_generation_context& context
 	) {
 		(void)context; // suppress C4100
-		const std::vector<channel::node*>& index_nodes = node.get_array_element_index_nodes();
+		const std::vector<sigma::node*>& index_nodes = node.get_array_element_index_nodes();
 
 		// evaluate the array base expression
 		expected_value array_ptr_result = node.get_array_base_node()->accept(
@@ -473,7 +473,7 @@ namespace channel {
 		const code_generation_context& context
 	) {
 		(void)context; // suppress C4100
-		const std::vector<channel::node*>& index_nodes = node.get_array_element_index_nodes();
+		const std::vector<sigma::node*>& index_nodes = node.get_array_element_index_nodes();
 
 		// evaluate the array base expression
 		expected_value array_ptr_result = node.get_array_base_node()->accept(
@@ -588,7 +588,7 @@ namespace channel {
 		const code_generation_context& context
 	) {
 		// evaluate the expression to get the initial value
-		if (channel::node* expression = node.get_expression_node()) {
+		if (sigma::node* expression = node.get_expression_node()) {
 			// evaluate the assigned value
 			return expression->accept(*this, context);
 		}

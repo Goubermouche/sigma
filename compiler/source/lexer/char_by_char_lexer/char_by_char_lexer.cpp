@@ -1,6 +1,6 @@
 #include "char_by_char_lexer.h"
 
-namespace channel {
+namespace sigma {
 	error_result char_by_char_lexer::tokenize() {
 		// tokenize
 		token tok = token::unknown;

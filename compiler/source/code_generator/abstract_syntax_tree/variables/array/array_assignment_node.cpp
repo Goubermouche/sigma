@@ -1,6 +1,6 @@
 #include "array_assignment_node.h"
 
-namespace channel {
+namespace sigma {
 	array_assignment_node::array_assignment_node(
 		const token_location& location,
 		const node_ptr& array_base,

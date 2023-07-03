@@ -1,6 +1,6 @@
 #include "code_generation_context.h"
 
-namespace channel {
+namespace sigma {
 	code_generation_context::code_generation_context(type expected_type)
 		: m_expected_type(expected_type) {}
 

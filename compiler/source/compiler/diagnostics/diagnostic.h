@@ -4,28 +4,28 @@
 #include "utility/containers/compile_time_hash_map.h"
 
 template<>
-struct std::formatter<channel::type> {
+struct std::formatter<sigma::type> {
 	static auto parse(format_parse_context& ctx) {
 		return ctx.begin();
 	}
 
-	static auto format(channel::type e, format_context& ctx) {
+	static auto format(sigma::type e, format_context& ctx) {
 		return format_to(ctx.out(), "{}", e.to_string());
 	}
 };
 
 template<>
-struct std::formatter<channel::token> {
+struct std::formatter<sigma::token> {
 	static auto parse(format_parse_context& ctx) {
 		return ctx.begin();
 	}
 
-	static auto format(channel::token e, format_context& ctx) {
+	static auto format(sigma::token e, format_context& ctx) {
 		return format_to(ctx.out(), "{}", token_to_string(e));
 	}
 };
 
-namespace channel {
+namespace sigma {
 	class diagnostic_message {
 	public:
 		virtual ~diagnostic_message() = default;

@@ -1,6 +1,6 @@
 #include "operator_disjunction_node.h"
 
-namespace channel {
+namespace sigma {
 	operator_disjunction_node::operator_disjunction_node(
 		const token_location& location,
 		const node_ptr& left_expression_node,

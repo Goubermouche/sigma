@@ -4,7 +4,7 @@
 #include "parser/parser.h"
 #include "code_generator/code_generator.h"
 
-namespace channel {
+namespace sigma {
 	enum class optimization_level {
 		none = 0,
 		low = 1,
@@ -28,7 +28,7 @@ namespace channel {
 	};
 
 	/**
-	 * \brief Compiler instance, used for compiling channel files into an executable.
+	 * \brief Compiler instance, used for compiling sigma files into an executable.
 	 */
 	class compiler {
 	public:

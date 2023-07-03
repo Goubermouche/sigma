@@ -2,7 +2,7 @@
 #include "compiler/diagnostics/error.h"
 #include "utility/macros.h"
 
-namespace channel::detail {
+namespace sigma::detail {
 	/**
 	 * \brief Reads the contents of the specified \a source \a file and, if everything is correct, returns them in the \a out parameter. If there has been an issue when reading the file nothing is read and the function outputs False.
 	 * \param filepath Source file path

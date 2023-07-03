@@ -1,6 +1,6 @@
 #include "operator_multiplication_node.h"
 
-namespace channel {
+namespace sigma {
 	operator_multiplication_node::operator_multiplication_node(
 		const token_location& location,
 		const node_ptr& left_expression_node,

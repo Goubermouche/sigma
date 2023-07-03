@@ -1,6 +1,6 @@
 #include "type.h"
 
-namespace channel {
+namespace sigma {
 	type::type(base base, u16 pointer_level)
 		: m_base(base), m_pointer_level(pointer_level) {}
 

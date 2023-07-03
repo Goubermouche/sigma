@@ -4,7 +4,7 @@
 local llvm_root = os.getenv("LLVM_ROOT")
 local script_root = path.getabsolute(".")
 
-workspace "channel"
+workspace "sigma"
     configurations { "Release" }
     architecture "x64"
     startproject "compiler"
@@ -22,7 +22,7 @@ project "compiler"
 
     externalanglebrackets "On"
     externalwarnings "Off"
-
+    
     flags 
     {
         "MultiProcessorCompile"

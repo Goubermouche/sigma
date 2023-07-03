@@ -1,6 +1,6 @@
 #include "console.h"
 
-namespace channel {
+namespace sigma {
 	console& console::out = *new console();
 
 	void console::init() {

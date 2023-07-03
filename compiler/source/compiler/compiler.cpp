@@ -25,7 +25,7 @@
 
 #include "code_generator/abstract_syntax_tree/keywords/file_include_node.h"
 
-namespace channel {
+namespace sigma {
 	compiler::compiler(
 		compiler_settings settings
 	) : m_settings(settings) {

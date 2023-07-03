@@ -1,6 +1,6 @@
 #include "for_node.h"
 
-namespace channel {
+namespace sigma {
 	for_node::for_node(
 		const token_location& location,
 		const node_ptr& loop_initialization_node,

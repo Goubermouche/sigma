@@ -1,7 +1,7 @@
 #pragma once
 #include "code_generator/abstract_syntax_tree/operators/binary/operator_binary_base.h"
 
-namespace channel {
+namespace sigma {
 	/**
 	 * \brief AST node, represents the greater than binary operator.
 	 */

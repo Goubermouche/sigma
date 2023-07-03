@@ -1,7 +1,7 @@
 #include "lexer.h"
 #include "utility/filesystem.h"
 
-namespace channel {
+namespace sigma {
 	token_list::token_list(std::vector<token_data> tokens)
 		: m_tokens(tokens) {}
 

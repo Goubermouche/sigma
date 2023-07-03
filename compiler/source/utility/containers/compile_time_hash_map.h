@@ -1,7 +1,7 @@
 #pragma once
 #include "utility/macros.h"
 
-namespace channel {
+namespace sigma {
 	template <std::size_t N, typename K, typename V>
 	class hash_map {
 	public:

@@ -2,7 +2,7 @@
 #include "lexer/lexer.h"
 #include "code_generator/abstract_syntax_tree/abstract_syntax_tree.h"
 
-namespace channel {
+namespace sigma {
 	class parser {
 	public:
 		parser();

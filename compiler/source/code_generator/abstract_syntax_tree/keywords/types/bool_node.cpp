@@ -1,6 +1,6 @@
 #include "bool_node.h"
 
-namespace channel {
+namespace sigma {
 	bool_node::bool_node(
 		const token_location& location, bool 
 		value

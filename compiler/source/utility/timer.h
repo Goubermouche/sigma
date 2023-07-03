@@ -1,7 +1,7 @@
 #pragma once
 #include "utility/macros.h"
 
-namespace channel {
+namespace sigma {
 	class timer {
 	public:
 		void start();

@@ -1,7 +1,7 @@
 #pragma once
 #include "code_generator/abstract_syntax_tree/node.h"
 
-namespace channel {
+namespace sigma {
 	/**
 	 * \brief AST node, represents an assignment to a non-array variable.
 	 */

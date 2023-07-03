@@ -2,7 +2,7 @@
 #include <llvm/IR/IRBuilder.h>
 #include "lexer/token.h"
 
-namespace channel {
+namespace sigma {
 	/**
 	 * \brief A class for representing data types and their characteristics.
 	 */

@@ -1,6 +1,6 @@
 #include "break_node.h"
 
-namespace channel {
+namespace sigma {
 	break_node::break_node(const token_location& location)
 		: node(location) {}
 

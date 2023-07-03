@@ -1,6 +1,6 @@
 #include "array_access_node.h"
 
-namespace channel {
+namespace sigma {
 	array_access_node::array_access_node(
 		const token_location& location,
 		const node_ptr& array_base,

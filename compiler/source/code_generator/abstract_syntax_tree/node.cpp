@@ -1,7 +1,7 @@
 ﻿#include "node.h"
 #include "code_generator/code_generator.h"
 
-namespace channel {
+namespace sigma {
 	node::node(const token_location& location)
 		: m_location(location) {}
 

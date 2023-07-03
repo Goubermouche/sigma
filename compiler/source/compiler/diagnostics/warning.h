@@ -1,7 +1,7 @@
 #pragma once
 #include "compiler/diagnostics/diagnostic.h"
 
-namespace channel {
+namespace sigma {
 	namespace diagnostics {}
 	constexpr auto warning_templates = make_hash_map(
 		// *********************************************************************************************************************

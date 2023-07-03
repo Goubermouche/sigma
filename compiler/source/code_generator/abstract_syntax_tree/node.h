@@ -11,7 +11,7 @@
 #define AST_NODE_OPERATOR_COLOR			 color::magenta
 #define AST_NODE_VARIABLE_COLOR			 color::green
 
-namespace channel {
+namespace sigma {
 	class code_generator;
 	class node;
 

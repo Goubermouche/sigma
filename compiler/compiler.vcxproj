@@ -58,18 +58,10 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="source\code_generator\abstract_syntax_tree\keywords\file_include_node.h" />
-    <ClInclude Include="source\code_generator\abstract_syntax_tree\operators\binary\bitwise\operator_bitwise_and_node.h" />
-    <ClInclude Include="source\code_generator\abstract_syntax_tree\operators\binary\bitwise\operator_bitwise_left_shift_node.h" />
-    <ClInclude Include="source\code_generator\abstract_syntax_tree\operators\unary\bitwise\operator_bitwise_not_node.h" />
-    <ClInclude Include="source\code_generator\abstract_syntax_tree\operators\binary\bitwise\operator_bitwise_or_node.h" />
-    <ClInclude Include="source\code_generator\abstract_syntax_tree\operators\binary\bitwise\operator_bitwise_right_shift_node.h" />
-    <ClInclude Include="source\code_generator\abstract_syntax_tree\operators\binary\bitwise\operator_bitwise_xor_node.h" />
-    <ClInclude Include="source\code_generator\abstract_syntax_tree\operators\unary\logical\operator_not_node.h" />
-    <ClInclude Include="source\llvm_wrappers\llvm_context.h" />
     <ClInclude Include="source\code_generator\abstract_syntax_tree\abstract_syntax_tree.h" />
     <ClInclude Include="source\code_generator\abstract_syntax_tree\functions\function_call_node.h" />
     <ClInclude Include="source\code_generator\abstract_syntax_tree\functions\function_node.h" />
+    <ClInclude Include="source\code_generator\abstract_syntax_tree\keywords\file_include_node.h" />
     <ClInclude Include="source\code_generator\abstract_syntax_tree\keywords\flow_control\break_node.h" />
     <ClInclude Include="source\code_generator\abstract_syntax_tree\keywords\flow_control\for_node.h" />
     <ClInclude Include="source\code_generator\abstract_syntax_tree\keywords\flow_control\if_else_node.h" />
@@ -90,6 +82,11 @@
     <ClInclude Include="source\code_generator\abstract_syntax_tree\operators\binary\arithmetic\operator_multiplication_node.h" />
     <ClInclude Include="source\code_generator\abstract_syntax_tree\operators\binary\arithmetic\operator_subtraction_assignment_node.h" />
     <ClInclude Include="source\code_generator\abstract_syntax_tree\operators\binary\arithmetic\operator_subtraction_node.h" />
+    <ClInclude Include="source\code_generator\abstract_syntax_tree\operators\binary\bitwise\operator_bitwise_and_node.h" />
+    <ClInclude Include="source\code_generator\abstract_syntax_tree\operators\binary\bitwise\operator_bitwise_left_shift_node.h" />
+    <ClInclude Include="source\code_generator\abstract_syntax_tree\operators\binary\bitwise\operator_bitwise_or_node.h" />
+    <ClInclude Include="source\code_generator\abstract_syntax_tree\operators\binary\bitwise\operator_bitwise_right_shift_node.h" />
+    <ClInclude Include="source\code_generator\abstract_syntax_tree\operators\binary\bitwise\operator_bitwise_xor_node.h" />
     <ClInclude Include="source\code_generator\abstract_syntax_tree\operators\binary\logical\operator_conjunction_node.h" />
     <ClInclude Include="source\code_generator\abstract_syntax_tree\operators\binary\logical\operator_disjunction_node.h" />
     <ClInclude Include="source\code_generator\abstract_syntax_tree\operators\binary\logical\operator_equals_node.h" />
@@ -103,6 +100,8 @@
     <ClInclude Include="source\code_generator\abstract_syntax_tree\operators\unary\arithmetic\operator_post_increment_node.h" />
     <ClInclude Include="source\code_generator\abstract_syntax_tree\operators\unary\arithmetic\operator_pre_decrement_node.h" />
     <ClInclude Include="source\code_generator\abstract_syntax_tree\operators\unary\arithmetic\operator_pre_increment_node.h" />
+    <ClInclude Include="source\code_generator\abstract_syntax_tree\operators\unary\bitwise\operator_bitwise_not_node.h" />
+    <ClInclude Include="source\code_generator\abstract_syntax_tree\operators\unary\logical\operator_not_node.h" />
     <ClInclude Include="source\code_generator\abstract_syntax_tree\operators\unary\operator_unary_base.h" />
     <ClInclude Include="source\code_generator\abstract_syntax_tree\variables\array\array_access_node.h" />
     <ClInclude Include="source\code_generator\abstract_syntax_tree\variables\array\array_allocation_node.h" />
@@ -113,12 +112,6 @@
     <ClInclude Include="source\code_generator\abstract_syntax_tree\variables\declaration\local_declaration_node.h" />
     <ClInclude Include="source\code_generator\abstract_syntax_tree\variables\variable_access_node.h" />
     <ClInclude Include="source\code_generator\abstract_syntax_tree\variables\variable_node.h" />
-    <ClInclude Include="source\llvm_wrappers\code_generation_context.h" />
-    <ClInclude Include="source\llvm_wrappers\functions\function.h" />
-    <ClInclude Include="source\llvm_wrappers\functions\function_registry.h" />
-    <ClInclude Include="source\llvm_wrappers\scope.h" />
-    <ClInclude Include="source\llvm_wrappers\type.h" />
-    <ClInclude Include="source\llvm_wrappers\value.h" />
     <ClInclude Include="source\code_generator\basic_code_generator\basic_code_generator.h" />
     <ClInclude Include="source\code_generator\code_generator.h" />
     <ClInclude Include="source\compiler\compiler.h" />
@@ -128,6 +121,13 @@
     <ClInclude Include="source\lexer\char_by_char_lexer\char_by_char_lexer.h" />
     <ClInclude Include="source\lexer\lexer.h" />
     <ClInclude Include="source\lexer\token.h" />
+    <ClInclude Include="source\llvm_wrappers\code_generation_context.h" />
+    <ClInclude Include="source\llvm_wrappers\functions\function.h" />
+    <ClInclude Include="source\llvm_wrappers\functions\function_registry.h" />
+    <ClInclude Include="source\llvm_wrappers\llvm_context.h" />
+    <ClInclude Include="source\llvm_wrappers\scope.h" />
+    <ClInclude Include="source\llvm_wrappers\type.h" />
+    <ClInclude Include="source\llvm_wrappers\value.h" />
     <ClInclude Include="source\parser\parser.h" />
     <ClInclude Include="source\parser\recursive_descent_parser\recursive_descent_parser.h" />
     <ClInclude Include="source\utility\console.h" />
@@ -139,20 +139,11 @@
     <ClInclude Include="source\utility\types.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="source\code_generator\abstract_syntax_tree\keywords\file_include_node.cpp" />
-    <ClCompile Include="source\code_generator\abstract_syntax_tree\operators\binary\bitwise\operator_bitwise_and_node.cpp" />
-    <ClCompile Include="source\code_generator\abstract_syntax_tree\operators\binary\bitwise\operator_bitwise_left_shift_node.cpp" />
-    <ClCompile Include="source\code_generator\abstract_syntax_tree\operators\unary\bitwise\operator_bitwise_not_node.cpp" />
-    <ClCompile Include="source\code_generator\abstract_syntax_tree\operators\binary\bitwise\operator_bitwise_or_node.cpp" />
-    <ClCompile Include="source\code_generator\abstract_syntax_tree\operators\binary\bitwise\operator_bitwise_right_shift_node.cpp" />
-    <ClCompile Include="source\code_generator\abstract_syntax_tree\operators\binary\bitwise\operator_bitwise_xor_node.cpp" />
-    <ClCompile Include="source\code_generator\abstract_syntax_tree\operators\unary\logical\operator_not_node.cpp" />
-    <ClCompile Include="source\code_generator\basic_code_generator\codegen_visitor_keywords.cpp" />
-    <ClCompile Include="source\llvm_wrappers\llvm_context.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="source\code_generator\abstract_syntax_tree\abstract_syntax_tree.cpp" />
     <ClCompile Include="source\code_generator\abstract_syntax_tree\functions\function_call_node.cpp" />
     <ClCompile Include="source\code_generator\abstract_syntax_tree\functions\function_node.cpp" />
+    <ClCompile Include="source\code_generator\abstract_syntax_tree\keywords\file_include_node.cpp" />
     <ClCompile Include="source\code_generator\abstract_syntax_tree\keywords\flow_control\break_node.cpp" />
     <ClCompile Include="source\code_generator\abstract_syntax_tree\keywords\flow_control\for_node.cpp" />
     <ClCompile Include="source\code_generator\abstract_syntax_tree\keywords\flow_control\if_else_node.cpp" />
@@ -173,6 +164,11 @@
     <ClCompile Include="source\code_generator\abstract_syntax_tree\operators\binary\arithmetic\operator_multiplication_node.cpp" />
     <ClCompile Include="source\code_generator\abstract_syntax_tree\operators\binary\arithmetic\operator_subtraction_assignment_node.cpp" />
     <ClCompile Include="source\code_generator\abstract_syntax_tree\operators\binary\arithmetic\operator_subtraction_node.cpp" />
+    <ClCompile Include="source\code_generator\abstract_syntax_tree\operators\binary\bitwise\operator_bitwise_and_node.cpp" />
+    <ClCompile Include="source\code_generator\abstract_syntax_tree\operators\binary\bitwise\operator_bitwise_left_shift_node.cpp" />
+    <ClCompile Include="source\code_generator\abstract_syntax_tree\operators\binary\bitwise\operator_bitwise_or_node.cpp" />
+    <ClCompile Include="source\code_generator\abstract_syntax_tree\operators\binary\bitwise\operator_bitwise_right_shift_node.cpp" />
+    <ClCompile Include="source\code_generator\abstract_syntax_tree\operators\binary\bitwise\operator_bitwise_xor_node.cpp" />
     <ClCompile Include="source\code_generator\abstract_syntax_tree\operators\binary\logical\operator_conjunction_node.cpp" />
     <ClCompile Include="source\code_generator\abstract_syntax_tree\operators\binary\logical\operator_disjunction_node.cpp" />
     <ClCompile Include="source\code_generator\abstract_syntax_tree\operators\binary\logical\operator_equals_node.cpp" />
@@ -186,6 +182,8 @@
     <ClCompile Include="source\code_generator\abstract_syntax_tree\operators\unary\arithmetic\operator_post_increment_node.cpp" />
     <ClCompile Include="source\code_generator\abstract_syntax_tree\operators\unary\arithmetic\operator_pre_decrement_node.cpp" />
     <ClCompile Include="source\code_generator\abstract_syntax_tree\operators\unary\arithmetic\operator_pre_increment_node.cpp" />
+    <ClCompile Include="source\code_generator\abstract_syntax_tree\operators\unary\bitwise\operator_bitwise_not_node.cpp" />
+    <ClCompile Include="source\code_generator\abstract_syntax_tree\operators\unary\logical\operator_not_node.cpp" />
     <ClCompile Include="source\code_generator\abstract_syntax_tree\operators\unary\operator_unary_base.cpp" />
     <ClCompile Include="source\code_generator\abstract_syntax_tree\variables\array\array_access_node.cpp" />
     <ClCompile Include="source\code_generator\abstract_syntax_tree\variables\array\array_allocation_node.cpp" />
@@ -196,18 +194,13 @@
     <ClCompile Include="source\code_generator\abstract_syntax_tree\variables\declaration\local_declaration_node.cpp" />
     <ClCompile Include="source\code_generator\abstract_syntax_tree\variables\variable_access_node.cpp" />
     <ClCompile Include="source\code_generator\abstract_syntax_tree\variables\variable_node.cpp" />
-    <ClCompile Include="source\llvm_wrappers\code_generation_context.cpp" />
-    <ClCompile Include="source\llvm_wrappers\functions\function.cpp" />
-    <ClCompile Include="source\llvm_wrappers\functions\function_registry.cpp" />
-    <ClCompile Include="source\llvm_wrappers\scope.cpp" />
-    <ClCompile Include="source\llvm_wrappers\type.cpp" />
-    <ClCompile Include="source\llvm_wrappers\value.cpp" />
     <ClCompile Include="source\code_generator\basic_code_generator\basic_code_generator.cpp" />
     <ClCompile Include="source\code_generator\basic_code_generator\basic_code_generator_flow_control.cpp" />
     <ClCompile Include="source\code_generator\basic_code_generator\basic_code_generator_functions.cpp" />
     <ClCompile Include="source\code_generator\basic_code_generator\basic_code_generator_operators.cpp" />
     <ClCompile Include="source\code_generator\basic_code_generator\basic_code_generator_types.cpp" />
     <ClCompile Include="source\code_generator\basic_code_generator\basic_code_generator_variables.cpp" />
+    <ClCompile Include="source\code_generator\basic_code_generator\codegen_visitor_keywords.cpp" />
     <ClCompile Include="source\code_generator\code_generator.cpp" />
     <ClCompile Include="source\compiler\compiler.cpp" />
     <ClCompile Include="source\compiler\diagnostics\diagnostic.cpp" />
@@ -215,6 +208,13 @@
     <ClCompile Include="source\compiler\diagnostics\warning.cpp" />
     <ClCompile Include="source\lexer\char_by_char_lexer\char_by_char_lexer.cpp" />
     <ClCompile Include="source\lexer\lexer.cpp" />
+    <ClCompile Include="source\llvm_wrappers\code_generation_context.cpp" />
+    <ClCompile Include="source\llvm_wrappers\functions\function.cpp" />
+    <ClCompile Include="source\llvm_wrappers\functions\function_registry.cpp" />
+    <ClCompile Include="source\llvm_wrappers\llvm_context.cpp" />
+    <ClCompile Include="source\llvm_wrappers\scope.cpp" />
+    <ClCompile Include="source\llvm_wrappers\type.cpp" />
+    <ClCompile Include="source\llvm_wrappers\value.cpp" />
     <ClCompile Include="source\parser\parser.cpp" />
     <ClCompile Include="source\parser\recursive_descent_parser\recursive_descent_parser.cpp" />
     <ClCompile Include="source\utility\console.cpp" />

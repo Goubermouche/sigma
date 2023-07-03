@@ -2,7 +2,7 @@
 #include "code_generator/abstract_syntax_tree/node.h"
 #include "llvm_wrappers/type.h"
 
-namespace channel {
+namespace sigma {
 	/**
 	 * \brief AST node, represents the declaration of a variable.
 	 */

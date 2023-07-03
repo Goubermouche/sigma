@@ -1,6 +1,6 @@
 #include "return_node.h"
 
-namespace channel {
+namespace sigma {
 	return_node::return_node(
 		const token_location& location,
 		const node_ptr& return_expression_node

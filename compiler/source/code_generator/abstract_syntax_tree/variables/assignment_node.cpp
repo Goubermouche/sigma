@@ -1,6 +1,6 @@
 #include "assignment_node.h"
 
-namespace channel {
+namespace sigma {
 	assignment_node::assignment_node(
 		const token_location& location,
 		const node_ptr& variable,

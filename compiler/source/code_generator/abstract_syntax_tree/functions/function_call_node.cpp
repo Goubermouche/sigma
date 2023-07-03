@@ -1,6 +1,6 @@
 #include "function_call_node.h"
 
-namespace channel {
+namespace sigma {
 	function_call_node::function_call_node(
 		const token_location& location,
 		const std::string& function_identifier,

@@ -13,7 +13,7 @@ llvm::StructType::get(m_llvm_context->get_context(), {       \
 	llvm::Type::getInt8PtrTy(m_llvm_context->get_context())  \
 })
 
-namespace channel {
+namespace sigma {
 	class declaration_node;
 
 	/**

@@ -1,7 +1,7 @@
 #pragma once
 #include "code_generator/abstract_syntax_tree/node.h"
 
-namespace channel {
+namespace sigma {
 	class abstract_syntax_tree {
 	public:
 		abstract_syntax_tree() = default;

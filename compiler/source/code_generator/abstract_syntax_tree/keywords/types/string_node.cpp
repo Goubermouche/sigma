@@ -1,6 +1,6 @@
 #include "string_node.h"	
 
-namespace channel {
+namespace sigma {
 	string_node::string_node(
 		const token_location& location, 
 		const std::string& value

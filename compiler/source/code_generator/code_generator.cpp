@@ -1,6 +1,6 @@
 #include "code_generator.h"
 
-namespace channel {
+namespace sigma {
 	code_generator::code_generator()
 		: m_llvm_context(std::make_shared<llvm_context>()) {} 
 

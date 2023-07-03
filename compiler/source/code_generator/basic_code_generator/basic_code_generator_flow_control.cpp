@@ -6,7 +6,7 @@
 #include "code_generator/abstract_syntax_tree/keywords/flow_control/for_node.h"
 #include "code_generator/abstract_syntax_tree/keywords/flow_control/break_node.h"
 
-namespace channel {
+namespace sigma {
 	expected_value basic_code_generator::visit_return_node(
 		return_node& node, 
 		const code_generation_context& context
@@ -239,7 +239,7 @@ namespace channel {
 		// accept all statements in the loop body
 		m_llvm_context->get_builder().SetInsertPoint(loop_body_block);
 
-		for (channel::node* n : node.get_loop_body_nodes()) {
+		for (sigma::node* n : node.get_loop_body_nodes()) {
 			expected_value statement_result = n->accept(
 				*this,
 				{}
@@ -342,7 +342,7 @@ namespace channel {
 
 		// create the increment block
 		m_llvm_context->get_builder().SetInsertPoint(increment_block);
-		for (channel::node* n : node.get_post_iteration_nodes()) {
+		for (sigma::node* n : node.get_post_iteration_nodes()) {
 			expected_value statement_result = n->accept(*this, {});
 			if (!statement_result) {
 				return statement_result; // return on failure
@@ -355,7 +355,7 @@ namespace channel {
 		m_llvm_context->get_builder().SetInsertPoint(loop_body_block);
 
 		// accept all inner statements
-		for (channel::node* n : node.get_loop_body_nodes()) {
+		for (sigma::node* n : node.get_loop_body_nodes()) {
 			expected_value statement_result = n->accept(*this, {});
 			if (!statement_result) {
 				return statement_result; // return on failure

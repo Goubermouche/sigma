@@ -1,6 +1,6 @@
 #include "operator_binary_base.h"
 
-namespace channel {
+namespace sigma {
 	operator_binary_base::operator_binary_base(
 		const token_location& location,
 		const node_ptr& left_expression_node,

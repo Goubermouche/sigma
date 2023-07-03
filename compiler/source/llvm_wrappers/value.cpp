@@ -1,6 +1,6 @@
 #include "value.h"
 
-namespace channel {
+namespace sigma {
 	value::value(
 		const std::string& name, 
 		type type,

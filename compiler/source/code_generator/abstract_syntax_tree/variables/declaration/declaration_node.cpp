@@ -1,6 +1,6 @@
 #include "declaration_node.h"
 
-namespace channel {
+namespace sigma {
 	declaration_node::declaration_node(
 		const token_location& location,
 		const type& declaration_type, 

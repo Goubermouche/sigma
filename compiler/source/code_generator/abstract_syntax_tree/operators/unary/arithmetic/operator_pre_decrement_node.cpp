@@ -1,6 +1,6 @@
 #include "operator_pre_decrement_node.h"
 
-namespace channel {
+namespace sigma {
 	operator_pre_decrement_node::operator_pre_decrement_node(
 		const token_location& location,
 		const node_ptr& expression_node

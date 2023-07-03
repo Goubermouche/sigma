@@ -1,6 +1,6 @@
 #include "function.h"
 
-namespace channel {
+namespace sigma {
 	function_declaration::function_declaration(
 		type return_type,
 		const std::vector<std::pair<std::string, type>>& arguments,

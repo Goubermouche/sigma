@@ -1,6 +1,6 @@
 #include "error.h"
 
-namespace channel {
+namespace sigma {
 	error_message::error_message(
 		std::string message, 
 		u64 code

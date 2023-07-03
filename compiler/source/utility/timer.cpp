@@ -1,6 +1,6 @@
 #include "timer.h"
 
-namespace channel {
+namespace sigma {
 	void timer::start()	{
 		m_start = std::chrono::steady_clock::now();
 	}

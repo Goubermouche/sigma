@@ -1,7 +1,7 @@
 #pragma once
 #include <llvm/IR/IRBuilder.h>
 
-namespace channel {
+namespace sigma {
 	/**
 	 * \brief LLVM context, holds LLVM variables that are relevant to the code generation process. 
 	 */

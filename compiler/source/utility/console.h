@@ -4,7 +4,7 @@
 #define NOMINMAX
 #include <Windows.h>
 
-namespace channel {
+namespace sigma {
 	class color {
 	public:
 		static constexpr WORD white = 7;

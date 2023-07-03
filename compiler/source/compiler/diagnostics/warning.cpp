@@ -1,6 +1,6 @@
 #include "warning.h"
 
-namespace channel {
+namespace sigma {
 	warning_message::warning_message(
 		std::string message,
 		u64 code

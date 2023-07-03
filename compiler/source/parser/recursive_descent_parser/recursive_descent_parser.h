@@ -2,7 +2,7 @@
 #include "parser/parser.h"
 #include "llvm_wrappers/type.h"
 
-namespace channel {
+namespace sigma {
 	class recursive_descent_parser : public parser {
 	public:
 		recursive_descent_parser();

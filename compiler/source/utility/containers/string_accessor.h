@@ -1,7 +1,7 @@
 #pragma once
 #include "utility/filesystem.h"
 
-namespace channel::detail {
+namespace sigma::detail {
 	/**
 	 * \brief Utility string container class with support for caret movements.
 	 */

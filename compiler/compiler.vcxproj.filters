@@ -4,59 +4,62 @@
     <Filter Include="source">
       <UniqueIdentifier>{76FF3A1C-62A1-65F2-4B5C-7946379DEC42}</UniqueIdentifier>
     </Filter>
-    <Filter Include="source\codegen">
-      <UniqueIdentifier>{7AFF388B-66CD-2C91-4F61-9DB73BCE08F6}</UniqueIdentifier>
+    <Filter Include="source\code_generator">
+      <UniqueIdentifier>{26A85C68-9214-1863-5B08-B0C0C7333ACB}</UniqueIdentifier>
     </Filter>
-    <Filter Include="source\codegen\abstract_syntax_tree">
-      <UniqueIdentifier>{52D5C200-BE8E-2DAB-47EE-4785B3A6E31A}</UniqueIdentifier>
+    <Filter Include="source\code_generator\abstract_syntax_tree">
+      <UniqueIdentifier>{7EA1814E-6A09-481C-D374-5C32BFFB5E08}</UniqueIdentifier>
     </Filter>
-    <Filter Include="source\codegen\abstract_syntax_tree\functions">
-      <UniqueIdentifier>{5A80425A-C6F0-44D3-8F0F-BF5BFB3E7DD4}</UniqueIdentifier>
+    <Filter Include="source\code_generator\abstract_syntax_tree\functions">
+      <UniqueIdentifier>{8673DF39-72B2-89B5-1B35-66E707533F20}</UniqueIdentifier>
     </Filter>
-    <Filter Include="source\codegen\abstract_syntax_tree\keywords">
-      <UniqueIdentifier>{590B24B5-451E-240E-EE07-01FBDAF9C05B}</UniqueIdentifier>
+    <Filter Include="source\code_generator\abstract_syntax_tree\keywords">
+      <UniqueIdentifier>{05491976-715A-C11C-FAAB-535C66BC4A56}</UniqueIdentifier>
     </Filter>
-    <Filter Include="source\codegen\abstract_syntax_tree\keywords\flow_control">
-      <UniqueIdentifier>{80068E04-EC78-D020-350D-06A5A1BE9A19}</UniqueIdentifier>
+    <Filter Include="source\code_generator\abstract_syntax_tree\keywords\flow_control">
+      <UniqueIdentifier>{AC1B8508-981C-1983-C1E4-8507AD448F3D}</UniqueIdentifier>
     </Filter>
-    <Filter Include="source\codegen\abstract_syntax_tree\keywords\types">
-      <UniqueIdentifier>{DD3DD9F9-C9D1-CEA1-3296-28561E490994}</UniqueIdentifier>
+    <Filter Include="source\code_generator\abstract_syntax_tree\keywords\types">
+      <UniqueIdentifier>{890C2937-F57E-6B53-3E13-A1D7AAC4354C}</UniqueIdentifier>
     </Filter>
-    <Filter Include="source\codegen\abstract_syntax_tree\operators">
-      <UniqueIdentifier>{C0C63842-2C37-3BBB-F555-B543618573BC}</UniqueIdentifier>
+    <Filter Include="source\code_generator\abstract_syntax_tree\operators">
+      <UniqueIdentifier>{ECB9D521-D8F8-7F9D-817B-5CCF6D993508}</UniqueIdentifier>
     </Filter>
-    <Filter Include="source\codegen\abstract_syntax_tree\operators\binary">
-      <UniqueIdentifier>{346E72BD-20AD-1C39-C92F-F96AB54DD2A3}</UniqueIdentifier>
+    <Filter Include="source\code_generator\abstract_syntax_tree\operators\binary">
+      <UniqueIdentifier>{E097F08D-4C55-99C4-D51F-852C41DC0B19}</UniqueIdentifier>
     </Filter>
-    <Filter Include="source\codegen\abstract_syntax_tree\operators\binary\arithmetic">
-      <UniqueIdentifier>{4D621B5C-B9F5-7C0A-C2DC-ECC02EEF13D2}</UniqueIdentifier>
+    <Filter Include="source\code_generator\abstract_syntax_tree\operators\binary\arithmetic">
+      <UniqueIdentifier>{79A850FF-65AA-940F-4E2D-8B083ACE8FB4}</UniqueIdentifier>
     </Filter>
-    <Filter Include="source\codegen\abstract_syntax_tree\operators\binary\logical">
-      <UniqueIdentifier>{7ED85E15-6A43-1F21-135F-8486FFA8E203}</UniqueIdentifier>
+    <Filter Include="source\code_generator\abstract_syntax_tree\operators\binary\bitwise">
+      <UniqueIdentifier>{86A2BFA6-F20B-5509-7B4F-03B4E7B7054E}</UniqueIdentifier>
     </Filter>
-    <Filter Include="source\codegen\abstract_syntax_tree\operators\unary">
-      <UniqueIdentifier>{BE7C08C9-2A8E-B06F-B3DF-42AF1FF039A9}</UniqueIdentifier>
+    <Filter Include="source\code_generator\abstract_syntax_tree\operators\binary\logical">
+      <UniqueIdentifier>{2AEE91B5-9657-2718-1F9B-D5C28B03D85C}</UniqueIdentifier>
     </Filter>
-    <Filter Include="source\codegen\abstract_syntax_tree\operators\unary\arithmetic">
-      <UniqueIdentifier>{97063DF0-83DC-C3ED-6C86-DE4058FBF68E}</UniqueIdentifier>
+    <Filter Include="source\code_generator\abstract_syntax_tree\operators\unary">
+      <UniqueIdentifier>{EA2052B0-D6E0-E254-3FFE-CA5F2BDDF566}</UniqueIdentifier>
     </Filter>
-    <Filter Include="source\codegen\abstract_syntax_tree\variables">
-      <UniqueIdentifier>{7A1F716D-E68F-73E6-AFAE-ED6E1BDEABE7}</UniqueIdentifier>
+    <Filter Include="source\code_generator\abstract_syntax_tree\operators\unary\arithmetic">
+      <UniqueIdentifier>{43378C69-AFAB-21C7-78F5-6ED6E428ADFA}</UniqueIdentifier>
     </Filter>
-    <Filter Include="source\codegen\abstract_syntax_tree\variables\array">
-      <UniqueIdentifier>{88868B6F-F497-3316-7DE9-C555E9F9BC4F}</UniqueIdentifier>
+    <Filter Include="source\code_generator\abstract_syntax_tree\operators\unary\bitwise">
+      <UniqueIdentifier>{909576BF-7C81-0E2F-E5F7-CD81D102AF5F}</UniqueIdentifier>
     </Filter>
-    <Filter Include="source\codegen\abstract_syntax_tree\variables\declaration">
-      <UniqueIdentifier>{0FAC3115-7B1E-7431-C4B2-A9B530643E2A}</UniqueIdentifier>
+    <Filter Include="source\code_generator\abstract_syntax_tree\operators\unary\logical">
+      <UniqueIdentifier>{34E148CE-20CD-E03D-8943-A090754E816E}</UniqueIdentifier>
     </Filter>
-    <Filter Include="source\codegen\llvm_wrappers">
-      <UniqueIdentifier>{77160437-63D1-F3E2-0C89-6C2DF8223E73}</UniqueIdentifier>
+    <Filter Include="source\code_generator\abstract_syntax_tree\variables">
+      <UniqueIdentifier>{A6120E4D-9251-B8C8-3BD4-94FA27F26D33}</UniqueIdentifier>
     </Filter>
-    <Filter Include="source\codegen\llvm_wrappers\functions">
-      <UniqueIdentifier>{BF332FE6-AB85-06D6-94A4-43E680951FBF}</UniqueIdentifier>
+    <Filter Include="source\code_generator\abstract_syntax_tree\variables\array">
+      <UniqueIdentifier>{B42AD556-A0EA-65FB-0908-4E06F5E6780D}</UniqueIdentifier>
     </Filter>
-    <Filter Include="source\codegen\visitor">
-      <UniqueIdentifier>{B92BCE93-A525-F7E5-8E92-8DF67A2B5D52}</UniqueIdentifier>
+    <Filter Include="source\code_generator\abstract_syntax_tree\variables\declaration">
+      <UniqueIdentifier>{3BC12819-27C2-BC93-508A-29183CEA324E}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="source\code_generator\basic_code_generator">
+      <UniqueIdentifier>{378EF486-23F6-BA54-8C61-CF6A78E8D140}</UniqueIdentifier>
     </Filter>
     <Filter Include="source\compiler">
       <UniqueIdentifier>{C09F1F08-2C2B-8DCC-353C-10C1A146E9CC}</UniqueIdentifier>
@@ -69,6 +72,12 @@
     </Filter>
     <Filter Include="source\lexer\char_by_char_lexer">
       <UniqueIdentifier>{28F5951D-94D8-A45D-9DDB-D299093E6BAE}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="source\llvm_wrappers">
+      <UniqueIdentifier>{735F68D6-5FEE-F19F-080D-069BF47A0246}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="source\llvm_wrappers\functions">
+      <UniqueIdentifier>{BBE7CF6C-A70D-9AD3-9053-1F9F7C18BF9F}</UniqueIdentifier>
     </Filter>
     <Filter Include="source\parser">
       <UniqueIdentifier>{52EFAC7E-BEAF-28B5-87EA-7132F3696D91}</UniqueIdentifier>
@@ -85,166 +94,172 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="source\code_generator\abstract_syntax_tree\abstract_syntax_tree.h">
-      <Filter>source\codegen\abstract_syntax_tree</Filter>
+      <Filter>source\code_generator\abstract_syntax_tree</Filter>
     </ClInclude>
     <ClInclude Include="source\code_generator\abstract_syntax_tree\functions\function_call_node.h">
-      <Filter>source\codegen\abstract_syntax_tree\functions</Filter>
+      <Filter>source\code_generator\abstract_syntax_tree\functions</Filter>
     </ClInclude>
     <ClInclude Include="source\code_generator\abstract_syntax_tree\functions\function_node.h">
-      <Filter>source\codegen\abstract_syntax_tree\functions</Filter>
+      <Filter>source\code_generator\abstract_syntax_tree\functions</Filter>
+    </ClInclude>
+    <ClInclude Include="source\code_generator\abstract_syntax_tree\keywords\file_include_node.h">
+      <Filter>source\code_generator\abstract_syntax_tree\keywords</Filter>
     </ClInclude>
     <ClInclude Include="source\code_generator\abstract_syntax_tree\keywords\flow_control\break_node.h">
-      <Filter>source\codegen\abstract_syntax_tree\keywords\flow_control</Filter>
+      <Filter>source\code_generator\abstract_syntax_tree\keywords\flow_control</Filter>
     </ClInclude>
     <ClInclude Include="source\code_generator\abstract_syntax_tree\keywords\flow_control\for_node.h">
-      <Filter>source\codegen\abstract_syntax_tree\keywords\flow_control</Filter>
+      <Filter>source\code_generator\abstract_syntax_tree\keywords\flow_control</Filter>
     </ClInclude>
     <ClInclude Include="source\code_generator\abstract_syntax_tree\keywords\flow_control\if_else_node.h">
-      <Filter>source\codegen\abstract_syntax_tree\keywords\flow_control</Filter>
+      <Filter>source\code_generator\abstract_syntax_tree\keywords\flow_control</Filter>
     </ClInclude>
     <ClInclude Include="source\code_generator\abstract_syntax_tree\keywords\flow_control\return_node.h">
-      <Filter>source\codegen\abstract_syntax_tree\keywords\flow_control</Filter>
+      <Filter>source\code_generator\abstract_syntax_tree\keywords\flow_control</Filter>
     </ClInclude>
     <ClInclude Include="source\code_generator\abstract_syntax_tree\keywords\flow_control\while_node.h">
-      <Filter>source\codegen\abstract_syntax_tree\keywords\flow_control</Filter>
+      <Filter>source\code_generator\abstract_syntax_tree\keywords\flow_control</Filter>
     </ClInclude>
     <ClInclude Include="source\code_generator\abstract_syntax_tree\keywords\types\bool_node.h">
-      <Filter>source\codegen\abstract_syntax_tree\keywords\types</Filter>
+      <Filter>source\code_generator\abstract_syntax_tree\keywords\types</Filter>
     </ClInclude>
     <ClInclude Include="source\code_generator\abstract_syntax_tree\keywords\types\char_node.h">
-      <Filter>source\codegen\abstract_syntax_tree\keywords\types</Filter>
+      <Filter>source\code_generator\abstract_syntax_tree\keywords\types</Filter>
     </ClInclude>
     <ClInclude Include="source\code_generator\abstract_syntax_tree\keywords\types\numerical_literal_node.h">
-      <Filter>source\codegen\abstract_syntax_tree\keywords\types</Filter>
+      <Filter>source\code_generator\abstract_syntax_tree\keywords\types</Filter>
     </ClInclude>
     <ClInclude Include="source\code_generator\abstract_syntax_tree\keywords\types\string_node.h">
-      <Filter>source\codegen\abstract_syntax_tree\keywords\types</Filter>
+      <Filter>source\code_generator\abstract_syntax_tree\keywords\types</Filter>
     </ClInclude>
     <ClInclude Include="source\code_generator\abstract_syntax_tree\node.h">
-      <Filter>source\codegen\abstract_syntax_tree</Filter>
+      <Filter>source\code_generator\abstract_syntax_tree</Filter>
     </ClInclude>
     <ClInclude Include="source\code_generator\abstract_syntax_tree\operators\binary\arithmetic\operator_addition_assignment_node.h">
-      <Filter>source\codegen\abstract_syntax_tree\operators\binary\arithmetic</Filter>
+      <Filter>source\code_generator\abstract_syntax_tree\operators\binary\arithmetic</Filter>
     </ClInclude>
     <ClInclude Include="source\code_generator\abstract_syntax_tree\operators\binary\arithmetic\operator_addition_node.h">
-      <Filter>source\codegen\abstract_syntax_tree\operators\binary\arithmetic</Filter>
+      <Filter>source\code_generator\abstract_syntax_tree\operators\binary\arithmetic</Filter>
     </ClInclude>
     <ClInclude Include="source\code_generator\abstract_syntax_tree\operators\binary\arithmetic\operator_division_assignment_node.h">
-      <Filter>source\codegen\abstract_syntax_tree\operators\binary\arithmetic</Filter>
+      <Filter>source\code_generator\abstract_syntax_tree\operators\binary\arithmetic</Filter>
     </ClInclude>
     <ClInclude Include="source\code_generator\abstract_syntax_tree\operators\binary\arithmetic\operator_division_node.h">
-      <Filter>source\codegen\abstract_syntax_tree\operators\binary\arithmetic</Filter>
+      <Filter>source\code_generator\abstract_syntax_tree\operators\binary\arithmetic</Filter>
     </ClInclude>
     <ClInclude Include="source\code_generator\abstract_syntax_tree\operators\binary\arithmetic\operator_modulo_assignment_node.h">
-      <Filter>source\codegen\abstract_syntax_tree\operators\binary\arithmetic</Filter>
+      <Filter>source\code_generator\abstract_syntax_tree\operators\binary\arithmetic</Filter>
     </ClInclude>
     <ClInclude Include="source\code_generator\abstract_syntax_tree\operators\binary\arithmetic\operator_modulo_node.h">
-      <Filter>source\codegen\abstract_syntax_tree\operators\binary\arithmetic</Filter>
+      <Filter>source\code_generator\abstract_syntax_tree\operators\binary\arithmetic</Filter>
     </ClInclude>
     <ClInclude Include="source\code_generator\abstract_syntax_tree\operators\binary\arithmetic\operator_multiplication_assignment_node.h">
-      <Filter>source\codegen\abstract_syntax_tree\operators\binary\arithmetic</Filter>
+      <Filter>source\code_generator\abstract_syntax_tree\operators\binary\arithmetic</Filter>
     </ClInclude>
     <ClInclude Include="source\code_generator\abstract_syntax_tree\operators\binary\arithmetic\operator_multiplication_node.h">
-      <Filter>source\codegen\abstract_syntax_tree\operators\binary\arithmetic</Filter>
+      <Filter>source\code_generator\abstract_syntax_tree\operators\binary\arithmetic</Filter>
     </ClInclude>
     <ClInclude Include="source\code_generator\abstract_syntax_tree\operators\binary\arithmetic\operator_subtraction_assignment_node.h">
-      <Filter>source\codegen\abstract_syntax_tree\operators\binary\arithmetic</Filter>
+      <Filter>source\code_generator\abstract_syntax_tree\operators\binary\arithmetic</Filter>
     </ClInclude>
     <ClInclude Include="source\code_generator\abstract_syntax_tree\operators\binary\arithmetic\operator_subtraction_node.h">
-      <Filter>source\codegen\abstract_syntax_tree\operators\binary\arithmetic</Filter>
+      <Filter>source\code_generator\abstract_syntax_tree\operators\binary\arithmetic</Filter>
+    </ClInclude>
+    <ClInclude Include="source\code_generator\abstract_syntax_tree\operators\binary\bitwise\operator_bitwise_and_node.h">
+      <Filter>source\code_generator\abstract_syntax_tree\operators\binary\bitwise</Filter>
+    </ClInclude>
+    <ClInclude Include="source\code_generator\abstract_syntax_tree\operators\binary\bitwise\operator_bitwise_left_shift_node.h">
+      <Filter>source\code_generator\abstract_syntax_tree\operators\binary\bitwise</Filter>
+    </ClInclude>
+    <ClInclude Include="source\code_generator\abstract_syntax_tree\operators\binary\bitwise\operator_bitwise_or_node.h">
+      <Filter>source\code_generator\abstract_syntax_tree\operators\binary\bitwise</Filter>
+    </ClInclude>
+    <ClInclude Include="source\code_generator\abstract_syntax_tree\operators\binary\bitwise\operator_bitwise_right_shift_node.h">
+      <Filter>source\code_generator\abstract_syntax_tree\operators\binary\bitwise</Filter>
+    </ClInclude>
+    <ClInclude Include="source\code_generator\abstract_syntax_tree\operators\binary\bitwise\operator_bitwise_xor_node.h">
+      <Filter>source\code_generator\abstract_syntax_tree\operators\binary\bitwise</Filter>
     </ClInclude>
     <ClInclude Include="source\code_generator\abstract_syntax_tree\operators\binary\logical\operator_conjunction_node.h">
-      <Filter>source\codegen\abstract_syntax_tree\operators\binary\logical</Filter>
+      <Filter>source\code_generator\abstract_syntax_tree\operators\binary\logical</Filter>
     </ClInclude>
     <ClInclude Include="source\code_generator\abstract_syntax_tree\operators\binary\logical\operator_disjunction_node.h">
-      <Filter>source\codegen\abstract_syntax_tree\operators\binary\logical</Filter>
+      <Filter>source\code_generator\abstract_syntax_tree\operators\binary\logical</Filter>
     </ClInclude>
     <ClInclude Include="source\code_generator\abstract_syntax_tree\operators\binary\logical\operator_equals_node.h">
-      <Filter>source\codegen\abstract_syntax_tree\operators\binary\logical</Filter>
+      <Filter>source\code_generator\abstract_syntax_tree\operators\binary\logical</Filter>
     </ClInclude>
     <ClInclude Include="source\code_generator\abstract_syntax_tree\operators\binary\logical\operator_greater_than_equal_to_node.h">
-      <Filter>source\codegen\abstract_syntax_tree\operators\binary\logical</Filter>
+      <Filter>source\code_generator\abstract_syntax_tree\operators\binary\logical</Filter>
     </ClInclude>
     <ClInclude Include="source\code_generator\abstract_syntax_tree\operators\binary\logical\operator_greater_than_node.h">
-      <Filter>source\codegen\abstract_syntax_tree\operators\binary\logical</Filter>
+      <Filter>source\code_generator\abstract_syntax_tree\operators\binary\logical</Filter>
     </ClInclude>
     <ClInclude Include="source\code_generator\abstract_syntax_tree\operators\binary\logical\operator_less_than_equal_to_node.h">
-      <Filter>source\codegen\abstract_syntax_tree\operators\binary\logical</Filter>
+      <Filter>source\code_generator\abstract_syntax_tree\operators\binary\logical</Filter>
     </ClInclude>
     <ClInclude Include="source\code_generator\abstract_syntax_tree\operators\binary\logical\operator_less_than_node.h">
-      <Filter>source\codegen\abstract_syntax_tree\operators\binary\logical</Filter>
+      <Filter>source\code_generator\abstract_syntax_tree\operators\binary\logical</Filter>
     </ClInclude>
     <ClInclude Include="source\code_generator\abstract_syntax_tree\operators\binary\logical\operator_not_equals_node.h">
-      <Filter>source\codegen\abstract_syntax_tree\operators\binary\logical</Filter>
+      <Filter>source\code_generator\abstract_syntax_tree\operators\binary\logical</Filter>
     </ClInclude>
     <ClInclude Include="source\code_generator\abstract_syntax_tree\operators\binary\operator_binary_base.h">
-      <Filter>source\codegen\abstract_syntax_tree\operators\binary</Filter>
+      <Filter>source\code_generator\abstract_syntax_tree\operators\binary</Filter>
     </ClInclude>
     <ClInclude Include="source\code_generator\abstract_syntax_tree\operators\unary\arithmetic\operator_post_decrement_node.h">
-      <Filter>source\codegen\abstract_syntax_tree\operators\unary\arithmetic</Filter>
+      <Filter>source\code_generator\abstract_syntax_tree\operators\unary\arithmetic</Filter>
     </ClInclude>
     <ClInclude Include="source\code_generator\abstract_syntax_tree\operators\unary\arithmetic\operator_post_increment_node.h">
-      <Filter>source\codegen\abstract_syntax_tree\operators\unary\arithmetic</Filter>
+      <Filter>source\code_generator\abstract_syntax_tree\operators\unary\arithmetic</Filter>
     </ClInclude>
     <ClInclude Include="source\code_generator\abstract_syntax_tree\operators\unary\arithmetic\operator_pre_decrement_node.h">
-      <Filter>source\codegen\abstract_syntax_tree\operators\unary\arithmetic</Filter>
+      <Filter>source\code_generator\abstract_syntax_tree\operators\unary\arithmetic</Filter>
     </ClInclude>
     <ClInclude Include="source\code_generator\abstract_syntax_tree\operators\unary\arithmetic\operator_pre_increment_node.h">
-      <Filter>source\codegen\abstract_syntax_tree\operators\unary\arithmetic</Filter>
+      <Filter>source\code_generator\abstract_syntax_tree\operators\unary\arithmetic</Filter>
+    </ClInclude>
+    <ClInclude Include="source\code_generator\abstract_syntax_tree\operators\unary\bitwise\operator_bitwise_not_node.h">
+      <Filter>source\code_generator\abstract_syntax_tree\operators\unary\bitwise</Filter>
+    </ClInclude>
+    <ClInclude Include="source\code_generator\abstract_syntax_tree\operators\unary\logical\operator_not_node.h">
+      <Filter>source\code_generator\abstract_syntax_tree\operators\unary\logical</Filter>
     </ClInclude>
     <ClInclude Include="source\code_generator\abstract_syntax_tree\operators\unary\operator_unary_base.h">
-      <Filter>source\codegen\abstract_syntax_tree\operators\unary</Filter>
+      <Filter>source\code_generator\abstract_syntax_tree\operators\unary</Filter>
     </ClInclude>
     <ClInclude Include="source\code_generator\abstract_syntax_tree\variables\array\array_access_node.h">
-      <Filter>source\codegen\abstract_syntax_tree\variables\array</Filter>
+      <Filter>source\code_generator\abstract_syntax_tree\variables\array</Filter>
     </ClInclude>
     <ClInclude Include="source\code_generator\abstract_syntax_tree\variables\array\array_allocation_node.h">
-      <Filter>source\codegen\abstract_syntax_tree\variables\array</Filter>
+      <Filter>source\code_generator\abstract_syntax_tree\variables\array</Filter>
     </ClInclude>
     <ClInclude Include="source\code_generator\abstract_syntax_tree\variables\array\array_assignment_node.h">
-      <Filter>source\codegen\abstract_syntax_tree\variables\array</Filter>
+      <Filter>source\code_generator\abstract_syntax_tree\variables\array</Filter>
     </ClInclude>
     <ClInclude Include="source\code_generator\abstract_syntax_tree\variables\assignment_node.h">
-      <Filter>source\codegen\abstract_syntax_tree\variables</Filter>
+      <Filter>source\code_generator\abstract_syntax_tree\variables</Filter>
     </ClInclude>
     <ClInclude Include="source\code_generator\abstract_syntax_tree\variables\declaration\declaration_node.h">
-      <Filter>source\codegen\abstract_syntax_tree\variables\declaration</Filter>
+      <Filter>source\code_generator\abstract_syntax_tree\variables\declaration</Filter>
     </ClInclude>
     <ClInclude Include="source\code_generator\abstract_syntax_tree\variables\declaration\global_declaration_node.h">
-      <Filter>source\codegen\abstract_syntax_tree\variables\declaration</Filter>
+      <Filter>source\code_generator\abstract_syntax_tree\variables\declaration</Filter>
     </ClInclude>
     <ClInclude Include="source\code_generator\abstract_syntax_tree\variables\declaration\local_declaration_node.h">
-      <Filter>source\codegen\abstract_syntax_tree\variables\declaration</Filter>
+      <Filter>source\code_generator\abstract_syntax_tree\variables\declaration</Filter>
     </ClInclude>
     <ClInclude Include="source\code_generator\abstract_syntax_tree\variables\variable_access_node.h">
-      <Filter>source\codegen\abstract_syntax_tree\variables</Filter>
+      <Filter>source\code_generator\abstract_syntax_tree\variables</Filter>
     </ClInclude>
     <ClInclude Include="source\code_generator\abstract_syntax_tree\variables\variable_node.h">
-      <Filter>source\codegen\abstract_syntax_tree\variables</Filter>
-    </ClInclude>
-    <ClInclude Include="source\llvm_wrappers\code_generation_context.h">
-      <Filter>source\codegen\llvm_wrappers</Filter>
-    </ClInclude>
-    <ClInclude Include="source\llvm_wrappers\functions\function.h">
-      <Filter>source\codegen\llvm_wrappers\functions</Filter>
-    </ClInclude>
-    <ClInclude Include="source\llvm_wrappers\functions\function_registry.h">
-      <Filter>source\codegen\llvm_wrappers\functions</Filter>
-    </ClInclude>
-    <ClInclude Include="source\llvm_wrappers\scope.h">
-      <Filter>source\codegen\llvm_wrappers</Filter>
-    </ClInclude>
-    <ClInclude Include="source\llvm_wrappers\type.h">
-      <Filter>source\codegen\llvm_wrappers</Filter>
-    </ClInclude>
-    <ClInclude Include="source\llvm_wrappers\value.h">
-      <Filter>source\codegen\llvm_wrappers</Filter>
+      <Filter>source\code_generator\abstract_syntax_tree\variables</Filter>
     </ClInclude>
     <ClInclude Include="source\code_generator\basic_code_generator\basic_code_generator.h">
-      <Filter>source\codegen\visitor</Filter>
+      <Filter>source\code_generator\basic_code_generator</Filter>
     </ClInclude>
     <ClInclude Include="source\code_generator\code_generator.h">
-      <Filter>source\codegen\visitor</Filter>
+      <Filter>source\code_generator</Filter>
     </ClInclude>
     <ClInclude Include="source\compiler\compiler.h">
       <Filter>source\compiler</Filter>
@@ -266,6 +281,27 @@
     </ClInclude>
     <ClInclude Include="source\lexer\token.h">
       <Filter>source\lexer</Filter>
+    </ClInclude>
+    <ClInclude Include="source\llvm_wrappers\code_generation_context.h">
+      <Filter>source\llvm_wrappers</Filter>
+    </ClInclude>
+    <ClInclude Include="source\llvm_wrappers\functions\function.h">
+      <Filter>source\llvm_wrappers\functions</Filter>
+    </ClInclude>
+    <ClInclude Include="source\llvm_wrappers\functions\function_registry.h">
+      <Filter>source\llvm_wrappers\functions</Filter>
+    </ClInclude>
+    <ClInclude Include="source\llvm_wrappers\llvm_context.h">
+      <Filter>source\llvm_wrappers</Filter>
+    </ClInclude>
+    <ClInclude Include="source\llvm_wrappers\scope.h">
+      <Filter>source\llvm_wrappers</Filter>
+    </ClInclude>
+    <ClInclude Include="source\llvm_wrappers\type.h">
+      <Filter>source\llvm_wrappers</Filter>
+    </ClInclude>
+    <ClInclude Include="source\llvm_wrappers\value.h">
+      <Filter>source\llvm_wrappers</Filter>
     </ClInclude>
     <ClInclude Include="source\parser\parser.h">
       <Filter>source\parser</Filter>
@@ -294,194 +330,194 @@
     <ClInclude Include="source\utility\types.h">
       <Filter>source\utility</Filter>
     </ClInclude>
-    <ClInclude Include="source\llvm_wrappers\llvm_context.h" />
-    <ClInclude Include="source\code_generator\abstract_syntax_tree\operators\unary\logical\operator_not_node.h" />
-    <ClInclude Include="source\code_generator\abstract_syntax_tree\operators\binary\bitwise\operator_bitwise_left_shift_node.h" />
-    <ClInclude Include="source\code_generator\abstract_syntax_tree\operators\binary\bitwise\operator_bitwise_right_shift_node.h" />
-    <ClInclude Include="source\code_generator\abstract_syntax_tree\operators\binary\bitwise\operator_bitwise_or_node.h" />
-    <ClInclude Include="source\code_generator\abstract_syntax_tree\operators\binary\bitwise\operator_bitwise_and_node.h" />
-    <ClInclude Include="source\code_generator\abstract_syntax_tree\operators\unary\bitwise\operator_bitwise_not_node.h" />
-    <ClInclude Include="source\code_generator\abstract_syntax_tree\operators\binary\bitwise\operator_bitwise_xor_node.h" />
-    <ClInclude Include="source\code_generator\abstract_syntax_tree\keywords\file_include_node.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp" />
     <ClCompile Include="source\code_generator\abstract_syntax_tree\abstract_syntax_tree.cpp">
-      <Filter>source\codegen\abstract_syntax_tree</Filter>
+      <Filter>source\code_generator\abstract_syntax_tree</Filter>
     </ClCompile>
     <ClCompile Include="source\code_generator\abstract_syntax_tree\functions\function_call_node.cpp">
-      <Filter>source\codegen\abstract_syntax_tree\functions</Filter>
+      <Filter>source\code_generator\abstract_syntax_tree\functions</Filter>
     </ClCompile>
     <ClCompile Include="source\code_generator\abstract_syntax_tree\functions\function_node.cpp">
-      <Filter>source\codegen\abstract_syntax_tree\functions</Filter>
+      <Filter>source\code_generator\abstract_syntax_tree\functions</Filter>
+    </ClCompile>
+    <ClCompile Include="source\code_generator\abstract_syntax_tree\keywords\file_include_node.cpp">
+      <Filter>source\code_generator\abstract_syntax_tree\keywords</Filter>
     </ClCompile>
     <ClCompile Include="source\code_generator\abstract_syntax_tree\keywords\flow_control\break_node.cpp">
-      <Filter>source\codegen\abstract_syntax_tree\keywords\flow_control</Filter>
+      <Filter>source\code_generator\abstract_syntax_tree\keywords\flow_control</Filter>
     </ClCompile>
     <ClCompile Include="source\code_generator\abstract_syntax_tree\keywords\flow_control\for_node.cpp">
-      <Filter>source\codegen\abstract_syntax_tree\keywords\flow_control</Filter>
+      <Filter>source\code_generator\abstract_syntax_tree\keywords\flow_control</Filter>
     </ClCompile>
     <ClCompile Include="source\code_generator\abstract_syntax_tree\keywords\flow_control\if_else_node.cpp">
-      <Filter>source\codegen\abstract_syntax_tree\keywords\flow_control</Filter>
+      <Filter>source\code_generator\abstract_syntax_tree\keywords\flow_control</Filter>
     </ClCompile>
     <ClCompile Include="source\code_generator\abstract_syntax_tree\keywords\flow_control\return_node.cpp">
-      <Filter>source\codegen\abstract_syntax_tree\keywords\flow_control</Filter>
+      <Filter>source\code_generator\abstract_syntax_tree\keywords\flow_control</Filter>
     </ClCompile>
     <ClCompile Include="source\code_generator\abstract_syntax_tree\keywords\flow_control\while_node.cpp">
-      <Filter>source\codegen\abstract_syntax_tree\keywords\flow_control</Filter>
+      <Filter>source\code_generator\abstract_syntax_tree\keywords\flow_control</Filter>
     </ClCompile>
     <ClCompile Include="source\code_generator\abstract_syntax_tree\keywords\types\bool_node.cpp">
-      <Filter>source\codegen\abstract_syntax_tree\keywords\types</Filter>
+      <Filter>source\code_generator\abstract_syntax_tree\keywords\types</Filter>
     </ClCompile>
     <ClCompile Include="source\code_generator\abstract_syntax_tree\keywords\types\char_node.cpp">
-      <Filter>source\codegen\abstract_syntax_tree\keywords\types</Filter>
+      <Filter>source\code_generator\abstract_syntax_tree\keywords\types</Filter>
     </ClCompile>
     <ClCompile Include="source\code_generator\abstract_syntax_tree\keywords\types\numerical_literal_node.cpp">
-      <Filter>source\codegen\abstract_syntax_tree\keywords\types</Filter>
+      <Filter>source\code_generator\abstract_syntax_tree\keywords\types</Filter>
     </ClCompile>
     <ClCompile Include="source\code_generator\abstract_syntax_tree\keywords\types\string_node.cpp">
-      <Filter>source\codegen\abstract_syntax_tree\keywords\types</Filter>
+      <Filter>source\code_generator\abstract_syntax_tree\keywords\types</Filter>
     </ClCompile>
     <ClCompile Include="source\code_generator\abstract_syntax_tree\node.cpp">
-      <Filter>source\codegen\abstract_syntax_tree</Filter>
+      <Filter>source\code_generator\abstract_syntax_tree</Filter>
     </ClCompile>
     <ClCompile Include="source\code_generator\abstract_syntax_tree\operators\binary\arithmetic\operator_addition_assignment_node.cpp">
-      <Filter>source\codegen\abstract_syntax_tree\operators\binary\arithmetic</Filter>
+      <Filter>source\code_generator\abstract_syntax_tree\operators\binary\arithmetic</Filter>
     </ClCompile>
     <ClCompile Include="source\code_generator\abstract_syntax_tree\operators\binary\arithmetic\operator_addition_node.cpp">
-      <Filter>source\codegen\abstract_syntax_tree\operators\binary\arithmetic</Filter>
+      <Filter>source\code_generator\abstract_syntax_tree\operators\binary\arithmetic</Filter>
     </ClCompile>
     <ClCompile Include="source\code_generator\abstract_syntax_tree\operators\binary\arithmetic\operator_division_assignment_node.cpp">
-      <Filter>source\codegen\abstract_syntax_tree\operators\binary\arithmetic</Filter>
+      <Filter>source\code_generator\abstract_syntax_tree\operators\binary\arithmetic</Filter>
     </ClCompile>
     <ClCompile Include="source\code_generator\abstract_syntax_tree\operators\binary\arithmetic\operator_division_node.cpp">
-      <Filter>source\codegen\abstract_syntax_tree\operators\binary\arithmetic</Filter>
+      <Filter>source\code_generator\abstract_syntax_tree\operators\binary\arithmetic</Filter>
     </ClCompile>
     <ClCompile Include="source\code_generator\abstract_syntax_tree\operators\binary\arithmetic\operator_modulo_assignment_node.cpp">
-      <Filter>source\codegen\abstract_syntax_tree\operators\binary\arithmetic</Filter>
+      <Filter>source\code_generator\abstract_syntax_tree\operators\binary\arithmetic</Filter>
     </ClCompile>
     <ClCompile Include="source\code_generator\abstract_syntax_tree\operators\binary\arithmetic\operator_modulo_node.cpp">
-      <Filter>source\codegen\abstract_syntax_tree\operators\binary\arithmetic</Filter>
+      <Filter>source\code_generator\abstract_syntax_tree\operators\binary\arithmetic</Filter>
     </ClCompile>
     <ClCompile Include="source\code_generator\abstract_syntax_tree\operators\binary\arithmetic\operator_multiplication_assignment_node.cpp">
-      <Filter>source\codegen\abstract_syntax_tree\operators\binary\arithmetic</Filter>
+      <Filter>source\code_generator\abstract_syntax_tree\operators\binary\arithmetic</Filter>
     </ClCompile>
     <ClCompile Include="source\code_generator\abstract_syntax_tree\operators\binary\arithmetic\operator_multiplication_node.cpp">
-      <Filter>source\codegen\abstract_syntax_tree\operators\binary\arithmetic</Filter>
+      <Filter>source\code_generator\abstract_syntax_tree\operators\binary\arithmetic</Filter>
     </ClCompile>
     <ClCompile Include="source\code_generator\abstract_syntax_tree\operators\binary\arithmetic\operator_subtraction_assignment_node.cpp">
-      <Filter>source\codegen\abstract_syntax_tree\operators\binary\arithmetic</Filter>
+      <Filter>source\code_generator\abstract_syntax_tree\operators\binary\arithmetic</Filter>
     </ClCompile>
     <ClCompile Include="source\code_generator\abstract_syntax_tree\operators\binary\arithmetic\operator_subtraction_node.cpp">
-      <Filter>source\codegen\abstract_syntax_tree\operators\binary\arithmetic</Filter>
+      <Filter>source\code_generator\abstract_syntax_tree\operators\binary\arithmetic</Filter>
+    </ClCompile>
+    <ClCompile Include="source\code_generator\abstract_syntax_tree\operators\binary\bitwise\operator_bitwise_and_node.cpp">
+      <Filter>source\code_generator\abstract_syntax_tree\operators\binary\bitwise</Filter>
+    </ClCompile>
+    <ClCompile Include="source\code_generator\abstract_syntax_tree\operators\binary\bitwise\operator_bitwise_left_shift_node.cpp">
+      <Filter>source\code_generator\abstract_syntax_tree\operators\binary\bitwise</Filter>
+    </ClCompile>
+    <ClCompile Include="source\code_generator\abstract_syntax_tree\operators\binary\bitwise\operator_bitwise_or_node.cpp">
+      <Filter>source\code_generator\abstract_syntax_tree\operators\binary\bitwise</Filter>
+    </ClCompile>
+    <ClCompile Include="source\code_generator\abstract_syntax_tree\operators\binary\bitwise\operator_bitwise_right_shift_node.cpp">
+      <Filter>source\code_generator\abstract_syntax_tree\operators\binary\bitwise</Filter>
+    </ClCompile>
+    <ClCompile Include="source\code_generator\abstract_syntax_tree\operators\binary\bitwise\operator_bitwise_xor_node.cpp">
+      <Filter>source\code_generator\abstract_syntax_tree\operators\binary\bitwise</Filter>
     </ClCompile>
     <ClCompile Include="source\code_generator\abstract_syntax_tree\operators\binary\logical\operator_conjunction_node.cpp">
-      <Filter>source\codegen\abstract_syntax_tree\operators\binary\logical</Filter>
+      <Filter>source\code_generator\abstract_syntax_tree\operators\binary\logical</Filter>
     </ClCompile>
     <ClCompile Include="source\code_generator\abstract_syntax_tree\operators\binary\logical\operator_disjunction_node.cpp">
-      <Filter>source\codegen\abstract_syntax_tree\operators\binary\logical</Filter>
+      <Filter>source\code_generator\abstract_syntax_tree\operators\binary\logical</Filter>
     </ClCompile>
     <ClCompile Include="source\code_generator\abstract_syntax_tree\operators\binary\logical\operator_equals_node.cpp">
-      <Filter>source\codegen\abstract_syntax_tree\operators\binary\logical</Filter>
+      <Filter>source\code_generator\abstract_syntax_tree\operators\binary\logical</Filter>
     </ClCompile>
     <ClCompile Include="source\code_generator\abstract_syntax_tree\operators\binary\logical\operator_greater_than_equal_to_node.cpp">
-      <Filter>source\codegen\abstract_syntax_tree\operators\binary\logical</Filter>
+      <Filter>source\code_generator\abstract_syntax_tree\operators\binary\logical</Filter>
     </ClCompile>
     <ClCompile Include="source\code_generator\abstract_syntax_tree\operators\binary\logical\operator_greater_than_node.cpp">
-      <Filter>source\codegen\abstract_syntax_tree\operators\binary\logical</Filter>
+      <Filter>source\code_generator\abstract_syntax_tree\operators\binary\logical</Filter>
     </ClCompile>
     <ClCompile Include="source\code_generator\abstract_syntax_tree\operators\binary\logical\operator_less_than_equal_to_node.cpp">
-      <Filter>source\codegen\abstract_syntax_tree\operators\binary\logical</Filter>
+      <Filter>source\code_generator\abstract_syntax_tree\operators\binary\logical</Filter>
     </ClCompile>
     <ClCompile Include="source\code_generator\abstract_syntax_tree\operators\binary\logical\operator_less_than_node.cpp">
-      <Filter>source\codegen\abstract_syntax_tree\operators\binary\logical</Filter>
+      <Filter>source\code_generator\abstract_syntax_tree\operators\binary\logical</Filter>
     </ClCompile>
     <ClCompile Include="source\code_generator\abstract_syntax_tree\operators\binary\logical\operator_not_equals_node.cpp">
-      <Filter>source\codegen\abstract_syntax_tree\operators\binary\logical</Filter>
+      <Filter>source\code_generator\abstract_syntax_tree\operators\binary\logical</Filter>
     </ClCompile>
     <ClCompile Include="source\code_generator\abstract_syntax_tree\operators\binary\operator_binary_base.cpp">
-      <Filter>source\codegen\abstract_syntax_tree\operators\binary</Filter>
+      <Filter>source\code_generator\abstract_syntax_tree\operators\binary</Filter>
     </ClCompile>
     <ClCompile Include="source\code_generator\abstract_syntax_tree\operators\unary\arithmetic\operator_post_decrement_node.cpp">
-      <Filter>source\codegen\abstract_syntax_tree\operators\unary\arithmetic</Filter>
+      <Filter>source\code_generator\abstract_syntax_tree\operators\unary\arithmetic</Filter>
     </ClCompile>
     <ClCompile Include="source\code_generator\abstract_syntax_tree\operators\unary\arithmetic\operator_post_increment_node.cpp">
-      <Filter>source\codegen\abstract_syntax_tree\operators\unary\arithmetic</Filter>
+      <Filter>source\code_generator\abstract_syntax_tree\operators\unary\arithmetic</Filter>
     </ClCompile>
     <ClCompile Include="source\code_generator\abstract_syntax_tree\operators\unary\arithmetic\operator_pre_decrement_node.cpp">
-      <Filter>source\codegen\abstract_syntax_tree\operators\unary\arithmetic</Filter>
+      <Filter>source\code_generator\abstract_syntax_tree\operators\unary\arithmetic</Filter>
     </ClCompile>
     <ClCompile Include="source\code_generator\abstract_syntax_tree\operators\unary\arithmetic\operator_pre_increment_node.cpp">
-      <Filter>source\codegen\abstract_syntax_tree\operators\unary\arithmetic</Filter>
+      <Filter>source\code_generator\abstract_syntax_tree\operators\unary\arithmetic</Filter>
+    </ClCompile>
+    <ClCompile Include="source\code_generator\abstract_syntax_tree\operators\unary\bitwise\operator_bitwise_not_node.cpp">
+      <Filter>source\code_generator\abstract_syntax_tree\operators\unary\bitwise</Filter>
+    </ClCompile>
+    <ClCompile Include="source\code_generator\abstract_syntax_tree\operators\unary\logical\operator_not_node.cpp">
+      <Filter>source\code_generator\abstract_syntax_tree\operators\unary\logical</Filter>
     </ClCompile>
     <ClCompile Include="source\code_generator\abstract_syntax_tree\operators\unary\operator_unary_base.cpp">
-      <Filter>source\codegen\abstract_syntax_tree\operators\unary</Filter>
+      <Filter>source\code_generator\abstract_syntax_tree\operators\unary</Filter>
     </ClCompile>
     <ClCompile Include="source\code_generator\abstract_syntax_tree\variables\array\array_access_node.cpp">
-      <Filter>source\codegen\abstract_syntax_tree\variables\array</Filter>
+      <Filter>source\code_generator\abstract_syntax_tree\variables\array</Filter>
     </ClCompile>
     <ClCompile Include="source\code_generator\abstract_syntax_tree\variables\array\array_allocation_node.cpp">
-      <Filter>source\codegen\abstract_syntax_tree\variables\array</Filter>
+      <Filter>source\code_generator\abstract_syntax_tree\variables\array</Filter>
     </ClCompile>
     <ClCompile Include="source\code_generator\abstract_syntax_tree\variables\array\array_assignment_node.cpp">
-      <Filter>source\codegen\abstract_syntax_tree\variables\array</Filter>
+      <Filter>source\code_generator\abstract_syntax_tree\variables\array</Filter>
     </ClCompile>
     <ClCompile Include="source\code_generator\abstract_syntax_tree\variables\assignment_node.cpp">
-      <Filter>source\codegen\abstract_syntax_tree\variables</Filter>
+      <Filter>source\code_generator\abstract_syntax_tree\variables</Filter>
     </ClCompile>
     <ClCompile Include="source\code_generator\abstract_syntax_tree\variables\declaration\declaration_node.cpp">
-      <Filter>source\codegen\abstract_syntax_tree\variables\declaration</Filter>
+      <Filter>source\code_generator\abstract_syntax_tree\variables\declaration</Filter>
     </ClCompile>
     <ClCompile Include="source\code_generator\abstract_syntax_tree\variables\declaration\global_declaration_node.cpp">
-      <Filter>source\codegen\abstract_syntax_tree\variables\declaration</Filter>
+      <Filter>source\code_generator\abstract_syntax_tree\variables\declaration</Filter>
     </ClCompile>
     <ClCompile Include="source\code_generator\abstract_syntax_tree\variables\declaration\local_declaration_node.cpp">
-      <Filter>source\codegen\abstract_syntax_tree\variables\declaration</Filter>
+      <Filter>source\code_generator\abstract_syntax_tree\variables\declaration</Filter>
     </ClCompile>
     <ClCompile Include="source\code_generator\abstract_syntax_tree\variables\variable_access_node.cpp">
-      <Filter>source\codegen\abstract_syntax_tree\variables</Filter>
+      <Filter>source\code_generator\abstract_syntax_tree\variables</Filter>
     </ClCompile>
     <ClCompile Include="source\code_generator\abstract_syntax_tree\variables\variable_node.cpp">
-      <Filter>source\codegen\abstract_syntax_tree\variables</Filter>
-    </ClCompile>
-    <ClCompile Include="source\llvm_wrappers\code_generation_context.cpp">
-      <Filter>source\codegen\llvm_wrappers</Filter>
-    </ClCompile>
-    <ClCompile Include="source\llvm_wrappers\functions\function.cpp">
-      <Filter>source\codegen\llvm_wrappers\functions</Filter>
-    </ClCompile>
-    <ClCompile Include="source\llvm_wrappers\functions\function_registry.cpp">
-      <Filter>source\codegen\llvm_wrappers\functions</Filter>
-    </ClCompile>
-    <ClCompile Include="source\llvm_wrappers\scope.cpp">
-      <Filter>source\codegen\llvm_wrappers</Filter>
-    </ClCompile>
-    <ClCompile Include="source\llvm_wrappers\type.cpp">
-      <Filter>source\codegen\llvm_wrappers</Filter>
-    </ClCompile>
-    <ClCompile Include="source\llvm_wrappers\value.cpp">
-      <Filter>source\codegen\llvm_wrappers</Filter>
+      <Filter>source\code_generator\abstract_syntax_tree\variables</Filter>
     </ClCompile>
     <ClCompile Include="source\code_generator\basic_code_generator\basic_code_generator.cpp">
-      <Filter>source\codegen\visitor</Filter>
+      <Filter>source\code_generator\basic_code_generator</Filter>
     </ClCompile>
     <ClCompile Include="source\code_generator\basic_code_generator\basic_code_generator_flow_control.cpp">
-      <Filter>source\codegen\visitor</Filter>
+      <Filter>source\code_generator\basic_code_generator</Filter>
     </ClCompile>
     <ClCompile Include="source\code_generator\basic_code_generator\basic_code_generator_functions.cpp">
-      <Filter>source\codegen\visitor</Filter>
+      <Filter>source\code_generator\basic_code_generator</Filter>
     </ClCompile>
     <ClCompile Include="source\code_generator\basic_code_generator\basic_code_generator_operators.cpp">
-      <Filter>source\codegen\visitor</Filter>
+      <Filter>source\code_generator\basic_code_generator</Filter>
     </ClCompile>
     <ClCompile Include="source\code_generator\basic_code_generator\basic_code_generator_types.cpp">
-      <Filter>source\codegen\visitor</Filter>
+      <Filter>source\code_generator\basic_code_generator</Filter>
     </ClCompile>
     <ClCompile Include="source\code_generator\basic_code_generator\basic_code_generator_variables.cpp">
-      <Filter>source\codegen\visitor</Filter>
+      <Filter>source\code_generator\basic_code_generator</Filter>
+    </ClCompile>
+    <ClCompile Include="source\code_generator\basic_code_generator\codegen_visitor_keywords.cpp">
+      <Filter>source\code_generator\basic_code_generator</Filter>
     </ClCompile>
     <ClCompile Include="source\code_generator\code_generator.cpp">
-      <Filter>source\codegen\visitor</Filter>
+      <Filter>source\code_generator</Filter>
     </ClCompile>
     <ClCompile Include="source\compiler\compiler.cpp">
       <Filter>source\compiler</Filter>
@@ -501,6 +537,27 @@
     <ClCompile Include="source\lexer\lexer.cpp">
       <Filter>source\lexer</Filter>
     </ClCompile>
+    <ClCompile Include="source\llvm_wrappers\code_generation_context.cpp">
+      <Filter>source\llvm_wrappers</Filter>
+    </ClCompile>
+    <ClCompile Include="source\llvm_wrappers\functions\function.cpp">
+      <Filter>source\llvm_wrappers\functions</Filter>
+    </ClCompile>
+    <ClCompile Include="source\llvm_wrappers\functions\function_registry.cpp">
+      <Filter>source\llvm_wrappers\functions</Filter>
+    </ClCompile>
+    <ClCompile Include="source\llvm_wrappers\llvm_context.cpp">
+      <Filter>source\llvm_wrappers</Filter>
+    </ClCompile>
+    <ClCompile Include="source\llvm_wrappers\scope.cpp">
+      <Filter>source\llvm_wrappers</Filter>
+    </ClCompile>
+    <ClCompile Include="source\llvm_wrappers\type.cpp">
+      <Filter>source\llvm_wrappers</Filter>
+    </ClCompile>
+    <ClCompile Include="source\llvm_wrappers\value.cpp">
+      <Filter>source\llvm_wrappers</Filter>
+    </ClCompile>
     <ClCompile Include="source\parser\parser.cpp">
       <Filter>source\parser</Filter>
     </ClCompile>
@@ -519,15 +576,5 @@
     <ClCompile Include="source\utility\timer.cpp">
       <Filter>source\utility</Filter>
     </ClCompile>
-    <ClCompile Include="source\llvm_wrappers\llvm_context.cpp" />
-    <ClCompile Include="source\code_generator\abstract_syntax_tree\operators\unary\logical\operator_not_node.cpp" />
-    <ClCompile Include="source\code_generator\abstract_syntax_tree\operators\binary\bitwise\operator_bitwise_left_shift_node.cpp" />
-    <ClCompile Include="source\code_generator\abstract_syntax_tree\operators\binary\bitwise\operator_bitwise_right_shift_node.cpp" />
-    <ClCompile Include="source\code_generator\abstract_syntax_tree\operators\binary\bitwise\operator_bitwise_or_node.cpp" />
-    <ClCompile Include="source\code_generator\abstract_syntax_tree\operators\binary\bitwise\operator_bitwise_and_node.cpp" />
-    <ClCompile Include="source\code_generator\abstract_syntax_tree\operators\unary\bitwise\operator_bitwise_not_node.cpp" />
-    <ClCompile Include="source\code_generator\abstract_syntax_tree\operators\binary\bitwise\operator_bitwise_xor_node.cpp" />
-    <ClCompile Include="source\code_generator\abstract_syntax_tree\keywords\file_include_node.cpp" />
-    <ClCompile Include="source\code_generator\basic_code_generator\codegen_visitor_keywords.cpp" />
   </ItemGroup>
 </Project>

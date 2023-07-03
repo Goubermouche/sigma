@@ -1,7 +1,7 @@
 #pragma once
 #include "llvm_wrappers/type.h"
 
-namespace channel {
+namespace sigma {
 	/**
 	 * \brief Code generation context, holds variables that may be used in the next accept call.
 	 */

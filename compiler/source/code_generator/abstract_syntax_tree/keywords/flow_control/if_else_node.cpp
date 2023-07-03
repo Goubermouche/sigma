@@ -1,6 +1,6 @@
 #include "if_else_node.h"
 
-namespace channel {
+namespace sigma {
 	if_else_node::if_else_node(
 		const token_location& location,
 		const std::vector<node_ptr>& condition_nodes,

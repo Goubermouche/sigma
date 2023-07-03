@@ -1,7 +1,7 @@
 #pragma once
 #include "code_generator/abstract_syntax_tree/variables/declaration/declaration_node.h"
 
-namespace channel {
+namespace sigma {
 	/**
 	 * \brief AST node, represents the local declaration of a variable.
 	 */

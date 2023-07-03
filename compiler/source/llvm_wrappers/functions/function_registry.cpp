@@ -1,6 +1,6 @@
 #include "function_registry.h"
 
-namespace channel {
+namespace sigma {
 	function_ptr function_registry::get_function(
 		const std::string& identifier,
 		const std::shared_ptr<llvm_context>& context

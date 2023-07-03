@@ -3,7 +3,7 @@
 #include "compiler/diagnostics/error.h"
 #include "utility/containers/string_accessor.h"
 
-namespace channel {
+namespace sigma {
 	/**
 	 * \brief Set of information related to a specific token, at a specific location.
 	 */

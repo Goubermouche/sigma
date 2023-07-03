@@ -1,6 +1,6 @@
 #include "operator_unary_base.h"
 
-namespace channel {
+namespace sigma {
 	operator_unary_base::operator_unary_base(
 		const token_location& location,
 		const node_ptr& expression_node

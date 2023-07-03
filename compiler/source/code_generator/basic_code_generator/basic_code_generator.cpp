@@ -1,7 +1,7 @@
 #include "basic_code_generator.h"
 #include <llvm/IR/Verifier.h>
 
-namespace channel {
+namespace sigma {
 	basic_code_generator::basic_code_generator()
 		: m_scope(new scope(nullptr, nullptr))
 	{

@@ -1,9 +1,9 @@
 #include "llvm_context.h"
 
-namespace channel {
+namespace sigma {
 	llvm_context::llvm_context()
 		: m_builder(m_context),
-	m_module(std::make_unique<llvm::Module>("channel", m_context)) {}
+	m_module(std::make_unique<llvm::Module>("sigma", m_context)) {}
 
 	void llvm_context::print_intermediate_representation() const {
 		m_module->print(llvm::outs(), nullptr);

@@ -1,6 +1,6 @@
 #include "char_node.h"
 
-namespace channel {
+namespace sigma {
 	char_node::char_node(
 		const token_location& location,
 		char value

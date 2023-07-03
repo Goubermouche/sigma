@@ -17,7 +17,7 @@
 #include <utility>
 #include <vector>
 
-namespace channel {
+namespace sigma {
 	namespace types {
 		// signed
 		using i8 = int8_t;

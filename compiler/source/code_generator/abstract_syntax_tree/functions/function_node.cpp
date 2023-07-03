@@ -1,6 +1,6 @@
 #include "function_node.h"
 
-namespace channel {
+namespace sigma {
 	function_node::function_node(
 		const token_location& location,
 		const type& function_return_type,

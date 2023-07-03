@@ -1,6 +1,6 @@
 #include "numerical_literal_node.h"
 
-namespace channel {
+namespace sigma {
 	numerical_literal_node::numerical_literal_node(
 		const token_location& location,
 		const std::string& value,

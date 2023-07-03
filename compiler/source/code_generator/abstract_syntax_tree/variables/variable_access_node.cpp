@@ -1,6 +1,6 @@
 #include "variable_access_node.h"
 
-namespace channel {
+namespace sigma {
 	variable_access_node::variable_access_node(
 		const token_location& location,
 		const std::string& variable_identifier

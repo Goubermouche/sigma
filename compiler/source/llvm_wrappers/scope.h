@@ -1,7 +1,7 @@
 #pragma once
 #include "llvm_wrappers/value.h"
 
-namespace channel {
+namespace sigma {
 	class scope;
 	using scope_ptr = std::shared_ptr<scope>;
 

@@ -3,7 +3,7 @@
 #include "llvm_wrappers/functions/function.h"
 #include "llvm_wrappers/llvm_context.h"
 
-namespace channel {
+namespace sigma {
 	using function_ptr = std::shared_ptr<function>;
 	using function_declaration_ptr = std::shared_ptr<function_declaration>;
 

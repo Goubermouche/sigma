@@ -1,7 +1,7 @@
 #pragma once
 #include "llvm_wrappers/type.h"
 
-namespace channel {
+namespace sigma {
 	class value;
 	using value_ptr = std::shared_ptr<value>;
 

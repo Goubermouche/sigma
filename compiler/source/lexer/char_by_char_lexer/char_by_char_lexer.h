@@ -1,7 +1,7 @@
 #pragma once
 #include "lexer/lexer.h"
 
-namespace channel {
+namespace sigma {
 	// note: 2-letter tokens need their first token to exist, otherwise the longer version doesn't get
 	// selected and an identifier is returned.
 

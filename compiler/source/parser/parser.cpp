@@ -1,7 +1,7 @@
 #include "parser.h"
 #include "utility/macros.h"
 
-namespace channel {
+namespace sigma {
 	parser::parser()
 		: m_abstract_syntax_tree(
 			std::make_shared<abstract_syntax_tree>()

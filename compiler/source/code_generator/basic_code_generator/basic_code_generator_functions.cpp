@@ -3,7 +3,7 @@
 #include "code_generator/abstract_syntax_tree/functions/function_call_node.h"
 #include "code_generator/abstract_syntax_tree/functions/function_node.h"
 
-namespace channel {
+namespace sigma {
 	expected_value basic_code_generator::visit_function_node(
 		function_node& node, 
 		const code_generation_context& context
@@ -168,7 +168,7 @@ namespace channel {
 		}
 
 		const std::vector<std::pair<std::string, type>>& required_arguments = func->get_arguments();
-		const std::vector<channel::node*>& given_arguments = node.get_function_arguments();
+		const std::vector<sigma::node*>& given_arguments = node.get_function_arguments();
 
 		// check if the argument counts match
 		if(!func->is_variadic() && required_arguments.size() != given_arguments.size()) {

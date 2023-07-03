@@ -1,6 +1,6 @@
 #include "filesystem.h"
 
-namespace channel::detail {
+namespace sigma::detail {
 	std::expected<std::string, error_msg> read_file(
 		const std::string& filepath
 	) {

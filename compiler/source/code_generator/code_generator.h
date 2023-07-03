@@ -1,7 +1,7 @@
 #pragma once
 #include "code_generator/abstract_syntax_tree/keywords/flow_control/if_else_node.h"
 
-namespace channel {
+namespace sigma {
 	// functions
 	class function_node;
 	class function_call_node;
@@ -75,7 +75,7 @@ namespace channel {
 #include "llvm_wrappers/code_generation_context.h"
 #include "llvm_wrappers/llvm_context.h"
 
-namespace channel {
+namespace sigma {
 	class abstract_syntax_tree;
 
 	/**

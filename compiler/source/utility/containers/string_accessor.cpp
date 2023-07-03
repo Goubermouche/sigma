@@ -1,6 +1,6 @@
 #include "string_accessor.h"
 
-namespace channel::detail {
+namespace sigma::detail {
 	string_accessor::string_accessor(const std::string& string)
 		: m_string(string) {}
 

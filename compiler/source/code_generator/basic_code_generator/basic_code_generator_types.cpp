@@ -5,7 +5,7 @@
 #include "code_generator/abstract_syntax_tree/keywords/types/bool_node.h"
 #include "code_generator/abstract_syntax_tree/keywords/types/numerical_literal_node.h"
 
-namespace channel {
+namespace sigma {
 	expected_value basic_code_generator::visit_numerical_literal_node(
 		numerical_literal_node& node,
 		const code_generation_context& context

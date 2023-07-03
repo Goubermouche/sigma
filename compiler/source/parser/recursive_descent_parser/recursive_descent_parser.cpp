@@ -72,7 +72,7 @@
 #include "code_generator/abstract_syntax_tree/keywords/flow_control/break_node.h"
 #include "code_generator/abstract_syntax_tree/operators/binary/arithmetic/operator_addition_assignment_node.h"
 
-namespace channel {
+namespace sigma {
 	recursive_descent_parser::recursive_descent_parser() {}
 
 	error_result recursive_descent_parser::parse() {

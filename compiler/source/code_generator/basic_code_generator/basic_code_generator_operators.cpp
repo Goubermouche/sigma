@@ -38,7 +38,7 @@
 #include "code_generator/abstract_syntax_tree/operators/binary/logical/operator_equals_node.h"
 #include "code_generator/abstract_syntax_tree/operators/binary/logical/operator_not_equals_node.h"
 
-namespace channel {
+namespace sigma {
 	// unary
 	// arithmetic
 	expected_value basic_code_generator::visit_operator_post_decrement_node(

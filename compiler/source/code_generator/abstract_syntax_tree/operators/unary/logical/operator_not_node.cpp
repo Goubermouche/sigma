@@ -1,6 +1,6 @@
 #include "operator_not_node.h"
 
-namespace channel {
+namespace sigma {
 	operator_not_node::operator_not_node(
 		const token_location& location,
 		const node_ptr& expression_node

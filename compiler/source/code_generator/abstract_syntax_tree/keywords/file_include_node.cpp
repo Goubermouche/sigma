@@ -1,6 +1,6 @@
 #include "file_include_node.h"
 
-namespace channel {
+namespace sigma {
 	file_include_node::file_include_node(
 		const token_location& location,
 		const std::string& filepath

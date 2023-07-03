@@ -1,7 +1,7 @@
 #pragma once
 #include "utility/macros.h"
 
-namespace channel {
+namespace sigma {
 	enum class token {
 		l_parenthesis,                      // (
 		r_parenthesis,                      // )

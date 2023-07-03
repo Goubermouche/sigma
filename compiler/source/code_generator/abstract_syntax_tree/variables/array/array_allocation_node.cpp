@@ -1,6 +1,6 @@
 #include "array_allocation_node.h"
 
-namespace channel {
+namespace sigma {
 	array_allocation_node::array_allocation_node(
 		const token_location& location,
 		const type& array_element_type, 

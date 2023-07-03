@@ -1,6 +1,6 @@
 #include "while_node.h"
 
-namespace channel {
+namespace sigma {
 	while_node::while_node(
 		const token_location& location,
 		const node_ptr& loop_condition_node,

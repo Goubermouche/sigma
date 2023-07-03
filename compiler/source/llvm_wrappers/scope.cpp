@@ -1,6 +1,6 @@
 #include "scope.h"
 
-namespace channel {
+namespace sigma {
 	scope::scope(
 		scope_ptr parent
 	) : m_parent(parent) {}

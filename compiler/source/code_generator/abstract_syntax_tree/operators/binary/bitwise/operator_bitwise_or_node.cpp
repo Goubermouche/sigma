@@ -1,6 +1,6 @@
 #include "operator_bitwise_or_node.h"
 
-namespace channel {
+namespace sigma {
 	operator_bitwise_or_node::operator_bitwise_or_node(
 		const token_location& location,
 		const node_ptr& left_expression_node,

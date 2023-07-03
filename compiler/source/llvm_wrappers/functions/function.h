@@ -1,7 +1,7 @@
 #pragma once
 #include "llvm_wrappers/type.h"
 
-namespace channel {
+namespace sigma {
 	class function_declaration {
 	public:
 		function_declaration(

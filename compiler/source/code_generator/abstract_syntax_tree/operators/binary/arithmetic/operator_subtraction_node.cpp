@@ -1,6 +1,6 @@
 #include "operator_subtraction_node.h"
 
-namespace channel {
+namespace sigma {
 	operator_subtraction_node::operator_subtraction_node(
 		const token_location& location,
 		const node_ptr& left_expression_node,

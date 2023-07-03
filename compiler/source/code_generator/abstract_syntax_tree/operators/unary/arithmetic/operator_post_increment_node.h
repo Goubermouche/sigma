@@ -1,7 +1,7 @@
 #pragma once
 #include "code_generator/abstract_syntax_tree/operators/unary/operator_unary_base.h"
 
-namespace channel {
+namespace sigma {
 	/**
 	 * \brief AST node, represents the post increment unary operator.
 	 */

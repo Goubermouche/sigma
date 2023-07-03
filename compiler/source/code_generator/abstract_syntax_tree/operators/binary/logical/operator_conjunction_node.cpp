@@ -1,6 +1,6 @@
 #include "operator_conjunction_node.h"
 
-namespace channel {
+namespace sigma {
 	operator_conjunction_node::operator_conjunction_node(
 		const token_location& location,
 		const node_ptr& left_expression_node,

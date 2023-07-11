@@ -2,13 +2,13 @@
 
 namespace sigma::detail {
 	std::expected<std::string, error_msg> read_file(
-		const std::string& filepath
+		const filepath& path
 	) {
-		std::ifstream file(filepath, std::ios::in | std::ios::binary);
+		std::ifstream file(path, std::ios::in | std::ios::binary);
 
 		if (!file.is_open()) {
 			return std::unexpected(
-				error::emit<1000>(filepath)
+				error::emit<1000>(path)
 			);
 		}
 
@@ -21,7 +21,7 @@ namespace sigma::detail {
 			file.close();
 
 			return std::unexpected(
-				error::emit<1005>(filepath)
+				error::emit<1005>(path)
 			);
 		}
 
@@ -35,7 +35,7 @@ namespace sigma::detail {
 			file.close();
 
 			return std::unexpected(
-				error::emit<1006>(filepath)
+				error::emit<1006>(path)
 			);
 		}
 
@@ -44,16 +44,14 @@ namespace sigma::detail {
 		return { (contents) };
 	}
 
-	bool delete_file(const std::string& filepath) {
-		return std::remove(filepath.c_str()) == 0;
+	bool delete_file(const filepath& path) {
+		return std::remove(path.string().c_str()) == 0;
 	}
 
 	std::string extract_directory_from_filepath(
-		const std::string& filepath
+		const filepath& path
 	) {
-		const std::filesystem::path path(filepath);
-
-		if (is_directory(path)) {
+		if (std::filesystem::is_directory(path)) {
 			// if it's already a directory, just return it
 			return path.string(); 
 		}
@@ -63,28 +61,26 @@ namespace sigma::detail {
 	}
 
 	std::string extract_filename_from_filepath(
-		const std::string& filepath
+		const filepath& path
 	) {
-		const std::filesystem::path path(filepath);
 		return path.stem().string();
 	}
 
 	bool is_file(
-		const std::string& filepath
+		const filepath& path
 	) {
-		return std::filesystem::is_regular_file(filepath);
+		return std::filesystem::is_regular_file(path);
 	}
 
 	bool is_directory(
-		const std::string& filepath
+		const filepath& path
 	) {
-		return std::filesystem::is_directory(filepath);
+		return std::filesystem::is_directory(path);
 	}
 
 	std::string extract_extension_from_filepath(
-		const std::string& filepath
+		const filepath& path
 	) {
-		const std::filesystem::path path(filepath);
 		return path.extension().string();
 	}
 }

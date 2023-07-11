@@ -8,7 +8,7 @@ namespace sigma {
 	class string_node : public node {
 	public:
 		string_node(
-			const token_location& location,
+			const file_position& location,
 			const std::string& value
 		);
 

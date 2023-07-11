@@ -2,7 +2,7 @@
 
 namespace sigma {
 	variable_access_node::variable_access_node(
-		const token_location& location,
+		const file_position& location,
 		const std::string& variable_identifier
 	) : node(location),
 	m_variable_identifier(variable_identifier) {}

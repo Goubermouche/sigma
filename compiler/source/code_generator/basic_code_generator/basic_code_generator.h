@@ -386,7 +386,7 @@ namespace sigma {
 		llvm::Value* cast_value(
 			const value_ptr& source_value,
 			type target_type, 
-			const token_location& location
+			const file_position& location
 		);
 
 		error_result verify_main_entry_point();

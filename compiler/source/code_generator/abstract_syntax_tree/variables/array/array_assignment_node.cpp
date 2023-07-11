@@ -2,7 +2,7 @@
 
 namespace sigma {
 	array_assignment_node::array_assignment_node(
-		const token_location& location,
+		const file_position& location,
 		const node_ptr& array_base,
 		const std::vector<node_ptr>& index_nodes,
 		const node_ptr& expression_node

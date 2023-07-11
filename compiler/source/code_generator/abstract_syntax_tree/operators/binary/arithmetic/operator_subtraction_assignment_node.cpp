@@ -2,7 +2,7 @@
 
 namespace sigma {
 	operator_subtraction_assignment_node::operator_subtraction_assignment_node(
-			const token_location& location,
+			const file_position& location,
 			const node_ptr& left_expression_node,
 			const node_ptr& right_expression_node
 		) : operator_binary_base(

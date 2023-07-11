@@ -2,7 +2,7 @@
 
 namespace sigma {
 	local_declaration_node::local_declaration_node(
-		const token_location& location,
+		const file_position& location,
 		const type& declaration_type,
 		const std::string& declaration_identifier, 
 		const node_ptr& expression_node

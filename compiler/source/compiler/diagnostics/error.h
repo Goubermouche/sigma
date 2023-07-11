@@ -90,12 +90,12 @@ namespace sigma {
 		error_message_position(
 			std::string message,
 			u64 code,
-			token_location location
+			file_position location
 		);
 
 		void print() const override;
 	protected:
-		token_location m_position;
+		file_position m_position;
 	};
 
 	class error {
@@ -107,7 +107,7 @@ namespace sigma {
 
 		template <u64 code, typename... Args>
 		static std::shared_ptr<error_message_position> emit(
-			token_location location, 
+			file_position location, 
 			Args&&... args
 		);
 	};
@@ -125,7 +125,7 @@ namespace sigma {
 
 	template<u64 code, typename ...Args>
 	std::shared_ptr<error_message_position> error::emit(
-		token_location location, 
+		file_position location, 
 		Args && ...args
 	) {
 		return std::make_shared<error_message_position>(

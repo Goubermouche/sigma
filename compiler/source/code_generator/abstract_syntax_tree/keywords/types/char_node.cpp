@@ -2,7 +2,7 @@
 
 namespace sigma {
 	char_node::char_node(
-		const token_location& location,
+		const file_position& location,
 		char value
 	) : node(location),
 	m_value(value)	{}

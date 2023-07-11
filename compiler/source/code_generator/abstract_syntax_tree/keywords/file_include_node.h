@@ -8,8 +8,8 @@ namespace sigma {
 	class file_include_node : public node {
 	public:
 		file_include_node(
-			const token_location& location,
-			const std::string& filepath
+			const file_position& location,
+			const filepath& path
 		);
 
 		expected_value accept(
@@ -23,8 +23,8 @@ namespace sigma {
 			bool is_last
 		) override;
 
-		const std::string& get_filepath() const;
+		const filepath& get_path() const;
 	private:
-		std::string m_filepath;
+		filepath m_path;
 	};
 }

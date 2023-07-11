@@ -2,7 +2,7 @@
 
 namespace sigma {
 	string_node::string_node(
-		const token_location& location, 
+		const file_position& location, 
 		const std::string& value
 	) : node(location),
 	m_value(value) {}

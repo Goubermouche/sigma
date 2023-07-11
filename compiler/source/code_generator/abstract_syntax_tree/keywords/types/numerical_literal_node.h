@@ -8,7 +8,7 @@ namespace sigma {
 	class numerical_literal_node : public node {
 	public:
 		numerical_literal_node(
-			const token_location& location,
+			const file_position& location,
 			const std::string& value,
 			type preferred_type
 		);

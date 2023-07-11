@@ -2,7 +2,7 @@
 
 namespace sigma {
 	array_allocation_node::array_allocation_node(
-		const token_location& location,
+		const file_position& location,
 		const type& array_element_type, 
 		const node_ptr& array_element_count_node
 	) : node(location),

@@ -2,10 +2,10 @@
 
 namespace sigma {
 	file_include_node::file_include_node(
-		const token_location& location,
-		const std::string& filepath
+		const file_position& location,
+		const filepath& path
 	) : node(location),
-	m_filepath(filepath) {}
+	m_path(path) {}
 
 	expected_value file_include_node::accept(code_generator& visitor, const code_generation_context& context) {
 		return visitor.visit_file_include_node(*this, context);
@@ -23,12 +23,12 @@ namespace sigma {
 			<< color::white
 			<< '\''
 			<< AST_NODE_TEXT_LITERAL_COLOR
-			<< escape_string(m_filepath)
+			<< escape_string(m_path.string())
 			<< color::white
 			<< "'\n";
 	}
 
-	const std::string& file_include_node::get_filepath() const {
-		return m_filepath;
+	const filepath& file_include_node::get_path() const {
+		return m_path;
 	}
 }

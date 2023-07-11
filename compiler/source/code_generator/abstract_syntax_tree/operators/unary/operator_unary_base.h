@@ -8,7 +8,7 @@ namespace sigma {
 	class operator_unary_base : public node {
 	public:
 		operator_unary_base(
-			const token_location& location,
+			const file_position& location,
 			const node_ptr& expression_node
 		);
 

@@ -8,7 +8,7 @@ namespace sigma {
 	class operator_pre_increment_node : public operator_unary_base {
 	public:
 		operator_pre_increment_node(
-			const token_location& location,
+			const file_position& location,
 			const node_ptr& expression_node
 		);
 

@@ -32,14 +32,16 @@ namespace sigma {
 		m_peek_token_index = m_main_token_index;
 	}
 
-	error_result lexer::set_source_filepath(const std::string& filepath) {
+	error_result lexer::set_source_filepath(
+		const filepath& path
+	) {
 		// check if the file exists, and if it has been opened successfully
-		auto file_read_result = detail::read_file(filepath);
+		auto file_read_result = detail::read_file(path);
 		if(!file_read_result.has_value()) {
 			return file_read_result.error();
 		}
 
-		m_source_filepath = filepath;
+		m_source_path = path;
 		m_accessor = detail::string_accessor(file_read_result.value());
 		return {};
 	}

@@ -36,10 +36,10 @@ namespace sigma {
 	}
 
 	error_result compiler::compile(
-		const std::string& root_source_file_filepath, 
-		const std::string& target_executable_directory
+		const filepath& root_source_path,
+		const filepath& target_executable_directory
 	) {
-		m_root_source_file_filepath = root_source_file_filepath;
+		m_root_source_path = root_source_path;
 		m_target_executable_directory = target_executable_directory;
 
 		timer m_compilation_timer;
@@ -47,19 +47,19 @@ namespace sigma {
 
 		// verify the root source file
 		if (auto source_file_error = verify_source_file(
-			m_root_source_file_filepath
+			m_root_source_path
 		)) {
 			return source_file_error; // return on failure
 		}
 
 		console::out
 			<< "compiling file '"
-			<< m_root_source_file_filepath
+			<< m_root_source_path
 			<< "'\n";
 
 		// generate the module
 		auto module_generation_result = generate_module(
-			m_root_source_file_filepath
+			m_root_source_path
 		);
 
 		if (!module_generation_result) {
@@ -94,7 +94,7 @@ namespace sigma {
 		std::shared_ptr<llvm_context>,
 		error_msg
 	> compiler::generate_module(
-		const std::string& source_filepath
+		const filepath& source_path
 	) const {
 		// tokenize the source file
 		timer lexer_timer;
@@ -102,7 +102,7 @@ namespace sigma {
 
 		const std::shared_ptr<lexer> lexer = m_lexer_generator();
 		if(auto set_source_error = lexer->set_source_filepath(
-			source_filepath
+			source_path
 		)) {
 			return std::unexpected(set_source_error.value());
 		}
@@ -143,7 +143,7 @@ namespace sigma {
 			if(const auto* include = dynamic_cast<file_include_node*>(n)) {
 				console::out
 					<< color::red
-					<< include->get_filepath()
+					<< include->get_path()
 					<< color::white
 					<< '\n';
 			}
@@ -215,8 +215,8 @@ namespace sigma {
 			target_triple
 		);
 
-		const std::string o_file = m_target_executable_directory + "a.o";
-		const std::string exe_file = m_target_executable_directory + "a.exe";
+		const std::string o_file = m_target_executable_directory.string() + "a.o";
+		const std::string exe_file = m_target_executable_directory.string() + "a.exe";
 
 		// generate the .o file
 		{
@@ -324,32 +324,32 @@ namespace sigma {
 	}
 
 	error_result compiler::verify_source_file(
-		const std::string& filepath
+		const filepath& path
 	) {
-		if (!std::filesystem::exists(filepath)) {
-			return error::emit<1002>(filepath);
+		if (!std::filesystem::exists(path)) {
+			return error::emit<1002>(path);
 		}
 
-		if (!detail::is_file(filepath)) {
-			return error::emit<1003>(filepath);
+		if (!detail::is_file(path)) {
+			return error::emit<1003>(path);
 		}
 
-		if (detail::extract_extension_from_filepath(filepath) != ".ch") {
-			return error::emit<1007>(filepath, ".ch");
+		if (detail::extract_extension_from_filepath(path) != ".ch") {
+			return error::emit<1007>(path, ".ch");
 		}
 
 		return {};
 	}
 
 	error_result compiler::verify_folder(
-		const std::string& folder_filepath
+		const filepath& folder_path
 	) {
-		if (!std::filesystem::exists(folder_filepath)) {
-			return error::emit<1002>(folder_filepath);
+		if (!std::filesystem::exists(folder_path)) {
+			return error::emit<1002>(folder_path);
 		}
 
-		if(!detail::is_directory(folder_filepath)) {
-			return error::emit<1004>(folder_filepath);
+		if(!detail::is_directory(folder_path)) {
+			return error::emit<1004>(folder_path);
 		}
 
 		return {};

@@ -2,7 +2,7 @@
 
 namespace sigma {
 	return_node::return_node(
-		const token_location& location,
+		const file_position& location,
 		const node_ptr& return_expression_node
 	) : node(location),
 	m_return_expression_node(return_expression_node) {}

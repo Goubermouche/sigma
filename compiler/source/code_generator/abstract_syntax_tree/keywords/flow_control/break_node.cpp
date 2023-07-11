@@ -1,7 +1,7 @@
 #include "break_node.h"
 
 namespace sigma {
-	break_node::break_node(const token_location& location)
+	break_node::break_node(const file_position& location)
 		: node(location) {}
 
 	expected_value break_node::accept(code_generator& visitor, const code_generation_context& context) {

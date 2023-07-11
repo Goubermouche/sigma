@@ -2,7 +2,7 @@
 
 namespace sigma {
 	operator_greater_than_equal_to_node::operator_greater_than_equal_to_node(
-		const token_location& location,
+		const file_position& location,
 		const node_ptr& left_expression_node,
 		const node_ptr& right_expression_node
 	) : operator_binary_base(

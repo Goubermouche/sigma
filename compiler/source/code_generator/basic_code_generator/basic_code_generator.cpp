@@ -108,7 +108,7 @@ namespace sigma {
 		return {};
 	}
 
-	llvm::Value* basic_code_generator::cast_value(const value_ptr& source_value, type target_type, const token_location& location) {
+	llvm::Value* basic_code_generator::cast_value(const value_ptr& source_value, type target_type, const file_position& location) {
 		// both types are the same
 		if (source_value->get_type() == target_type) {
 			return source_value->get_value();

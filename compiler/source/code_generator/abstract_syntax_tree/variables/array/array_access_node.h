@@ -8,7 +8,7 @@ namespace sigma {
 	class array_access_node : public node {
 	public:
 		array_access_node(
-			const token_location& location,
+			const file_position& location,
 			const node_ptr& array_base,
 			const std::vector<node_ptr>& array_element_index_nodes
 		);

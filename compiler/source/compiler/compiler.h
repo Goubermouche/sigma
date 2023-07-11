@@ -62,21 +62,21 @@ namespace sigma {
 		void set_code_generator();
 
 		/**
-		 * \brief Compiles the given \a root_source_file_filepath using the underlying compiler settings and outputs an executable at the given \a target_executable_directory.
-		 * \param root_source_file_filepath Path to the file to be compiled
+		 * \brief Compiles the given \a root_source_path using the underlying compiler settings and outputs an executable at the given \a target_executable_directory.
+		 * \param root_source_path Path to the file to be compiled
 		 * \param target_executable_directory Path to the target directory the generated executable should be store to
 		 * \return Optional error message containing information about a potential error.
 		 */
 		error_result compile(
-			const std::string& root_source_file_filepath,
-			const std::string& target_executable_directory
+			const filepath& root_source_path,
+			const filepath& target_executable_directory
 		);
 	private:
 		std::expected<
 			std::shared_ptr<llvm_context>,
 			error_msg
 		> generate_module(
-			const std::string& source_filepath
+			const filepath& source_path
 		) const;
 
 		error_result compile_module(
@@ -84,11 +84,11 @@ namespace sigma {
 		) const;
 
 		static error_result verify_source_file(
-			const std::string& filepath
+			const filepath& path
 		);
 
 		static error_result verify_folder(
-			const std::string& folder_filepath
+			const filepath& folder_path
 		);
 	private:
 		compiler_settings m_settings;
@@ -101,8 +101,8 @@ namespace sigma {
 		std::function<std::shared_ptr<code_generator>()> m_code_generator_generator;
 
 		// compilation specific 
-		std::string m_root_source_file_filepath;
-		std::string m_target_executable_directory;
+		filepath m_root_source_path;
+		filepath m_target_executable_directory;
 	};
 
 	template<typename lexer>

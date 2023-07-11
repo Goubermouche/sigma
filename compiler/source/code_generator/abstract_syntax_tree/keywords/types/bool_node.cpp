@@ -2,7 +2,7 @@
 
 namespace sigma {
 	bool_node::bool_node(
-		const token_location& location, bool 
+		const file_position& location, bool 
 		value
 	) : node(location),
 	m_value(value) {}

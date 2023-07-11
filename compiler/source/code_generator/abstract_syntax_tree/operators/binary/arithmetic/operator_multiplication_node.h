@@ -8,7 +8,7 @@ namespace sigma {
 	class operator_multiplication_node : public operator_binary_base {
 	public:
 		operator_multiplication_node(
-			const token_location& location,
+			const file_position& location,
 			const node_ptr& left_expression_node,
 			const node_ptr& right_expression_node
 		);

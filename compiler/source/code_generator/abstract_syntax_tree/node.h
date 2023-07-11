@@ -27,7 +27,7 @@ namespace sigma {
 		 * \brief Constructs a node with using data about the node's location.
 		 * \param location Token location of the node. 
 		 */
-		node(const token_location& location);
+		node(const file_position& location);
 		virtual ~node() = default;
 
 		/**
@@ -57,7 +57,7 @@ namespace sigma {
 		 * \brief Gets the declared node location.
 		 * \return Declared node location
 		 */
-		const token_location& get_declared_location() const;
+		const file_position& get_declared_location() const;
 	protected:
 		/**
 		 * \brief Prints a node name with additional formatting relevant to the tree hierarchy.
@@ -86,7 +86,7 @@ namespace sigma {
 			bool is_last
 		);
 	private:
-		token_location m_location;
+		file_position m_location;
 	};
 }
 

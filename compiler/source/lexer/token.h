@@ -114,13 +114,18 @@ namespace sigma {
 		unknown
 	};
 
-	struct token_location {
-		token_location() = default;
-		token_location(const std::string& file, u64 line_number, u64 character_number)
-			: m_file(file), m_line_number(line_number), m_character_number(character_number) {}
+	struct file_position {
+		file_position() = default;
+		file_position(
+			const filepath& path, 
+			u64 line_number,
+			u64 character_number
+		) : m_path(path),
+		m_line_number(line_number),
+		m_character_number(character_number) {}
 
-		const std::string& get_file() const {
-			return m_file;
+		const filepath& get_path() const {
+			return m_path;
 		}
 
 		u64 get_line_number() const {
@@ -131,7 +136,7 @@ namespace sigma {
 			return m_character_number;
 		}
 	private:
-		std::string m_file;
+		filepath m_path;
 		u64 m_line_number;
 		u64 m_character_number;
 	};

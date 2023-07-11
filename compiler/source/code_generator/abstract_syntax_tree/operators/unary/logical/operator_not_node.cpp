@@ -2,7 +2,7 @@
 
 namespace sigma {
 	operator_not_node::operator_not_node(
-		const token_location& location,
+		const file_position& location,
 		const node_ptr& expression_node
 	) : operator_unary_base(location, expression_node) {}
 

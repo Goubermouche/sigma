@@ -8,7 +8,7 @@ namespace sigma {
 	class char_node : public node {
 	public:
 		char_node(
-			const token_location& location, 
+			const file_position& location, 
 			char value
 		);
 

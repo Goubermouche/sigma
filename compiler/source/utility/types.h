@@ -34,6 +34,8 @@ namespace sigma {
 		// floating point
 		using f32 = float;
 		using f64 = double;
+
+		using filepath = std::filesystem::path;
 	}
 
 	using namespace types;

@@ -8,7 +8,7 @@ namespace sigma {
 	class if_else_node : public node {
 	public:
 		if_else_node(
-			const token_location& location,
+			const file_position& location,
 			const std::vector<node_ptr>& condition_nodes,
 			const std::vector<std::vector<node_ptr>>& branch_nodes
 		);

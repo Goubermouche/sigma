@@ -20,13 +20,13 @@ namespace sigma {
 	error_message_position::error_message_position(
 		std::string message, 
 		u64 code, 
-		token_location location
+		file_position location
 	) : error_message(std::move(message), code),
 	m_position(std::move(location)) {}
 
 	void error_message_position::print() const {
 		console::out
-			<< m_position.get_file()
+			<< m_position.get_path().string()
 			<< " ("
 			<< m_position.get_line_number()
 			<< ", "

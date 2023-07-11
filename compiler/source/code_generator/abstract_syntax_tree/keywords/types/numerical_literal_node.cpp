@@ -2,7 +2,7 @@
 
 namespace sigma {
 	numerical_literal_node::numerical_literal_node(
-		const token_location& location,
+		const file_position& location,
 		const std::string& value,
 		type preferred_type
 	) : node(location),

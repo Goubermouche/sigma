@@ -2,10 +2,10 @@
 #include "code_generator/code_generator.h"
 
 namespace sigma {
-	node::node(const token_location& location)
+	node::node(const file_position& location)
 		: m_location(location) {}
 
-	const token_location& node::get_declared_location() const {
+	const file_position& node::get_declared_location() const {
 		return m_location;
 	}
 

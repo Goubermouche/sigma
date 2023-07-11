@@ -2,7 +2,7 @@
 
 namespace sigma {
 	assignment_node::assignment_node(
-		const token_location& location,
+		const file_position& location,
 		const node_ptr& variable,
 		const node_ptr& expression_node
 	) : node(location),

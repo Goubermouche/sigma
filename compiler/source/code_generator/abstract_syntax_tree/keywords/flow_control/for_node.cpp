@@ -2,7 +2,7 @@
 
 namespace sigma {
 	for_node::for_node(
-		const token_location& location,
+		const file_position& location,
 		const node_ptr& loop_initialization_node,
 		const node_ptr& loop_condition_node,
 		const std::vector<node_ptr>& post_iteration_nodes,

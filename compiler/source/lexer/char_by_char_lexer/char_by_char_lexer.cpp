@@ -12,8 +12,8 @@ namespace sigma {
 			m_tokens.push_back({ 
 				tok,
 				m_value_string,
-				token_location {
-					m_source_filepath,
+				file_position {
+					m_source_path,
 					m_current_line,
 					m_current_character
 				}
@@ -286,7 +286,7 @@ namespace sigma {
 		return {};
 	}
 
-	token_data::token_data(token tok, const std::string& value, const token_location& location)
+	token_data::token_data(token tok, const std::string& value, const file_position& location)
 		: m_token(tok), m_value(value), m_position(location) {}
 
 	token token_data::get_token() const	{
@@ -297,7 +297,7 @@ namespace sigma {
 		return m_value;
 	}
 
-	const token_location& token_data::get_token_location() const {
+	const file_position& token_data::get_token_location() const {
 		return m_position;
 	}
 }

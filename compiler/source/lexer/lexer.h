@@ -13,19 +13,19 @@ namespace sigma {
 		token_data(
 			token tok,
 			const std::string& value,
-			const token_location& location
+			const file_position& location
 		);
 
 		token get_token() const;
 		const std::string& get_value() const;
-		const token_location& get_token_location() const;
+		const file_position& get_token_location() const;
 	private:
 		// token type representation of the given token
 		token m_token = token::unknown;
 		// token value of the given token (ie. the identifier value of an identifier token)
 		std::string m_value;
 		// location of the given token
-		token_location m_position;
+		file_position m_position;
 	};
 
 	/**
@@ -77,15 +77,18 @@ namespace sigma {
 		virtual ~lexer() = default;
 
 		/**
-		 * \brief Sets the \a source \a filepath for the next lexing operation.
-		 * \param filepath Filepath to use
+		 * \brief Sets the \a source \a path for the next lexing operation.
+		 * \param path Filepath to use
 		 * \return Potentially erroneous result.
 		 */
-		error_result set_source_filepath(const std::string& filepath);
+		error_result set_source_filepath(
+			const filepath& path
+		);
+
 		token_list get_token_list() const;
 	protected:
 		std::vector<token_data> m_tokens;
-		std::string m_source_filepath;
+		filepath m_source_path;
 		detail::string_accessor m_accessor;
 
 		// tokens that are longer than one character 

@@ -129,7 +129,7 @@ namespace sigma {
 			return type_parse_error; // return on failure
 		}
 
-		const token_location location = m_current_token.get_token_location();
+		const file_position location = m_current_token.get_token_location();
 		get_next_token(); // identifier (guaranteed)
 		const std::string identifier = m_current_token.get_value();
 		get_next_token(); // l_parenthesis (guaranteed)
@@ -344,7 +344,7 @@ namespace sigma {
 				// return right away since we don't want to check for a semicolon at the end of the statement
 				return parse_for_loop(out_node);
 			default:
-				token_location p = m_current_token.get_token_location();
+				file_position p = m_current_token.get_token_location();
 				return error::emit<3001>(
 					p,
 					next_token
@@ -400,7 +400,7 @@ namespace sigma {
 	error_result recursive_descent_parser::parse_if_else_statement(node*& out_node) {
 		std::vector<node*> conditions;
 		std::vector<std::vector<node*>> branches;
-		const token_location location = m_current_token.get_token_location();
+		const file_position location = m_current_token.get_token_location();
 		bool has_else = false;
 
 		while (true) {
@@ -455,7 +455,7 @@ namespace sigma {
 
 	error_result recursive_descent_parser::parse_while_loop(node*& out_node) {
 		get_next_token(); // keyword_while (guaranteed)
-		const token_location location = m_current_token.get_token_location();
+		const file_position location = m_current_token.get_token_location();
 
 		if (auto next_token_error = expect_next_token(token::l_parenthesis)) {
 			return next_token_error; // return on failure
@@ -531,7 +531,7 @@ namespace sigma {
 
 	error_result recursive_descent_parser::parse_for_loop(node*& out_node) {
 		get_next_token(); // keyword_for (guaranteed)
-		const token_location location = m_current_token.get_token_location();
+		const file_position location = m_current_token.get_token_location();
 
 		if (auto next_token_error = expect_next_token(token::l_parenthesis)) {
 			return next_token_error; // return on failure
@@ -682,7 +682,7 @@ namespace sigma {
 	error_result recursive_descent_parser::parse_array_assignment(node*& out_node) {
 		get_next_token(); // identifier (guaranteed)
 		const std::string identifier = m_current_token.get_value();
-		const token_location location = m_current_token.get_token_location();
+		const file_position location = m_current_token.get_token_location();
 
 		std::vector<node*> index_nodes;
 		while (peek_next_token() == token::l_bracket) {
@@ -832,7 +832,7 @@ namespace sigma {
 	}
 
 	error_result recursive_descent_parser::parse_return_statement(node*& out_node) {
-		const token_location location = m_current_token.get_token_location();
+		const file_position location = m_current_token.get_token_location();
 		get_next_token(); // keyword_return (guaranteed)
 
 		// allow return statements without any expressions
@@ -852,7 +852,7 @@ namespace sigma {
 	}
 
 	error_result recursive_descent_parser::parse_declaration(node*& out_node, bool is_global) {
-		const token_location location = m_current_token.get_token_location();
+		const file_position location = m_current_token.get_token_location();
 
 		type declaration_type;
 		if (auto type_parse_error = parse_type(declaration_type)) {
@@ -1208,7 +1208,7 @@ namespace sigma {
 
 	error_result recursive_descent_parser::parse_new_allocation(node*& out_node) {
 		get_next_token(); // keyword_new (guaranteed)
-		const token_location location = m_current_token.get_token_location();
+		const file_position location = m_current_token.get_token_location();
 
 		type allocation_type;
 		if (auto type_parse_error = parse_type(allocation_type)) {

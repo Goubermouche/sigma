@@ -8,7 +8,7 @@ namespace sigma {
 		parser();
 		virtual ~parser() = default;
 
-		virtual error_result parse() = 0;
+		virtual outcome::result<void> parse() = 0;
 		void set_token_list(const token_list& token_list);
 		std::shared_ptr<abstract_syntax_tree> get_abstract_syntax_tree() const;
 	protected:

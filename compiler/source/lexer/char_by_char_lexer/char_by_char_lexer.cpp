@@ -1,13 +1,11 @@
 #include "char_by_char_lexer.h"
 
 namespace sigma {
-	error_result char_by_char_lexer::tokenize() {
+	outcome::result<void> char_by_char_lexer::tokenize() {
 		// tokenize
 		token tok = token::unknown;
 		while(tok != token::end_of_file) {
-			if(auto next_token_error_message = extract_next_token(tok)) {
-				return next_token_error_message;
-			}
+			OUTCOME_TRY(extract_next_token(tok));
 
 			m_tokens.push_back({ 
 				tok,
@@ -20,7 +18,7 @@ namespace sigma {
 			});
 		}
 
-		return {};
+		return outcome::success();
 	}
 
 	void char_by_char_lexer::read_char() {
@@ -33,7 +31,7 @@ namespace sigma {
 		m_current_character++;
 	}
 
-	error_result char_by_char_lexer::extract_next_token(token& tok) {
+	outcome::result<void> char_by_char_lexer::extract_next_token(token& tok) {
 		m_value_string.clear();
 
 		// ignore spaces between tokens 
@@ -63,13 +61,13 @@ namespace sigma {
 		// prevent '.' characters from being located at the beginning of a token
 		// note: we may want to allow this in some cases (ie. when calling member functions)
 		if (m_last_character == '.') {
-			return error::emit<2000>();
+			return outcome::failure(error::emit<2000>());
 		}
 
 		// check for EOF so we don't have to do it in the individual brace checks 
 		if(m_accessor.end()) {
 			tok = token::end_of_file;
-			return {};
+			return outcome::success();
 		}
 
 		// extract special tokens
@@ -93,7 +91,7 @@ namespace sigma {
 				if(operator_token_long != m_special_tokens.end()) {
 					read_char();
 					tok = operator_token_long->second;
-					return {};
+					return outcome::success();
 				}
 
 				// since we don't have the "//" token in our token table we check for it separately, and if we find
@@ -110,16 +108,16 @@ namespace sigma {
 			}
 
 			tok = operator_token_short->second;
-			return {};
+			return outcome::success();
 		}
 
 		// not a token, return an identifier
 		m_value_string = m_last_character;
 		tok = token::identifier;
-		return {};
+		return outcome::success();
     }
 
-	error_result char_by_char_lexer::get_identifier_token(token& tok)	{
+	outcome::result<void> char_by_char_lexer::get_identifier_token(token& tok)	{
 		bool last_char_was_underscore = false;
 		m_value_string = m_last_character;
 
@@ -129,7 +127,7 @@ namespace sigma {
 		while ((isalnum(m_last_character) || m_last_character == '_') && !m_accessor.end()) {
 			// prevent two underscore characters from being right next to each other
 			if (m_last_character == '_' && last_char_was_underscore) {
-				return error::emit<2001>();
+				return outcome::failure(error::emit<2001>());
 			}
 
 			last_char_was_underscore = (m_last_character == '_');
@@ -144,15 +142,15 @@ namespace sigma {
 			// return the appropriate token
 			m_value_string.clear(); // clear the value string since we don't want our token value to be equal to the token type
 			tok = token->second;
-			return {};
+			return outcome::success();
 		}
 
 		// the identifier is not a keyword
 		tok = token::identifier;
-		return {};
+		return outcome::success();
 	}
 
-	error_result char_by_char_lexer::get_numerical_token(token& tok) {
+	outcome::result<void> char_by_char_lexer::get_numerical_token(token& tok) {
 		m_value_string = m_last_character;
 		// keep track of whether we've met the '.' character
 		bool dot_met = false;
@@ -163,7 +161,7 @@ namespace sigma {
 		while (!isspace(m_last_character) && !m_accessor.end()) {
 			if (m_last_character == '.') {
 				if (dot_met) {
-					return error::emit<2002>();
+					return outcome::failure(error::emit<2002>());
 				}
 
 				dot_met = true;
@@ -173,20 +171,20 @@ namespace sigma {
 					read_char();
 					// 0u format
 					tok = token::number_unsigned;
-					return {};
+					return outcome::success();
 				}
 
-				return error::emit<2003>();
+				return outcome::failure(error::emit<2003>());
 			}
 			else if (m_last_character == 'f') {
 				if (dot_met) {
 					read_char();
 					// 0.0f format
 					tok = token::number_f32;
-					return {};
+					return outcome::success();
 				}
 
-				return error::emit<2004>();
+				return outcome::failure(error::emit<2004>());
 			}
 			// break early if we have a non-special and non-digit character
 			else if (!isdigit(m_last_character)) {
@@ -200,15 +198,17 @@ namespace sigma {
 		// 0.0 format
 		if (dot_met) {
 			tok = token::number_f64;
-			return {};
+			return outcome::success();
 		}
 
 		// 0 format
 		tok = token::number_signed;
-		return {};
+		return outcome::success();
 	}
 
-	error_result char_by_char_lexer::get_char_literal_token(token& tok) {
+	outcome::result<void> char_by_char_lexer::get_char_literal_token(
+		token& tok
+	) {
 		m_value_string = "";
 		read_char(); // read the character after the opening quote
 
@@ -234,13 +234,15 @@ namespace sigma {
 		if (m_last_character == '\'') {
 			read_char(); // read the character after the closing quote
 			tok = token::char_literal;
-			return {};
+			return outcome::success();
 		}
 
-		return error::emit<2005>();
+		return outcome::failure(error::emit<2005>());
 	}
 
-	error_result char_by_char_lexer::get_string_literal_token(token& tok) {
+	outcome::result<void> char_by_char_lexer::get_string_literal_token(
+		token& tok
+	) {
 		m_value_string = "";
 		read_char();
 
@@ -279,14 +281,18 @@ namespace sigma {
 			read_char();
 		}
 		else {
-			return error::emit<2006>();
+			return outcome::failure(error::emit<2006>());
 		}
 
 		tok = token::string_literal;
-		return {};
+		return outcome::success();
 	}
 
-	token_data::token_data(token tok, const std::string& value, const file_position& location)
+	token_data::token_data(
+		token tok, 
+		const std::string& value,
+		const file_position& location
+	)
 		: m_token(tok), m_value(value), m_position(location) {}
 
 	token token_data::get_token() const	{

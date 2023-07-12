@@ -9,11 +9,18 @@ namespace sigma {
 	m_function_name(function_identifier),
 	m_function_arguments(function_arguments) {}
 
-	expected_value function_call_node::accept(code_generator& visitor, const code_generation_context& context) {
+	outcome::result<value_ptr> function_call_node::accept(
+		code_generator& visitor, 
+		const code_generation_context& context
+	) {
 		return visitor.visit_function_call_node(*this, context);
 	}
 
-	void function_call_node::print(u64 depth, const std::wstring& prefix, bool is_last) {
+	void function_call_node::print(
+		u64 depth,
+		const std::wstring& prefix, 
+		bool is_last
+	) {
 		print_node_name(depth, prefix, "function call",	is_last);
 		console::out
 			<< "'"

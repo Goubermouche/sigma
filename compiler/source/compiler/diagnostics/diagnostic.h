@@ -25,6 +25,28 @@ struct std::formatter<sigma::token> {
 	}
 };
 
+template<>
+struct std::formatter<sigma::types::filepath> {
+	static auto parse(format_parse_context& ctx) {
+		return ctx.begin();
+	}
+
+	static auto format(sigma::types::filepath e, format_context& ctx) {
+		return format_to(ctx.out(), "{}", e.string());
+	}
+};
+
+//template<>
+//struct std::formatter<sigma::file_position> {
+//	static auto parse(format_parse_context& ctx) {
+//		return ctx.begin();
+//	}
+//
+//	static auto format(sigma::file_position e, format_context& ctx) {
+//		return format_to(ctx.out(), "{}", "x");
+//	}
+//};
+
 namespace sigma {
 	class diagnostic_message {
 	public:

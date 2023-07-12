@@ -16,7 +16,6 @@ namespace sigma {
 	class node;
 
 	using node_ptr = node*;
-	using expected_value = std::expected<value_ptr, error_msg>;
 
 	/**
 	 * \brief base AST node.
@@ -36,7 +35,7 @@ namespace sigma {
 		 * \param context Context provided by the previous accept call
 		 * \return Result of the acceptation operation, either an error or a pointer to the generated value.
 		 */
-		virtual expected_value accept(
+		virtual outcome::result<value_ptr> accept(
 			code_generator& visitor,
 			const code_generation_context& context
 		) = 0;

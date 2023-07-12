@@ -13,7 +13,7 @@ namespace sigma {
 			const std::vector<std::vector<node_ptr>>& branch_nodes
 		);
 
-		expected_value accept(
+		outcome::result<value_ptr> accept(
 			code_generator& visitor,
 			const code_generation_context& context
 		) override;

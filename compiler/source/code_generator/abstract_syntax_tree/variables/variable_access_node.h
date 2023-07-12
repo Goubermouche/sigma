@@ -12,12 +12,16 @@ namespace sigma {
 			const std::string& variable_identifier
 		);
 
-		expected_value accept(
+		outcome::result<value_ptr> accept(
 			code_generator& visitor,
 			const code_generation_context& context
 		) override;
 
-		void print(u64 depth, const std::wstring& prefix, bool is_last) override;
+		void print(
+			u64 depth,
+			const std::wstring& prefix,
+			bool is_last
+		) override;
 
 		const std::string& get_variable_identifier() const;
 	private:

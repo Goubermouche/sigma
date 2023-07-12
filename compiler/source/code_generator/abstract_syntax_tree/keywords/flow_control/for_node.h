@@ -15,7 +15,7 @@ namespace sigma {
 			const std::vector<node_ptr>& statement_nodes
 		);
 
-		expected_value accept(
+		outcome::result<value_ptr> accept(
 			code_generator& visitor,
 			const code_generation_context& context
 		) override;

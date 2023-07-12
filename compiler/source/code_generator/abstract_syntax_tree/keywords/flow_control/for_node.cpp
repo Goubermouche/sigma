@@ -13,11 +13,18 @@ namespace sigma {
 	m_post_iteration_nodes(post_iteration_nodes),
 	m_loop_body_nodes(statement_nodes) {}
 
-	expected_value for_node::accept(code_generator& visitor, const code_generation_context& context) {
+	outcome::result<value_ptr> for_node::accept(
+		code_generator& visitor,
+		const code_generation_context& context
+	) {
 		return visitor.visit_for_node(*this, context);
 	}
 
-	void for_node::print(u64 depth, const std::wstring& prefix, bool is_last) {
+	void for_node::print(
+		u64 depth, 
+		const std::wstring& prefix,
+		bool is_last
+	) {
 		print_node_name(depth, prefix, "for statement", is_last);
 		console::out << "\n";
 

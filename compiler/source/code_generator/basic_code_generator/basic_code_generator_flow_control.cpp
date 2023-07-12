@@ -7,7 +7,7 @@
 #include "code_generator/abstract_syntax_tree/keywords/flow_control/break_node.h"
 
 namespace sigma {
-	expected_value basic_code_generator::visit_return_node(
+	outcome::result<value_ptr> basic_code_generator::visit_return_node(
 		return_node& node, 
 		const code_generation_context& context
 	) {
@@ -23,18 +23,14 @@ namespace sigma {
 		// check if we have a return expression
 		if(node.get_return_expression_node()) {
 			// evaluate the expression of the return statement, if there is one
-			expected_value return_value_result = node.get_return_expression_node()->accept(
+			OUTCOME_TRY(const auto return_value_result, node.get_return_expression_node()->accept(
 				*this,
 				{}
-			);
-
-			if (!return_value_result) {
-				return return_value_result; // return on failure
-			}
+			));
 
 			// upcast the return value to match the function's return type
 			llvm::Value* upcasted_return_value = cast_value(
-				return_value_result.value(),
+				return_value_result,
 				parent_function->get_return_type(),
 				node.get_declared_location()
 			);
@@ -55,7 +51,7 @@ namespace sigma {
 		// if we don't we want to check for a void return expression
 		// check if the return type matches the expected return type
 		if(parent_function->get_return_type() != type(type::base::empty, 0)) {
-			return std::unexpected(
+			return outcome::failure(
 				error::emit<4007>(
 					parent_function_identifier,
 					type(type::base::empty, 0),
@@ -73,7 +69,7 @@ namespace sigma {
 		);
 	}
 
-	expected_value basic_code_generator::visit_if_else_node(
+	outcome::result<value_ptr> basic_code_generator::visit_if_else_node(
 		if_else_node& node, 
 		const code_generation_context& context
 	) {
@@ -118,18 +114,14 @@ namespace sigma {
 		}
 
 		// accept the first condition
-		expected_value condition_value_result = condition_nodes[0]->accept(
+		OUTCOME_TRY(auto condition_value_result, condition_nodes[0]->accept(
 			*this,
 			code_generation_context(type(type::base::boolean, 0))
-		);
-
-		if(!condition_value_result) {
-			return condition_value_result; // return on failure
-		}
+		));
 
 		// create a conditional branch based on the first condition
 		m_llvm_context->get_builder().CreateCondBr(
-			condition_value_result.value()->get_value(),
+			condition_value_result->get_value(),
 			branch_blocks[0],
 			condition_blocks.empty() ? (has_trailing_else ? branch_blocks.back() : end_block) : condition_blocks[0]
 		);
@@ -138,17 +130,17 @@ namespace sigma {
 		for (u64 i = 0; i < condition_node_count; ++i) {
 			m_llvm_context->get_builder().SetInsertPoint(condition_blocks[i]);
 
-			condition_value_result = condition_nodes[i + 1]->accept(
+			OUTCOME_TRY(condition_value_result, condition_nodes[i + 1]->accept(
 				*this,
 				code_generation_context(type(type::base::boolean, 0))
-			);
+			));
 
 			if(!condition_value_result) {
 				return condition_value_result; // return on failure
 			}
 
 			m_llvm_context->get_builder().CreateCondBr(
-				condition_value_result.value()->get_value(),
+				condition_value_result->get_value(),
 				branch_blocks[i + 1],
 				i < condition_node_count - 1 ? condition_blocks[i + 1] : branch_blocks.back()
 			);
@@ -163,14 +155,10 @@ namespace sigma {
 			m_scope = std::make_unique<scope>(prev_scope);
 
 			for (const auto& statement : branch_nodes[i]) {
-				expected_value statement_result = statement->accept(
+				OUTCOME_TRY(statement->accept(
 					*this,
 					{}
-				);
-
-				if(!statement_result) {
-					return statement_result; // return on failure
-				}
+				));
 			}
 
 			if(!m_llvm_context->get_builder().GetInsertBlock()->getTerminator()) {
@@ -184,7 +172,7 @@ namespace sigma {
 		return nullptr;
 	}
 
-	expected_value basic_code_generator::visit_while_node(
+	outcome::result<value_ptr> basic_code_generator::visit_while_node(
 		while_node& node, 
 		const code_generation_context& context
 	) {
@@ -221,17 +209,13 @@ namespace sigma {
 		m_scope = std::make_shared<scope>(prev_scope, end_block);
 
 		// accept the condition node
-		expected_value condition_value_result = node.get_loop_condition_node()->accept(
+		OUTCOME_TRY(const auto condition_value_result, node.get_loop_condition_node()->accept(
 			*this,
 			code_generation_context(type(type::base::boolean, 0))
-		);
-
-		if (!condition_value_result) {
-			return condition_value_result; // return on failure
-		}
+		));
 
 		m_llvm_context->get_builder().CreateCondBr(
-			condition_value_result.value()->get_value(),
+			condition_value_result->get_value(),
 			loop_body_block,
 			end_block
 		);
@@ -240,14 +224,10 @@ namespace sigma {
 		m_llvm_context->get_builder().SetInsertPoint(loop_body_block);
 
 		for (sigma::node* n : node.get_loop_body_nodes()) {
-			expected_value statement_result = n->accept(
+			OUTCOME_TRY(n->accept(
 				*this,
 				{}
-			);
-
-			if (!statement_result) {
-				return statement_result; // return on failure
-			}
+			));
 		}
 
 		// restore the previous scope and set the insert point to the end block
@@ -262,7 +242,7 @@ namespace sigma {
 		return nullptr;
 	}
 
-	expected_value basic_code_generator::visit_for_node(
+	outcome::result<value_ptr> basic_code_generator::visit_for_node(
 		for_node& node,
 		const code_generation_context& context
 	) {
@@ -300,42 +280,34 @@ namespace sigma {
 		m_scope = std::make_shared<scope>(prev_scope, end_block);
 
 		// create the index expression
-		expected_value index_expression_result = node.get_loop_initialization_node()->accept(
+		OUTCOME_TRY(node.get_loop_initialization_node()->accept(
 			*this,
 			{}
-		);
-
-		if (!index_expression_result) {
-			return index_expression_result; // return on failure
-		}
+		));
 
 		m_llvm_context->get_builder().CreateBr(condition_block);
 
 		// accept the condition block
 		m_llvm_context->get_builder().SetInsertPoint(condition_block);
 
-		expected_value condition_value_result = node.get_loop_condition_node()->accept(
-			*this, 
+		OUTCOME_TRY(const auto condition_value_result, node.get_loop_condition_node()->accept(
+			*this,
 			{}
-		);
-
-		if (!condition_value_result) {
-			return condition_value_result;
-		}
+		));
 
 		// check if the conditional operator evaluates to a boolean
-		if (condition_value_result.value()->get_type().get_base() != type::base::boolean ||
-			condition_value_result.value()->get_type().is_pointer()) {
-			return std::unexpected(
+		if (condition_value_result->get_type().get_base() != type::base::boolean ||
+			condition_value_result->get_type().is_pointer()) {
+			return outcome::failure(
 				error::emit<4010>(
-					std::move(node.get_declared_location()),
-					condition_value_result.value()->get_type()
+					node.get_declared_location(),
+					condition_value_result->get_type()
 				)
 			);
 		}
 
 		m_llvm_context->get_builder().CreateCondBr(
-			condition_value_result.value()->get_value(),
+			condition_value_result->get_value(),
 			loop_body_block,
 			end_block
 		);
@@ -343,10 +315,7 @@ namespace sigma {
 		// create the increment block
 		m_llvm_context->get_builder().SetInsertPoint(increment_block);
 		for (sigma::node* n : node.get_post_iteration_nodes()) {
-			expected_value statement_result = n->accept(*this, {});
-			if (!statement_result) {
-				return statement_result; // return on failure
-			}
+			OUTCOME_TRY(n->accept(*this, {}));
 		}
 
 		m_llvm_context->get_builder().CreateBr(condition_block);
@@ -356,10 +325,7 @@ namespace sigma {
 
 		// accept all inner statements
 		for (sigma::node* n : node.get_loop_body_nodes()) {
-			expected_value statement_result = n->accept(*this, {});
-			if (!statement_result) {
-				return statement_result; // return on failure
-			}
+			OUTCOME_TRY(n->accept(*this, {}));
 		}
 
 		// restore the previous scope and set the insert point to the end block
@@ -374,7 +340,7 @@ namespace sigma {
 		return nullptr;
 	}
 
-	expected_value basic_code_generator::visit_break_node(
+	outcome::result<value_ptr> basic_code_generator::visit_break_node(
 		break_node& node, 
 		const code_generation_context& context
 	) {
@@ -383,9 +349,9 @@ namespace sigma {
 		llvm::BasicBlock* end_block = m_scope->get_loop_end_block();
 		if (end_block == nullptr) {
 			// emit an error if there's no enclosing loop to break from
-			return std::unexpected(
+			return outcome::failure(
 				error::emit<4011>(
-					std::move(node.get_declared_location())
+					node.get_declared_location()
 				)
 			);
 		}

@@ -11,11 +11,18 @@ namespace sigma {
 			right_expression_node
 		) {}
 
-		expected_value operator_subtraction_assignment_node::accept(code_generator& visitor, const code_generation_context& context) {
+	outcome::result<value_ptr> operator_subtraction_assignment_node::accept(
+		code_generator& visitor, 
+		const code_generation_context& context
+	) {
 			return visitor.visit_operator_subtraction_assignment_node(*this, context);
 		}
 
-		void operator_subtraction_assignment_node::print(u64 depth, const std::wstring& prefix, bool is_last) {
+		void operator_subtraction_assignment_node::print(
+			u64 depth, 
+			const std::wstring& prefix, 
+			bool is_last
+		) {
 			print_node_name(depth, prefix, "binary operator", is_last);
 			console::out
 				<< '\''

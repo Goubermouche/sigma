@@ -11,11 +11,18 @@ namespace sigma {
 	m_array_element_index_nodes(index_nodes),
 	m_expression_node(expression_node) {}
 
-	expected_value array_assignment_node::accept(code_generator& visitor, const code_generation_context& context) {
+	outcome::result<value_ptr> array_assignment_node::accept(
+		code_generator& visitor,
+		const code_generation_context& context
+	) {
 		return visitor.visit_array_assignment_node(*this, context);
 	}
 
-	void array_assignment_node::print(u64 depth, const std::wstring& prefix, bool is_last) {
+	void array_assignment_node::print(
+		u64 depth, 
+		const std::wstring& prefix,
+		bool is_last
+	) {
 		print_node_name(depth, prefix, "array assignment", is_last);
 		console::out << "\n";
 

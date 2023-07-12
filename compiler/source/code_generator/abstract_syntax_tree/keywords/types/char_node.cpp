@@ -7,11 +7,18 @@ namespace sigma {
 	) : node(location),
 	m_value(value)	{}
 
-	expected_value char_node::accept(code_generator& visitor, const code_generation_context& context)	{
+	outcome::result<value_ptr> char_node::accept(
+		code_generator& visitor,
+		const code_generation_context& context
+	)	{
 		return visitor.visit_keyword_char_node(*this, context);
 	}
 
-	void char_node::print(u64 depth, const std::wstring& prefix, bool is_last) {
+	void char_node::print(
+		u64 depth,
+		const std::wstring& prefix, 
+		bool is_last
+	) {
 		print_node_name(
 			depth,
 			prefix, 

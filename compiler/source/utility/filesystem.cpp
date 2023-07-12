@@ -1,13 +1,13 @@
 #include "filesystem.h"
 
 namespace sigma::detail {
-	std::expected<std::string, error_msg> read_file(
+	outcome::result<std::string> read_file(
 		const filepath& path
 	) {
 		std::ifstream file(path, std::ios::in | std::ios::binary);
 
 		if (!file.is_open()) {
-			return std::unexpected(
+			return outcome::failure(
 				error::emit<1000>(path)
 			);
 		}
@@ -20,7 +20,7 @@ namespace sigma::detail {
 			file.clear();
 			file.close();
 
-			return std::unexpected(
+			return outcome::failure(
 				error::emit<1005>(path)
 			);
 		}
@@ -34,7 +34,7 @@ namespace sigma::detail {
 			file.clear();
 			file.close();
 
-			return std::unexpected(
+			return outcome::failure(
 				error::emit<1006>(path)
 			);
 		}

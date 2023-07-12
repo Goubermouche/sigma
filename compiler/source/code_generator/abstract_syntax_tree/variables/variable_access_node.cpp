@@ -7,11 +7,18 @@ namespace sigma {
 	) : node(location),
 	m_variable_identifier(variable_identifier) {}
 
-	expected_value variable_access_node::accept(code_generator& visitor, const code_generation_context& context) {
+	outcome::result<value_ptr> variable_access_node::accept(
+		code_generator& visitor,
+		const code_generation_context& context
+	) {
 		return visitor.visit_variable_access_node(*this, context);
 	}
 
-	void variable_access_node::print(u64 depth, const std::wstring& prefix, bool is_last) {
+	void variable_access_node::print(
+		u64 depth, 
+		const std::wstring& prefix, 
+		bool is_last
+	) {
 		print_node_name(
 			depth, 
 			prefix, 

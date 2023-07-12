@@ -7,11 +7,18 @@ namespace sigma {
 	) : node(location),
 	m_path(path) {}
 
-	expected_value file_include_node::accept(code_generator& visitor, const code_generation_context& context) {
+	outcome::result<value_ptr> file_include_node::accept(
+		code_generator& visitor,
+		const code_generation_context& context
+	) {
 		return visitor.visit_file_include_node(*this, context);
 	}
 
-	void file_include_node::print(u64 depth, const std::wstring& prefix, bool is_last) {
+	void file_include_node::print(
+		u64 depth, 
+		const std::wstring& prefix,
+		bool is_last
+	) {
 		print_node_name(
 			depth,
 			prefix,

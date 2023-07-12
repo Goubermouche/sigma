@@ -14,11 +14,15 @@ namespace sigma {
 			const node_ptr& expression_node = nullptr
 		);
 
-		expected_value accept(
+		outcome::result<value_ptr> accept(
 			code_generator& visitor,
 			const code_generation_context& context
 		) override;
 
-		void print(u64 depth, const std::wstring& prefix, bool is_last) override;
+		void print(
+			u64 depth, 
+			const std::wstring& prefix, 
+			bool is_last
+		) override;
 	};
 }

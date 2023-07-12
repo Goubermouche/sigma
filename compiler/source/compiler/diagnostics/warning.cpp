@@ -28,9 +28,9 @@ namespace sigma {
 		console::out
 			<< m_position.get_path().string() 
 			<< " ("
-			<< m_position.get_line_number()
+			<< m_position.get_line_index()
 			<< ", "
-			<< m_position.get_character_number()
+			<< m_position.get_char_index()
 			<< "): "
 			<< color::yellow
 			<< "warning "

@@ -7,11 +7,18 @@ namespace sigma {
 	) : node(location),
 	m_value(value) {}
 
-	expected_value bool_node::accept(code_generator& visitor, const code_generation_context& context) {
+	outcome::result<value_ptr> bool_node::accept(
+		code_generator& visitor, 
+		const code_generation_context& context
+	) {
 		return visitor.visit_keyword_bool_node(*this, context);
 	}
 
-	void bool_node::print(u64 depth, const std::wstring& prefix, bool is_last) {
+	void bool_node::print(
+		u64 depth,
+		const std::wstring& prefix,
+		bool is_last
+	) {
 		const std::string value_string = m_value ? "true" : "false";
 
 		print_node_name(

@@ -13,11 +13,18 @@ namespace sigma {
 		expression_node
 	) {}
 
-	expected_value global_declaration_node::accept(code_generator& visitor, const code_generation_context& context)	{
+	outcome::result<value_ptr> global_declaration_node::accept(
+		code_generator& visitor, 
+		const code_generation_context& context
+	)	{
 		return visitor.visit_global_declaration_node(*this, context);
 	}
 
-	void global_declaration_node::print(u64 depth, const std::wstring& prefix, bool is_last) {
+	void global_declaration_node::print(
+		u64 depth,
+		const std::wstring& prefix,
+		bool is_last
+	) {
 		print_node_name(
 			depth, 
 			prefix, 

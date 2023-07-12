@@ -9,11 +9,18 @@ namespace sigma {
 	m_condition_nodes(condition_nodes),
 	m_branch_nodes(branch_nodes) {}
 
-	expected_value if_else_node::accept(code_generator& visitor, const code_generation_context& context) {
+	outcome::result<value_ptr> if_else_node::accept(
+		code_generator& visitor,
+		const code_generation_context& context
+	) {
 		return visitor.visit_if_else_node(*this, context);
 	}
 
-	void if_else_node::print(u64 depth, const std::wstring& prefix, bool is_last) {
+	void if_else_node::print(
+		u64 depth, 
+		const std::wstring& prefix,
+		bool is_last
+	) {
 		print_node_name(depth, prefix, "if statement", is_last);
 		console::out << "\n";
 

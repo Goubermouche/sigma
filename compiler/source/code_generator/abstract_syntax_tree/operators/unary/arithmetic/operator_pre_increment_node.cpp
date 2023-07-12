@@ -6,11 +6,18 @@ namespace sigma {
 		const node_ptr& expression_node
 	) : operator_unary_base(location, expression_node) {}
 
-	expected_value operator_pre_increment_node::accept(code_generator& visitor, const code_generation_context& context) {
+	outcome::result<value_ptr> operator_pre_increment_node::accept(
+		code_generator& visitor,
+		const code_generation_context& context
+	) {
 		return visitor.visit_operator_pre_increment_node(*this, context);
 	}
 
-	void operator_pre_increment_node::print(u64 depth, const std::wstring& prefix, bool is_last) {
+	void operator_pre_increment_node::print(
+		u64 depth, 
+		const std::wstring& prefix,
+		bool is_last
+	) {
 		print_node_name(depth, prefix, "unary operator", is_last);
 		console::out
 			<< '\''

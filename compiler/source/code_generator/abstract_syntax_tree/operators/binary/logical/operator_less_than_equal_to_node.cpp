@@ -11,11 +11,18 @@ namespace sigma {
 		right_expression_node
 	) {}
 
-	expected_value operator_less_than_equal_to_node::accept(code_generator& visitor, const code_generation_context& context) {
+	outcome::result<value_ptr> operator_less_than_equal_to_node::accept(
+		code_generator& visitor,
+		const code_generation_context& context
+	) {
 		return visitor.visit_operator_less_than_equal_to_node(*this, context);
 	}
 
-	void operator_less_than_equal_to_node::print(u64 depth, const std::wstring& prefix, bool is_last) {
+	void operator_less_than_equal_to_node::print(
+		u64 depth,
+		const std::wstring& prefix, 
+		bool is_last
+	) {
 		print_node_name(depth, prefix, "binary operator", is_last);
 		console::out
 			<< '\''

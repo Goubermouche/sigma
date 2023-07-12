@@ -2,20 +2,13 @@
 #include "compiler/diagnostics/error.h"
 #include "utility/macros.h"
 
-template <>
-struct std::formatter<sigma::types::filepath> : std::formatter<std::string> {
-	auto format(sigma::types::filepath p, format_context& ctx) {
-		return formatter<string>::format(p.string(), ctx);
-	}
-};
-
 namespace sigma::detail {
 	/**
 	 * \brief Reads the contents of the specified \a source \a file and, if everything is correct, returns them in the \a out parameter. If there has been an issue when reading the file nothing is read and the function outputs False.
 	 * \param path Source file path
 	 * \return Expected - contents of the file, or, in the case of an erroneous state, an error message.
 	 */
-	std::expected<std::string, error_msg> read_file(
+	outcome::result<std::string> read_file(
 		const filepath& path
 	);
 

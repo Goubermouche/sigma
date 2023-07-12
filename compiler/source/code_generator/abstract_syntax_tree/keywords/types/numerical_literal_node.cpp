@@ -9,11 +9,18 @@ namespace sigma {
 	m_value(value),
 	m_preferred_type(preferred_type) {}
 
-	expected_value numerical_literal_node::accept(code_generator& visitor, const code_generation_context& context) {
+	outcome::result<value_ptr> numerical_literal_node::accept(
+		code_generator& visitor, 
+		const code_generation_context& context
+	) {
 		return visitor.visit_numerical_literal_node(*this, context);
 	}
 
-	void numerical_literal_node::print(u64 depth, const std::wstring& prefix, bool is_last) {
+	void numerical_literal_node::print(
+		u64 depth,
+		const std::wstring& prefix,
+		bool is_last
+	) {
 		print_node_name(
 			depth,
 			prefix,

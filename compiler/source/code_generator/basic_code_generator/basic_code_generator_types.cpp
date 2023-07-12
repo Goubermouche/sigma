@@ -6,7 +6,7 @@
 #include "code_generator/abstract_syntax_tree/keywords/types/numerical_literal_node.h"
 
 namespace sigma {
-	expected_value basic_code_generator::visit_numerical_literal_node(
+	outcome::result<value_ptr> basic_code_generator::visit_numerical_literal_node(
 		numerical_literal_node& node,
 		const code_generation_context& context
 	) {
@@ -14,9 +14,9 @@ namespace sigma {
 		const type literal_type = contextually_derived_type == type::unknown() ? node.get_preferred_type() : contextually_derived_type;
 
 		if (literal_type.get_pointer_level() > 0) {
-			return std::unexpected(
+			return outcome::failure(
 				error::emit<4014>(
-					std::move(node.get_declared_location())
+					node.get_declared_location()
 				)
 			); // return on failure
 		}
@@ -127,16 +127,16 @@ namespace sigma {
 				)
 			);
 		default:
-			return std::unexpected(
+			return outcome::failure(
 				error::emit<4015>(
-					std::move(node.get_declared_location()), 
+					node.get_declared_location(), 
 					literal_type
 				)
 			); // return on failure
 		}
 	}
 
-	expected_value basic_code_generator::visit_keyword_string_node(
+	outcome::result<value_ptr> basic_code_generator::visit_keyword_string_node(
 		string_node& node,
 		const code_generation_context& context
 	) {
@@ -178,7 +178,7 @@ namespace sigma {
 		);
 	}
 
-	expected_value basic_code_generator::visit_keyword_char_node(
+	outcome::result<value_ptr> basic_code_generator::visit_keyword_char_node(
 		char_node& node,
 		const code_generation_context& context
 	) {
@@ -186,7 +186,7 @@ namespace sigma {
 		return create_character(node.get_value());
 	}
 
-	expected_value basic_code_generator::visit_keyword_bool_node(
+	outcome::result<value_ptr> basic_code_generator::visit_keyword_bool_node(
 		bool_node& node, 
 		const code_generation_context& context
 	) {
@@ -194,7 +194,7 @@ namespace sigma {
 		return create_boolean(node.get_value());
 	}
 
-	value_ptr basic_code_generator::create_boolean(bool val) {
+	value_ptr basic_code_generator::create_boolean(bool val) const {
 		return std::make_shared<value>(
 			"__bool",
 			type(type::base::boolean, 0),
@@ -205,7 +205,7 @@ namespace sigma {
 		);
 	}
 
-	value_ptr basic_code_generator::create_character(char val) {
+	value_ptr basic_code_generator::create_character(char val) const {
 		return std::make_shared<value>(
 			"__char",
 			type(type::base::character, 0),

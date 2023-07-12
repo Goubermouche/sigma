@@ -34,7 +34,9 @@ namespace sigma {
 	class token_list {
 	public:
 		token_list() = default;
-		token_list(std::vector<token_data> tokens);
+		token_list(
+			std::vector<token_data> tokens
+		);
 
 		/**
 		 * \brief Prints all the contained tokens, if there are any.
@@ -73,7 +75,7 @@ namespace sigma {
 		 * \brief Traverses the entire file and generates a list of tokens which can be traversed later.
 		 * \return Potentially erroneous result.
 		 */
-		virtual error_result tokenize() = 0;
+		virtual outcome::result<void> tokenize() = 0;
 		virtual ~lexer() = default;
 
 		/**
@@ -81,7 +83,7 @@ namespace sigma {
 		 * \param path Filepath to use
 		 * \return Potentially erroneous result.
 		 */
-		error_result set_source_filepath(
+		outcome::result<void> set_source_filepath(
 			const filepath& path
 		);
 

@@ -43,25 +43,18 @@ namespace sigma {
 		// }
 	}
 
-	error_result basic_code_generator::generate() {
+	outcome::result<void> basic_code_generator::generate() {
 		// walk the abstract syntax tree
 		for (node* n : *m_abstract_syntax_tree) {
-			expected_value result = n->accept(*this, {});
-
-			if(!result) {
-				return result.error(); // return on failure
-			}
+			OUTCOME_TRY(n->accept(*this, {}));
 		}
 
 		initialize_global_variables();
 		initialize_used_external_functions();
 
 		// verify the generated IR
-		if (auto verification_error = verify_intermediate_representation()) {
-			return verification_error; // return on failure 
-		}
-
-		return {};
+		OUTCOME_TRY(verify_intermediate_representation());
+		return outcome::success();
 	}
 
 	void basic_code_generator::initialize_global_variables() const {
@@ -75,11 +68,9 @@ namespace sigma {
 
 	}
 
-	error_result basic_code_generator::verify_intermediate_representation() {
+	outcome::result<void> basic_code_generator::verify_intermediate_representation() {
 		// check if we have a valid 'main' function
-		if(auto main_entry_point_error = verify_main_entry_point()) {
-			return main_entry_point_error; // return on failure
-		}
+		OUTCOME_TRY(verify_main_entry_point());
 		
 		// check for IR errors
 		console::out << color::red;
@@ -89,23 +80,22 @@ namespace sigma {
 		// }
 		
 		console::out << color::white;
-
-		return {};
+		return outcome::success();
 	}
 
-	error_result basic_code_generator::verify_main_entry_point() {
+	outcome::result<void> basic_code_generator::verify_main_entry_point() {
 		// check if we have a main entry point
 		if(!m_function_registry.contains_function("main")) {
-			return error::emit<4012>(); // return on failure
+			return outcome::failure(error::emit<4012>()); // return on failure
 		}
 
 		// check if the main entry point's return type is an i32
 		const function_ptr func = m_function_registry.get_function("main", m_llvm_context);
 		if(func->get_return_type().get_base() != type::base::i32) {
-			return error::emit<4013>(func->get_return_type()); // return on failure
+			return outcome::failure(error::emit<4013>(func->get_return_type())); // return on failure
 		}
 
-		return {};
+		return outcome::success();
 	}
 
 	llvm::Value* basic_code_generator::cast_value(const value_ptr& source_value, type target_type, const file_position& location) {

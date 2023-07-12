@@ -67,27 +67,24 @@ namespace sigma {
 		 * \param target_executable_directory Path to the target directory the generated executable should be store to
 		 * \return Optional error message containing information about a potential error.
 		 */
-		error_result compile(
+		outcome::result<void> compile(
 			const filepath& root_source_path,
 			const filepath& target_executable_directory
 		);
 	private:
-		std::expected<
-			std::shared_ptr<llvm_context>,
-			error_msg
-		> generate_module(
+		outcome::result<std::shared_ptr<llvm_context>> generate_module(
 			const filepath& source_path
 		) const;
 
-		error_result compile_module(
+		outcome::result<void> compile_module(
 			const std::shared_ptr<llvm_context>& llvm_context
 		) const;
 
-		static error_result verify_source_file(
+		static outcome::result<void> verify_source_file(
 			const filepath& path
 		);
 
-		static error_result verify_folder(
+		static outcome::result<void> verify_folder(
 			const filepath& folder_path
 		);
 	private:

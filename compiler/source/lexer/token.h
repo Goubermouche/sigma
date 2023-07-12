@@ -118,27 +118,27 @@ namespace sigma {
 		file_position() = default;
 		file_position(
 			const filepath& path, 
-			u64 line_number,
-			u64 character_number
+			u64 line_index,
+			u64 char_index
 		) : m_path(path),
-		m_line_number(line_number),
-		m_character_number(character_number) {}
+		m_line_index(line_index),
+		m_char_index(char_index) {}
 
 		const filepath& get_path() const {
 			return m_path;
 		}
 
-		u64 get_line_number() const {
-			return m_line_number;
+		u64 get_line_index() const {
+			return m_line_index;
 		}
 
-		u64 get_character_number() const {
-			return m_character_number;
+		u64 get_char_index() const {
+			return m_char_index;
 		}
 	private:
 		filepath m_path;
-		u64 m_line_number;
-		u64 m_character_number;
+		u64 m_line_index;
+		u64 m_char_index;
 	};
 
 	inline std::string token_to_string(token token) {

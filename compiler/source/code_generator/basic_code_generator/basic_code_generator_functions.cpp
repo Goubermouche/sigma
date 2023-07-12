@@ -4,7 +4,7 @@
 #include "code_generator/abstract_syntax_tree/functions/function_node.h"
 
 namespace sigma {
-	expected_value basic_code_generator::visit_function_node(
+	outcome::result<value_ptr> basic_code_generator::visit_function_node(
 		function_node& node, 
 		const code_generation_context& context
 	) {
@@ -42,9 +42,9 @@ namespace sigma {
 		if(m_function_registry.contains_function(
 			node.get_function_identifier()
 		)) {
-			return std::unexpected(
+			return outcome::failure(
 				error::emit<4000>(
-					std::move(node.get_declared_location()), 
+					node.get_declared_location(), 
 					node.get_function_identifier()
 				)
 			); // return on failure
@@ -102,14 +102,7 @@ namespace sigma {
 
 		// accept all statements inside the function
 		for (const auto& statement : node.get_function_statements()) {
-			expected_value statement_result = statement->accept(
-				*this,
-				{}
-			);
-
-			if (!statement_result) {
-				return statement_result; // return on failure
-			}
+			OUTCOME_TRY(statement->accept(*this, {}));
 		}
 	
 		// restore the previous scope
@@ -146,7 +139,7 @@ namespace sigma {
 		);
 	}
 
-	expected_value basic_code_generator::visit_function_call_node(
+	outcome::result<value_ptr> basic_code_generator::visit_function_call_node(
 		function_call_node& node, 
 		const code_generation_context& context
 	) {
@@ -159,9 +152,9 @@ namespace sigma {
 
 		// check if it exists
 		if(!func) {
-			return std::unexpected(
+			return outcome::failure(
 				error::emit<4001>(
-					std::move(node.get_declared_location()),
+					node.get_declared_location(),
 					node.get_function_identifier()
 				)
 			); // return on failure
@@ -172,9 +165,9 @@ namespace sigma {
 
 		// check if the argument counts match
 		if(!func->is_variadic() && required_arguments.size() != given_arguments.size()) {
-			return std::unexpected(
+			return outcome::failure(
 				error::emit<4002>(
-					std::move(node.get_declared_location()),
+					node.get_declared_location(),
 					node.get_function_identifier()
 				)
 			); // return on failure
@@ -184,18 +177,14 @@ namespace sigma {
 		std::vector<llvm::Value*> argument_values(required_arguments.size());
 		for (u64 i = 0; i < required_arguments.size(); i++) {
 			// get the argument value
-			expected_value argument_result = given_arguments[i]->accept(
+			OUTCOME_TRY(auto argument_result, given_arguments[i]->accept(
 				*this,
 				code_generation_context(required_arguments[i].second)
-			);
-
-			if(!argument_result) {
-				return argument_result; // return on failure
-			}
+			));
 
 			// cast the given argument to match the required argument's type, if necessary
 			argument_values[i] = cast_value(
-				argument_result.value(), 
+				argument_result, 
 				required_arguments[i].second, 
 				node.get_declared_location()
 			);
@@ -204,18 +193,12 @@ namespace sigma {
 		// parse variadic arguments
 		for (u64 i = required_arguments.size(); i < given_arguments.size(); i++) {
 			// get the argument value
-			expected_value argument_result = given_arguments[i]->accept(
+			OUTCOME_TRY(auto argument_value, given_arguments[i]->accept(
 				*this,
 				{}
-			);
+			));
 
-			if (!argument_result) {
-				return argument_result; // return on failure
-			}
-
-			value_ptr argument_value = argument_result.value();
-
-			const type argument_type = argument_result.value()->get_type();
+			const type argument_type = argument_value->get_type();
 
 			// default variadic promotions:
 			if(argument_type == type(type::base::f32, 0)) {

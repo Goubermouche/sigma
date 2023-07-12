@@ -11,11 +11,18 @@ namespace sigma {
 		right_expression_node
 	) {}
 
-	expected_value operator_greater_than_node::accept(code_generator& visitor, const code_generation_context& context) {
+	outcome::result<value_ptr> operator_greater_than_node::accept(
+		code_generator& visitor,
+		const code_generation_context& context
+	) {
 		return visitor.visit_operator_greater_than_node(*this, context);
 	}
 
-	void operator_greater_than_node::print(u64 depth, const std::wstring& prefix, bool is_last) {
+	void operator_greater_than_node::print(
+		u64 depth, 
+		const std::wstring& prefix,
+		bool is_last
+	) {
 		print_node_name(depth, prefix, "binary operator", is_last);
 		console::out
 			<< '\''

@@ -9,11 +9,18 @@ namespace sigma {
 	m_loop_condition_node(loop_condition_node),
 	m_loop_body_nodes(statement_nodes) {}
 
-	expected_value while_node::accept(code_generator& visitor, const code_generation_context& context) {
+	outcome::result<value_ptr> while_node::accept(
+		code_generator& visitor,
+		const code_generation_context& context
+	) {
 		return visitor.visit_while_node(*this, context);
 	}
 
-	void while_node::print(u64 depth, const std::wstring& prefix, bool is_last) {
+	void while_node::print(
+		u64 depth, 
+		const std::wstring& prefix,
+		bool is_last
+	) {
 		print_node_name(depth, prefix, "while statement", is_last);
 		console::out << "\n";
 

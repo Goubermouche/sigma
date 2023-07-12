@@ -9,11 +9,18 @@ namespace sigma {
 	m_variable_node(variable),
 	m_expression_node(expression_node) {}
 
-	expected_value assignment_node::accept(code_generator& visitor, const code_generation_context& context) {
+	outcome::result<value_ptr> assignment_node::accept(
+		code_generator& visitor,
+		const code_generation_context& context
+	) {
 		return visitor.visit_assignment_node(*this, context);
 	}
 
-	void assignment_node::print(u64 depth, const std::wstring& prefix, bool is_last) {
+	void assignment_node::print(
+		u64 depth,
+		const std::wstring& prefix,
+		bool is_last
+	) {
 		print_node_name(depth, prefix, "variable assignment", is_last);
 		console::out << "\n";
 

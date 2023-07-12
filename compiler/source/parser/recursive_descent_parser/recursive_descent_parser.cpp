@@ -75,30 +75,24 @@
 namespace sigma {
 	recursive_descent_parser::recursive_descent_parser() {}
 
-	error_result recursive_descent_parser::parse() {
+	outcome::result<void> recursive_descent_parser::parse() {
 		while (true) {
 			if (peek_next_token() == token::end_of_file) {
-				return {};
+				return outcome::success();
 			}
 
 			node* node;
 
 			if (peek_is_function_definition()) {
 				// parse a top-level function definition
-				if(auto function_parse_error = parse_function_definition(node)) {
-					return function_parse_error; // return on failure
-				}
+				OUTCOME_TRY(parse_function_definition(node));
 			}
 			else if(peek_is_file_include()) {
-				if(auto include_parse_error = parse_file_include(node)) {
-					return include_parse_error;
-				}
+				OUTCOME_TRY(parse_file_include(node));
 			}
 			else {
 				// parse a global statement
-				if (auto global_statement_parse_error = parse_global_statement(node)) {
-					return global_statement_parse_error; // return on failure
-				}
+				OUTCOME_TRY(parse_global_statement(node));
 			}
 
 			m_abstract_syntax_tree->add_node(node);
@@ -109,25 +103,23 @@ namespace sigma {
 		m_current_token = m_token_list.get_token();
 	}
 
-	error_result recursive_descent_parser::expect_next_token(token token) {
+	outcome::result<void> recursive_descent_parser::expect_next_token(token token) {
 		get_next_token();
 
 		if (m_current_token.get_token() == token) {
-			return {};
+			return outcome::success();
 		}
 
-		return error::emit<3000>(
+		return outcome::failure(error::emit<3000>(
 			m_current_token.get_token_location(),
 			token,
 			m_current_token.get_token()
-		);
+		));
 	}
 
-	error_result recursive_descent_parser::parse_function_definition(node*& out_node) {
+	outcome::result<void> recursive_descent_parser::parse_function_definition(node*& out_node) {
 		type return_type;
-		if (auto type_parse_error = parse_type(return_type)) {
-			return type_parse_error; // return on failure
-		}
+		OUTCOME_TRY(parse_type(return_type));
 
 		const file_position location = m_current_token.get_token_location();
 		get_next_token(); // identifier (guaranteed)
@@ -141,13 +133,8 @@ namespace sigma {
 		if (next_token != token::r_parenthesis) {
 			while (true) {
 				type argument_type;
-				if (auto type_parse_error = parse_type(argument_type)) {
-					return type_parse_error; // return on failure
-				}
-
-				if (auto type_parse_error = expect_next_token(token::identifier)) {
-					return type_parse_error; // return on failure
-				}
+				OUTCOME_TRY(parse_type(argument_type));
+				OUTCOME_TRY(expect_next_token(token::identifier));
 
 				std::string argument_name = m_current_token.get_value();
 				arguments.emplace_back(argument_name, argument_type);
@@ -158,11 +145,11 @@ namespace sigma {
 					get_next_token(); // comma (guaranteed)
 				}
 				else if (next_token != token::r_parenthesis) {
-					return error::emit<3000>(
+					return outcome::failure(error::emit<3000>(
 						m_current_token.get_token_location(), 
 						token::r_parenthesis, 
 						m_current_token.get_token()
-					); // return on failure
+					)); // return on failure
 				}
 				else {
 					get_next_token(); // r_parenthesis(guaranteed)
@@ -175,9 +162,7 @@ namespace sigma {
 		}
 
 		std::vector<node*> statements;
-		if (auto local_statement_parse_error = parse_local_statements(statements)) {
-			return local_statement_parse_error; // return on failure
-		}
+		OUTCOME_TRY(parse_local_statements(statements));
 
 		out_node = new function_node(
 			location,
@@ -188,66 +173,47 @@ namespace sigma {
 			statements
 		);
 
-		return {};
+		return outcome::success();
 	}
 
-	error_result recursive_descent_parser::parse_file_include(node*& out_node) {
-		// #
-		if(auto next_token_error = expect_next_token(token::hash)) {
-			return next_token_error; // return on failure
-		}
-
-		// include
-		if (auto next_token_error = expect_next_token(token::keyword_include)) {
-			return next_token_error; // return on failure
-		}
-
-		// string literal
-		if (auto next_token_error = expect_next_token(token::string_literal)) {
-			return next_token_error; // return on failure
-		}
+	outcome::result<void> recursive_descent_parser::parse_file_include(node*& out_node) {
+		// #include string literal
+		OUTCOME_TRY(expect_next_token(token::hash));
+		OUTCOME_TRY(expect_next_token(token::keyword_include));
+		OUTCOME_TRY(expect_next_token(token::string_literal));
 
 		const token_data file_token = m_current_token;
 		out_node = new file_include_node(m_current_token.get_token_location(), m_current_token.get_value());
-		return {};
+		return outcome::success();
 	}
 
-	error_result recursive_descent_parser::parse_global_statement(node*& out_node) {
+	outcome::result<void> recursive_descent_parser::parse_global_statement(node*& out_node) {
 		const token token = peek_next_token(); // identifier || type || keyword
 
 		if (is_token_type(token)) {
 			// statements beginning with a type keyword have to be variable declarations
-			if (auto declaration_parse_error = parse_declaration(out_node, true)) {
-				return declaration_parse_error; // return on failure
-			}
+			OUTCOME_TRY(parse_declaration(out_node, true));
 		}
 		else {
 			switch (token) {
 			case token::identifier:
 				// assignment statement
-				if (auto assignment_parse_error = parse_assignment(out_node)) {
-					return assignment_parse_error; // return on failure
-				}
+				OUTCOME_TRY(parse_assignment(out_node));
 				break;
 			default:
-				return error::emit<3001>(
+				return outcome::failure(error::emit<3001>(
 					m_current_token.get_token_location(),
 					token
-				);
+				));
 			}
 		}
 
-		if (auto next_token_error = expect_next_token(token::semicolon)) {
-			return next_token_error; // return on failure
-		}
-
-		return {};
+		OUTCOME_TRY(expect_next_token(token::semicolon));
+		return outcome::success();
 	}
 
-	error_result recursive_descent_parser::parse_local_statements(std::vector<node*>& out_statements) {
-		if (auto next_token_error = expect_next_token(token::l_brace)) {
-			return next_token_error;  // return on failure
-		}
+	outcome::result<void> recursive_descent_parser::parse_local_statements(std::vector<node*>& out_statements) {
+		OUTCOME_TRY(expect_next_token(token::l_brace));
 
 		bool met_block_break = false;
 		token next_token = peek_next_token();
@@ -255,9 +221,7 @@ namespace sigma {
 		// get all statements in the current scope
 		while (next_token != token::r_brace) {
 			node* statement;
-			if (auto local_statement_parse_error = parse_local_statement(statement)) {
-				return local_statement_parse_error; // return on failure
-			}
+			OUTCOME_TRY(parse_local_statement(statement));
 
 			// check if we've met a block break token
 			if (met_block_break == false) {
@@ -271,37 +235,29 @@ namespace sigma {
 		}
 
 		get_next_token(); // r_brace (guaranteed)
-		return {};
+		return outcome::success();
 	}
 
-	error_result recursive_descent_parser::parse_local_statement(node*& out_node) {
+	outcome::result<void> recursive_descent_parser::parse_local_statement(node*& out_node) {
 		const token next_token = peek_next_token(); // identifier || type || keyword
 
 		if (is_token_type(next_token)) {
 			// statements beginning with a type keyword have to be variable declarations
-			if (auto declaration_parse_error = parse_declaration(out_node, false)) {
-				return declaration_parse_error;  // return on failure
-			}
+			OUTCOME_TRY(parse_declaration(out_node, false));
 		}
 		else {
 			switch (next_token) {
 			case token::identifier:
-				if (auto local_statement_identifier_parse_error = parse_local_statement_identifier(out_node)) {
-					return local_statement_identifier_parse_error; // return on failure
-				}
+				OUTCOME_TRY(parse_local_statement_identifier(out_node));
 				break;
 			case token::l_parenthesis:
 				// parse a deep expression (parenthesized expression)
-				if (auto deep_expression_parse_error = parse_deep_expression(out_node, type::unknown())) {
-					return deep_expression_parse_error; // return on failure
-				}
+				OUTCOME_TRY(parse_deep_expression(out_node, type::unknown()));
 
 				// check for post unary operators after deep expression
 				if (peek_next_token() == token::operator_increment || peek_next_token() == token::operator_decrement) {
 					node* operand = out_node;
-					if (auto post_operator_parse_error = parse_post_operator(operand, out_node)) {
-						return post_operator_parse_error; // return on failure
-					}
+					OUTCOME_TRY(parse_post_operator(operand, out_node));
 				}
 				break;
 			case token::operator_increment:
@@ -312,27 +268,20 @@ namespace sigma {
 				token next_next_token;
 				next_next_token = peek_nth_token(2);
 
-				if (next_next_token == token::identifier ||
-					next_next_token == token::l_parenthesis) {
-					if (auto pre_operator_parse_error = parse_pre_operator(out_node)) {
-						return pre_operator_parse_error; // return on failure
-					}
+				if (next_next_token == token::identifier || next_next_token == token::l_parenthesis) {
+					OUTCOME_TRY(parse_pre_operator(out_node));
 				}
 				else {
-					return error::emit<3004>(
+					return outcome::failure(error::emit<3004>(
 						m_current_token.get_token_location()
-					); // return on failure
+					)); // return on failure
 				}
 				break;
 			case token::keyword_return:
-				if (auto return_statement_parse_error = parse_return_statement(out_node)) {
-					return return_statement_parse_error; // return on failure
-				}
+				OUTCOME_TRY(parse_return_statement(out_node));
 				break;
 			case token::keyword_break:
-				if (auto break_keyword_parse_error = parse_break_keyword(out_node)) {
-					return break_keyword_parse_error; // return on failure
-				}
+				OUTCOME_TRY(parse_break_keyword(out_node));
 				break;
 			case token::keyword_if:
 				// return right away since we don't want to check for a semicolon at the end of the statement
@@ -344,39 +293,29 @@ namespace sigma {
 				// return right away since we don't want to check for a semicolon at the end of the statement
 				return parse_for_loop(out_node);
 			default:
-				file_position p = m_current_token.get_token_location();
-				return error::emit<3001>(
-					p,
+				return outcome::failure(error::emit<3001>(
+					m_current_token.get_token_location(),
 					next_token
-				); // return on failure
+				)); // return on failure
 			}
 		}
 
-		if (auto next_token_error = expect_next_token(token::semicolon)) {
-			return next_token_error; // return on failure
-		}
-
-		return {};
+		OUTCOME_TRY(expect_next_token(token::semicolon));
+		return outcome::success();
 	}
 
-	error_result recursive_descent_parser::parse_local_statement_identifier(node*& out_node) {
+	outcome::result<void> recursive_descent_parser::parse_local_statement_identifier(node*& out_node) {
 		if (peek_is_function_call()) {
 			// function call statement
-			if (auto function_call_parse_error = parse_function_call(out_node)) {
-				return function_call_parse_error; // return on failure
-			}
+			OUTCOME_TRY(parse_function_call(out_node));
 		}
 		else if (peek_is_array_index_access()) {
 			// array assignment
-			if (auto array_assignment_parse_error = parse_array_assignment(out_node)) {
-				return array_assignment_parse_error; // return on failure
-			}
+			OUTCOME_TRY(parse_array_assignment(out_node));
 		}
 		else if (peek_is_assignment()) {
 			// assignment statement
-			if(auto assignment_parse_error = parse_assignment(out_node)) {
-				return assignment_parse_error; // return on failure
-			}
+			OUTCOME_TRY(parse_assignment(out_node));
 		}
 		else {
 			// create a simple access node
@@ -394,10 +333,10 @@ namespace sigma {
 			return parse_compound_operation(out_node, out_node);
 		}
 
-		return {};
+		return outcome::success();
 	}
 
-	error_result recursive_descent_parser::parse_if_else_statement(node*& out_node) {
+	outcome::result<void> recursive_descent_parser::parse_if_else_statement(node*& out_node) {
 		std::vector<node*> conditions;
 		std::vector<std::vector<node*>> branches;
 		const file_position location = m_current_token.get_token_location();
@@ -418,17 +357,9 @@ namespace sigma {
 
 				node* condition = nullptr;
 				if (!has_else) {
-					if(auto next_token_error = expect_next_token(token::l_parenthesis)) {
-						return next_token_error;
-					}
-
-					if (auto expression_parse_error = parse_expression(condition)) {
-						return expression_parse_error;
-					}
-
-					if(auto next_token_error = expect_next_token(token::r_parenthesis)) {
-						return next_token_error;
-					}
+					OUTCOME_TRY(expect_next_token(token::l_parenthesis));
+					OUTCOME_TRY(parse_expression(condition));
+					OUTCOME_TRY(expect_next_token(token::r_parenthesis));
 				}
 
 				conditions.push_back(condition);
@@ -438,9 +369,7 @@ namespace sigma {
 			}
 
 			std::vector<node*> branch_statements;
-			if (auto local_statement_parse_error = parse_local_statements(branch_statements)) {
-				return local_statement_parse_error; // return on failure
-			}
+			OUTCOME_TRY(parse_local_statements(branch_statements));
 
 			branches.push_back(branch_statements);
 
@@ -450,51 +379,37 @@ namespace sigma {
 		}
 
 		out_node = new if_else_node(location, conditions, branches);
-		return {};
+		return outcome::success();
 	}
 
-	error_result recursive_descent_parser::parse_while_loop(node*& out_node) {
+	outcome::result<void> recursive_descent_parser::parse_while_loop(node*& out_node) {
 		get_next_token(); // keyword_while (guaranteed)
 		const file_position location = m_current_token.get_token_location();
 
-		if (auto next_token_error = expect_next_token(token::l_parenthesis)) {
-			return next_token_error; // return on failure
-		}
+		OUTCOME_TRY(expect_next_token(token::l_parenthesis));
 
 		node* loop_condition_node;
-		if (auto expression_parse_error = parse_expression(loop_condition_node)) {
-			return expression_parse_error; // return on failure
-		}
-
-		if (auto next_token_error = expect_next_token(token::r_parenthesis)) {
-			return next_token_error; // return on failure
-		}
-
-		if (auto next_token_error = expect_next_token(token::l_brace)) {
-			return next_token_error; // return on failure
-		}
+		OUTCOME_TRY(parse_expression(loop_condition_node));
+		OUTCOME_TRY(expect_next_token(token::r_parenthesis));
+		OUTCOME_TRY(expect_next_token(token::l_brace));
 
 		std::vector<node*> loop_statements;
 		while (peek_next_token() != token::r_brace) {
 			node* statement;
-			if (auto local_statement_error = parse_local_statement(statement)) {
-				return local_statement_error; // return on failure
-			}
+			OUTCOME_TRY(parse_local_statement(statement));
 
 			loop_statements.push_back(statement);
 		}
 
 		get_next_token(); // r_brace (guaranteed)
 		out_node = new while_node(location, loop_condition_node, loop_statements);
-		return {};
+		return outcome::success();
 	}
 
-	error_result recursive_descent_parser::parse_loop_increment(node*& out_node) {
+	outcome::result<void> recursive_descent_parser::parse_loop_increment(node*& out_node) {
 		switch (const token next_token = peek_next_token()) {
 		case token::identifier:
-			if (auto local_statement_identifier_parse_error = parse_local_statement_identifier(out_node)) {
-				return local_statement_identifier_parse_error; // return on failure
-			}
+			OUTCOME_TRY(parse_local_statement_identifier(out_node));
 			break;
 		case token::operator_increment:
 		case token::operator_decrement:
@@ -507,35 +422,31 @@ namespace sigma {
 			if (
 				next_next_token == token::identifier || 
 				next_next_token == token::l_parenthesis) {
-				if (auto pre_operator_parse_error = parse_pre_operator(out_node)) {
-					return pre_operator_parse_error; // return on failure
-				}
+				OUTCOME_TRY(parse_pre_operator(out_node));
 			}
 			else {
-				return error::emit<3004>(
-					std::move(m_current_token.get_token_location())
-					); // return on failure
+				return outcome::failure(error::emit<3004>(
+					m_current_token.get_token_location()
+				)); // return on failure
 			}
 			break;
 		case token::r_parenthesis:
 			break;
 		default:
-			return error::emit<3001>(
-				std::move(m_current_token.get_token_location()), 
+			return outcome::failure(error::emit<3001>(
+				m_current_token.get_token_location(), 
 				next_token
-			); // return on failure
+			)); // return on failure
 		}
 
-		return {};
+		return outcome::success();
 	}
 
-	error_result recursive_descent_parser::parse_for_loop(node*& out_node) {
+	outcome::result<void> recursive_descent_parser::parse_for_loop(node*& out_node) {
 		get_next_token(); // keyword_for (guaranteed)
 		const file_position location = m_current_token.get_token_location();
 
-		if (auto next_token_error = expect_next_token(token::l_parenthesis)) {
-			return next_token_error; // return on failure
-		}
+		OUTCOME_TRY(expect_next_token(token::l_parenthesis));
 
 		// parse the initialization section
 		node* loop_initialization_node;
@@ -543,38 +454,27 @@ namespace sigma {
 
 		if (is_token_type(next_token)) {
 			// statements beginning with a type keyword have to be variable declarations
-			if (auto declaration_parse_error = parse_declaration(loop_initialization_node, false)) {
-				return declaration_parse_error; // return on failure
-			}
+			OUTCOME_TRY(parse_declaration(loop_initialization_node, false));
 		}
 		else {
 			switch (next_token) {
 			case token::identifier:
-				if (auto local_statement_identifier_parse_error = parse_local_statement_identifier(loop_initialization_node)) {
-					return local_statement_identifier_parse_error; // return on failure
-				}
+				OUTCOME_TRY(parse_local_statement_identifier(loop_initialization_node));
 				break;
 			default:
-				return error::emit<3001>(
-					std::move(m_current_token.get_token_location()), 
+				return outcome::failure(error::emit<3001>(
+					m_current_token.get_token_location(), 
 					next_token
-				); // return on failure
+				)); // return on failure
 			}
 		}
 
-		if (auto next_token_error = expect_next_token(token::semicolon)) {
-			return next_token_error;
-		}
+		OUTCOME_TRY(expect_next_token(token::semicolon));
 
 		// parse the loop condition section
 		node* loop_condition_node;
-		if (auto expression_parse_error = parse_expression(loop_condition_node)) {
-			return expression_parse_error; // return on failure
-		}
-
-		if (auto next_token_error = expect_next_token(token::semicolon)) {
-			return next_token_error; // return on failure
-		}
+		OUTCOME_TRY(parse_expression(loop_condition_node));
+		OUTCOME_TRY(expect_next_token(token::semicolon));
 
 		// parse the increment section
 		std::vector<node*> post_iteration_nodes;
@@ -586,10 +486,7 @@ namespace sigma {
 				break;
 			}
 
-			if (auto loop_increment_parse_error = parse_loop_increment(post_iteration_node)) {
-				return loop_increment_parse_error; // return on failure
-			}
-
+			OUTCOME_TRY(parse_loop_increment(post_iteration_node));
 			post_iteration_nodes.push_back(post_iteration_node);
 
 			if (peek_next_token() != token::comma) {
@@ -599,31 +496,30 @@ namespace sigma {
 			get_next_token(); // comma (guaranteed)
 		}
 
-		if (auto next_token_error = expect_next_token(token::r_parenthesis)) {
-			return next_token_error; // return on failure
-		}
-
-		if (auto next_token_error = expect_next_token(token::l_brace)) {
-			return next_token_error; // return on failure
-		}
+		OUTCOME_TRY(expect_next_token(token::r_parenthesis));
+		OUTCOME_TRY(expect_next_token(token::l_brace));
 
 		// parse body statements
 		std::vector<node*> loop_statements;
 		while (peek_next_token() != token::r_brace) {
 			node* statement;
-			if (auto local_statement_error = parse_local_statement(statement)) {
-				return local_statement_error; // return on failure
-			}
-
+			OUTCOME_TRY(parse_local_statement(statement));
 			loop_statements.push_back(statement);
 		}
 
 		get_next_token(); // r_brace (guaranteed)
-		out_node = new for_node(location, loop_initialization_node, loop_condition_node, post_iteration_nodes, loop_statements);
-		return {};
+		out_node = new for_node(
+			location,
+			loop_initialization_node, 
+			loop_condition_node,
+			post_iteration_nodes, 
+			loop_statements
+		);
+
+		return outcome::success();
 	}
 
-	error_result recursive_descent_parser::parse_compound_operation(node*& out_node, node* left_operand) {
+	outcome::result<void> recursive_descent_parser::parse_compound_operation(node*& out_node, node* left_operand) {
 		// operator_addition_assignment ||
 		// operator_subtraction_assignment || 
 		// operator_multiplication_assignment || 
@@ -634,9 +530,7 @@ namespace sigma {
 
 		// rhs of the expression
 		node* expression;
-		if(auto expression_parse_error = parse_expression(expression)) {
-			return expression_parse_error;
-		}
+		OUTCOME_TRY(parse_expression(expression));
 
 		switch (op) {
 		case token::operator_addition_assignment:
@@ -676,10 +570,10 @@ namespace sigma {
 			break;
 		}
 
-		return {};
+		return outcome::success();
 	}
 
-	error_result recursive_descent_parser::parse_array_assignment(node*& out_node) {
+	outcome::result<void> recursive_descent_parser::parse_array_assignment(node*& out_node) {
 		get_next_token(); // identifier (guaranteed)
 		const std::string identifier = m_current_token.get_value();
 		const file_position location = m_current_token.get_token_location();
@@ -688,16 +582,12 @@ namespace sigma {
 		while (peek_next_token() == token::l_bracket) {
 			get_next_token(); // l_bracket (guaranteed)
 			node* index_node;
-			if (auto expression_error = parse_expression(index_node, type(type::base::u64, 0))) {
-				return expression_error; // return on failure
-			}
+			OUTCOME_TRY(parse_expression(index_node, type(type::base::u64, 0)));
 
 			index_nodes.push_back(index_node);
 
 			// make sure the next token is a right square bracket
-			if (auto next_token_error = expect_next_token(token::r_bracket)) {
-				return next_token_error; // return on failure
-			}
+			OUTCOME_TRY(expect_next_token(token::r_bracket));
 		}
 
 		const token next_token = peek_next_token();
@@ -707,14 +597,10 @@ namespace sigma {
 			// parse access-assignment
 			node* value;
 			if (peek_is_function_call()) {
-				if (auto function_call_parse_error = parse_function_call(value)) {
-					return function_call_parse_error; // return on failure
-				}
+				OUTCOME_TRY(parse_function_call(value));
 			}
 			else {
-				if (auto expression_parse_error = parse_expression(value)) {
-					return expression_parse_error; // return on failure
-				}
+				OUTCOME_TRY(parse_expression(value));
 			}
 
 			node* array_node = new variable_node(m_current_token.get_token_location(), identifier);
@@ -724,40 +610,32 @@ namespace sigma {
 			node* array_node = new variable_node(m_current_token.get_token_location(), identifier);
 			out_node = new array_access_node(location, array_node, index_nodes);
 
-			if (auto post_operator_parse_error = parse_post_operator(out_node, out_node)) {
-				return post_operator_parse_error; // return on failure
-			}
+			OUTCOME_TRY(parse_post_operator(out_node, out_node));
 		}
 
-		return {};
+		return outcome::success();
 	}
 
-	error_result recursive_descent_parser::parse_assignment(node*& out_node) {
+	outcome::result<void> recursive_descent_parser::parse_assignment(node*& out_node) {
 		get_next_token(); // identifier (guaranteed)
 		node* variable = new variable_node(m_current_token.get_token_location(), m_current_token.get_value());
 
-		if (auto next_token_error = expect_next_token(token::operator_assignment)) {
-			return next_token_error;  // return on failure
-		}
+		OUTCOME_TRY(expect_next_token(token::operator_assignment));
 
 		// parse access-assignment
 		node* value;
 		if (peek_is_function_call()) {
-			if (auto function_call_parse_error = parse_function_call(value)) {
-				return function_call_parse_error; // return on failure
-			}
+			OUTCOME_TRY(parse_function_call(value));
 		}
 		else {
-			if (auto expression_parse_error = parse_expression(value)) {
-				return expression_parse_error; // return on failure
-			}
+			OUTCOME_TRY(parse_expression(value));
 		}
 
 		out_node = new assignment_node(m_current_token.get_token_location(), variable, value);
-		return {};
+		return outcome::success();
 	}
 
-	error_result recursive_descent_parser::parse_array_access(node*& out_node) {
+	outcome::result<void> recursive_descent_parser::parse_array_access(node*& out_node) {
 		get_next_token(); // identifier (guaranteed)
 		const std::string identifier = m_current_token.get_value();
 
@@ -770,14 +648,10 @@ namespace sigma {
 		while (m_current_token.get_token() == token::l_bracket) {
 			// parse access index
 			node* array_index;
-			if (auto expression_parse_error = parse_expression(array_index, type(type::base::u64, 0))) {
-				return expression_parse_error; // return on failure
-			}
-			index_nodes.push_back(array_index);
 
-			if (auto next_token_error = expect_next_token(token::r_bracket)) {
-				return next_token_error; // return on failure
-			}
+			OUTCOME_TRY(parse_expression(array_index, type(type::base::u64, 0)));
+			index_nodes.push_back(array_index);
+			OUTCOME_TRY(expect_next_token(token::r_bracket));
 
 			if (peek_next_token() != token::l_bracket) {
 				break;
@@ -787,10 +661,10 @@ namespace sigma {
 		}
 
 		out_node = new array_access_node(m_current_token.get_token_location(), array_node, index_nodes);
-		return {};
+		return outcome::success();
 	}
 
-	error_result recursive_descent_parser::parse_function_call(node*& out_node) {
+	outcome::result<void> recursive_descent_parser::parse_function_call(node*& out_node) {
 		get_next_token(); // identifier (guaranteed)
 		const std::string identifier = m_current_token.get_value();
 		get_next_token(); // l_parenthesis (guaranteed)
@@ -800,9 +674,7 @@ namespace sigma {
 		if (next_token != token::r_parenthesis) {
 			while (true) {
 				node* argument;
-				if (auto expression_parse_error = parse_expression(argument)) {
-					return expression_parse_error; // return on failure
-				}
+				OUTCOME_TRY(parse_expression(argument));
 
 				arguments.push_back(argument);
 
@@ -815,23 +687,21 @@ namespace sigma {
 					break;
 				}
 				else {
-					return error::emit<3001>(
-						std::move(m_current_token.get_token_location()),
+					return outcome::failure(error::emit<3001>(
+						m_current_token.get_token_location(),
 						m_current_token.get_token()
-					);  // return on failure
+					));  // return on failure
 				}
 			}
 		}
 
-		if (auto next_token_error = expect_next_token(token::r_parenthesis)) {
-			return next_token_error; // return on failure
-		}
+		OUTCOME_TRY(expect_next_token(token::r_parenthesis));
 
 		out_node = new function_call_node(m_current_token.get_token_location(), identifier, arguments);
-		return  {};
+		return outcome::success();
 	}
 
-	error_result recursive_descent_parser::parse_return_statement(node*& out_node) {
+	outcome::result<void> recursive_descent_parser::parse_return_statement(node*& out_node) {
 		const file_position location = m_current_token.get_token_location();
 		get_next_token(); // keyword_return (guaranteed)
 
@@ -841,100 +711,81 @@ namespace sigma {
 		}
 		else {
 			node* expression;
-			if (auto expression_parse_error = parse_expression(expression)) {
-				return expression_parse_error; // return on failure
-			}
+			OUTCOME_TRY(parse_expression(expression));
 
 			out_node = new return_node(location, expression);
 		}
 	
-		return {};
+		return outcome::success();
 	}
 
-	error_result recursive_descent_parser::parse_declaration(node*& out_node, bool is_global) {
+	outcome::result<void> recursive_descent_parser::parse_declaration(node*& out_node, bool is_global) {
 		const file_position location = m_current_token.get_token_location();
 
 		type declaration_type;
-		if (auto type_parse_error = parse_type(declaration_type)) {
-			return type_parse_error; // return on failure
-		}
-
-		if (auto next_token_error = expect_next_token(token::identifier)) {
-			return next_token_error; // return on failure
-		}
+		OUTCOME_TRY(parse_type(declaration_type));
+		OUTCOME_TRY(expect_next_token(token::identifier));
 
 		const std::string identifier = m_current_token.get_value();
 
 		node* value = nullptr;
 		if (peek_next_token() == token::operator_assignment) {
 			get_next_token(); // operator_assignment
-			if (auto expression_parse_error = parse_expression(value, declaration_type)) {
-				return expression_parse_error; // return on failure
-			}
+			OUTCOME_TRY(parse_expression(value, declaration_type));
 		}
 
 		if (is_global) {
 			out_node = new global_declaration_node(location, declaration_type, identifier, value);
-			return {};
+			return outcome::success();
 		}
 
 		out_node = new local_declaration_node(location, declaration_type, identifier, value);
-		return {};
+		return outcome::success();
 	}
 
-	error_result recursive_descent_parser::parse_expression(node*& out_node, type expression_type) {
+	outcome::result<void> recursive_descent_parser::parse_expression(node*& out_node, type expression_type) {
 		return parse_logical_conjunction(out_node, expression_type);
 	}
 
-	error_result recursive_descent_parser::parse_logical_conjunction(node*& out_node, type expression_type) {
+	outcome::result<void> recursive_descent_parser::parse_logical_conjunction(node*& out_node, type expression_type) {
 		node* left;
-		if (auto logical_disjunction_parse_error = parse_logical_disjunction(left, expression_type)) {
-			return logical_disjunction_parse_error;  // return on failure
-		}
+		OUTCOME_TRY(parse_logical_disjunction(left, expression_type));
 
 		while (peek_next_token() == token::operator_logical_conjunction) {
 			get_next_token();
 			const token_data op = m_current_token;
 
 			node* right;
-			if (auto logical_disjunction_parse_error = parse_logical_disjunction(right, expression_type)) {
-				return logical_disjunction_parse_error; // return on failure
-			}
+			OUTCOME_TRY(parse_logical_disjunction(right, expression_type));
 
 			left = new operator_conjunction_node(op.get_token_location(), left, right);
 		}
 
 		out_node = left;
-		return {};
+		return outcome::success();
 	}
 
-	error_result recursive_descent_parser::parse_logical_disjunction(node*& out_node, type expression_type) {
+	outcome::result<void> recursive_descent_parser::parse_logical_disjunction(node*& out_node, type expression_type) {
 		node* left;
-		if (auto comparison_parse_error = parse_comparison(left, expression_type)) {
-			return comparison_parse_error; // return on failure
-		}
+		OUTCOME_TRY(parse_comparison(left, expression_type));
 
 		while (peek_next_token() == token::operator_logical_disjunction) {
 			get_next_token();
 			const token_data op = m_current_token;
 
 			node* right;
-			if (auto comparison_parse_error = parse_comparison(right, expression_type)) {
-				return comparison_parse_error; // return on failure
-			}
+			OUTCOME_TRY(parse_comparison(right, expression_type));
 
 			left = new operator_disjunction_node(op.get_token_location(), left, right);
 		}
 
 		out_node = left;
-		return {};
+		return outcome::success();
 	}
 
-	error_result recursive_descent_parser::parse_comparison(node*& out_node, type expression_type) {
+	outcome::result<void> recursive_descent_parser::parse_comparison(node*& out_node, type expression_type) {
 		node* left;
-		if (auto term_parse_error = parse_term(left, expression_type)) {
-			return term_parse_error; // return on failure
-		}
+		OUTCOME_TRY(parse_term(left, expression_type));
 
 		while (
 			peek_next_token() == token::operator_greater_than ||
@@ -947,9 +798,7 @@ namespace sigma {
 			const token_data op = m_current_token;
 
 			node* right;
-			if (auto term_parse_error = parse_term(right, expression_type)) {
-				return term_parse_error; // return on failure
-			}
+			OUTCOME_TRY(parse_term(right, expression_type));
 
 			switch (op.get_token()) {
 			case token::operator_greater_than:
@@ -974,14 +823,12 @@ namespace sigma {
 		}
 
 		out_node = left;
-		return {};
+		return outcome::success();
 	}
 
-	error_result recursive_descent_parser::parse_term(node*& out_node, type expression_type) {
+	outcome::result<void> recursive_descent_parser::parse_term(node*& out_node, type expression_type) {
 		node* left;
-		if (auto factor_parse_error = parse_factor(left, expression_type)) {
-			return factor_parse_error; // return on failure
-		}
+		OUTCOME_TRY(parse_factor(left, expression_type));
 
 		while (
 			peek_next_token() == token::operator_addition ||
@@ -990,9 +837,7 @@ namespace sigma {
 			const token_data op = m_current_token;
 
 			node* right;
-			if (auto factor_parse_error = parse_factor(right, expression_type)) {
-				return factor_parse_error; // return on failure
-			}
+			OUTCOME_TRY(parse_factor(right, expression_type));
 
 			switch (op.get_token()) {
 			case token::operator_addition:
@@ -1005,14 +850,12 @@ namespace sigma {
 		}
 
 		out_node = left;
-		return {};
+		return outcome::success();
 	}
 
-	error_result recursive_descent_parser::parse_factor(node*& out_node, type expression_type) {
+	outcome::result<void> recursive_descent_parser::parse_factor(node*& out_node, type expression_type) {
 		node* left;
-		if (auto primary_parse_error = parse_primary(left, expression_type)) {
-			return primary_parse_error; // return on failure
-		}
+		OUTCOME_TRY(parse_primary(left, expression_type));
 
 		while (
 			peek_next_token() == token::operator_multiplication ||
@@ -1028,9 +871,7 @@ namespace sigma {
 			const token_data op = m_current_token;
 
 			node* right;
-			if (auto primary_parse_error = parse_primary(right, expression_type)) {
-				return primary_parse_error; // return on failure
-			}
+			OUTCOME_TRY(parse_primary(right, expression_type));
 
 			switch (op.get_token()) {
 			case token::operator_multiplication:
@@ -1061,10 +902,10 @@ namespace sigma {
 		}
 
 		out_node = left;
-		return {};
+		return outcome::success();
 	}
 
-	error_result recursive_descent_parser::parse_primary(node*& out_node, type expression_type) {
+	outcome::result<void> recursive_descent_parser::parse_primary(node*& out_node, type expression_type) {
 		const token next_token = peek_next_token();
 
 		if (is_token_numerical(next_token)) {
@@ -1089,9 +930,9 @@ namespace sigma {
 				return parse_pre_operator(out_node);
 			}
 
-			return error::emit<3004>(
-				std::move(m_current_token.get_token_location())
-			); // return on failure
+			return outcome::failure(error::emit<3004>(
+				m_current_token.get_token_location()
+			)); // return on failure
 		case token::identifier:
 			// parse a function call or an assignment
 			return parse_primary_identifier(out_node);
@@ -1113,45 +954,45 @@ namespace sigma {
 			return parse_bool(out_node);
 		}
 
-		return error::emit<3001>(
+		return outcome::failure(error::emit<3001>(
 			m_current_token.get_token_location(),
 			m_current_token.get_token()
-		); // return on failure
+		)); // return on failure
 	}
 
-	error_result recursive_descent_parser::parse_number(node*& out_node, type expression_type) {
+	outcome::result<void> recursive_descent_parser::parse_number(node*& out_node, type expression_type) {
 		get_next_token(); // type
 		const std::string str_value = m_current_token.get_value();
 		const type ty = expression_type.is_unknown() ? type(m_current_token.get_token(), 0) : expression_type;
 		out_node = new numerical_literal_node(m_current_token.get_token_location(), str_value, ty);
-		return {};
+		return outcome::success();
 	}
 
-	error_result recursive_descent_parser::parse_char(node*& out_node) {
+	outcome::result<void> recursive_descent_parser::parse_char(node*& out_node) {
 		get_next_token(); // char_literal (guaranteed)
 		out_node = new char_node(m_current_token.get_token_location(), m_current_token.get_value()[0]);
-		return {};
+		return outcome::success();
 	}
 
-	error_result recursive_descent_parser::parse_string(node*& out_node) {
+	outcome::result<void> recursive_descent_parser::parse_string(node*& out_node) {
 		get_next_token(); // string_literal (guaranteed)
 		out_node = new string_node(m_current_token.get_token_location(), m_current_token.get_value());
-		return {};
+		return outcome::success();
 	}
 
-	error_result recursive_descent_parser::parse_bool(node*& out_node) {
+	outcome::result<void> recursive_descent_parser::parse_bool(node*& out_node) {
 		get_next_token(); // bool_literal_true || bool_literal_false (guaranteed)
 		out_node = new bool_node(m_current_token.get_token_location(), m_current_token.get_token() == token::bool_literal_true);
-		return {};
+		return outcome::success();
 	}
 
-	error_result recursive_descent_parser::parse_break_keyword(node*& out_node) {
+	outcome::result<void> recursive_descent_parser::parse_break_keyword(node*& out_node) {
 		get_next_token(); // keyword_break (guaranteed)
 		out_node = new break_node(m_current_token.get_token_location());
-		return {};
+		return outcome::success();
 	}
 
-	error_result recursive_descent_parser::parse_post_operator(node* operand, node*& out_node) {
+	outcome::result<void> recursive_descent_parser::parse_post_operator(node* operand, node*& out_node) {
 		get_next_token();
 
 		if (m_current_token.get_token() == token::operator_increment) {
@@ -1161,17 +1002,15 @@ namespace sigma {
 			out_node = new operator_post_decrement_node(m_current_token.get_token_location(), operand);
 		}
 
-		return {};
+		return outcome::success();
 	}
 
-	error_result recursive_descent_parser::parse_pre_operator(node*& out_node) {
+	outcome::result<void> recursive_descent_parser::parse_pre_operator(node*& out_node) {
 		get_next_token();
 		const token_data op = m_current_token;
 		node* operand;
 
-		if (auto primary_parse_error = parse_primary(operand, type::unknown())) {
-			return primary_parse_error; // return on failure
-		}
+		OUTCOME_TRY(parse_primary(operand, type::unknown()));
 
 		switch (op.get_token()) {
 		case token::operator_increment:
@@ -1188,62 +1027,50 @@ namespace sigma {
 			break;
 		}
 
-		return {};
+		return outcome::success();
 	}
 
-	error_result recursive_descent_parser::parse_negative_number(node*& out_node, type expression_type) {
+	outcome::result<void> recursive_descent_parser::parse_negative_number(node*& out_node, type expression_type) {
 		get_next_token(); // operator_subtraction (guaranteed)
 
 		// negate the number by subtracting it from 0
 		node* zero_node = create_zero_node(expression_type);
 		node* number;
 
-		if (auto number_parse_error = parse_number(number, expression_type)) {
-			return number_parse_error; // return on failure
-		}
+		OUTCOME_TRY(parse_number(number, expression_type));
 
 		out_node = new operator_subtraction_node(m_current_token.get_token_location(), zero_node, number);
-		return {};
+		return outcome::success();
 	}
 
-	error_result recursive_descent_parser::parse_new_allocation(node*& out_node) {
+	outcome::result<void> recursive_descent_parser::parse_new_allocation(node*& out_node) {
 		get_next_token(); // keyword_new (guaranteed)
 		const file_position location = m_current_token.get_token_location();
 
 		type allocation_type;
-		if (auto type_parse_error = parse_type(allocation_type)) {
-			return type_parse_error; // return on failure
-		}
+		OUTCOME_TRY(parse_type(allocation_type));
 
 		// l_bracket
-		if (auto next_token_error = expect_next_token(token::l_bracket)) {
-			return next_token_error; // return on failure
-		}
+		OUTCOME_TRY(expect_next_token(token::l_bracket));
 
 		// parse array size
 		node* array_size;
-		if (auto expression_parse_error = parse_expression(array_size, type(type::base::u64, 0))) {
-			return expression_parse_error; // return on failure
-		}
+		OUTCOME_TRY(parse_expression(array_size, type(type::base::u64, 0)));
 
 		// r_bracket
-		if (auto next_token_error = expect_next_token(token::r_bracket)) {
-			return next_token_error; // return on failure
-		}
+		OUTCOME_TRY(expect_next_token(token::r_bracket));
 
 		out_node = new array_allocation_node(location, allocation_type, array_size);
-		return {};
+		return outcome::success();
 	}
 
-	error_result recursive_descent_parser::parse_primary_identifier(node*& out_node) {
+	outcome::result<void> recursive_descent_parser::parse_primary_identifier(node*& out_node) {
 		if (peek_is_function_call()) {
 			// parse a function call
 			return parse_function_call(out_node);
 		}
 		else if (peek_is_array_index_access()) {
-			if (auto array_access_parse_error = parse_array_access(out_node)) {
-				return array_access_parse_error; // return on failure
-			}
+			OUTCOME_TRY(parse_array_access(out_node));
 		}
 		else {
 			// parse an assignment
@@ -1262,23 +1089,19 @@ namespace sigma {
 			return parse_compound_operation(out_node, out_node);
 		}
 
-		return {};
+		return outcome::success();
 	}
 
-	error_result recursive_descent_parser::parse_deep_expression(node*& out_node, type expression_type) {
+	outcome::result<void> recursive_descent_parser::parse_deep_expression(node*& out_node, type expression_type) {
 		get_next_token(); // l_parenthesis (guaranteed)
 
 		// nested expression
-		if (auto expression_parse_error = parse_expression(out_node, expression_type)) {
-			return expression_parse_error; // return on failure
-		}
+		OUTCOME_TRY(parse_expression(out_node, expression_type));
 
 		// r_parenthesis
-		if (auto next_token_error = expect_next_token(token::r_parenthesis)) {
-			return next_token_error; // return on failure
-		}
+		OUTCOME_TRY(expect_next_token(token::r_parenthesis));
 
-		return {};
+		return outcome::success();
 	}
 
 	bool recursive_descent_parser::peek_is_function_definition() {
@@ -1391,14 +1214,14 @@ namespace sigma {
 		return new numerical_literal_node(m_current_token.get_token_location(), "0", expression_type);
 	}
 
-	error_result recursive_descent_parser::parse_type(type& ty) {
+	outcome::result<void> recursive_descent_parser::parse_type(type& ty) {
 		get_next_token();
 
 		if (!is_token_type(m_current_token.get_token())) {
-			return error::emit<3003>(
-				std::move(m_current_token.get_token_location()),
+			return outcome::failure(error::emit<3003>(
+				m_current_token.get_token_location(),
 				m_current_token.get_token()
-			); // return on failure
+			)); // return on failure
 		}
 
 		ty = type(m_current_token.get_token(), 0);
@@ -1409,6 +1232,6 @@ namespace sigma {
 			ty.set_pointer_level(ty.get_pointer_level() + 1);
 		}
 
-		return {};
+		return outcome::success();
 	}
 }

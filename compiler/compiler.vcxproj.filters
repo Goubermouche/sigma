@@ -330,6 +330,9 @@
     <ClInclude Include="source\utility\types.h">
       <Filter>source\utility</Filter>
     </ClInclude>
+    <ClInclude Include="source\utility\containers\directed_graph.h" />
+    <ClInclude Include="source\utility\thread_pool.h" />
+    <ClInclude Include="source\utility\thread_safe_queue.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp" />
@@ -576,5 +579,6 @@
     <ClCompile Include="source\utility\timer.cpp">
       <Filter>source\utility</Filter>
     </ClCompile>
+    <ClCompile Include="source\utility\containers\directed_graph.cpp" />
   </ItemGroup>
 </Project>

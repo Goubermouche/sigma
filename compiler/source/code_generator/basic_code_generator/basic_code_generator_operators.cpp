@@ -41,36 +41,32 @@
 namespace sigma {
 	// unary
 	// arithmetic
-	expected_value basic_code_generator::visit_operator_post_decrement_node(
+	outcome::result<value_ptr> basic_code_generator::visit_operator_post_decrement_node(
 		operator_post_decrement_node& node,
 		const code_generation_context& context
 	) {
 		(void)context; // suppress C4100
-		expected_value expression_result = node.get_expression_node()->accept(
-			*this, 
+		OUTCOME_TRY(auto expression_result, node.get_expression_node()->accept(
+			*this,
 			{}
-		);
-
-		if (!expression_result) {
-			return expression_result;
-		}
+		));
 
 		// check if the expression is an integer or a floating-point value
-		if (!expression_result.value()->get_type().is_numerical()) {
-			return std::unexpected(
+		if (!expression_result->get_type().is_numerical()) {
+			return outcome::failure(
 				error::emit<4100>(
-					std::move(node.get_declared_location()), 
-					expression_result.value()->get_type()
+					node.get_declared_location(), 
+					expression_result->get_type()
 				)
 			); // return on failure
 		}
 
 		llvm::Value* decrement_result;
-		if (expression_result.value()->get_type().is_floating_point()) {
+		if (expression_result->get_type().is_floating_point()) {
 			decrement_result = m_llvm_context->get_builder().CreateFSub(
-				expression_result.value()->get_value(),
+				expression_result->get_value(),
 				llvm::ConstantFP::get(
-					expression_result.value()->get_type().get_llvm_type(
+					expression_result->get_type().get_llvm_type(
 						m_llvm_context->get_context()
 					), 
 					1.0
@@ -79,273 +75,241 @@ namespace sigma {
 		}
 		else {
 			decrement_result = m_llvm_context->get_builder().CreateSub(
-				expression_result.value()->get_value(),
+				expression_result->get_value(),
 				llvm::ConstantInt::get(
-					expression_result.value()->get_type().get_llvm_type(m_llvm_context->get_context()),
+					expression_result->get_type().get_llvm_type(m_llvm_context->get_context()),
 					1
 				)
 			);
 		}
 
-		// assert that the pointer is not nullptr
-		ASSERT(expression_result.value()->get_pointer() != nullptr, "pointer is nullptr");
-
 		m_llvm_context->get_builder().CreateStore(
 			decrement_result,
-			expression_result.value()->get_pointer()
+			expression_result->get_pointer()
 		);
 
 		return expression_result;
 	}
 
-	expected_value basic_code_generator::visit_operator_post_increment_node(
+	outcome::result<value_ptr> basic_code_generator::visit_operator_post_increment_node(
 		operator_post_increment_node& node,
 		const code_generation_context& context
 	) {
 		(void)context; // suppress C4100
-		expected_value expression_result = node.get_expression_node()->accept(
+		OUTCOME_TRY(auto expression_result, node.get_expression_node()->accept(
 			*this,
 			{}
-		);
-
-		if (!expression_result) {
-			return expression_result;
-		}
+		));
 
 		// check if the expression is an integer or a floating-point value
-		if (!expression_result.value()->get_type().is_numerical()) {
-			return std::unexpected(
+		if (!expression_result->get_type().is_numerical()) {
+			return outcome::failure(
 				error::emit<4101>(
-					std::move(node.get_declared_location()),
-					expression_result.value()->get_type()
+					node.get_declared_location(),
+					expression_result->get_type()
 				)
 			); // return on failure
 		}
 
 		llvm::Value* decrement_result;
-		if (expression_result.value()->get_type().is_floating_point()) {
+		if (expression_result->get_type().is_floating_point()) {
 			decrement_result = m_llvm_context->get_builder().CreateFAdd(
-				expression_result.value()->get_value(),
+				expression_result->get_value(),
 				llvm::ConstantFP::get(
-					expression_result.value()->get_type().get_llvm_type(m_llvm_context->get_context()),
+					expression_result->get_type().get_llvm_type(m_llvm_context->get_context()),
 					1.0
 				)
 			);
 		}
 		else {
 			decrement_result = m_llvm_context->get_builder().CreateAdd(
-				expression_result.value()->get_value(), 
+				expression_result->get_value(), 
 				llvm::ConstantInt::get(
-					expression_result.value()->get_type().get_llvm_type(m_llvm_context->get_context()),
+					expression_result->get_type().get_llvm_type(m_llvm_context->get_context()),
 					1
 				)
 			);
 		}
 
-		// assert that the pointer is not nullptr
-		ASSERT(expression_result.value()->get_pointer() != nullptr, "pointer is nullptr");
-
 		m_llvm_context->get_builder().CreateStore(
 			decrement_result,
-			expression_result.value()->get_pointer()
+			expression_result->get_pointer()
 		);
 
 		return expression_result;
 	}
 
-	expected_value basic_code_generator::visit_operator_pre_decrement_node(
+	outcome::result<value_ptr> basic_code_generator::visit_operator_pre_decrement_node(
 		operator_pre_decrement_node& node, 
 		const code_generation_context& context
 	) {
 		(void)context; // suppress C4100
 		// accept the expression
-		expected_value expression_result = node.get_expression_node()->accept(
+		OUTCOME_TRY(auto expression_result, node.get_expression_node()->accept(
 			*this,
 			{}
-		);
-
-		if (!expression_result) {
-			return expression_result;
-		}
+		));
 
 		// check if the expression is an integer or a floating-point value
-		if (!expression_result.value()->get_type().is_numerical()) {
-			return std::unexpected(
+		if (!expression_result->get_type().is_numerical()) {
+			return outcome::failure(
 				error::emit<4102>(
-					std::move(node.get_declared_location()), 
-					expression_result.value()->get_type()
+					node.get_declared_location(), 
+					expression_result->get_type()
 				)
 			); // return on failure
 		}
 
 		// increment the expression
 		llvm::Value* increment_result;
-		if (expression_result.value()->get_type().is_floating_point()) {
+		if (expression_result->get_type().is_floating_point()) {
 			increment_result = m_llvm_context->get_builder().CreateFSub(
-				expression_result.value()->get_value(),
+				expression_result->get_value(),
 				llvm::ConstantFP::get(
-					expression_result.value()->get_type().get_llvm_type(m_llvm_context->get_context()), 
+					expression_result->get_type().get_llvm_type(m_llvm_context->get_context()), 
 					1.0
 				)
 			);
 		}
 		else {
 			increment_result = m_llvm_context->get_builder().CreateSub(
-				expression_result.value()->get_value(),
+				expression_result->get_value(),
 				llvm::ConstantInt::get(
-					expression_result.value()->get_type().get_llvm_type(m_llvm_context->get_context()),
+					expression_result->get_type().get_llvm_type(m_llvm_context->get_context()),
 					1
 				)
 			);
 		}
 
-		// assert that the pointer is not nullptr
-		ASSERT(expression_result.value()->get_pointer() != nullptr, "pointer is nullptr");
-
 		// store the decremented value back to memory
 		m_llvm_context->get_builder().CreateStore(
 			increment_result,
-			expression_result.value()->get_pointer()
+			expression_result->get_pointer()
 		);
 
 		return std::make_shared<value>(
 			"__pre_increment", 
-			expression_result.value()->get_type(),
+			expression_result->get_type(),
 			increment_result
 		);
 	}
 
-	expected_value basic_code_generator::visit_operator_pre_increment_node(
+	outcome::result<value_ptr> basic_code_generator::visit_operator_pre_increment_node(
 		operator_pre_increment_node& node, 
 		const code_generation_context& context
 	) {
 		(void)context; // suppress C4100
 		// accept the expression
-		expected_value expression_result = node.get_expression_node()->accept(
+		OUTCOME_TRY(auto expression_result, node.get_expression_node()->accept(
 			*this,
 			{}
-		);
-
-		if (!expression_result) {
-			return expression_result;
-		}
+		));
 
 		// check if the expression is an integer or a floating-point value
-		if (!expression_result.value()->get_type().is_numerical()) {
-			return std::unexpected(
+		if (!expression_result->get_type().is_numerical()) {
+			return outcome::failure(
 				error::emit<4103>(
-					std::move(node.get_declared_location()), 
-					expression_result.value()->get_type()
+					node.get_declared_location(), 
+					expression_result->get_type()
 				)
 			); // return on failure
 		}
 
 		// increment the expression
 		llvm::Value* increment_result;
-		if (expression_result.value()->get_type().is_floating_point()) {
+		if (expression_result->get_type().is_floating_point()) {
 			increment_result = m_llvm_context->get_builder().CreateFAdd(
-				expression_result.value()->get_value(), 
+				expression_result->get_value(), 
 				llvm::ConstantFP::get(
-					expression_result.value()->get_type().get_llvm_type(m_llvm_context->get_context()),
+					expression_result->get_type().get_llvm_type(m_llvm_context->get_context()),
 					1.0
 				)
 			);
 		}
 		else {
 			increment_result = m_llvm_context->get_builder().CreateAdd(
-				expression_result.value()->get_value(),
+				expression_result->get_value(),
 				llvm::ConstantInt::get(
-					expression_result.value()->get_type().get_llvm_type(m_llvm_context->get_context()),
+					expression_result->get_type().get_llvm_type(m_llvm_context->get_context()),
 					1
 				)
 			);
 		}
 
-		// assert that the pointer is not nullptr
-		ASSERT(expression_result.value()->get_pointer() != nullptr, "pointer is nullptr");
-
 		// store the incremented value back to memory
 		m_llvm_context->get_builder().CreateStore(
 			increment_result,
-			expression_result.value()->get_pointer()
+			expression_result->get_pointer()
 		);
 
 		return std::make_shared<value>(
 			"__pre_increment", 
-			expression_result.value()->get_type(),
+			expression_result->get_type(),
 			increment_result
 		);
 	}
 
 	// bitwise
-	expected_value basic_code_generator::visit_operator_bitwise_not_node(
+	outcome::result<value_ptr> basic_code_generator::visit_operator_bitwise_not_node(
 		operator_bitwise_not_node& node,
 		const code_generation_context& context
 	) {
 		(void)context; // suppress C4100
 
 		// accept the operand
-		expected_value operand_result = node.get_expression_node()->accept(
+		OUTCOME_TRY(auto operand_result, node.get_expression_node()->accept(
 			*this,
 			{}
-		);
-
-		if (!operand_result) {
-			return operand_result; // return on failure
-		}
+		));
 
 		// the expression must be integral
-		if (!operand_result.value()->get_type().is_integral()) {
-			return std::unexpected(
+		if (!operand_result->get_type().is_integral()) {
+			return outcome::failure(
 				error::emit<4105>(
-					std::move(node.get_declared_location()),
-					operand_result.value()->get_type()
+					node.get_declared_location(),
+					operand_result->get_type()
 				)
 			); // return on failure
 		}
 
 		// create a bitwise NOT operation
 		llvm::Value* not_result = m_llvm_context->get_builder().CreateNot(
-			operand_result.value()->get_value()
+			operand_result->get_value()
 		);
 
 		return std::make_shared<value>(
 			"__bitwise_not",
-			operand_result.value()->get_type(),
+			operand_result->get_type(),
 			not_result
 		);
 	}
 
 	// logical
-	expected_value basic_code_generator::visit_operator_not_node(
+	outcome::result<value_ptr> basic_code_generator::visit_operator_not_node(
 		operator_not_node& node, 
 		const code_generation_context& context
 	) {
 		(void)context; // suppress C4100
 
 		// accept the operand
-		expected_value operand_result = node.get_expression_node()->accept(
+		OUTCOME_TRY(auto operand_result, node.get_expression_node()->accept(
 			*this,
 			{}
-		);
+		));
 
-		if (!operand_result) {
-			return operand_result; // return on failure
-		}
-
-		if(!operand_result.value()->get_type().is_numerical() && 
-			operand_result.value()->get_type().get_base() != type::base::boolean) {
-			return std::unexpected(
+		if(!operand_result->get_type().is_numerical() && 
+			operand_result->get_type().get_base() != type::base::boolean) {
+			return outcome::failure(
 				error::emit<4104>(
-					std::move(node.get_declared_location()),
-					operand_result.value()->get_type()
+					node.get_declared_location(),
+					operand_result->get_type()
 				)
 			); // return on failure
 		}
 
 		// create a not operation (i.e., compare the operand with true and use the result)
 		llvm::Value* not_result = m_llvm_context->get_builder().CreateICmpEQ(
-			operand_result.value()->get_value(),
+			operand_result->get_value(),
 			llvm::ConstantInt::get(
 				llvm::Type::getInt1Ty(m_llvm_context->get_context()),
 				0
@@ -361,27 +325,21 @@ namespace sigma {
 
 	// binary
 	// arithmetic
-	expected_value basic_code_generator::visit_operator_addition_assignment_node(
+	outcome::result<value_ptr> basic_code_generator::visit_operator_addition_assignment_node(
 		operator_addition_assignment_node& node,
 		const code_generation_context& context
 	) {
 		(void)context; // suppress C4100
-		auto operation_result = create_add_operation(
+		OUTCOME_TRY(auto operation_result, create_add_operation(
 			node.get_left_expression_node(),
 			node.get_right_expression_node()
-		);
-
-		if(!operation_result) {
-			return std::unexpected(
-				operation_result.error()
-			); // return on failure
-		}
+		));
 
 		const auto& [
 			result_value,
 			highest_precision, 
 			left_operand_result
-		] = operation_result.value();
+		] = operation_result;
 
 		// create the assignment value
 		auto assignment_value = std::make_shared<value>(
@@ -393,33 +351,27 @@ namespace sigma {
 		// store the result of the addition operation back into the variable
 		m_llvm_context->get_builder().CreateStore(
 			assignment_value->get_value(), 
-			left_operand_result.value()->get_pointer()
+			left_operand_result->get_pointer()
 		);
 
 		return assignment_value;
 	}
 
-	expected_value basic_code_generator::visit_operator_addition_node(
+	outcome::result<value_ptr> basic_code_generator::visit_operator_addition_node(
 		operator_addition_node& node,
 		const code_generation_context& context
 	) {
 		(void)context; // suppress C4100
-		auto operation_result = create_add_operation(
-			node.get_left_expression_node(), 
+		OUTCOME_TRY(auto operation_result, create_add_operation(
+			node.get_left_expression_node(),
 			node.get_right_expression_node()
-		);
-
-		if (!operation_result) {
-			return std::unexpected(
-				operation_result.error()
-			); // return on failure
-		}
+		));
 
 		const auto& [
 			result_value, 
 			highest_precision, 
 			left_operand_result
-		] = operation_result.value();
+		] = operation_result;
 
 		return std::make_shared<value>(
 			"__add",
@@ -428,27 +380,21 @@ namespace sigma {
 		);
 	}
 
-	expected_value basic_code_generator::visit_operator_subtraction_assignment_node(
+	outcome::result<value_ptr> basic_code_generator::visit_operator_subtraction_assignment_node(
 		operator_subtraction_assignment_node& node,
 		const code_generation_context& context
 	) {
 		(void)context; // suppress C4100
-		auto operation_result = create_sub_operation(
-			node.get_left_expression_node(), 
+		OUTCOME_TRY(auto operation_result, create_sub_operation(
+			node.get_left_expression_node(),
 			node.get_right_expression_node()
-		);
-
-		if (!operation_result) {
-			return std::unexpected(
-				operation_result.error()
-			); // return on failure
-		}
+		));
 
 		const auto& [
 			result_value, 
 			highest_precision, 
 			left_operand_result
-		] = operation_result.value();
+		] = operation_result;
 
 		// create the assignment value
 		auto assignment_value = std::make_shared<value>(
@@ -460,33 +406,27 @@ namespace sigma {
 		// store the result of the subtraction operation back into the variable
 		m_llvm_context->get_builder().CreateStore(
 			assignment_value->get_value(),
-			left_operand_result.value()->get_pointer()
+			left_operand_result->get_pointer()
 		);
 
 		return assignment_value;
 	}
 
-	expected_value basic_code_generator::visit_operator_subtraction_node(
+	outcome::result<value_ptr> basic_code_generator::visit_operator_subtraction_node(
 		operator_subtraction_node& node,
 		const code_generation_context& context
 	) {
 		(void)context; // suppress C4100
-		auto operation_result = create_sub_operation(
+		OUTCOME_TRY(auto operation_result, create_sub_operation(
 			node.get_left_expression_node(),
 			node.get_right_expression_node()
-		);
-
-		if (!operation_result) {
-			return std::unexpected(
-				operation_result.error()
-			); // return on failure
-		}
+		));
 
 		const auto& [
 			result_value,
 			highest_precision, 
 			left_operand_result
-		] = operation_result.value();
+		] = operation_result;
 
 		return std::make_shared<value>(
 			"__sub",
@@ -495,27 +435,21 @@ namespace sigma {
 		);
 	}
 
-	expected_value basic_code_generator::visit_operator_multiplication_assignment_node(
+	outcome::result<value_ptr> basic_code_generator::visit_operator_multiplication_assignment_node(
 		operator_multiplication_assignment_node& node, 
 		const code_generation_context& context
 	) {
 		(void)context; // suppress C4100
-		auto operation_result = create_mul_operation(
-			node.get_left_expression_node(), 
+		OUTCOME_TRY(auto operation_result, create_mul_operation(
+			node.get_left_expression_node(),
 			node.get_right_expression_node()
-		);
-
-		if (!operation_result) {
-			return std::unexpected(
-				operation_result.error()
-			); // return on failure
-		}
+		));
 
 		const auto& [
 			result_value,
 			highest_precision,
 			left_operand_result
-		] = operation_result.value();
+		] = operation_result;
 
 		// create the assignment value
 		auto assignment_value = std::make_shared<value>(
@@ -527,33 +461,27 @@ namespace sigma {
 		// store the result of the multiplication operation back into the variable
 		m_llvm_context->get_builder().CreateStore(
 			assignment_value->get_value(),
-			left_operand_result.value()->get_pointer()
+			left_operand_result->get_pointer()
 		);
 
 		return assignment_value;
 	}
 
-	expected_value basic_code_generator::visit_operator_multiplication_node(
+	outcome::result<value_ptr> basic_code_generator::visit_operator_multiplication_node(
 		operator_multiplication_node& node,
 		const code_generation_context& context
 	) {
 		(void)context; // suppress C4100
-		auto operation_result = create_mul_operation(
-			node.get_left_expression_node(), 
+		OUTCOME_TRY(auto operation_result, create_mul_operation(
+			node.get_left_expression_node(),
 			node.get_right_expression_node()
-		);
-
-		if (!operation_result) {
-			return std::unexpected(
-				operation_result.error()
-			); // return on failure
-		}
+		));
 
 		const auto& [
 			result_value, 
 			highest_precision,
 			left_operand_result
-		] = operation_result.value();
+		] = operation_result;
 
 		return std::make_shared<value>(
 			"__mul",
@@ -562,27 +490,21 @@ namespace sigma {
 		);
 	}
 
-	expected_value basic_code_generator::visit_operator_division_assignment_node(
+	outcome::result<value_ptr> basic_code_generator::visit_operator_division_assignment_node(
 		operator_division_assignment_node& node, 
 		const code_generation_context& context
 	) {
 		(void)context; // suppress C4100
-		auto operation_result = create_div_operation(
+		OUTCOME_TRY(auto operation_result, create_div_operation(
 			node.get_left_expression_node(),
 			node.get_right_expression_node()
-		);
-
-		if (!operation_result) {
-			return std::unexpected(
-				operation_result.error()
-			); // return on failure
-		}
+		));
 
 		const auto& [
 			result_value, 
 			highest_precision,
 			left_operand_result
-		] = operation_result.value();
+		] = operation_result;
 
 		// create the assignment value
 		auto assignment_value = std::make_shared<value>(
@@ -594,33 +516,27 @@ namespace sigma {
 		// store the result of the division operation back into the variable
 		m_llvm_context->get_builder().CreateStore(
 			assignment_value->get_value(),
-			left_operand_result.value()->get_pointer()
+			left_operand_result->get_pointer()
 		);
 
 		return assignment_value;
 	}
 
-	expected_value basic_code_generator::visit_operator_division_node(
+	outcome::result<value_ptr> basic_code_generator::visit_operator_division_node(
 		operator_division_node& node, 
 		const code_generation_context& context
 	) {
 		(void)context; // suppress C4100
-		auto operation_result = create_div_operation(
+		OUTCOME_TRY(auto operation_result, create_div_operation(
 			node.get_left_expression_node(),
 			node.get_right_expression_node()
-		);
-
-		if (!operation_result) {
-			return std::unexpected(
-				operation_result.error()
-			); // return on failure
-		}
+		));
 
 		const auto& [
 			result_value,
 			highest_precision, 
 			left_operand_result
-		] = operation_result.value();
+		] = operation_result;
 
 		return std::make_shared<value>(
 			"__div",
@@ -629,27 +545,21 @@ namespace sigma {
 		);
 	}
 
-	expected_value basic_code_generator::visit_operator_modulo_assignment_node(
+	outcome::result<value_ptr> basic_code_generator::visit_operator_modulo_assignment_node(
 		operator_modulo_assignment_node& node,
 		const code_generation_context& context
 	) {
 		(void)context; // suppress C4100
-		auto operation_result = create_mod_operation(
+		OUTCOME_TRY(auto operation_result, create_mod_operation(
 			node.get_left_expression_node(),
 			node.get_right_expression_node()
-		);
-
-		if (!operation_result) {
-			return std::unexpected(
-				operation_result.error()
-			); // return on failure
-		}
+		));
 
 		const auto& [
 			result_value, 
 			highest_precision,
 			left_operand_result
-		] = operation_result.value();
+		] = operation_result;
 
 		// create the assignment value
 		auto assignment_value = std::make_shared<value>(
@@ -661,33 +571,27 @@ namespace sigma {
 		// store the result of the modulo operation back into the variable
 		m_llvm_context->get_builder().CreateStore(
 			assignment_value->get_value(),
-			left_operand_result.value()->get_pointer()
+			left_operand_result->get_pointer()
 		);
 
 		return assignment_value;
 	}
 
-	expected_value basic_code_generator::visit_operator_modulo_node(
+	outcome::result<value_ptr> basic_code_generator::visit_operator_modulo_node(
 		operator_modulo_node& node,
 		const code_generation_context& context
 	) {
 		(void)context; // suppress C4100
-		auto operation_result = create_mod_operation(
+		OUTCOME_TRY(auto operation_result, create_mod_operation(
 			node.get_left_expression_node(),
 			node.get_right_expression_node()
-		);
-
-		if (!operation_result) {
-			return std::unexpected(
-				operation_result.error()
-			); // return on failure
-		}
+		));
 
 		const auto& [
 			result_value,
 			highest_precision,
 			left_operand_result
-		] = operation_result.value();
+		] = operation_result;
 
 		return std::make_shared<value>(
 			"__mod",
@@ -696,303 +600,256 @@ namespace sigma {
 		);
 	}
 
-	expected_value basic_code_generator::visit_operator_bitwise_and_node(
+	outcome::result<value_ptr> basic_code_generator::visit_operator_bitwise_and_node(
 		operator_bitwise_and_node& node, 
 		const code_generation_context& context
 	) {
 		(void)context; // suppress C4100
 
 		// accept the left operand
-		expected_value left_operand_result = node.get_left_expression_node()->accept(
+		OUTCOME_TRY(auto left_operand_result, node.get_left_expression_node()->accept(
 			*this,
 			{}
-		);
-
-		if (!left_operand_result) {
-			return left_operand_result; // return on failure
-		}
+		));
 
 		// accept the right operand
-		expected_value right_operand_result = node.get_right_expression_node()->accept(
+		OUTCOME_TRY(auto right_operand_result, node.get_right_expression_node()->accept(
 			*this,
 			{}
-		);
-
-		if (!right_operand_result) {
-			return right_operand_result; // return on failure
-		}
+		));
 
 		// both expressions must be integral
-		if (!left_operand_result.value()->get_type().is_integral() ||
-			!right_operand_result.value()->get_type().is_integral()) {
-			return std::unexpected(
+		if (!left_operand_result->get_type().is_integral() ||
+			!right_operand_result->get_type().is_integral()) {
+			return outcome::failure(
 				error::emit<4202>(
-					std::move(node.get_declared_location()),
-					left_operand_result.value()->get_type(),
-					right_operand_result.value()->get_type()
+					node.get_declared_location(),
+					left_operand_result->get_type(),
+					right_operand_result->get_type()
 				)
 			); // return on failure
 		}
 
 		// create a bitwise AND operation
 		llvm::Value* and_result = m_llvm_context->get_builder().CreateAnd(
-			left_operand_result.value()->get_value(),
-			right_operand_result.value()->get_value()
+			left_operand_result->get_value(),
+			right_operand_result->get_value()
 		);
 
 		return std::make_shared<value>(
 			"__bitwise_and",
-			left_operand_result.value()->get_type(),
+			left_operand_result->get_type(),
 			and_result
 		);
 	}
 
-	expected_value basic_code_generator::visit_operator_bitwise_or_node(
+	outcome::result<value_ptr> basic_code_generator::visit_operator_bitwise_or_node(
 		operator_bitwise_or_node& node,
 		const code_generation_context& context
 	) {
 		(void)context; // suppress C4100
 
 		// accept the left operand
-		expected_value left_operand_result = node.get_left_expression_node()->accept(
+		OUTCOME_TRY(auto left_operand_result, node.get_left_expression_node()->accept(
 			*this,
 			{}
-		);
-
-		if (!left_operand_result) {
-			return left_operand_result; // return on failure
-		}
+		));
 
 		// accept the right operand
-		expected_value right_operand_result = node.get_right_expression_node()->accept(
+		OUTCOME_TRY(auto right_operand_result, node.get_right_expression_node()->accept(
 			*this,
 			{}
-		);
-
-		if (!right_operand_result) {
-			return right_operand_result; // return on failure
-		}
+		));
 
 		// both expressions must be integral
-		if (!left_operand_result.value()->get_type().is_integral() ||
-			!right_operand_result.value()->get_type().is_integral()) {
-			return std::unexpected(
+		if (!left_operand_result->get_type().is_integral() ||
+			!right_operand_result->get_type().is_integral()) {
+			return outcome::failure(
 				error::emit<4203>(
-					std::move(node.get_declared_location()),
-					left_operand_result.value()->get_type(),
-					right_operand_result.value()->get_type()
+					node.get_declared_location(),
+					left_operand_result->get_type(),
+					right_operand_result->get_type()
 				)
 			); // return on failure
 		}
 
 		// create a bitwise OR operation
 		llvm::Value* and_result = m_llvm_context->get_builder().CreateOr(
-			left_operand_result.value()->get_value(),
-			right_operand_result.value()->get_value()
+			left_operand_result->get_value(),
+			right_operand_result->get_value()
 		);
 
 		return std::make_shared<value>(
 			"__bitwise_or",
-			left_operand_result.value()->get_type(),
+			left_operand_result->get_type(),
 			and_result
 		);
 	}
 
-	expected_value basic_code_generator::visit_operator_bitwise_left_shift_node(
+	outcome::result<value_ptr> basic_code_generator::visit_operator_bitwise_left_shift_node(
 		operator_bitwise_left_shift_node& node, 
 		const code_generation_context& context
 	) {
 		(void)context; // suppress C4100
 
 		// accept the left operand
-		expected_value left_operand_result = node.get_left_expression_node()->accept(
+		OUTCOME_TRY(auto left_operand_result, node.get_left_expression_node()->accept(
 			*this,
 			{}
-		);
-
-		if (!left_operand_result) {
-			return left_operand_result; // return on failure
-		}
+		));
 
 		// accept the right operand
-		expected_value right_operand_result = node.get_right_expression_node()->accept(
+		OUTCOME_TRY(auto right_operand_result, node.get_right_expression_node()->accept(
 			*this,
 			{}
-		);
-
-		if (!right_operand_result) {
-			return right_operand_result; // return on failure
-		}
+		));
 
 		// both expressions must be integral
-		if (!left_operand_result.value()->get_type().is_integral() ||
-			!right_operand_result.value()->get_type().is_integral()) {
-			return std::unexpected(
+		if (!left_operand_result->get_type().is_integral() ||
+			!right_operand_result->get_type().is_integral()) {
+			return outcome::failure(
 				error::emit<4204>(
-					std::move(node.get_declared_location()),
-					left_operand_result.value()->get_type(),
-					right_operand_result.value()->get_type()
+					node.get_declared_location(),
+					left_operand_result->get_type(),
+					right_operand_result->get_type()
 				)
 			); // return on failure
 		}
 
 		// create a bitwise left shift operation
 		llvm::Value* left_shift_result = m_llvm_context->get_builder().CreateShl(
-			left_operand_result.value()->get_value(),
-			right_operand_result.value()->get_value()
+			left_operand_result->get_value(),
+			right_operand_result->get_value()
 		);
 
 		return std::make_shared<value>(
 			"__bitwise_left_shift",
-			left_operand_result.value()->get_type(),
+			left_operand_result->get_type(),
 			left_shift_result
 		);
 	}
 
-	expected_value basic_code_generator::visit_operator_bitwise_right_shift_node(
+	outcome::result<value_ptr> basic_code_generator::visit_operator_bitwise_right_shift_node(
 		operator_bitwise_right_shift_node& node,
 		const code_generation_context& context
 	) {
 		(void)context; // suppress C4100
 
 		// accept the left operand
-		expected_value left_operand_result = node.get_left_expression_node()->accept(
+		OUTCOME_TRY(auto left_operand_result, node.get_left_expression_node()->accept(
 			*this,
 			{}
-		);
-
-		if (!left_operand_result) {
-			return left_operand_result; // return on failure
-		}
+		));
 
 		// accept the right operand
-		expected_value right_operand_result = node.get_right_expression_node()->accept(
+		OUTCOME_TRY(auto right_operand_result, node.get_right_expression_node()->accept(
 			*this,
 			{}
-		);
-
-		if (!right_operand_result) {
-			return right_operand_result; // return on failure
-		}
+		));
 
 		// both expressions must be integral
-		if (!left_operand_result.value()->get_type().is_integral() ||
-			!right_operand_result.value()->get_type().is_integral()) {
-			return std::unexpected(
+		if (!left_operand_result->get_type().is_integral() ||
+			!right_operand_result->get_type().is_integral()) {
+			return outcome::failure(
 				error::emit<4205>(
-					std::move(node.get_declared_location()),
-					left_operand_result.value()->get_type(),
-					right_operand_result.value()->get_type()
+					node.get_declared_location(),
+					left_operand_result->get_type(),
+					right_operand_result->get_type()
 				)
 			); // return on failure
 		}
 
 		// create a bitwise right shift operation
 		llvm::Value* right_shift_result = m_llvm_context->get_builder().CreateLShr(
-			left_operand_result.value()->get_value(),
-			right_operand_result.value()->get_value()
+			left_operand_result->get_value(),
+			right_operand_result->get_value()
 		);
 
 		return std::make_shared<value>(
 			"__bitwise_right_shift",
-			left_operand_result.value()->get_type(),
+			left_operand_result->get_type(),
 			right_shift_result
 		);
 	}
 
-	expected_value basic_code_generator::visit_operator_bitwise_xor_node(
+	outcome::result<value_ptr> basic_code_generator::visit_operator_bitwise_xor_node(
 		operator_bitwise_xor_node& node,
 		const code_generation_context& context
 	) {
 		(void)context; // suppress C4100
 
 		// accept the left operand
-		expected_value left_operand_result = node.get_left_expression_node()->accept(
+		OUTCOME_TRY(auto left_operand_result, node.get_left_expression_node()->accept(
 			*this,
 			{}
-		);
-
-		if (!left_operand_result) {
-			return left_operand_result; // return on failure
-		}
+		));
 
 		// accept the right operand
-		expected_value right_operand_result = node.get_right_expression_node()->accept(
+		OUTCOME_TRY(auto right_operand_result, node.get_right_expression_node()->accept(
 			*this,
 			{}
-		);
-
-		if (!right_operand_result) {
-			return right_operand_result; // return on failure
-		}
+		));
 
 		// both expressions must be integral
-		if (!left_operand_result.value()->get_type().is_integral() ||
-			!right_operand_result.value()->get_type().is_integral()) {
-			return std::unexpected(
+		if (!left_operand_result->get_type().is_integral() ||
+			!right_operand_result->get_type().is_integral()) {
+			return outcome::failure(
 				error::emit<4206>(
-					std::move(node.get_declared_location()),
-					left_operand_result.value()->get_type(),
-					right_operand_result.value()->get_type()
+					node.get_declared_location(),
+					left_operand_result->get_type(),
+					right_operand_result->get_type()
 				)
 			); // return on failure
 		}
 
 		// create a bitwise XOR operation
 		llvm::Value* xor_result = m_llvm_context->get_builder().CreateXor(
-			left_operand_result.value()->get_value(),
-			right_operand_result.value()->get_value()
+			left_operand_result->get_value(),
+			right_operand_result->get_value()
 		);
 
 		return std::make_shared<value>(
 			"__bitwise_xor",
-			left_operand_result.value()->get_type(),
+			left_operand_result->get_type(),
 			xor_result
 		);
 	}
 
 	// logical
-	expected_value basic_code_generator::visit_operator_logical_conjunction_node(
+	outcome::result<value_ptr> basic_code_generator::visit_operator_logical_conjunction_node(
 		operator_conjunction_node& node,
 		const code_generation_context& context
 	) {
 		(void)context; // suppress C4100
+
 		// accept the left operand
-		expected_value left_operand_result = node.get_left_expression_node()->accept(
+		OUTCOME_TRY(auto left_operand_result, node.get_left_expression_node()->accept(
 			*this,
 			{}
-		);
-
-		if (!left_operand_result) {
-			return left_operand_result; // return on failure
-		}
+		));
 
 		// accept the right operand
-		expected_value right_operand_result = node.get_right_expression_node()->accept(
+		OUTCOME_TRY(auto right_operand_result, node.get_right_expression_node()->accept(
 			*this,
 			{}
-		);
-
-		if (!right_operand_result) {
-			return right_operand_result; // return on failure
-		}
+		));
 
 		// both expressions must be boolean
-		if (left_operand_result.value()->get_type().get_base() != type::base::boolean || 
-			right_operand_result.value()->get_type().get_base() != type::base::boolean) {
-			return std::unexpected(
+		if (left_operand_result->get_type().get_base() != type::base::boolean || 
+			right_operand_result->get_type().get_base() != type::base::boolean) {
+			return outcome::failure(
 				error::emit<4200>(
-					std::move(node.get_declared_location()),
-					left_operand_result.value()->get_type(),
-					right_operand_result.value()->get_type()
+					node.get_declared_location(),
+					left_operand_result->get_type(),
+					right_operand_result->get_type()
 				)
 			); // return on failure
 		}
 
 		// create a logical AND operation
 		llvm::Value* and_result = m_llvm_context->get_builder().CreateAnd(
-			left_operand_result.value()->get_value(),
-			right_operand_result.value()->get_value(),
+			left_operand_result->get_value(),
+			right_operand_result->get_value(),
 			"and"
 		);
 
@@ -1003,47 +860,40 @@ namespace sigma {
 		);
 	}
 
-	expected_value basic_code_generator::visit_operator_logical_disjunction_node(
+	outcome::result<value_ptr> basic_code_generator::visit_operator_logical_disjunction_node(
 		operator_disjunction_node& node, 
 		const code_generation_context& context
 	) {
 		(void)context; // suppress C4100
+
 		// accept the left operand
-		expected_value left_operand_result = node.get_left_expression_node()->accept(
-			*this, 
-			{}
-		);
-
-		if (!left_operand_result) {
-			return left_operand_result; // return on failure
-		}
-
-		// accept the right operand
-		expected_value right_operand_result = node.get_right_expression_node()->accept(
+		OUTCOME_TRY(auto left_operand_result, node.get_left_expression_node()->accept(
 			*this,
 			{}
-		);
+		));
 
-		if (!right_operand_result) {
-			return right_operand_result;
-		}
+		// accept the right operand
+		OUTCOME_TRY(auto right_operand_result, node.get_right_expression_node()->accept(
+			*this,
+			{}
+		));
 
 		// both expressions must be boolean
-		if (left_operand_result.value()->get_type().get_base() != type::base::boolean ||
-			right_operand_result.value()->get_type().get_base() != type::base::boolean) {
-			return std::unexpected(
+		if (left_operand_result->get_type().get_base() != type::base::boolean ||
+			right_operand_result->get_type().get_base() != type::base::boolean) {
+			return outcome::failure(
 				error::emit<4201>(
-					std::move(node.get_declared_location()),
-					left_operand_result.value()->get_type(), 
-					right_operand_result.value()->get_type()
+					node.get_declared_location(),
+					left_operand_result->get_type(), 
+					right_operand_result->get_type()
 				)
 			); // return on failure
 		}
 
 		// create a logical OR operation
 		llvm::Value* or_result = m_llvm_context->get_builder().CreateOr(
-			left_operand_result.value()->get_value(),
-			right_operand_result.value()->get_value()
+			left_operand_result->get_value(),
+			right_operand_result->get_value()
 		);
 
 		return std::make_shared<value>(
@@ -1053,45 +903,38 @@ namespace sigma {
 		);
 	}
 
-	expected_value basic_code_generator::visit_operator_greater_than_node(
+	outcome::result<value_ptr> basic_code_generator::visit_operator_greater_than_node(
 		operator_greater_than_node& node, 
 		const code_generation_context& context
 	) {
 		(void)context; // suppress C4100
+
 		// accept the left operand
-		expected_value left_operand_result = node.get_left_expression_node()->accept(
+		OUTCOME_TRY(auto left_operand_result, node.get_left_expression_node()->accept(
 			*this,
 			{}
-		);
-
-		if (!left_operand_result) {
-			return left_operand_result; // return on failure
-		}
+		));
 
 		// accept the right operand
-		expected_value right_operand_result = node.get_right_expression_node()->accept(
+		OUTCOME_TRY(auto right_operand_result, node.get_right_expression_node()->accept(
 			*this,
 			{}
-		);
-
-		if (!right_operand_result) {
-			return right_operand_result; // return on failure
-		}
+		));
 
 		// upcast both expressions
 		const type highest_precision = get_highest_precision_type(
-			left_operand_result.value()->get_type(),
-			right_operand_result.value()->get_type()
+			left_operand_result->get_type(),
+			right_operand_result->get_type()
 		);
 
 		llvm::Value* left_value_upcasted = cast_value(
-			left_operand_result.value(),
+			left_operand_result,
 			highest_precision,
 			node.get_declared_location()
 		);
 
 		llvm::Value* right_value_upcasted = cast_value(
-			right_operand_result.value(), 
+			right_operand_result, 
 			highest_precision, 
 			node.get_declared_location()
 		);
@@ -1126,45 +969,38 @@ namespace sigma {
 		);
 	}
 
-	expected_value basic_code_generator::visit_operator_greater_than_equal_to_node(
+	outcome::result<value_ptr> basic_code_generator::visit_operator_greater_than_equal_to_node(
 		operator_greater_than_equal_to_node& node, 
 		const code_generation_context& context
 	) {
 		(void)context; // suppress C4100
+
 		// accept the left operand
-		expected_value left_operand_result = node.get_left_expression_node()->accept(
+		OUTCOME_TRY(auto left_operand_result, node.get_left_expression_node()->accept(
 			*this,
 			{}
-		);
-
-		if (!left_operand_result) {
-			return left_operand_result; // return on failure
-		}
+		));
 
 		// accept the right operand
-		expected_value right_operand_result = node.get_right_expression_node()->accept(
+		OUTCOME_TRY(auto right_operand_result, node.get_right_expression_node()->accept(
 			*this,
 			{}
-		);
-
-		if (!right_operand_result) {
-			return right_operand_result; // return on failure
-		}
+		));
 
 		// upcast both expressions
 		const type highest_precision = get_highest_precision_type(
-			left_operand_result.value()->get_type(),
-			right_operand_result.value()->get_type()
+			left_operand_result->get_type(),
+			right_operand_result->get_type()
 		);
 
 		llvm::Value* left_value_upcasted = cast_value(
-			left_operand_result.value(),
+			left_operand_result,
 			highest_precision,
 			node.get_declared_location()
 		);
 
 		llvm::Value* right_value_upcasted = cast_value(
-			right_operand_result.value(), 
+			right_operand_result, 
 			highest_precision,
 			node.get_declared_location()
 		);
@@ -1199,45 +1035,38 @@ namespace sigma {
 		);
 	}
 
-	expected_value basic_code_generator::visit_operator_less_than_node(
+	outcome::result<value_ptr> basic_code_generator::visit_operator_less_than_node(
 		operator_less_than_node& node, 
 		const code_generation_context& context
 	) {
 		(void)context; // suppress C4100
+
 		// accept the left operand
-		expected_value left_operand_result = node.get_left_expression_node()->accept(
-			*this, 
-			{}
-		);
-
-		if (!left_operand_result) {
-			return left_operand_result; // return on failure
-		}
-
-		// accept the right operand
-		expected_value right_operand_result = node.get_right_expression_node()->accept(
+		OUTCOME_TRY(auto left_operand_result, node.get_left_expression_node()->accept(
 			*this,
 			{}
-		);
+		));
 
-		if (!right_operand_result) {
-			return right_operand_result; // return on failure
-		}
+		// accept the right operand
+		OUTCOME_TRY(auto right_operand_result, node.get_right_expression_node()->accept(
+			*this,
+			{}
+		));
 
 		// upcast both expressions
 		const type highest_precision = get_highest_precision_type(
-			left_operand_result.value()->get_type(),
-			right_operand_result.value()->get_type()
+			left_operand_result->get_type(),
+			right_operand_result->get_type()
 		);
 
 		llvm::Value* left_value_upcasted = cast_value(
-			left_operand_result.value(),
+			left_operand_result,
 			highest_precision,
 			node.get_declared_location()
 		);
 
 		llvm::Value* right_value_upcasted = cast_value(
-			right_operand_result.value(), 
+			right_operand_result, 
 			highest_precision,
 			node.get_declared_location()
 		);
@@ -1272,45 +1101,38 @@ namespace sigma {
 		);
 	}
 
-	expected_value basic_code_generator::visit_operator_less_than_equal_to_node(
+	outcome::result<value_ptr> basic_code_generator::visit_operator_less_than_equal_to_node(
 		operator_less_than_equal_to_node& node,
 		const code_generation_context& context
 	) {
 		(void)context; // suppress C4100
+
 		// accept the left operand
-		expected_value left_operand_result = node.get_left_expression_node()->accept(
+		OUTCOME_TRY(auto left_operand_result, node.get_left_expression_node()->accept(
 			*this,
 			{}
-		);
-
-		if (!left_operand_result) {
-			return left_operand_result; // return on failure
-		}
+		));
 
 		// accept the right operand
-		expected_value right_operand_result = node.get_right_expression_node()->accept(
+		OUTCOME_TRY(auto right_operand_result, node.get_right_expression_node()->accept(
 			*this,
 			{}
-		);
-
-		if (!right_operand_result) {
-			return right_operand_result; // return on failure
-		}
+		));
 
 		// upcast both expressions
 		const type highest_precision = get_highest_precision_type(
-			left_operand_result.value()->get_type(),
-			right_operand_result.value()->get_type()
+			left_operand_result->get_type(),
+			right_operand_result->get_type()
 		);
 
 		llvm::Value* left_value_upcasted = cast_value(
-			left_operand_result.value(),
+			left_operand_result,
 			highest_precision,
 			node.get_declared_location()
 		);
 
 		llvm::Value* right_value_upcasted = cast_value(
-			right_operand_result.value(), 
+			right_operand_result, 
 			highest_precision, 
 			node.get_declared_location()
 		);
@@ -1345,45 +1167,38 @@ namespace sigma {
 		);
 	}
 
-	expected_value basic_code_generator::visit_operator_equals_node(
+	outcome::result<value_ptr> basic_code_generator::visit_operator_equals_node(
 		operator_equals_node& node, 
 		const code_generation_context& context
 	) {
 		(void)context; // suppress C4100
+
 		// accept the left operand
-		expected_value left_operand_result = node.get_left_expression_node()->accept(
-			*this, 
-			{}
-		);
-
-		if (!left_operand_result) {
-			return left_operand_result; // return on failure
-		}
-
-		// accept the right operand
-		expected_value right_operand_result = node.get_right_expression_node()->accept(
+		OUTCOME_TRY(auto left_operand_result, node.get_left_expression_node()->accept(
 			*this,
 			{}
-		);
+		));
 
-		if (!right_operand_result) {
-			return right_operand_result; // return on failure
-		}
+		// accept the right operand
+		OUTCOME_TRY(auto right_operand_result, node.get_right_expression_node()->accept(
+			*this,
+			{}
+		));
 
 		// upcast both expressions
 		const type highest_precision = get_highest_precision_type(
-			left_operand_result.value()->get_type(),
-			right_operand_result.value()->get_type()
+			left_operand_result->get_type(),
+			right_operand_result->get_type()
 		);
 
 		llvm::Value* left_value_upcasted = cast_value(
-			left_operand_result.value(),
+			left_operand_result,
 			highest_precision,
 			node.get_declared_location()
 		);
 
 		llvm::Value* right_value_upcasted = cast_value(
-			right_operand_result.value(),
+			right_operand_result,
 			highest_precision,
 			node.get_declared_location()
 		);
@@ -1410,45 +1225,38 @@ namespace sigma {
 		);
 	}
 
-	expected_value basic_code_generator::visit_operator_not_equals_node(
+	outcome::result<value_ptr> basic_code_generator::visit_operator_not_equals_node(
 		operator_not_equals_node& node, 
 		const code_generation_context& context
 	) {
 		(void)context; // suppress C4100
-		// accept the left operand
-		expected_value left_operand_result = node.get_left_expression_node()->accept(
-			*this, 
-			{}
-		);
 
-		if (!left_operand_result) {
-			return left_operand_result; // return on failure
-		}
+		// accept the left operand
+		OUTCOME_TRY(auto left_operand_result, node.get_left_expression_node()->accept(
+			*this,
+			{}
+		));
 
 		// accept the right operand
-		expected_value right_operand_result = node.get_right_expression_node()->accept(
-			*this, 
+		OUTCOME_TRY(auto right_operand_result, node.get_right_expression_node()->accept(
+			*this,
 			{}
-		);
-
-		if (!right_operand_result) {
-			return right_operand_result; // return on failure
-		}
+		));
 
 		// upcast both expressions
 		const type highest_precision = get_highest_precision_type(
-			left_operand_result.value()->get_type(),
-			right_operand_result.value()->get_type()
+			left_operand_result->get_type(),
+			right_operand_result->get_type()
 		);
 
 		llvm::Value* left_value_upcasted = cast_value(
-			left_operand_result.value(), 
+			left_operand_result, 
 			highest_precision,
 			node.get_declared_location()
 		);
 
 		llvm::Value* right_value_upcasted = cast_value(
-			right_operand_result.value(), 
+			right_operand_result, 
 			highest_precision, 
 			node.get_declared_location()
 		);
@@ -1475,52 +1283,36 @@ namespace sigma {
 		);
 	}
 
-	std::expected<std::tuple<
-		llvm::Value*,
-		type,
-		expected_value
-	>, error_msg> basic_code_generator::create_add_operation(
+	outcome::result<std::tuple<llvm::Value*, type, value_ptr>> basic_code_generator::create_add_operation(
 		node* left_operand,
 		node* right_operand
 	) {
 		// accept the left operand (variable to be assigned to)
-		expected_value left_operand_result = left_operand->accept(
-			*this, 
+		OUTCOME_TRY(auto left_operand_result, left_operand->accept(
+			*this,
 			{}
-		);
-
-		if (!left_operand_result) {
-			return std::unexpected(
-				left_operand_result.error()
-			); // return on failure
-		}
+		));
 
 		// accept the right operand
-		expected_value right_operand_result = right_operand->accept(
-			*this, 
+		OUTCOME_TRY(auto right_operand_result, right_operand->accept(
+			*this,
 			{}
-		);
-
-		if (!right_operand_result) {
-			return std::unexpected(
-				right_operand_result.error()
-			); // return on failure
-		}
+		));
 
 		// upcast both expressions
 		const type highest_precision = get_highest_precision_type(
-			left_operand_result.value()->get_type(),
-			right_operand_result.value()->get_type()
+			left_operand_result->get_type(),
+			right_operand_result->get_type()
 		);
 
 		llvm::Value* left_value_upcasted = cast_value(
-			left_operand_result.value(), 
+			left_operand_result, 
 			highest_precision, 
 			left_operand->get_declared_location()
 		);
 
 		llvm::Value* right_value_upcasted = cast_value(
-			right_operand_result.value(),
+			right_operand_result,
 			highest_precision, 
 			right_operand->get_declared_location()
 		);
@@ -1564,52 +1356,36 @@ namespace sigma {
 		);
 	}
 
-	std::expected<std::tuple<
-		llvm::Value*,
-		type,
-		expected_value
-	>, error_msg> basic_code_generator::create_sub_operation(
+	outcome::result<std::tuple<llvm::Value*, type, value_ptr>> basic_code_generator::create_sub_operation(
 		node* left_operand, 
 		node* right_operand
 	) {
 		// accept the left operand (variable to be assigned to)
-		expected_value left_operand_result = left_operand->accept(
+		OUTCOME_TRY(auto left_operand_result, left_operand->accept(
 			*this,
 			{}
-		);
-
-		if (!left_operand_result) {
-			return std::unexpected(
-				left_operand_result.error()
-			); // return on failure
-		}
+		));
 
 		// accept the right operand
-		expected_value right_operand_result = right_operand->accept(
-			*this, 
+		OUTCOME_TRY(auto right_operand_result, right_operand->accept(
+			*this,
 			{}
-		);
-
-		if (!right_operand_result) {
-			return std::unexpected(
-				right_operand_result.error()
-			); // return on failure
-		}
+		));
 
 		// upcast both expressions
 		const type highest_precision = get_highest_precision_type(
-			left_operand_result.value()->get_type(),
-			right_operand_result.value()->get_type()
+			left_operand_result->get_type(),
+			right_operand_result->get_type()
 		);
 
 		llvm::Value* left_value_upcasted = cast_value(
-			left_operand_result.value(), 
+			left_operand_result, 
 			highest_precision, 
 			left_operand->get_declared_location()
 		);
 
 		llvm::Value* right_value_upcasted = cast_value(
-			right_operand_result.value(),
+			right_operand_result,
 			highest_precision, 
 			right_operand->get_declared_location()
 		);
@@ -1653,52 +1429,36 @@ namespace sigma {
 		);
 	}
 
-	std::expected<std::tuple<
-		llvm::Value*,
-		type,
-		expected_value
-	>, error_msg> basic_code_generator::create_mul_operation(
+	outcome::result<std::tuple<llvm::Value*, type, value_ptr>> basic_code_generator::create_mul_operation(
 		node* left_operand,
 		node* right_operand
 	) {
 		// accept the left operand (variable to be assigned to)
-		expected_value left_operand_result = left_operand->accept(
-			*this, 
-			{}
-		);
-
-		if (!left_operand_result) {
-			return std::unexpected(
-				left_operand_result.error()
-			); // return on failure
-		}
-
-		// accept the right operand
-		expected_value right_operand_result = right_operand->accept(
+		OUTCOME_TRY(auto left_operand_result, left_operand->accept(
 			*this,
 			{}
-		);
+		));
 
-		if (!right_operand_result) {
-			return std::unexpected(
-				right_operand_result.error()
-			); // return on failure
-		}
+		// accept the right operand
+		OUTCOME_TRY(auto right_operand_result, right_operand->accept(
+			*this,
+			{}
+		));
 
 		// upcast both expressions
 		const type highest_precision = get_highest_precision_type(
-			left_operand_result.value()->get_type(),
-			right_operand_result.value()->get_type()
+			left_operand_result->get_type(),
+			right_operand_result->get_type()
 		);
 
 		llvm::Value* left_value_upcasted = cast_value(
-			left_operand_result.value(), 
+			left_operand_result, 
 			highest_precision,
 			left_operand->get_declared_location()
 		);
 
 		llvm::Value* right_value_upcasted = cast_value(
-			right_operand_result.value(), 
+			right_operand_result, 
 			highest_precision,
 			right_operand->get_declared_location()
 		);
@@ -1742,52 +1502,36 @@ namespace sigma {
 		);
 	}
 
-	std::expected<std::tuple<
-		llvm::Value*,
-		type,
-		expected_value
-	>, error_msg> basic_code_generator::create_div_operation(
+	outcome::result<std::tuple<llvm::Value*, type, value_ptr>> basic_code_generator::create_div_operation(
 		node* left_operand,
 		node* right_operand
 	) {
 		// accept the left operand (variable to be assigned to)
-		expected_value left_operand_result = left_operand->accept(
+		OUTCOME_TRY(auto left_operand_result, left_operand->accept(
 			*this,
 			{}
-		);
-
-		if (!left_operand_result) {
-			return std::unexpected(
-				left_operand_result.error()
-			); // return on failure
-		}
+		));
 
 		// accept the right operand
-		expected_value right_operand_result = right_operand->accept(
-			*this, 
+		OUTCOME_TRY(auto right_operand_result, right_operand->accept(
+			*this,
 			{}
-		);
-
-		if (!right_operand_result) {
-			return std::unexpected(
-				right_operand_result.error()
-			); // return on failure
-		}
+		));
 
 		// upcast both expressions
 		const type highest_precision = get_highest_precision_type(
-			left_operand_result.value()->get_type(),
-			right_operand_result.value()->get_type()
+			left_operand_result->get_type(),
+			right_operand_result->get_type()
 		);
 
 		llvm::Value* left_value_upcasted = cast_value(
-			left_operand_result.value(),
+			left_operand_result,
 			highest_precision,
 			left_operand->get_declared_location()
 		);
 
 		llvm::Value* right_value_upcasted = cast_value(
-			right_operand_result.value(),
+			right_operand_result,
 			highest_precision,
 			right_operand->get_declared_location()
 		);
@@ -1831,52 +1575,36 @@ namespace sigma {
 		);
 	}
 
-	std::expected<std::tuple<
-		llvm::Value*,
-		type,
-		expected_value
-	>, error_msg> basic_code_generator::create_mod_operation(
+	outcome::result<std::tuple<llvm::Value*, type, value_ptr>> basic_code_generator::create_mod_operation(
 		node* left_operand, 
 		node* right_operand
 	) {
 		// accept the left operand (variable to be assigned to)
-		expected_value left_operand_result = left_operand->accept(
+		OUTCOME_TRY(auto left_operand_result, left_operand->accept(
 			*this,
 			{}
-		);
-
-		if (!left_operand_result) {
-			return std::unexpected(
-				left_operand_result.error()
-			); // return on failure
-		}
+		));
 
 		// accept the right operand
-		expected_value right_operand_result = right_operand->accept(
+		OUTCOME_TRY(auto right_operand_result, right_operand->accept(
 			*this,
 			{}
-		);
-
-		if (!right_operand_result) {
-			return std::unexpected(
-				right_operand_result.error()
-			); // return on failure
-		}
+		));
 
 		// upcast both expressions
 		const type highest_precision = get_highest_precision_type(
-			left_operand_result.value()->get_type(), 
-			right_operand_result.value()->get_type()
+			left_operand_result->get_type(), 
+			right_operand_result->get_type()
 		);
 
 		llvm::Value* left_value_upcasted = cast_value(
-			left_operand_result.value(), 
+			left_operand_result, 
 			highest_precision,
 			left_operand->get_declared_location()
 		);
 
 		llvm::Value* right_value_upcasted = cast_value(
-			right_operand_result.value(),
+			right_operand_result,
 			highest_precision, 
 			right_operand->get_declared_location()
 		);

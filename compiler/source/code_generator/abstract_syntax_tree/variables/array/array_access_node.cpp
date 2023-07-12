@@ -9,11 +9,18 @@ namespace sigma {
 	m_array_base(array_base),
 	m_array_element_index_nodes(array_element_index_nodes) {}
 
-	expected_value array_access_node::accept(code_generator& visitor, const code_generation_context& context) {
+	outcome::result<value_ptr> array_access_node::accept(
+		code_generator& visitor, 
+		const code_generation_context& context
+	) {
 		return visitor.visit_array_access_node(*this, context);
 	}
 
-	void array_access_node::print(u64 depth, const std::wstring& prefix, bool is_last) {
+	void array_access_node::print(
+		u64 depth,
+		const std::wstring& prefix, 
+		bool is_last
+	) {
 		print_node_name(depth, prefix, "array access", is_last);
 		console::out << "\n";
 

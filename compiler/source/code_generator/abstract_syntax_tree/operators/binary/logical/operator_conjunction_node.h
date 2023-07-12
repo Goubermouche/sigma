@@ -13,7 +13,7 @@ namespace sigma {
 			const node_ptr& right_expression_node
 		);
 
-		expected_value accept(
+		outcome::result<value_ptr> accept(
 			code_generator& visitor,
 			const code_generation_context& context
 		) override;

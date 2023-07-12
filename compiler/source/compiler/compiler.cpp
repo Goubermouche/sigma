@@ -35,7 +35,7 @@ namespace sigma {
 		set_code_generator<basic_code_generator>();
 	}
 
-	error_result compiler::compile(
+	outcome::result<void> compiler::compile(
 		const filepath& root_source_path,
 		const filepath& target_executable_directory
 	) {
@@ -46,11 +46,7 @@ namespace sigma {
 		m_compilation_timer.start();
 
 		// verify the root source file
-		if (auto source_file_error = verify_source_file(
-			m_root_source_path
-		)) {
-			return source_file_error; // return on failure
-		}
+		OUTCOME_TRY(verify_source_file(m_root_source_path));
 
 		console::out
 			<< "compiling file '"
@@ -58,27 +54,13 @@ namespace sigma {
 			<< "'\n";
 
 		// generate the module
-		auto module_generation_result = generate_module(
-			m_root_source_path
-		);
-
-		if (!module_generation_result) {
-			return module_generation_result.error(); // return on failure
-		}
+		OUTCOME_TRY(const auto module_generation_result, generate_module(m_root_source_path));
 
 		// verify the executable directory
-		if (auto executable_directory_error = verify_folder(
-			m_target_executable_directory
-		)) {
-			return executable_directory_error; // return on failure
-		}
+		OUTCOME_TRY(verify_folder(m_target_executable_directory));
 
 		// compile the module into an executable
-		if (auto compilation_error = compile_module(
-			module_generation_result.value()
-		)) {
-			return compilation_error; // return on failure
-		}
+		OUTCOME_TRY(compile_module(module_generation_result));
 
 		console::out
 			<< color::green
@@ -87,13 +69,10 @@ namespace sigma {
 			<< "ms)\n"
 			<< color::white;
 
-		return {};
+		return outcome::success();
 	}
 
-	std::expected<
-		std::shared_ptr<llvm_context>,
-		error_msg
-	> compiler::generate_module(
+	outcome::result<std::shared_ptr<llvm_context>> compiler::generate_module(
 		const filepath& source_path
 	) const {
 		// tokenize the source file
@@ -101,17 +80,8 @@ namespace sigma {
 		lexer_timer.start();
 
 		const std::shared_ptr<lexer> lexer = m_lexer_generator();
-		if(auto set_source_error = lexer->set_source_filepath(
-			source_path
-		)) {
-			return std::unexpected(set_source_error.value());
-		}
-
-		if (auto tokenization_error = lexer->tokenize()) {
-			return std::unexpected(
-				tokenization_error.value()
-			); // return on failure 
-		}
+		OUTCOME_TRY(lexer->set_source_filepath(source_path));
+		OUTCOME_TRY(lexer->tokenize());
 
 		console::out
 			<< "lexing finished ("
@@ -123,31 +93,27 @@ namespace sigma {
 		parser_timer.start();
 
 		const std::shared_ptr<parser> parser = m_parser_generator();
+
 		parser->set_token_list(
 			lexer->get_token_list()
 		);
 
-		if (auto parser_error = parser->parse()) {
-			return std::unexpected(
-				parser_error.value()
-			); // return on failure 
-		}
+		OUTCOME_TRY(parser->parse());
 
 		console::out
 			<< "parsing finished ("
 			<< parser_timer.elapsed()
 			<< "ms)\n";
 
-		// 
-		for(node* n : *parser->get_abstract_syntax_tree()) {
-			if(const auto* include = dynamic_cast<file_include_node*>(n)) {
-				console::out
-					<< color::red
-					<< include->get_path()
-					<< color::white
-					<< '\n';
-			}
-		}
+		// for(node* n : *parser->get_abstract_syntax_tree()) {
+		// 	if(const auto* include = dynamic_cast<file_include_node*>(n)) {
+		// 		console::out
+		// 			<< color::red
+		// 			<< include->get_path()
+		// 			<< color::white
+		// 			<< '\n';
+		// 	}
+		// }
 
 		parser->get_abstract_syntax_tree()->print_nodes();
 
@@ -159,11 +125,7 @@ namespace sigma {
 			parser->get_abstract_syntax_tree()
 		);
 
-		if (auto visitor_error_message = code_generator->generate()) {
-			return std::unexpected(
-				visitor_error_message.value()
-			); // return on failure 
-		}
+		OUTCOME_TRY(code_generator->generate());
 
 		console::out
 			<< "codegen finished ("
@@ -174,7 +136,7 @@ namespace sigma {
 		return code_generator->get_llvm_context();
 	}
 
-	error_result compiler::compile_module(
+	outcome::result<void> compiler::compile_module(
 		const std::shared_ptr<llvm_context>& llvm_context
 	) const {
 		const std::string target_triple = llvm::sys::getDefaultTargetTriple();
@@ -251,7 +213,7 @@ namespace sigma {
 				nullptr,
 				llvm::CGFT_ObjectFile
 			)) {
-				return error::emit<5000>();
+				return outcome::failure(error::emit<5000>());
 			}
 
 			pass_manager.run(
@@ -317,41 +279,41 @@ namespace sigma {
 
 		// delete the .o file
 		if (!detail::delete_file(o_file)) {
-			return error::emit<1001>(o_file);
+			return outcome::failure(error::emit<1001>(o_file));
 		}
 
-		return {};
+		return outcome::success();;
 	}
 
-	error_result compiler::verify_source_file(
+	outcome::result<void> compiler::verify_source_file(
 		const filepath& path
 	) {
 		if (!std::filesystem::exists(path)) {
-			return error::emit<1002>(path);
+			return outcome::failure(error::emit<1002>(path));
 		}
 
 		if (!detail::is_file(path)) {
-			return error::emit<1003>(path);
+			return outcome::failure(error::emit<1003>(path));
 		}
 
 		if (detail::extract_extension_from_filepath(path) != ".ch") {
-			return error::emit<1007>(path, ".ch");
+			return outcome::failure(error::emit<1007>(path, ".ch"));
 		}
 
-		return {};
+		return outcome::success();;
 	}
 
-	error_result compiler::verify_folder(
+	outcome::result<void> compiler::verify_folder(
 		const filepath& folder_path
 	) {
 		if (!std::filesystem::exists(folder_path)) {
-			return error::emit<1002>(folder_path);
+			return outcome::failure(error::emit<1002>(folder_path));
 		}
 
 		if(!detail::is_directory(folder_path)) {
-			return error::emit<1004>(folder_path);
+			return outcome::failure(error::emit<1004>(folder_path));
 		}
 
-		return {};
+		return outcome::success();;
 	}
 }

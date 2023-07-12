@@ -33,9 +33,9 @@ i32 main(i32 argc, char* argv[]) {
 	sigma::compiler compiler(settings);
 
 	// check for compilation errors
-	if(const auto compilation_result = compiler.compile(".\\test\\main.ch", ".\\test\\")) {
-		compilation_result.value()->print();
-		return 1;
+	const auto compilation_result = compiler.compile(".\\test\\main.ch", ".\\test\\");
+	if(compilation_result.has_error()) {
+		compilation_result.get_error()->print();
 	}
 
 	return 0;

@@ -11,11 +11,18 @@ namespace sigma {
 		right_expression_node
 	) {}
 
-	expected_value operator_modulo_node::accept(code_generator& visitor, const code_generation_context& context) {
+	outcome::result<value_ptr> operator_modulo_node::accept(
+		code_generator& visitor, 
+		const code_generation_context& context
+	) {
 		return visitor.visit_operator_modulo_node(*this, context);
 	}
 
-	void operator_modulo_node::print(u64 depth, const std::wstring& prefix, bool is_last) {
+	void operator_modulo_node::print(
+		u64 depth, 
+		const std::wstring& prefix,
+		bool is_last
+	) {
 		print_node_name(depth, prefix, "binary operator", is_last);
 		console::out
 			<< '\''

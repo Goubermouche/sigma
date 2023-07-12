@@ -35,3 +35,31 @@
 #else
 #define LOG_NODE_NAME(node)
 #endif
+
+#define CONCATENATE(x, y) _CONCATENATE(x, y)
+#define _CONCATENATE(x, y) x ## y
+
+#define OUTCOME_TRY_1(__function)                                             \
+    do {                                                                      \
+		auto CONCATENATE(result, __LINE__) = __function;                      \
+		if (CONCATENATE(result, __LINE__).has_error())                        \
+		return outcome::failure((CONCATENATE(result, __LINE__)).get_error()); \
+    }                                                                         \
+	while(0)
+
+#define OUTCOME_TRY_2(__success, __function)                                  \
+     auto CONCATENATE(result, __LINE__) = __function;                          \
+     if(CONCATENATE(result, __LINE__).has_error())                             \
+         return outcome::failure((CONCATENATE(result, __LINE__)).get_error()); \
+     __success = CONCATENATE(result, __LINE__).get_value()
+
+#define EXPAND(x) x
+#define GET_MACRO(_1, _2, NAME, ...) NAME
+
+/**
+ * \brief Attempts to call the given \a __function, if the outcome of the
+ * function call is erroneous immediately returns from the parent function/method.
+ * \param __success Variable declaration used for storing the successful result
+ * \param __function Function to execute
+ */
+#define OUTCOME_TRY(...) EXPAND(GET_MACRO(__VA_ARGS__, OUTCOME_TRY_2, OUTCOME_TRY_1)(__VA_ARGS__))

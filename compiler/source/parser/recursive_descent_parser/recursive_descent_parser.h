@@ -6,7 +6,7 @@ namespace sigma {
 	class recursive_descent_parser : public parser {
 	public:
 		recursive_descent_parser();
-		error_result parse() override;
+		outcome::result<void> parse() override;
 	private:
 		/**
 		 * \brief Retrieves the next token from the lexer.
@@ -18,84 +18,86 @@ namespace sigma {
 		 * \param token Expected token type
 		 * \return True if the two tokens match
 		 */
-		error_result expect_next_token(token token);
+		outcome::result<void> expect_next_token(
+			token token
+		);
 
 		/**
 		 * \brief Attempts to parse a function definition. The first expected token is a type.
 		 * \param out_node Output AST node
 		 * \return True if the expression is parsed successfully
 		 */
-		error_result parse_function_definition(node*& out_node);
+		outcome::result<void> parse_function_definition(node*& out_node);
 
-		error_result parse_file_include(node*& out_node);
+		outcome::result<void> parse_file_include(node*& out_node);
 
 		/**
 		 * \brief Attempts to parse a global statement.
 		 * \param out_node Output AST node
 		 * \return True if the expression is parsed successfully
 		 */
-		error_result parse_global_statement(node*& out_node);
+		outcome::result<void> parse_global_statement(node*& out_node);
 
-		error_result parse_local_statements(std::vector<node*>& out_statements);
+		outcome::result<void> parse_local_statements(std::vector<node*>& out_statements);
 
 		/**
 		 * \brief Attempts to parse a local statement.
 		 * \param out_node Output AST node
 		 * \return True if the expression is parsed successfully
 		 */
-		error_result parse_local_statement(node*& out_node);
+		outcome::result<void> parse_local_statement(node*& out_node);
 
-		error_result parse_local_statement_identifier(node*& out_node);
+		outcome::result<void> parse_local_statement_identifier(node*& out_node);
 
 		/**
 		 * \brief Attempts to parse an if else chain. The first expected token is the keyword_if token.
 		 * \param out_node Output AST node
 		 * \return True if the expression is parsed successfully
 		 */
-		error_result parse_if_else_statement(node*& out_node);
+		outcome::result<void> parse_if_else_statement(node*& out_node);
 
-		error_result parse_while_loop(node*& out_node);
+		outcome::result<void> parse_while_loop(node*& out_node);
 
-		error_result parse_loop_increment(node*& out_node);
+		outcome::result<void> parse_loop_increment(node*& out_node);
 
-		error_result parse_for_loop(node*& out_node);
+		outcome::result<void> parse_for_loop(node*& out_node);
 
-		error_result parse_compound_operation(node*& out_node, node* left_operand);
+		outcome::result<void> parse_compound_operation(node*& out_node, node* left_operand);
 
 		/**
 		 * \brief Attempts to parse an assignment operation. The first expected token is an identifier.
 		 * \param out_node Output AST node
 		 * \return True if the expression is parsed successfully
 		 */
-		error_result parse_assignment(node*& out_node);
+		outcome::result<void> parse_assignment(node*& out_node);
 
 		/**
 		 * \brief Attempts to parse an array assignment. The first expected token is an identifier.
 		 * \param out_node Output AST node
 		 * \return True if the expression is parsed successfully
 		 */
-		error_result parse_array_assignment(node*& out_node);
+		outcome::result<void> parse_array_assignment(node*& out_node);
 
 		/**
 		 * \brief Attempts to parse an array access. The first expected token is an identifier.
 		 * \param out_node Output AST node
 		 * \return True if the expression is parsed successfully
 		 */
-		error_result parse_array_access(node*& out_node);
+		outcome::result<void> parse_array_access(node*& out_node);
 
 		/**
 		 * \brief Attempts to parse a function call. The first expected token is an identifier.
 		 * \param out_node Output AST node
 		 * \return True if the expression is parsed successfully
 		 */
-		error_result parse_function_call(node*& out_node);
+		outcome::result<void> parse_function_call(node*& out_node);
 
 		/**
 		 * \brief Attempts to parse a return statement. The first expected token is a return keyword.
 		 * \param out_node Output AST node
 		 * \return True if the expression is parsed successfully
 		 */
-		error_result parse_return_statement(node*& out_node);
+		outcome::result<void> parse_return_statement(node*& out_node);
 
 		/**
 		 * \brief Attempts to parse a variable declaration. The first expected token is a type.
@@ -103,7 +105,7 @@ namespace sigma {
 		 * \param is_global Global setting of the declaration (global vs. local declaration)
 		 * \return True if the expression is parsed successfully
 		 */
-		error_result parse_declaration(node*& out_node, bool is_global);
+		outcome::result<void> parse_declaration(node*& out_node, bool is_global);
 
 		/**
 		 * \brief Attempts to parse an expression.
@@ -111,7 +113,7 @@ namespace sigma {
 		 * \param expression_type Specified expression type
 		 * \return True if the expression is parsed successfully
 		 */
-		error_result parse_expression(node*& out_node, type expression_type = type::unknown());
+		outcome::result<void> parse_expression(node*& out_node, type expression_type = type::unknown());
 
 		/**
 		 * \brief Attempts to parse a conjunction expression node.
@@ -119,7 +121,7 @@ namespace sigma {
 		 * \param expression_type Specified expression type
 		 * \return True if the expression is parsed successfully
 		 */
-		error_result parse_logical_conjunction(node*& out_node, type expression_type);
+		outcome::result<void> parse_logical_conjunction(node*& out_node, type expression_type);
 
 		/**
 		 * \brief Attempts to parse a disjunction expression node.
@@ -127,7 +129,7 @@ namespace sigma {
 		 * \param expression_type Specified expression type
 		 * \return True if the expression is parsed successfully
 		 */
-		error_result parse_logical_disjunction(node*& out_node, type expression_type);
+		outcome::result<void> parse_logical_disjunction(node*& out_node, type expression_type);
 
 		/**
 		 * \brief Attempts to parse a comparison expression node.
@@ -135,7 +137,7 @@ namespace sigma {
 		 * \param expression_type Specified expression type
 		 * \return True if the expression is parsed successfully
 		 */
-		error_result parse_comparison(node*& out_node, type expression_type);
+		outcome::result<void> parse_comparison(node*& out_node, type expression_type);
 
 		/**
 		 * \brief Attempts to parse a term expression node.
@@ -143,7 +145,7 @@ namespace sigma {
 		 * \param expression_type Specified expression type
 		 * \return True if the expression is parsed successfully
 		 */
-		error_result parse_term(node*& out_node, type expression_type);
+		outcome::result<void> parse_term(node*& out_node, type expression_type);
 
 		/**
 		 * \brief Attempts to parse a factor expression node.
@@ -151,10 +153,10 @@ namespace sigma {
 		 * \param expression_type Specified expression type
 		 * \return True if the expression is parsed successfully
 		 */
-		error_result parse_factor(node*& out_node, type expression_type);
+		outcome::result<void> parse_factor(node*& out_node, type expression_type);
 
-		error_result parse_pre_operator(node*& out_node);
-		error_result parse_post_operator(node* operand, node*& out_node);
+		outcome::result<void> parse_pre_operator(node*& out_node);
+		outcome::result<void> parse_post_operator(node* operand, node*& out_node);
 
 		/**
 		 * \brief Attempts to parse a primary expression node.
@@ -162,7 +164,7 @@ namespace sigma {
 		 * \param expression_type Specified expression type
 		 * \return True if the expression is parsed successfully
 		 */
-		error_result parse_primary(node*& out_node, type expression_type);
+		outcome::result<void> parse_primary(node*& out_node, type expression_type);
 
 		/**
 		 * \brief Attempts to parse a number token. The first expected token is a numerical type.
@@ -170,30 +172,30 @@ namespace sigma {
 		 * \param expression_type Specified expression type
 		 * \return True if the expression is parsed successfully
 		 */
-		error_result parse_number(node*& out_node, type expression_type = type::unknown());
+		outcome::result<void> parse_number(node*& out_node, type expression_type = type::unknown());
 
 		/**
 		 * \brief Attempts to parse a char literal. The first expected token is a char_literal.
 		 * \param out_node Output AST node
 		 * \return True if the expression is parsed successfully
 		 */
-		error_result parse_char(node*& out_node);
+		outcome::result<void> parse_char(node*& out_node);
 
 		/**
 		 * \brief Attempts to parse a string literal. The first expected token is a string_literal.
 		 * \param out_node Output AST node
 		 * \return True if the expression is parsed successfully
 		 */
-		error_result parse_string(node*& out_node);
+		outcome::result<void> parse_string(node*& out_node);
 
 		/**
 		 * \brief Attempts to parse a boolean value. The first expected token is either a bool_literal_true or a bool_literal_false.
 		 * \param out_node Output AST node
 		 * \return True if the expression is parsed successfully
 		 */
-		error_result parse_bool(node*& out_node);
+		outcome::result<void> parse_bool(node*& out_node);
 
-		error_result parse_break_keyword(node*& out_node);
+		outcome::result<void> parse_break_keyword(node*& out_node);
 
 		/**
 		 * \brief Parses a negative number. The first expected token is a minus operator.
@@ -201,21 +203,21 @@ namespace sigma {
 		 * \param expression_type Specified expression type
 		 * \return True if the expression is parsed successfully
 		 */
-		error_result parse_negative_number(node*& out_node, type expression_type = type::unknown());
+		outcome::result<void> parse_negative_number(node*& out_node, type expression_type = type::unknown());
 
 		/**
 		 * \brief Parses a new allocation. The first expected token is the 'new' keyword.
 		 * \param out_node Output AST node
 		 * \return True if the expression is parsed successfully
 		 */
-		error_result parse_new_allocation(node*& out_node);
+		outcome::result<void> parse_new_allocation(node*& out_node);
 
 		/**
 		 * \brief Parses either a function call or a variable assignment. The first expected token is an identifier.
 		 * \param out_node Output AST node
 		 * \return True if the expression is parsed successfully
 		 */
-		error_result parse_primary_identifier(node*& out_node);
+		outcome::result<void> parse_primary_identifier(node*& out_node);
 
 		/**
 		 * \brief Parses a deep (nested) expression. The first expected token is a left parenthesis.
@@ -223,7 +225,7 @@ namespace sigma {
 		 * \param expression_type Specified expression type
 		 * \return True if the expression is parsed successfully
 		 */
-		error_result parse_deep_expression(node*& out_node, type expression_type);
+		outcome::result<void> parse_deep_expression(node*& out_node, type expression_type);
 
 		/**
 		 * \brief Checks if a statement is a function definition. The first expected token is a type.
@@ -268,7 +270,7 @@ namespace sigma {
 		 * \brief Parses the next tokens as a type. The first expected token is a type.
 		 * \return Parsed type token
 		 */
-		error_result parse_type(type& ty);
+		outcome::result<void> parse_type(type& ty);
 	private:
 		token_data m_current_token;
 	};

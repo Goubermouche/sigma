@@ -15,11 +15,18 @@ namespace sigma {
 	m_function_arguments(function_arguments),
 	m_function_statements(function_statements) {}
 
-	expected_value function_node::accept(code_generator& visitor, const code_generation_context& context) {
+	outcome::result<value_ptr> function_node::accept(
+		code_generator& visitor, 
+		const code_generation_context& context
+	) {
 		return visitor.visit_function_node(*this, context);
 	}
 
-	void function_node::print(u64 depth, const std::wstring& prefix, bool is_last) {
+	void function_node::print(
+		u64 depth, 
+		const std::wstring& prefix,
+		bool is_last
+	) {
 		// print the function name and return type
 		print_node_name(
 			depth,

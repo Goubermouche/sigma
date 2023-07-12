@@ -9,11 +9,18 @@ namespace sigma {
 	m_array_element_type(array_element_type),
 	m_array_element_count(array_element_count_node) {}
 
-	expected_value array_allocation_node::accept(code_generator& visitor, const code_generation_context& context) {
+	outcome::result<value_ptr> array_allocation_node::accept(
+		code_generator& visitor,
+		const code_generation_context& context
+	) {
 		return visitor.visit_allocation_node(*this, context);
 	}
 
-	void array_allocation_node::print(u64 depth, const std::wstring& prefix, bool is_last) {
+	void array_allocation_node::print(
+		u64 depth, 
+		const std::wstring& prefix,
+		bool is_last
+	) {
 		print_node_name(
 			depth, 
 			prefix, 

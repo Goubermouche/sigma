@@ -3,6 +3,7 @@
 #include "lexer/lexer.h"
 #include "parser/parser.h"
 #include "code_generator/code_generator.h"
+#include "dependency_graph.h"
 
 namespace sigma {
 	enum class optimization_level {
@@ -25,6 +26,9 @@ namespace sigma {
 		size_optimization_level size_optimization_level = size_optimization_level::none;
 		// vectorize loops and enable auto vectorization 
 		bool vectorize = false;
+		// thread limit for any multithreaded operation
+		// note: using only one thread doesn't currently work
+		u32 thread_limit = 8;
 	};
 
 	/**
@@ -90,11 +94,8 @@ namespace sigma {
 	private:
 		compiler_settings m_settings;
 
-		// lexer to use for tokenization of the source file
 		std::function<std::shared_ptr<lexer>()> m_lexer_generator;
-		// parser to use for generating the AST
 		std::function<std::shared_ptr<parser>()> m_parser_generator;
-		// code generator used for generating LLVM IR
 		std::function<std::shared_ptr<code_generator>()> m_code_generator_generator;
 
 		// compilation specific 

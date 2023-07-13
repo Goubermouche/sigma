@@ -23,8 +23,6 @@
 #include <clang/Driver/Compilation.h>
 #include <clang/Frontend/TextDiagnosticPrinter.h>
 
-#include "code_generator/abstract_syntax_tree/keywords/file_include_node.h"
-
 namespace sigma {
 	compiler::compiler(
 		compiler_settings settings
@@ -42,33 +40,41 @@ namespace sigma {
 		m_root_source_path = root_source_path;
 		m_target_executable_directory = target_executable_directory;
 
-		timer m_compilation_timer;
-		m_compilation_timer.start();
+		dependency_graph graph(m_root_source_path);
+		detail::thread_pool pool(m_settings.thread_limit);
 
-		// verify the root source file
-		OUTCOME_TRY(verify_source_file(m_root_source_path));
+		OUTCOME_TRY(graph.construct());
+		OUTCOME_TRY(graph.verify());
+		graph.print();
+		OUTCOME_TRY(graph.traverse_compile(pool));
 
-		console::out
-			<< "compiling file '"
-			<< m_root_source_path
-			<< "'\n";
-
-		// generate the module
-		OUTCOME_TRY(const auto module_generation_result, generate_module(m_root_source_path));
-
-		// verify the executable directory
-		OUTCOME_TRY(verify_folder(m_target_executable_directory));
-
-		// compile the module into an executable
-		OUTCOME_TRY(compile_module(module_generation_result));
-
-		console::out
-			<< color::green
-			<< "compilation finished ("
-			<< m_compilation_timer.elapsed()
-			<< "ms)\n"
-			<< color::white;
-
+		// timer m_compilation_timer;
+		// m_compilation_timer.start();
+		// 
+		// // verify the root source file
+		// OUTCOME_TRY(verify_source_file(m_root_source_path));
+		// 
+		// console::out
+		// 	<< "compiling file '"
+		// 	<< m_root_source_path
+		// 	<< "'\n";
+		// 
+		// // generate the module
+		// OUTCOME_TRY(const auto& module_generation_result, generate_module(m_root_source_path));
+		// 
+		// // verify the executable directory
+		// OUTCOME_TRY(verify_folder(m_target_executable_directory));
+		// 
+		// // compile the module into an executable
+		// OUTCOME_TRY(compile_module(module_generation_result));
+		// 
+		// console::out
+		// 	<< color::green
+		// 	<< "compilation finished ("
+		// 	<< m_compilation_timer.elapsed()
+		// 	<< "ms)\n"
+		// 	<< color::white;
+		// 
 		return outcome::success();
 	}
 
@@ -105,17 +111,7 @@ namespace sigma {
 			<< parser_timer.elapsed()
 			<< "ms)\n";
 
-		// for(node* n : *parser->get_abstract_syntax_tree()) {
-		// 	if(const auto* include = dynamic_cast<file_include_node*>(n)) {
-		// 		console::out
-		// 			<< color::red
-		// 			<< include->get_path()
-		// 			<< color::white
-		// 			<< '\n';
-		// 	}
-		// }
-
-		parser->get_abstract_syntax_tree()->print_nodes();
+		// parser->get_abstract_syntax_tree()->print_nodes();
 
 		// generate the module
 		timer code_generator_timer;
@@ -167,7 +163,6 @@ namespace sigma {
 			target_options, 
 			relocation_model
 		);
-
 
 		llvm_context->get_module()->setDataLayout(
 			target_machine->createDataLayout()

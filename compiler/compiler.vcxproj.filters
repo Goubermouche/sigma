@@ -297,9 +297,6 @@
     <ClInclude Include="source\parser\parser.h">
       <Filter>source\parser</Filter>
     </ClInclude>
-    <ClInclude Include="source\parser\recursive_descent_parser\recursive_descent_parser.h">
-      <Filter>source\parser\recursive_descent_parser</Filter>
-    </ClInclude>
     <ClInclude Include="source\utility\containers\compile_time_hash_map.h">
       <Filter>source\utility\containers</Filter>
     </ClInclude>
@@ -560,9 +557,6 @@
     </ClCompile>
     <ClCompile Include="source\parser\parser.cpp">
       <Filter>source\parser</Filter>
-    </ClCompile>
-    <ClCompile Include="source\parser\recursive_descent_parser\recursive_descent_parser.cpp">
-      <Filter>source\parser\recursive_descent_parser</Filter>
     </ClCompile>
     <ClCompile Include="source\utility\containers\directed_graph.cpp">
       <Filter>source\utility\containers</Filter>

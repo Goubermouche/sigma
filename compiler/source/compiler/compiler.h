@@ -45,20 +45,6 @@ namespace sigma {
 		);
 
 		/**
-		 * \brief Sets the new lexer that the compiler will use for tokenizing the source code.
-		 * \tparam lexer Lexer to use
-		 */
-		template <typename lexer>
-		void set_lexer();
-
-		/**
-		 * \brief Sets the new parser that the compiler will use for generating the AST. 
-		 * \tparam parser Parser to use
-		 */
-		template <typename parser>
-		void set_parser();
-
-		/**
 		 * \brief Sets the new code generator that the compiler will use for generating LLVM IR.
 		 * \tparam code_generator Code generator to use 
 		 */
@@ -95,20 +81,13 @@ namespace sigma {
 		compiler_settings m_settings;
 
 		lexer m_lexer;
-		std::function<std::shared_ptr<parser>()> m_parser_generator;
+		parser m_parser;
 		std::function<std::shared_ptr<code_generator>()> m_code_generator_generator;
 
 		// compilation specific 
 		filepath m_root_source_path;
 		filepath m_target_executable_directory;
 	};
-
-	template<typename parser>
-	void compiler::set_parser() {
-		m_parser_generator = [] {
-			return std::make_shared<parser>();
-		};
-	}
 
 	template<typename code_generator>
 	void compiler::set_code_generator() {

@@ -1,6 +1,5 @@
 #include "compiler.h"
 
-#include "parser/recursive_descent_parser/recursive_descent_parser.h"
 #include "code_generator/basic_code_generator/basic_code_generator.h"
 
 #include "utility/timer.h"
@@ -27,7 +26,6 @@ namespace sigma {
 		compiler_settings settings
 	) : m_settings(settings) {
 		// initialize the default compilation step generators 
-		set_parser<recursive_descent_parser>();
 		set_code_generator<basic_code_generator>();
 	}
 
@@ -95,13 +93,11 @@ namespace sigma {
 		timer parser_timer;
 		parser_timer.start();
 
-		const std::shared_ptr<parser> parser = m_parser_generator();
-
-		parser->set_token_list(
+		m_parser.set_token_list(
 			m_lexer.get_token_list()
 		);
 
-		OUTCOME_TRY(parser->parse());
+		OUTCOME_TRY(m_parser.parse());
 
 		console::out
 			<< "parsing finished ("
@@ -115,7 +111,7 @@ namespace sigma {
 		code_generator_timer.start();
 		const std::shared_ptr<code_generator> code_generator = m_code_generator_generator();
 		code_generator->set_abstract_syntax_tree(
-			parser->get_abstract_syntax_tree()
+			m_parser.get_abstract_syntax_tree()
 		);
 
 		OUTCOME_TRY(code_generator->generate());

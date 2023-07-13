@@ -1,6 +1,5 @@
 #include "compiler.h"
 
-#include "lexer/char_by_char_lexer/char_by_char_lexer.h"
 #include "parser/recursive_descent_parser/recursive_descent_parser.h"
 #include "code_generator/basic_code_generator/basic_code_generator.h"
 
@@ -28,7 +27,6 @@ namespace sigma {
 		compiler_settings settings
 	) : m_settings(settings) {
 		// initialize the default compilation step generators 
-		set_lexer<char_by_char_lexer>();
 		set_parser<recursive_descent_parser>();
 		set_code_generator<basic_code_generator>();
 	}
@@ -40,54 +38,53 @@ namespace sigma {
 		m_root_source_path = root_source_path;
 		m_target_executable_directory = target_executable_directory;
 
-		dependency_graph graph(m_root_source_path);
-		detail::thread_pool pool(m_settings.thread_limit);
+		//dependency_graph graph(m_root_source_path);
+		//detail::thread_pool pool(m_settings.thread_limit);
 
-		OUTCOME_TRY(graph.construct());
-		OUTCOME_TRY(graph.verify());
-		graph.print();
-		OUTCOME_TRY(graph.traverse_compile(pool));
+		//OUTCOME_TRY(graph.construct());
+		//OUTCOME_TRY(graph.verify());
+		//graph.print();
+		//OUTCOME_TRY(graph.traverse_compile(pool));
 
-		// timer m_compilation_timer;
-		// m_compilation_timer.start();
-		// 
-		// // verify the root source file
-		// OUTCOME_TRY(verify_source_file(m_root_source_path));
-		// 
-		// console::out
-		// 	<< "compiling file '"
-		// 	<< m_root_source_path
-		// 	<< "'\n";
-		// 
-		// // generate the module
-		// OUTCOME_TRY(const auto& module_generation_result, generate_module(m_root_source_path));
-		// 
-		// // verify the executable directory
-		// OUTCOME_TRY(verify_folder(m_target_executable_directory));
-		// 
-		// // compile the module into an executable
-		// OUTCOME_TRY(compile_module(module_generation_result));
-		// 
-		// console::out
-		// 	<< color::green
-		// 	<< "compilation finished ("
-		// 	<< m_compilation_timer.elapsed()
-		// 	<< "ms)\n"
-		// 	<< color::white;
-		// 
+		 timer m_compilation_timer;
+		 m_compilation_timer.start();
+		 
+		 // verify the root source file
+		 OUTCOME_TRY(verify_source_file(m_root_source_path));
+		 
+		 console::out
+		 	<< "compiling file '"
+		 	<< m_root_source_path
+		 	<< "'\n";
+		 
+		 // generate the module
+		 OUTCOME_TRY(const auto& module_generation_result, generate_module(m_root_source_path));
+		 
+		 // verify the executable directory
+		 OUTCOME_TRY(verify_folder(m_target_executable_directory));
+		 
+		 // compile the module into an executable
+		 OUTCOME_TRY(compile_module(module_generation_result));
+		 
+		 console::out
+		 	<< color::green
+		 	<< "compilation finished ("
+		 	<< m_compilation_timer.elapsed()
+		 	<< "ms)\n"
+		 	<< color::white;
+		 
 		return outcome::success();
 	}
 
 	outcome::result<std::shared_ptr<llvm_context>> compiler::generate_module(
 		const filepath& source_path
-	) const {
+	) {
 		// tokenize the source file
 		timer lexer_timer;
 		lexer_timer.start();
 
-		const std::shared_ptr<lexer> lexer = m_lexer_generator();
-		OUTCOME_TRY(lexer->set_source_filepath(source_path));
-		OUTCOME_TRY(lexer->tokenize());
+		OUTCOME_TRY(m_lexer.set_source_filepath(source_path));
+		OUTCOME_TRY(m_lexer.tokenize());
 
 		console::out
 			<< "lexing finished ("
@@ -101,7 +98,7 @@ namespace sigma {
 		const std::shared_ptr<parser> parser = m_parser_generator();
 
 		parser->set_token_list(
-			lexer->get_token_list()
+			m_lexer.get_token_list()
 		);
 
 		OUTCOME_TRY(parser->parse());

@@ -78,7 +78,7 @@ namespace sigma {
 	private:
 		outcome::result<std::shared_ptr<llvm_context>> generate_module(
 			const filepath& source_path
-		) const;
+		);
 
 		outcome::result<void> compile_module(
 			const std::shared_ptr<llvm_context>& llvm_context
@@ -94,7 +94,7 @@ namespace sigma {
 	private:
 		compiler_settings m_settings;
 
-		std::function<std::shared_ptr<lexer>()> m_lexer_generator;
+		lexer m_lexer;
 		std::function<std::shared_ptr<parser>()> m_parser_generator;
 		std::function<std::shared_ptr<code_generator>()> m_code_generator_generator;
 
@@ -102,13 +102,6 @@ namespace sigma {
 		filepath m_root_source_path;
 		filepath m_target_executable_directory;
 	};
-
-	template<typename lexer>
-	void compiler::set_lexer() {
-		m_lexer_generator = [] {
-			return std::make_shared<lexer>();
-		};
-	}
 
 	template<typename parser>
 	void compiler::set_parser() {

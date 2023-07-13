@@ -64,9 +64,6 @@
     <Filter Include="source\compiler">
       <UniqueIdentifier>{C09F1F08-2C2B-8DCC-353C-10C1A146E9CC}</UniqueIdentifier>
     </Filter>
-    <Filter Include="source\compiler\diagnostics">
-      <UniqueIdentifier>{E75280CA-5360-AEB0-DC46-AA9B48537A67}</UniqueIdentifier>
-    </Filter>
     <Filter Include="source\lexer">
       <UniqueIdentifier>{257A1413-11DD-A3B7-BA62-DC6DA6A46F3A}</UniqueIdentifier>
     </Filter>
@@ -90,6 +87,9 @@
     </Filter>
     <Filter Include="source\utility\containers">
       <UniqueIdentifier>{DE98363B-4A5B-6AC5-930B-F951FF0C43A3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="source\utility\diagnostics">
+      <UniqueIdentifier>{800C941C-6C1C-40ED-D5D5-A40BC1042F86}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -258,20 +258,14 @@
     <ClInclude Include="source\code_generator\code_generator.h">
       <Filter>source\code_generator</Filter>
     </ClInclude>
+    <ClInclude Include="source\compiler\compilation_unit.h">
+      <Filter>source\compiler</Filter>
+    </ClInclude>
     <ClInclude Include="source\compiler\compiler.h">
       <Filter>source\compiler</Filter>
     </ClInclude>
-    <ClInclude Include="source\utility\diagnostics\diagnostic.h">
-      <Filter>source\compiler\diagnostics</Filter>
-    </ClInclude>
-    <ClInclude Include="source\utility\diagnostics\error.h">
-      <Filter>source\compiler\diagnostics</Filter>
-    </ClInclude>
-    <ClInclude Include="source\utility\diagnostics\warning.h">
-      <Filter>source\compiler\diagnostics</Filter>
-    </ClInclude>
-    <ClInclude Include="source\lexer\char_by_char_lexer\char_by_char_lexer.h">
-      <Filter>source\lexer\char_by_char_lexer</Filter>
+    <ClInclude Include="source\compiler\dependency_graph.h">
+      <Filter>source\compiler</Filter>
     </ClInclude>
     <ClInclude Include="source\lexer\lexer.h">
       <Filter>source\lexer</Filter>
@@ -306,19 +300,37 @@
     <ClInclude Include="source\parser\recursive_descent_parser\recursive_descent_parser.h">
       <Filter>source\parser\recursive_descent_parser</Filter>
     </ClInclude>
-    <ClInclude Include="source\utility\diagnostics\console.h">
-      <Filter>source\utility</Filter>
-    </ClInclude>
     <ClInclude Include="source\utility\containers\compile_time_hash_map.h">
+      <Filter>source\utility\containers</Filter>
+    </ClInclude>
+    <ClInclude Include="source\utility\containers\directed_graph.h">
       <Filter>source\utility\containers</Filter>
     </ClInclude>
     <ClInclude Include="source\utility\containers\string_accessor.h">
       <Filter>source\utility\containers</Filter>
     </ClInclude>
+    <ClInclude Include="source\utility\diagnostics\console.h">
+      <Filter>source\utility\diagnostics</Filter>
+    </ClInclude>
+    <ClInclude Include="source\utility\diagnostics\diagnostic.h">
+      <Filter>source\utility\diagnostics</Filter>
+    </ClInclude>
+    <ClInclude Include="source\utility\diagnostics\error.h">
+      <Filter>source\utility\diagnostics</Filter>
+    </ClInclude>
+    <ClInclude Include="source\utility\diagnostics\warning.h">
+      <Filter>source\utility\diagnostics</Filter>
+    </ClInclude>
     <ClInclude Include="source\utility\filesystem.h">
       <Filter>source\utility</Filter>
     </ClInclude>
     <ClInclude Include="source\utility\macros.h">
+      <Filter>source\utility</Filter>
+    </ClInclude>
+    <ClInclude Include="source\utility\thread_pool.h">
+      <Filter>source\utility</Filter>
+    </ClInclude>
+    <ClInclude Include="source\utility\thread_safe_queue.h">
       <Filter>source\utility</Filter>
     </ClInclude>
     <ClInclude Include="source\utility\timer.h">
@@ -327,11 +339,6 @@
     <ClInclude Include="source\utility\types.h">
       <Filter>source\utility</Filter>
     </ClInclude>
-    <ClInclude Include="source\utility\containers\directed_graph.h" />
-    <ClInclude Include="source\utility\thread_pool.h" />
-    <ClInclude Include="source\utility\thread_safe_queue.h" />
-    <ClInclude Include="source\compiler\compilation_unit.h" />
-    <ClInclude Include="source\compiler\dependency_graph.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp" />
@@ -518,20 +525,14 @@
     <ClCompile Include="source\code_generator\code_generator.cpp">
       <Filter>source\code_generator</Filter>
     </ClCompile>
+    <ClCompile Include="source\compiler\compilation_unit.cpp">
+      <Filter>source\compiler</Filter>
+    </ClCompile>
     <ClCompile Include="source\compiler\compiler.cpp">
       <Filter>source\compiler</Filter>
     </ClCompile>
-    <ClCompile Include="source\utility\diagnostics\diagnostic.cpp">
-      <Filter>source\compiler\diagnostics</Filter>
-    </ClCompile>
-    <ClCompile Include="source\utility\diagnostics\error.cpp">
-      <Filter>source\compiler\diagnostics</Filter>
-    </ClCompile>
-    <ClCompile Include="source\utility\diagnostics\warning.cpp">
-      <Filter>source\compiler\diagnostics</Filter>
-    </ClCompile>
-    <ClCompile Include="source\lexer\char_by_char_lexer\char_by_char_lexer.cpp">
-      <Filter>source\lexer\char_by_char_lexer</Filter>
+    <ClCompile Include="source\compiler\dependency_graph.cpp">
+      <Filter>source\compiler</Filter>
     </ClCompile>
     <ClCompile Include="source\lexer\lexer.cpp">
       <Filter>source\lexer</Filter>
@@ -563,11 +564,23 @@
     <ClCompile Include="source\parser\recursive_descent_parser\recursive_descent_parser.cpp">
       <Filter>source\parser\recursive_descent_parser</Filter>
     </ClCompile>
-    <ClCompile Include="source\utility\diagnostics\console.cpp">
-      <Filter>source\utility</Filter>
+    <ClCompile Include="source\utility\containers\directed_graph.cpp">
+      <Filter>source\utility\containers</Filter>
     </ClCompile>
     <ClCompile Include="source\utility\containers\string_accessor.cpp">
       <Filter>source\utility\containers</Filter>
+    </ClCompile>
+    <ClCompile Include="source\utility\diagnostics\console.cpp">
+      <Filter>source\utility\diagnostics</Filter>
+    </ClCompile>
+    <ClCompile Include="source\utility\diagnostics\diagnostic.cpp">
+      <Filter>source\utility\diagnostics</Filter>
+    </ClCompile>
+    <ClCompile Include="source\utility\diagnostics\error.cpp">
+      <Filter>source\utility\diagnostics</Filter>
+    </ClCompile>
+    <ClCompile Include="source\utility\diagnostics\warning.cpp">
+      <Filter>source\utility\diagnostics</Filter>
     </ClCompile>
     <ClCompile Include="source\utility\filesystem.cpp">
       <Filter>source\utility</Filter>
@@ -575,11 +588,5 @@
     <ClCompile Include="source\utility\timer.cpp">
       <Filter>source\utility</Filter>
     </ClCompile>
-    <ClCompile Include="source\utility\containers\directed_graph.cpp" />
-    <ClCompile Include="source\compiler\compilation_unit.cpp" />
-    <ClCompile Include="source\compiler\dependency_graph.cpp" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="test\second.ch" />
   </ItemGroup>
 </Project>

@@ -1,7 +1,7 @@
 #include "abstract_syntax_tree.h"
 
 namespace sigma {
-	void abstract_syntax_tree::add_node(node* node) {
+	void abstract_syntax_tree::add_node(node_ptr node) {
 		m_nodes.push_back(node);
 	}
 
@@ -13,11 +13,11 @@ namespace sigma {
 		}
 	}
 
-	std::vector<node*>::iterator abstract_syntax_tree::begin() {
+	std::vector<node_ptr>::iterator abstract_syntax_tree::begin() {
 		return m_nodes.begin();
 	}
 
-	std::vector<node*>::iterator abstract_syntax_tree::end() {
+	std::vector<node_ptr>::iterator abstract_syntax_tree::end() {
 		return m_nodes.end();
 	}
 }

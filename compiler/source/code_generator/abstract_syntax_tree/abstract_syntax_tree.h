@@ -7,14 +7,14 @@ namespace sigma {
 		abstract_syntax_tree() = default;
 
 		void add_node(
-			node* node
+			node_ptr node
 		);
 
 		void print_nodes() const;
 
-		std::vector<node*>::iterator begin();
-		std::vector<node*>::iterator end();
+		std::vector<node_ptr>::iterator begin();
+		std::vector<node_ptr>::iterator end();
 	private:
-		std::vector<node*> m_nodes;
+		std::vector<node_ptr> m_nodes;
 	};
 }

@@ -45,7 +45,7 @@ namespace sigma {
 
 	outcome::result<void> basic_code_generator::generate() {
 		// walk the abstract syntax tree
-		for (node* n : *m_abstract_syntax_tree) {
+		for (node_ptr n : *m_abstract_syntax_tree) {
 			OUTCOME_TRY(n->accept(*this, {}));
 		}
 

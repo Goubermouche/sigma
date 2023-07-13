@@ -41,7 +41,7 @@ namespace sigma::detail {
 
 		file.close();
 
-		return { (contents) };
+		return contents;
 	}
 
 	bool delete_file(const filepath& path) {

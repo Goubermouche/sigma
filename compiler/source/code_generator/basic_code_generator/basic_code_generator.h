@@ -39,11 +39,6 @@ namespace sigma {
 		) override;
 
 		// keywords
-		// codegen_visitor_keywords.cpp
-		virtual outcome::result<value_ptr> visit_file_include_node(
-			file_include_node& node,
-			const code_generation_context& context
-		) override;
 
 		// variables
 		// codegen_visitor_variables.cpp
@@ -100,8 +95,8 @@ namespace sigma {
 		 * \return Expected - value(operation result, operation precision, left operand result), error received from inner accept invocations.
 		 */
 		outcome::result<std::tuple<llvm::Value*, type, value_ptr>> create_add_operation(
-			node* left_operand,
-			node* right_operand
+			node_ptr left_operand,
+			node_ptr right_operand
 		);
 
 		/**
@@ -111,8 +106,8 @@ namespace sigma {
 		 * \return Expected - value(operation result, operation precision, left operand result), error received from inner accept invocations.
 		 */
 		outcome::result<std::tuple<llvm::Value*, type, value_ptr>> create_sub_operation(
-			node* left_operand,
-			node* right_operand
+			node_ptr left_operand,
+			node_ptr right_operand
 		);
 
 		/**
@@ -122,8 +117,8 @@ namespace sigma {
 		 * \return Expected - value(operation result, operation precision, left operand result), error received from inner accept invocations.
 		 */
 		outcome::result<std::tuple<llvm::Value*, type, value_ptr>> create_mul_operation(
-			node* left_operand,
-			node* right_operand
+			node_ptr left_operand,
+			node_ptr right_operand
 		);
 
 		/**
@@ -133,8 +128,8 @@ namespace sigma {
 		 * \return Expected - value(operation result, operation precision, left operand result), error received from inner accept invocations.
 		 */
 		outcome::result<std::tuple<llvm::Value*, type, value_ptr>> create_div_operation(
-			node* left_operand,
-			node* right_operand
+			node_ptr left_operand,
+			node_ptr right_operand
 		);
 
 		/**
@@ -144,8 +139,8 @@ namespace sigma {
 		 * \return Expected - value(operation result, operation precision, left operand result), error received from inner accept invocations.
 		 */
 		outcome::result<std::tuple<llvm::Value*, type, value_ptr>> create_mod_operation(
-			node* left_operand,
-			node* right_operand
+			node_ptr left_operand,
+			node_ptr right_operand
 		);
 
 		bool get_named_value(

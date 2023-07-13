@@ -6,9 +6,6 @@ namespace sigma {
 	class function_node;
 	class function_call_node;
 
-	// keywords
-	class file_include_node;
-
 	// variables
 	class assignment_node;
 	class variable_access_node;
@@ -102,12 +99,6 @@ namespace sigma {
 
 		virtual outcome::result<value_ptr> visit_function_call_node(
 			function_call_node& node, 
-			const code_generation_context& context
-		) = 0;
-
-		// keywords
-		virtual outcome::result<value_ptr> visit_file_include_node(
-			file_include_node& node,
 			const code_generation_context& context
 		) = 0;
 

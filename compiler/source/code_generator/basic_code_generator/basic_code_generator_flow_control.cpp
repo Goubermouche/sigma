@@ -223,7 +223,7 @@ namespace sigma {
 		// accept all statements in the loop body
 		m_llvm_context->get_builder().SetInsertPoint(loop_body_block);
 
-		for (sigma::node* n : node.get_loop_body_nodes()) {
+		for (sigma::node_ptr n : node.get_loop_body_nodes()) {
 			OUTCOME_TRY(n->accept(
 				*this,
 				{}
@@ -314,7 +314,7 @@ namespace sigma {
 
 		// create the increment block
 		m_llvm_context->get_builder().SetInsertPoint(increment_block);
-		for (sigma::node* n : node.get_post_iteration_nodes()) {
+		for (sigma::node_ptr n : node.get_post_iteration_nodes()) {
 			OUTCOME_TRY(n->accept(*this, {}));
 		}
 
@@ -324,7 +324,7 @@ namespace sigma {
 		m_llvm_context->get_builder().SetInsertPoint(loop_body_block);
 
 		// accept all inner statements
-		for (sigma::node* n : node.get_loop_body_nodes()) {
+		for (sigma::node_ptr n : node.get_loop_body_nodes()) {
 			OUTCOME_TRY(n->accept(*this, {}));
 		}
 

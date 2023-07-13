@@ -20,6 +20,7 @@
 #include <unordered_map>
 #include <utility>
 #include <vector>
+#include <regex>
 
 namespace sigma {
 	namespace types {

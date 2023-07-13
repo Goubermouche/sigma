@@ -161,7 +161,7 @@ namespace sigma {
 		}
 
 		const std::vector<std::pair<std::string, type>>& required_arguments = func->get_arguments();
-		const std::vector<sigma::node*>& given_arguments = node.get_function_arguments();
+		const std::vector<sigma::node_ptr>& given_arguments = node.get_function_arguments();
 
 		// check if the argument counts match
 		if(!func->is_variadic() && required_arguments.size() != given_arguments.size()) {

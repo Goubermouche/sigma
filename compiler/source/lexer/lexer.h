@@ -1,6 +1,6 @@
 #pragma once
 #include "lexer/token.h"
-#include "compiler/diagnostics/error.h"
+#include "utility/diagnostics/error.h"
 #include "utility/containers/string_accessor.h"
 
 namespace sigma {

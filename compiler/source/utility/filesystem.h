@@ -1,5 +1,5 @@
 #pragma once
-#include "compiler/diagnostics/error.h"
+#include "diagnostics/error.h"
 #include "utility/macros.h"
 
 namespace sigma::detail {

@@ -102,9 +102,6 @@
     <ClInclude Include="source\code_generator\abstract_syntax_tree\functions\function_node.h">
       <Filter>source\code_generator\abstract_syntax_tree\functions</Filter>
     </ClInclude>
-    <ClInclude Include="source\code_generator\abstract_syntax_tree\keywords\file_include_node.h">
-      <Filter>source\code_generator\abstract_syntax_tree\keywords</Filter>
-    </ClInclude>
     <ClInclude Include="source\code_generator\abstract_syntax_tree\keywords\flow_control\break_node.h">
       <Filter>source\code_generator\abstract_syntax_tree\keywords\flow_control</Filter>
     </ClInclude>
@@ -264,13 +261,13 @@
     <ClInclude Include="source\compiler\compiler.h">
       <Filter>source\compiler</Filter>
     </ClInclude>
-    <ClInclude Include="source\compiler\diagnostics\diagnostic.h">
+    <ClInclude Include="source\utility\diagnostics\diagnostic.h">
       <Filter>source\compiler\diagnostics</Filter>
     </ClInclude>
-    <ClInclude Include="source\compiler\diagnostics\error.h">
+    <ClInclude Include="source\utility\diagnostics\error.h">
       <Filter>source\compiler\diagnostics</Filter>
     </ClInclude>
-    <ClInclude Include="source\compiler\diagnostics\warning.h">
+    <ClInclude Include="source\utility\diagnostics\warning.h">
       <Filter>source\compiler\diagnostics</Filter>
     </ClInclude>
     <ClInclude Include="source\lexer\char_by_char_lexer\char_by_char_lexer.h">
@@ -309,7 +306,7 @@
     <ClInclude Include="source\parser\recursive_descent_parser\recursive_descent_parser.h">
       <Filter>source\parser\recursive_descent_parser</Filter>
     </ClInclude>
-    <ClInclude Include="source\utility\console.h">
+    <ClInclude Include="source\utility\diagnostics\console.h">
       <Filter>source\utility</Filter>
     </ClInclude>
     <ClInclude Include="source\utility\containers\compile_time_hash_map.h">
@@ -333,6 +330,8 @@
     <ClInclude Include="source\utility\containers\directed_graph.h" />
     <ClInclude Include="source\utility\thread_pool.h" />
     <ClInclude Include="source\utility\thread_safe_queue.h" />
+    <ClInclude Include="source\compiler\compilation_unit.h" />
+    <ClInclude Include="source\compiler\dependency_graph.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp" />
@@ -344,9 +343,6 @@
     </ClCompile>
     <ClCompile Include="source\code_generator\abstract_syntax_tree\functions\function_node.cpp">
       <Filter>source\code_generator\abstract_syntax_tree\functions</Filter>
-    </ClCompile>
-    <ClCompile Include="source\code_generator\abstract_syntax_tree\keywords\file_include_node.cpp">
-      <Filter>source\code_generator\abstract_syntax_tree\keywords</Filter>
     </ClCompile>
     <ClCompile Include="source\code_generator\abstract_syntax_tree\keywords\flow_control\break_node.cpp">
       <Filter>source\code_generator\abstract_syntax_tree\keywords\flow_control</Filter>
@@ -525,13 +521,13 @@
     <ClCompile Include="source\compiler\compiler.cpp">
       <Filter>source\compiler</Filter>
     </ClCompile>
-    <ClCompile Include="source\compiler\diagnostics\diagnostic.cpp">
+    <ClCompile Include="source\utility\diagnostics\diagnostic.cpp">
       <Filter>source\compiler\diagnostics</Filter>
     </ClCompile>
-    <ClCompile Include="source\compiler\diagnostics\error.cpp">
+    <ClCompile Include="source\utility\diagnostics\error.cpp">
       <Filter>source\compiler\diagnostics</Filter>
     </ClCompile>
-    <ClCompile Include="source\compiler\diagnostics\warning.cpp">
+    <ClCompile Include="source\utility\diagnostics\warning.cpp">
       <Filter>source\compiler\diagnostics</Filter>
     </ClCompile>
     <ClCompile Include="source\lexer\char_by_char_lexer\char_by_char_lexer.cpp">
@@ -567,7 +563,7 @@
     <ClCompile Include="source\parser\recursive_descent_parser\recursive_descent_parser.cpp">
       <Filter>source\parser\recursive_descent_parser</Filter>
     </ClCompile>
-    <ClCompile Include="source\utility\console.cpp">
+    <ClCompile Include="source\utility\diagnostics\console.cpp">
       <Filter>source\utility</Filter>
     </ClCompile>
     <ClCompile Include="source\utility\containers\string_accessor.cpp">
@@ -580,5 +576,10 @@
       <Filter>source\utility</Filter>
     </ClCompile>
     <ClCompile Include="source\utility\containers\directed_graph.cpp" />
+    <ClCompile Include="source\compiler\compilation_unit.cpp" />
+    <ClCompile Include="source\compiler\dependency_graph.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="test\second.ch" />
   </ItemGroup>
 </Project>

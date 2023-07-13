@@ -35,8 +35,7 @@ namespace sigma::detail {
         );
 
         using node_type = directed_graph_node<key_type, value_type>;
-        using function_type = std::function<void(value_type&)>;
-
+        using function_type = std::function<void(const key_type&, node_type*)>;
     public:
         void add_node(
             const key_type& key,
@@ -48,14 +47,14 @@ namespace sigma::detail {
 
         void print() const {
             for (const auto& [key, node] : m_nodes) {
-                std::cout << key << '\n';
+                console::out << key << '\n';
 
                 for (const auto& dependency : node->get_children()) {
-                    std::cout << "    " << dependency << '\n';
+                    console::out << "    " << dependency << '\n';
                 }
             }
 
-            std::cout << '\n';
+            console::out << '\n';
         }
 
         bool is_acyclic() const {
@@ -77,6 +76,14 @@ namespace sigma::detail {
             return m_nodes.contains(key);
         }
 
+        node_type* get_node(const key_type& key) {
+            return m_nodes[key];
+        }
+
+        value_type& get_value(const key_type& key) {
+            return m_nodes[key]->get_value();
+        }
+
         void traverse_parallel_bottom_up(
             const key_type& root,
             thread_pool& pool,
@@ -90,7 +97,7 @@ namespace sigma::detail {
 
             node->has_been_processed = true;
             if (node->get_children().empty()) {
-                function(node->get_value());
+                function(root, node);
                 return;
             }
 
@@ -121,7 +128,7 @@ namespace sigma::detail {
                 future.get();
             }
 
-            function(node->get_value());
+            function(root, node);
         }
     private:
         bool dfs_visit(
@@ -147,7 +154,6 @@ namespace sigma::detail {
             rec_stack[path] = false;
             return false;
         }
-
     private:
         std::unordered_map<key_type, node_type*> m_nodes;
 	};

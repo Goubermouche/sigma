@@ -26,6 +26,7 @@ namespace sigma {
 
 		console& operator<<(WORD color);
 		console& operator<<(const std::string& value);
+		console& operator<<(const filepath& value);
 
 		template <typename T>
 		console& operator<<(const T& value);

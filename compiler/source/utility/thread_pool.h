@@ -7,44 +7,44 @@ namespace sigma::detail{
     class thread_pool {
     public:
         explicit thread_pool(
-            const unsigned int& number_of_threads = std::thread::hardware_concurrency()
-        ) : tasks_(number_of_threads) {
+            const u32& number_of_threads = std::thread::hardware_concurrency()
+        ) : m_tasks(number_of_threads) {
             u64 current_id = 0;
 
             for (u64 i = 0; i < number_of_threads; ++i) {
-                priority_queue_.push_back(static_cast<u64>(current_id));
+                m_priority_queue.push_back(static_cast<u64>(current_id));
 
                 try {
-                    threads_.emplace_back([&, id = current_id](const std::stop_token& stop_tok) {
+                    m_threads.emplace_back([&, id = current_id](const std::stop_token& stop_tok) {
                         do {
                             // wait until signaled
-                            tasks_[id].signal.acquire();
+                            m_tasks[id].signal.acquire();
 
                             do {
                                 // invoke the task
-                                while (auto task = tasks_[id].tasks.pop_front()) {
+                                while (auto task = m_tasks[id].tasks.pop_front()) {
                                     try {
-                                        pending_tasks_.fetch_sub(1, std::memory_order_release);
+                                        m_pending_tasks.fetch_sub(1, std::memory_order_release);
                                         std::invoke(std::move(task.value()));
                                     }
                                     catch (...) {}
                                 }
 
                                 // try to steal a task
-                                for (u64 j = 1; j < tasks_.size(); ++j) {
-                                    const u64 index = (id + j) % tasks_.size();
-                                    if (auto task = tasks_[index].tasks.steal()) {
+                                for (u64 j = 1; j < m_tasks.size(); ++j) {
+                                    const u64 index = (id + j) % m_tasks.size();
+                                    if (auto task = m_tasks[index].tasks.steal()) {
                                         // steal a task
-                                        pending_tasks_.fetch_sub(1, std::memory_order_release);
+                                        m_pending_tasks.fetch_sub(1, std::memory_order_release);
                                         std::invoke(std::move(task.value()));
                                         // stop stealing once we have invoked a stolen task
                                         break;
                                     }
                                 }
 
-                            } while (pending_tasks_.load(std::memory_order_acquire) > 0);
+                            } while (m_pending_tasks.load(std::memory_order_acquire) > 0);
 
-                            priority_queue_.rotate_to_front(id);
+                            m_priority_queue.rotate_to_front(id);
 
                         } while (!stop_tok.stop_requested());
                     });
@@ -54,20 +54,20 @@ namespace sigma::detail{
                 }
                 catch (...) {
                     // remove one item from the tasks
-                    tasks_.pop_back();
+                    m_tasks.pop_back();
 
                     // remove our thread from the priority queue
-                    std::ignore = priority_queue_.pop_back();
+                    std::ignore = m_priority_queue.pop_back();
                 }
             }
         }
 
         ~thread_pool() {
             // stop all threads
-            for (u64 i = 0; i < threads_.size(); ++i) {
-                threads_[i].request_stop();
-                tasks_[i].signal.release();
-                threads_[i].join();
+            for (u64 i = 0; i < m_threads.size(); ++i) {
+                m_threads[i].request_stop();
+                m_tasks[i].signal.release();
+                m_threads[i].join();
             }
         }
 
@@ -135,20 +135,20 @@ namespace sigma::detail{
                     }));
         }
 
-        [[nodiscard]] auto size() const { return threads_.size(); }
+        [[nodiscard]] auto size() const { return m_threads.size(); }
 
     private:
         template <typename function>
         void enqueue_task(function&& f) {
-            auto i_opt = priority_queue_.copy_front_and_rotate_to_back();
+            auto i_opt = m_priority_queue.copy_front_and_rotate_to_back();
             if (!i_opt.has_value()) {
                 // would only be a problem if there are zero threads
                 return;
             }
             auto i = *(i_opt);
-            pending_tasks_.fetch_add(1, std::memory_order_relaxed);
-            tasks_[i].tasks.push_back(std::forward<function>(f));
-            tasks_[i].signal.release();
+            m_pending_tasks.fetch_add(1, std::memory_order_relaxed);
+            m_tasks[i].tasks.push_back(std::forward<function>(f));
+            m_tasks[i].signal.release();
         }
 
         struct task_item {
@@ -156,9 +156,9 @@ namespace sigma::detail{
             std::binary_semaphore signal{ 0 };
         };
 
-        std::vector<std::jthread> threads_;
-        std::deque<task_item> tasks_;
-        thread_safe_queue<u64> priority_queue_;
-        std::atomic_int_fast64_t pending_tasks_{};
+        std::vector<std::jthread> m_threads;
+        std::deque<task_item> m_tasks;
+        thread_safe_queue<u64> m_priority_queue;
+        std::atomic_int_fast64_t m_pending_tasks{};
     };
 }

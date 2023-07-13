@@ -44,6 +44,11 @@ namespace sigma {
 		return *this;
 	}
 
+	console& console::operator<<(const filepath& value) {
+		std::wcout << value.wstring();
+		return *this;
+	}
+
 	void console::set_color(WORD color) {
 		SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), color);
 	}

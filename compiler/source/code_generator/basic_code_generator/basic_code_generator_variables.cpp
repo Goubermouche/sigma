@@ -377,7 +377,7 @@ namespace sigma {
 		const code_generation_context& context
 	) {
 		(void)context; // suppress C4100
-		const std::vector<sigma::node*>& index_nodes = node.get_array_element_index_nodes();
+		const std::vector<sigma::node_ptr>& index_nodes = node.get_array_element_index_nodes();
 
 		// evaluate the array base expression
 		OUTCOME_TRY(auto array_ptr_result, node.get_array_base_node()->accept(*this, {}));
@@ -436,7 +436,7 @@ namespace sigma {
 		const code_generation_context& context
 	) {
 		(void)context; // suppress C4100
-		const std::vector<sigma::node*>& index_nodes = node.get_array_element_index_nodes();
+		const std::vector<sigma::node_ptr>& index_nodes = node.get_array_element_index_nodes();
 
 		// evaluate the array base expression
 		OUTCOME_TRY(auto array_ptr_result, node.get_array_base_node()->accept(*this, {}));
@@ -533,7 +533,7 @@ namespace sigma {
 		const code_generation_context& context
 	) {
 		// evaluate the expression to get the initial value
-		if (sigma::node* expression = node.get_expression_node()) {
+		if (sigma::node_ptr expression = node.get_expression_node()) {
 			// evaluate the assigned value
 			return expression->accept(*this, context);
 		}

@@ -1,5 +1,5 @@
 #pragma once
-#include "utility/types.h"
+#include "utility/diagnostics/console.h"
 
 namespace sigma::detail {
     template <typename Lock>

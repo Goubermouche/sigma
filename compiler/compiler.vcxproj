@@ -58,11 +58,12 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="source\compiler\dependency_graph.h" />
+    <ClInclude Include="source\compiler\compilation_unit.h" />
     <ClInclude Include="source\utility\containers\directed_graph.h" />
     <ClInclude Include="source\code_generator\abstract_syntax_tree\abstract_syntax_tree.h" />
     <ClInclude Include="source\code_generator\abstract_syntax_tree\functions\function_call_node.h" />
     <ClInclude Include="source\code_generator\abstract_syntax_tree\functions\function_node.h" />
-    <ClInclude Include="source\code_generator\abstract_syntax_tree\keywords\file_include_node.h" />
     <ClInclude Include="source\code_generator\abstract_syntax_tree\keywords\flow_control\break_node.h" />
     <ClInclude Include="source\code_generator\abstract_syntax_tree\keywords\flow_control\for_node.h" />
     <ClInclude Include="source\code_generator\abstract_syntax_tree\keywords\flow_control\if_else_node.h" />
@@ -116,9 +117,9 @@
     <ClInclude Include="source\code_generator\basic_code_generator\basic_code_generator.h" />
     <ClInclude Include="source\code_generator\code_generator.h" />
     <ClInclude Include="source\compiler\compiler.h" />
-    <ClInclude Include="source\compiler\diagnostics\diagnostic.h" />
-    <ClInclude Include="source\compiler\diagnostics\error.h" />
-    <ClInclude Include="source\compiler\diagnostics\warning.h" />
+    <ClInclude Include="source\utility\diagnostics\diagnostic.h" />
+    <ClInclude Include="source\utility\diagnostics\error.h" />
+    <ClInclude Include="source\utility\diagnostics\warning.h" />
     <ClInclude Include="source\lexer\char_by_char_lexer\char_by_char_lexer.h" />
     <ClInclude Include="source\lexer\lexer.h" />
     <ClInclude Include="source\lexer\token.h" />
@@ -131,7 +132,7 @@
     <ClInclude Include="source\llvm_wrappers\value.h" />
     <ClInclude Include="source\parser\parser.h" />
     <ClInclude Include="source\parser\recursive_descent_parser\recursive_descent_parser.h" />
-    <ClInclude Include="source\utility\console.h" />
+    <ClInclude Include="source\utility\diagnostics\console.h" />
     <ClInclude Include="source\utility\containers\compile_time_hash_map.h" />
     <ClInclude Include="source\utility\containers\string_accessor.h" />
     <ClInclude Include="source\utility\filesystem.h" />
@@ -142,12 +143,13 @@
     <ClInclude Include="source\utility\thread_pool.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="source\compiler\dependency_graph.cpp" />
+    <ClCompile Include="source\compiler\compilation_unit.cpp" />
     <ClCompile Include="source\utility\containers\directed_graph.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="source\code_generator\abstract_syntax_tree\abstract_syntax_tree.cpp" />
     <ClCompile Include="source\code_generator\abstract_syntax_tree\functions\function_call_node.cpp" />
     <ClCompile Include="source\code_generator\abstract_syntax_tree\functions\function_node.cpp" />
-    <ClCompile Include="source\code_generator\abstract_syntax_tree\keywords\file_include_node.cpp" />
     <ClCompile Include="source\code_generator\abstract_syntax_tree\keywords\flow_control\break_node.cpp" />
     <ClCompile Include="source\code_generator\abstract_syntax_tree\keywords\flow_control\for_node.cpp" />
     <ClCompile Include="source\code_generator\abstract_syntax_tree\keywords\flow_control\if_else_node.cpp" />
@@ -207,9 +209,9 @@
     <ClCompile Include="source\code_generator\basic_code_generator\codegen_visitor_keywords.cpp" />
     <ClCompile Include="source\code_generator\code_generator.cpp" />
     <ClCompile Include="source\compiler\compiler.cpp" />
-    <ClCompile Include="source\compiler\diagnostics\diagnostic.cpp" />
-    <ClCompile Include="source\compiler\diagnostics\error.cpp" />
-    <ClCompile Include="source\compiler\diagnostics\warning.cpp" />
+    <ClCompile Include="source\utility\diagnostics\diagnostic.cpp" />
+    <ClCompile Include="source\utility\diagnostics\error.cpp" />
+    <ClCompile Include="source\utility\diagnostics\warning.cpp" />
     <ClCompile Include="source\lexer\char_by_char_lexer\char_by_char_lexer.cpp" />
     <ClCompile Include="source\lexer\lexer.cpp" />
     <ClCompile Include="source\llvm_wrappers\code_generation_context.cpp" />
@@ -221,10 +223,13 @@
     <ClCompile Include="source\llvm_wrappers\value.cpp" />
     <ClCompile Include="source\parser\parser.cpp" />
     <ClCompile Include="source\parser\recursive_descent_parser\recursive_descent_parser.cpp" />
-    <ClCompile Include="source\utility\console.cpp" />
+    <ClCompile Include="source\utility\diagnostics\console.cpp" />
     <ClCompile Include="source\utility\containers\string_accessor.cpp" />
     <ClCompile Include="source\utility\filesystem.cpp" />
     <ClCompile Include="source\utility\timer.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="test\second.ch" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

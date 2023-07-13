@@ -29,6 +29,7 @@ i32 main(i32 argc, char* argv[]) {
 	settings.optimization_level = sigma::optimization_level::high;
 	settings.size_optimization_level = sigma::size_optimization_level::high;
 	settings.vectorize = true;
+	settings.thread_limit = 10;
 
 	sigma::compiler compiler(settings);
 

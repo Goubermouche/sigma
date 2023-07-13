@@ -1,18 +1,3 @@
-// todo: explicit cast (!)
-//  - cast<i32>(value)
-// todo: references (!!)
-//  - add support for references (&)
-// todo: general
-//  - continue (!!)
-// todo: major cleanup (!!!)
-//  - documentation
-//  - tests
-// todo: numerical literal auto upcasts 
-//  - handle upcasts for numerical literals 
-//  - 2 * double_var etc
-// todo: includes
-
-#include "first.ch"
 #include "second.ch"
 
 void donut(f32 rot_speed) {

@@ -1284,8 +1284,8 @@ namespace sigma {
 	}
 
 	outcome::result<std::tuple<llvm::Value*, type, value_ptr>> basic_code_generator::create_add_operation(
-		node* left_operand,
-		node* right_operand
+		node_ptr left_operand,
+		node_ptr right_operand
 	) {
 		// accept the left operand (variable to be assigned to)
 		OUTCOME_TRY(auto left_operand_result, left_operand->accept(
@@ -1357,8 +1357,8 @@ namespace sigma {
 	}
 
 	outcome::result<std::tuple<llvm::Value*, type, value_ptr>> basic_code_generator::create_sub_operation(
-		node* left_operand, 
-		node* right_operand
+		node_ptr left_operand, 
+		node_ptr right_operand
 	) {
 		// accept the left operand (variable to be assigned to)
 		OUTCOME_TRY(auto left_operand_result, left_operand->accept(
@@ -1430,8 +1430,8 @@ namespace sigma {
 	}
 
 	outcome::result<std::tuple<llvm::Value*, type, value_ptr>> basic_code_generator::create_mul_operation(
-		node* left_operand,
-		node* right_operand
+		node_ptr left_operand,
+		node_ptr right_operand
 	) {
 		// accept the left operand (variable to be assigned to)
 		OUTCOME_TRY(auto left_operand_result, left_operand->accept(
@@ -1503,8 +1503,8 @@ namespace sigma {
 	}
 
 	outcome::result<std::tuple<llvm::Value*, type, value_ptr>> basic_code_generator::create_div_operation(
-		node* left_operand,
-		node* right_operand
+		node_ptr left_operand,
+		node_ptr right_operand
 	) {
 		// accept the left operand (variable to be assigned to)
 		OUTCOME_TRY(auto left_operand_result, left_operand->accept(
@@ -1576,8 +1576,8 @@ namespace sigma {
 	}
 
 	outcome::result<std::tuple<llvm::Value*, type, value_ptr>> basic_code_generator::create_mod_operation(
-		node* left_operand, 
-		node* right_operand
+		node_ptr left_operand, 
+		node_ptr right_operand
 	) {
 		// accept the left operand (variable to be assigned to)
 		OUTCOME_TRY(auto left_operand_result, left_operand->accept(

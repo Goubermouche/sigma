@@ -14,7 +14,7 @@ namespace sigma {
 	m_loop_body_nodes(statement_nodes) {}
 
 	outcome::result<value_ptr> for_node::accept(
-		code_generator& visitor,
+		code_generator_template& visitor,
 		const code_generation_context& context
 	) {
 		return visitor.visit_for_node(*this, context);

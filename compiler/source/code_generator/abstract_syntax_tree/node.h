@@ -12,7 +12,7 @@
 #define AST_NODE_VARIABLE_COLOR			 color::green
 
 namespace sigma {
-	class code_generator;
+	class code_generator_template;
 	class node;
 
 	using node_ptr = node*;
@@ -36,7 +36,7 @@ namespace sigma {
 		 * \return Result of the acceptation operation, either an error or a pointer to the generated value.
 		 */
 		virtual outcome::result<value_ptr> accept(
-			code_generator& visitor,
+			code_generator_template& visitor,
 			const code_generation_context& context
 		) = 0;
 
@@ -89,4 +89,4 @@ namespace sigma {
 	};
 }
 
-#include "code_generator/code_generator.h"
+#include "code_generator/code_generator_template.h"

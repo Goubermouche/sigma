@@ -10,7 +10,7 @@ namespace sigma {
 	m_function_arguments(function_arguments) {}
 
 	outcome::result<value_ptr> function_call_node::accept(
-		code_generator& visitor, 
+		code_generator_template& visitor, 
 		const code_generation_context& context
 	) {
 		return visitor.visit_function_call_node(*this, context);

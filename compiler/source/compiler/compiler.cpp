@@ -1,6 +1,6 @@
 #include "compiler.h"
 
-#include "code_generator/basic_code_generator/basic_code_generator.h"
+#include "code_generator/code_generator.h"
 
 #include "utility/timer.h"
 
@@ -24,10 +24,7 @@
 namespace sigma {
 	compiler::compiler(
 		compiler_settings settings
-	) : m_settings(settings) {
-		// initialize the default compilation step generators 
-		set_code_generator<basic_code_generator>();
-	}
+	) : m_settings(settings) {}
 
 	outcome::result<void> compiler::compile(
 		const filepath& root_source_path,
@@ -109,12 +106,11 @@ namespace sigma {
 		// generate the module
 		timer code_generator_timer;
 		code_generator_timer.start();
-		const std::shared_ptr<code_generator> code_generator = m_code_generator_generator();
-		code_generator->set_abstract_syntax_tree(
+		m_code_generator.set_abstract_syntax_tree(
 			m_parser.get_abstract_syntax_tree()
 		);
 
-		OUTCOME_TRY(code_generator->generate());
+		OUTCOME_TRY(m_code_generator.generate());
 
 		console::out
 			<< "codegen finished ("
@@ -122,7 +118,7 @@ namespace sigma {
 			<< "ms)\n";
 
 		// code_generator->get_llvm_context()->print_intermediate_representation();
-		return code_generator->get_llvm_context();
+		return m_code_generator.get_llvm_context();
 	}
 
 	outcome::result<void> compiler::compile_module(

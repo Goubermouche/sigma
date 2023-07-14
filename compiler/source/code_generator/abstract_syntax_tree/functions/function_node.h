@@ -18,7 +18,7 @@ namespace sigma {
 		);
 
 		outcome::result<value_ptr> accept(
-			code_generator& visitor,
+			code_generator_template& visitor,
 			const code_generation_context& context
 		) override;
 

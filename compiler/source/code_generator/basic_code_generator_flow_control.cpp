@@ -1,4 +1,4 @@
-#include "basic_code_generator.h"
+#include "code_generator.h"
 
 #include "code_generator/abstract_syntax_tree/keywords/flow_control/return_node.h"
 #include "code_generator/abstract_syntax_tree/keywords/flow_control/if_else_node.h"
@@ -7,7 +7,7 @@
 #include "code_generator/abstract_syntax_tree/keywords/flow_control/break_node.h"
 
 namespace sigma {
-	outcome::result<value_ptr> basic_code_generator::visit_return_node(
+	outcome::result<value_ptr> code_generator::visit_return_node(
 		return_node& node, 
 		const code_generation_context& context
 	) {
@@ -69,7 +69,7 @@ namespace sigma {
 		);
 	}
 
-	outcome::result<value_ptr> basic_code_generator::visit_if_else_node(
+	outcome::result<value_ptr> code_generator::visit_if_else_node(
 		if_else_node& node, 
 		const code_generation_context& context
 	) {
@@ -172,7 +172,7 @@ namespace sigma {
 		return nullptr;
 	}
 
-	outcome::result<value_ptr> basic_code_generator::visit_while_node(
+	outcome::result<value_ptr> code_generator::visit_while_node(
 		while_node& node, 
 		const code_generation_context& context
 	) {
@@ -242,7 +242,7 @@ namespace sigma {
 		return nullptr;
 	}
 
-	outcome::result<value_ptr> basic_code_generator::visit_for_node(
+	outcome::result<value_ptr> code_generator::visit_for_node(
 		for_node& node,
 		const code_generation_context& context
 	) {
@@ -340,7 +340,7 @@ namespace sigma {
 		return nullptr;
 	}
 
-	outcome::result<value_ptr> basic_code_generator::visit_break_node(
+	outcome::result<value_ptr> code_generator::visit_break_node(
 		break_node& node, 
 		const code_generation_context& context
 	) {

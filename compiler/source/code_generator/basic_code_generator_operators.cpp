@@ -1,4 +1,4 @@
-#include "basic_code_generator.h"
+#include "code_generator.h"
 
 // unary
 // arithmetic
@@ -41,7 +41,7 @@
 namespace sigma {
 	// unary
 	// arithmetic
-	outcome::result<value_ptr> basic_code_generator::visit_operator_post_decrement_node(
+	outcome::result<value_ptr> code_generator::visit_operator_post_decrement_node(
 		operator_post_decrement_node& node,
 		const code_generation_context& context
 	) {
@@ -91,7 +91,7 @@ namespace sigma {
 		return expression_result;
 	}
 
-	outcome::result<value_ptr> basic_code_generator::visit_operator_post_increment_node(
+	outcome::result<value_ptr> code_generator::visit_operator_post_increment_node(
 		operator_post_increment_node& node,
 		const code_generation_context& context
 	) {
@@ -139,7 +139,7 @@ namespace sigma {
 		return expression_result;
 	}
 
-	outcome::result<value_ptr> basic_code_generator::visit_operator_pre_decrement_node(
+	outcome::result<value_ptr> code_generator::visit_operator_pre_decrement_node(
 		operator_pre_decrement_node& node, 
 		const code_generation_context& context
 	) {
@@ -194,7 +194,7 @@ namespace sigma {
 		);
 	}
 
-	outcome::result<value_ptr> basic_code_generator::visit_operator_pre_increment_node(
+	outcome::result<value_ptr> code_generator::visit_operator_pre_increment_node(
 		operator_pre_increment_node& node, 
 		const code_generation_context& context
 	) {
@@ -250,7 +250,7 @@ namespace sigma {
 	}
 
 	// bitwise
-	outcome::result<value_ptr> basic_code_generator::visit_operator_bitwise_not_node(
+	outcome::result<value_ptr> code_generator::visit_operator_bitwise_not_node(
 		operator_bitwise_not_node& node,
 		const code_generation_context& context
 	) {
@@ -285,7 +285,7 @@ namespace sigma {
 	}
 
 	// logical
-	outcome::result<value_ptr> basic_code_generator::visit_operator_not_node(
+	outcome::result<value_ptr> code_generator::visit_operator_not_node(
 		operator_not_node& node, 
 		const code_generation_context& context
 	) {
@@ -325,7 +325,7 @@ namespace sigma {
 
 	// binary
 	// arithmetic
-	outcome::result<value_ptr> basic_code_generator::visit_operator_addition_assignment_node(
+	outcome::result<value_ptr> code_generator::visit_operator_addition_assignment_node(
 		operator_addition_assignment_node& node,
 		const code_generation_context& context
 	) {
@@ -357,7 +357,7 @@ namespace sigma {
 		return assignment_value;
 	}
 
-	outcome::result<value_ptr> basic_code_generator::visit_operator_addition_node(
+	outcome::result<value_ptr> code_generator::visit_operator_addition_node(
 		operator_addition_node& node,
 		const code_generation_context& context
 	) {
@@ -380,7 +380,7 @@ namespace sigma {
 		);
 	}
 
-	outcome::result<value_ptr> basic_code_generator::visit_operator_subtraction_assignment_node(
+	outcome::result<value_ptr> code_generator::visit_operator_subtraction_assignment_node(
 		operator_subtraction_assignment_node& node,
 		const code_generation_context& context
 	) {
@@ -412,7 +412,7 @@ namespace sigma {
 		return assignment_value;
 	}
 
-	outcome::result<value_ptr> basic_code_generator::visit_operator_subtraction_node(
+	outcome::result<value_ptr> code_generator::visit_operator_subtraction_node(
 		operator_subtraction_node& node,
 		const code_generation_context& context
 	) {
@@ -435,7 +435,7 @@ namespace sigma {
 		);
 	}
 
-	outcome::result<value_ptr> basic_code_generator::visit_operator_multiplication_assignment_node(
+	outcome::result<value_ptr> code_generator::visit_operator_multiplication_assignment_node(
 		operator_multiplication_assignment_node& node, 
 		const code_generation_context& context
 	) {
@@ -467,7 +467,7 @@ namespace sigma {
 		return assignment_value;
 	}
 
-	outcome::result<value_ptr> basic_code_generator::visit_operator_multiplication_node(
+	outcome::result<value_ptr> code_generator::visit_operator_multiplication_node(
 		operator_multiplication_node& node,
 		const code_generation_context& context
 	) {
@@ -490,7 +490,7 @@ namespace sigma {
 		);
 	}
 
-	outcome::result<value_ptr> basic_code_generator::visit_operator_division_assignment_node(
+	outcome::result<value_ptr> code_generator::visit_operator_division_assignment_node(
 		operator_division_assignment_node& node, 
 		const code_generation_context& context
 	) {
@@ -522,7 +522,7 @@ namespace sigma {
 		return assignment_value;
 	}
 
-	outcome::result<value_ptr> basic_code_generator::visit_operator_division_node(
+	outcome::result<value_ptr> code_generator::visit_operator_division_node(
 		operator_division_node& node, 
 		const code_generation_context& context
 	) {
@@ -545,7 +545,7 @@ namespace sigma {
 		);
 	}
 
-	outcome::result<value_ptr> basic_code_generator::visit_operator_modulo_assignment_node(
+	outcome::result<value_ptr> code_generator::visit_operator_modulo_assignment_node(
 		operator_modulo_assignment_node& node,
 		const code_generation_context& context
 	) {
@@ -577,7 +577,7 @@ namespace sigma {
 		return assignment_value;
 	}
 
-	outcome::result<value_ptr> basic_code_generator::visit_operator_modulo_node(
+	outcome::result<value_ptr> code_generator::visit_operator_modulo_node(
 		operator_modulo_node& node,
 		const code_generation_context& context
 	) {
@@ -600,7 +600,7 @@ namespace sigma {
 		);
 	}
 
-	outcome::result<value_ptr> basic_code_generator::visit_operator_bitwise_and_node(
+	outcome::result<value_ptr> code_generator::visit_operator_bitwise_and_node(
 		operator_bitwise_and_node& node, 
 		const code_generation_context& context
 	) {
@@ -643,7 +643,7 @@ namespace sigma {
 		);
 	}
 
-	outcome::result<value_ptr> basic_code_generator::visit_operator_bitwise_or_node(
+	outcome::result<value_ptr> code_generator::visit_operator_bitwise_or_node(
 		operator_bitwise_or_node& node,
 		const code_generation_context& context
 	) {
@@ -686,7 +686,7 @@ namespace sigma {
 		);
 	}
 
-	outcome::result<value_ptr> basic_code_generator::visit_operator_bitwise_left_shift_node(
+	outcome::result<value_ptr> code_generator::visit_operator_bitwise_left_shift_node(
 		operator_bitwise_left_shift_node& node, 
 		const code_generation_context& context
 	) {
@@ -729,7 +729,7 @@ namespace sigma {
 		);
 	}
 
-	outcome::result<value_ptr> basic_code_generator::visit_operator_bitwise_right_shift_node(
+	outcome::result<value_ptr> code_generator::visit_operator_bitwise_right_shift_node(
 		operator_bitwise_right_shift_node& node,
 		const code_generation_context& context
 	) {
@@ -772,7 +772,7 @@ namespace sigma {
 		);
 	}
 
-	outcome::result<value_ptr> basic_code_generator::visit_operator_bitwise_xor_node(
+	outcome::result<value_ptr> code_generator::visit_operator_bitwise_xor_node(
 		operator_bitwise_xor_node& node,
 		const code_generation_context& context
 	) {
@@ -816,7 +816,7 @@ namespace sigma {
 	}
 
 	// logical
-	outcome::result<value_ptr> basic_code_generator::visit_operator_logical_conjunction_node(
+	outcome::result<value_ptr> code_generator::visit_operator_logical_conjunction_node(
 		operator_conjunction_node& node,
 		const code_generation_context& context
 	) {
@@ -860,7 +860,7 @@ namespace sigma {
 		);
 	}
 
-	outcome::result<value_ptr> basic_code_generator::visit_operator_logical_disjunction_node(
+	outcome::result<value_ptr> code_generator::visit_operator_logical_disjunction_node(
 		operator_disjunction_node& node, 
 		const code_generation_context& context
 	) {
@@ -903,7 +903,7 @@ namespace sigma {
 		);
 	}
 
-	outcome::result<value_ptr> basic_code_generator::visit_operator_greater_than_node(
+	outcome::result<value_ptr> code_generator::visit_operator_greater_than_node(
 		operator_greater_than_node& node, 
 		const code_generation_context& context
 	) {
@@ -969,7 +969,7 @@ namespace sigma {
 		);
 	}
 
-	outcome::result<value_ptr> basic_code_generator::visit_operator_greater_than_equal_to_node(
+	outcome::result<value_ptr> code_generator::visit_operator_greater_than_equal_to_node(
 		operator_greater_than_equal_to_node& node, 
 		const code_generation_context& context
 	) {
@@ -1035,7 +1035,7 @@ namespace sigma {
 		);
 	}
 
-	outcome::result<value_ptr> basic_code_generator::visit_operator_less_than_node(
+	outcome::result<value_ptr> code_generator::visit_operator_less_than_node(
 		operator_less_than_node& node, 
 		const code_generation_context& context
 	) {
@@ -1101,7 +1101,7 @@ namespace sigma {
 		);
 	}
 
-	outcome::result<value_ptr> basic_code_generator::visit_operator_less_than_equal_to_node(
+	outcome::result<value_ptr> code_generator::visit_operator_less_than_equal_to_node(
 		operator_less_than_equal_to_node& node,
 		const code_generation_context& context
 	) {
@@ -1167,7 +1167,7 @@ namespace sigma {
 		);
 	}
 
-	outcome::result<value_ptr> basic_code_generator::visit_operator_equals_node(
+	outcome::result<value_ptr> code_generator::visit_operator_equals_node(
 		operator_equals_node& node, 
 		const code_generation_context& context
 	) {
@@ -1225,7 +1225,7 @@ namespace sigma {
 		);
 	}
 
-	outcome::result<value_ptr> basic_code_generator::visit_operator_not_equals_node(
+	outcome::result<value_ptr> code_generator::visit_operator_not_equals_node(
 		operator_not_equals_node& node, 
 		const code_generation_context& context
 	) {
@@ -1283,7 +1283,7 @@ namespace sigma {
 		);
 	}
 
-	outcome::result<std::tuple<llvm::Value*, type, value_ptr>> basic_code_generator::create_add_operation(
+	outcome::result<std::tuple<llvm::Value*, type, value_ptr>> code_generator::create_add_operation(
 		node_ptr left_operand,
 		node_ptr right_operand
 	) {
@@ -1356,7 +1356,7 @@ namespace sigma {
 		);
 	}
 
-	outcome::result<std::tuple<llvm::Value*, type, value_ptr>> basic_code_generator::create_sub_operation(
+	outcome::result<std::tuple<llvm::Value*, type, value_ptr>> code_generator::create_sub_operation(
 		node_ptr left_operand, 
 		node_ptr right_operand
 	) {
@@ -1429,7 +1429,7 @@ namespace sigma {
 		);
 	}
 
-	outcome::result<std::tuple<llvm::Value*, type, value_ptr>> basic_code_generator::create_mul_operation(
+	outcome::result<std::tuple<llvm::Value*, type, value_ptr>> code_generator::create_mul_operation(
 		node_ptr left_operand,
 		node_ptr right_operand
 	) {
@@ -1502,7 +1502,7 @@ namespace sigma {
 		);
 	}
 
-	outcome::result<std::tuple<llvm::Value*, type, value_ptr>> basic_code_generator::create_div_operation(
+	outcome::result<std::tuple<llvm::Value*, type, value_ptr>> code_generator::create_div_operation(
 		node_ptr left_operand,
 		node_ptr right_operand
 	) {
@@ -1575,7 +1575,7 @@ namespace sigma {
 		);
 	}
 
-	outcome::result<std::tuple<llvm::Value*, type, value_ptr>> basic_code_generator::create_mod_operation(
+	outcome::result<std::tuple<llvm::Value*, type, value_ptr>> code_generator::create_mod_operation(
 		node_ptr left_operand, 
 		node_ptr right_operand
 	) {

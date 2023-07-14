@@ -1,4 +1,4 @@
-#include "basic_code_generator.h"
+#include "code_generator.h"
 
 #include "code_generator/abstract_syntax_tree/variables/assignment_node.h"
 #include "code_generator/abstract_syntax_tree/variables/variable_access_node.h"
@@ -10,7 +10,7 @@
 #include "code_generator/abstract_syntax_tree/variables/declaration/global_declaration_node.h"
 
 namespace sigma {
-	outcome::result<value_ptr> basic_code_generator::visit_assignment_node(
+	outcome::result<value_ptr> code_generator::visit_assignment_node(
 		assignment_node& node, 
 		const code_generation_context& context
 	) {
@@ -41,7 +41,7 @@ namespace sigma {
 		return expression_result;
 	}
 
-	outcome::result<value_ptr> basic_code_generator::visit_variable_access_node(
+	outcome::result<value_ptr> code_generator::visit_variable_access_node(
 		variable_access_node& node, 
 		const code_generation_context& context
 	) {
@@ -104,7 +104,7 @@ namespace sigma {
 		);
 	}
 
-	outcome::result<value_ptr> basic_code_generator::visit_local_declaration_node(
+	outcome::result<value_ptr> code_generator::visit_local_declaration_node(
 		local_declaration_node& node, 
 		const code_generation_context& context
 	) {
@@ -175,7 +175,7 @@ namespace sigma {
 		return declaration_value_result;
 	}
 
-	outcome::result<value_ptr> basic_code_generator::visit_global_declaration_node(
+	outcome::result<value_ptr> code_generator::visit_global_declaration_node(
 		global_declaration_node& node,
 		const code_generation_context& context
 	) {
@@ -280,7 +280,7 @@ namespace sigma {
 		return global_declaration;
 	}
 
-	outcome::result<value_ptr> basic_code_generator::visit_allocation_node(
+	outcome::result<value_ptr> code_generator::visit_allocation_node(
 		array_allocation_node& node,
 		const code_generation_context& context
 	) {
@@ -372,7 +372,7 @@ namespace sigma {
 		return array_value;
 	}
 
-	outcome::result<value_ptr> basic_code_generator::visit_array_access_node(
+	outcome::result<value_ptr> code_generator::visit_array_access_node(
 		array_access_node& node, 
 		const code_generation_context& context
 	) {
@@ -431,7 +431,7 @@ namespace sigma {
 		return element_value;
 	}
 
-	outcome::result<value_ptr> basic_code_generator::visit_array_assignment_node(
+	outcome::result<value_ptr> code_generator::visit_array_assignment_node(
 		array_assignment_node& node,
 		const code_generation_context& context
 	) {
@@ -507,7 +507,7 @@ namespace sigma {
 		return expression_value;
 	}
 
-	outcome::result<value_ptr> basic_code_generator::visit_variable_node(
+	outcome::result<value_ptr> code_generator::visit_variable_node(
 		variable_node& node, 
 		const code_generation_context& context
 	) {
@@ -528,7 +528,7 @@ namespace sigma {
 		return var_value;
 	}
 
-	outcome::result<value_ptr> basic_code_generator::get_declaration_value(
+	outcome::result<value_ptr> code_generator::get_declaration_value(
 		const declaration_node& node,
 		const code_generation_context& context
 	) {

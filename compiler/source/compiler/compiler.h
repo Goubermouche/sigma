@@ -45,13 +45,6 @@ namespace sigma {
 		);
 
 		/**
-		 * \brief Sets the new code generator that the compiler will use for generating LLVM IR.
-		 * \tparam code_generator Code generator to use 
-		 */
-		template <typename code_generator>
-		void set_code_generator();
-
-		/**
 		 * \brief Compiles the given \a root_source_path using the underlying compiler settings and outputs an executable at the given \a target_executable_directory.
 		 * \param root_source_path Path to the file to be compiled
 		 * \param target_executable_directory Path to the target directory the generated executable should be store to
@@ -82,17 +75,10 @@ namespace sigma {
 
 		lexer m_lexer;
 		parser m_parser;
-		std::function<std::shared_ptr<code_generator>()> m_code_generator_generator;
+		code_generator m_code_generator;
 
 		// compilation specific 
 		filepath m_root_source_path;
 		filepath m_target_executable_directory;
 	};
-
-	template<typename code_generator>
-	void compiler::set_code_generator() {
-		m_code_generator_generator = [] {
-			return std::make_shared<code_generator>();
-		};
-	}
 }

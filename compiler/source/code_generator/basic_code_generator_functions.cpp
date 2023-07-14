@@ -1,10 +1,10 @@
-#include "basic_code_generator.h"
+#include "code_generator.h"
 
 #include "code_generator/abstract_syntax_tree/functions/function_call_node.h"
 #include "code_generator/abstract_syntax_tree/functions/function_node.h"
 
 namespace sigma {
-	outcome::result<value_ptr> basic_code_generator::visit_function_node(
+	outcome::result<value_ptr> code_generator::visit_function_node(
 		function_node& node, 
 		const code_generation_context& context
 	) {
@@ -139,7 +139,7 @@ namespace sigma {
 		);
 	}
 
-	outcome::result<value_ptr> basic_code_generator::visit_function_call_node(
+	outcome::result<value_ptr> code_generator::visit_function_call_node(
 		function_call_node& node, 
 		const code_generation_context& context
 	) {

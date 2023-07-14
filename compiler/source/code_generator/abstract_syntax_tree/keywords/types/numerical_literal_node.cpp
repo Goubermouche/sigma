@@ -10,7 +10,7 @@ namespace sigma {
 	m_preferred_type(preferred_type) {}
 
 	outcome::result<value_ptr> numerical_literal_node::accept(
-		code_generator& visitor, 
+		code_generator_template& visitor, 
 		const code_generation_context& context
 	) {
 		return visitor.visit_numerical_literal_node(*this, context);

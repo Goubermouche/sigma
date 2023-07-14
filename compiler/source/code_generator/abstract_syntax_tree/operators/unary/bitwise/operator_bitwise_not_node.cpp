@@ -7,7 +7,7 @@ namespace sigma {
 	) : operator_unary_base(location, expression_node) {}
 
 	outcome::result<value_ptr> operator_bitwise_not_node::accept(
-		code_generator& visitor,
+		code_generator_template& visitor,
 		const code_generation_context& context
 	) {
 		return visitor.visit_operator_bitwise_not_node(*this, context);

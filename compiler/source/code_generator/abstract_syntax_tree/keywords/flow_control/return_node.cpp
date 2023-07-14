@@ -8,7 +8,7 @@ namespace sigma {
 	m_return_expression_node(return_expression_node) {}
 
 	outcome::result<value_ptr> return_node::accept(
-		code_generator& visitor, 
+		code_generator_template& visitor, 
 		const code_generation_context& context
 	) {
 		return visitor.visit_return_node(*this, context);

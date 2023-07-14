@@ -14,7 +14,7 @@ namespace sigma {
 	) {}
 
 	outcome::result<value_ptr> global_declaration_node::accept(
-		code_generator& visitor, 
+		code_generator_template& visitor, 
 		const code_generation_context& context
 	)	{
 		return visitor.visit_global_declaration_node(*this, context);

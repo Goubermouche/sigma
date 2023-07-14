@@ -16,7 +16,7 @@ namespace sigma {
 	m_function_statements(function_statements) {}
 
 	outcome::result<value_ptr> function_node::accept(
-		code_generator& visitor, 
+		code_generator_template& visitor, 
 		const code_generation_context& context
 	) {
 		return visitor.visit_function_node(*this, context);

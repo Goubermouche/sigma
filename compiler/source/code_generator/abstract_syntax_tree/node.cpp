@@ -1,5 +1,5 @@
 ﻿#include "node.h"
-#include "code_generator/code_generator.h"
+#include "code_generator/code_generator_template.h"
 
 namespace sigma {
 	node::node(const file_position& location)

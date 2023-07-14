@@ -5,7 +5,7 @@ namespace sigma {
 		: node(location) {}
 
 	outcome::result<value_ptr> break_node::accept(
-		code_generator& visitor, 
+		code_generator_template& visitor, 
 		const code_generation_context& context
 	) {
 		return visitor.visit_break_node(*this, context);

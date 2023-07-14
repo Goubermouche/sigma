@@ -10,7 +10,7 @@ namespace sigma {
 	m_array_element_count(array_element_count_node) {}
 
 	outcome::result<value_ptr> array_allocation_node::accept(
-		code_generator& visitor,
+		code_generator_template& visitor,
 		const code_generation_context& context
 	) {
 		return visitor.visit_allocation_node(*this, context);

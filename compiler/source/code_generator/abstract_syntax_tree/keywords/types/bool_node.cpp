@@ -8,7 +8,7 @@ namespace sigma {
 	m_value(value) {}
 
 	outcome::result<value_ptr> bool_node::accept(
-		code_generator& visitor, 
+		code_generator_template& visitor, 
 		const code_generation_context& context
 	) {
 		return visitor.visit_keyword_bool_node(*this, context);

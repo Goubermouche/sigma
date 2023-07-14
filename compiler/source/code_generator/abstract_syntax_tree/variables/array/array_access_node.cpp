@@ -10,7 +10,7 @@ namespace sigma {
 	m_array_element_index_nodes(array_element_index_nodes) {}
 
 	outcome::result<value_ptr> array_access_node::accept(
-		code_generator& visitor, 
+		code_generator_template& visitor, 
 		const code_generation_context& context
 	) {
 		return visitor.visit_array_access_node(*this, context);

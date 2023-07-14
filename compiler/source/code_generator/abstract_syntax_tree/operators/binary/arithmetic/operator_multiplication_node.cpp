@@ -12,7 +12,7 @@ namespace sigma {
 	) {}
 
 	outcome::result<value_ptr> operator_multiplication_node::accept(
-		code_generator& visitor, 
+		code_generator_template& visitor, 
 		const code_generation_context& context
 	) {
 		return visitor.visit_operator_multiplication_node(*this, context);

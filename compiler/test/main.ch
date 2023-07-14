@@ -1,5 +1,5 @@
 // #include "first.ch" 
-// #include "second.ch"
+#include "second.ch"k
 // #include "third.ch"
 
 i32 x = 10;

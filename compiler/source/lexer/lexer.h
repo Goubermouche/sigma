@@ -65,6 +65,8 @@ namespace sigma {
 		void synchronize_indices();
 	private:
 		std::vector<token_data> m_tokens;
+
+		// todo: implement a check for non-initialized tokens
 		token_data m_current_token;
 
 		u64 m_main_token_index = 0;

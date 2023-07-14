@@ -173,6 +173,8 @@ namespace sigma {
 				OUTCOME_TRY(global_statement_node, parse_assignment());
 			}
 			else {
+				m_token_list.get_token(); // read the erroneous token
+
 				return outcome::failure(error::emit<3001>(
 					m_token_list.get_current_token().get_token_location(),
 					token

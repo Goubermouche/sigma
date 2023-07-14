@@ -1,11 +1,12 @@
 #pragma once
 #include "llvm_wrappers/type.h"
 #include "llvm_wrappers/functions/function.h"
-#include "llvm_wrappers/llvm_context.h"
 
 namespace sigma {
 	using function_ptr = std::shared_ptr<function>;
 	using function_declaration_ptr = std::shared_ptr<function_declaration>;
+
+	class code_generator_context;
 
 	class function_registry {
 	public:
@@ -13,7 +14,7 @@ namespace sigma {
 
 		function_ptr get_function(
 			const std::string& identifier,
-			const std::shared_ptr<llvm_context>& context
+			const std::shared_ptr<code_generator_context>& context
 		);
 
 		function_declaration_ptr get_function_declaration(

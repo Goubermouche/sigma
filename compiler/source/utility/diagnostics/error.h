@@ -291,7 +291,9 @@ namespace sigma {
 
 			constexpr result(
 				success&& success
-			) : m_value() {}
+			) : m_value() {
+				SUPPRESS_C4100(success);
+			}
 
 			bool has_error() const {
 				return !m_value.has_value();

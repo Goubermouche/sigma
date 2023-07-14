@@ -38,7 +38,7 @@ namespace sigma {
 				// gather dependency contexts
 				const auto& child_nodes = node->get_children();
 
-				std::vector<std::shared_ptr<llvm_context>> dependencies(
+				std::vector<std::shared_ptr<code_generator_context>> dependencies(
 					child_nodes.size()
 				);
 
@@ -82,30 +82,32 @@ namespace sigma {
 			return outcome::success();
 		}
 
-		OUTCOME_TRY(auto file_contents, detail::read_file(path));
-		const std::regex include_regex(R"((^|\n)\s*#include\s*\"([^\"]+)\")");
+		lexer lexer;
+		lexer.set_source_filepath(path);
+		lexer.tokenize();
+		auto token_list = lexer.get_token_list();
 		const filepath parent_path = path.parent_path();
 		std::vector<filepath> includes;
-		std::string remainder = file_contents;
-		std::smatch match;
 
-		bool include_found = false;
-		while (std::regex_search(remainder, match, include_regex)) {
-			if (include_found && !match.prefix().str().empty() && match.prefix().str().find_first_not_of(" \t\n") != std::string::npos) {
-				const u64 line_index = std::count(file_contents.begin(), file_contents.begin() + file_contents.size() - remainder.size(), '\n') + 1;
-				const u64 char_index = file_contents.size() - remainder.size() - file_contents.rfind('\n', file_contents.size() - remainder.size());
+		// traverse until we run out of preprocessor directives
+		while(true) {
+			if(token_list.peek_token().get_token() == token::hash) {
+				token_list.synchronize_indices();
 
-				return outcome::failure(
-					error::emit<5101>({ path, line_index, char_index })
+				token_list.get_token(); // hash (guaranteed)
+				OUTCOME_TRY(token_list.expect_token(token::keyword_include));
+				OUTCOME_TRY(token_list.expect_token(token::string_literal));
+
+				includes.push_back(
+					parent_path / token_list.get_current_token().get_value()
 				);
 			}
-
-			includes.push_back(parent_path / match[2].str());
-			remainder = match.suffix().str();
-			include_found = true;
+			else {
+				break;
+			}
 		}
 
-		compilation_unit unit;
+		const compilation_unit unit(token_list);
 		m_graph.add_node(path, unit, includes);
 
 		for(const auto& include : includes) {

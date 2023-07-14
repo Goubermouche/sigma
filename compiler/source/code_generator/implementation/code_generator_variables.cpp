@@ -14,7 +14,8 @@ namespace sigma {
 		assignment_node& node, 
 		const code_generation_context& context
 	) {
-		(void)context; // suppress C4100
+		SUPPRESS_C4100(context);
+
 		// assignment to a local variable
 		// look up the local variable in the active scope
 		OUTCOME_TRY(auto variable_result, node.get_variable_node()->accept(*this, {}));
@@ -33,7 +34,7 @@ namespace sigma {
 
 		expression_result->set_value(out_cast);
 
-		m_llvm_context->get_builder().CreateStore(
+		m_context->get_builder().CreateStore(
 			expression_result->get_value(),
 			variable_result->get_value()
 		);
@@ -45,17 +46,18 @@ namespace sigma {
 		variable_access_node& node, 
 		const code_generation_context& context
 	) {
-		(void)context; // suppress C4100
+		SUPPRESS_C4100(context);
+
 		// load a local variable
 		// look up the local variable in the active scope
-		if (const value_ptr variable_value = m_scope->get_named_value(
+		if (const value_ptr variable_value = m_context->get_scope()->get_variable(
 			node.get_variable_identifier())) {
 			// load the value from the memory location
 			llvm::AllocaInst* alloca = llvm::dyn_cast<llvm::AllocaInst>(
 				variable_value->get_value()
 			);
 
-			llvm::Value* load = m_llvm_context->get_builder().CreateLoad(
+			llvm::Value* load = m_context->get_builder().CreateLoad(
 				alloca->getAllocatedType(),
 				variable_value->get_value()
 			);
@@ -74,7 +76,7 @@ namespace sigma {
 		// we haven't found a local variable, check if we're loading a global one
 		// load a global variable
 		// look up the global variable in the m_global_named_values map
-		const value_ptr global_variable = m_global_named_values[node.get_variable_identifier()];
+		const value_ptr global_variable = m_context->get_global_variable_registry().get(node.get_variable_identifier());
 		// check if the global variable exists
 		if (!global_variable) {
 			return outcome::failure(
@@ -91,7 +93,7 @@ namespace sigma {
 		);
 
 		// load the value from the memory location
-		llvm::Value* load = m_llvm_context->get_builder().CreateLoad(
+		llvm::Value* load = m_context->get_builder().CreateLoad(
 			global_variable_value->getValueType(),
 			global_variable->get_value()
 		);
@@ -108,24 +110,26 @@ namespace sigma {
 		local_declaration_node& node, 
 		const code_generation_context& context
 	) {
-		(void)context; // suppress C4100
-		llvm::BasicBlock* original_entry_block = m_llvm_context->get_builder().GetInsertBlock();
+		SUPPRESS_C4100(context);
+
+		llvm::BasicBlock* original_entry_block = m_context->get_builder().GetInsertBlock();
 		llvm::Function* parent_function = original_entry_block->getParent();
 		llvm::BasicBlock* function_entry_block = &*parent_function->begin();
 
-		m_llvm_context->get_builder().SetInsertPoint(
+		m_context->get_builder().SetInsertPoint(
 			function_entry_block,
 			function_entry_block->getFirstInsertionPt()
 		);
 
 		// store the initial value
-		llvm::AllocaInst* alloca = m_llvm_context->get_builder().CreateAlloca(
-			node.get_declaration_type().get_llvm_type(m_llvm_context->get_context()),
+		llvm::AllocaInst* alloca = m_context->get_builder().CreateAlloca(
+			node.get_declaration_type().get_llvm_type(m_context->get_context()),
 			nullptr
 		);
 
 		// check if the variable already exists as a global
-		if (m_global_named_values[node.get_declaration_identifier()]) {
+		if(m_context->get_global_variable_registry().contains(
+			node.get_declaration_identifier())) {
 			return outcome::failure(
 				error::emit<4004>(
 					node.get_declared_location(),
@@ -135,7 +139,7 @@ namespace sigma {
 		}
 
 		// add the variable to the active scope
-		const auto insertion_result = m_scope->add_named_value(
+		const auto insertion_result = m_context->get_scope()->insert_variable(
 			node.get_declaration_identifier(), 
 			std::make_shared<value>(
 				node.get_declaration_identifier(), 
@@ -145,7 +149,7 @@ namespace sigma {
 		);
 
 		// check if the active scope already contains the variable
-		if (!insertion_result.second) {
+		if (!insertion_result) {
 			return outcome::failure(
 				error::emit<4005>(
 					node.get_declared_location(),
@@ -155,7 +159,7 @@ namespace sigma {
 		}
 
 		// assign the actual value
-		m_llvm_context->get_builder().SetInsertPoint(original_entry_block);
+		m_context->get_builder().SetInsertPoint(original_entry_block);
 
 		// evaluate the assigned value, if there is one
 		OUTCOME_TRY(auto declaration_value_result, get_declaration_value(
@@ -169,9 +173,9 @@ namespace sigma {
 			node.get_declared_location()
 		);
 
-		m_llvm_context->get_builder().CreateStore(cast_assigned_value, alloca);
+		m_context->get_builder().CreateStore(cast_assigned_value, alloca);
 		declaration_value_result->set_pointer(alloca);
-		m_llvm_context->get_builder().SetInsertPoint(original_entry_block);
+		m_context->get_builder().SetInsertPoint(original_entry_block);
 		return declaration_value_result;
 	}
 
@@ -179,12 +183,12 @@ namespace sigma {
 		global_declaration_node& node,
 		const code_generation_context& context
 	) {
-		(void)context; // suppress C4100
+		SUPPRESS_C4100(context);
 
 		// start creating the init function for our global ctor
 		const std::string init_func_name = "__global_init_" + node.get_declaration_identifier();
 		llvm::FunctionType* init_func_type = llvm::FunctionType::get(
-			llvm::Type::getVoidTy(m_llvm_context->get_context()),
+			llvm::Type::getVoidTy(m_context->get_context()),
 			false
 		);
 
@@ -192,16 +196,16 @@ namespace sigma {
 			init_func_type,
 			llvm::Function::InternalLinkage,
 			init_func_name, 
-			m_llvm_context->get_module().get()
+			m_context->get_module().get()
 		);
 
 		llvm::BasicBlock* init_func_entry = llvm::BasicBlock::Create(
-			m_llvm_context->get_context(), 
+			m_context->get_context(), 
 			"", 
 			init_func
 		);
 
-		m_llvm_context->get_builder().SetInsertPoint(init_func_entry); // write to the init function
+		m_context->get_builder().SetInsertPoint(init_func_entry); // write to the init function
 
 		// evaluate the assigned value, if there is one
 		OUTCOME_TRY(auto declaration_value_result, get_declaration_value(
@@ -220,25 +224,25 @@ namespace sigma {
 		value_ptr global_declaration = std::make_shared<value>(
 			node.get_declaration_identifier(),
 			node.get_declaration_type(),
-			new llvm::GlobalVariable(*m_llvm_context->get_module(),
-				node.get_declaration_type().get_llvm_type(m_llvm_context->get_context()),
+			new llvm::GlobalVariable(*m_context->get_module(),
+				node.get_declaration_type().get_llvm_type(m_context->get_context()),
 				false,
 				llvm::GlobalValue::ExternalLinkage,
 				llvm::Constant::getNullValue(
-					node.get_declaration_type().get_llvm_type(m_llvm_context->get_context())
+					node.get_declaration_type().get_llvm_type(m_context->get_context())
 				), // default initializer
 				node.get_declaration_identifier()
 			)
 		);
 
 		// add the variable to the m_global_named_values map
-		const auto insertion_result = m_global_named_values.insert({ 
+		const auto insertion_result = m_context->get_global_variable_registry().insert(
 			node.get_declaration_identifier(),
 			global_declaration
-		});
+		);
 
 		// check if a global with the same name already exists
-		if (!insertion_result.second) {
+		if (!insertion_result) {
 			return outcome::failure(
 				error::emit<4006>(
 					node.get_declared_location(), 
@@ -247,7 +251,7 @@ namespace sigma {
 			); // return on failure
 		}
 
-		m_llvm_context->get_builder().CreateStore(
+		m_context->get_builder().CreateStore(
 			cast_assigned_value, 
 			global_declaration->get_value()
 		);
@@ -256,27 +260,29 @@ namespace sigma {
 			global_declaration->get_value()
 		);
 
-		m_llvm_context->get_builder().CreateRetVoid();
+		m_context->get_builder().CreateRetVoid();
 
 		// create a new constructor with the given priority
 		llvm::ConstantInt* priority = llvm::ConstantInt::get(
-			llvm::Type::getInt32Ty(m_llvm_context->get_context()),
-			m_global_initialization_priority++
+			llvm::Type::getInt32Ty(m_context->get_context()),
+			m_context->get_global_variable_registry().get_initialization_priority()
 		);
+
+		m_context->get_global_variable_registry().increment_initialization_priority();
 
 		llvm::Constant* initializer_cast = llvm::ConstantExpr::getBitCast(
 			init_func, 
-			llvm::Type::getInt8PtrTy(m_llvm_context->get_context())
+			llvm::Type::getInt8PtrTy(m_context->get_context())
 		);
 
 		llvm::Constant* new_ctor = llvm::ConstantStruct::get(CTOR_STRUCT_TYPE, {
 			priority,
 			initializer_cast,
-			llvm::Constant::getNullValue(llvm::Type::getInt8PtrTy(m_llvm_context->get_context()))
+			llvm::Constant::getNullValue(llvm::Type::getInt8PtrTy(m_context->get_context()))
 		});
 
 		// push the constructor to the ctor list
-		m_global_ctors.push_back(new_ctor);
+		m_context->get_global_variable_registry().add_global_ctor(new_ctor);
 		return global_declaration;
 	}
 
@@ -284,7 +290,7 @@ namespace sigma {
 		array_allocation_node& node,
 		const code_generation_context& context
 	) {
-		(void)context; // suppress C4100
+		SUPPRESS_C4100(context);
 
 		// get the count of allocated elements
 		OUTCOME_TRY(auto element_count_result, node.get_array_element_count_node()->accept(
@@ -299,23 +305,23 @@ namespace sigma {
 			node.get_array_element_count_node()->get_declared_location()
 		);
 
-		const llvm::FunctionCallee malloc_func = m_function_registry.get_function(
+		const llvm::FunctionCallee malloc_func = m_context->get_function_registry().get_function(
 			"malloc",
-			m_llvm_context
+			m_context
 		)->get_function();
 
 		// calculate the total size
 		const type array_element_type = node.get_array_element_type();
 		llvm::Type* element_type = array_element_type.get_llvm_type(
-			m_llvm_context->get_context()
+			m_context->get_context()
 		);
 
 		llvm::Value* element_size = llvm::ConstantInt::get(
-			m_llvm_context->get_context(), 
+			m_context->get_context(), 
 			llvm::APInt(64, (node.get_array_element_type().get_bit_width() + 7) / 8)
 		);
 
-		llvm::Value* total_size = m_llvm_context->get_builder().CreateMul(
+		llvm::Value* total_size = m_context->get_builder().CreateMul(
 			element_count_cast,
 			element_size
 		);
@@ -326,37 +332,37 @@ namespace sigma {
 		// add space for a null terminator if the element type is a character
 		if (is_char_pointer) {
 			llvm::Value* extra_size = llvm::ConstantInt::get(
-				m_llvm_context->get_context(), 
+				m_context->get_context(), 
 				llvm::APInt(64, 1)
 			); // space for a null terminator
 
-			total_size = m_llvm_context->get_builder().CreateAdd(
+			total_size = m_context->get_builder().CreateAdd(
 				total_size, 
 				extra_size
 			);
 		}
 
 		// allocate the array
-		llvm::Value* allocated_ptr = m_llvm_context->get_builder().CreateCall(
+		llvm::Value* allocated_ptr = m_context->get_builder().CreateCall(
 			malloc_func, 
 			total_size
 		);
 
 		// cast the result to the correct pointer type
-		llvm::Value* typed_ptr = m_llvm_context->get_builder().CreateBitCast(
+		llvm::Value* typed_ptr = m_context->get_builder().CreateBitCast(
 			allocated_ptr,
 			llvm::PointerType::getUnqual(element_type)
 		);
 
 		// add null terminator if the element type is a character
 		if (is_char_pointer) {
-			llvm::Value* null_terminator_ptr = m_llvm_context->get_builder().CreateGEP(
+			llvm::Value* null_terminator_ptr = m_context->get_builder().CreateGEP(
 				element_type,
 				typed_ptr, 
 				element_count_cast
 			);
 
-			m_llvm_context->get_builder().CreateStore(llvm::ConstantInt::get(m_llvm_context->get_context(), llvm::APInt(8, 0)), null_terminator_ptr);
+			m_context->get_builder().CreateStore(llvm::ConstantInt::get(m_context->get_context(), llvm::APInt(8, 0)), null_terminator_ptr);
 		}
 
 		value_ptr array_value = std::make_shared<value>(
@@ -376,8 +382,9 @@ namespace sigma {
 		array_access_node& node, 
 		const code_generation_context& context
 	) {
-		(void)context; // suppress C4100
-		const std::vector<sigma::node_ptr>& index_nodes = node.get_array_element_index_nodes();
+		SUPPRESS_C4100(context);
+
+		const std::vector<node_ptr>& index_nodes = node.get_array_element_index_nodes();
 
 		// evaluate the array base expression
 		OUTCOME_TRY(auto array_ptr_result, node.get_array_base_node()->accept(*this, {}));
@@ -397,14 +404,14 @@ namespace sigma {
 			);
 
 			// load the actual pointer value
-			current_ptr = m_llvm_context->get_builder().CreateLoad(
-				current_type.get_llvm_type(m_llvm_context->get_context()), 
+			current_ptr = m_context->get_builder().CreateLoad(
+				current_type.get_llvm_type(m_context->get_context()), 
 				current_ptr
 			);
 
 			// get the next level pointer
-			current_ptr = m_llvm_context->get_builder().CreateInBoundsGEP(
-				current_type.get_element_type().get_llvm_type(m_llvm_context->get_context()),
+			current_ptr = m_context->get_builder().CreateInBoundsGEP(
+				current_type.get_element_type().get_llvm_type(m_context->get_context()),
 				current_ptr,
 				index_value_cast
 			);
@@ -416,8 +423,8 @@ namespace sigma {
 		}
 
 		// load the value at the final element address
-		llvm::Value* loaded_value = m_llvm_context->get_builder().CreateLoad(
-			current_type.get_element_type().get_llvm_type(m_llvm_context->get_context()), 
+		llvm::Value* loaded_value = m_context->get_builder().CreateLoad(
+			current_type.get_element_type().get_llvm_type(m_context->get_context()), 
 			current_ptr
 		);
 
@@ -435,18 +442,19 @@ namespace sigma {
 		array_assignment_node& node,
 		const code_generation_context& context
 	) {
-		(void)context; // suppress C4100
-		const std::vector<sigma::node_ptr>& index_nodes = node.get_array_element_index_nodes();
+		SUPPRESS_C4100(context);
+
+		const std::vector<node_ptr>& index_nodes = node.get_array_element_index_nodes();
 
 		// evaluate the array base expression
-		OUTCOME_TRY(auto array_ptr_result, node.get_array_base_node()->accept(*this, {}));
+		OUTCOME_TRY(const auto& array_ptr_result, node.get_array_base_node()->accept(*this, {}));
 
 		// traverse the array indexes
 		type current_type = array_ptr_result->get_type();
 		llvm::Value* current_ptr = array_ptr_result->get_value();
 
 		for (u64 i = 0; i < index_nodes.size(); ++i) {
-			OUTCOME_TRY(auto index_value_result, index_nodes[i]->accept(*this, {}));
+			OUTCOME_TRY(const auto& index_value_result, index_nodes[i]->accept(*this, {}));
 
 			// cast the index value to u64
 			llvm::Value* index_value_cast = cast_value(
@@ -456,15 +464,15 @@ namespace sigma {
 			);
 
 			// load the actual pointer value
-			current_ptr = m_llvm_context->get_builder().CreateLoad(
-				current_type.get_llvm_type(m_llvm_context->get_context()), 
+			current_ptr = m_context->get_builder().CreateLoad(
+				current_type.get_llvm_type(m_context->get_context()), 
 				current_ptr
 			);
 
 			// get the next level pointer
 			// current_ptr = m_llvm_handler->get_builder().CreateGEP(current_type.get_element_type().get_llvm_type(m_llvm_handler->get_context()), current_ptr, index_value_cast);
-			current_ptr = m_llvm_context->get_builder().CreateInBoundsGEP(
-				current_type.get_element_type().get_llvm_type(m_llvm_context->get_context()),
+			current_ptr = m_context->get_builder().CreateInBoundsGEP(
+				current_type.get_element_type().get_llvm_type(m_context->get_context()),
 				current_ptr, 
 				index_value_cast
 			);
@@ -498,7 +506,7 @@ namespace sigma {
 		);
 
 		// store the result of the right-hand side expression in the array
-		m_llvm_context->get_builder().CreateStore(
+		m_context->get_builder().CreateStore(
 			expression_value_result->get_value(), 
 			current_ptr
 		);
@@ -511,7 +519,8 @@ namespace sigma {
 		variable_node& node, 
 		const code_generation_context& context
 	) {
-		(void)context; // suppress C4100
+		SUPPRESS_C4100(context);
+
 		// find the variable value in our named values
 		value_ptr var_value;
 		if (!get_named_value(var_value, node.get_variable_identifier())) {
@@ -533,14 +542,14 @@ namespace sigma {
 		const code_generation_context& context
 	) {
 		// evaluate the expression to get the initial value
-		if (sigma::node_ptr expression = node.get_expression_node()) {
+		if (const node_ptr expression = node.get_expression_node()) {
 			// evaluate the assigned value
 			return expression->accept(*this, context);
 		}
 
 		// declared without an assigned value, set it to 0
 		llvm::Type* value_type = node.get_declaration_type().get_llvm_type(
-			m_llvm_context->get_context()
+			m_context->get_context()
 		);
 
 		return std::make_shared<value>(

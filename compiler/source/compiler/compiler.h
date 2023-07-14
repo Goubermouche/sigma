@@ -2,7 +2,7 @@
 
 #include "lexer/lexer.h"
 #include "parser/parser.h"
-#include "code_generator/code_generator.h"
+#include "code_generator/implementation/code_generator.h"
 #include "dependency_graph.h"
 
 namespace sigma {
@@ -55,12 +55,12 @@ namespace sigma {
 			const filepath& target_executable_directory
 		);
 	private:
-		outcome::result<std::shared_ptr<llvm_context>> generate_module(
+		outcome::result<std::shared_ptr<code_generator_context>> generate_module(
 			const filepath& source_path
 		);
 
 		outcome::result<void> compile_module(
-			const std::shared_ptr<llvm_context>& llvm_context
+			const std::shared_ptr<code_generator_context>& llvm_context
 		) const;
 
 		static outcome::result<void> verify_source_file(

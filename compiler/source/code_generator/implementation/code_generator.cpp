@@ -3,8 +3,7 @@
 
 namespace sigma {
 	code_generator::code_generator()
-		: m_llvm_context(std::make_shared<llvm_context>()),
-	m_scope(new scope(nullptr, nullptr)) {}
+		: m_context(std::make_shared<code_generator_context>()) {}
 
 	outcome::result<void> code_generator::generate() {
 		// walk the abstract syntax tree
@@ -22,9 +21,9 @@ namespace sigma {
 
 	void code_generator::initialize_global_variables() const {
 		// create the global ctors array
-		llvm::ArrayType* updated_ctor_array_type = llvm::ArrayType::get(CTOR_STRUCT_TYPE, m_global_ctors.size());
-		llvm::Constant* updated_ctors = llvm::ConstantArray::get(updated_ctor_array_type, m_global_ctors);
-		new llvm::GlobalVariable(*m_llvm_context->get_module(), updated_ctor_array_type, false, llvm::GlobalValue::AppendingLinkage, updated_ctors, "llvm.global_ctors");
+		llvm::ArrayType* updated_ctor_array_type = llvm::ArrayType::get(CTOR_STRUCT_TYPE, m_context->get_global_variable_registry().get_global_ctors_count());
+		llvm::Constant* updated_ctors = llvm::ConstantArray::get(updated_ctor_array_type, m_context->get_global_variable_registry().get_global_ctors());
+		new llvm::GlobalVariable(*m_context->get_module(), updated_ctor_array_type, false, llvm::GlobalValue::AppendingLinkage, updated_ctors, "llvm.global_ctors");
 	}
 
 	void code_generator::initialize_used_external_functions() const {}
@@ -50,18 +49,18 @@ namespace sigma {
 		m_abstract_syntax_tree = abstract_syntax_tree;
 	}
 
-	std::shared_ptr<llvm_context> code_generator::get_llvm_context() {
-		return m_llvm_context;
+	std::shared_ptr<code_generator_context> code_generator::get_llvm_context() {
+		return m_context;
 	}
 
 	outcome::result<void> code_generator::verify_main_entry_point() {
 		// check if we have a main entry point
-		if(!m_function_registry.contains_function("main")) {
+		if(!m_context->get_function_registry().contains_function("main")) {
 			return outcome::failure(error::emit<4012>()); // return on failure
 		}
 
 		// check if the main entry point's return type is an i32
-		const function_ptr func = m_function_registry.get_function("main", m_llvm_context);
+		const function_ptr func = m_context->get_function_registry().get_function("main", m_context);
 		if(func->get_return_type().get_base() != type::base::i32) {
 			return outcome::failure(error::emit<4013>(func->get_return_type())); // return on failure
 		}
@@ -78,9 +77,9 @@ namespace sigma {
 		// cast a function call
 		if (source_value->get_type() == type(type::base::function_call, 0)) {
 			// use the function return type as its type
-			const type function_return_type = m_function_registry.get_function(
+			const type function_return_type = m_context->get_function_registry().get_function(
 				source_value->get_name(),
-				m_llvm_context
+				m_context
 			)->get_return_type();
 
 			// both types are the same 
@@ -102,20 +101,20 @@ namespace sigma {
 			// perform the cast op
 			if (function_return_type.is_floating_point()) {
 				if (target_type.is_integral()) {
-					return m_llvm_context->get_builder().CreateFPToSI(function_call_result, target_llvm_type, "fptosi");
+					return m_context->get_builder().CreateFPToSI(function_call_result, target_llvm_type, "fptosi");
 				}
 
 				if (target_type.is_floating_point()) {
-					return m_llvm_context->get_builder().CreateFPCast(function_call_result, target_llvm_type, "fpcast");
+					return m_context->get_builder().CreateFPCast(function_call_result, target_llvm_type, "fpcast");
 				}
 			}
 			else if (function_return_type.is_integral()) {
 				if (target_type.is_floating_point()) {
-					return m_llvm_context->get_builder().CreateSIToFP(function_call_result, target_llvm_type, "sitofp");
+					return m_context->get_builder().CreateSIToFP(function_call_result, target_llvm_type, "sitofp");
 				}
 
 				if (target_type.is_integral()) {
-					return m_llvm_context->get_builder().CreateIntCast(function_call_result, target_llvm_type, target_type.is_signed(), "intcast");
+					return m_context->get_builder().CreateIntCast(function_call_result, target_llvm_type, target_type.is_signed(), "intcast");
 				}
 			}
 		}
@@ -134,45 +133,48 @@ namespace sigma {
 
 		// boolean to i32
 		if (source_value->get_type().get_base() == type::base::boolean && target_type.get_base() == type::base::i32) {
-			return m_llvm_context->get_builder().CreateZExt(source_llvm_value, target_llvm_type, "zext");
+			return m_context->get_builder().CreateZExt(source_llvm_value, target_llvm_type, "zext");
 		}
 
 		// floating-point to integer
 		if (source_value->get_type().is_floating_point() && target_type.is_integral()) {
-			return m_llvm_context->get_builder().CreateFPToSI(source_llvm_value, target_llvm_type);
+			return m_context->get_builder().CreateFPToSI(source_llvm_value, target_llvm_type);
 		}
 
 		// integer to floating-point
 		if (source_value->get_type().is_integral() && target_type.is_floating_point()) {
-			return m_llvm_context->get_builder().CreateSIToFP(source_llvm_value, target_llvm_type);
+			return m_context->get_builder().CreateSIToFP(source_llvm_value, target_llvm_type);
 		}
 
 		// floating-point upcast or downcast
 		if (source_value->get_type().is_floating_point() && target_type.is_floating_point()) {
-			return m_llvm_context->get_builder().CreateFPCast(source_llvm_value, target_llvm_type, "fpcast");
+			return m_context->get_builder().CreateFPCast(source_llvm_value, target_llvm_type, "fpcast");
 		}
 
 		// other cases
 		if (source_value->get_type().get_bit_width() < target_type.get_bit_width()) {
 			// perform upcast
 			if (source_value->get_type().is_unsigned()) {
-				return m_llvm_context->get_builder().CreateZExt(source_llvm_value, target_llvm_type, "zext");
+				return m_context->get_builder().CreateZExt(source_llvm_value, target_llvm_type, "zext");
 			}
 
-			return m_llvm_context->get_builder().CreateSExt(source_llvm_value, target_llvm_type, "sext");
+			return m_context->get_builder().CreateSExt(source_llvm_value, target_llvm_type, "sext");
 		}
 
 		// downcast
-		return m_llvm_context->get_builder().CreateTrunc(source_llvm_value, target_llvm_type, "trunc");
+		return m_context->get_builder().CreateTrunc(source_llvm_value, target_llvm_type, "trunc");
 	}
 
-	bool code_generator::get_named_value(value_ptr& out_value, const std::string& variable_name) {
+	bool code_generator::get_named_value(
+		value_ptr& out_value, 
+		const std::string& variable_name
+	) const {
 		// check the local scope
-		out_value = m_scope->get_named_value(variable_name);
+		out_value = m_context->get_scope()->get_variable(variable_name);
 
 		if (!out_value) {
 			// variable with the given name was not found in the local scope hierarchy, check global variables
-			out_value = m_global_named_values[variable_name];
+			out_value = m_context->get_global_variable_registry().get(variable_name);
 
 			if (!out_value) {
 				return false; // variable not found

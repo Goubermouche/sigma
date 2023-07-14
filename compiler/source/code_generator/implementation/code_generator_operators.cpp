@@ -45,7 +45,7 @@ namespace sigma {
 		operator_post_decrement_node& node,
 		const code_generation_context& context
 	) {
-		(void)context; // suppress C4100
+		SUPPRESS_C4100(context);
 		OUTCOME_TRY(auto expression_result, node.get_expression_node()->accept(
 			*this,
 			{}
@@ -63,27 +63,27 @@ namespace sigma {
 
 		llvm::Value* decrement_result;
 		if (expression_result->get_type().is_floating_point()) {
-			decrement_result = m_llvm_context->get_builder().CreateFSub(
+			decrement_result = m_context->get_builder().CreateFSub(
 				expression_result->get_value(),
 				llvm::ConstantFP::get(
 					expression_result->get_type().get_llvm_type(
-						m_llvm_context->get_context()
+						m_context->get_context()
 					), 
 					1.0
 				)
 			);
 		}
 		else {
-			decrement_result = m_llvm_context->get_builder().CreateSub(
+			decrement_result = m_context->get_builder().CreateSub(
 				expression_result->get_value(),
 				llvm::ConstantInt::get(
-					expression_result->get_type().get_llvm_type(m_llvm_context->get_context()),
+					expression_result->get_type().get_llvm_type(m_context->get_context()),
 					1
 				)
 			);
 		}
 
-		m_llvm_context->get_builder().CreateStore(
+		m_context->get_builder().CreateStore(
 			decrement_result,
 			expression_result->get_pointer()
 		);
@@ -95,7 +95,7 @@ namespace sigma {
 		operator_post_increment_node& node,
 		const code_generation_context& context
 	) {
-		(void)context; // suppress C4100
+		SUPPRESS_C4100(context);
 		OUTCOME_TRY(auto expression_result, node.get_expression_node()->accept(
 			*this,
 			{}
@@ -113,25 +113,25 @@ namespace sigma {
 
 		llvm::Value* decrement_result;
 		if (expression_result->get_type().is_floating_point()) {
-			decrement_result = m_llvm_context->get_builder().CreateFAdd(
+			decrement_result = m_context->get_builder().CreateFAdd(
 				expression_result->get_value(),
 				llvm::ConstantFP::get(
-					expression_result->get_type().get_llvm_type(m_llvm_context->get_context()),
+					expression_result->get_type().get_llvm_type(m_context->get_context()),
 					1.0
 				)
 			);
 		}
 		else {
-			decrement_result = m_llvm_context->get_builder().CreateAdd(
+			decrement_result = m_context->get_builder().CreateAdd(
 				expression_result->get_value(), 
 				llvm::ConstantInt::get(
-					expression_result->get_type().get_llvm_type(m_llvm_context->get_context()),
+					expression_result->get_type().get_llvm_type(m_context->get_context()),
 					1
 				)
 			);
 		}
 
-		m_llvm_context->get_builder().CreateStore(
+		m_context->get_builder().CreateStore(
 			decrement_result,
 			expression_result->get_pointer()
 		);
@@ -143,7 +143,7 @@ namespace sigma {
 		operator_pre_decrement_node& node, 
 		const code_generation_context& context
 	) {
-		(void)context; // suppress C4100
+		SUPPRESS_C4100(context);
 		// accept the expression
 		OUTCOME_TRY(auto expression_result, node.get_expression_node()->accept(
 			*this,
@@ -163,26 +163,26 @@ namespace sigma {
 		// increment the expression
 		llvm::Value* increment_result;
 		if (expression_result->get_type().is_floating_point()) {
-			increment_result = m_llvm_context->get_builder().CreateFSub(
+			increment_result = m_context->get_builder().CreateFSub(
 				expression_result->get_value(),
 				llvm::ConstantFP::get(
-					expression_result->get_type().get_llvm_type(m_llvm_context->get_context()), 
+					expression_result->get_type().get_llvm_type(m_context->get_context()), 
 					1.0
 				)
 			);
 		}
 		else {
-			increment_result = m_llvm_context->get_builder().CreateSub(
+			increment_result = m_context->get_builder().CreateSub(
 				expression_result->get_value(),
 				llvm::ConstantInt::get(
-					expression_result->get_type().get_llvm_type(m_llvm_context->get_context()),
+					expression_result->get_type().get_llvm_type(m_context->get_context()),
 					1
 				)
 			);
 		}
 
 		// store the decremented value back to memory
-		m_llvm_context->get_builder().CreateStore(
+		m_context->get_builder().CreateStore(
 			increment_result,
 			expression_result->get_pointer()
 		);
@@ -198,7 +198,7 @@ namespace sigma {
 		operator_pre_increment_node& node, 
 		const code_generation_context& context
 	) {
-		(void)context; // suppress C4100
+		SUPPRESS_C4100(context);
 		// accept the expression
 		OUTCOME_TRY(auto expression_result, node.get_expression_node()->accept(
 			*this,
@@ -218,26 +218,26 @@ namespace sigma {
 		// increment the expression
 		llvm::Value* increment_result;
 		if (expression_result->get_type().is_floating_point()) {
-			increment_result = m_llvm_context->get_builder().CreateFAdd(
+			increment_result = m_context->get_builder().CreateFAdd(
 				expression_result->get_value(), 
 				llvm::ConstantFP::get(
-					expression_result->get_type().get_llvm_type(m_llvm_context->get_context()),
+					expression_result->get_type().get_llvm_type(m_context->get_context()),
 					1.0
 				)
 			);
 		}
 		else {
-			increment_result = m_llvm_context->get_builder().CreateAdd(
+			increment_result = m_context->get_builder().CreateAdd(
 				expression_result->get_value(),
 				llvm::ConstantInt::get(
-					expression_result->get_type().get_llvm_type(m_llvm_context->get_context()),
+					expression_result->get_type().get_llvm_type(m_context->get_context()),
 					1
 				)
 			);
 		}
 
 		// store the incremented value back to memory
-		m_llvm_context->get_builder().CreateStore(
+		m_context->get_builder().CreateStore(
 			increment_result,
 			expression_result->get_pointer()
 		);
@@ -254,7 +254,7 @@ namespace sigma {
 		operator_bitwise_not_node& node,
 		const code_generation_context& context
 	) {
-		(void)context; // suppress C4100
+		SUPPRESS_C4100(context);
 
 		// accept the operand
 		OUTCOME_TRY(auto operand_result, node.get_expression_node()->accept(
@@ -273,7 +273,7 @@ namespace sigma {
 		}
 
 		// create a bitwise NOT operation
-		llvm::Value* not_result = m_llvm_context->get_builder().CreateNot(
+		llvm::Value* not_result = m_context->get_builder().CreateNot(
 			operand_result->get_value()
 		);
 
@@ -289,7 +289,7 @@ namespace sigma {
 		operator_not_node& node, 
 		const code_generation_context& context
 	) {
-		(void)context; // suppress C4100
+		SUPPRESS_C4100(context);
 
 		// accept the operand
 		OUTCOME_TRY(auto operand_result, node.get_expression_node()->accept(
@@ -308,10 +308,10 @@ namespace sigma {
 		}
 
 		// create a not operation (i.e., compare the operand with true and use the result)
-		llvm::Value* not_result = m_llvm_context->get_builder().CreateICmpEQ(
+		llvm::Value* not_result = m_context->get_builder().CreateICmpEQ(
 			operand_result->get_value(),
 			llvm::ConstantInt::get(
-				llvm::Type::getInt1Ty(m_llvm_context->get_context()),
+				llvm::Type::getInt1Ty(m_context->get_context()),
 				0
 			)
 		);
@@ -329,7 +329,7 @@ namespace sigma {
 		operator_addition_assignment_node& node,
 		const code_generation_context& context
 	) {
-		(void)context; // suppress C4100
+		SUPPRESS_C4100(context);
 		OUTCOME_TRY(auto operation_result, create_add_operation(
 			node.get_left_expression_node(),
 			node.get_right_expression_node()
@@ -349,7 +349,7 @@ namespace sigma {
 		);
 
 		// store the result of the addition operation back into the variable
-		m_llvm_context->get_builder().CreateStore(
+		m_context->get_builder().CreateStore(
 			assignment_value->get_value(), 
 			left_operand_result->get_pointer()
 		);
@@ -361,7 +361,7 @@ namespace sigma {
 		operator_addition_node& node,
 		const code_generation_context& context
 	) {
-		(void)context; // suppress C4100
+		SUPPRESS_C4100(context);
 		OUTCOME_TRY(auto operation_result, create_add_operation(
 			node.get_left_expression_node(),
 			node.get_right_expression_node()
@@ -384,7 +384,7 @@ namespace sigma {
 		operator_subtraction_assignment_node& node,
 		const code_generation_context& context
 	) {
-		(void)context; // suppress C4100
+		SUPPRESS_C4100(context);
 		OUTCOME_TRY(auto operation_result, create_sub_operation(
 			node.get_left_expression_node(),
 			node.get_right_expression_node()
@@ -404,7 +404,7 @@ namespace sigma {
 		);
 
 		// store the result of the subtraction operation back into the variable
-		m_llvm_context->get_builder().CreateStore(
+		m_context->get_builder().CreateStore(
 			assignment_value->get_value(),
 			left_operand_result->get_pointer()
 		);
@@ -416,7 +416,7 @@ namespace sigma {
 		operator_subtraction_node& node,
 		const code_generation_context& context
 	) {
-		(void)context; // suppress C4100
+		SUPPRESS_C4100(context);
 		OUTCOME_TRY(auto operation_result, create_sub_operation(
 			node.get_left_expression_node(),
 			node.get_right_expression_node()
@@ -439,7 +439,7 @@ namespace sigma {
 		operator_multiplication_assignment_node& node, 
 		const code_generation_context& context
 	) {
-		(void)context; // suppress C4100
+		SUPPRESS_C4100(context);
 		OUTCOME_TRY(auto operation_result, create_mul_operation(
 			node.get_left_expression_node(),
 			node.get_right_expression_node()
@@ -459,7 +459,7 @@ namespace sigma {
 		);
 
 		// store the result of the multiplication operation back into the variable
-		m_llvm_context->get_builder().CreateStore(
+		m_context->get_builder().CreateStore(
 			assignment_value->get_value(),
 			left_operand_result->get_pointer()
 		);
@@ -471,7 +471,7 @@ namespace sigma {
 		operator_multiplication_node& node,
 		const code_generation_context& context
 	) {
-		(void)context; // suppress C4100
+		SUPPRESS_C4100(context);
 		OUTCOME_TRY(auto operation_result, create_mul_operation(
 			node.get_left_expression_node(),
 			node.get_right_expression_node()
@@ -494,7 +494,7 @@ namespace sigma {
 		operator_division_assignment_node& node, 
 		const code_generation_context& context
 	) {
-		(void)context; // suppress C4100
+		SUPPRESS_C4100(context);
 		OUTCOME_TRY(auto operation_result, create_div_operation(
 			node.get_left_expression_node(),
 			node.get_right_expression_node()
@@ -514,7 +514,7 @@ namespace sigma {
 		);
 
 		// store the result of the division operation back into the variable
-		m_llvm_context->get_builder().CreateStore(
+		m_context->get_builder().CreateStore(
 			assignment_value->get_value(),
 			left_operand_result->get_pointer()
 		);
@@ -526,7 +526,7 @@ namespace sigma {
 		operator_division_node& node, 
 		const code_generation_context& context
 	) {
-		(void)context; // suppress C4100
+		SUPPRESS_C4100(context);
 		OUTCOME_TRY(auto operation_result, create_div_operation(
 			node.get_left_expression_node(),
 			node.get_right_expression_node()
@@ -549,7 +549,7 @@ namespace sigma {
 		operator_modulo_assignment_node& node,
 		const code_generation_context& context
 	) {
-		(void)context; // suppress C4100
+		SUPPRESS_C4100(context);
 		OUTCOME_TRY(auto operation_result, create_mod_operation(
 			node.get_left_expression_node(),
 			node.get_right_expression_node()
@@ -569,7 +569,7 @@ namespace sigma {
 		);
 
 		// store the result of the modulo operation back into the variable
-		m_llvm_context->get_builder().CreateStore(
+		m_context->get_builder().CreateStore(
 			assignment_value->get_value(),
 			left_operand_result->get_pointer()
 		);
@@ -581,7 +581,7 @@ namespace sigma {
 		operator_modulo_node& node,
 		const code_generation_context& context
 	) {
-		(void)context; // suppress C4100
+		SUPPRESS_C4100(context);
 		OUTCOME_TRY(auto operation_result, create_mod_operation(
 			node.get_left_expression_node(),
 			node.get_right_expression_node()
@@ -604,7 +604,7 @@ namespace sigma {
 		operator_bitwise_and_node& node, 
 		const code_generation_context& context
 	) {
-		(void)context; // suppress C4100
+		SUPPRESS_C4100(context);
 
 		// accept the left operand
 		OUTCOME_TRY(auto left_operand_result, node.get_left_expression_node()->accept(
@@ -631,7 +631,7 @@ namespace sigma {
 		}
 
 		// create a bitwise AND operation
-		llvm::Value* and_result = m_llvm_context->get_builder().CreateAnd(
+		llvm::Value* and_result = m_context->get_builder().CreateAnd(
 			left_operand_result->get_value(),
 			right_operand_result->get_value()
 		);
@@ -647,7 +647,7 @@ namespace sigma {
 		operator_bitwise_or_node& node,
 		const code_generation_context& context
 	) {
-		(void)context; // suppress C4100
+		SUPPRESS_C4100(context);
 
 		// accept the left operand
 		OUTCOME_TRY(auto left_operand_result, node.get_left_expression_node()->accept(
@@ -674,7 +674,7 @@ namespace sigma {
 		}
 
 		// create a bitwise OR operation
-		llvm::Value* and_result = m_llvm_context->get_builder().CreateOr(
+		llvm::Value* and_result = m_context->get_builder().CreateOr(
 			left_operand_result->get_value(),
 			right_operand_result->get_value()
 		);
@@ -690,7 +690,7 @@ namespace sigma {
 		operator_bitwise_left_shift_node& node, 
 		const code_generation_context& context
 	) {
-		(void)context; // suppress C4100
+		SUPPRESS_C4100(context);
 
 		// accept the left operand
 		OUTCOME_TRY(auto left_operand_result, node.get_left_expression_node()->accept(
@@ -717,7 +717,7 @@ namespace sigma {
 		}
 
 		// create a bitwise left shift operation
-		llvm::Value* left_shift_result = m_llvm_context->get_builder().CreateShl(
+		llvm::Value* left_shift_result = m_context->get_builder().CreateShl(
 			left_operand_result->get_value(),
 			right_operand_result->get_value()
 		);
@@ -733,7 +733,7 @@ namespace sigma {
 		operator_bitwise_right_shift_node& node,
 		const code_generation_context& context
 	) {
-		(void)context; // suppress C4100
+		SUPPRESS_C4100(context);
 
 		// accept the left operand
 		OUTCOME_TRY(auto left_operand_result, node.get_left_expression_node()->accept(
@@ -760,7 +760,7 @@ namespace sigma {
 		}
 
 		// create a bitwise right shift operation
-		llvm::Value* right_shift_result = m_llvm_context->get_builder().CreateLShr(
+		llvm::Value* right_shift_result = m_context->get_builder().CreateLShr(
 			left_operand_result->get_value(),
 			right_operand_result->get_value()
 		);
@@ -776,7 +776,7 @@ namespace sigma {
 		operator_bitwise_xor_node& node,
 		const code_generation_context& context
 	) {
-		(void)context; // suppress C4100
+		SUPPRESS_C4100(context);
 
 		// accept the left operand
 		OUTCOME_TRY(auto left_operand_result, node.get_left_expression_node()->accept(
@@ -803,7 +803,7 @@ namespace sigma {
 		}
 
 		// create a bitwise XOR operation
-		llvm::Value* xor_result = m_llvm_context->get_builder().CreateXor(
+		llvm::Value* xor_result = m_context->get_builder().CreateXor(
 			left_operand_result->get_value(),
 			right_operand_result->get_value()
 		);
@@ -820,7 +820,7 @@ namespace sigma {
 		operator_conjunction_node& node,
 		const code_generation_context& context
 	) {
-		(void)context; // suppress C4100
+		SUPPRESS_C4100(context);
 
 		// accept the left operand
 		OUTCOME_TRY(auto left_operand_result, node.get_left_expression_node()->accept(
@@ -847,7 +847,7 @@ namespace sigma {
 		}
 
 		// create a logical AND operation
-		llvm::Value* and_result = m_llvm_context->get_builder().CreateAnd(
+		llvm::Value* and_result = m_context->get_builder().CreateAnd(
 			left_operand_result->get_value(),
 			right_operand_result->get_value(),
 			"and"
@@ -864,7 +864,7 @@ namespace sigma {
 		operator_disjunction_node& node, 
 		const code_generation_context& context
 	) {
-		(void)context; // suppress C4100
+		SUPPRESS_C4100(context);
 
 		// accept the left operand
 		OUTCOME_TRY(auto left_operand_result, node.get_left_expression_node()->accept(
@@ -891,7 +891,7 @@ namespace sigma {
 		}
 
 		// create a logical OR operation
-		llvm::Value* or_result = m_llvm_context->get_builder().CreateOr(
+		llvm::Value* or_result = m_context->get_builder().CreateOr(
 			left_operand_result->get_value(),
 			right_operand_result->get_value()
 		);
@@ -907,7 +907,7 @@ namespace sigma {
 		operator_greater_than_node& node, 
 		const code_generation_context& context
 	) {
-		(void)context; // suppress C4100
+		SUPPRESS_C4100(context);
 
 		// accept the left operand
 		OUTCOME_TRY(auto left_operand_result, node.get_left_expression_node()->accept(
@@ -942,20 +942,20 @@ namespace sigma {
 		// create a greater than operation based on the highest_precision type
 		llvm::Value* greater_than_result;
 		if (highest_precision.is_floating_point()) {
-			greater_than_result = m_llvm_context->get_builder().CreateFCmpOGT(
+			greater_than_result = m_context->get_builder().CreateFCmpOGT(
 				left_value_upcasted,
 				right_value_upcasted
 			);
 		}
 		else {
 			if (highest_precision.is_unsigned()) {
-				greater_than_result = m_llvm_context->get_builder().CreateICmpUGT(
+				greater_than_result = m_context->get_builder().CreateICmpUGT(
 					left_value_upcasted, 
 					right_value_upcasted
 				);
 			}
 			else {
-				greater_than_result = m_llvm_context->get_builder().CreateICmpSGT(
+				greater_than_result = m_context->get_builder().CreateICmpSGT(
 					left_value_upcasted,
 					right_value_upcasted
 				);
@@ -973,7 +973,7 @@ namespace sigma {
 		operator_greater_than_equal_to_node& node, 
 		const code_generation_context& context
 	) {
-		(void)context; // suppress C4100
+		SUPPRESS_C4100(context);
 
 		// accept the left operand
 		OUTCOME_TRY(auto left_operand_result, node.get_left_expression_node()->accept(
@@ -1008,20 +1008,20 @@ namespace sigma {
 		// create a greater than or equal to operation based on the highest_precision type
 		llvm::Value* greater_than_equal_result;
 		if (highest_precision.is_floating_point()) {
-			greater_than_equal_result = m_llvm_context->get_builder().CreateFCmpOGE(
+			greater_than_equal_result = m_context->get_builder().CreateFCmpOGE(
 				left_value_upcasted, 
 				right_value_upcasted
 			);
 		}
 		else {
 			if (highest_precision.is_unsigned()) {
-				greater_than_equal_result = m_llvm_context->get_builder().CreateICmpUGE(
+				greater_than_equal_result = m_context->get_builder().CreateICmpUGE(
 					left_value_upcasted, 
 					right_value_upcasted
 				);
 			}
 			else {
-				greater_than_equal_result = m_llvm_context->get_builder().CreateICmpSGE(
+				greater_than_equal_result = m_context->get_builder().CreateICmpSGE(
 					left_value_upcasted, 
 					right_value_upcasted
 				);
@@ -1039,7 +1039,7 @@ namespace sigma {
 		operator_less_than_node& node, 
 		const code_generation_context& context
 	) {
-		(void)context; // suppress C4100
+		SUPPRESS_C4100(context);
 
 		// accept the left operand
 		OUTCOME_TRY(auto left_operand_result, node.get_left_expression_node()->accept(
@@ -1074,20 +1074,20 @@ namespace sigma {
 		// create a less than operation based on the highest_precision type
 		llvm::Value* less_than_result;
 		if (highest_precision.is_floating_point()) {
-			less_than_result = m_llvm_context->get_builder().CreateFCmpOLT(
+			less_than_result = m_context->get_builder().CreateFCmpOLT(
 				left_value_upcasted, 
 				right_value_upcasted
 			);
 		}
 		else {
 			if (highest_precision.is_unsigned()) {
-				less_than_result = m_llvm_context->get_builder().CreateICmpULT(
+				less_than_result = m_context->get_builder().CreateICmpULT(
 					left_value_upcasted,
 					right_value_upcasted
 				);
 			}
 			else {
-				less_than_result = m_llvm_context->get_builder().CreateICmpSLT(
+				less_than_result = m_context->get_builder().CreateICmpSLT(
 					left_value_upcasted,
 					right_value_upcasted
 				);
@@ -1105,7 +1105,7 @@ namespace sigma {
 		operator_less_than_equal_to_node& node,
 		const code_generation_context& context
 	) {
-		(void)context; // suppress C4100
+		SUPPRESS_C4100(context);
 
 		// accept the left operand
 		OUTCOME_TRY(auto left_operand_result, node.get_left_expression_node()->accept(
@@ -1140,20 +1140,20 @@ namespace sigma {
 		// create a less than or equal to operation based on the highest_precision type
 		llvm::Value* less_than_equal_result;
 		if (highest_precision.is_floating_point()) {
-			less_than_equal_result = m_llvm_context->get_builder().CreateFCmpOLE(
+			less_than_equal_result = m_context->get_builder().CreateFCmpOLE(
 				left_value_upcasted,
 				right_value_upcasted
 			);
 		}
 		else {
 			if (highest_precision.is_unsigned()) {
-				less_than_equal_result = m_llvm_context->get_builder().CreateICmpULE(
+				less_than_equal_result = m_context->get_builder().CreateICmpULE(
 					left_value_upcasted,
 					right_value_upcasted
 				);
 			}
 			else {
-				less_than_equal_result = m_llvm_context->get_builder().CreateICmpSLE(
+				less_than_equal_result = m_context->get_builder().CreateICmpSLE(
 					left_value_upcasted, 
 					right_value_upcasted
 				);
@@ -1171,7 +1171,7 @@ namespace sigma {
 		operator_equals_node& node, 
 		const code_generation_context& context
 	) {
-		(void)context; // suppress C4100
+		SUPPRESS_C4100(context);
 
 		// accept the left operand
 		OUTCOME_TRY(auto left_operand_result, node.get_left_expression_node()->accept(
@@ -1206,13 +1206,13 @@ namespace sigma {
 		// create an equals operation based on the highest_precision type
 		llvm::Value* equals_result;
 		if (highest_precision.is_floating_point()) {
-			equals_result = m_llvm_context->get_builder().CreateFCmpOEQ(
+			equals_result = m_context->get_builder().CreateFCmpOEQ(
 				left_value_upcasted, 
 				right_value_upcasted
 			);
 		}
 		else {
-			equals_result = m_llvm_context->get_builder().CreateICmpEQ(
+			equals_result = m_context->get_builder().CreateICmpEQ(
 				left_value_upcasted, 
 				right_value_upcasted
 			);
@@ -1229,7 +1229,7 @@ namespace sigma {
 		operator_not_equals_node& node, 
 		const code_generation_context& context
 	) {
-		(void)context; // suppress C4100
+		SUPPRESS_C4100(context);
 
 		// accept the left operand
 		OUTCOME_TRY(auto left_operand_result, node.get_left_expression_node()->accept(
@@ -1264,13 +1264,13 @@ namespace sigma {
 		// create a not equals operation based on the highest_precision type
 		llvm::Value* not_equals_result;
 		if (highest_precision.is_floating_point()) {
-			not_equals_result = m_llvm_context->get_builder().CreateFCmpONE(
+			not_equals_result = m_context->get_builder().CreateFCmpONE(
 				left_value_upcasted, 
 				right_value_upcasted
 			);
 		}
 		else {
-			not_equals_result = m_llvm_context->get_builder().CreateICmpNE(
+			not_equals_result = m_context->get_builder().CreateICmpNE(
 				left_value_upcasted,
 				right_value_upcasted
 			);
@@ -1320,7 +1320,7 @@ namespace sigma {
 		// both types are floating point
 		if (highest_precision.is_floating_point()) {
 			return std::make_tuple(
-				m_llvm_context->get_builder().CreateFAdd(
+				m_context->get_builder().CreateFAdd(
 					left_value_upcasted,
 					right_value_upcasted,
 					"fadd"
@@ -1333,7 +1333,7 @@ namespace sigma {
 		// both types are unsigned
 		if (highest_precision.is_unsigned()) {
 			return std::make_tuple(
-				m_llvm_context->get_builder().CreateAdd(
+				m_context->get_builder().CreateAdd(
 					left_value_upcasted,
 					right_value_upcasted,
 					"uadd",
@@ -1346,7 +1346,7 @@ namespace sigma {
 
 		// fallback to regular op
 		return std::make_tuple(
-			m_llvm_context->get_builder().CreateAdd(
+			m_context->get_builder().CreateAdd(
 				left_value_upcasted,
 				right_value_upcasted,
 				"add"
@@ -1393,7 +1393,7 @@ namespace sigma {
 		// both types are floating point
 		if (highest_precision.is_floating_point()) {
 			return std::make_tuple(
-				m_llvm_context->get_builder().CreateFSub(
+				m_context->get_builder().CreateFSub(
 					left_value_upcasted,
 					right_value_upcasted,
 					"fsub"
@@ -1406,7 +1406,7 @@ namespace sigma {
 		// both types are unsigned
 		if (highest_precision.is_unsigned()) {
 			return std::make_tuple(
-				m_llvm_context->get_builder().CreateSub(
+				m_context->get_builder().CreateSub(
 					left_value_upcasted,
 					right_value_upcasted,
 					"usub",
@@ -1419,7 +1419,7 @@ namespace sigma {
 
 		// fallback to regular op
 		return std::make_tuple(
-			m_llvm_context->get_builder().CreateSub(
+			m_context->get_builder().CreateSub(
 				left_value_upcasted,
 				right_value_upcasted,
 				"sub"
@@ -1466,7 +1466,7 @@ namespace sigma {
 		// both types are floating point
 		if (highest_precision.is_floating_point()) {
 			return std::make_tuple(
-				m_llvm_context->get_builder().CreateFMul(
+				m_context->get_builder().CreateFMul(
 					left_value_upcasted,
 					right_value_upcasted,
 					"fmul"
@@ -1479,7 +1479,7 @@ namespace sigma {
 		// both types are unsigned
 		if (highest_precision.is_unsigned()) {
 			return std::make_tuple(
-				m_llvm_context->get_builder().CreateMul(
+				m_context->get_builder().CreateMul(
 					left_value_upcasted,
 					right_value_upcasted,
 					"umul",
@@ -1492,7 +1492,7 @@ namespace sigma {
 
 		// fallback to regular op
 		return std::make_tuple(
-			m_llvm_context->get_builder().CreateMul(
+			m_context->get_builder().CreateMul(
 				left_value_upcasted,
 				right_value_upcasted,
 				"mul"
@@ -1539,7 +1539,7 @@ namespace sigma {
 		// both types are floating point
 		if (highest_precision.is_floating_point()) {
 			return std::make_tuple(
-				m_llvm_context->get_builder().CreateFDiv(
+				m_context->get_builder().CreateFDiv(
 					left_value_upcasted,
 					right_value_upcasted,
 					"fdiv"
@@ -1552,7 +1552,7 @@ namespace sigma {
 		// both types are unsigned
 		if (highest_precision.is_unsigned()) {
 			return std::make_tuple(
-				m_llvm_context->get_builder().CreateUDiv(
+				m_context->get_builder().CreateUDiv(
 					left_value_upcasted,
 					right_value_upcasted,
 					"udiv",
@@ -1565,7 +1565,7 @@ namespace sigma {
 
 		// fallback to regular op
 		return std::make_tuple(
-			m_llvm_context->get_builder().CreateSDiv(
+			m_context->get_builder().CreateSDiv(
 				left_value_upcasted,
 				right_value_upcasted,
 				"sdiv"
@@ -1612,7 +1612,7 @@ namespace sigma {
 		// both types are floating point
 		if (highest_precision.is_floating_point()) {
 			return std::make_tuple(
-				m_llvm_context->get_builder().CreateFRem(
+				m_context->get_builder().CreateFRem(
 					left_value_upcasted,
 					right_value_upcasted,
 					"fmod"
@@ -1625,7 +1625,7 @@ namespace sigma {
 		// both types are unsigned
 		if (highest_precision.is_unsigned()) {
 			return std::make_tuple(
-				m_llvm_context->get_builder().CreateURem(
+				m_context->get_builder().CreateURem(
 					left_value_upcasted,
 					right_value_upcasted,
 					"umod"
@@ -1637,7 +1637,7 @@ namespace sigma {
 
 		// fallback to regular op
 		return std::make_tuple(
-			m_llvm_context->get_builder().CreateSRem(
+			m_context->get_builder().CreateSRem(
 				left_value_upcasted,
 				right_value_upcasted,
 				"smod"

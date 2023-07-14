@@ -1,9 +1,10 @@
 #include "function_registry.h"
+#include "code_generator/code_generator_context.h"
 
 namespace sigma {
 	function_ptr function_registry::get_function(
 		const std::string& identifier,
-		const std::shared_ptr<llvm_context>& context
+		const std::shared_ptr<code_generator_context>& context
 	) {
 		// locate a defined function
 		const auto it = m_functions.find(identifier);

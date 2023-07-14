@@ -246,7 +246,7 @@
     <ClInclude Include="source\code_generator\abstract_syntax_tree\variables\variable_node.h">
       <Filter>source\code_generator\abstract_syntax_tree\variables</Filter>
     </ClInclude>
-    <ClInclude Include="source\code_generator\code_generator.h">
+    <ClInclude Include="source\code_generator\implementation\code_generator.h">
       <Filter>source\code_generator\basic_code_generator</Filter>
     </ClInclude>
     <ClInclude Include="source\code_generator\code_generator_template.h">
@@ -276,7 +276,7 @@
     <ClInclude Include="source\llvm_wrappers\functions\function_registry.h">
       <Filter>source\llvm_wrappers\functions</Filter>
     </ClInclude>
-    <ClInclude Include="source\llvm_wrappers\llvm_context.h">
+    <ClInclude Include="source\code_generator\code_generator_context.h">
       <Filter>source\llvm_wrappers</Filter>
     </ClInclude>
     <ClInclude Include="source\llvm_wrappers\scope.h">
@@ -330,6 +330,9 @@
     <ClInclude Include="source\utility\types.h">
       <Filter>source\utility</Filter>
     </ClInclude>
+    <ClInclude Include="source\utility\string.h" />
+    <ClInclude Include="source\llvm_wrappers\variables\global_variable_registry.h" />
+    <ClInclude Include="source\llvm_wrappers\variables\variable_registry.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp" />
@@ -492,22 +495,22 @@
     <ClCompile Include="source\code_generator\abstract_syntax_tree\variables\variable_node.cpp">
       <Filter>source\code_generator\abstract_syntax_tree\variables</Filter>
     </ClCompile>
-    <ClCompile Include="source\code_generator\code_generator.cpp">
+    <ClCompile Include="source\code_generator\implementation\code_generator.cpp">
       <Filter>source\code_generator\basic_code_generator</Filter>
     </ClCompile>
-    <ClCompile Include="source\code_generator\basic_code_generator_flow_control.cpp">
+    <ClCompile Include="source\code_generator\implementation\code_generator_flow_control.cpp">
       <Filter>source\code_generator\basic_code_generator</Filter>
     </ClCompile>
-    <ClCompile Include="source\code_generator\basic_code_generator_functions.cpp">
+    <ClCompile Include="source\code_generator\implementation\code_generator_functions.cpp">
       <Filter>source\code_generator\basic_code_generator</Filter>
     </ClCompile>
-    <ClCompile Include="source\code_generator\basic_code_generator_operators.cpp">
+    <ClCompile Include="source\code_generator\implementation\code_generator_operators.cpp">
       <Filter>source\code_generator\basic_code_generator</Filter>
     </ClCompile>
-    <ClCompile Include="source\code_generator\basic_code_generator_types.cpp">
+    <ClCompile Include="source\code_generator\implementation\code_generator_types.cpp">
       <Filter>source\code_generator\basic_code_generator</Filter>
     </ClCompile>
-    <ClCompile Include="source\code_generator\basic_code_generator_variables.cpp">
+    <ClCompile Include="source\code_generator\implementation\code_generator_variables.cpp">
       <Filter>source\code_generator\basic_code_generator</Filter>
     </ClCompile>
     <ClCompile Include="source\code_generator\code_generator_template.cpp">
@@ -534,7 +537,7 @@
     <ClCompile Include="source\llvm_wrappers\functions\function_registry.cpp">
       <Filter>source\llvm_wrappers\functions</Filter>
     </ClCompile>
-    <ClCompile Include="source\llvm_wrappers\llvm_context.cpp">
+    <ClCompile Include="source\code_generator\code_generator_context.cpp">
       <Filter>source\llvm_wrappers</Filter>
     </ClCompile>
     <ClCompile Include="source\llvm_wrappers\scope.cpp">
@@ -573,5 +576,8 @@
     <ClCompile Include="source\utility\timer.cpp">
       <Filter>source\utility</Filter>
     </ClCompile>
+    <ClCompile Include="source\utility\string.cpp" />
+    <ClCompile Include="source\llvm_wrappers\variables\global_variable_registry.cpp" />
+    <ClCompile Include="source\llvm_wrappers\variables\variable_registry.cpp" />
   </ItemGroup>
 </Project>

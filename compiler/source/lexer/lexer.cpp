@@ -21,11 +21,30 @@ namespace sigma {
 
 	const token_data& token_list::get_token() {
 		m_peek_token_index++;
-		return  m_tokens[m_main_token_index++];
+		m_current_token = m_tokens[m_main_token_index++];
+		return m_current_token;
 	}
 
 	const token_data& token_list::peek_token() {
 		return m_tokens[m_peek_token_index++];
+	}
+
+	const token_data& token_list::get_current_token() const {
+		return m_current_token;
+	}
+
+	outcome::result<void> token_list::expect_token(token token) {
+		get_token();
+
+		if (m_current_token.get_token() == token) {
+			return outcome::success();
+		}
+
+		return outcome::failure(error::emit<3000>(
+			m_current_token.get_token_location(),
+			token,
+			m_current_token.get_token()
+		));
 	}
 
 	void token_list::synchronize_indices() {

@@ -1,7 +1,4 @@
 #include "compiler.h"
-
-#include "code_generator/code_generator.h"
-
 #include "utility/timer.h"
 
 // llvm
@@ -33,45 +30,45 @@ namespace sigma {
 		m_root_source_path = root_source_path;
 		m_target_executable_directory = target_executable_directory;
 
-		//dependency_graph graph(m_root_source_path);
-		//detail::thread_pool pool(m_settings.thread_limit);
+		// dependency_graph graph(m_root_source_path);
+		// detail::thread_pool pool(m_settings.thread_limit);
 
-		//OUTCOME_TRY(graph.construct());
-		//OUTCOME_TRY(graph.verify());
-		//graph.print();
-		//OUTCOME_TRY(graph.traverse_compile(pool));
+		// OUTCOME_TRY(graph.construct());
+		// OUTCOME_TRY(graph.verify());
+		// graph.print();
+		// OUTCOME_TRY(graph.traverse_compile(pool));
 
-		 timer m_compilation_timer;
-		 m_compilation_timer.start();
-		 
-		 // verify the root source file
-		 OUTCOME_TRY(verify_source_file(m_root_source_path));
-		 
-		 console::out
-		 	<< "compiling file '"
-		 	<< m_root_source_path
-		 	<< "'\n";
-		 
-		 // generate the module
-		 OUTCOME_TRY(const auto& module_generation_result, generate_module(m_root_source_path));
-		 
-		 // verify the executable directory
-		 OUTCOME_TRY(verify_folder(m_target_executable_directory));
-		 
-		 // compile the module into an executable
-		 OUTCOME_TRY(compile_module(module_generation_result));
-		 
-		 console::out
-		 	<< color::green
-		 	<< "compilation finished ("
-		 	<< m_compilation_timer.elapsed()
-		 	<< "ms)\n"
-		 	<< color::white;
-		 
+		timer m_compilation_timer;
+		m_compilation_timer.start();
+		
+		// verify the root source file
+		OUTCOME_TRY(verify_source_file(m_root_source_path));
+		
+		console::out
+			<< "compiling file '"
+			<< m_root_source_path
+			<< "'\n";
+		
+		// generate the module
+		OUTCOME_TRY(const auto& module_generation_result, generate_module(m_root_source_path));
+		
+		// verify the executable directory
+		OUTCOME_TRY(verify_folder(m_target_executable_directory));
+		
+		// compile the module into an executable
+		OUTCOME_TRY(compile_module(module_generation_result));
+		
+		console::out
+			<< color::green
+			<< "compilation finished ("
+			<< m_compilation_timer.elapsed()
+			<< "ms)\n"
+			<< color::white;
+		
 		return outcome::success();
 	}
 
-	outcome::result<std::shared_ptr<llvm_context>> compiler::generate_module(
+	outcome::result<std::shared_ptr<code_generator_context>> compiler::generate_module(
 		const filepath& source_path
 	) {
 		// tokenize the source file
@@ -122,7 +119,7 @@ namespace sigma {
 	}
 
 	outcome::result<void> compiler::compile_module(
-		const std::shared_ptr<llvm_context>& llvm_context
+		const std::shared_ptr<code_generator_context>& llvm_context
 	) const {
 		const std::string target_triple = llvm::sys::getDefaultTargetTriple();
 

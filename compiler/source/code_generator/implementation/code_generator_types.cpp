@@ -28,7 +28,7 @@ namespace sigma {
 				"__i8", 
 				type(type::base::i8, 0), 
 				llvm::ConstantInt::get(
-					m_llvm_context->get_context(),
+					m_context->get_context(),
 					llvm::APInt(8, std::stoll(node.get_value()), true)
 				)
 			);
@@ -37,7 +37,7 @@ namespace sigma {
 				"__i16", 
 				type(type::base::i16, 0),
 				llvm::ConstantInt::get(
-					m_llvm_context->get_context(), 
+					m_context->get_context(), 
 					llvm::APInt(16, std::stoll(node.get_value()), true)
 				)
 			);
@@ -46,7 +46,7 @@ namespace sigma {
 				"__i32", 
 				type(type::base::i32, 0), 
 				llvm::ConstantInt::get(
-					m_llvm_context->get_context(), 
+					m_context->get_context(), 
 					llvm::APInt(32, std::stoll(node.get_value()), true)
 				)
 			);
@@ -55,7 +55,7 @@ namespace sigma {
 				"__i64", 
 				type(type::base::i64, 0), 
 				llvm::ConstantInt::get(
-					m_llvm_context->get_context(),
+					m_context->get_context(),
 					llvm::APInt(64, std::stoll(node.get_value()), true)
 				)
 			);
@@ -65,7 +65,7 @@ namespace sigma {
 				"__u8",
 				type(type::base::u8, 0),
 				llvm::ConstantInt::get(
-					m_llvm_context->get_context(), 
+					m_context->get_context(), 
 					llvm::APInt(8, std::stoull(node.get_value()), false)
 				)
 			);
@@ -74,7 +74,7 @@ namespace sigma {
 				"__u16", 
 				type(type::base::u16, 0), 
 				llvm::ConstantInt::get(
-					m_llvm_context->get_context(),
+					m_context->get_context(),
 					llvm::APInt(16, std::stoull(node.get_value()), false)
 				)
 			);
@@ -83,7 +83,7 @@ namespace sigma {
 				"__u32", 
 				type(type::base::u32, 0),
 				llvm::ConstantInt::get(
-					m_llvm_context->get_context(),
+					m_context->get_context(),
 					llvm::APInt(32, std::stoull(node.get_value()), false)
 				)
 			);
@@ -92,7 +92,7 @@ namespace sigma {
 				"__u64",
 				type(type::base::u64, 0),
 				llvm::ConstantInt::get(
-					m_llvm_context->get_context(),
+					m_context->get_context(),
 					llvm::APInt(64, std::stoull(node.get_value()), false)
 				)
 			);
@@ -102,7 +102,7 @@ namespace sigma {
 				"__f32",
 				type(type::base::f32, 0),
 				llvm::ConstantFP::get(
-					m_llvm_context->get_context(),
+					m_context->get_context(),
 					llvm::APFloat(std::stof(node.get_value()))
 				)
 			);
@@ -111,7 +111,7 @@ namespace sigma {
 				"__f64",
 				type(type::base::f64, 0),
 				llvm::ConstantFP::get(
-					m_llvm_context->get_context(), 
+					m_context->get_context(), 
 					llvm::APFloat(std::stod(node.get_value()))
 				)
 			);
@@ -140,24 +140,25 @@ namespace sigma {
 		string_node& node,
 		const code_generation_context& context
 	) {
-		(void)context; // suppress C4100
+		SUPPRESS_C4100(context);
+
 		// note: + 1 is for the null termination character
 		const u64 string_length = node.get_value().size() + 1;
 
 		// allocate memory for the string literal as a global constant
 		llvm::ArrayType* array_type = llvm::ArrayType::get(
-			type(type::base::character, 0).get_llvm_type(m_llvm_context->get_context()), 
+			type(type::base::character, 0).get_llvm_type(m_context->get_context()), 
 			string_length
 		);
 
 		llvm::Constant* string_constant = llvm::ConstantDataArray::getString(
-			m_llvm_context->get_context(), 
+			m_context->get_context(), 
 			node.get_value()
 		);
 
 		// create a global variable to store the string constant
 		auto* global_string_literal = new llvm::GlobalVariable(
-			*m_llvm_context->get_module(),
+			*m_context->get_module(),
 			array_type,
 			true,
 			llvm::GlobalValue::PrivateLinkage,
@@ -166,9 +167,9 @@ namespace sigma {
 		);
 
 		// bit cast the pointer to the global variable into a char* (i8*)
-		llvm::Value* string_literal_ptr = m_llvm_context->get_builder().CreateBitCast(
+		llvm::Value* string_literal_ptr = m_context->get_builder().CreateBitCast(
 			global_string_literal,
-			type(type::base::character, 1).get_llvm_type(m_llvm_context->get_context())
+			type(type::base::character, 1).get_llvm_type(m_context->get_context())
 		);
 
 		return std::make_shared<value>(
@@ -182,7 +183,8 @@ namespace sigma {
 		char_node& node,
 		const code_generation_context& context
 	) {
-		(void)context; // suppress C4100
+		SUPPRESS_C4100(context);
+
 		return create_character(node.get_value());
 	}
 
@@ -190,7 +192,8 @@ namespace sigma {
 		bool_node& node, 
 		const code_generation_context& context
 	) {
-		(void)context; // suppress C4100
+		SUPPRESS_C4100(context);
+
 		return create_boolean(node.get_value());
 	}
 
@@ -199,7 +202,7 @@ namespace sigma {
 			"__bool",
 			type(type::base::boolean, 0),
 			llvm::ConstantInt::get(
-				m_llvm_context->get_context(),
+				m_context->get_context(),
 				llvm::APInt(1, val, false)
 			)
 		);
@@ -210,7 +213,7 @@ namespace sigma {
 			"__char",
 			type(type::base::character, 0),
 			llvm::ConstantInt::get(
-				m_llvm_context->get_context(),
+				m_context->get_context(),
 				llvm::APInt(8, static_cast<u64>(val), false)
 			)
 		);

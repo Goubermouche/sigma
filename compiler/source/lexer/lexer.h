@@ -55,12 +55,17 @@ namespace sigma {
 		 */
 		const token_data& peek_token();
 
+		const token_data& get_current_token() const;
+
+		outcome::result<void> expect_token(token token);
+
 		/**
 		 * \brief Synchronizes the peek and main indices.
 		 */
 		void synchronize_indices();
 	private:
 		std::vector<token_data> m_tokens;
+		token_data m_current_token;
 
 		u64 m_main_token_index = 0;
 		u64 m_peek_token_index = 0;

@@ -8,10 +8,10 @@ namespace sigma {
 		function_node& node, 
 		const code_generation_context& context
 	) {
-		(void)context; // suppress C4100
+		SUPPRESS_C4100(context);
 		// get the function return type
 		llvm::Type* return_type = node.get_function_return_type().get_llvm_type(
-			m_llvm_context->get_context()
+			m_context->get_context()
 		);
 
 		// convert the argument types to LLVM types and store them in a vector
@@ -19,7 +19,7 @@ namespace sigma {
 		for (const auto& [arg_name, arg_type] : node.get_function_arguments()) {
 			param_types.push_back(
 				arg_type.get_llvm_type(
-					m_llvm_context->get_context()
+					m_context->get_context()
 				)
 			);
 		}
@@ -35,11 +35,11 @@ namespace sigma {
 			func_type, 
 			llvm::Function::ExternalLinkage,
 			node.get_function_identifier(), 
-			m_llvm_context->get_module().get()
+			m_context->get_module().get()
 		);
 
 		// check for multiple definitions by checking if the function has already been added to our map
-		if(m_function_registry.contains_function(
+		if(m_context->get_function_registry().contains_function(
 			node.get_function_identifier()
 		)) {
 			return outcome::failure(
@@ -51,7 +51,7 @@ namespace sigma {
 		}
 
 		// add it to our function map
-		m_function_registry.insert_function(
+		m_context->get_function_registry().insert_function(
 			node.get_function_identifier(),
 			std::make_shared<function>(
 				node.get_function_return_type(),
@@ -63,16 +63,16 @@ namespace sigma {
 
 		// create and use a new entry block
 		llvm::BasicBlock* entry_block = llvm::BasicBlock::Create(
-			m_llvm_context->get_context(),
+			m_context->get_context(),
 			"",
 			func
 		);
 
-		m_llvm_context->get_builder().SetInsertPoint(entry_block);
+		m_context->get_builder().SetInsertPoint(entry_block);
 
 		// create a new nested scope for the function body
-		scope_ptr prev_scope = m_scope;
-		m_scope = std::make_shared<scope>(prev_scope);
+		scope_ptr prev_scope = m_context->get_scope();
+		m_context->get_scope() = std::make_shared<scope>(prev_scope);
 
 		// create the given arguments 
 		u64 index = 0;
@@ -82,16 +82,16 @@ namespace sigma {
 			llvm_arg->setName(arg_name);
 
 			// create an alloca instruction for the argument and store the incoming value into it
-			llvm::AllocaInst* alloca = m_llvm_context->get_builder().CreateAlloca(
-				arg_type.get_llvm_type(m_llvm_context->get_context()), 
+			llvm::AllocaInst* alloca = m_context->get_builder().CreateAlloca(
+				arg_type.get_llvm_type(m_context->get_context()), 
 				nullptr, 
 				arg_name
 			);
 
-			m_llvm_context->get_builder().CreateStore(llvm_arg, alloca);
+			m_context->get_builder().CreateStore(llvm_arg, alloca);
 
 			// add the alloca to the current scope
-			m_scope->add_named_value(arg_name, std::make_shared<value>(
+			m_context->get_scope()->insert_variable(arg_name, std::make_shared<value>(
 				arg_name,
 				arg_type,
 				alloca
@@ -106,10 +106,10 @@ namespace sigma {
 		}
 	
 		// restore the previous scope
-		m_scope = prev_scope;
+		m_context->get_scope() = prev_scope;
 
 		// add a return statement if the function does not have one
-		if (m_llvm_context->get_builder().GetInsertBlock()->getTerminator() == nullptr) {
+		if (m_context->get_builder().GetInsertBlock()->getTerminator() == nullptr) {
 			// emit the relevant warning
 			// check if the return type is non-void
 			if(node.get_function_return_type() != type(type::base::empty, 0)) {
@@ -120,10 +120,10 @@ namespace sigma {
 			}
 
 			if (return_type->isVoidTy()) {
-				m_llvm_context->get_builder().CreateRetVoid();
+				m_context->get_builder().CreateRetVoid();
 			}
 			else {
-				m_llvm_context->get_builder().CreateRet(
+				m_context->get_builder().CreateRet(
 					llvm::Constant::getNullValue(
 						return_type
 					)
@@ -143,11 +143,11 @@ namespace sigma {
 		function_call_node& node, 
 		const code_generation_context& context
 	) {
-		(void)context; // suppress C4100
+		SUPPRESS_C4100(context);
 
-		const function_ptr func = m_function_registry.get_function(
+		const function_ptr func = m_context->get_function_registry().get_function(
 			node.get_function_identifier(),
-			m_llvm_context
+			m_context
 		);
 
 		// check if it exists
@@ -161,7 +161,7 @@ namespace sigma {
 		}
 
 		const std::vector<std::pair<std::string, type>>& required_arguments = func->get_arguments();
-		const std::vector<sigma::node_ptr>& given_arguments = node.get_function_arguments();
+		const std::vector<node_ptr>& given_arguments = node.get_function_arguments();
 
 		// check if the argument counts match
 		if(!func->is_variadic() && required_arguments.size() != given_arguments.size()) {
@@ -234,7 +234,7 @@ namespace sigma {
 		}
 
 		// return the function call as the value
-		llvm::CallInst* call_inst = m_llvm_context->get_builder().CreateCall(
+		llvm::CallInst* call_inst = m_context->get_builder().CreateCall(
 			func->get_function(),
 			argument_values
 		);

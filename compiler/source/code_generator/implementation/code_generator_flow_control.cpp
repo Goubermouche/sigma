@@ -11,13 +11,14 @@ namespace sigma {
 		return_node& node, 
 		const code_generation_context& context
 	) {
-		(void)context; // suppress C4100
+		SUPPRESS_C4100(context);
+
 		// get the return type of the current function
-		const llvm::Function* parent_function_block = m_llvm_context->get_builder().GetInsertBlock()->getParent();
+		const llvm::Function* parent_function_block = m_context->get_builder().GetInsertBlock()->getParent();
 		const std::string parent_function_identifier = parent_function_block->getName().str();
-		const function_ptr parent_function = m_function_registry.get_function(
+		const function_ptr parent_function = m_context->get_function_registry().get_function(
 			parent_function_identifier,
-			m_llvm_context
+			m_context
 		);
 
 		// check if we have a return expression
@@ -36,7 +37,7 @@ namespace sigma {
 			);
 
 			// generate the LLVM return instruction with the upcasted value
-			m_llvm_context->get_builder().CreateRet(
+			m_context->get_builder().CreateRet(
 				upcasted_return_value
 			);
 
@@ -60,7 +61,7 @@ namespace sigma {
 			); // return on error
 		}
 
-		m_llvm_context->get_builder().CreateRetVoid();
+		m_context->get_builder().CreateRetVoid();
 
 		return std::make_shared<value>(
 			"__return",
@@ -73,12 +74,12 @@ namespace sigma {
 		if_else_node& node, 
 		const code_generation_context& context
 	) {
-		(void)context; // suppress C4100
+		SUPPRESS_C4100(context);
 
-		llvm::BasicBlock* entry_block = m_llvm_context->get_builder().GetInsertBlock();
+		llvm::BasicBlock* entry_block = m_context->get_builder().GetInsertBlock();
 		llvm::Function* parent_function = entry_block->getParent();
 		llvm::BasicBlock* end_block = llvm::BasicBlock::Create(
-			m_llvm_context->get_context(),
+			m_context->get_context(),
 			"", 
 			parent_function
 		);
@@ -98,7 +99,7 @@ namespace sigma {
 		// create condition blocks
 		for (u64 i = 0; i < condition_node_count; ++i) {
 			condition_blocks[i] = llvm::BasicBlock::Create(
-				m_llvm_context->get_context(),
+				m_context->get_context(),
 				"",
 				parent_function
 			);
@@ -107,7 +108,7 @@ namespace sigma {
 		// create branch blocks
 		for (u64 i = 0; i < branch_nodes.size(); ++i) {
 			branch_blocks[i] = llvm::BasicBlock::Create(
-				m_llvm_context->get_context(), 
+				m_context->get_context(), 
 				"", 
 				parent_function
 			);
@@ -120,7 +121,7 @@ namespace sigma {
 		));
 
 		// create a conditional branch based on the first condition
-		m_llvm_context->get_builder().CreateCondBr(
+		m_context->get_builder().CreateCondBr(
 			condition_value_result->get_value(),
 			branch_blocks[0],
 			condition_blocks.empty() ? (has_trailing_else ? branch_blocks.back() : end_block) : condition_blocks[0]
@@ -128,7 +129,7 @@ namespace sigma {
 
 		// process remaining conditions and create appropriate branches
 		for (u64 i = 0; i < condition_node_count; ++i) {
-			m_llvm_context->get_builder().SetInsertPoint(condition_blocks[i]);
+			m_context->get_builder().SetInsertPoint(condition_blocks[i]);
 
 			OUTCOME_TRY(condition_value_result, condition_nodes[i + 1]->accept(
 				*this,
@@ -139,7 +140,7 @@ namespace sigma {
 				return condition_value_result; // return on failure
 			}
 
-			m_llvm_context->get_builder().CreateCondBr(
+			m_context->get_builder().CreateCondBr(
 				condition_value_result->get_value(),
 				branch_blocks[i + 1],
 				i < condition_node_count - 1 ? condition_blocks[i + 1] : branch_blocks.back()
@@ -147,12 +148,12 @@ namespace sigma {
 		}
 
 		// save the previous scope
-		scope_ptr prev_scope = m_scope;
+		scope_ptr prev_scope = m_context->get_scope();
 
 		// process branch nodes and create appropriate inner statements
 		for (u64 i = 0; i < branch_nodes.size(); ++i) {
-			m_llvm_context->get_builder().SetInsertPoint(branch_blocks[i]);
-			m_scope = std::make_unique<scope>(prev_scope);
+			m_context->get_builder().SetInsertPoint(branch_blocks[i]);
+			m_context->get_scope() = std::make_shared<scope>(prev_scope);
 
 			for (const auto& statement : branch_nodes[i]) {
 				OUTCOME_TRY(statement->accept(
@@ -161,14 +162,14 @@ namespace sigma {
 				));
 			}
 
-			if(!m_llvm_context->get_builder().GetInsertBlock()->getTerminator()) {
-				m_llvm_context->get_builder().CreateBr(end_block);
+			if(!m_context->get_builder().GetInsertBlock()->getTerminator()) {
+				m_context->get_builder().CreateBr(end_block);
 			}
 		}
 
 		// restore the previous scope and set the insert point to the end block
-		m_scope = prev_scope;
-		m_llvm_context->get_builder().SetInsertPoint(end_block);
+		m_context->get_scope() = prev_scope;
+		m_context->get_builder().SetInsertPoint(end_block);
 		return nullptr;
 	}
 
@@ -176,37 +177,37 @@ namespace sigma {
 		while_node& node, 
 		const code_generation_context& context
 	) {
-		(void)context; // suppress C4100
+		SUPPRESS_C4100(context);
 
-		llvm::BasicBlock* entry_block = m_llvm_context->get_builder().GetInsertBlock();
+		llvm::BasicBlock* entry_block = m_context->get_builder().GetInsertBlock();
 		llvm::Function* parent_function = entry_block->getParent();
 
 		llvm::BasicBlock* end_block = llvm::BasicBlock::Create(
-			m_llvm_context->get_context(),
+			m_context->get_context(),
 			"",
 			parent_function
 		);
 
 		llvm::BasicBlock* condition_block = llvm::BasicBlock::Create(
-			m_llvm_context->get_context(),
+			m_context->get_context(),
 			"",
 			parent_function
 		);
 
 		llvm::BasicBlock* loop_body_block = llvm::BasicBlock::Create(
-			m_llvm_context->get_context(),
+			m_context->get_context(),
 			"",
 			parent_function
 		);
 
-		m_llvm_context->get_builder().CreateBr(condition_block);
+		m_context->get_builder().CreateBr(condition_block);
 
 		// condition block
-		m_llvm_context->get_builder().SetInsertPoint(condition_block);
+		m_context->get_builder().SetInsertPoint(condition_block);
 
 		// save the previous scope
-		scope_ptr prev_scope = m_scope;
-		m_scope = std::make_shared<scope>(prev_scope, end_block);
+		scope_ptr prev_scope = m_context->get_scope();
+		m_context->get_scope() = std::make_shared<scope>(prev_scope, end_block);
 
 		// accept the condition node
 		OUTCOME_TRY(const auto condition_value_result, node.get_loop_condition_node()->accept(
@@ -214,16 +215,16 @@ namespace sigma {
 			code_generation_context(type(type::base::boolean, 0))
 		));
 
-		m_llvm_context->get_builder().CreateCondBr(
+		m_context->get_builder().CreateCondBr(
 			condition_value_result->get_value(),
 			loop_body_block,
 			end_block
 		);
 
 		// accept all statements in the loop body
-		m_llvm_context->get_builder().SetInsertPoint(loop_body_block);
+		m_context->get_builder().SetInsertPoint(loop_body_block);
 
-		for (sigma::node_ptr n : node.get_loop_body_nodes()) {
+		for (node_ptr n : node.get_loop_body_nodes()) {
 			OUTCOME_TRY(n->accept(
 				*this,
 				{}
@@ -231,14 +232,14 @@ namespace sigma {
 		}
 
 		// restore the previous scope and set the insert point to the end block
-		m_scope = prev_scope;
+		m_context->get_scope() = prev_scope;
 
 		// only add a terminator block if we don't have one
-		if (!m_llvm_context->get_builder().GetInsertBlock()->getTerminator()) {
-			m_llvm_context->get_builder().CreateBr(condition_block);
+		if (!m_context->get_builder().GetInsertBlock()->getTerminator()) {
+			m_context->get_builder().CreateBr(condition_block);
 		}
 
-		m_llvm_context->get_builder().SetInsertPoint(end_block);
+		m_context->get_builder().SetInsertPoint(end_block);
 		return nullptr;
 	}
 
@@ -246,38 +247,38 @@ namespace sigma {
 		for_node& node,
 		const code_generation_context& context
 	) {
-		(void)context; // suppress C4100
+		SUPPRESS_C4100(context);
 
-		llvm::BasicBlock* entry_block = m_llvm_context->get_builder().GetInsertBlock();
+		llvm::BasicBlock* entry_block = m_context->get_builder().GetInsertBlock();
 		llvm::Function* parent_function = entry_block->getParent();
 
 		llvm::BasicBlock* end_block = llvm::BasicBlock::Create(
-			m_llvm_context->get_context(), 
+			m_context->get_context(), 
 			"", 
 			parent_function
 		);
 
 		llvm::BasicBlock* condition_block = llvm::BasicBlock::Create(
-			m_llvm_context->get_context(),
+			m_context->get_context(),
 			"",
 			parent_function
 		);
 
 		llvm::BasicBlock* increment_block = llvm::BasicBlock::Create(
-			m_llvm_context->get_context(), 
+			m_context->get_context(), 
 			"", 
 			parent_function
 		);
 
 		llvm::BasicBlock* loop_body_block = llvm::BasicBlock::Create(
-			m_llvm_context->get_context(), 
+			m_context->get_context(), 
 			"", 
 			parent_function
 		);
 
 		// save the previous scope
-		scope_ptr prev_scope = m_scope;
-		m_scope = std::make_shared<scope>(prev_scope, end_block);
+		scope_ptr prev_scope = m_context->get_scope();
+		m_context->get_scope() = std::make_shared<scope>(prev_scope, end_block);
 
 		// create the index expression
 		OUTCOME_TRY(node.get_loop_initialization_node()->accept(
@@ -285,10 +286,10 @@ namespace sigma {
 			{}
 		));
 
-		m_llvm_context->get_builder().CreateBr(condition_block);
+		m_context->get_builder().CreateBr(condition_block);
 
 		// accept the condition block
-		m_llvm_context->get_builder().SetInsertPoint(condition_block);
+		m_context->get_builder().SetInsertPoint(condition_block);
 
 		OUTCOME_TRY(const auto condition_value_result, node.get_loop_condition_node()->accept(
 			*this,
@@ -306,37 +307,37 @@ namespace sigma {
 			);
 		}
 
-		m_llvm_context->get_builder().CreateCondBr(
+		m_context->get_builder().CreateCondBr(
 			condition_value_result->get_value(),
 			loop_body_block,
 			end_block
 		);
 
 		// create the increment block
-		m_llvm_context->get_builder().SetInsertPoint(increment_block);
-		for (sigma::node_ptr n : node.get_post_iteration_nodes()) {
+		m_context->get_builder().SetInsertPoint(increment_block);
+		for (node_ptr n : node.get_post_iteration_nodes()) {
 			OUTCOME_TRY(n->accept(*this, {}));
 		}
 
-		m_llvm_context->get_builder().CreateBr(condition_block);
+		m_context->get_builder().CreateBr(condition_block);
 
 		// create the loop body block
-		m_llvm_context->get_builder().SetInsertPoint(loop_body_block);
+		m_context->get_builder().SetInsertPoint(loop_body_block);
 
 		// accept all inner statements
-		for (sigma::node_ptr n : node.get_loop_body_nodes()) {
+		for (node_ptr n : node.get_loop_body_nodes()) {
 			OUTCOME_TRY(n->accept(*this, {}));
 		}
 
 		// restore the previous scope and set the insert point to the end block
-		m_scope = prev_scope;
+		m_context->get_scope() = prev_scope;
 
 		// only add a terminator block if we don't have one
-		if (!m_llvm_context->get_builder().GetInsertBlock()->getTerminator()) {
-			m_llvm_context->get_builder().CreateBr(increment_block);
+		if (!m_context->get_builder().GetInsertBlock()->getTerminator()) {
+			m_context->get_builder().CreateBr(increment_block);
 		}
 
-		m_llvm_context->get_builder().SetInsertPoint(end_block);
+		m_context->get_builder().SetInsertPoint(end_block);
 		return nullptr;
 	}
 
@@ -344,9 +345,9 @@ namespace sigma {
 		break_node& node, 
 		const code_generation_context& context
 	) {
-		(void)context; // suppress C4100
+		SUPPRESS_C4100(context);
 
-		llvm::BasicBlock* end_block = m_scope->get_loop_end_block();
+		llvm::BasicBlock* end_block = m_context->get_scope()->get_loop_end_block();
 		if (end_block == nullptr) {
 			// emit an error if there's no enclosing loop to break from
 			return outcome::failure(
@@ -357,19 +358,19 @@ namespace sigma {
 		}
 
 		// only add a terminator block if we don't have one
-		if (!m_llvm_context->get_builder().GetInsertBlock()->getTerminator()) {
-			m_llvm_context->get_builder().CreateBr(end_block);
+		if (!m_context->get_builder().GetInsertBlock()->getTerminator()) {
+			m_context->get_builder().CreateBr(end_block);
 		}
 
 		// create a new basic block for the remaining loop body and set it as the current insert point
 		llvm::Function* parent_function = end_block->getParent();
 		llvm::BasicBlock* continue_block = llvm::BasicBlock::Create(
-			m_llvm_context->get_context(), 
+			m_context->get_context(), 
 			"", 
 			parent_function
 		);
 
-		m_llvm_context->get_builder().SetInsertPoint(continue_block);
+		m_context->get_builder().SetInsertPoint(continue_block);
 		return nullptr;
 	}
 }

@@ -1,16 +1,14 @@
 #pragma once
 
 #include "parser/parser.h"
-#include "code_generator_template.h"
-#include "llvm_wrappers/scope.h"
+#include "code_generator/code_generator_template.h"
 #include "llvm_wrappers/code_generation_context.h"
-#include "llvm_wrappers/functions/function_registry.h"
 
-#define CTOR_STRUCT_TYPE                                     \
-llvm::StructType::get(m_llvm_context->get_context(), {       \
-	llvm::Type::getInt32Ty(m_llvm_context->get_context()),   \
-	llvm::Type::getInt8PtrTy(m_llvm_context->get_context()), \
-	llvm::Type::getInt8PtrTy(m_llvm_context->get_context())  \
+#define CTOR_STRUCT_TYPE                                \
+llvm::StructType::get(m_context->get_context(), {       \
+	llvm::Type::getInt32Ty(m_context->get_context()),   \
+	llvm::Type::getInt8PtrTy(m_context->get_context()), \
+	llvm::Type::getInt8PtrTy(m_context->get_context())  \
 })
 
 namespace sigma {
@@ -30,7 +28,7 @@ namespace sigma {
 			std::shared_ptr<abstract_syntax_tree> abstract_syntax_tree
 		);
 
-		std::shared_ptr<llvm_context> get_llvm_context();
+		std::shared_ptr<code_generator_context> get_llvm_context();
 	private:
 		// functions
 		// codegen_visitor_functions.cpp
@@ -152,7 +150,7 @@ namespace sigma {
 		bool get_named_value(
 			value_ptr& out_value,
 			const std::string& variable_name
-		);
+		) const;
 
 		// flow control
 		// codegen_visitor_flow_control.cpp
@@ -375,10 +373,6 @@ namespace sigma {
 		void initialize_used_external_functions() const;
 	private:
 		std::shared_ptr<abstract_syntax_tree> m_abstract_syntax_tree;
-		std::shared_ptr<llvm_context> m_llvm_context; scope_ptr m_scope;
-		std::unordered_map<std::string, value_ptr> m_global_named_values;
-		std::vector<llvm::Constant*> m_global_ctors;
-		u64 m_global_initialization_priority = 0;
-		function_registry m_function_registry;
+		std::shared_ptr<code_generator_context> m_context;
 	};
 }

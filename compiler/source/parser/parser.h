@@ -13,15 +13,6 @@ namespace sigma {
 		void set_token_list(const token_list& token_list);
 		std::shared_ptr<abstract_syntax_tree> get_abstract_syntax_tree() const;
 	private:
-		/**
-		 * \brief Retrieves the next token from the lexer.
-		 */
-		void get_next_token();
-
-		outcome::result<void> expect_next_token(
-			token token
-		);
-
 		outcome::result<node_ptr> parse_function_definition();
 		outcome::result<node_ptr> parse_global_statement();
 		outcome::result<std::vector<node_ptr>> parse_local_statements();
@@ -114,7 +105,6 @@ namespace sigma {
 
 		outcome::result<type> parse_type();
 	private:
-		token_data m_current_token;
 		token_list m_token_list;
 		std::shared_ptr<abstract_syntax_tree> m_abstract_syntax_tree;
 	};

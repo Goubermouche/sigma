@@ -1,5 +1,5 @@
 #pragma once
-#include "llvm_wrappers/value.h"
+#include "llvm_wrappers/variables/variable_registry.h"
 
 namespace sigma {
 	class scope;
@@ -27,41 +27,31 @@ namespace sigma {
 
 		/**
 		 * \brief Inserts a new named value into the scope.
-		 * \param name Name of the value
-		 * \param value Value to insert
-		 */
-		void insert_named_value(
-			const std::string& name, 
-			value_ptr value
-		);
-
-		/**
-		 * \brief Inserts a new named value into the scope.
-		 * \param name Name of the value
+		 * \param variable_name Name of the value
 		 * \param value Value to insert
 		 * \return Pair, where the first element is an iterator to the added element, and the second element is a boolean that is true if the insertion took place, and false if the value already existed.
 		 */
-		std::pair<std::unordered_map<std::string, value_ptr>::iterator, bool> add_named_value(
-			const std::string& name,
+		bool insert_variable(
+			const std::string& variable_name,
 			value_ptr value
 		);
 
 		/**
 		 * \brief Checks if a named value exists in the scope.
-		 * \param name Name of the named value to look for
+		 * \param variable_name Name of the named value to look for
 		 * \return True if the named value exists.
 		 */
-		bool contains_named_value(
-			const std::string& name
+		bool contains_variable(
+			const std::string& variable_name
 		) const;
 
 		/**
 		 * \brief Returns the named value from the scope. If the named value does not exist, a nullptr is returned.
-		 * \param name Name of the named value to look for
+		 * \param variable_name Name of the named value to look for
 		 * \return Pointer to the value of our named value, may be nullptr if the value does not exist.
 		 */
-		value_ptr get_named_value(
-			const std::string& name
+		value_ptr get_variable(
+			const std::string& variable_name
 		);
 
 		/**
@@ -72,6 +62,6 @@ namespace sigma {
 	private:
 		scope_ptr m_parent = nullptr;
 		llvm::BasicBlock* m_loop_end_block = nullptr;
-		std::unordered_map<std::string, value_ptr> m_named_values;
+		variable_registry m_variables;
 	};
 }

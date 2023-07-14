@@ -70,7 +70,7 @@ namespace sigma {
 }
 
 #include "llvm_wrappers/code_generation_context.h"
-#include "llvm_wrappers/llvm_context.h"
+#include "code_generator/code_generator_context.h"
 
 namespace sigma {
 	class abstract_syntax_tree;

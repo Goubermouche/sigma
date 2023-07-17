@@ -281,8 +281,8 @@ namespace sigma {
 			return outcome::failure(error::emit<1003>(path));
 		}
 
-		if (detail::extract_extension_from_filepath(path) != ".ch") {
-			return outcome::failure(error::emit<1007>(path, ".ch"));
+		if (detail::extract_extension_from_filepath(path) != LANG_EXTENSION) {
+			return outcome::failure(error::emit<1007>(path, LANG_EXTENSION));
 		}
 
 		return outcome::success();;

@@ -65,3 +65,5 @@
 #define OUTCOME_TRY(...) EXPAND(GET_MACRO(__VA_ARGS__, OUTCOME_TRY_2, OUTCOME_TRY_1)(__VA_ARGS__))
 
 #define SUPPRESS_C4100(_statement) (void)_statement
+
+#define LANG_EXTENSION ".s"

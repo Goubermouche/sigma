@@ -124,9 +124,12 @@ The expected output, after running the generated .exe, looks like this:
 ,,,,,,,,-------~~~~~~~~~~~~~~~~~~~~~~~~~~::::::::::::;;;;=!!*#@*.#*!=;;::::::::~~~~~~~--------------
 ,,,,,,,,,--------~~~~~~~~~~~~~~~~~~~~~~~~~~~::::::::::;;;;==!#~$#@!=;:::::::~~~~~~~~----------------
 ```
-## Goals: 
+## Todo: 
 - [ ] Full C function toolset
 - [ ] Support for external files and linking
+- [ ] Integral formats (base-16 HEX, base-8 HEX)
+- [ ] Enum support
+- [ ] Struct support
 - [ ] GPU support with kernels 
 ## Tooling
 - [Syntax highlighting](https://github.com/Goubermouche/sigma-syntax-highlighter)

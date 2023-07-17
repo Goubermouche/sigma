@@ -52,8 +52,9 @@ namespace sigma {
 		 * \brief Inserts a new \a variable, which will be accessible from this and all child scopes.
 		 * \param identifier Identifier of the given \a variable 
 		 * \param variable Variable to insert
+		 * \return True if the insertion operation succeeded, false otherwise.
 		 */
-		void insert_variable(
+		bool insert_variable(
 			const std::string& identifier,
 			variable_ptr variable
 		);

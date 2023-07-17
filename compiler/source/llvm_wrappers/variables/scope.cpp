@@ -86,11 +86,11 @@ namespace sigma {
 		return false;
 	}
 
-	void scope::insert_variable(
+	bool scope::insert_variable(
 		const std::string& identifier,
 		variable_ptr variable
 	) {
-		m_variables[identifier] = variable;
+		return m_variables.insert({ identifier, variable }).second;
 	}
 
 	llvm::BasicBlock* scope::get_loop_end_block() const {

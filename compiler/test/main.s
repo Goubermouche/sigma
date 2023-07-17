@@ -1,4 +1,3 @@
-
 void donut(f32 rot_speed) {
 	f32 A = 0;
 	f32 B = 0;

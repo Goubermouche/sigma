@@ -5,18 +5,18 @@ namespace sigma {
 		m_scopes.push_back(std::make_shared<scope>(nullptr));
 	}
 
-	void variable_registry::insert_local_variable(
+	bool variable_registry::insert_local_variable(
 		const std::string& identifier, 
 		variable_ptr variable
 	) {
-		m_scopes.back()->insert_variable(identifier, variable);
+		return m_scopes.back()->insert_variable(identifier, variable);
 	}
 
-	void variable_registry::insert_global_variable(
+	bool variable_registry::insert_global_variable(
 		const std::string& identifier,
 		variable_ptr variable
 	) {
-		m_global_variables[identifier] = variable;
+		return m_global_variables.insert({ identifier, variable }).second;
 	}
 
 	variable_ptr variable_registry::get_variable(

@@ -62,21 +62,9 @@ namespace sigma {
 		return func;
 	}
 
-	function_declaration_ptr function_registry::get_function_declaration(
-		const std::string& identifier
-	) const {
-		// try and find a regular declaration
-		const auto it = m_function_declarations.find(identifier);
-		if (it != m_function_declarations.end()) {
-			return it->second;
-		}
-
-		return nullptr;
-	}
-
 	function_declaration_ptr function_registry::get_external_function_declaration(
 		const std::string& identifier
-	) const 	{
+	) {
 		// try and find an external function declaration
 		const auto it = g_external_function_declarations.find(identifier);
 		if (it != g_external_function_declarations.end()) {
@@ -103,35 +91,14 @@ namespace sigma {
 			m_functions.insert(function);
 		}
 
-		for(const auto& function_declaration : other.m_function_declarations) {
-			if (m_function_declarations.contains(function_declaration.first)) {
-				return outcome::failure(
-					error::emit<4018>(
-						function_declaration.second->get_position(),
-						function_declaration.first,
-						m_functions[function_declaration.first]->get_position()
-					)
-				);
-			}
-
-			m_function_declarations.insert(function_declaration);
-		}
-
 		return outcome::success();
 	}
 
-	void function_registry::insert_function(
+	bool function_registry::insert_function(
 		const std::string& identifier,
 		function_ptr function
 	) {
-		m_functions[identifier] = function;
-	}
-
-	void function_registry::insert_function_declaration(
-		const std::string& identifier, 
-		function_declaration_ptr function
-	) {
-		m_function_declarations[identifier] = function;
+		return m_functions.insert({ identifier , function }).second;
 	}
 
 	bool function_registry::contains_function(
@@ -139,12 +106,6 @@ namespace sigma {
 	) const {
 		return m_functions.contains(identifier) || 
 			g_external_function_declarations.contains(identifier);
-	}
-
-	bool function_registry::contains_function_declaration(
-		const std::string& identifier
-	) const {
-		return m_function_declarations.contains(identifier) || 
-			g_external_function_declarations.contains(identifier);
+		// || m_function_declarations ? 
 	}
 }

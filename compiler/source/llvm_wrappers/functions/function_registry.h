@@ -86,46 +86,60 @@ namespace sigma {
 
 	class code_generator_context;
 
+	/**
+	 * \brief Function registry, contains a set of various function types for the given compilation unit. 
+	 */
 	class function_registry {
 	public:
 		function_registry() = default;
 
+		/**
+		 * \brief Gets the function with the given \a identifier. If no function definition is found the
+		 * method fall backs on external function declarations. 
+		 * \param identifier Function identifier to look for
+		 * \param context Context to use when a fall back is required
+		 * \return function_ptr if a function is found, nullptr otherwise.
+		 */
 		function_ptr get_function(
 			const std::string& identifier,
 			const std::shared_ptr<code_generator_context>& context
 		);
 
-		function_declaration_ptr get_function_declaration(
+		static function_declaration_ptr get_external_function_declaration(
 			const std::string& identifier
-		) const;
+		);
 
-		function_declaration_ptr get_external_function_declaration(
-			const std::string& identifier
-		) const;
-
+		/**
+		 * \brief Concatenates \a this and \a other function registries. Does not change the \a other registry,
+		 * and only updates the current registry.
+		 * \param other Second registry to concatenate with.
+		 * \return Outcome (void)
+		 */
 		outcome::result<void> concatenate(
 			const function_registry& other
 		);
 
-		void insert_function(
+		/**
+		 * \brief Attempts to insert a function definition into the registry. 
+		 * \param identifier Identifier to insert the function under
+		 * \param function Function to insert
+		 * \return True if the insertion operation succeeded, false otherwise.
+		 */
+		bool insert_function(
 			const std::string& identifier,
 			function_ptr function
 		);
 
-		void insert_function_declaration(
-			const std::string& identifier,
-			function_declaration_ptr function
-		);
-
+		/**
+		 * \brief Checks if the registry contains the given function \a identifier. Checks for function definitions and
+		 * external function declarations. 
+		 * \param identifier Identifier to query 
+		 * \return True if the registry contains the queries \a identifier, false otherwise.
+		 */
 		bool contains_function(
-			const std::string& identifier
-		) const;
-
-		bool contains_function_declaration(
 			const std::string& identifier
 		) const;
 	private:
 		std::unordered_map<std::string, function_ptr> m_functions;
-		std::unordered_map<std::string, function_declaration_ptr> m_function_declarations;
 	};
 }

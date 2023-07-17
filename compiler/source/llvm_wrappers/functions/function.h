@@ -2,8 +2,19 @@
 #include "llvm_wrappers/type.h"
 
 namespace sigma {
+	/**
+	 * \brief Base function declaration class, contains information about a specific function declaration. 
+	 */
 	class function_declaration {
 	public:
+		/**
+		 * \brief Constructs a new function declaration. 
+		 * \param return_type Return type of the function declaration
+		 * \param arguments List of arguments the function declaration expects
+		 * \param is_variadic Truthy value representing the variadic nature of the function declaration 
+		 * \param external_function_name (optional) Name of the external function this function derives from
+		 * \param position (optional) Position the function declaration was declared at
+		 */
 		function_declaration(
 			type return_type,
 			const std::vector<std::pair<std::string, type>>& arguments,
@@ -25,8 +36,20 @@ namespace sigma {
 		file_position m_position;
 	};
 
+	/**
+	 * \brief Base function definition class, derives from the function declaration, soft wrapper around
+	 * llvm::Function*.
+	 */
 	class function : public function_declaration{
 	public:
+		/**
+		 * \brief Constructs the function definition.
+		 * \param return_type Return type of the function
+		 * \param function llvm::Function* which refers to the llvm function object
+		 * \param arguments List of arguments the function expects
+		 * \param is_variadic Truthy value representing the variadic nature of the function 
+		 * \param position (optional) Position the function was declared at
+		 */
 		function(
 			type return_type, 
 			llvm::Function* function,

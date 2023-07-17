@@ -14,8 +14,9 @@ namespace sigma {
 		 * \brief Inserts a new local \a variable under the given \a identifier. 
 		 * \param identifier Identifier to insert the \a variable under
 		 * \param variable Variable to insert
+		 * \return True if the insertion operation succeeded, false otherwise.
 		 */
-		void insert_local_variable(
+		bool insert_local_variable(
 			const std::string& identifier,
 			variable_ptr variable
 		);
@@ -24,8 +25,9 @@ namespace sigma {
 		 * \brief Inserts a new global \a variable under the given \a identifier.
 		 * \param identifier Identifier to insert the \a variable under
 		 * \param variable Variable to insert
+		 * \return True if the insertion operation succeeded, false otherwise.
 		 */
-		void insert_global_variable(
+		bool insert_global_variable(
 			const std::string& identifier,
 			variable_ptr variable
 		);

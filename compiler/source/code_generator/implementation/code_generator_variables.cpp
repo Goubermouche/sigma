@@ -132,18 +132,8 @@ namespace sigma {
 			nullptr
 		);
 
-		// check if the variable already exists
-		if(m_context->get_variable_registry().contains_variable(node.get_declaration_identifier())) {
-			return outcome::failure(
-				error::emit<4004>(
-					node.get_declared_position(),
-					node.get_declaration_identifier()
-				)
-			);
-		}
-
 		// add the variable to the active scope
-		m_context->get_variable_registry().insert_local_variable(
+		if(!m_context->get_variable_registry().insert_local_variable(
 			node.get_declaration_identifier(),
 			std::make_shared<variable>(
 				std::make_shared<value>(
@@ -153,7 +143,15 @@ namespace sigma {
 				),
 				node.get_declared_position()
 			)
-		);
+		)) {
+			// insertion operation failed - the variable has already been defined before
+			return outcome::failure(
+				error::emit<4004>(
+					node.get_declared_position(),
+					node.get_declaration_identifier()
+				)
+			);
+		}
 
 		// assign the actual value
 		m_context->get_builder().SetInsertPoint(original_entry_block);
@@ -232,8 +230,15 @@ namespace sigma {
 			)
 		);
 
-		// check if a global with the same name already exists
-		if(m_context->get_variable_registry().contains_global_variable(node.get_declaration_identifier())) {
+		// add the variable to the m_global_named_values map
+		if(!m_context->get_variable_registry().insert_global_variable(
+			node.get_declaration_identifier(),
+			std::make_shared<variable>(
+				global_declaration,
+				node.get_declared_position()
+			)
+		)) {
+			// variable insertion failed - variable has been declared before
 			return outcome::failure(
 				error::emit<4006>(
 					node.get_declared_position(),
@@ -241,15 +246,6 @@ namespace sigma {
 				)
 			); // return on failure
 		}
-
-		// add the variable to the m_global_named_values map
-		m_context->get_variable_registry().insert_global_variable(
-			node.get_declaration_identifier(),
-			std::make_shared<variable>(
-				global_declaration,
-				node.get_declared_position()
-			)
-		);
 
 		m_context->get_builder().CreateStore(
 			cast_assigned_value, 

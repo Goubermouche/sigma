@@ -39,20 +39,8 @@ namespace sigma {
 			m_context->get_module().get()
 		);
 
-		// check for multiple definitions by checking if the function has already been added to our map
-		if(m_context->get_function_registry().contains_function(
-			node.get_function_identifier()
-		)) {
-			return outcome::failure(
-				error::emit<4000>(
-					node.get_declared_position(), 
-					node.get_function_identifier()
-				)
-			); // return on failure
-		}
-
 		// add it to our function map
-		m_context->get_function_registry().insert_function(
+		if(!m_context->get_function_registry().insert_function(
 			node.get_function_identifier(),
 			std::make_shared<function>(
 				node.get_function_return_type(),
@@ -61,7 +49,15 @@ namespace sigma {
 				false,
 				node.get_declared_position()
 			)
-		);
+		)) {
+			// failed to insert the function into the registry - function has already been defined before
+			return outcome::failure(
+				error::emit<4000>(
+					node.get_declared_position(),
+					node.get_function_identifier()
+				)
+			); // return on failure
+		}
 
 		// create and use a new entry block
 		llvm::BasicBlock* entry_block = llvm::BasicBlock::Create(

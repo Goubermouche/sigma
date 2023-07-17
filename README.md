@@ -90,7 +90,7 @@ i32 main() {
     return 0;
 }
 ```
-The expected output, after running the generated .exe, looks like this: 
+The expected output, after running the generated .exe, looks like this:  
 ```
 ,,,,,,,,,--------~~~~~~~~~~~~~~~~~~~~~~~~~~~::::::::::;;;;==!#~$#@!=;:::::::~~~~~~~~----------------
 ,,,,,,,,-------~~~~~~~~~~~~~~~~~~~~~~~~~~::::::::::::;;;;=!!*#@*.#*!=;;::::::::~~~~~~~--------------

@@ -1,22 +1,61 @@
 #pragma once
-#include "llvm_wrappers/value.h"
+#include "llvm_wrappers/variables/scope.h"
 
 namespace sigma {
 	class variable_registry {
 	public:
-		bool insert(
-			const std::string& variable_name,
+		variable_registry();
+		void insert_local_variable(
+			const std::string& identifier,
 			value_ptr value
 		);
 
-		bool contains(
-			const std::string& variable_name
-		) const;
-
-		value_ptr get(
-			const std::string& variable_name
+		void insert_global_variable(
+			const std::string& identifier,
+			value_ptr value
 		);
+
+		value_ptr get_variable(
+			const std::string& identifier
+		);
+
+		value_ptr get_local_variable(
+			const std::string& identifier
+		);
+
+		value_ptr get_global_variable(
+			const std::string& identifier
+		);
+
+		bool contains_variable(
+			const std::string& identifier
+		);
+
+		bool contains_global_variable(
+			const std::string& identifier
+		);
+
+		void add_global_ctor(
+			llvm::Constant* ctor
+		);
+
+		outcome::result<void> concatenate(
+			const variable_registry& other
+		);
+
+		void push_scope();
+		void pop_scope();
+		void print() const;
+
+		u64 increment_global_initialization_priority();
+		const std::vector<llvm::Constant*>& get_global_ctors() const;
+		u64 get_global_ctors_count();
+		llvm::BasicBlock* get_loop_end_block();
 	private:
-		std::unordered_map<std::string, value_ptr> m_variables;
+		std::vector<scope_ptr> m_scopes;
+
+		std::unordered_map<std::string, value_ptr> m_global_variables;
+		std::vector<llvm::Constant*> m_global_ctors;
+		u64 m_initialization_priority = 0;
 	};
 }

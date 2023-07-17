@@ -71,8 +71,7 @@ namespace sigma {
 		m_context->get_builder().SetInsertPoint(entry_block);
 
 		// create a new nested scope for the function body
-		scope_ptr prev_scope = m_context->get_scope();
-		m_context->get_scope() = std::make_shared<scope>(prev_scope);
+		m_context->get_variable_registry().push_scope();
 
 		// create the given arguments 
 		u64 index = 0;
@@ -91,11 +90,14 @@ namespace sigma {
 			m_context->get_builder().CreateStore(llvm_arg, alloca);
 
 			// add the alloca to the current scope
-			m_context->get_scope()->insert_variable(arg_name, std::make_shared<value>(
+			m_context->get_variable_registry().insert_local_variable(
 				arg_name,
-				arg_type,
-				alloca
-			));
+				std::make_shared<value>(
+					arg_name,
+					arg_type,
+					alloca
+				)
+			);
 
 			index++;
 		}
@@ -106,7 +108,7 @@ namespace sigma {
 		}
 	
 		// restore the previous scope
-		m_context->get_scope() = prev_scope;
+		m_context->get_variable_registry().pop_scope();
 
 		// add a return statement if the function does not have one
 		if (m_context->get_builder().GetInsertBlock()->getTerminator() == nullptr) {

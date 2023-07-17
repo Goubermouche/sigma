@@ -76,6 +76,7 @@ namespace sigma {
 	) {
 		SUPPRESS_C4100(context);
 
+
 		llvm::BasicBlock* entry_block = m_context->get_builder().GetInsertBlock();
 		llvm::Function* parent_function = entry_block->getParent();
 		llvm::BasicBlock* end_block = llvm::BasicBlock::Create(
@@ -147,19 +148,14 @@ namespace sigma {
 			);
 		}
 
-		// save the previous scope
-		scope_ptr prev_scope = m_context->get_scope();
+		m_context->get_variable_registry().push_scope();
 
 		// process branch nodes and create appropriate inner statements
 		for (u64 i = 0; i < branch_nodes.size(); ++i) {
 			m_context->get_builder().SetInsertPoint(branch_blocks[i]);
-			m_context->get_scope() = std::make_shared<scope>(prev_scope);
 
 			for (const auto& statement : branch_nodes[i]) {
-				OUTCOME_TRY(statement->accept(
-					*this,
-					{}
-				));
+				OUTCOME_TRY(statement->accept(*this, {}));
 			}
 
 			if(!m_context->get_builder().GetInsertBlock()->getTerminator()) {
@@ -167,8 +163,7 @@ namespace sigma {
 			}
 		}
 
-		// restore the previous scope and set the insert point to the end block
-		m_context->get_scope() = prev_scope;
+		m_context->get_variable_registry().pop_scope();
 		m_context->get_builder().SetInsertPoint(end_block);
 		return nullptr;
 	}
@@ -206,8 +201,7 @@ namespace sigma {
 		m_context->get_builder().SetInsertPoint(condition_block);
 
 		// save the previous scope
-		scope_ptr prev_scope = m_context->get_scope();
-		m_context->get_scope() = std::make_shared<scope>(prev_scope, end_block);
+		m_context->get_variable_registry().push_scope();
 
 		// accept the condition node
 		OUTCOME_TRY(const auto condition_value_result, node.get_loop_condition_node()->accept(
@@ -232,7 +226,7 @@ namespace sigma {
 		}
 
 		// restore the previous scope and set the insert point to the end block
-		m_context->get_scope() = prev_scope;
+		m_context->get_variable_registry().pop_scope();
 
 		// only add a terminator block if we don't have one
 		if (!m_context->get_builder().GetInsertBlock()->getTerminator()) {
@@ -277,8 +271,7 @@ namespace sigma {
 		);
 
 		// save the previous scope
-		scope_ptr prev_scope = m_context->get_scope();
-		m_context->get_scope() = std::make_shared<scope>(prev_scope, end_block);
+		m_context->get_variable_registry().push_scope();
 
 		// create the index expression
 		OUTCOME_TRY(node.get_loop_initialization_node()->accept(
@@ -330,7 +323,7 @@ namespace sigma {
 		}
 
 		// restore the previous scope and set the insert point to the end block
-		m_context->get_scope() = prev_scope;
+		m_context->get_variable_registry().pop_scope();
 
 		// only add a terminator block if we don't have one
 		if (!m_context->get_builder().GetInsertBlock()->getTerminator()) {
@@ -347,7 +340,7 @@ namespace sigma {
 	) {
 		SUPPRESS_C4100(context);
 
-		llvm::BasicBlock* end_block = m_context->get_scope()->get_loop_end_block();
+		llvm::BasicBlock* end_block = m_context->get_variable_registry().get_loop_end_block();
 		if (end_block == nullptr) {
 			// emit an error if there's no enclosing loop to break from
 			return outcome::failure(

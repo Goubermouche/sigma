@@ -8,7 +8,7 @@ namespace sigma {
 
 	void token_list::print_tokens() const {
 		for (const token_data& t : m_tokens) {
-			console::out << std::left << std::setw(40) << token_to_string(t.get_token());
+			// console::out << std::left << std::setw(40) << token_to_string(t.get_token());
 
 			if (!t.get_value().empty()) {
 				// the value string may contain escape sequences 

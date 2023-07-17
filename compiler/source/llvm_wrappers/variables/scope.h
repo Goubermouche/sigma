@@ -1,5 +1,6 @@
 #pragma once
-#include "llvm_wrappers/variables/variable_registry.h"
+#include "llvm_wrappers/value.h"
+#include "utility/diagnostics/error.h"
 
 namespace sigma {
 	class scope;
@@ -25,33 +26,35 @@ namespace sigma {
 			llvm::BasicBlock* loop_end_block
 		);
 
-		/**
-		 * \brief Inserts a new named value into the scope.
-		 * \param variable_name Name of the value
-		 * \param value Value to insert
-		 * \return Pair, where the first element is an iterator to the added element, and the second element is a boolean that is true if the insertion took place, and false if the value already existed.
-		 */
-		bool insert_variable(
-			const std::string& variable_name,
+		outcome::result<void> concatenate(
+			const scope_ptr& other
+		);
+
+		void add_child(
+			const scope_ptr child
+		);
+
+		void insert_variable(
+			const std::string& identifier,
 			value_ptr value
 		);
 
 		/**
 		 * \brief Checks if a named value exists in the scope.
-		 * \param variable_name Name of the named value to look for
+		 * \param identifier Name of the named value to look for
 		 * \return True if the named value exists.
 		 */
 		bool contains_variable(
-			const std::string& variable_name
+			const std::string& identifier
 		) const;
 
 		/**
 		 * \brief Returns the named value from the scope. If the named value does not exist, a nullptr is returned.
-		 * \param variable_name Name of the named value to look for
+		 * \param identifier Name of the named value to look for
 		 * \return Pointer to the value of our named value, may be nullptr if the value does not exist.
 		 */
 		value_ptr get_variable(
-			const std::string& variable_name
+			const std::string& identifier
 		);
 
 		/**
@@ -59,9 +62,13 @@ namespace sigma {
 		 * \return Current loop end block, may be nullptr if the loop end block has not been set.
 		 */
 		llvm::BasicBlock* get_loop_end_block() const;
+
+		void print(u64 level = 0) const;
 	private:
 		scope_ptr m_parent = nullptr;
+		std::vector<scope_ptr> m_children;
+
 		llvm::BasicBlock* m_loop_end_block = nullptr;
-		variable_registry m_variables;
+		std::unordered_map<std::string, value_ptr> m_variables;
 	};
 }

@@ -33,7 +33,7 @@ namespace sigma {
 		//SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), color::white);
 	}
 
-	console& console::operator<<(WORD color) {
+	console& console::operator<<(const color_value& color) {
 		set_color(color);
 		return *this;
 	}
@@ -49,7 +49,70 @@ namespace sigma {
 		return *this;
 	}
 
-	void console::set_color(WORD color) {
-		SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), color);
+	console& console::operator<<(const char* value) {
+		// int size_needed = MultiByteToWideChar(CP_UTF8, 0, value, -1, NULL, 0);
+		// wchar_t* wstr = new wchar_t[size_needed];
+		// MultiByteToWideChar(CP_UTF8, 0, value, -1, wstr, size_needed);
+		std::wcout << value;
+		return *this;
+	}
+
+	console& console::operator<<(char value) {
+		std::wcout << value;
+		return *this;
+	}
+
+	console& console::operator<<(f32 value) {
+		std::wcout << value;
+		return *this;
+	}
+
+	console& console::operator<<(f64 value) {
+		std::wcout << value;
+		return *this;
+	}
+
+	console& console::operator<<(u8 value) {
+		std::wcout << value;
+		return *this;
+	}
+
+	console& console::operator<<(u16 value) {
+		std::wcout << value;
+		return *this;
+	}
+
+	console& console::operator<<(u32 value) {
+		std::wcout << value;
+		return *this;
+	}
+
+	console& console::operator<<(u64 value) {
+		std::wcout << value;
+		return *this;
+	}
+
+	console& console::operator<<(i8 value) {
+		std::wcout << value;
+		return *this;
+	}
+
+	console& console::operator<<(i16 value) {
+		std::wcout << value;
+		return *this;
+	}
+
+	console& console::operator<<(i32 value) {
+		std::wcout << value;
+		return *this;
+	}
+
+	console& console::operator<<(i64 value) {
+		std::wcout << value;
+		return *this;
+	}
+
+	void console::set_color(const color_value& color) {
+		SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), color.value);
 	}
 }

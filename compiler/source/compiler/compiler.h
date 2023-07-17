@@ -47,7 +47,7 @@ namespace sigma {
 		/**
 		 * \brief Compiles the given \a root_source_path using the underlying compiler settings and outputs an executable at the given \a target_executable_directory.
 		 * \param root_source_path Path to the file to be compiled
-		 * \param target_executable_directory Path to the target directory the generated executable should be store to
+		 * \param target_executable_directory Path to the target directory the generated executable should be saved at
 		 * \return Optional error message containing information about a potential error.
 		 */
 		outcome::result<void> compile(

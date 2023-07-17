@@ -279,7 +279,7 @@
     <ClInclude Include="source\code_generator\code_generator_context.h">
       <Filter>source\llvm_wrappers</Filter>
     </ClInclude>
-    <ClInclude Include="source\llvm_wrappers\scope.h">
+    <ClInclude Include="source\llvm_wrappers\variables\scope.h">
       <Filter>source\llvm_wrappers</Filter>
     </ClInclude>
     <ClInclude Include="source\llvm_wrappers\type.h">
@@ -331,7 +331,6 @@
       <Filter>source\utility</Filter>
     </ClInclude>
     <ClInclude Include="source\utility\string.h" />
-    <ClInclude Include="source\llvm_wrappers\variables\global_variable_registry.h" />
     <ClInclude Include="source\llvm_wrappers\variables\variable_registry.h" />
   </ItemGroup>
   <ItemGroup>
@@ -540,7 +539,7 @@
     <ClCompile Include="source\code_generator\code_generator_context.cpp">
       <Filter>source\llvm_wrappers</Filter>
     </ClCompile>
-    <ClCompile Include="source\llvm_wrappers\scope.cpp">
+    <ClCompile Include="source\llvm_wrappers\variables\scope.cpp">
       <Filter>source\llvm_wrappers</Filter>
     </ClCompile>
     <ClCompile Include="source\llvm_wrappers\type.cpp">
@@ -577,7 +576,6 @@
       <Filter>source\utility</Filter>
     </ClCompile>
     <ClCompile Include="source\utility\string.cpp" />
-    <ClCompile Include="source\llvm_wrappers\variables\global_variable_registry.cpp" />
     <ClCompile Include="source\llvm_wrappers\variables\variable_registry.cpp" />
   </ItemGroup>
 </Project>

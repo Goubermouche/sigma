@@ -1,22 +1,149 @@
 #include "variable_registry.h"
 
 namespace sigma {
-	bool variable_registry::insert(
-		const std::string& variable_name, 
+	variable_registry::variable_registry() {
+		m_scopes.push_back(std::make_shared<scope>(nullptr));
+	}
+
+	void variable_registry::insert_local_variable(
+		const std::string& identifier, 
 		value_ptr value
 	) {
-		return m_variables.insert({ variable_name, value }).second;
+		m_scopes.back()->insert_variable(identifier, value);
 	}
 
-	bool variable_registry::contains(
-		const std::string& variable_name
-	) const {
-		return m_variables.contains(variable_name);
-	}
-
-	value_ptr variable_registry::get(
-		const std::string& variable_name
+	void variable_registry::insert_global_variable(
+		const std::string& identifier,
+		value_ptr value
 	) {
-		return m_variables[variable_name];
+		m_global_variables[identifier] = value;
+	}
+
+	value_ptr variable_registry::get_variable(
+		const std::string& identifier
+	) {
+		if(const auto& value = get_global_variable(identifier)) {
+			return value;
+		}
+
+		return get_local_variable(identifier);
+	}
+
+	value_ptr variable_registry::get_local_variable(
+		const std::string& identifier
+	) {
+		return m_scopes.back()->get_variable(identifier);
+	}
+
+	value_ptr variable_registry::get_global_variable(
+		const std::string& identifier
+	) {
+		const auto it = m_global_variables.find(identifier);
+		if(it == m_global_variables.end()) {
+			return nullptr;
+		}
+
+		return it->second;
+	}
+
+	bool variable_registry::contains_variable(
+		const std::string& identifier
+	) {
+		if(m_scopes.back()->contains_variable(identifier)) {
+			return true;
+		}
+
+		return m_global_variables.contains(identifier);
+	}
+
+	bool variable_registry::contains_global_variable(
+		const std::string& identifier
+	) {
+		return m_global_variables.contains(identifier);
+	}
+
+	void variable_registry::push_scope() {
+		auto new_scope = std::make_shared<scope>(m_scopes.back());
+		m_scopes.back()->add_child(new_scope);
+		m_scopes.push_back(new_scope);
+	}
+
+	void variable_registry::pop_scope() {
+		if (m_scopes.size() > 1) {
+			m_scopes.pop_back();
+		}
+	}
+
+	u64 variable_registry::increment_global_initialization_priority() {
+		return m_initialization_priority++;
+	}
+
+	void variable_registry::add_global_ctor(
+		llvm::Constant* ctor
+	) {
+		m_global_ctors.push_back(ctor);
+	}
+
+	outcome::result<void> variable_registry::concatenate(
+		const variable_registry& other
+	) {
+		for (size_t i = 0; i < other.m_scopes.size(); ++i) {
+			// If current registry doesn't have enough scopes, create new ones
+			if (i >= m_scopes.size()) {
+				m_scopes.push_back(std::make_shared<scope>(m_scopes.back()));
+			}
+
+			// Merge the scopes
+			OUTCOME_TRY(m_scopes[i]->concatenate(other.m_scopes[i]));
+		}
+
+		for (const auto& variable : other.m_global_variables) {
+			if (m_global_variables.contains(variable.first)) {
+				return outcome::failure(
+					error::emit<4006>(variable.first)
+				);
+			}
+			m_global_variables.insert(variable);
+		}
+
+		return outcome::success();
+	}
+
+	const std::vector<llvm::Constant*>& variable_registry::get_global_ctors() const {
+		return m_global_ctors;
+	}
+
+	u64 variable_registry::get_global_ctors_count() {
+		return m_global_ctors.size();
+	}
+
+	llvm::BasicBlock* variable_registry::get_loop_end_block() {
+		return m_scopes.back()->get_loop_end_block();
+	}
+
+	void variable_registry::print() const {
+		console::out
+			<< color::red
+			<< "variable registry:\n"
+			<< color::white;
+
+		console::out
+			<< color::yellow
+			<< "local variables:\n"
+			<< color::white;
+
+		m_scopes[0]->print(0);
+
+		console::out
+			<< color::yellow
+			<< "global variables:\n"
+			<< color::white;
+
+		for(const auto& [identifier, variable] : m_global_variables) {
+			console::out
+				<< std::string(2, ' ')
+				<< identifier << ": "
+				<< variable->get_type().to_string() << '\n';
+		}
 	}
 }

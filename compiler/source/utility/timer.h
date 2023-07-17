@@ -5,7 +5,7 @@ namespace sigma {
 	class timer {
 	public:
 		void start();
-		double elapsed() const;
+		f64 elapsed() const;
 	private:
 		std::chrono::steady_clock::time_point m_start;
 	};

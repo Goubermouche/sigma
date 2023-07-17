@@ -135,6 +135,16 @@ namespace sigma {
 		u64 get_char_index() const {
 			return m_char_index;
 		}
+
+		friend console& operator<<(
+			console& out, 
+			const file_position& position
+		) {
+			return out
+				<< position.m_path << ":"
+				<< position.m_line_index << ":"
+				<< position.m_char_index;
+		}
 	private:
 		filepath m_path;
 		u64 m_line_index;

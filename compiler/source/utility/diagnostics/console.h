@@ -5,18 +5,22 @@
 #include <Windows.h>
 
 namespace sigma {
+	struct color_value {
+		WORD value;
+	};
+
 	class color {
 	public:
-		static constexpr WORD white = 7;
-		static constexpr WORD pink = 2; // 
-		static constexpr WORD magenta = 3;
-		static constexpr WORD blue = 1;
-		static constexpr WORD light_blue = 9;
-		static constexpr WORD green = 2;
-		static constexpr WORD light_green = 10;
-		static constexpr WORD orange = 14; // 
-		static constexpr WORD yellow = 6;
-		static constexpr WORD red = 4;
+		static constexpr color_value white = { 7 };
+		static constexpr color_value pink = { 2 }; // 
+		static constexpr color_value magenta = { 3 };
+		static constexpr color_value blue = { 1 };
+		static constexpr color_value light_blue = { 9 };
+		static constexpr color_value green = { 2 };
+		static constexpr color_value light_green = { 10 };
+		static constexpr color_value orange = { 14 }; // 
+		static constexpr color_value yellow = { 6 };
+		static constexpr color_value red = { 4 };
 	};
 
 	class console {
@@ -24,22 +28,49 @@ namespace sigma {
 		static void init();
 		static console& out;
 
-		console& operator<<(WORD color);
+		console& operator<<(const color_value& color);
 		console& operator<<(const std::string& value);
 		console& operator<<(const filepath& value);
 
-		template <typename T>
-		console& operator<<(const T& value);
+		console& operator<<(const char* value);
+		console& operator<<(char value);
+
+		console& operator<<(f32 value);
+		console& operator<<(f64 value);
+
+		console& operator<<(u8 value);
+		console& operator<<(u16 value);
+		console& operator<<(u32 value);
+		console& operator<<(u64 value);
+
+		console& operator<<(i8 value);
+		console& operator<<(i16 value);
+		console& operator<<(i32 value);
+		console& operator<<(i64 value);
+
+		template<typename type>
+		console& operator<<(std::shared_ptr<type> value);
+
+		// template <typename T>
+		// console& operator<<(const T& value);
 	private:
 		console() = default;
-		static void set_color(WORD color);
+		static void set_color(const color_value& color);
 	};
 
-	template<typename T>
-	console& console::operator<<(const T& value) {
-		std::wcout << value;
-		return *this;
+	template<typename type>
+	console& console::operator<<(std::shared_ptr<type> value) {
+		if (value) // check that the shared_ptr isn't null
+			return *this << *value; // call the << operator for error_message
+		else
+			return *this << "null";
 	}
+
+	// template<typename T>
+	// console& console::operator<<(const T& value) {
+	// 	std::wcout << value;
+	// 	return *this;
+	// }
 
 	inline COLORREF hex_to_rgb(const std::string& hex) {
 		if (hex.size() != 6) {

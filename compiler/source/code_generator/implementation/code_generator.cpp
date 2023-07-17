@@ -21,8 +21,8 @@ namespace sigma {
 
 	void code_generator::initialize_global_variables() const {
 		// create the global ctors array
-		llvm::ArrayType* updated_ctor_array_type = llvm::ArrayType::get(CTOR_STRUCT_TYPE, m_context->get_global_variable_registry().get_global_ctors_count());
-		llvm::Constant* updated_ctors = llvm::ConstantArray::get(updated_ctor_array_type, m_context->get_global_variable_registry().get_global_ctors());
+		llvm::ArrayType* updated_ctor_array_type = llvm::ArrayType::get(CTOR_STRUCT_TYPE, m_context->get_variable_registry().get_global_ctors_count());
+		llvm::Constant* updated_ctors = llvm::ConstantArray::get(updated_ctor_array_type, m_context->get_variable_registry().get_global_ctors());
 		new llvm::GlobalVariable(*m_context->get_module(), updated_ctor_array_type, false, llvm::GlobalValue::AppendingLinkage, updated_ctors, "llvm.global_ctors");
 	}
 
@@ -163,24 +163,5 @@ namespace sigma {
 
 		// downcast
 		return m_context->get_builder().CreateTrunc(source_llvm_value, target_llvm_type, "trunc");
-	}
-
-	bool code_generator::get_named_value(
-		value_ptr& out_value, 
-		const std::string& variable_name
-	) const {
-		// check the local scope
-		out_value = m_context->get_scope()->get_variable(variable_name);
-
-		if (!out_value) {
-			// variable with the given name was not found in the local scope hierarchy, check global variables
-			out_value = m_context->get_global_variable_registry().get(variable_name);
-
-			if (!out_value) {
-				return false; // variable not found
-			}
-		}
-
-		return true;
 	}
 }

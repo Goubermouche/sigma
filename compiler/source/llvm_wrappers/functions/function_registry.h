@@ -1,6 +1,7 @@
 #pragma once
 #include "llvm_wrappers/type.h"
 #include "llvm_wrappers/functions/function.h"
+#include "utility/diagnostics/error.h"
 
 namespace sigma {
 	using function_ptr = std::shared_ptr<function>;
@@ -24,6 +25,10 @@ namespace sigma {
 		function_declaration_ptr get_external_function_declaration(
 			const std::string& identifier
 		) const;
+
+		outcome::result<void> concatenate(
+			const function_registry& other
+		);
 
 		const std::unordered_map<std::string, function_declaration_ptr>& get_external_function_declarations() const;
 

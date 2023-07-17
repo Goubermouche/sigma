@@ -10,6 +10,15 @@ namespace sigma {
 		) : m_error_code(error_code),
 			m_message(std::move(message)) {}
 
+		friend console& operator<<(
+			console& out, 
+			error_message& message
+		) {
+			message.print();
+			return out;
+		}
+
+	protected:
 		virtual void print() {
 			console::out
 				<< color::red
@@ -20,7 +29,6 @@ namespace sigma {
 				<< "\n"
 				<< color::white;
 		}
-
 	protected:
 		u64 m_error_code;
 		std::string m_message;
@@ -35,14 +43,11 @@ namespace sigma {
 		) : error_message(error_code, std::move(message)),
 			m_position(position) {}
 
-		virtual void print() override {
+	protected:
+		void print() override {
 			console::out
-				<< m_position.get_path().string()
-				<< " ("
-				<< m_position.get_line_index()
-				<< ", "
-				<< m_position.get_char_index()
-				<< "): "
+				<< m_position
+				<< ":   "
 				<< color::red
 				<< "error "
 				<< m_error_code

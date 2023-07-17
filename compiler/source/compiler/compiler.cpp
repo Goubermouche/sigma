@@ -65,6 +65,7 @@ namespace sigma {
 			<< "ms)\n"
 			<< color::white;
 		
+
 		return outcome::success();
 	}
 
@@ -98,7 +99,7 @@ namespace sigma {
 			<< parser_timer.elapsed()
 			<< "ms)\n";
 
-		// parser->get_abstract_syntax_tree()->print_nodes();
+		// m_parser.get_abstract_syntax_tree()->print_nodes();
 
 		// generate the module
 		timer code_generator_timer;
@@ -115,7 +116,10 @@ namespace sigma {
 			<< "ms)\n";
 
 		// code_generator->get_llvm_context()->print_intermediate_representation();
-		return m_code_generator.get_llvm_context();
+
+		const auto& ctx = m_code_generator.get_llvm_context();
+		// ctx->print();
+		return ctx;
 	}
 
 	outcome::result<void> compiler::compile_module(
@@ -269,7 +273,7 @@ namespace sigma {
 	outcome::result<void> compiler::verify_source_file(
 		const filepath& path
 	) {
-		if (!std::filesystem::exists(path)) {
+		if (!exists(path)) {
 			return outcome::failure(error::emit<1002>(path));
 		}
 
@@ -287,7 +291,7 @@ namespace sigma {
 	outcome::result<void> compiler::verify_folder(
 		const filepath& folder_path
 	) {
-		if (!std::filesystem::exists(folder_path)) {
+		if (!exists(folder_path)) {
 			return outcome::failure(error::emit<1002>(folder_path));
 		}
 

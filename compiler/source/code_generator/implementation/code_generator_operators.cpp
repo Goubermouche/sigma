@@ -1645,5 +1645,5 @@ namespace sigma {
 			highest_precision,
 			left_operand_result
 		);
-	}
+	}	
 }

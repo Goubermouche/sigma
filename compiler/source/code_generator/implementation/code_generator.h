@@ -147,11 +147,6 @@ namespace sigma {
 			node_ptr right_operand
 		);
 
-		bool get_named_value(
-			value_ptr& out_value,
-			const std::string& variable_name
-		) const;
-
 		// flow control
 		// codegen_visitor_flow_control.cpp
 		outcome::result<value_ptr> visit_return_node(

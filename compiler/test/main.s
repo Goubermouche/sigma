@@ -1,4 +1,3 @@
-// todo: add more context to values (position etc.)
 
 void donut(f32 rot_speed) {
 	f32 A = 0;

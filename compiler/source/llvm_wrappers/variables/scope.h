@@ -6,6 +6,10 @@ namespace sigma {
 	class scope;
 	using scope_ptr = std::shared_ptr<scope>;
 
+	/**
+	 * \brief Base scope class, contains information about the current, parent, and child scopes,
+	 * each scope contains a list of variables which have been defined there.
+	 */
 	class scope	{
 	public:
 		/**
@@ -26,14 +30,29 @@ namespace sigma {
 			llvm::BasicBlock* loop_end_block
 		);
 
+		/**
+		 * \brief Concatenates \a this and \a other scopes. Does not change the \a other scope,
+		 * updates the current scope.
+		 * \param other Second scope to concatenate with. 
+		 * \return Outcome (void) 
+		 */
 		outcome::result<void> concatenate(
 			const scope_ptr& other
 		);
 
+		/**
+		 * \brief Inserts a new \a child scope. 
+		 * \param child Scope to insert
+		 */
 		void add_child(
 			const scope_ptr child
 		);
 
+		/**
+		 * \brief Inserts a new \a variable, which will be accessible from this and all child scopes.
+		 * \param identifier Identifier of the given \a variable 
+		 * \param variable Variable to insert
+		 */
 		void insert_variable(
 			const std::string& identifier,
 			variable_ptr variable

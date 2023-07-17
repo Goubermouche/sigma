@@ -2,10 +2,10 @@
 
 namespace sigma {
 	numerical_literal_node::numerical_literal_node(
-		const file_position& location,
+		const file_position& position,
 		const std::string& value,
 		type preferred_type
-	) : node(location),
+	) : node(position),
 	m_value(value),
 	m_preferred_type(preferred_type) {}
 

@@ -13,12 +13,12 @@ namespace sigma {
 		token_data(
 			token tok,
 			const std::string& value,
-			const file_position& location
+			const file_position& position
 		);
 
 		token get_token() const;
 		const std::string& get_value() const;
-		const file_position& get_token_location() const;
+		const file_position& get_position() const;
 	private:
 		// token type representation of the given token
 		token m_token = token::unknown;

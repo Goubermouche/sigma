@@ -2,10 +2,10 @@
 
 namespace sigma {
 	array_access_node::array_access_node(
-		const file_position& location,
+		const file_position& position,
 		const node_ptr& array_base,
 		const std::vector<node_ptr>& array_element_index_nodes
-	) : node(location),
+	) : node(position),
 	m_array_base(array_base),
 	m_array_element_index_nodes(array_element_index_nodes) {}
 

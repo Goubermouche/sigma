@@ -8,8 +8,8 @@ namespace sigma {
 	class variable_access_node : public node {
 	public:
 		variable_access_node(
-			const file_position& location,
-			const std::string& variable_identifier
+			const file_position& position,
+			const std::string& identifier
 		);
 
 		outcome::result<value_ptr> accept(
@@ -23,8 +23,8 @@ namespace sigma {
 			bool is_last
 		) override;
 
-		const std::string& get_variable_identifier() const;
+		const std::string& get_identifier() const;
 	private:
-		std::string m_variable_identifier;
+		std::string m_identifier;
 	};
 }

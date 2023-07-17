@@ -2,9 +2,9 @@
 
 namespace sigma {
 	operator_bitwise_not_node::operator_bitwise_not_node(
-		const file_position& location,
+		const file_position& position,
 		const node_ptr& expression_node
-	) : operator_unary_base(location, expression_node) {}
+	) : operator_unary_base(position, expression_node) {}
 
 	outcome::result<value_ptr> operator_bitwise_not_node::accept(
 		code_generator_template& visitor,

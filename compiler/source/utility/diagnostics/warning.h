@@ -26,7 +26,7 @@ namespace sigma {
 		warning_message_position(
 			std::string message,
 			u64 code, 
-			const file_position& location
+			const file_position& position
 		);
 
 		void print() const override;
@@ -43,7 +43,7 @@ namespace sigma {
 
 		template <u64 code, typename... Args>
 		static std::shared_ptr<warning_message_position> emit(
-			file_position location,
+			file_position position,
 			Args&&... args
 		);
 	};
@@ -61,13 +61,14 @@ namespace sigma {
 
 	template<u64 code, typename ...Args>
 	std::shared_ptr<warning_message_position> warning::emit(
-		file_position location, Args && ...args
+		file_position position,
+		Args && ...args
 	) {
 		return std::make_shared<warning_message_position>(
 			std::format(warning_templates[code],
 			std::forward<Args>(args)...),
 			code,
-			location
+			position
 		);
 	}
 }

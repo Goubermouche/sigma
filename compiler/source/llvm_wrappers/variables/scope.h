@@ -1,5 +1,5 @@
 #pragma once
-#include "llvm_wrappers/value.h"
+#include "llvm_wrappers/variables/variable.h"
 #include "utility/diagnostics/error.h"
 
 namespace sigma {
@@ -36,7 +36,7 @@ namespace sigma {
 
 		void insert_variable(
 			const std::string& identifier,
-			value_ptr value
+			variable_ptr variable
 		);
 
 		/**
@@ -53,7 +53,7 @@ namespace sigma {
 		 * \param identifier Name of the named value to look for
 		 * \return Pointer to the value of our named value, may be nullptr if the value does not exist.
 		 */
-		value_ptr get_variable(
+		variable_ptr get_variable(
 			const std::string& identifier
 		);
 
@@ -69,6 +69,6 @@ namespace sigma {
 		std::vector<scope_ptr> m_children;
 
 		llvm::BasicBlock* m_loop_end_block = nullptr;
-		std::unordered_map<std::string, value_ptr> m_variables;
+		std::unordered_map<std::string, variable_ptr> m_variables;
 	};
 }

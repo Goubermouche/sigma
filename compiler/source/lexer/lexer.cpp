@@ -41,7 +41,7 @@ namespace sigma {
 		}
 
 		return outcome::failure(error::emit<3000>(
-			m_current_token.get_token_location(),
+			m_current_token.get_position(),
 			token,
 			m_current_token.get_token()
 		));
@@ -356,9 +356,9 @@ namespace sigma {
 	token_data::token_data(
 		token tok,
 		const std::string& value,
-		const file_position& location
+		const file_position& position
 	)
-		: m_token(tok), m_value(value), m_position(location) {}
+		: m_token(tok), m_value(value), m_position(position) {}
 
 	token token_data::get_token() const {
 		return m_token;
@@ -368,7 +368,7 @@ namespace sigma {
 		return m_value;
 	}
 
-	const file_position& token_data::get_token_location() const {
+	const file_position& token_data::get_position() const {
 		return m_position;
 	}
 }

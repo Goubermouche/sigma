@@ -2,11 +2,11 @@
 
 namespace sigma {
 	operator_modulo_node::operator_modulo_node(
-		const file_position& location,
+		const file_position& position,
 		const node_ptr& left_expression_node,
 		const node_ptr& right_expression_node
 	) : operator_binary_base(
-		location,
+		position,
 		left_expression_node,
 		right_expression_node
 	) {}

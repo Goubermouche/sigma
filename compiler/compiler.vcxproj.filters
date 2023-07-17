@@ -332,6 +332,7 @@
     </ClInclude>
     <ClInclude Include="source\utility\string.h" />
     <ClInclude Include="source\llvm_wrappers\variables\variable_registry.h" />
+    <ClInclude Include="source\llvm_wrappers\variables\variable.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp" />
@@ -577,5 +578,6 @@
     </ClCompile>
     <ClCompile Include="source\utility\string.cpp" />
     <ClCompile Include="source\llvm_wrappers\variables\variable_registry.cpp" />
+    <ClCompile Include="source\llvm_wrappers\variables\variable.cpp" />
   </ItemGroup>
 </Project>

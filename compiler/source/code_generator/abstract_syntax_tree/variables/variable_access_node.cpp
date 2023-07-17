@@ -2,10 +2,10 @@
 
 namespace sigma {
 	variable_access_node::variable_access_node(
-		const file_position& location,
-		const std::string& variable_identifier
-	) : node(location),
-	m_variable_identifier(variable_identifier) {}
+		const file_position& position,
+		const std::string& identifier
+	) : node(position),
+	m_identifier(identifier) {}
 
 	outcome::result<value_ptr> variable_access_node::accept(
 		code_generator_template& visitor,
@@ -29,12 +29,12 @@ namespace sigma {
 		console::out
 			<< "'"
 			<< AST_NODE_VARIABLE_COLOR
-			<< m_variable_identifier 
+			<< m_identifier 
 			<< color::white
 			<< "'\n";
 	}
 
-	const std::string& variable_access_node::get_variable_identifier() const {
-		return m_variable_identifier;
+	const std::string& variable_access_node::get_identifier() const {
+		return m_identifier;
 	}
 }

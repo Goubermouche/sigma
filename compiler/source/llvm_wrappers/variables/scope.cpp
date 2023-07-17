@@ -51,7 +51,7 @@ namespace sigma {
 		m_children.push_back(child);
 	}
 
-	value_ptr scope::get_variable(
+	variable_ptr scope::get_variable(
 		const std::string& identifier
 	) {
 		// try to find an llvm::Value in this scope
@@ -88,9 +88,9 @@ namespace sigma {
 
 	void scope::insert_variable(
 		const std::string& identifier,
-		value_ptr value
+		variable_ptr variable
 	) {
-		m_variables[identifier] = value;
+		m_variables[identifier] = variable;
 	}
 
 	llvm::BasicBlock* scope::get_loop_end_block() const {
@@ -118,7 +118,7 @@ namespace sigma {
 			console::out
 				<< std::string(indent, ' ')
 				<< identifier << ": "
-				<< variable->get_type().to_string() << '\n';
+				<< variable->get_value()->get_type().to_string() << '\n';
 		}
 
 		for(const auto& child : m_children) {

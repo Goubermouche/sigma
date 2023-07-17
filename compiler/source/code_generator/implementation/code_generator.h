@@ -360,7 +360,7 @@ namespace sigma {
 		llvm::Value* cast_value(
 			const value_ptr& source_value,
 			type target_type, 
-			const file_position& location
+			const file_position& position
 		);
 
 		outcome::result<void> verify_main_entry_point();

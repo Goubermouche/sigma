@@ -68,7 +68,11 @@ namespace sigma {
 		return outcome::success();
 	}
 
-	llvm::Value* code_generator::cast_value(const value_ptr& source_value, type target_type, const file_position& location) {
+	llvm::Value* code_generator::cast_value(
+		const value_ptr& source_value,
+		type target_type, 
+		const file_position& position
+	) {
 		// both types are the same
 		if (source_value->get_type() == target_type) {
 			return source_value->get_value();
@@ -93,7 +97,7 @@ namespace sigma {
 			//	return false;
 			//}
 
-			warning::emit<3001>(location, function_return_type, target_type)->print();
+			warning::emit<3001>(position, function_return_type, target_type)->print();
 
 			llvm::Value* function_call_result = source_value->get_value();
 			llvm::Type* target_llvm_type = target_type.get_llvm_type(function_call_result->getContext());
@@ -125,7 +129,7 @@ namespace sigma {
 		//	return false;
 		//}
 
-		warning::emit<3002>(location, source_value->get_type(), target_type)->print();
+		warning::emit<3002>(position, source_value->get_type(), target_type)->print();
 
 		// get the LLVM value and type for source and target
 		llvm::Value* source_llvm_value = source_value->get_value();

@@ -36,16 +36,22 @@ struct std::formatter<sigma::types::filepath> {
 	}
 };
 
-//template<>
-//struct std::formatter<sigma::file_position> {
-//	static auto parse(format_parse_context& ctx) {
-//		return ctx.begin();
-//	}
-//
-//	static auto format(sigma::file_position e, format_context& ctx) {
-//		return format_to(ctx.out(), "{}", "x");
-//	}
-//};
+template<>
+struct std::formatter<sigma::file_position> {
+	static auto parse(format_parse_context& ctx) {
+		return ctx.begin();
+	}
+
+	static auto format(sigma::file_position e, format_context& ctx) {
+		return format_to(
+			ctx.out(),
+			"{}:{}:{}",
+			e.get_path(),
+			e.get_line_index(),
+			e.get_char_index()
+		);
+	}
+};
 
 namespace sigma {
 	class diagnostic_message {

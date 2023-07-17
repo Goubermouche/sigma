@@ -7,7 +7,7 @@ namespace sigma {
 	 */
 	class break_node : public node {
 	public:
-		break_node(const file_position& location);
+		break_node(const file_position& position);
 
 		outcome::result<value_ptr> accept(
 			code_generator_template& visitor,

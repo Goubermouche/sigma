@@ -32,9 +32,9 @@ namespace sigma::detail {
 		return m_position;
 	}
 
-	void string_accessor::set_position(u64 location) {
+	void string_accessor::set_position(u64 position) {
 		// check if we are inside of our strings' bounds
-		ASSERT(location <= m_string.size(), "accessor out of range! (set)");
-		m_position = location;
+		ASSERT(position <= m_string.size(), "accessor out of range! (set)");
+		m_position = position;
 	}
 }

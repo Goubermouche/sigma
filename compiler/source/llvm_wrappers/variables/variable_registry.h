@@ -7,23 +7,23 @@ namespace sigma {
 		variable_registry();
 		void insert_local_variable(
 			const std::string& identifier,
-			value_ptr value
+			variable_ptr variable
 		);
 
 		void insert_global_variable(
 			const std::string& identifier,
-			value_ptr value
+			variable_ptr variable
 		);
 
-		value_ptr get_variable(
+		variable_ptr get_variable(
 			const std::string& identifier
 		);
 
-		value_ptr get_local_variable(
+		variable_ptr get_local_variable(
 			const std::string& identifier
 		);
 
-		value_ptr get_global_variable(
+		variable_ptr get_global_variable(
 			const std::string& identifier
 		);
 
@@ -54,7 +54,7 @@ namespace sigma {
 	private:
 		std::vector<scope_ptr> m_scopes;
 
-		std::unordered_map<std::string, value_ptr> m_global_variables;
+		std::unordered_map<std::string, variable_ptr> m_global_variables;
 		std::vector<llvm::Constant*> m_global_ctors;
 		u64 m_initialization_priority = 0;
 	};

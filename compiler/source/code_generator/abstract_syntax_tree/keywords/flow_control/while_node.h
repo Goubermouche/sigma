@@ -8,7 +8,7 @@ namespace sigma {
 	class while_node : public node {
 	public:
 		while_node(
-			const file_position& location,
+			const file_position& position,
 			const node_ptr& loop_condition_node,
 			const std::vector<node_ptr>& statement_nodes
 		);

@@ -20,9 +20,9 @@ namespace sigma {
 	warning_message_position::warning_message_position(
 		std::string message,
 		u64 code,
-		const file_position& location
+		const file_position& position
 	) : warning_message(std::move(message), code),
-	m_position(location) {}
+	m_position(position) {}
 
 	void warning_message_position::print() const {
 		console::out

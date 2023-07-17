@@ -9,7 +9,7 @@ namespace sigma {
 	class declaration_node : public node {
 	public:
 		declaration_node(
-			const file_position& location,
+			const file_position& position,
 			const type& declaration_type,
 			const std::string& declaration_identifier,
 			const node_ptr& expression_node = nullptr

@@ -2,10 +2,10 @@
 
 namespace sigma {
 	variable_node::variable_node(
-		const file_position& location,
-		const std::string& variable_identifier
-	) : node(location),
-	m_variable_identifier(variable_identifier) {}
+		const file_position& position,
+		const std::string& identifier
+	) : node(position),
+	m_identifier(identifier) {}
 
 	outcome::result<value_ptr> variable_node::accept(
 		code_generator_template& visitor, 
@@ -26,10 +26,10 @@ namespace sigma {
 			is_last
 		);
 
-		console::out << "'" + m_variable_identifier + "'\n";
+		console::out << "'" + m_identifier + "'\n";
 	}
 
-	const std::string& variable_node::get_variable_identifier() const {
-		return m_variable_identifier;
+	const std::string& variable_node::get_identifier() const {
+		return m_identifier;
 	}
 }

@@ -7,19 +7,19 @@ namespace sigma {
 
 	void variable_registry::insert_local_variable(
 		const std::string& identifier, 
-		value_ptr value
+		variable_ptr variable
 	) {
-		m_scopes.back()->insert_variable(identifier, value);
+		m_scopes.back()->insert_variable(identifier, variable);
 	}
 
 	void variable_registry::insert_global_variable(
 		const std::string& identifier,
-		value_ptr value
+		variable_ptr variable
 	) {
-		m_global_variables[identifier] = value;
+		m_global_variables[identifier] = variable;
 	}
 
-	value_ptr variable_registry::get_variable(
+	variable_ptr variable_registry::get_variable(
 		const std::string& identifier
 	) {
 		if(const auto& value = get_global_variable(identifier)) {
@@ -29,13 +29,13 @@ namespace sigma {
 		return get_local_variable(identifier);
 	}
 
-	value_ptr variable_registry::get_local_variable(
+	variable_ptr variable_registry::get_local_variable(
 		const std::string& identifier
 	) {
 		return m_scopes.back()->get_variable(identifier);
 	}
 
-	value_ptr variable_registry::get_global_variable(
+	variable_ptr variable_registry::get_global_variable(
 		const std::string& identifier
 	) {
 		const auto it = m_global_variables.find(identifier);
@@ -88,21 +88,26 @@ namespace sigma {
 		const variable_registry& other
 	) {
 		for (size_t i = 0; i < other.m_scopes.size(); ++i) {
-			// If current registry doesn't have enough scopes, create new ones
+			// if the current registry doesn't have enough scopes, create new ones
 			if (i >= m_scopes.size()) {
 				m_scopes.push_back(std::make_shared<scope>(m_scopes.back()));
 			}
 
-			// Merge the scopes
+			// merge the scopes
 			OUTCOME_TRY(m_scopes[i]->concatenate(other.m_scopes[i]));
 		}
 
 		for (const auto& variable : other.m_global_variables) {
 			if (m_global_variables.contains(variable.first)) {
 				return outcome::failure(
-					error::emit<4006>(variable.first)
+					error::emit<4017>(
+						variable.second->get_position(),
+						variable.first,
+						m_global_variables[variable.first]->get_position()
+					)
 				);
 			}
+
 			m_global_variables.insert(variable);
 		}
 
@@ -143,7 +148,7 @@ namespace sigma {
 			console::out
 				<< std::string(2, ' ')
 				<< identifier << ": "
-				<< variable->get_type().to_string() << '\n';
+				<< variable->get_value()->get_type().to_string() << '\n';
 		}
 	}
 }

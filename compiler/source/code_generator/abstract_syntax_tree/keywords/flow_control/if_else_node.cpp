@@ -2,10 +2,10 @@
 
 namespace sigma {
 	if_else_node::if_else_node(
-		const file_position& location,
+		const file_position& position,
 		const std::vector<node_ptr>& condition_nodes,
 		const std::vector<std::vector<node_ptr>>& branch_nodes
-	) : node(location),
+	) : node(position),
 	m_condition_nodes(condition_nodes),
 	m_branch_nodes(branch_nodes) {}
 

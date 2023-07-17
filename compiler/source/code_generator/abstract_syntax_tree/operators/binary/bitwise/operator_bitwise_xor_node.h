@@ -8,7 +8,7 @@ namespace sigma {
 	class operator_bitwise_xor_node : public operator_binary_base {
 	public:
 		operator_bitwise_xor_node(
-			const file_position& location,
+			const file_position& position,
 			const node_ptr& left_expression_node,
 			const node_ptr& right_expression_node
 		);

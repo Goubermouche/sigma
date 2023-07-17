@@ -8,7 +8,7 @@ namespace sigma {
 	class array_allocation_node : public node {
 	public:
 		array_allocation_node(
-			const file_position& location,
+			const file_position& position,
 			const type& array_element_type,
 			const node_ptr& array_element_count_node
 		);

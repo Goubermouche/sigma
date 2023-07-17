@@ -8,7 +8,7 @@ namespace sigma {
 	class return_node : public node {
 	public:
 		return_node(
-			const file_position& location,
+			const file_position& position,
 			const node_ptr& return_expression_node
 		);
 

@@ -44,7 +44,7 @@ namespace sigma {
 		)) {
 			return outcome::failure(
 				error::emit<4000>(
-					node.get_declared_location(), 
+					node.get_declared_position(), 
 					node.get_function_identifier()
 				)
 			); // return on failure
@@ -92,10 +92,13 @@ namespace sigma {
 			// add the alloca to the current scope
 			m_context->get_variable_registry().insert_local_variable(
 				arg_name,
-				std::make_shared<value>(
-					arg_name,
-					arg_type,
-					alloca
+				std::make_shared<variable>(
+					std::make_shared<value>(
+						arg_name,
+						arg_type,
+						alloca
+					),
+					node.get_declared_position()
 				)
 			);
 
@@ -116,7 +119,7 @@ namespace sigma {
 			// check if the return type is non-void
 			if(node.get_function_return_type() != type(type::base::empty, 0)) {
 				warning::emit<3000>(
-					node.get_declared_location(),
+					node.get_declared_position(),
 					node.get_function_identifier()
 				)->print();
 			}
@@ -156,7 +159,7 @@ namespace sigma {
 		if(!func) {
 			return outcome::failure(
 				error::emit<4001>(
-					node.get_declared_location(),
+					node.get_declared_position(),
 					node.get_function_identifier()
 				)
 			); // return on failure
@@ -169,7 +172,7 @@ namespace sigma {
 		if(!func->is_variadic() && required_arguments.size() != given_arguments.size()) {
 			return outcome::failure(
 				error::emit<4002>(
-					node.get_declared_location(),
+					node.get_declared_position(),
 					node.get_function_identifier()
 				)
 			); // return on failure
@@ -188,7 +191,7 @@ namespace sigma {
 			argument_values[i] = cast_value(
 				argument_result, 
 				required_arguments[i].second, 
-				node.get_declared_location()
+				node.get_declared_position()
 			);
 		}
 
@@ -208,7 +211,7 @@ namespace sigma {
 				llvm::Value* argument_value_cast = cast_value(
 					argument_value,
 					type(type::base::f64, 0),
-					given_arguments[i]->get_declared_location()
+					given_arguments[i]->get_declared_position()
 				);
 
 				argument_value = std::make_shared<value>(
@@ -222,7 +225,7 @@ namespace sigma {
 				llvm::Value* argument_value_cast = cast_value(
 					argument_value,
 					type(type::base::i32, 0), 
-					given_arguments[i]->get_declared_location()
+					given_arguments[i]->get_declared_position()
 				);
 
 				argument_value = std::make_shared<value>(

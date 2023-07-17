@@ -2,9 +2,9 @@
 
 namespace sigma {
 	return_node::return_node(
-		const file_position& location,
+		const file_position& position,
 		const node_ptr& return_expression_node
-	) : node(location),
+	) : node(position),
 	m_return_expression_node(return_expression_node) {}
 
 	outcome::result<value_ptr> return_node::accept(

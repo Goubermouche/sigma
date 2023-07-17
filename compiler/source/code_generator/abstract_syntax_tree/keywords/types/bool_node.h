@@ -8,7 +8,7 @@ namespace sigma {
 	class bool_node : public node {
 	public:
 		bool_node(
-			const file_position& location,
+			const file_position& position,
 			bool value
 		);
 

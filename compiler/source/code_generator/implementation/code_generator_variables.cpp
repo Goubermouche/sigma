@@ -29,7 +29,7 @@ namespace sigma {
 		llvm::Value* out_cast = cast_value(
 			expression_result,
 			variable_result->get_type(), 
-			node.get_declared_location()
+			node.get_declared_position()
 		);
 		
 		expression_result->set_value(out_cast);
@@ -50,9 +50,11 @@ namespace sigma {
 
 		// load a local variable
 		// look up the local variable in the active scope
-		if (const value_ptr variable_value = m_context->get_variable_registry().get_local_variable(
-			node.get_variable_identifier())
+		if (const variable_ptr variable = m_context->get_variable_registry().get_local_variable(
+			node.get_identifier())
 		) {
+			const value_ptr variable_value = variable->get_value();
+
 			// load the value from the memory location
 			llvm::AllocaInst* alloca = llvm::dyn_cast<llvm::AllocaInst>(
 				variable_value->get_value()
@@ -65,7 +67,7 @@ namespace sigma {
 
 			// return the load instruction as a value
 			value_ptr variable_load = std::make_shared<value>(
-				node.get_variable_identifier(), 
+				node.get_identifier(), 
 				variable_value->get_type(), 
 				load
 			);
@@ -77,32 +79,34 @@ namespace sigma {
 		// we haven't found a local variable, check if we're loading a global one
 		// load a global variable
 		// look up the global variable in the m_global_named_values map
-		const value_ptr global_variable = m_context->get_variable_registry().get_global_variable(node.get_variable_identifier());
+		const variable_ptr global_variable = m_context->get_variable_registry().get_global_variable(node.get_identifier());
 		// check if the global variable exists
 		if (!global_variable) {
 			return outcome::failure(
 				error::emit<4003>(
-					node.get_declared_location(), 
-					node.get_variable_identifier()
+					node.get_declared_position(), 
+					node.get_identifier()
 				)
 			); // return on failure
 		}
 
+		const value_ptr global_variable_value = global_variable->get_value();
+
 		// get the value from the global variable pointer
-		const llvm::GlobalValue* global_variable_value = llvm::dyn_cast<llvm::GlobalValue>(
-			global_variable->get_value()
+		const llvm::GlobalValue* global_variable_value_ptr = llvm::dyn_cast<llvm::GlobalValue>(
+			global_variable_value->get_value()
 		);
 
 		// load the value from the memory location
 		llvm::Value* load = m_context->get_builder().CreateLoad(
-			global_variable_value->getValueType(),
-			global_variable->get_value()
+			global_variable_value_ptr->getValueType(),
+			global_variable_value->get_value()
 		);
 
 		// return the load instruction as a value
 		return std::make_shared<value>(
-			node.get_variable_identifier(),
-			global_variable->get_type(),
+			node.get_identifier(),
+			global_variable_value->get_type(),
 			load
 		);
 	}
@@ -132,7 +136,7 @@ namespace sigma {
 		if(m_context->get_variable_registry().contains_variable(node.get_declaration_identifier())) {
 			return outcome::failure(
 				error::emit<4004>(
-					node.get_declared_location(),
+					node.get_declared_position(),
 					node.get_declaration_identifier()
 				)
 			);
@@ -140,11 +144,14 @@ namespace sigma {
 
 		// add the variable to the active scope
 		m_context->get_variable_registry().insert_local_variable(
-			node.get_declaration_identifier(), 
-			std::make_shared<value>(
-				node.get_declaration_identifier(), 
-				node.get_declaration_type(),
-				alloca
+			node.get_declaration_identifier(),
+			std::make_shared<variable>(
+				std::make_shared<value>(
+					node.get_declaration_identifier(),
+					node.get_declaration_type(),
+					alloca
+				),
+				node.get_declared_position()
 			)
 		);
 
@@ -160,7 +167,7 @@ namespace sigma {
 		llvm::Value* cast_assigned_value = cast_value(
 			declaration_value_result,
 			node.get_declaration_type(),
-			node.get_declared_location()
+			node.get_declared_position()
 		);
 
 		m_context->get_builder().CreateStore(cast_assigned_value, alloca);
@@ -207,7 +214,7 @@ namespace sigma {
 		llvm::Value* cast_assigned_value = cast_value(
 			declaration_value_result, 
 			node.get_declaration_type(), 
-			node.get_declared_location()
+			node.get_declared_position()
 		);
 
 		// create a global variable
@@ -229,7 +236,7 @@ namespace sigma {
 		if(m_context->get_variable_registry().contains_global_variable(node.get_declaration_identifier())) {
 			return outcome::failure(
 				error::emit<4006>(
-					node.get_declared_location(),
+					node.get_declared_position(),
 					node.get_declaration_identifier()
 				)
 			); // return on failure
@@ -238,7 +245,10 @@ namespace sigma {
 		// add the variable to the m_global_named_values map
 		m_context->get_variable_registry().insert_global_variable(
 			node.get_declaration_identifier(),
-			global_declaration
+			std::make_shared<variable>(
+				global_declaration,
+				node.get_declared_position()
+			)
 		);
 
 		m_context->get_builder().CreateStore(
@@ -290,7 +300,7 @@ namespace sigma {
 		llvm::Value* element_count_cast = cast_value(
 			element_count_result, 
 			type(type::base::u64, 0),
-			node.get_array_element_count_node()->get_declared_location()
+			node.get_array_element_count_node()->get_declared_position()
 		);
 
 		const llvm::FunctionCallee malloc_func = m_context->get_function_registry().get_function(
@@ -388,7 +398,7 @@ namespace sigma {
 			llvm::Value* index_value_cast = cast_value(
 				index_value_result,
 				type(type::base::u64, 0),
-				node.get_declared_location()
+				node.get_declared_position()
 			);
 
 			// load the actual pointer value
@@ -448,7 +458,7 @@ namespace sigma {
 			llvm::Value* index_value_cast = cast_value(
 				index_value_result,
 				type(type::base::u64, 0), 
-				node.get_declared_location()
+				node.get_declared_position()
 			);
 		
 			// load the actual pointer value
@@ -484,7 +494,7 @@ namespace sigma {
 		llvm::Value* expression_llvm_value_cast = cast_value(
 			expression_value_result, 
 			final_element_type, 
-			node.get_declared_location()
+			node.get_declared_position()
 		);
 		
 		value_ptr expression_value = std::make_shared<value>(
@@ -512,16 +522,16 @@ namespace sigma {
 		SUPPRESS_C4100(context);
 
 		// find the variable value in our named values
-		if (value_ptr var_value = m_context->get_variable_registry().get_variable(node.get_variable_identifier())) {
+		if (const variable_ptr variable = m_context->get_variable_registry().get_variable(node.get_identifier())) {
 			// since the variable_node represents an address, we do not need to load it
 			// just return the found value
-			return var_value;
+			return variable->get_value();
 		}
 
 		return outcome::failure(
 			error::emit<4003>(
-				node.get_declared_location(),
-				node.get_variable_identifier()
+				node.get_declared_position(),
+				node.get_identifier()
 			)
 		); // return on failure
 	}

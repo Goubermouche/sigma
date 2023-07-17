@@ -141,6 +141,7 @@
     <ClInclude Include="source\utility\types.h" />
     <ClInclude Include="source\utility\string.h" />
     <ClInclude Include="source\llvm_wrappers\variables\variable_registry.h" />
+    <ClInclude Include="source\llvm_wrappers\variables\variable.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp" />
@@ -226,6 +227,7 @@
     <ClCompile Include="source\utility\timer.cpp" />
     <ClCompile Include="source\utility\string.cpp" />
     <ClCompile Include="source\llvm_wrappers\variables\variable_registry.cpp" />
+    <ClCompile Include="source\llvm_wrappers\variables\variable.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

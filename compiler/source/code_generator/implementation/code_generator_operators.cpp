@@ -55,7 +55,7 @@ namespace sigma {
 		if (!expression_result->get_type().is_numerical()) {
 			return outcome::failure(
 				error::emit<4100>(
-					node.get_declared_location(), 
+					node.get_declared_position(), 
 					expression_result->get_type()
 				)
 			); // return on failure
@@ -105,7 +105,7 @@ namespace sigma {
 		if (!expression_result->get_type().is_numerical()) {
 			return outcome::failure(
 				error::emit<4101>(
-					node.get_declared_location(),
+					node.get_declared_position(),
 					expression_result->get_type()
 				)
 			); // return on failure
@@ -154,7 +154,7 @@ namespace sigma {
 		if (!expression_result->get_type().is_numerical()) {
 			return outcome::failure(
 				error::emit<4102>(
-					node.get_declared_location(), 
+					node.get_declared_position(), 
 					expression_result->get_type()
 				)
 			); // return on failure
@@ -209,7 +209,7 @@ namespace sigma {
 		if (!expression_result->get_type().is_numerical()) {
 			return outcome::failure(
 				error::emit<4103>(
-					node.get_declared_location(), 
+					node.get_declared_position(), 
 					expression_result->get_type()
 				)
 			); // return on failure
@@ -266,7 +266,7 @@ namespace sigma {
 		if (!operand_result->get_type().is_integral()) {
 			return outcome::failure(
 				error::emit<4105>(
-					node.get_declared_location(),
+					node.get_declared_position(),
 					operand_result->get_type()
 				)
 			); // return on failure
@@ -301,7 +301,7 @@ namespace sigma {
 			operand_result->get_type().get_base() != type::base::boolean) {
 			return outcome::failure(
 				error::emit<4104>(
-					node.get_declared_location(),
+					node.get_declared_position(),
 					operand_result->get_type()
 				)
 			); // return on failure
@@ -623,7 +623,7 @@ namespace sigma {
 			!right_operand_result->get_type().is_integral()) {
 			return outcome::failure(
 				error::emit<4202>(
-					node.get_declared_location(),
+					node.get_declared_position(),
 					left_operand_result->get_type(),
 					right_operand_result->get_type()
 				)
@@ -666,7 +666,7 @@ namespace sigma {
 			!right_operand_result->get_type().is_integral()) {
 			return outcome::failure(
 				error::emit<4203>(
-					node.get_declared_location(),
+					node.get_declared_position(),
 					left_operand_result->get_type(),
 					right_operand_result->get_type()
 				)
@@ -709,7 +709,7 @@ namespace sigma {
 			!right_operand_result->get_type().is_integral()) {
 			return outcome::failure(
 				error::emit<4204>(
-					node.get_declared_location(),
+					node.get_declared_position(),
 					left_operand_result->get_type(),
 					right_operand_result->get_type()
 				)
@@ -752,7 +752,7 @@ namespace sigma {
 			!right_operand_result->get_type().is_integral()) {
 			return outcome::failure(
 				error::emit<4205>(
-					node.get_declared_location(),
+					node.get_declared_position(),
 					left_operand_result->get_type(),
 					right_operand_result->get_type()
 				)
@@ -795,7 +795,7 @@ namespace sigma {
 			!right_operand_result->get_type().is_integral()) {
 			return outcome::failure(
 				error::emit<4206>(
-					node.get_declared_location(),
+					node.get_declared_position(),
 					left_operand_result->get_type(),
 					right_operand_result->get_type()
 				)
@@ -839,7 +839,7 @@ namespace sigma {
 			right_operand_result->get_type().get_base() != type::base::boolean) {
 			return outcome::failure(
 				error::emit<4200>(
-					node.get_declared_location(),
+					node.get_declared_position(),
 					left_operand_result->get_type(),
 					right_operand_result->get_type()
 				)
@@ -883,7 +883,7 @@ namespace sigma {
 			right_operand_result->get_type().get_base() != type::base::boolean) {
 			return outcome::failure(
 				error::emit<4201>(
-					node.get_declared_location(),
+					node.get_declared_position(),
 					left_operand_result->get_type(), 
 					right_operand_result->get_type()
 				)
@@ -930,13 +930,13 @@ namespace sigma {
 		llvm::Value* left_value_upcasted = cast_value(
 			left_operand_result,
 			highest_precision,
-			node.get_declared_location()
+			node.get_declared_position()
 		);
 
 		llvm::Value* right_value_upcasted = cast_value(
 			right_operand_result, 
 			highest_precision, 
-			node.get_declared_location()
+			node.get_declared_position()
 		);
 
 		// create a greater than operation based on the highest_precision type
@@ -996,13 +996,13 @@ namespace sigma {
 		llvm::Value* left_value_upcasted = cast_value(
 			left_operand_result,
 			highest_precision,
-			node.get_declared_location()
+			node.get_declared_position()
 		);
 
 		llvm::Value* right_value_upcasted = cast_value(
 			right_operand_result, 
 			highest_precision,
-			node.get_declared_location()
+			node.get_declared_position()
 		);
 
 		// create a greater than or equal to operation based on the highest_precision type
@@ -1062,13 +1062,13 @@ namespace sigma {
 		llvm::Value* left_value_upcasted = cast_value(
 			left_operand_result,
 			highest_precision,
-			node.get_declared_location()
+			node.get_declared_position()
 		);
 
 		llvm::Value* right_value_upcasted = cast_value(
 			right_operand_result, 
 			highest_precision,
-			node.get_declared_location()
+			node.get_declared_position()
 		);
 
 		// create a less than operation based on the highest_precision type
@@ -1128,13 +1128,13 @@ namespace sigma {
 		llvm::Value* left_value_upcasted = cast_value(
 			left_operand_result,
 			highest_precision,
-			node.get_declared_location()
+			node.get_declared_position()
 		);
 
 		llvm::Value* right_value_upcasted = cast_value(
 			right_operand_result, 
 			highest_precision, 
-			node.get_declared_location()
+			node.get_declared_position()
 		);
 
 		// create a less than or equal to operation based on the highest_precision type
@@ -1194,13 +1194,13 @@ namespace sigma {
 		llvm::Value* left_value_upcasted = cast_value(
 			left_operand_result,
 			highest_precision,
-			node.get_declared_location()
+			node.get_declared_position()
 		);
 
 		llvm::Value* right_value_upcasted = cast_value(
 			right_operand_result,
 			highest_precision,
-			node.get_declared_location()
+			node.get_declared_position()
 		);
 
 		// create an equals operation based on the highest_precision type
@@ -1252,13 +1252,13 @@ namespace sigma {
 		llvm::Value* left_value_upcasted = cast_value(
 			left_operand_result, 
 			highest_precision,
-			node.get_declared_location()
+			node.get_declared_position()
 		);
 
 		llvm::Value* right_value_upcasted = cast_value(
 			right_operand_result, 
 			highest_precision, 
-			node.get_declared_location()
+			node.get_declared_position()
 		);
 
 		// create a not equals operation based on the highest_precision type
@@ -1308,13 +1308,13 @@ namespace sigma {
 		llvm::Value* left_value_upcasted = cast_value(
 			left_operand_result, 
 			highest_precision, 
-			left_operand->get_declared_location()
+			left_operand->get_declared_position()
 		);
 
 		llvm::Value* right_value_upcasted = cast_value(
 			right_operand_result,
 			highest_precision, 
-			right_operand->get_declared_location()
+			right_operand->get_declared_position()
 		);
 
 		// both types are floating point
@@ -1381,13 +1381,13 @@ namespace sigma {
 		llvm::Value* left_value_upcasted = cast_value(
 			left_operand_result, 
 			highest_precision, 
-			left_operand->get_declared_location()
+			left_operand->get_declared_position()
 		);
 
 		llvm::Value* right_value_upcasted = cast_value(
 			right_operand_result,
 			highest_precision, 
-			right_operand->get_declared_location()
+			right_operand->get_declared_position()
 		);
 
 		// both types are floating point
@@ -1454,13 +1454,13 @@ namespace sigma {
 		llvm::Value* left_value_upcasted = cast_value(
 			left_operand_result, 
 			highest_precision,
-			left_operand->get_declared_location()
+			left_operand->get_declared_position()
 		);
 
 		llvm::Value* right_value_upcasted = cast_value(
 			right_operand_result, 
 			highest_precision,
-			right_operand->get_declared_location()
+			right_operand->get_declared_position()
 		);
 
 		// both types are floating point
@@ -1527,13 +1527,13 @@ namespace sigma {
 		llvm::Value* left_value_upcasted = cast_value(
 			left_operand_result,
 			highest_precision,
-			left_operand->get_declared_location()
+			left_operand->get_declared_position()
 		);
 
 		llvm::Value* right_value_upcasted = cast_value(
 			right_operand_result,
 			highest_precision,
-			right_operand->get_declared_location()
+			right_operand->get_declared_position()
 		);
 
 		// both types are floating point
@@ -1600,13 +1600,13 @@ namespace sigma {
 		llvm::Value* left_value_upcasted = cast_value(
 			left_operand_result, 
 			highest_precision,
-			left_operand->get_declared_location()
+			left_operand->get_declared_position()
 		);
 
 		llvm::Value* right_value_upcasted = cast_value(
 			right_operand_result,
 			highest_precision, 
-			right_operand->get_declared_location()
+			right_operand->get_declared_position()
 		);
 
 		// both types are floating point

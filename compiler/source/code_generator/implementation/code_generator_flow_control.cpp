@@ -33,7 +33,7 @@ namespace sigma {
 			llvm::Value* upcasted_return_value = cast_value(
 				return_value_result,
 				parent_function->get_return_type(),
-				node.get_declared_location()
+				node.get_declared_position()
 			);
 
 			// generate the LLVM return instruction with the upcasted value
@@ -294,7 +294,7 @@ namespace sigma {
 			condition_value_result->get_type().is_pointer()) {
 			return outcome::failure(
 				error::emit<4010>(
-					node.get_declared_location(),
+					node.get_declared_position(),
 					condition_value_result->get_type()
 				)
 			);
@@ -345,7 +345,7 @@ namespace sigma {
 			// emit an error if there's no enclosing loop to break from
 			return outcome::failure(
 				error::emit<4011>(
-					node.get_declared_location()
+					node.get_declared_position()
 				)
 			);
 		}

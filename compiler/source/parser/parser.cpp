@@ -109,7 +109,7 @@ namespace sigma {
 	outcome::result<node_ptr> parser::parse_function_definition() {
 		OUTCOME_TRY(const type return_type, parse_type());
 
-		const file_position location = m_token_list.get_current_token().get_token_location();
+		const file_position position = m_token_list.get_current_token().get_position();
 		m_token_list.get_token(); // identifier (guaranteed)
 		const std::string identifier = m_token_list.get_current_token().get_value();
 		m_token_list.get_token(); // l_parenthesis (guaranteed)
@@ -133,7 +133,7 @@ namespace sigma {
 				}
 				else if (next_token != token::r_parenthesis) {
 					return outcome::failure(error::emit<3000>(
-						m_token_list.get_current_token().get_token_location(),
+						m_token_list.get_current_token().get_position(),
 						token::r_parenthesis,
 						m_token_list.get_current_token().get_token()
 					)); // return on failure
@@ -151,7 +151,7 @@ namespace sigma {
 		OUTCOME_TRY(const std::vector<node_ptr>&statements, parse_local_statements());
 
 		return new function_node(
-			location,
+			position,
 			return_type,
 			false,
 			identifier,
@@ -176,7 +176,7 @@ namespace sigma {
 				m_token_list.get_token(); // read the erroneous token
 
 				return outcome::failure(error::emit<3001>(
-					m_token_list.get_current_token().get_token_location(),
+					m_token_list.get_current_token().get_position(),
 					token
 				));
 			}
@@ -250,7 +250,7 @@ namespace sigma {
 				}
 				else {
 					return outcome::failure(error::emit<3004>(
-						m_token_list.get_current_token().get_token_location()
+						m_token_list.get_current_token().get_position()
 					)); // return on failure
 				}
 
@@ -275,7 +275,7 @@ namespace sigma {
 				return parse_for_loop();
 			default:
 				return outcome::failure(error::emit<3001>(
-					m_token_list.get_current_token().get_token_location(),
+					m_token_list.get_current_token().get_position(),
 					next_token
 				)); // return on failure
 			}
@@ -303,7 +303,7 @@ namespace sigma {
 		else {
 			// create a simple access node
 			m_token_list.get_token(); // identifier (guaranteed)
-			local_statement_identifier_node = new variable_access_node(m_token_list.get_current_token().get_token_location(), m_token_list.get_current_token().get_value());
+			local_statement_identifier_node = new variable_access_node(m_token_list.get_current_token().get_position(), m_token_list.get_current_token().get_value());
 		}
 
 		// check for post unary operators after identifier, deep expression, or array index access
@@ -323,7 +323,7 @@ namespace sigma {
 	outcome::result<node_ptr> parser::parse_if_else_statement() {
 		std::vector<node_ptr> conditions;
 		std::vector<std::vector<node_ptr>> branches;
-		const file_position location = m_token_list.get_current_token().get_token_location();
+		const file_position position = m_token_list.get_current_token().get_position();
 		bool has_else = false;
 
 		while (true) {
@@ -360,12 +360,12 @@ namespace sigma {
 			}
 		}
 
-		return new if_else_node(location, conditions, branches);
+		return new if_else_node(position, conditions, branches);
 	}
 
 	outcome::result<node_ptr> parser::parse_while_loop() {
 		m_token_list.get_token(); // keyword_while (guaranteed)
-		const file_position location = m_token_list.get_current_token().get_token_location();
+		const file_position position = m_token_list.get_current_token().get_position();
 
 		OUTCOME_TRY(m_token_list.expect_token(token::l_parenthesis));
 
@@ -381,7 +381,7 @@ namespace sigma {
 		}
 
 		m_token_list.get_token(); // r_brace (guaranteed)
-		return new while_node(location, loop_condition_node, loop_statements);
+		return new while_node(position, loop_condition_node, loop_statements);
 	}
 
 	outcome::result<node_ptr> parser::parse_loop_increment() {
@@ -407,7 +407,7 @@ namespace sigma {
 			}
 			else {
 				return outcome::failure(error::emit<3004>(
-					m_token_list.get_current_token().get_token_location()
+					m_token_list.get_current_token().get_position()
 				)); // return on failure
 			}
 			break;
@@ -415,7 +415,7 @@ namespace sigma {
 			break;
 		default:
 			return outcome::failure(error::emit<3001>(
-				m_token_list.get_current_token().get_token_location(),
+				m_token_list.get_current_token().get_position(),
 				next_token
 			)); // return on failure
 		}
@@ -425,7 +425,7 @@ namespace sigma {
 
 	outcome::result<node_ptr> parser::parse_for_loop() {
 		m_token_list.get_token(); // keyword_for (guaranteed)
-		const file_position location = m_token_list.get_current_token().get_token_location();
+		const file_position position = m_token_list.get_current_token().get_position();
 
 		OUTCOME_TRY(m_token_list.expect_token(token::l_parenthesis));
 
@@ -442,7 +442,7 @@ namespace sigma {
 		}
 		else {
 			return outcome::failure(error::emit<3001>(
-				m_token_list.get_current_token().get_token_location(),
+				m_token_list.get_current_token().get_position(),
 				next_token
 			)); // return on failure
 		}
@@ -483,7 +483,7 @@ namespace sigma {
 
 		m_token_list.get_token(); // r_brace (guaranteed)
 		return new for_node(
-			location,
+			position,
 			loop_initialization_node,
 			loop_condition_node,
 			post_iteration_nodes,
@@ -506,31 +506,31 @@ namespace sigma {
 		switch (op) {
 		case token::operator_addition_assignment:
 			return new operator_addition_assignment_node(
-				m_token_list.get_current_token().get_token_location(),
+				m_token_list.get_current_token().get_position(),
 				left_operand,
 				expression
 			);
 		case token::operator_subtraction_assignment:
 			return new operator_subtraction_assignment_node(
-				m_token_list.get_current_token().get_token_location(),
+				m_token_list.get_current_token().get_position(),
 				left_operand,
 				expression
 			);
 		case token::operator_multiplication_assignment:
 			return new operator_multiplication_assignment_node(
-				m_token_list.get_current_token().get_token_location(),
+				m_token_list.get_current_token().get_position(),
 				left_operand,
 				expression
 			);
 		case token::operator_division_assignment:
 			return new operator_division_assignment_node(
-				m_token_list.get_current_token().get_token_location(),
+				m_token_list.get_current_token().get_position(),
 				left_operand,
 				expression
 			);
 		case token::operator_modulo_assignment:
 			return new operator_modulo_assignment_node(
-				m_token_list.get_current_token().get_token_location(),
+				m_token_list.get_current_token().get_position(),
 				left_operand,
 				expression
 			);
@@ -544,7 +544,7 @@ namespace sigma {
 	outcome::result<node_ptr> parser::parse_array_assignment() {
 		m_token_list.get_token(); // identifier (guaranteed)
 		const std::string identifier = m_token_list.get_current_token().get_value();
-		const file_position location = m_token_list.get_current_token().get_token_location();
+		const file_position position = m_token_list.get_current_token().get_position();
 
 		std::vector<node_ptr> index_nodes;
 		while (peek_next_token() == token::l_bracket) {
@@ -570,13 +570,13 @@ namespace sigma {
 				OUTCOME_TRY(value, parse_expression());
 			}
 
-			const node_ptr array_node = new variable_node(m_token_list.get_current_token().get_token_location(), identifier);
-			return new array_assignment_node(location, array_node, index_nodes, value);
+			const node_ptr array_node = new variable_node(m_token_list.get_current_token().get_position(), identifier);
+			return new array_assignment_node(position, array_node, index_nodes, value);
 		}
 
 		if (next_token == token::operator_increment || next_token == token::operator_decrement) {
-			const node_ptr array_node = new variable_node(m_token_list.get_current_token().get_token_location(), identifier);
-			node_ptr array_access = new array_access_node(location, array_node, index_nodes);
+			const node_ptr array_node = new variable_node(m_token_list.get_current_token().get_position(), identifier);
+			node_ptr array_access = new array_access_node(position, array_node, index_nodes);
 
 			OUTCOME_TRY(array_access, parse_post_operator(array_access));
 		}
@@ -586,7 +586,7 @@ namespace sigma {
 
 	outcome::result<node_ptr> parser::parse_assignment() {
 		m_token_list.get_token(); // identifier (guaranteed)
-		const node_ptr variable = new variable_node(m_token_list.get_current_token().get_token_location(), m_token_list.get_current_token().get_value());
+		const node_ptr variable = new variable_node(m_token_list.get_current_token().get_position(), m_token_list.get_current_token().get_value());
 
 		OUTCOME_TRY(m_token_list.expect_token(token::operator_assignment));
 
@@ -599,14 +599,14 @@ namespace sigma {
 			OUTCOME_TRY(value, parse_expression());
 		}
 
-		return new assignment_node(m_token_list.get_current_token().get_token_location(), variable, value);
+		return new assignment_node(m_token_list.get_current_token().get_position(), variable, value);
 	}
 
 	outcome::result<node_ptr> parser::parse_array_access() {
 		m_token_list.get_token(); // identifier (guaranteed)
 		const std::string identifier = m_token_list.get_current_token().get_value();
 
-		const node_ptr array_node = new variable_node(m_token_list.get_current_token().get_token_location(), identifier);
+		const node_ptr array_node = new variable_node(m_token_list.get_current_token().get_position(), identifier);
 		std::vector<node_ptr> index_nodes;
 
 		m_token_list.get_token(); // l_bracket (guaranteed)
@@ -625,7 +625,7 @@ namespace sigma {
 			m_token_list.get_token(); // l_bracket(guaranteed)
 		}
 
-		return new array_access_node(m_token_list.get_current_token().get_token_location(), array_node, index_nodes);
+		return new array_access_node(m_token_list.get_current_token().get_position(), array_node, index_nodes);
 	}
 
 	outcome::result<node_ptr> parser::parse_function_call() {
@@ -650,7 +650,7 @@ namespace sigma {
 				}
 				else {
 					return outcome::failure(error::emit<3001>(
-						m_token_list.get_current_token().get_token_location(),
+						m_token_list.get_current_token().get_position(),
 						m_token_list.get_current_token().get_token()
 					));  // return on failure
 				}
@@ -658,24 +658,24 @@ namespace sigma {
 		}
 
 		OUTCOME_TRY(m_token_list.expect_token(token::r_parenthesis));
-		return new function_call_node(m_token_list.get_current_token().get_token_location(), identifier, arguments);
+		return new function_call_node(m_token_list.get_current_token().get_position(), identifier, arguments);
 	}
 
 	outcome::result<node_ptr> parser::parse_return_statement() {
-		const file_position location = m_token_list.get_current_token().get_token_location();
+		const file_position position = m_token_list.get_current_token().get_position();
 		m_token_list.get_token(); // keyword_return (guaranteed)
 
 		// allow return statements without any expressions
 		if (peek_next_token() == token::semicolon) {
-			return new return_node(location, nullptr);
+			return new return_node(position, nullptr);
 		}
 
 		OUTCOME_TRY(const node_ptr expression, parse_expression());
-		return new return_node(location, expression);
+		return new return_node(position, expression);
 	}
 
 	outcome::result<node_ptr> parser::parse_declaration(bool is_global) {
-		const file_position location = m_token_list.get_current_token().get_token_location();
+		const file_position position = m_token_list.get_current_token().get_position();
 
 		OUTCOME_TRY(const type declaration_type, parse_type());
 		OUTCOME_TRY(m_token_list.expect_token(token::identifier));
@@ -689,10 +689,10 @@ namespace sigma {
 		}
 
 		if (is_global) {
-			return new global_declaration_node(location, declaration_type, identifier, value);
+			return new global_declaration_node(position, declaration_type, identifier, value);
 		}
 
-		return new local_declaration_node(location, declaration_type, identifier, value);
+		return new local_declaration_node(position, declaration_type, identifier, value);
 	}
 
 	outcome::result<node_ptr> parser::parse_expression(type expression_type) {
@@ -708,7 +708,7 @@ namespace sigma {
 			const token_data op = m_token_list.get_current_token();
 
 			OUTCOME_TRY(node_ptr right, parse_logical_disjunction(expression_type));
-			left = new operator_conjunction_node(op.get_token_location(), left, right);
+			left = new operator_conjunction_node(op.get_position(), left, right);
 		}
 
 		return left;
@@ -723,7 +723,7 @@ namespace sigma {
 			const token_data op = m_token_list.get_current_token();
 
 			OUTCOME_TRY(node_ptr right, parse_comparison(expression_type));
-			left = new operator_disjunction_node(op.get_token_location(), left, right);
+			left = new operator_disjunction_node(op.get_position(), left, right);
 		}
 
 		return left;
@@ -746,22 +746,22 @@ namespace sigma {
 
 			switch (op.get_token()) {
 			case token::operator_greater_than:
-				left = new operator_greater_than_node(m_token_list.get_current_token().get_token_location(), left, right);
+				left = new operator_greater_than_node(m_token_list.get_current_token().get_position(), left, right);
 				break;
 			case token::operator_greater_than_equal_to:
-				left = new operator_greater_than_equal_to_node(m_token_list.get_current_token().get_token_location(), left, right);
+				left = new operator_greater_than_equal_to_node(m_token_list.get_current_token().get_position(), left, right);
 				break;
 			case token::operator_less_than:
-				left = new operator_less_than_node(m_token_list.get_current_token().get_token_location(), left, right);
+				left = new operator_less_than_node(m_token_list.get_current_token().get_position(), left, right);
 				break;
 			case token::operator_less_than_equal_to:
-				left = new operator_less_than_equal_to_node(m_token_list.get_current_token().get_token_location(), left, right);
+				left = new operator_less_than_equal_to_node(m_token_list.get_current_token().get_position(), left, right);
 				break;
 			case token::operator_equals:
-				left = new operator_equals_node(m_token_list.get_current_token().get_token_location(), left, right);
+				left = new operator_equals_node(m_token_list.get_current_token().get_position(), left, right);
 				break;
 			case token::operator_not_equals:
-				left = new operator_not_equals_node(m_token_list.get_current_token().get_token_location(), left, right);
+				left = new operator_not_equals_node(m_token_list.get_current_token().get_position(), left, right);
 				break;
 			}
 		}
@@ -782,10 +782,10 @@ namespace sigma {
 
 			switch (op.get_token()) {
 			case token::operator_addition:
-				left = new operator_addition_node(op.get_token_location(), left, right);
+				left = new operator_addition_node(op.get_position(), left, right);
 				break;
 			case token::operator_subtraction:
-				left = new operator_subtraction_node(op.get_token_location(), left, right);
+				left = new operator_subtraction_node(op.get_position(), left, right);
 				break;
 			}
 		}
@@ -812,28 +812,28 @@ namespace sigma {
 
 			switch (op.get_token()) {
 			case token::operator_multiplication:
-				left = new operator_multiplication_node(op.get_token_location(), left, right);
+				left = new operator_multiplication_node(op.get_position(), left, right);
 				break;
 			case token::operator_division:
-				left = new operator_division_node(op.get_token_location(), left, right);
+				left = new operator_division_node(op.get_position(), left, right);
 				break;
 			case token::operator_modulo:
-				left = new operator_modulo_node(op.get_token_location(), left, right);
+				left = new operator_modulo_node(op.get_position(), left, right);
 				break;
 			case token::operator_bitwise_and:
-				left = new operator_bitwise_and_node(op.get_token_location(), left, right);
+				left = new operator_bitwise_and_node(op.get_position(), left, right);
 				break;
 			case token::operator_bitwise_or:
-				left = new operator_bitwise_or_node(op.get_token_location(), left, right);
+				left = new operator_bitwise_or_node(op.get_position(), left, right);
 				break;
 			case token::operator_bitwise_left_shift:
-				left = new operator_bitwise_left_shift_node(op.get_token_location(), left, right);
+				left = new operator_bitwise_left_shift_node(op.get_position(), left, right);
 				break;
 			case token::operator_bitwise_right_shift:
-				left = new operator_bitwise_right_shift_node(op.get_token_location(), left, right);
+				left = new operator_bitwise_right_shift_node(op.get_position(), left, right);
 				break;
 			case token::operator_bitwise_xor:
-				left = new operator_bitwise_xor_node(op.get_token_location(), left, right);
+				left = new operator_bitwise_xor_node(op.get_position(), left, right);
 				break;
 			}
 		}
@@ -867,7 +867,7 @@ namespace sigma {
 			}
 
 			return outcome::failure(error::emit<3004>(
-				m_token_list.get_current_token().get_token_location()
+				m_token_list.get_current_token().get_position()
 			)); // return on failure
 		case token::identifier:
 			// parse a function call or an assignment
@@ -891,7 +891,7 @@ namespace sigma {
 		}
 
 		return outcome::failure(error::emit<3001>(
-			m_token_list.get_current_token().get_token_location(),
+			m_token_list.get_current_token().get_position(),
 			m_token_list.get_current_token().get_token()
 		)); // return on failure
 	}
@@ -900,37 +900,37 @@ namespace sigma {
 		m_token_list.get_token(); // type
 		const std::string str_value = m_token_list.get_current_token().get_value();
 		const type ty = expression_type.is_unknown() ? type(m_token_list.get_current_token().get_token(), 0) : expression_type;
-		return new numerical_literal_node(m_token_list.get_current_token().get_token_location(), str_value, ty);
+		return new numerical_literal_node(m_token_list.get_current_token().get_position(), str_value, ty);
 	}
 
 	outcome::result<node_ptr> parser::parse_char() {
 		m_token_list.get_token(); // char_literal (guaranteed)
-		return new char_node(m_token_list.get_current_token().get_token_location(), m_token_list.get_current_token().get_value()[0]);
+		return new char_node(m_token_list.get_current_token().get_position(), m_token_list.get_current_token().get_value()[0]);
 	}
 
 	outcome::result<node_ptr> parser::parse_string() {
 		m_token_list.get_token(); // string_literal (guaranteed)
-		return new string_node(m_token_list.get_current_token().get_token_location(), m_token_list.get_current_token().get_value());
+		return new string_node(m_token_list.get_current_token().get_position(), m_token_list.get_current_token().get_value());
 	}
 
 	outcome::result<node_ptr> parser::parse_bool() {
 		m_token_list.get_token(); // bool_literal_true || bool_literal_false (guaranteed)
-		return new bool_node(m_token_list.get_current_token().get_token_location(), m_token_list.get_current_token().get_token() == token::bool_literal_true);
+		return new bool_node(m_token_list.get_current_token().get_position(), m_token_list.get_current_token().get_token() == token::bool_literal_true);
 	}
 
 	outcome::result<node_ptr> parser::parse_break_keyword() {
 		m_token_list.get_token(); // keyword_break (guaranteed)
-		return new break_node(m_token_list.get_current_token().get_token_location());
+		return new break_node(m_token_list.get_current_token().get_position());
 	}
 
 	outcome::result<node_ptr> parser::parse_post_operator(node_ptr operand) {
 		m_token_list.get_token();
 
 		if (m_token_list.get_current_token().get_token() == token::operator_increment) {
-			return new operator_post_increment_node(m_token_list.get_current_token().get_token_location(), operand);
+			return new operator_post_increment_node(m_token_list.get_current_token().get_position(), operand);
 		}
 
-		return new operator_post_decrement_node(m_token_list.get_current_token().get_token_location(), operand);
+		return new operator_post_decrement_node(m_token_list.get_current_token().get_position(), operand);
 	}
 
 	outcome::result<node_ptr> parser::parse_pre_operator() {
@@ -940,13 +940,13 @@ namespace sigma {
 
 		switch (op.get_token()) {
 		case token::operator_increment:
-			return new operator_pre_increment_node(op.get_token_location(), operand);
+			return new operator_pre_increment_node(op.get_position(), operand);
 		case token::operator_decrement:
-			return new operator_pre_decrement_node(op.get_token_location(), operand);
+			return new operator_pre_decrement_node(op.get_position(), operand);
 		case token::operator_not:
-			return new operator_not_node(op.get_token_location(), operand);
+			return new operator_not_node(op.get_position(), operand);
 		case token::operator_bitwise_not:
-			return new operator_bitwise_not_node(op.get_token_location(), operand);
+			return new operator_bitwise_not_node(op.get_position(), operand);
 		}
 
 		ASSERT(false, "unexpected control path reached");
@@ -960,12 +960,12 @@ namespace sigma {
 		const node_ptr zero_node = create_zero_node(expression_type);
 		OUTCOME_TRY(const node_ptr number, parse_number(expression_type));
 
-		return new operator_subtraction_node(m_token_list.get_current_token().get_token_location(), zero_node, number);
+		return new operator_subtraction_node(m_token_list.get_current_token().get_position(), zero_node, number);
 	}
 
 	outcome::result<node_ptr> parser::parse_new_allocation() {
 		m_token_list.get_token(); // keyword_new (guaranteed)
-		const file_position location = m_token_list.get_current_token().get_token_location();
+		const file_position position = m_token_list.get_current_token().get_position();
 		OUTCOME_TRY(const type allocation_type, parse_type());
 
 		// l_bracket
@@ -976,7 +976,7 @@ namespace sigma {
 
 		// r_bracket
 		OUTCOME_TRY(m_token_list.expect_token(token::r_bracket));
-		return new array_allocation_node(location, allocation_type, array_size);
+		return new array_allocation_node(position, allocation_type, array_size);
 	}
 
 	outcome::result<node_ptr> parser::parse_primary_identifier() {
@@ -994,7 +994,7 @@ namespace sigma {
 			// parse an assignment
 			m_token_list.get_token();
 			const std::string identifier = m_token_list.get_current_token().get_value();
-			primary_identifier_node = new variable_access_node(m_token_list.get_current_token().get_token_location(), identifier);
+			primary_identifier_node = new variable_access_node(m_token_list.get_current_token().get_position(), identifier);
 		}
 
 		const token next_token = peek_next_token();
@@ -1112,7 +1112,7 @@ namespace sigma {
 	}
 
 	node_ptr parser::create_zero_node(type expression_type) const {
-		return new numerical_literal_node(m_token_list.get_current_token().get_token_location(), "0", expression_type);
+		return new numerical_literal_node(m_token_list.get_current_token().get_position(), "0", expression_type);
 	}
 
 	outcome::result<type> parser::parse_type() {
@@ -1120,7 +1120,7 @@ namespace sigma {
 
 		if (!is_token_type(m_token_list.get_current_token().get_token())) {
 			return outcome::failure(error::emit<3003>(
-				m_token_list.get_current_token().get_token_location(),
+				m_token_list.get_current_token().get_position(),
 				m_token_list.get_current_token().get_token()
 			)); // return on failure
 		}

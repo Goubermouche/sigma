@@ -16,7 +16,7 @@ namespace sigma {
 		if (literal_type.get_pointer_level() > 0) {
 			return outcome::failure(
 				error::emit<4014>(
-					node.get_declared_location()
+					node.get_declared_position()
 				)
 			); // return on failure
 		}
@@ -129,7 +129,7 @@ namespace sigma {
 		default:
 			return outcome::failure(
 				error::emit<4015>(
-					node.get_declared_location(), 
+					node.get_declared_position(), 
 					literal_type
 				)
 			); // return on failure

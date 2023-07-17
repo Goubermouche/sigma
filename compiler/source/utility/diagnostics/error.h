@@ -153,6 +153,7 @@ namespace sigma {
 	template<> const char* error::error_template<4014> = "unable to declare a numerical literal using a pointer type";
 	template<> const char* error::error_template<4015> = "unable to declare a numerical literal using the given type '{}'";
 	template<> const char* error::error_template<4016> = "IR module contains errors";
+	template<> const char* error::error_template<4017> = "'{}': global variable has already been defined before at {}";
 	// unary errors (4100)
 	template<> const char* error::error_template<4100> = "'post decrement': operator expected a numerical value, but got '{}' instead";
 	template<> const char* error::error_template<4101> = "'post increment': operator expected a numerical value, but got '{}' instead";

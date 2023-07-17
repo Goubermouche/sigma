@@ -9,6 +9,7 @@ namespace sigma {
 		const code_generation_context& context
 	) {
 		SUPPRESS_C4100(context);
+
 		// get the function return type
 		llvm::Type* return_type = node.get_function_return_type().get_llvm_type(
 			m_context->get_context()
@@ -57,7 +58,8 @@ namespace sigma {
 				node.get_function_return_type(),
 				func,
 				node.get_function_arguments(),
-				false
+				false,
+				node.get_declared_position()
 			)
 		);
 

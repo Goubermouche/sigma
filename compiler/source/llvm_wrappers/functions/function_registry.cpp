@@ -78,16 +78,46 @@ namespace sigma {
 		const std::string& identifier
 	) const 	{
 		// try and find an external function declaration
-		const auto it = m_external_function_declarations.find(identifier);
-		if (it != m_external_function_declarations.end()) {
+		const auto it = g_external_function_declarations.find(identifier);
+		if (it != g_external_function_declarations.end()) {
 			return it->second;
 		}
 
 		return nullptr;
 	}
 
-	const std::unordered_map<std::string, function_declaration_ptr>& function_registry::get_external_function_declarations() const {
-		return m_external_function_declarations;
+	outcome::result<void> function_registry::concatenate(
+		const function_registry& other
+	) {
+		for(const auto& function : other.m_functions) {
+			if(m_functions.contains(function.first)) {
+				return outcome::failure(
+					error::emit<4018>(
+						function.second->get_position(),
+						function.first,
+						m_functions[function.first]->get_position()
+					)
+				);
+			}
+
+			m_functions.insert(function);
+		}
+
+		for(const auto& function_declaration : other.m_function_declarations) {
+			if (m_function_declarations.contains(function_declaration.first)) {
+				return outcome::failure(
+					error::emit<4018>(
+						function_declaration.second->get_position(),
+						function_declaration.first,
+						m_functions[function_declaration.first]->get_position()
+					)
+				);
+			}
+
+			m_function_declarations.insert(function_declaration);
+		}
+
+		return outcome::success();
 	}
 
 	void function_registry::insert_function(
@@ -108,13 +138,13 @@ namespace sigma {
 		const std::string& identifier
 	) const {
 		return m_functions.contains(identifier) || 
-			m_external_function_declarations.contains(identifier);
+			g_external_function_declarations.contains(identifier);
 	}
 
 	bool function_registry::contains_function_declaration(
 		const std::string& identifier
 	) const {
 		return m_function_declarations.contains(identifier) || 
-			m_external_function_declarations.contains(identifier);
+			g_external_function_declarations.contains(identifier);
 	}
 }

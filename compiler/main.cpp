@@ -24,17 +24,22 @@ i32 main(i32 argc, char* argv[]) {
 	// 	return 1;
 	// }
 
-	// initialize the compiler 
+	// initialize the compiler settings
 	sigma::compiler_settings settings;
 	settings.optimization_level = sigma::optimization_level::high;
 	settings.size_optimization_level = sigma::size_optimization_level::high;
 	settings.vectorize = true;
 	settings.thread_limit = 10;
 
+	// construct the compiler object
 	sigma::compiler compiler(settings);
 
+	const auto compilation_result = compiler.compile(
+		"./test/main.s", 
+		"./test/"
+	);
+
 	// check for compilation errors
-	const auto compilation_result = compiler.compile("./test/main.s", "./test/");
 	if(compilation_result.has_error()) {
 		sigma::console::out << compilation_result.get_error() << '\n';
 	}

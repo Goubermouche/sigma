@@ -291,9 +291,6 @@
     <ClInclude Include="source\parser\parser.h">
       <Filter>source\parser</Filter>
     </ClInclude>
-    <ClInclude Include="source\utility\containers\compile_time_hash_map.h">
-      <Filter>source\utility\containers</Filter>
-    </ClInclude>
     <ClInclude Include="source\utility\containers\directed_graph.h">
       <Filter>source\utility\containers</Filter>
     </ClInclude>

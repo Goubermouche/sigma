@@ -126,7 +126,6 @@
     <ClInclude Include="source\llvm_wrappers\type.h" />
     <ClInclude Include="source\llvm_wrappers\value.h" />
     <ClInclude Include="source\parser\parser.h" />
-    <ClInclude Include="source\utility\containers\compile_time_hash_map.h" />
     <ClInclude Include="source\utility\containers\directed_graph.h" />
     <ClInclude Include="source\utility\containers\string_accessor.h" />
     <ClInclude Include="source\utility\diagnostics\console.h" />

@@ -1,5 +1,3 @@
 #include "directed_graph.h"
 
-namespace sigma::detail {
-	
-}
+namespace sigma::detail {}

@@ -1,6 +1,4 @@
 #pragma once
 #include "utility/macros.h"
 
-namespace sigma::detail {
-	
-}
+namespace sigma::detail {}

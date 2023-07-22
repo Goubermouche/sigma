@@ -76,6 +76,10 @@ namespace sigma::detail {
             return m_nodes.contains(key);
         }
 
+        u64 size() const {
+            return m_nodes.size();
+        }
+
         node_type* get_node(const key_type& key) {
             return m_nodes[key];
         }
@@ -129,6 +133,14 @@ namespace sigma::detail {
             }
 
             function(root, node);
+        }
+
+        value_type& operator[](const key_type& key) {
+            return m_nodes[key]->get_value();
+        }
+
+        const value_type& operator[](const key_type& key) const {
+            return m_nodes.at(key)->get_value();
         }
     private:
         bool dfs_visit(

@@ -3,7 +3,7 @@
 namespace sigma {
 	code_generator_context::code_generator_context()
 		: m_builder(m_context),
-	m_module(std::make_unique<llvm::Module>("sigma", m_context)) {}
+	m_module(std::make_shared<llvm::Module>("sigma", m_context)) {}
 
 	llvm::LLVMContext& code_generator_context::get_context() {
 		return m_context;
@@ -29,7 +29,23 @@ namespace sigma {
 		return m_variable_registry;
 	}
 
+	outcome::result<void> code_generator_context::concatenate_function_registry(
+		const function_registry& registry
+	) {
+		return m_function_registry.concatenate(registry);
+	}
+
+	outcome::result<void> code_generator_context::concatenate_variable_registry(
+		const variable_registry& registry
+	) {
+		return m_variable_registry.concatenate(registry);
+	}
+
 	void code_generator_context::print() const {
+		console::out << "---------------------------------------\n";
+		m_module->print(llvm::outs(), nullptr);
+		console::out << "---------------------------------------\n";
+
 		m_variable_registry.print();
 	}
 

@@ -87,6 +87,7 @@ namespace sigma {
 	outcome::result<void> variable_registry::concatenate(
 		const variable_registry& other
 	) {
+		// local variables
 		for (size_t i = 0; i < other.m_scopes.size(); ++i) {
 			// if the current registry doesn't have enough scopes, create new ones
 			if (i >= m_scopes.size()) {
@@ -97,6 +98,7 @@ namespace sigma {
 			OUTCOME_TRY(m_scopes[i]->concatenate(other.m_scopes[i]));
 		}
 
+		// global variables
 		for (const auto& variable : other.m_global_variables) {
 			if (m_global_variables.contains(variable.first)) {
 				return outcome::failure(
@@ -110,6 +112,13 @@ namespace sigma {
 
 			m_global_variables.insert(variable);
 		}
+
+		// global ctors
+		m_global_ctors.insert(
+			m_global_ctors.end(),
+			other.m_global_ctors.begin(),
+			other.m_global_ctors.end()
+		);
 
 		return outcome::success();
 	}
@@ -150,5 +159,11 @@ namespace sigma {
 				<< identifier << ": "
 				<< variable->get_value()->get_type().to_string() << '\n';
 		}
+
+		console::out
+			<< color::yellow
+			<< m_global_ctors.size()
+			<< " ctors\n"
+			<< color::white;
 	}
 }

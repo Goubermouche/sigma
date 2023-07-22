@@ -19,6 +19,14 @@ namespace sigma {
 		function_registry& get_function_registry();
 		variable_registry& get_variable_registry();
 
+		outcome::result<void> concatenate_function_registry(
+			const function_registry& registry
+		);
+
+		outcome::result<void> concatenate_variable_registry(
+			const variable_registry& registry
+		);
+
 		void print() const;
 	private:
 		llvm::LLVMContext m_context;

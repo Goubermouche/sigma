@@ -1,5 +1,4 @@
 #include "dependency_graph.h"
-#include "utility/filesystem.h"
 
 namespace sigma {
 	dependency_graph::dependency_graph(
@@ -73,6 +72,14 @@ namespace sigma {
 
 	outcome::result<void> dependency_graph::construct() {
 		return construct(m_root_compilation_unit_path);
+	}
+
+	std::shared_ptr<code_generator_context> dependency_graph::get_context() const {
+		return m_graph[m_root_compilation_unit_path].get_context();
+	}
+
+	u64 dependency_graph::size() const {
+		return m_graph.size();
 	}
 
 	outcome::result<void> dependency_graph::construct(

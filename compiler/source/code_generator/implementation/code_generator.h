@@ -28,8 +28,14 @@ namespace sigma {
 			std::shared_ptr<abstract_syntax_tree> abstract_syntax_tree
 		);
 
+		void set_context(
+			std::shared_ptr<code_generator_context> context
+		);
+
 		std::shared_ptr<code_generator_context> get_llvm_context();
 	private:
+		// void initialize_global_variables() const;
+
 		// functions
 		// codegen_visitor_functions.cpp
 		outcome::result<value_ptr> visit_function_node(
@@ -364,8 +370,6 @@ namespace sigma {
 		);
 
 		outcome::result<void> verify_main_entry_point();
-		void initialize_global_variables() const;
-		void initialize_used_external_functions() const;
 	private:
 		std::shared_ptr<abstract_syntax_tree> m_abstract_syntax_tree;
 		std::shared_ptr<code_generator_context> m_context;

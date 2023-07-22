@@ -6,7 +6,8 @@
 namespace sigma {
 	class compilation_unit {
 	public:
-		compilation_unit() = default;
+		compilation_unit();
+
 		compilation_unit(
 			const token_list& token_list
 		);

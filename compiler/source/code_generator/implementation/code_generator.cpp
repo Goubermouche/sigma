@@ -11,22 +11,24 @@ namespace sigma {
 			OUTCOME_TRY(n->accept(*this, {}));
 		}
 
-		initialize_global_variables();
-		initialize_used_external_functions();
+		// initialize_global_variables();
 
-		// verify the generated IR
-		OUTCOME_TRY(verify_intermediate_representation());
 		return outcome::success();
 	}
 
-	void code_generator::initialize_global_variables() const {
-		// create the global ctors array
-		llvm::ArrayType* updated_ctor_array_type = llvm::ArrayType::get(CTOR_STRUCT_TYPE, m_context->get_variable_registry().get_global_ctors_count());
-		llvm::Constant* updated_ctors = llvm::ConstantArray::get(updated_ctor_array_type, m_context->get_variable_registry().get_global_ctors());
-		new llvm::GlobalVariable(*m_context->get_module(), updated_ctor_array_type, false, llvm::GlobalValue::AppendingLinkage, updated_ctors, "llvm.global_ctors");
-	}
-
-	void code_generator::initialize_used_external_functions() const {}
+	// void code_generator::initialize_global_variables() const {
+	// 	// create the global ctors array
+	// 	llvm::ArrayType* updated_ctor_array_type = llvm::ArrayType::get(CTOR_STRUCT_TYPE, m_context->get_variable_registry().get_global_ctors_count());
+	// 	llvm::Constant* updated_ctors = llvm::ConstantArray::get(updated_ctor_array_type, m_context->get_variable_registry().get_global_ctors());
+	// 
+	// 	if (llvm::GlobalVariable* global_ctors_var = m_context->get_module()->getGlobalVariable("llvm.global_ctors")) {
+	// 		global_ctors_var->setInitializer(updated_ctors);
+	// 		global_ctors_var->setLinkage(llvm::GlobalValue::AppendingLinkage); // Or CommonLinkage/InternalLinkage as required
+	// 	}
+	// 	else {
+	// 		new llvm::GlobalVariable(*m_context->get_module(), updated_ctor_array_type, false, llvm::GlobalValue::ExternalLinkage, updated_ctors, "llvm.global_ctors");
+	// 	}
+	// }
 
 	outcome::result<void> code_generator::verify_intermediate_representation() {
 		// check if we have a valid 'main' function
@@ -47,6 +49,12 @@ namespace sigma {
 		std::shared_ptr<abstract_syntax_tree> abstract_syntax_tree
 	) {
 		m_abstract_syntax_tree = abstract_syntax_tree;
+	}
+
+	void code_generator::set_context(
+		std::shared_ptr<code_generator_context> context
+	) {
+		m_context = context;
 	}
 
 	std::shared_ptr<code_generator_context> code_generator::get_llvm_context() {

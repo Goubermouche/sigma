@@ -189,14 +189,14 @@ namespace sigma {
 
 		llvm::Function* init_func = llvm::Function::Create(
 			init_func_type,
-			llvm::Function::InternalLinkage,
-			init_func_name, 
+			llvm::Function::ExternalLinkage,
+			init_func_name,
 			m_context->get_module().get()
 		);
 
 		llvm::BasicBlock* init_func_entry = llvm::BasicBlock::Create(
-			m_context->get_context(), 
-			"", 
+			m_context->get_context(),
+			"",
 			init_func
 		);
 
@@ -210,8 +210,8 @@ namespace sigma {
 
 		// cast the right-hand side operator to the assigned type
 		llvm::Value* cast_assigned_value = cast_value(
-			declaration_value_result, 
-			node.get_declaration_type(), 
+			declaration_value_result,
+			node.get_declaration_type(),
 			node.get_declared_position()
 		);
 
@@ -231,7 +231,7 @@ namespace sigma {
 		);
 
 		// add the variable to the m_global_named_values map
-		if(!m_context->get_variable_registry().insert_global_variable(
+		if (!m_context->get_variable_registry().insert_global_variable(
 			node.get_declaration_identifier(),
 			std::make_shared<variable>(
 				global_declaration,
@@ -248,7 +248,7 @@ namespace sigma {
 		}
 
 		m_context->get_builder().CreateStore(
-			cast_assigned_value, 
+			cast_assigned_value,
 			global_declaration->get_value()
 		);
 
@@ -265,18 +265,58 @@ namespace sigma {
 		);
 
 		llvm::Constant* initializer_cast = llvm::ConstantExpr::getBitCast(
-			init_func, 
+			init_func,
 			llvm::Type::getInt8PtrTy(m_context->get_context())
 		);
 
-		llvm::Constant* new_ctor = llvm::ConstantStruct::get(CTOR_STRUCT_TYPE, {
+		llvm::Constant* new_ctor = llvm::ConstantStruct::get(llvm::StructType::get(
+			m_context->get_context(), {
+				llvm::Type::getInt32Ty(m_context->get_context()),
+				llvm::Type::getInt8PtrTy(m_context->get_context()),
+				llvm::Type::getInt8PtrTy(m_context->get_context())
+			}
+		), {
 			priority,
 			initializer_cast,
 			llvm::Constant::getNullValue(llvm::Type::getInt8PtrTy(m_context->get_context()))
-		});
+			});
 
-		// push the constructor to the ctor list
-		m_context->get_variable_registry().add_global_ctor(new_ctor);
+		// Check if the global ctors array exists
+		llvm::GlobalVariable* global_ctors_var = m_context->get_module()->getGlobalVariable("llvm.global_ctors");
+
+		std::vector<llvm::Constant*> all_ctors;
+		if (global_ctors_var) {
+			// If the global variable already exists, get all ctors from it
+			if (auto* initializer = dyn_cast<llvm::ConstantArray>(global_ctors_var->getInitializer())) {
+				for (unsigned i = 0, e = initializer->getNumOperands(); i != e; ++i) {
+					all_ctors.push_back(cast<llvm::Constant>(initializer->getOperand(i)));
+				}
+			}
+		}
+
+		// Add new_ctor to all_ctors
+		all_ctors.push_back(new_ctor);
+
+		// Create or update the global ctors array
+		llvm::ArrayType* ctor_array_type = llvm::ArrayType::get(llvm::StructType::get(
+			m_context->get_context(), {
+				llvm::Type::getInt32Ty(m_context->get_context()),
+				llvm::Type::getInt8PtrTy(m_context->get_context()),
+				llvm::Type::getInt8PtrTy(m_context->get_context())
+			}
+		), all_ctors.size());
+
+		llvm::Constant* updated_ctors = llvm::ConstantArray::get(ctor_array_type, all_ctors);
+
+		if (!global_ctors_var) {
+			// If the global variable does not exist, create a new one
+			global_ctors_var = new llvm::GlobalVariable(*m_context->get_module(), ctor_array_type, false, llvm::GlobalValue::AppendingLinkage, updated_ctors, "llvm.global_ctors");
+		}
+		else {
+			// If the global variable already exists, update it
+			global_ctors_var->setInitializer(updated_ctors);
+		}
+
 		return global_declaration;
 	}
 

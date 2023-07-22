@@ -30,41 +30,60 @@ namespace sigma {
 		m_root_source_path = root_source_path;
 		m_target_executable_directory = target_executable_directory;
 
-		// dependency_graph graph(m_root_source_path);
-		// detail::thread_pool pool(m_settings.thread_limit);
+		dependency_graph graph(m_root_source_path);
+		detail::thread_pool pool(m_settings.thread_limit);
 
-		// OUTCOME_TRY(graph.construct());
-		// OUTCOME_TRY(graph.verify());
-		// graph.print();
-		// OUTCOME_TRY(graph.traverse_compile(pool));
+		OUTCOME_TRY(graph.construct());
+		OUTCOME_TRY(graph.verify());
+		graph.print();
+		OUTCOME_TRY(graph.traverse_compile(pool));
 
-		timer m_compilation_timer;
-		m_compilation_timer.start();
-		
-		// verify the root source file
-		OUTCOME_TRY(verify_source_file(m_root_source_path));
-		
-		console::out
-			<< "compiling file '"
-			<< m_root_source_path
-			<< "'\n";
-		
-		// generate the module
-		OUTCOME_TRY(const auto& module_generation_result, generate_module(m_root_source_path));
-		
 		// verify the executable directory
 		OUTCOME_TRY(verify_folder(m_target_executable_directory));
-		
+		console::out << "compilation done, creating .exe file...\n";
+
+		auto context = graph.get_context();
+
+		context->print();
+
+
 		// compile the module into an executable
-		OUTCOME_TRY(compile_module(module_generation_result));
-		
+		OUTCOME_TRY(compile_module(context));
+
 		console::out
 			<< color::green
-			<< "compilation finished ("
-			<< m_compilation_timer.elapsed()
-			<< "ms)\n"
+			<< "compilation finished successfully (compiled "
+			<< graph.size()
+			<< " file/s)\n"
 			<< color::white;
-		
+
+		// timer m_compilation_timer;
+		// m_compilation_timer.start();
+		// 
+		// // verify the root source file
+		// OUTCOME_TRY(verify_source_file(m_root_source_path));
+		// 
+		// console::out
+		// 	<< "compiling file '"
+		// 	<< m_root_source_path
+		// 	<< "'\n";
+		// 
+		// // generate the module
+		// OUTCOME_TRY(const auto& module_generation_result, generate_module(m_root_source_path));
+		// 
+		// // verify the executable directory
+		// OUTCOME_TRY(verify_folder(m_target_executable_directory));
+		// 
+		// // compile the module into an executable
+		// OUTCOME_TRY(compile_module(module_generation_result));
+		// 
+		// console::out
+		// 	<< color::green
+		// 	<< "compilation finished ("
+		// 	<< m_compilation_timer.elapsed()
+		// 	<< "ms)\n"
+		// 	<< color::white;
+		// 
 
 		return outcome::success();
 	}
@@ -267,7 +286,7 @@ namespace sigma {
 			return outcome::failure(error::emit<1001>(o_file));
 		}
 
-		return outcome::success();;
+		return outcome::success();
 	}
 
 	outcome::result<void> compiler::verify_source_file(

@@ -12,6 +12,9 @@ namespace sigma {
 		outcome::result<void> verify() const;
 		outcome::result<void> traverse_compile(detail::thread_pool& pool);
 		outcome::result<void> construct();
+
+		std::shared_ptr<code_generator_context> get_context() const;
+		u64 size() const;
 	private:
 		outcome::result<void> construct(const filepath& path);
 	private:

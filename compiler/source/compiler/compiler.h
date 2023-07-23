@@ -55,27 +55,19 @@ namespace sigma {
 			const filepath& target_executable_directory
 		);
 	private:
-		outcome::result<std::shared_ptr<code_generator_context>> generate_module(
-			const filepath& source_path
-		);
-
 		outcome::result<void> compile_module(
 			const std::shared_ptr<code_generator_context>& llvm_context
 		) const;
 
-		static outcome::result<void> verify_source_file(
-			const filepath& path
-		);
-
 		static outcome::result<void> verify_folder(
 			const filepath& folder_path
 		);
+
+		static outcome::result<void> verify_main_context(
+			const std::shared_ptr<code_generator_context>& context
+		);
 	private:
 		compiler_settings m_settings;
-
-		lexer m_lexer;
-		parser m_parser;
-		code_generator m_code_generator;
 
 		// compilation specific 
 		filepath m_root_source_path;

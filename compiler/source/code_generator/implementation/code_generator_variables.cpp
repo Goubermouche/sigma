@@ -261,7 +261,7 @@ namespace sigma {
 		// create a new constructor with the given priority
 		llvm::ConstantInt* priority = llvm::ConstantInt::get(
 			llvm::Type::getInt32Ty(m_context->get_context()),
-			m_context->get_variable_registry().increment_global_initialization_priority()
+			m_context->get_variable_registry().get_global_variable_count() - 1
 		);
 
 		llvm::Constant* initializer_cast = llvm::ConstantExpr::getBitCast(
@@ -279,7 +279,7 @@ namespace sigma {
 			priority,
 			initializer_cast,
 			llvm::Constant::getNullValue(llvm::Type::getInt8PtrTy(m_context->get_context()))
-			});
+		});
 
 		// Check if the global ctors array exists
 		llvm::GlobalVariable* global_ctors_var = m_context->get_module()->getGlobalVariable("llvm.global_ctors");
@@ -310,7 +310,7 @@ namespace sigma {
 
 		if (!global_ctors_var) {
 			// If the global variable does not exist, create a new one
-			global_ctors_var = new llvm::GlobalVariable(*m_context->get_module(), ctor_array_type, false, llvm::GlobalValue::AppendingLinkage, updated_ctors, "llvm.global_ctors");
+			new llvm::GlobalVariable(*m_context->get_module(), ctor_array_type, false, llvm::GlobalValue::AppendingLinkage, updated_ctors, "llvm.global_ctors");
 		}
 		else {
 			// If the global variable already exists, update it

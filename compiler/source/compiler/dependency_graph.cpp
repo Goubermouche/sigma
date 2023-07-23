@@ -46,12 +46,15 @@ namespace sigma {
 				}
 
 				// compile the current unit
+
 				console::out
-					<< "compiling file: "
-					<< color::light_blue
+					<< "sigma: "
+					<< color::yellow
+					<< "info: "
+					<< color::white
+					<< "compiling file '"
 					<< path
-					<< '\n'
-					<< color::white;
+					<< "'\n";
 
 				const auto compilation_result = node->get_value().compile(dependencies);
 
@@ -89,6 +92,8 @@ namespace sigma {
 			return outcome::success();
 		}
 
+		OUTCOME_TRY(verify_source_file(path));
+
 		lexer lexer;
 		lexer.set_source_filepath(path);
 		lexer.tokenize();
@@ -110,6 +115,10 @@ namespace sigma {
 				);
 			}
 			else {
+				// stop processing other tokens
+				// note: this may include other include directives which are located lower,
+				//       these will be caught by the parser and an error will be thrown,
+				//       this is expected behaviour
 				break;
 			}
 		}
@@ -119,6 +128,24 @@ namespace sigma {
 
 		for(const auto& include : includes) {
 			OUTCOME_TRY(construct(include));
+		}
+
+		return outcome::success();
+	}
+
+	outcome::result<void> dependency_graph::verify_source_file(
+		const filepath& path
+	) {
+		if (!exists(path)) {
+			return outcome::failure(error::emit<1002>(path));
+		}
+
+		if (!detail::is_file(path)) {
+			return outcome::failure(error::emit<1003>(path));
+		}
+
+		if (detail::extract_extension_from_filepath(path) != LANG_EXTENSION) {
+			return outcome::failure(error::emit<1007>(path, LANG_EXTENSION));
 		}
 
 		return outcome::success();

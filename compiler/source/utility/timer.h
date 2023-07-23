@@ -5,8 +5,14 @@ namespace sigma {
 	class timer {
 	public:
 		void start();
-		f64 elapsed() const;
+
+		template<typename duration>
+		f64 elapsed() const {
+			const auto now = std::chrono::high_resolution_clock::now();
+			const auto diff = now - m_start;
+			return std::chrono::duration_cast<duration>(diff).count();
+		}
 	private:
-		std::chrono::steady_clock::time_point m_start;
+		std::chrono::high_resolution_clock::time_point m_start;
 	};
 }

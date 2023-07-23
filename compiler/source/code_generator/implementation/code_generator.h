@@ -19,20 +19,12 @@ namespace sigma {
 	 */
 	class code_generator : public code_generator_template {
 	public:
-		code_generator();
+		code_generator() = default;
 
-		outcome::result<void> generate();
-		outcome::result<void> verify_intermediate_representation();
-
-		void set_abstract_syntax_tree(
-			std::shared_ptr<abstract_syntax_tree> abstract_syntax_tree
+		outcome::result<void> generate(
+			const std::shared_ptr< code_generator_context>& context,
+			const std::shared_ptr<abstract_syntax_tree>& abstract_syntax_tree
 		);
-
-		void set_context(
-			std::shared_ptr<code_generator_context> context
-		);
-
-		std::shared_ptr<code_generator_context> get_llvm_context();
 	private:
 		// void initialize_global_variables() const;
 
@@ -367,11 +359,9 @@ namespace sigma {
 			const value_ptr& source_value,
 			type target_type, 
 			const file_position& position
-		);
-
-		outcome::result<void> verify_main_entry_point();
+		) const;
 	private:
-		std::shared_ptr<abstract_syntax_tree> m_abstract_syntax_tree;
 		std::shared_ptr<code_generator_context> m_context;
+		std::shared_ptr<abstract_syntax_tree> m_abstract_syntax_tree;
 	};
 }

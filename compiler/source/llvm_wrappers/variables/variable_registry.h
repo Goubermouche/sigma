@@ -107,17 +107,14 @@ namespace sigma {
 
 		void print() const;
 
-		u64 increment_global_initialization_priority();
-		const std::vector<llvm::Constant*>& get_global_ctors() const;
-		u64 get_global_ctors_count();
-		llvm::BasicBlock* get_loop_end_block();
+		u64 get_global_variable_count() const;
+
+		llvm::BasicBlock* get_loop_end_block() const;
 	private:
 		// local variables
 		std::vector<scope_ptr> m_scopes;
 
 		// global variables
 		std::unordered_map<std::string, variable_ptr> m_global_variables;
-		std::vector<llvm::Constant*> m_global_ctors;
-		u64 m_initialization_priority = 0;
 	};
 }

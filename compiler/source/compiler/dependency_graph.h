@@ -17,6 +17,9 @@ namespace sigma {
 		u64 size() const;
 	private:
 		outcome::result<void> construct(const filepath& path);
+		static outcome::result<void> verify_source_file(
+			const filepath& path
+		);
 	private:
 		filepath m_root_compilation_unit_path;
 		detail::directed_graph<filepath, compilation_unit> m_graph;

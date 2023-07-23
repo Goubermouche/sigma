@@ -74,16 +74,6 @@ namespace sigma {
 		}
 	}
 
-	u64 variable_registry::increment_global_initialization_priority() {
-		return m_initialization_priority++;
-	}
-
-	void variable_registry::add_global_ctor(
-		llvm::Constant* ctor
-	) {
-		m_global_ctors.push_back(ctor);
-	}
-
 	outcome::result<void> variable_registry::concatenate(
 		const variable_registry& other
 	) {
@@ -113,25 +103,10 @@ namespace sigma {
 			m_global_variables.insert(variable);
 		}
 
-		// global ctors
-		m_global_ctors.insert(
-			m_global_ctors.end(),
-			other.m_global_ctors.begin(),
-			other.m_global_ctors.end()
-		);
-
 		return outcome::success();
 	}
 
-	const std::vector<llvm::Constant*>& variable_registry::get_global_ctors() const {
-		return m_global_ctors;
-	}
-
-	u64 variable_registry::get_global_ctors_count() {
-		return m_global_ctors.size();
-	}
-
-	llvm::BasicBlock* variable_registry::get_loop_end_block() {
+	llvm::BasicBlock* variable_registry::get_loop_end_block() const {
 		return m_scopes.back()->get_loop_end_block();
 	}
 
@@ -159,11 +134,9 @@ namespace sigma {
 				<< identifier << ": "
 				<< variable->get_value()->get_type().to_string() << '\n';
 		}
+	}
 
-		console::out
-			<< color::yellow
-			<< m_global_ctors.size()
-			<< " ctors\n"
-			<< color::white;
+	u64 variable_registry::get_global_variable_count() const {
+		return m_global_variables.size();
 	}
 }

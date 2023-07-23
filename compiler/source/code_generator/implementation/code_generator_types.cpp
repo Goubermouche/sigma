@@ -161,9 +161,9 @@ namespace sigma {
 			*m_context->get_module(),
 			array_type,
 			true,
-			llvm::GlobalValue::PrivateLinkage,
+			llvm::GlobalValue::ExternalLinkage,
 			string_constant,
-			".str"
+			""
 		);
 
 		// bit cast the pointer to the global variable into a char* (i8*)

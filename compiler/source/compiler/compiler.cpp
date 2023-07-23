@@ -27,6 +27,9 @@ namespace sigma {
 		const filepath& root_source_path,
 		const filepath& target_executable_directory
 	) {
+		timer compilation_timer;
+		compilation_timer.start();
+
 		m_root_source_path = root_source_path;
 		m_target_executable_directory = target_executable_directory;
 
@@ -34,111 +37,55 @@ namespace sigma {
 		detail::thread_pool pool(m_settings.thread_limit);
 
 		OUTCOME_TRY(graph.construct());
+
+		console::out
+			<< "sigma: "
+			<< color::yellow
+			<< "info: "
+			<< color::white
+			<< "constructing dependency graph...\n";
+
 		OUTCOME_TRY(graph.verify());
-		graph.print();
+
+		console::out
+			<< "sigma: "
+			<< color::yellow
+			<< "info: "
+			<< color::white
+			<< "verifying dependency graph...\n";
+
+		// graph.print();
+
+		console::out
+			<< "sigma: "
+			<< color::yellow
+			<< "info: "
+			<< color::white
+			<< "compiling dependency graph...\n";
+
 		OUTCOME_TRY(graph.traverse_compile(pool));
 
 		// verify the executable directory
 		OUTCOME_TRY(verify_folder(m_target_executable_directory));
-		console::out << "compilation done, creating .exe file...\n";
 
 		auto context = graph.get_context();
-
-		context->print();
-
+		// context->print();
+		OUTCOME_TRY(verify_main_context(context));
 
 		// compile the module into an executable
 		OUTCOME_TRY(compile_module(context));
 
 		console::out
-			<< color::green
-			<< "compilation finished successfully (compiled "
-			<< graph.size()
-			<< " file/s)\n"
-			<< color::white;
-
-		// timer m_compilation_timer;
-		// m_compilation_timer.start();
-		// 
-		// // verify the root source file
-		// OUTCOME_TRY(verify_source_file(m_root_source_path));
-		// 
-		// console::out
-		// 	<< "compiling file '"
-		// 	<< m_root_source_path
-		// 	<< "'\n";
-		// 
-		// // generate the module
-		// OUTCOME_TRY(const auto& module_generation_result, generate_module(m_root_source_path));
-		// 
-		// // verify the executable directory
-		// OUTCOME_TRY(verify_folder(m_target_executable_directory));
-		// 
-		// // compile the module into an executable
-		// OUTCOME_TRY(compile_module(module_generation_result));
-		// 
-		// console::out
-		// 	<< color::green
-		// 	<< "compilation finished ("
-		// 	<< m_compilation_timer.elapsed()
-		// 	<< "ms)\n"
-		// 	<< color::white;
-		// 
+			<< "sigma: "
+			<< color::yellow
+			<< "info: "
+			<< color::white
+			<< "compilation finished ("
+			<< precision(3)
+			<< compilation_timer.elapsed<std::chrono::duration<f64>>()
+			<< "s)\n";
 
 		return outcome::success();
-	}
-
-	outcome::result<std::shared_ptr<code_generator_context>> compiler::generate_module(
-		const filepath& source_path
-	) {
-		// tokenize the source file
-		timer lexer_timer;
-		lexer_timer.start();
-
-		OUTCOME_TRY(m_lexer.set_source_filepath(source_path));
-		OUTCOME_TRY(m_lexer.tokenize());
-
-		console::out
-			<< "lexing finished ("
-			<< lexer_timer.elapsed()
-			<< "ms)\n";
-
-		// generate the AST
-		timer parser_timer;
-		parser_timer.start();
-
-		m_parser.set_token_list(
-			m_lexer.get_token_list()
-		);
-
-		OUTCOME_TRY(m_parser.parse());
-
-		console::out
-			<< "parsing finished ("
-			<< parser_timer.elapsed()
-			<< "ms)\n";
-
-		// m_parser.get_abstract_syntax_tree()->print_nodes();
-
-		// generate the module
-		timer code_generator_timer;
-		code_generator_timer.start();
-		m_code_generator.set_abstract_syntax_tree(
-			m_parser.get_abstract_syntax_tree()
-		);
-
-		OUTCOME_TRY(m_code_generator.generate());
-
-		console::out
-			<< "codegen finished ("
-			<< code_generator_timer.elapsed()
-			<< "ms)\n";
-
-		// code_generator->get_llvm_context()->print_intermediate_representation();
-
-		const auto& ctx = m_code_generator.get_llvm_context();
-		// ctx->print();
-		return ctx;
 	}
 
 	outcome::result<void> compiler::compile_module(
@@ -289,24 +236,6 @@ namespace sigma {
 		return outcome::success();
 	}
 
-	outcome::result<void> compiler::verify_source_file(
-		const filepath& path
-	) {
-		if (!exists(path)) {
-			return outcome::failure(error::emit<1002>(path));
-		}
-
-		if (!detail::is_file(path)) {
-			return outcome::failure(error::emit<1003>(path));
-		}
-
-		if (detail::extract_extension_from_filepath(path) != LANG_EXTENSION) {
-			return outcome::failure(error::emit<1007>(path, LANG_EXTENSION));
-		}
-
-		return outcome::success();;
-	}
-
 	outcome::result<void> compiler::verify_folder(
 		const filepath& folder_path
 	) {
@@ -319,5 +248,27 @@ namespace sigma {
 		}
 
 		return outcome::success();;
+	}
+
+	outcome::result<void> compiler::verify_main_context(
+		const std::shared_ptr<code_generator_context>& context
+	) {
+		// check if we have a valid 'main' function
+		if(const auto main_func = context->get_function_registry().get_function("main", context)) {
+			if (main_func->get_return_type() != type(type::base::i32, 0)) {
+				return outcome::failure(error::emit<4013>(main_func->get_return_type())); // return on failure
+			}
+		}
+		else {
+			return outcome::failure(error::emit<4012>()); // return on failure
+		}
+
+		// check for IR errors
+		// if (llvm::verifyModule(*m_llvm_handler->get_module(), &llvm::outs())) {
+		// 	console::out << color::white;
+		// 	return error::emit<4016>();
+		// }
+
+		return outcome::success();
 	}
 }

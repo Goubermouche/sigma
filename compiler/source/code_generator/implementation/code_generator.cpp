@@ -2,75 +2,16 @@
 #include <llvm/IR/Verifier.h>
 
 namespace sigma {
-	code_generator::code_generator()
-		: m_context(std::make_shared<code_generator_context>()) {}
-
-	outcome::result<void> code_generator::generate() {
-		// walk the abstract syntax tree
-		for (node_ptr n : *m_abstract_syntax_tree) {
-			OUTCOME_TRY(n->accept(*this, {}));
-		}
-
-		// initialize_global_variables();
-
-		return outcome::success();
-	}
-
-	// void code_generator::initialize_global_variables() const {
-	// 	// create the global ctors array
-	// 	llvm::ArrayType* updated_ctor_array_type = llvm::ArrayType::get(CTOR_STRUCT_TYPE, m_context->get_variable_registry().get_global_ctors_count());
-	// 	llvm::Constant* updated_ctors = llvm::ConstantArray::get(updated_ctor_array_type, m_context->get_variable_registry().get_global_ctors());
-	// 
-	// 	if (llvm::GlobalVariable* global_ctors_var = m_context->get_module()->getGlobalVariable("llvm.global_ctors")) {
-	// 		global_ctors_var->setInitializer(updated_ctors);
-	// 		global_ctors_var->setLinkage(llvm::GlobalValue::AppendingLinkage); // Or CommonLinkage/InternalLinkage as required
-	// 	}
-	// 	else {
-	// 		new llvm::GlobalVariable(*m_context->get_module(), updated_ctor_array_type, false, llvm::GlobalValue::ExternalLinkage, updated_ctors, "llvm.global_ctors");
-	// 	}
-	// }
-
-	outcome::result<void> code_generator::verify_intermediate_representation() {
-		// check if we have a valid 'main' function
-		OUTCOME_TRY(verify_main_entry_point());
-		
-		// check for IR errors
-		console::out << color::red;
-		// if (llvm::verifyModule(*m_llvm_handler->get_module(), &llvm::outs())) {
-		// 	console::out << color::white;
-		// 	return error::emit<4016>();
-		// }
-		
-		console::out << color::white;
-		return outcome::success();
-	}
-
-	void code_generator::set_abstract_syntax_tree(
-		std::shared_ptr<abstract_syntax_tree> abstract_syntax_tree
-	) {
-		m_abstract_syntax_tree = abstract_syntax_tree;
-	}
-
-	void code_generator::set_context(
-		std::shared_ptr<code_generator_context> context
+	outcome::result<void> code_generator::generate(
+		const std::shared_ptr<code_generator_context>& context,
+		const std::shared_ptr<abstract_syntax_tree>& abstract_syntax_tree
 	) {
 		m_context = context;
-	}
+		m_abstract_syntax_tree = abstract_syntax_tree;
 
-	std::shared_ptr<code_generator_context> code_generator::get_llvm_context() {
-		return m_context;
-	}
-
-	outcome::result<void> code_generator::verify_main_entry_point() {
-		// check if we have a main entry point
-		if(!m_context->get_function_registry().contains_function("main")) {
-			return outcome::failure(error::emit<4012>()); // return on failure
-		}
-
-		// check if the main entry point's return type is an i32
-		const function_ptr func = m_context->get_function_registry().get_function("main", m_context);
-		if(func->get_return_type().get_base() != type::base::i32) {
-			return outcome::failure(error::emit<4013>(func->get_return_type())); // return on failure
+		// walk the abstract syntax tree
+		for (const node_ptr node : *m_abstract_syntax_tree) {
+			OUTCOME_TRY(node->accept(*this, {}));
 		}
 
 		return outcome::success();
@@ -80,7 +21,7 @@ namespace sigma {
 		const value_ptr& source_value,
 		type target_type, 
 		const file_position& position
-	) {
+	) const {
 		// both types are the same
 		if (source_value->get_type() == target_type) {
 			return source_value->get_value();

@@ -38,6 +38,11 @@ namespace sigma {
 		return *this;
 	}
 
+	console& console::operator<<(const precision& precision) {
+		std::wcout << std::fixed << std::setprecision(precision.get_precision());
+		return *this;
+	}
+
 	console& console::operator<<(const std::string& value) {
 		const std::wstring wide_string(value.begin(), value.end());
 		std::wcout << wide_string;
@@ -114,5 +119,11 @@ namespace sigma {
 
 	void console::set_color(const color_value& color) {
 		SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), color.value);
+	}
+	precision::precision(u64 precision)
+		: m_precision(precision) {}
+
+	u64 precision::get_precision() const {
+		return m_precision;
 	}
 }

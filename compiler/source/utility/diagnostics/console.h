@@ -18,9 +18,17 @@ namespace sigma {
 		static constexpr color_value light_blue = { 9 };
 		static constexpr color_value green = { 2 };
 		static constexpr color_value light_green = { 10 };
-		static constexpr color_value orange = { 14 }; // 
-		static constexpr color_value yellow = { 6 };
+		static constexpr color_value orange = { 6 }; // 
+		static constexpr color_value yellow = { 14 };
 		static constexpr color_value red = { 4 };
+	};
+
+	class precision {
+	public:
+		precision(u64 precision);
+		u64 get_precision() const;
+	private:
+		u64 m_precision;
 	};
 
 	class console {
@@ -29,6 +37,8 @@ namespace sigma {
 		static console& out;
 
 		console& operator<<(const color_value& color);
+		console& operator<<(const precision& precision);
+
 		console& operator<<(const std::string& value);
 		console& operator<<(const filepath& value);
 
@@ -60,10 +70,11 @@ namespace sigma {
 
 	template<typename type>
 	console& console::operator<<(std::shared_ptr<type> value) {
-		if (value) // check that the shared_ptr isn't null
+		if (value) {
 			return *this << *value; // call the << operator for error_message
-		else
-			return *this << "null";
+		}
+
+		return *this << "null";
 	}
 
 	// template<typename T>

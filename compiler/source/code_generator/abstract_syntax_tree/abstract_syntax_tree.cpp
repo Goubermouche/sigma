@@ -13,11 +13,28 @@ namespace sigma {
 		}
 	}
 
+	u64 abstract_syntax_tree::size() const {
+		return m_nodes.size();
+	}
+
 	std::vector<node_ptr>::iterator abstract_syntax_tree::begin() {
 		return m_nodes.begin();
 	}
 
 	std::vector<node_ptr>::iterator abstract_syntax_tree::end() {
 		return m_nodes.end();
+	}
+
+	void abstract_syntax_tree::move_insert(
+		std::vector<node_ptr>::iterator where,
+		std::shared_ptr<abstract_syntax_tree> other
+	) {
+		std::move(
+			std::make_move_iterator(other->m_nodes.begin()),
+			std::make_move_iterator(other->m_nodes.end()),
+			std::inserter(m_nodes, where)
+		);
+
+		other->m_nodes.clear();
 	}
 }

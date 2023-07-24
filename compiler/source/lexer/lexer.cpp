@@ -8,11 +8,11 @@ namespace sigma {
 
 	void token_list::print_tokens() const {
 		for (const token_data& t : m_tokens) {
-			// console::out << std::left << std::setw(40) << token_to_string(t.get_token());
+			console::out << token_to_string(t.get_token());
 
 			if (!t.get_value().empty()) {
 				// the value string may contain escape sequences 
-				console::out << escape_string(t.get_value());
+				console::out << "........" << escape_string(t.get_value());
 			}
 
 			console::out << '\n';
@@ -45,6 +45,21 @@ namespace sigma {
 			token,
 			m_current_token.get_token()
 		));
+	}
+
+	std::vector<token_data>::iterator token_list::begin() {
+		return m_tokens.begin();
+	}
+
+	std::vector<token_data>::iterator token_list::end() {
+		return m_tokens.end();
+	}
+
+	void token_list::set_indices(
+		u64 index
+	) {
+		m_main_token_index = index;
+		m_peek_token_index = index;
 	}
 
 	void token_list::synchronize_indices() {

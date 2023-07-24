@@ -6,15 +6,16 @@
 namespace sigma {
 	class parser {
 	public:
-		parser();
+		parser(const token_list& token_list);
 		virtual ~parser() = default;
 
-		outcome::result<void> parse();
-		void set_token_list(const token_list& token_list);
+		outcome::result<std::shared_ptr<abstract_syntax_tree>> parse();
 		std::shared_ptr<abstract_syntax_tree> get_abstract_syntax_tree() const;
+		const std::vector<u64>& get_include_directive_indices() const;
 	private:
 		outcome::result<node_ptr> parse_function_definition();
 		outcome::result<node_ptr> parse_global_statement();
+		outcome::result<void> parse_include_directive();
 		outcome::result<std::vector<node_ptr>> parse_local_statements();
 		outcome::result<node_ptr> parse_local_statement();
 		outcome::result<node_ptr> parse_local_statement_identifier();
@@ -93,6 +94,7 @@ namespace sigma {
 		bool peek_is_assignment();
 		bool peek_is_array_index_access();
 		bool peek_is_post_operator();
+		bool peek_is_include_directive();
 
 		token peek_next_token();
 		token peek_nth_token(
@@ -107,5 +109,7 @@ namespace sigma {
 	private:
 		token_list m_token_list;
 		std::shared_ptr<abstract_syntax_tree> m_abstract_syntax_tree;
+		std::vector<u64> m_include_directive_indices;
+		u64 m_top_level_abstract_syntax_tree_node_count = 0;
 	};
 }

@@ -59,6 +59,11 @@ namespace sigma {
 
 		outcome::result<void> expect_token(token token);
 
+		std::vector<token_data>::iterator begin();
+		std::vector<token_data>::iterator end();
+
+		void set_indices(u64 index);
+
 		/**
 		 * \brief Synchronizes the peek and main indices.
 		 */

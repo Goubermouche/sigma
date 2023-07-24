@@ -17,72 +17,53 @@ namespace sigma {
 		return outcome::success();
 	}
 
-	outcome::result<void> dependency_graph::traverse_compile(
-		detail::thread_pool& pool
-	) {
-		std::atomic error_encountered = false;
-		std::mutex error_mutex;
-		std::shared_ptr<error_message> error;
-
-		m_graph.traverse_parallel_bottom_up(
-			m_root_compilation_unit_path,
-			pool,
-			[&](const filepath& path, auto* node) {
-				// stop compiling if we've encountered an error
-				if(error_encountered) {
-					return;
-				}
-
-				// at this point all children have been compiled
-				// gather dependency contexts
-				const auto& child_nodes = node->get_children();
-
-				std::vector<std::shared_ptr<code_generator_context>> dependencies(
-					child_nodes.size()
-				);
-
-				for (u64 i = 0; i < child_nodes.size(); i++) {
-					dependencies[i] = m_graph.get_value(child_nodes[i]).get_context();
-				}
-
-				// compile the current unit
-
-				console::out
-					<< "sigma: "
-					<< color::yellow
-					<< "info: "
-					<< color::white
-					<< "compiling file '"
-					<< path
-					<< "'\n";
-
-				const auto compilation_result = node->get_value().compile(dependencies);
-
-				if(compilation_result.has_error()) {
-					error_encountered = true;
-					std::lock_guard error_lock(error_mutex);
-					error = compilation_result.get_error();
-				}
-			}
-		);
-
-		if(error_encountered) {
-			return outcome::failure(error);
-		}
-
-		return outcome::success();
-	}
-
 	outcome::result<void> dependency_graph::construct() {
 		return construct(m_root_compilation_unit_path);
 	}
 
-	std::shared_ptr<code_generator_context> dependency_graph::get_context() const {
-		return m_graph[m_root_compilation_unit_path].get_context();
-	}
-
 	u64 dependency_graph::size() const {
 		return m_graph.size();
+	}
+
+	outcome::result<std::shared_ptr<abstract_syntax_tree>> dependency_graph::parse() {
+		// todo: cleanup
+		std::unordered_map<filepath, std::shared_ptr<abstract_syntax_tree>> abstract_syntax_trees;
+		std::unordered_map<filepath, std::vector<u64>> include_directive_indices;
+
+		// parse individual files
+		for(const auto& [filepath, node] : m_graph) {
+			parser parser(node->get_value());
+			OUTCOME_TRY(abstract_syntax_trees[filepath], parser.parse());
+			include_directive_indices[filepath] = parser.get_include_directive_indices();
+		}
+
+		// insert all required abstract syntax trees into their respective parents 
+		m_graph.post_order_traverse(
+			m_root_compilation_unit_path,
+			[&](const auto& path, auto* node) {
+				const auto& children = node->get_children();
+				auto ast = abstract_syntax_trees[path];
+				u64 offset = 0;
+
+				for (u64 i = 0; i < children.size(); i++) {
+					auto ast_to_insert = abstract_syntax_trees[children[i]];
+					const u64 inserted_size = ast_to_insert->size();
+					u64 original_index = include_directive_indices[path][i];
+
+					ast->move_insert(
+						ast->begin() + original_index + offset,
+						ast_to_insert
+					);
+
+					offset += inserted_size - 1;
+				}
+			},
+			true
+		);
+
+		// return the top abstract syntax tree which now contains all other modules in the correct order
+		return abstract_syntax_trees[m_root_compilation_unit_path];
+
 	}
 
 	outcome::result<void> dependency_graph::construct(
@@ -123,8 +104,8 @@ namespace sigma {
 			}
 		}
 
-		const compilation_unit unit(token_list);
-		m_graph.add_node(path, unit, includes);
+		token_list.set_indices(0); // reset token indices
+		m_graph.add_node(path, token_list, includes);
 
 		for(const auto& include : includes) {
 			OUTCOME_TRY(construct(include));

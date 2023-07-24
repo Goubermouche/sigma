@@ -58,8 +58,8 @@
     <Filter Include="source\code_generator\abstract_syntax_tree\variables\declaration">
       <UniqueIdentifier>{3BC12819-27C2-BC93-508A-29183CEA324E}</UniqueIdentifier>
     </Filter>
-    <Filter Include="source\code_generator\basic_code_generator">
-      <UniqueIdentifier>{378EF486-23F6-BA54-8C61-CF6A78E8D140}</UniqueIdentifier>
+    <Filter Include="source\code_generator\implementation">
+      <UniqueIdentifier>{FB007606-E7E7-37FE-9038-9E1B7CFEB064}</UniqueIdentifier>
     </Filter>
     <Filter Include="source\compiler">
       <UniqueIdentifier>{C09F1F08-2C2B-8DCC-353C-10C1A146E9CC}</UniqueIdentifier>
@@ -72,6 +72,9 @@
     </Filter>
     <Filter Include="source\llvm_wrappers\functions">
       <UniqueIdentifier>{BBE7CF6C-A70D-9AD3-9053-1F9F7C18BF9F}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="source\llvm_wrappers\variables">
+      <UniqueIdentifier>{DB86FE7F-C7AC-C8E6-B0F2-4DB29CB7EDB2}</UniqueIdentifier>
     </Filter>
     <Filter Include="source\parser">
       <UniqueIdentifier>{52EFAC7E-BEAF-28B5-87EA-7132F3696D91}</UniqueIdentifier>
@@ -246,14 +249,14 @@
     <ClInclude Include="source\code_generator\abstract_syntax_tree\variables\variable_node.h">
       <Filter>source\code_generator\abstract_syntax_tree\variables</Filter>
     </ClInclude>
-    <ClInclude Include="source\code_generator\implementation\code_generator.h">
-      <Filter>source\code_generator\basic_code_generator</Filter>
+    <ClInclude Include="source\code_generator\code_generator_context.h">
+      <Filter>source\code_generator</Filter>
     </ClInclude>
     <ClInclude Include="source\code_generator\code_generator_template.h">
       <Filter>source\code_generator</Filter>
     </ClInclude>
-    <ClInclude Include="source\compiler\compilation_unit.h">
-      <Filter>source\compiler</Filter>
+    <ClInclude Include="source\code_generator\implementation\code_generator.h">
+      <Filter>source\code_generator\implementation</Filter>
     </ClInclude>
     <ClInclude Include="source\compiler\compiler.h">
       <Filter>source\compiler</Filter>
@@ -276,20 +279,26 @@
     <ClInclude Include="source\llvm_wrappers\functions\function_registry.h">
       <Filter>source\llvm_wrappers\functions</Filter>
     </ClInclude>
-    <ClInclude Include="source\code_generator\code_generator_context.h">
-      <Filter>source\llvm_wrappers</Filter>
-    </ClInclude>
-    <ClInclude Include="source\llvm_wrappers\variables\scope.h">
-      <Filter>source\llvm_wrappers</Filter>
-    </ClInclude>
     <ClInclude Include="source\llvm_wrappers\type.h">
       <Filter>source\llvm_wrappers</Filter>
     </ClInclude>
     <ClInclude Include="source\llvm_wrappers\value.h">
       <Filter>source\llvm_wrappers</Filter>
     </ClInclude>
+    <ClInclude Include="source\llvm_wrappers\variables\scope.h">
+      <Filter>source\llvm_wrappers\variables</Filter>
+    </ClInclude>
+    <ClInclude Include="source\llvm_wrappers\variables\variable.h">
+      <Filter>source\llvm_wrappers\variables</Filter>
+    </ClInclude>
+    <ClInclude Include="source\llvm_wrappers\variables\variable_registry.h">
+      <Filter>source\llvm_wrappers\variables</Filter>
+    </ClInclude>
     <ClInclude Include="source\parser\parser.h">
       <Filter>source\parser</Filter>
+    </ClInclude>
+    <ClInclude Include="source\utility\containers\compile_time_hash_map.h">
+      <Filter>source\utility\containers</Filter>
     </ClInclude>
     <ClInclude Include="source\utility\containers\directed_graph.h">
       <Filter>source\utility\containers</Filter>
@@ -315,6 +324,9 @@
     <ClInclude Include="source\utility\macros.h">
       <Filter>source\utility</Filter>
     </ClInclude>
+    <ClInclude Include="source\utility\string.h">
+      <Filter>source\utility</Filter>
+    </ClInclude>
     <ClInclude Include="source\utility\thread_pool.h">
       <Filter>source\utility</Filter>
     </ClInclude>
@@ -327,9 +339,6 @@
     <ClInclude Include="source\utility\types.h">
       <Filter>source\utility</Filter>
     </ClInclude>
-    <ClInclude Include="source\utility\string.h" />
-    <ClInclude Include="source\llvm_wrappers\variables\variable_registry.h" />
-    <ClInclude Include="source\llvm_wrappers\variables\variable.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp" />
@@ -492,29 +501,29 @@
     <ClCompile Include="source\code_generator\abstract_syntax_tree\variables\variable_node.cpp">
       <Filter>source\code_generator\abstract_syntax_tree\variables</Filter>
     </ClCompile>
-    <ClCompile Include="source\code_generator\implementation\code_generator.cpp">
-      <Filter>source\code_generator\basic_code_generator</Filter>
-    </ClCompile>
-    <ClCompile Include="source\code_generator\implementation\code_generator_flow_control.cpp">
-      <Filter>source\code_generator\basic_code_generator</Filter>
-    </ClCompile>
-    <ClCompile Include="source\code_generator\implementation\code_generator_functions.cpp">
-      <Filter>source\code_generator\basic_code_generator</Filter>
-    </ClCompile>
-    <ClCompile Include="source\code_generator\implementation\code_generator_operators.cpp">
-      <Filter>source\code_generator\basic_code_generator</Filter>
-    </ClCompile>
-    <ClCompile Include="source\code_generator\implementation\code_generator_types.cpp">
-      <Filter>source\code_generator\basic_code_generator</Filter>
-    </ClCompile>
-    <ClCompile Include="source\code_generator\implementation\code_generator_variables.cpp">
-      <Filter>source\code_generator\basic_code_generator</Filter>
+    <ClCompile Include="source\code_generator\code_generator_context.cpp">
+      <Filter>source\code_generator</Filter>
     </ClCompile>
     <ClCompile Include="source\code_generator\code_generator_template.cpp">
       <Filter>source\code_generator</Filter>
     </ClCompile>
-    <ClCompile Include="source\compiler\compilation_unit.cpp">
-      <Filter>source\compiler</Filter>
+    <ClCompile Include="source\code_generator\implementation\code_generator.cpp">
+      <Filter>source\code_generator\implementation</Filter>
+    </ClCompile>
+    <ClCompile Include="source\code_generator\implementation\code_generator_flow_control.cpp">
+      <Filter>source\code_generator\implementation</Filter>
+    </ClCompile>
+    <ClCompile Include="source\code_generator\implementation\code_generator_functions.cpp">
+      <Filter>source\code_generator\implementation</Filter>
+    </ClCompile>
+    <ClCompile Include="source\code_generator\implementation\code_generator_operators.cpp">
+      <Filter>source\code_generator\implementation</Filter>
+    </ClCompile>
+    <ClCompile Include="source\code_generator\implementation\code_generator_types.cpp">
+      <Filter>source\code_generator\implementation</Filter>
+    </ClCompile>
+    <ClCompile Include="source\code_generator\implementation\code_generator_variables.cpp">
+      <Filter>source\code_generator\implementation</Filter>
     </ClCompile>
     <ClCompile Include="source\compiler\compiler.cpp">
       <Filter>source\compiler</Filter>
@@ -534,17 +543,20 @@
     <ClCompile Include="source\llvm_wrappers\functions\function_registry.cpp">
       <Filter>source\llvm_wrappers\functions</Filter>
     </ClCompile>
-    <ClCompile Include="source\code_generator\code_generator_context.cpp">
-      <Filter>source\llvm_wrappers</Filter>
-    </ClCompile>
-    <ClCompile Include="source\llvm_wrappers\variables\scope.cpp">
-      <Filter>source\llvm_wrappers</Filter>
-    </ClCompile>
     <ClCompile Include="source\llvm_wrappers\type.cpp">
       <Filter>source\llvm_wrappers</Filter>
     </ClCompile>
     <ClCompile Include="source\llvm_wrappers\value.cpp">
       <Filter>source\llvm_wrappers</Filter>
+    </ClCompile>
+    <ClCompile Include="source\llvm_wrappers\variables\scope.cpp">
+      <Filter>source\llvm_wrappers\variables</Filter>
+    </ClCompile>
+    <ClCompile Include="source\llvm_wrappers\variables\variable.cpp">
+      <Filter>source\llvm_wrappers\variables</Filter>
+    </ClCompile>
+    <ClCompile Include="source\llvm_wrappers\variables\variable_registry.cpp">
+      <Filter>source\llvm_wrappers\variables</Filter>
     </ClCompile>
     <ClCompile Include="source\parser\parser.cpp">
       <Filter>source\parser</Filter>
@@ -570,11 +582,11 @@
     <ClCompile Include="source\utility\filesystem.cpp">
       <Filter>source\utility</Filter>
     </ClCompile>
+    <ClCompile Include="source\utility\string.cpp">
+      <Filter>source\utility</Filter>
+    </ClCompile>
     <ClCompile Include="source\utility\timer.cpp">
       <Filter>source\utility</Filter>
     </ClCompile>
-    <ClCompile Include="source\utility\string.cpp" />
-    <ClCompile Include="source\llvm_wrappers\variables\variable_registry.cpp" />
-    <ClCompile Include="source\llvm_wrappers\variables\variable.cpp" />
   </ItemGroup>
 </Project>

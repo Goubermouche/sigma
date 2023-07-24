@@ -18,6 +18,8 @@
 #include <clang/Driver/Compilation.h>
 #include <clang/Frontend/TextDiagnosticPrinter.h>
 
+#include "utility/string.h"
+
 namespace sigma {
 	compiler::compiler(
 		compiler_settings settings
@@ -27,16 +29,12 @@ namespace sigma {
 		const filepath& root_source_path,
 		const filepath& target_executable_directory
 	) {
+
 		timer compilation_timer;
 		compilation_timer.start();
-
+		
 		m_root_source_path = root_source_path;
 		m_target_executable_directory = target_executable_directory;
-
-		dependency_graph graph(m_root_source_path);
-		detail::thread_pool pool(m_settings.thread_limit);
-
-		OUTCOME_TRY(graph.construct());
 
 		console::out
 			<< "sigma: "
@@ -44,8 +42,9 @@ namespace sigma {
 			<< "info: "
 			<< color::white
 			<< "constructing dependency graph...\n";
-
-		OUTCOME_TRY(graph.verify());
+		
+		dependency_graph graph(m_root_source_path);
+		OUTCOME_TRY(graph.construct());
 
 		console::out
 			<< "sigma: "
@@ -54,24 +53,46 @@ namespace sigma {
 			<< color::white
 			<< "verifying dependency graph...\n";
 
-		// graph.print();
+		OUTCOME_TRY(graph.verify());
 
 		console::out
 			<< "sigma: "
 			<< color::yellow
 			<< "info: "
 			<< color::white
-			<< "compiling dependency graph...\n";
+			<< "parsing dependency graph...\n";
 
-		OUTCOME_TRY(graph.traverse_compile(pool));
+		OUTCOME_TRY(
+			const std::shared_ptr<abstract_syntax_tree>& abstract_syntax_tree, 
+			graph.parse()
+		);
+
+		// abstract_syntax_tree->print_nodes();
+
+		console::out
+			<< "sigma: "
+			<< color::yellow
+			<< "info: "
+			<< color::white
+			<< "generating code...\n";
+
+		code_generator codegen;
+		OUTCOME_TRY(const std::shared_ptr<code_generator_context>& context, codegen.generate(abstract_syntax_tree));
 
 		// verify the executable directory
 		OUTCOME_TRY(verify_folder(m_target_executable_directory));
 
-		auto context = graph.get_context();
-		// context->print();
-		OUTCOME_TRY(verify_main_context(context));
-
+		console::out
+			<< "sigma: "
+			<< color::yellow
+			<< "info: "
+			<< color::white
+			<< "compiling "
+			<< graph.size()
+			<< ' '
+			<< detail::format_ending(graph.size(), "file", "files")
+			<< "...\n";
+	
 		// compile the module into an executable
 		OUTCOME_TRY(compile_module(context));
 

@@ -21,8 +21,7 @@ namespace sigma {
 	public:
 		code_generator() = default;
 
-		outcome::result<void> generate(
-			const std::shared_ptr< code_generator_context>& context,
+		outcome::result<std::shared_ptr<code_generator_context>> generate(
 			const std::shared_ptr<abstract_syntax_tree>& abstract_syntax_tree
 		);
 	private:

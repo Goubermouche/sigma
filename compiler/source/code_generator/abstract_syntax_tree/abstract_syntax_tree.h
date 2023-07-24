@@ -11,9 +11,15 @@ namespace sigma {
 		);
 
 		void print_nodes() const;
+		u64 size() const;
 
 		std::vector<node_ptr>::iterator begin();
 		std::vector<node_ptr>::iterator end();
+
+		void move_insert(
+			std::vector<node_ptr>::iterator where,
+			std::shared_ptr<abstract_syntax_tree> other
+		);
 	private:
 		std::vector<node_ptr> m_nodes;
 	};

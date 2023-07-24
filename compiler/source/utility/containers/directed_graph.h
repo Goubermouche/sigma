@@ -88,6 +88,20 @@ namespace sigma::detail {
             return m_nodes[key]->get_value();
         }
 
+        void post_order_traverse(
+            const key_type& root,
+            const function_type& function,
+            bool unique
+        ) {
+            if(unique) {
+                std::unordered_set<key_type> visited;
+                post_order_traverse_unique(root, function, visited);
+            }
+            else {
+                post_order_traverse(root, function);
+            }
+        }
+
         void traverse_parallel_bottom_up(
             const key_type& root,
             thread_pool& pool,
@@ -142,7 +156,47 @@ namespace sigma::detail {
         const value_type& operator[](const key_type& key) const {
             return m_nodes.at(key)->get_value();
         }
+
+        std::unordered_map<key_type, node_type*>::iterator begin() {
+            return m_nodes.begin();
+        }
+
+        std::unordered_map<key_type, node_type*>::iterator end() {
+            return m_nodes.end();
+        }
     private:
+        void post_order_traverse_unique(
+            const key_type& root,
+            const function_type& function,
+            std::unordered_set<key_type>& visited
+        ) {
+            if(visited.contains(root)) {
+                return;
+            }
+
+            node_type* node = m_nodes[root];
+            visited.insert(root);
+
+            for (const auto& child : node->get_children()) {
+                post_order_traverse_unique(child, function, visited);
+            }
+
+            function(root, node);
+        }
+
+        void post_order_traverse(
+            const key_type& root,
+            const function_type& function
+        ) {
+            node_type* node = m_nodes[root];
+
+            for (const auto& child : node->get_children()) {
+                post_order_traverse(child, function);
+            }
+
+            function(root, node);
+        }
+
         bool dfs_visit(
             const key_type& path,
             std::unordered_map<key_type, bool>& visited,

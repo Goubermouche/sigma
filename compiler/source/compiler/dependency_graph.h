@@ -1,5 +1,6 @@
 #pragma once
-#include "compilation_unit.h"
+#include "parser/parser.h"
+#include "utility/diagnostics/error.h"
 #include "utility/thread_pool.h"
 #include "utility/containers/directed_graph.h"
 
@@ -10,18 +11,18 @@ namespace sigma {
 
 		void print() const;
 		outcome::result<void> verify() const;
-		outcome::result<void> traverse_compile(detail::thread_pool& pool);
 		outcome::result<void> construct();
 
-		std::shared_ptr<code_generator_context> get_context() const;
 		u64 size() const;
+		outcome::result<std::shared_ptr<abstract_syntax_tree>> parse();
 	private:
 		outcome::result<void> construct(const filepath& path);
+
 		static outcome::result<void> verify_source_file(
 			const filepath& path
 		);
 	private:
 		filepath m_root_compilation_unit_path;
-		detail::directed_graph<filepath, compilation_unit> m_graph;
+		detail::directed_graph<filepath, token_list> m_graph;
 	};
 }

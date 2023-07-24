@@ -71,15 +71,26 @@
 #include "code_generator/abstract_syntax_tree/operators/binary/arithmetic/operator_addition_assignment_node.h"
 
 namespace sigma {
-	parser::parser()
-		: m_abstract_syntax_tree(
-			std::make_shared<abstract_syntax_tree>()
-		) {}
+	parser::parser(
+		const token_list& token_list
+	) : m_token_list(token_list),
+	m_abstract_syntax_tree(
+		std::make_shared<abstract_syntax_tree>()
+	) {}
 
-	outcome::result<void> parser::parse() {
+	outcome::result<std::shared_ptr<abstract_syntax_tree>> parser::parse() {
 		while (true) {
 			if (peek_next_token() == token::end_of_file) {
-				return outcome::success();
+				return m_abstract_syntax_tree;
+			}
+
+			if(peek_is_include_directive()) {
+				// parse an include directive
+				// just consume the tokens, don't actually do anything with it
+				OUTCOME_TRY(parse_include_directive());
+				m_include_directive_indices.push_back(m_top_level_abstract_syntax_tree_node_count);
+				m_top_level_abstract_syntax_tree_node_count++;
+				continue;
 			}
 
 			node_ptr node;
@@ -93,17 +104,16 @@ namespace sigma {
 			}
 
 			m_abstract_syntax_tree->add_node(node);
+			m_top_level_abstract_syntax_tree_node_count++;
 		}
-	}
-
-	void parser::set_token_list(
-		const token_list& token_list
-	) {
-		m_token_list = token_list;
 	}
 
 	std::shared_ptr<abstract_syntax_tree> parser::get_abstract_syntax_tree() const {
 		return m_abstract_syntax_tree;
+	}
+
+	const std::vector<u64>& parser::get_include_directive_indices() const {
+		return m_include_directive_indices;
 	}
 
 	outcome::result<node_ptr> parser::parse_function_definition() {
@@ -184,6 +194,14 @@ namespace sigma {
 
 		OUTCOME_TRY(m_token_list.expect_token(token::semicolon));
 		return global_statement_node;
+	}
+
+	outcome::result<void> parser::parse_include_directive() {
+		m_token_list.get_token(); // hash (guaranteed)
+		m_token_list.get_token(); // keyword_include (guaranteed)
+		OUTCOME_TRY(m_token_list.expect_token(token::string_literal));
+		const std::string include_str = m_token_list.get_current_token().get_value();
+		outcome::success();
 	}
 
 	outcome::result<std::vector<node_ptr>> parser::parse_local_statements() {
@@ -1093,6 +1111,21 @@ namespace sigma {
 		const bool result = tok == token::operator_decrement || tok == token::operator_increment;
 		m_token_list.synchronize_indices();
 		return result;
+	}
+
+	bool parser::peek_is_include_directive() {
+		if(m_token_list.peek_token().get_token() != token::hash) {
+			m_token_list.synchronize_indices();
+			return false; // return on failure
+		}
+
+		if(m_token_list.peek_token().get_token() != token::keyword_include) {
+			m_token_list.synchronize_indices();
+			return false; // return on failure
+		}
+
+		m_token_list.synchronize_indices();
+		return true;
 	}
 
 	token parser::peek_next_token() {

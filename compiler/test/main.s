@@ -1,7 +1,7 @@
 #include "mandelbrot.s"
 
-u64 g_width = 150;
-u64 g_height = 60;
+u64 g_width = 100;
+u64 g_height = 40;
 u64 g_max_iterations = 1000;
 
 i32 main() {

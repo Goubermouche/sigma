@@ -2,12 +2,12 @@
 #include <llvm/IR/Verifier.h>
 
 namespace sigma {
-	outcome::result<std::shared_ptr<code_generator_context>> code_generator::generate(
+	code_generator::code_generator(
 		const std::shared_ptr<abstract_syntax_tree>& abstract_syntax_tree
-	) {
-		m_context = std::make_shared<code_generator_context>();
-		m_abstract_syntax_tree = abstract_syntax_tree;
+	) : m_abstract_syntax_tree(abstract_syntax_tree),
+	m_context(std::make_shared<code_generator_context>()) {}
 
+	outcome::result<std::shared_ptr<code_generator_context>> code_generator::generate() {
 		// walk the abstract syntax tree
 		for (const node_ptr node : *m_abstract_syntax_tree) {
 			OUTCOME_TRY(node->accept(*this, {}));

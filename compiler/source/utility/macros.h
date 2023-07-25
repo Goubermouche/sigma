@@ -55,4 +55,4 @@
 
 #define SUPPRESS_C4100(_statement) (void)_statement
 
-#define LANG_EXTENSION ".s"
+#define LANG_FILE_EXTENSION ".s"

@@ -261,7 +261,7 @@
     <ClInclude Include="source\compiler\compiler.h">
       <Filter>source\compiler</Filter>
     </ClInclude>
-    <ClInclude Include="source\compiler\dependency_graph.h">
+    <ClInclude Include="source\compiler\dependency_tree.h">
       <Filter>source\compiler</Filter>
     </ClInclude>
     <ClInclude Include="source\lexer\lexer.h">
@@ -528,7 +528,7 @@
     <ClCompile Include="source\compiler\compiler.cpp">
       <Filter>source\compiler</Filter>
     </ClCompile>
-    <ClCompile Include="source\compiler\dependency_graph.cpp">
+    <ClCompile Include="source\compiler\dependency_tree.cpp">
       <Filter>source\compiler</Filter>
     </ClCompile>
     <ClCompile Include="source\lexer\lexer.cpp">
@@ -588,5 +588,9 @@
     <ClCompile Include="source\utility\timer.cpp">
       <Filter>source\utility</Filter>
     </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="test\main.s" />
+    <None Include="test\mandelbrot.s" />
   </ItemGroup>
 </Project>

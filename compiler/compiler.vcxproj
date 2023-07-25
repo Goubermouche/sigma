@@ -115,7 +115,7 @@
     <ClInclude Include="source\code_generator\code_generator_template.h" />
     <ClInclude Include="source\code_generator\implementation\code_generator.h" />
     <ClInclude Include="source\compiler\compiler.h" />
-    <ClInclude Include="source\compiler\dependency_graph.h" />
+    <ClInclude Include="source\compiler\dependency_tree.h" />
     <ClInclude Include="source\lexer\lexer.h" />
     <ClInclude Include="source\lexer\token.h" />
     <ClInclude Include="source\llvm_wrappers\code_generation_context.h" />
@@ -206,7 +206,7 @@
     <ClCompile Include="source\code_generator\implementation\code_generator_types.cpp" />
     <ClCompile Include="source\code_generator\implementation\code_generator_variables.cpp" />
     <ClCompile Include="source\compiler\compiler.cpp" />
-    <ClCompile Include="source\compiler\dependency_graph.cpp" />
+    <ClCompile Include="source\compiler\dependency_tree.cpp" />
     <ClCompile Include="source\lexer\lexer.cpp" />
     <ClCompile Include="source\llvm_wrappers\code_generation_context.cpp" />
     <ClCompile Include="source\llvm_wrappers\functions\function.cpp" />
@@ -226,6 +226,10 @@
     <ClCompile Include="source\utility\filesystem.cpp" />
     <ClCompile Include="source\utility\string.cpp" />
     <ClCompile Include="source\utility\timer.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="test\main.s" />
+    <None Include="test\mandelbrot.s" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

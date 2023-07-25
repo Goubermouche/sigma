@@ -83,23 +83,13 @@ namespace sigma {
 	 */
 	class lexer {
 	public:
+		lexer(const filepath& path);
 		/**
 		 * \brief Traverses the entire file and generates a list of tokens which can be traversed later.
 		 * \return Potentially erroneous result.
 		 */
-		outcome::result<void> tokenize();
+		outcome::result<token_list> tokenize();
 		virtual ~lexer() = default;
-
-		/**
-		 * \brief Sets the \a source \a path for the next lexing operation.
-		 * \param path Filepath to use
-		 * \return Potentially erroneous result.
-		 */
-		outcome::result<void> set_source_filepath(
-			const filepath& path
-		);
-
-		token_list get_token_list() const;
 	private:
 		/**
 		 * \brief Helper function that reads the next char in the provided source file and advances the accessor caret.

@@ -29,7 +29,6 @@ namespace sigma {
 		const filepath& root_source_path,
 		const filepath& target_executable_directory
 	) {
-
 		timer compilation_timer;
 		compilation_timer.start();
 		
@@ -41,30 +40,30 @@ namespace sigma {
 			<< color::yellow
 			<< "info: "
 			<< color::white
-			<< "constructing dependency graph...\n";
+			<< "constructing dependency tree...\n";
 		
-		dependency_graph graph(m_root_source_path);
-		OUTCOME_TRY(graph.construct());
+		dependency_tree tree(m_root_source_path);
+		OUTCOME_TRY(tree.construct());
 
 		console::out
 			<< "sigma: "
 			<< color::yellow
 			<< "info: "
 			<< color::white
-			<< "verifying dependency graph...\n";
+			<< "verifying dependency tree...\n";
 
-		OUTCOME_TRY(graph.verify());
+		OUTCOME_TRY(tree.verify());
 
 		console::out
 			<< "sigma: "
 			<< color::yellow
 			<< "info: "
 			<< color::white
-			<< "parsing dependency graph...\n";
+			<< "parsing dependency tree...\n";
 
 		OUTCOME_TRY(
 			const std::shared_ptr<abstract_syntax_tree>& abstract_syntax_tree, 
-			graph.parse()
+			tree.parse()
 		);
 
 		// abstract_syntax_tree->print_nodes();
@@ -76,8 +75,11 @@ namespace sigma {
 			<< color::white
 			<< "generating code...\n";
 
-		code_generator codegen;
-		OUTCOME_TRY(const std::shared_ptr<code_generator_context>& context, codegen.generate(abstract_syntax_tree));
+		code_generator codegen(abstract_syntax_tree);
+		OUTCOME_TRY(
+			const std::shared_ptr<code_generator_context>& context, 
+			codegen.generate()
+		);
 
 		// verify the executable directory
 		OUTCOME_TRY(verify_folder(m_target_executable_directory));
@@ -88,9 +90,9 @@ namespace sigma {
 			<< "info: "
 			<< color::white
 			<< "compiling "
-			<< graph.size()
+			<< tree.size()
 			<< ' '
-			<< detail::format_ending(graph.size(), "file", "files")
+			<< detail::format_ending(tree.size(), "file", "files")
 			<< "...\n";
 	
 		// compile the module into an executable
@@ -268,7 +270,7 @@ namespace sigma {
 			return outcome::failure(error::emit<1004>(folder_path));
 		}
 
-		return outcome::success();;
+		return outcome::success();
 	}
 
 	outcome::result<void> compiler::verify_main_context(

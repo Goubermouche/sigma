@@ -1,9 +1,7 @@
 #pragma once
 
-#include "lexer/lexer.h"
-#include "parser/parser.h"
 #include "code_generator/implementation/code_generator.h"
-#include "dependency_graph.h"
+#include "dependency_tree.h"
 
 namespace sigma {
 	enum class optimization_level {
@@ -26,9 +24,6 @@ namespace sigma {
 		size_optimization_level size_optimization_level = size_optimization_level::none;
 		// vectorize loops and enable auto vectorization 
 		bool vectorize = false;
-		// thread limit for any multithreaded operation
-		// note: using only one thread doesn't currently work
-		u32 thread_limit = 8;
 	};
 
 	/**

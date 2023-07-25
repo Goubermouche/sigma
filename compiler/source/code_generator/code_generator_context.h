@@ -5,7 +5,7 @@
 
 namespace sigma {
 	/**
-	 * \brief LLVM context, holds LLVM variables that are relevant to the code generation process. 
+	 * \brief Code generator context, holds LLVM variables that are relevant to the code generation process. 
 	 */
 	class code_generator_context {
 	public:

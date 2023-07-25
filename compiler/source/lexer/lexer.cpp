@@ -66,22 +66,14 @@ namespace sigma {
 		m_peek_token_index = m_main_token_index;
 	}
 
-	outcome::result<void> lexer::set_source_filepath(
-		const filepath& path
-	) {
+	lexer::lexer(const filepath& path)
+		: m_source_path(path) {}
+
+	outcome::result<token_list> lexer::tokenize() {
 		// check if the file exists, and if it has been opened successfully
-		OUTCOME_TRY(auto file_contents, detail::read_file(path));
-
-		m_source_path = path;
+		OUTCOME_TRY(const auto& file_contents, detail::read_file(m_source_path));
 		m_accessor = detail::string_accessor(file_contents);
-		return outcome::success();
-	}
 
-	token_list lexer::get_token_list() const {
-		return { m_tokens };
-	}
-
-	outcome::result<void> lexer::tokenize() {
 		// tokenize
 		token tok = token::unknown;
 		while (tok != token::end_of_file) {
@@ -98,7 +90,7 @@ namespace sigma {
 				});
 		}
 
-		return outcome::success();
+		return { m_tokens };
 	}
 
 	void lexer::read_char() {

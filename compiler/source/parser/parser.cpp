@@ -58,6 +58,7 @@
 #include "code_generator/abstract_syntax_tree/operators/binary/bitwise/operator_bitwise_or_node.h"
 #include "code_generator/abstract_syntax_tree/operators/binary/bitwise/operator_bitwise_right_shift_node.h"
 #include "code_generator/abstract_syntax_tree/operators/binary/bitwise/operator_bitwise_xor_node.h"
+#include "code_generator/abstract_syntax_tree/operators/unary/bitwise/operator_address_of_node.h"
 // logical
 #include "code_generator/abstract_syntax_tree/operators/binary/logical/operator_conjunction_node.h"
 #include "code_generator/abstract_syntax_tree/operators/binary/logical/operator_disjunction_node.h"
@@ -69,7 +70,6 @@
 #include "code_generator/abstract_syntax_tree/operators/binary/logical/operator_not_equals_node.h"
 #include "code_generator/abstract_syntax_tree/keywords/flow_control/break_node.h"
 #include "code_generator/abstract_syntax_tree/operators/binary/arithmetic/operator_addition_assignment_node.h"
-
 namespace sigma {
 	parser::parser(
 		const token_list& token_list
@@ -250,18 +250,17 @@ namespace sigma {
 
 				// check for post unary operators after deep expression
 				if (peek_next_token() == token::operator_increment || peek_next_token() == token::operator_decrement) {
-					node_ptr operand = local_statement_node;
-					OUTCOME_TRY(local_statement_node, parse_post_operator(operand));
+					OUTCOME_TRY(local_statement_node, parse_post_operator(local_statement_node));
 				}
 				break;
 			}
 			case token::operator_increment:
 			case token::operator_decrement:
 			case token::operator_not:
-			case token::operator_bitwise_not: {
+			case token::operator_bitwise_not:
+			case token::ampersand: {
 				// check if the next token is an identifier or an opening parenthesis
-				token next_next_token;
-				next_next_token = peek_nth_token(2);
+				const token next_next_token = peek_nth_token(2);
 
 				if (next_next_token == token::identifier || next_next_token == token::l_parenthesis) {
 					OUTCOME_TRY(local_statement_node, parse_pre_operator());
@@ -414,6 +413,7 @@ namespace sigma {
 		case token::operator_decrement:
 		case token::operator_not:
 		case token::operator_bitwise_not:
+		case token::ampersand:
 			// check if the next token is an identifier or an opening parenthesis
 			token next_next_token;
 			next_next_token = peek_nth_token(2);
@@ -818,7 +818,7 @@ namespace sigma {
 			peek_next_token() == token::operator_multiplication ||
 			peek_next_token() == token::operator_division ||
 			peek_next_token() == token::operator_modulo ||
-			peek_next_token() == token::operator_bitwise_and ||
+			peek_next_token() == token::ampersand ||
 			peek_next_token() == token::operator_bitwise_or ||
 			peek_next_token() == token::operator_bitwise_left_shift ||
 			peek_next_token() == token::operator_bitwise_right_shift ||
@@ -838,7 +838,7 @@ namespace sigma {
 			case token::operator_modulo:
 				left = new operator_modulo_node(op.get_position(), left, right);
 				break;
-			case token::operator_bitwise_and:
+			case token::ampersand:
 				left = new operator_bitwise_and_node(op.get_position(), left, right);
 				break;
 			case token::operator_bitwise_or:
@@ -874,6 +874,7 @@ namespace sigma {
 		case token::operator_decrement:
 		case token::operator_not:
 		case token::operator_bitwise_not:
+		case token::ampersand:
 			// check if the next token is an identifier or an opening parenthesis
 			token next_next_token;
 			next_next_token = peek_nth_token(2);
@@ -965,6 +966,8 @@ namespace sigma {
 			return new operator_not_node(op.get_position(), operand);
 		case token::operator_bitwise_not:
 			return new operator_bitwise_not_node(op.get_position(), operand);
+		case token::ampersand:
+			return new operator_address_of_node(op.get_position(), operand);
 		}
 
 		ASSERT(false, "unexpected control path reached");

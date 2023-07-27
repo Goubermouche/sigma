@@ -58,6 +58,7 @@ namespace sigma {
 	class operator_bitwise_left_shift_node;
 	class operator_bitwise_right_shift_node;
 	class operator_bitwise_xor_node;
+	class operator_address_of_node;
 	// logical
 	class operator_conjunction_node;
 	class operator_disjunction_node;
@@ -275,6 +276,11 @@ namespace sigma {
 
 		virtual outcome::result<value_ptr> visit_operator_bitwise_not_node(
 			operator_bitwise_not_node& node,
+			const code_generation_context& context
+		) = 0;
+		
+		virtual outcome::result<value_ptr> visit_operator_address_of_node(
+			operator_address_of_node& node,
 			const code_generation_context& context
 		) = 0;
 

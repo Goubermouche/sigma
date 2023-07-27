@@ -14,6 +14,7 @@ namespace sigma {
 		single_quote,                       // '
 		double_quote,                       // "
 		hash,                               // #
+		ampersand,                          // &
 
 		// keywords
 		keyword_type_structure,             // struct
@@ -95,7 +96,6 @@ namespace sigma {
 		operator_less_than_equal_to,        // <=
 		operator_not,                       // !
 		operator_not_equals,                // !=
-		operator_bitwise_and,               // &
 		operator_logical_conjunction,       // &&
 		operator_bitwise_or,                // |
 		operator_logical_disjunction,       // ||
@@ -175,6 +175,8 @@ namespace sigma {
 			return "double_quote";
 		case token::hash:
 			return "hash";
+		case token::ampersand:
+			return "ampersand";
 
 		// keywords
 		// types
@@ -287,8 +289,6 @@ namespace sigma {
 			return "operator_not";
 		case token::operator_not_equals:
 			return "operator_not_equals";
-		case token::operator_bitwise_and:
-			return "operator_bitwise_and";
 		case token::operator_logical_conjunction:
 			return "operator_logical_conjunction";
 		case token::operator_bitwise_or:

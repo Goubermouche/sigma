@@ -8,6 +8,7 @@
 #include "code_generator/abstract_syntax_tree/operators/unary/arithmetic/operator_pre_increment_node.h"
 // bitwise
 #include "code_generator/abstract_syntax_tree/operators/unary/bitwise/operator_bitwise_not_node.h"
+#include "code_generator/abstract_syntax_tree/operators/unary/bitwise/operator_address_of_node.h"
 // logical
 #include "code_generator/abstract_syntax_tree/operators/unary/logical/operator_not_node.h"
 // binary
@@ -257,7 +258,7 @@ namespace sigma {
 		SUPPRESS_C4100(context);
 
 		// accept the operand
-		OUTCOME_TRY(auto operand_result, node.get_expression_node()->accept(
+		OUTCOME_TRY(const auto operand_result, node.get_expression_node()->accept(
 			*this,
 			{}
 		));
@@ -284,6 +285,34 @@ namespace sigma {
 		);
 	}
 
+	outcome::result<value_ptr> code_generator::visit_operator_address_of_node(
+		operator_address_of_node& node,
+		const code_generation_context& context
+	) {
+		SUPPRESS_C4100(context);
+
+		// accept the operand
+		OUTCOME_TRY(const auto operand_result, node.get_expression_node()->accept(
+			*this,
+			{}
+		));
+
+		// todo: check if the operand is an lvalue, and throw an error if it is
+
+			// Create a pointer type that corresponds to the type of the operand
+		llvm::Type* pointer_type = operand_result->get_value()->getType()->getPointerTo();
+		// Get the address of the operand (create a pointer to it)
+		llvm::Value* address = m_context->get_builder().CreateAlloca(operand_result->get_value()->getType());
+		m_context->get_builder().CreateStore(operand_result->get_value(), address);
+
+		// Return the result as a pointer to the operand's type
+		return std::make_shared<value>(
+			"__address_of",
+			operand_result->get_type().get_pointer_type(), // true indicates a pointer type
+			address
+		);
+	}
+
 	// logical
 	outcome::result<value_ptr> code_generator::visit_operator_not_node(
 		operator_not_node& node, 
@@ -292,7 +321,7 @@ namespace sigma {
 		SUPPRESS_C4100(context);
 
 		// accept the operand
-		OUTCOME_TRY(auto operand_result, node.get_expression_node()->accept(
+		OUTCOME_TRY(const auto operand_result, node.get_expression_node()->accept(
 			*this,
 			{}
 		));

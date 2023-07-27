@@ -339,6 +339,7 @@
     <ClInclude Include="source\utility\types.h">
       <Filter>source\utility</Filter>
     </ClInclude>
+    <ClInclude Include="source\code_generator\abstract_syntax_tree\operators\unary\bitwise\operator_address_of_node.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp" />
@@ -588,6 +589,7 @@
     <ClCompile Include="source\utility\timer.cpp">
       <Filter>source\utility</Filter>
     </ClCompile>
+    <ClCompile Include="source\code_generator\abstract_syntax_tree\operators\unary\bitwise\operator_address_of_node.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="test\main.s" />

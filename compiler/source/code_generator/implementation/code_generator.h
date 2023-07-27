@@ -228,6 +228,11 @@ namespace sigma {
 			const code_generation_context& context
 		) override;
 
+		outcome::result<value_ptr> visit_operator_address_of_node(
+			operator_address_of_node& node,
+			const code_generation_context& context
+		) override;
+
 		// logical
 		outcome::result<value_ptr> visit_operator_not_node(
 			operator_not_node& node,

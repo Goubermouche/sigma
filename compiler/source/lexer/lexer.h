@@ -191,6 +191,7 @@ namespace sigma {
 			{ "\'", token::single_quote                       },
 			{ "\"", token::double_quote                       },
 			{ "#" , token::hash                               },
+			{ "&" , token::ampersand                          },
 
 			// operators								      
 			{ "+" , token::operator_addition                  },
@@ -215,7 +216,6 @@ namespace sigma {
 			{ "<=", token::operator_less_than_equal_to        },
 			{ "!" , token::operator_not                       },
 			{ "!=", token::operator_not_equals                },
-			{ "&" , token::operator_bitwise_and               },
 			{ "&&", token::operator_logical_conjunction       },
 			{ "|" , token::operator_bitwise_or                },
 			{ "||", token::operator_logical_disjunction       },

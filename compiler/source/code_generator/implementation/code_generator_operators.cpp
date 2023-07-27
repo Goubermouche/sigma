@@ -38,6 +38,7 @@
 #include "code_generator/abstract_syntax_tree/operators/binary/logical/operator_less_than_equal_to_node.h"
 #include "code_generator/abstract_syntax_tree/operators/binary/logical/operator_equals_node.h"
 #include "code_generator/abstract_syntax_tree/operators/binary/logical/operator_not_equals_node.h"
+#include "code_generator/abstract_syntax_tree/operators/unary/bitwise/operator_dereference_node.h"
 
 namespace sigma {
 	// unary
@@ -291,25 +292,46 @@ namespace sigma {
 	) {
 		SUPPRESS_C4100(context);
 
+		// Accept the operand
+		OUTCOME_TRY(const auto operand_result, node.get_expression_node()->accept(
+			*this,
+			{}
+		));
+
+		// todo: check for lvalue
+
+		// return the result as a pointer to the operand's type
+		return std::make_shared<value>(
+			"__address_of",
+			operand_result->get_type().get_pointer_type(),
+			operand_result->get_pointer()
+		);
+	}
+
+	outcome::result<value_ptr> code_generator::visit_operator_dereference_node(
+		operator_dereference_node& node,
+		const code_generation_context& context
+	) {
+		SUPPRESS_C4100(context);
+
 		// accept the operand
 		OUTCOME_TRY(const auto operand_result, node.get_expression_node()->accept(
 			*this,
 			{}
 		));
 
-		// todo: check if the operand is an lvalue, and throw an error if it is
+		// todo: check if the operator is a pointer
 
-			// Create a pointer type that corresponds to the type of the operand
-		llvm::Type* pointer_type = operand_result->get_value()->getType()->getPointerTo();
-		// Get the address of the operand (create a pointer to it)
-		llvm::Value* address = m_context->get_builder().CreateAlloca(operand_result->get_value()->getType());
-		m_context->get_builder().CreateStore(operand_result->get_value(), address);
+		llvm::Value* dereferenced = m_context->get_builder().CreateLoad(
+			operand_result->get_type().get_llvm_type(m_context->get_context()),
+			operand_result->get_pointer()
+		);
 
-		// Return the result as a pointer to the operand's type
+		// return the result as the dereferenced value
 		return std::make_shared<value>(
-			"__address_of",
-			operand_result->get_type().get_pointer_type(), // true indicates a pointer type
-			address
+			"__dereference",
+			operand_result->get_type().get_element_type(),
+			dereferenced
 		);
 	}
 
@@ -647,6 +669,24 @@ namespace sigma {
 			{}
 		));
 
+		// upcast both expressions
+		const type highest_precision = get_highest_precision_type(
+			left_operand_result->get_type(),
+			right_operand_result->get_type()
+		);
+
+		llvm::Value* left_value_upcasted = cast_value(
+			left_operand_result,
+			highest_precision,
+			node.get_declared_position()
+		);
+
+		llvm::Value* right_value_upcasted = cast_value(
+			right_operand_result,
+			highest_precision,
+			node.get_declared_position()
+		);
+
 		// both expressions must be integral
 		if (!left_operand_result->get_type().is_integral() ||
 			!right_operand_result->get_type().is_integral()) {
@@ -661,13 +701,13 @@ namespace sigma {
 
 		// create a bitwise AND operation
 		llvm::Value* and_result = m_context->get_builder().CreateAnd(
-			left_operand_result->get_value(),
-			right_operand_result->get_value()
+			left_value_upcasted,
+			right_value_upcasted
 		);
 
 		return std::make_shared<value>(
 			"__bitwise_and",
-			left_operand_result->get_type(),
+			highest_precision,
 			and_result
 		);
 	}
@@ -690,6 +730,24 @@ namespace sigma {
 			{}
 		));
 
+		// upcast both expressions
+		const type highest_precision = get_highest_precision_type(
+			left_operand_result->get_type(),
+			right_operand_result->get_type()
+		);
+
+		llvm::Value* left_value_upcasted = cast_value(
+			left_operand_result,
+			highest_precision,
+			node.get_declared_position()
+		);
+
+		llvm::Value* right_value_upcasted = cast_value(
+			right_operand_result,
+			highest_precision,
+			node.get_declared_position()
+		);
+
 		// both expressions must be integral
 		if (!left_operand_result->get_type().is_integral() ||
 			!right_operand_result->get_type().is_integral()) {
@@ -702,15 +760,16 @@ namespace sigma {
 			); // return on failure
 		}
 
+
 		// create a bitwise OR operation
 		llvm::Value* and_result = m_context->get_builder().CreateOr(
-			left_operand_result->get_value(),
-			right_operand_result->get_value()
+			left_value_upcasted,
+			right_value_upcasted
 		);
 
 		return std::make_shared<value>(
 			"__bitwise_or",
-			left_operand_result->get_type(),
+			highest_precision,
 			and_result
 		);
 	}
@@ -733,6 +792,25 @@ namespace sigma {
 			{}
 		));
 
+		// upcast both expressions
+		const type highest_precision = get_highest_precision_type(
+			left_operand_result->get_type(),
+			right_operand_result->get_type()
+		);
+
+		// upcast both expressions
+		llvm::Value* left_value_upcasted = cast_value(
+			left_operand_result,
+			highest_precision,
+			node.get_declared_position()
+		);
+
+		llvm::Value* right_value_upcasted = cast_value(
+			right_operand_result,
+			highest_precision,
+			node.get_declared_position()
+		);
+
 		// both expressions must be integral
 		if (!left_operand_result->get_type().is_integral() ||
 			!right_operand_result->get_type().is_integral()) {
@@ -747,13 +825,13 @@ namespace sigma {
 
 		// create a bitwise left shift operation
 		llvm::Value* left_shift_result = m_context->get_builder().CreateShl(
-			left_operand_result->get_value(),
-			right_operand_result->get_value()
+			left_value_upcasted,
+			right_value_upcasted
 		);
 
 		return std::make_shared<value>(
 			"__bitwise_left_shift",
-			left_operand_result->get_type(),
+			highest_precision,
 			left_shift_result
 		);
 	}
@@ -776,6 +854,24 @@ namespace sigma {
 			{}
 		));
 
+		// upcast both expressions
+		const type highest_precision = get_highest_precision_type(
+			left_operand_result->get_type(),
+			right_operand_result->get_type()
+		);
+
+		llvm::Value* left_value_upcasted = cast_value(
+			left_operand_result,
+			highest_precision,
+			node.get_declared_position()
+		);
+
+		llvm::Value* right_value_upcasted = cast_value(
+			right_operand_result,
+			highest_precision,
+			node.get_declared_position()
+		);
+
 		// both expressions must be integral
 		if (!left_operand_result->get_type().is_integral() ||
 			!right_operand_result->get_type().is_integral()) {
@@ -788,16 +884,17 @@ namespace sigma {
 			); // return on failure
 		}
 
-		// create a bitwise right shift operation
-		llvm::Value* right_shift_result = m_context->get_builder().CreateLShr(
-			left_operand_result->get_value(),
-			right_operand_result->get_value()
+
+		// create a bitwise left shift operation
+		llvm::Value* left_shift_result = m_context->get_builder().CreateLShr(
+			left_value_upcasted,
+			right_value_upcasted
 		);
 
 		return std::make_shared<value>(
-			"__bitwise_right_shift",
-			left_operand_result->get_type(),
-			right_shift_result
+			"__bitwise_left_shift",
+			highest_precision,
+			left_shift_result
 		);
 	}
 
@@ -819,6 +916,24 @@ namespace sigma {
 			{}
 		));
 
+		// upcast both expressions
+		const type highest_precision = get_highest_precision_type(
+			left_operand_result->get_type(),
+			right_operand_result->get_type()
+		);
+
+		llvm::Value* left_value_upcasted = cast_value(
+			left_operand_result,
+			highest_precision,
+			node.get_declared_position()
+		);
+
+		llvm::Value* right_value_upcasted = cast_value(
+			right_operand_result,
+			highest_precision,
+			node.get_declared_position()
+		);
+
 		// both expressions must be integral
 		if (!left_operand_result->get_type().is_integral() ||
 			!right_operand_result->get_type().is_integral()) {
@@ -833,13 +948,13 @@ namespace sigma {
 
 		// create a bitwise XOR operation
 		llvm::Value* xor_result = m_context->get_builder().CreateXor(
-			left_operand_result->get_value(),
-			right_operand_result->get_value()
+			left_value_upcasted,
+			right_value_upcasted
 		);
 
 		return std::make_shared<value>(
 			"__bitwise_xor",
-			left_operand_result->get_type(),
+			highest_precision,
 			xor_result
 		);
 	}

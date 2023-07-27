@@ -27,6 +27,8 @@ namespace sigma {
 			node_ptr left_operand
 		);
 
+		outcome::result<node_ptr> parse_variable_access();
+		outcome::result<node_ptr> parse_variable();
 		outcome::result<node_ptr> parse_assignment();
 		outcome::result<node_ptr> parse_array_assignment();
 		outcome::result<node_ptr> parse_array_access();

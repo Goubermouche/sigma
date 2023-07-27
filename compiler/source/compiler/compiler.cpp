@@ -1,5 +1,4 @@
 #include "compiler.h"
-#include "utility/timer.h"
 
 // llvm
 #include <llvm/Support/VirtualFileSystem.h>
@@ -17,8 +16,11 @@
 #include <clang/Driver/Driver.h>
 #include <clang/Driver/Compilation.h>
 #include <clang/Frontend/TextDiagnosticPrinter.h>
+#include <llvm/IR/Verifier.h>
 
+// utility
 #include "utility/string.h"
+#include "utility/timer.h"
 
 namespace sigma {
 	compiler::compiler(
@@ -94,6 +96,27 @@ namespace sigma {
 			<< ' '
 			<< detail::format_ending(tree.size(), "file", "files")
 			<< "...\n";
+
+		// context->get_module()->print(llvm::outs(), nullptr);
+
+		if(verifyModule(*context->get_module(), &llvm::errs())) {
+			console::out
+				<< "sigma: "
+				<< color::yellow
+				<< "info: "
+				<< color::red
+				<< "module verification failed\n";
+			return outcome::success();
+		}
+		else {
+			console::out
+				<< "sigma: "
+				<< color::yellow
+				<< "info: "
+				<< color::green
+				<< "module verified successfully\n"
+				<< color::white;
+		}
 	
 		// compile the module into an executable
 		OUTCOME_TRY(compile_module(context));

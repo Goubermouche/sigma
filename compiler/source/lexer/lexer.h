@@ -192,6 +192,7 @@ namespace sigma {
 			{ "\"", token::double_quote                       },
 			{ "#" , token::hash                               },
 			{ "&" , token::ampersand                          },
+			{ "*" , token::asterisk                           },
 
 			// operators								      
 			{ "+" , token::operator_addition                  },
@@ -200,7 +201,6 @@ namespace sigma {
 			{ "-" , token::operator_subtraction               },
 			{ "--", token::operator_decrement                 },
 			{ "-=", token::operator_subtraction_assignment    },
-			{ "*" , token::operator_multiplication            },
 			{ "*=", token::operator_multiplication_assignment },
 			{ "%" , token::operator_modulo                    },
 			{ "%=", token::operator_modulo_assignment         },

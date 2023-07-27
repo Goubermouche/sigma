@@ -38,6 +38,8 @@ namespace sigma {
 	class operator_pre_increment_node;
 	// bitwise
 	class operator_bitwise_not_node;
+	class operator_address_of_node;
+	class operator_dereference_node;
 	// logical
 	class operator_not_node;
 	// binary
@@ -58,7 +60,6 @@ namespace sigma {
 	class operator_bitwise_left_shift_node;
 	class operator_bitwise_right_shift_node;
 	class operator_bitwise_xor_node;
-	class operator_address_of_node;
 	// logical
 	class operator_conjunction_node;
 	class operator_disjunction_node;
@@ -205,6 +206,22 @@ namespace sigma {
 			const code_generation_context& context
 		) = 0;
 
+		// bitwise
+		virtual outcome::result<value_ptr> visit_operator_bitwise_not_node(
+			operator_bitwise_not_node& node,
+			const code_generation_context& context
+		) = 0;
+
+		virtual outcome::result<value_ptr> visit_operator_address_of_node(
+			operator_address_of_node& node,
+			const code_generation_context& context
+		) = 0;
+
+		virtual outcome::result<value_ptr> visit_operator_dereference_node(
+			operator_dereference_node& node,
+			const code_generation_context& context
+		) = 0;
+
 		// logical
 		virtual outcome::result<value_ptr> visit_operator_not_node(
 			operator_not_node& node,
@@ -271,16 +288,6 @@ namespace sigma {
 
 		virtual outcome::result<value_ptr> visit_operator_bitwise_or_node(
 			operator_bitwise_or_node& node,
-			const code_generation_context& context
-		) = 0;
-
-		virtual outcome::result<value_ptr> visit_operator_bitwise_not_node(
-			operator_bitwise_not_node& node,
-			const code_generation_context& context
-		) = 0;
-		
-		virtual outcome::result<value_ptr> visit_operator_address_of_node(
-			operator_address_of_node& node,
 			const code_generation_context& context
 		) = 0;
 

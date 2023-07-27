@@ -15,6 +15,7 @@ namespace sigma {
 		double_quote,                       // "
 		hash,                               // #
 		ampersand,                          // &
+		asterisk,                           // *
 
 		// keywords
 		keyword_type_structure,             // struct
@@ -79,7 +80,6 @@ namespace sigma {
 		operator_subtraction,               // -
 		operator_decrement,                 // --
 		operator_subtraction_assignment,    // -=
-		operator_multiplication,            // *
 		operator_multiplication_assignment, // *=
 		operator_modulo,                    // %
 		operator_modulo_assignment,         // %=
@@ -177,6 +177,8 @@ namespace sigma {
 			return "hash";
 		case token::ampersand:
 			return "ampersand";
+		case token::asterisk:
+			return "asterisk";
 
 		// keywords
 		// types
@@ -257,8 +259,6 @@ namespace sigma {
 			return "operator_decrement";
 		case token::operator_subtraction_assignment:
 			return "operator_subtraction_assignment";
-		case token::operator_multiplication:
-			return "operator_multiplication";
 		case token::operator_multiplication_assignment:
 			return "operator_multiplication_assignment";
 		case token::operator_modulo:

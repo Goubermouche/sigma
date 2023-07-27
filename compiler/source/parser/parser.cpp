@@ -37,6 +37,8 @@
 #include "code_generator/abstract_syntax_tree/operators/unary/arithmetic/operator_pre_increment_node.h"
 // bitwise
 #include "code_generator/abstract_syntax_tree/operators/unary/bitwise/operator_bitwise_not_node.h"
+#include "code_generator/abstract_syntax_tree/operators/unary/bitwise/operator_address_of_node.h"
+#include "code_generator/abstract_syntax_tree/operators/unary/bitwise/operator_dereference_node.h"
 // logical
 #include "code_generator/abstract_syntax_tree/operators/unary/logical/operator_not_node.h"
 
@@ -58,7 +60,6 @@
 #include "code_generator/abstract_syntax_tree/operators/binary/bitwise/operator_bitwise_or_node.h"
 #include "code_generator/abstract_syntax_tree/operators/binary/bitwise/operator_bitwise_right_shift_node.h"
 #include "code_generator/abstract_syntax_tree/operators/binary/bitwise/operator_bitwise_xor_node.h"
-#include "code_generator/abstract_syntax_tree/operators/unary/bitwise/operator_address_of_node.h"
 // logical
 #include "code_generator/abstract_syntax_tree/operators/binary/logical/operator_conjunction_node.h"
 #include "code_generator/abstract_syntax_tree/operators/binary/logical/operator_disjunction_node.h"
@@ -179,7 +180,7 @@ namespace sigma {
 			OUTCOME_TRY(global_statement_node, parse_declaration(true));
 		}
 		else {
-			if (token == token::identifier) {
+			if (peek_is_assignment()) {
 				OUTCOME_TRY(global_statement_node, parse_assignment());
 			}
 			else {
@@ -240,6 +241,7 @@ namespace sigma {
 		}
 		else {
 			switch (next_token) {
+			case token::asterisk:
 			case token::identifier: {
 				OUTCOME_TRY(local_statement_node, parse_local_statement_identifier());
 				break;
@@ -319,8 +321,7 @@ namespace sigma {
 		}
 		else {
 			// create a simple access node
-			m_token_list.get_token(); // identifier (guaranteed)
-			local_statement_identifier_node = new variable_access_node(m_token_list.get_current_token().get_position(), m_token_list.get_current_token().get_value());
+			OUTCOME_TRY(local_statement_identifier_node, parse_variable_access());
 		}
 
 		// check for post unary operators after identifier, deep expression, or array index access
@@ -602,10 +603,48 @@ namespace sigma {
 		return nullptr;
 	}
 
-	outcome::result<node_ptr> parser::parse_assignment() {
-		m_token_list.get_token(); // identifier (guaranteed)
-		const node_ptr variable = new variable_node(m_token_list.get_current_token().get_position(), m_token_list.get_current_token().get_value());
+	outcome::result<node_ptr> parser::parse_variable_access() {
+		const token next = peek_next_token();
 
+		if(next == token::asterisk) {
+			m_token_list.get_token(); // asterisk (guaranteed)
+			OUTCOME_TRY(const node_ptr node, parse_variable_access());
+
+			return new operator_dereference_node(
+				m_token_list.get_current_token().get_position(),
+				node
+			);
+		}
+
+		m_token_list.get_token();
+		return new variable_access_node(
+			m_token_list.get_current_token().get_position(),
+			m_token_list.get_current_token().get_value()
+		);
+	}
+
+	outcome::result<node_ptr> parser::parse_variable() {
+		const token next = peek_next_token();
+
+		if (next == token::asterisk) {
+			m_token_list.get_token(); // asterisk (guaranteed)
+			OUTCOME_TRY(const node_ptr node, parse_variable_access());
+
+			return new operator_dereference_node(
+				m_token_list.get_current_token().get_position(),
+				node
+			);
+		}
+
+		m_token_list.get_token();
+		return new variable_node(
+			m_token_list.get_current_token().get_position(),
+			m_token_list.get_current_token().get_value()
+		);
+	}
+
+	outcome::result<node_ptr> parser::parse_assignment() {
+		OUTCOME_TRY(const node_ptr variable, parse_variable());
 		OUTCOME_TRY(m_token_list.expect_token(token::operator_assignment));
 
 		// parse access-assignment
@@ -815,7 +854,7 @@ namespace sigma {
 		OUTCOME_TRY(node_ptr left, parse_primary(expression_type));
 
 		while (
-			peek_next_token() == token::operator_multiplication ||
+			peek_next_token() == token::asterisk ||
 			peek_next_token() == token::operator_division ||
 			peek_next_token() == token::operator_modulo ||
 			peek_next_token() == token::ampersand ||
@@ -829,7 +868,7 @@ namespace sigma {
 			OUTCOME_TRY(node_ptr right, parse_primary(expression_type));
 
 			switch (op.get_token()) {
-			case token::operator_multiplication:
+			case token::asterisk:
 				left = new operator_multiplication_node(op.get_position(), left, right);
 				break;
 			case token::operator_division:
@@ -1012,10 +1051,11 @@ namespace sigma {
 			OUTCOME_TRY(primary_identifier_node, parse_array_access());
 		}
 		else {
+			OUTCOME_TRY(primary_identifier_node, parse_variable_access());
 			// parse an assignment
-			m_token_list.get_token();
-			const std::string identifier = m_token_list.get_current_token().get_value();
-			primary_identifier_node = new variable_access_node(m_token_list.get_current_token().get_position(), identifier);
+			// m_token_list.get_token();
+			// const std::string identifier = m_token_list.get_current_token().get_value();
+			// primary_identifier_node = new variable_access_node(m_token_list.get_current_token().get_position(), identifier);
 		}
 
 		const token next_token = peek_next_token();
@@ -1052,7 +1092,7 @@ namespace sigma {
 
 		// pointers?
 		token tok = m_token_list.peek_token().get_token();
-		while (tok == token::operator_multiplication) {
+		while (tok == token::asterisk) {
 			tok = m_token_list.peek_token().get_token();
 		}
 
@@ -1080,10 +1120,17 @@ namespace sigma {
 	}
 
 	bool parser::peek_is_assignment() {
+		token tok = m_token_list.peek_token().get_token();
+
+		// parse all available asterisks (***value = ...)
+		while(tok == token::asterisk) {
+			tok = m_token_list.peek_token().get_token();
+		}
+
 		// identifier
-		if (m_token_list.peek_token().get_token() != token::identifier) {
+		if(tok != token::identifier) {
 			m_token_list.synchronize_indices();
-			return false; // return on failure
+			return false;
 		}
 
 		const bool result = m_token_list.peek_token().get_token() == token::operator_assignment;
@@ -1164,7 +1211,7 @@ namespace sigma {
 		type ty = type(m_token_list.get_current_token().get_token(), 0);
 
 		// check if the next token is an asterisk
-		while (peek_next_token() == token::operator_multiplication) {
+		while (peek_next_token() == token::asterisk) {
 			m_token_list.get_token(); // operator_multiplication (guaranteed)
 			ty.set_pointer_level(ty.get_pointer_level() + 1);
 		}

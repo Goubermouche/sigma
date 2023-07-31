@@ -126,7 +126,7 @@ The expected output, after running the generated .exe, looks like this:
 ```
 ## Todo: 
 - [ ] Full C function toolset
-- [ ] Support for external files and linking
+- [X] Support for external files and linking
 - [ ] Integral formats (base-16 HEX, base-8 HEX)
 - [ ] Enum support
 - [ ] Struct support

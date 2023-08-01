@@ -1,26 +1,26 @@
 #pragma once
 #include "utility/types.h"
 
-#define NOMINMAX
-#include <Windows.h>
+// #define NOMINMAX
+// #include <Windows.h>
 
 namespace sigma {
 	struct color_value {
-		WORD value;
+		// WORD value;
 	};
 
 	class color {
 	public:
-		static constexpr color_value white = { 7 };
-		static constexpr color_value pink = { 2 }; // 
-		static constexpr color_value magenta = { 3 };
-		static constexpr color_value blue = { 1 };
-		static constexpr color_value light_blue = { 9 };
-		static constexpr color_value green = { 2 };
-		static constexpr color_value light_green = { 10 };
-		static constexpr color_value orange = { 6 }; // 
-		static constexpr color_value yellow = { 14 };
-		static constexpr color_value red = { 4 };
+		static constexpr color_value white;
+		static constexpr color_value pink;
+		static constexpr color_value magenta;
+		static constexpr color_value blue;
+		static constexpr color_value light_blue;
+		static constexpr color_value green;
+		static constexpr color_value light_green ;
+		static constexpr color_value orange;
+		static constexpr color_value yellow;
+		static constexpr color_value red;
 	};
 
 	class precision {

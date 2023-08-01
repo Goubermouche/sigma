@@ -118,8 +118,9 @@ namespace sigma {
 	}
 
 	void console::set_color(const color_value& color) {
-		SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), color.value);
+		// SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), color.value);
 	}
+
 	precision::precision(u64 precision)
 		: m_precision(precision) {}
 

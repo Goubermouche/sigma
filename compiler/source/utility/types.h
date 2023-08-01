@@ -6,22 +6,26 @@
 #include <deque>
 #include <expected>
 #include <filesystem>
-#include <fcntl.h>
-#include <format>
 #include <fstream>
 #include <future>
 #include <functional>
 #include <iomanip>
-#include <io.h>
 #include <iostream>
 #include <iterator>
 #include <string>
-#include <semaphore>
 #include <unordered_map>
 #include <unordered_set>
 #include <utility>
 #include <vector>
 #include <regex>
+
+// platform specific 
+#ifdef _WIN32
+    #include <io.h>
+#else
+    #include <unistd.h>
+    #include <fcntl.h>
+#endif
 
 namespace sigma {
 	namespace types {

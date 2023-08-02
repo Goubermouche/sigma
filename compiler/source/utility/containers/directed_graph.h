@@ -1,5 +1,5 @@
 #pragma once
-#include "utility/thread_pool.h"
+#include "utility/macros.h"
 
 namespace sigma::detail {
 	template<typename key_type, typename value_type>
@@ -19,9 +19,6 @@ namespace sigma::detail {
         value_type& get_value() {
             return m_value;
         }
-
-        bool has_been_processed = false;
-        std::mutex mutex;
     private:
         value_type m_value;
         std::vector<key_type> m_children;
@@ -100,53 +97,6 @@ namespace sigma::detail {
             else {
                 post_order_traverse(root, function);
             }
-        }
-
-        void traverse_parallel_bottom_up(
-            const key_type& root,
-            thread_pool& pool,
-            const function_type& function
-        ) {
-            node_type* node = m_nodes[root];
-            std::unique_lock lock{ node->mutex };
-            if (node->has_been_processed) {
-                return;
-            }
-
-            node->has_been_processed = true;
-            if (node->get_children().empty()) {
-                function(root, node);
-                return;
-            }
-
-            std::vector<std::future<void>> threads;
-            for (u64 i = 1; i < node->get_children().size(); i++) {
-                threads.push_back(pool.enqueue([
-                    this,
-                        node,
-                        i,
-                        &pool,
-                        function
-                ] {
-                        traverse_parallel_bottom_up(
-                            node->get_children()[i],
-                            pool,
-                            function
-                        );
-                    }));
-            }
-
-            traverse_parallel_bottom_up(
-                node->get_children()[0],
-                pool,
-                function
-            );
-
-            for (auto& future : threads) {
-                future.get();
-            }
-
-            function(root, node);
         }
 
         value_type& operator[](const key_type& key) {

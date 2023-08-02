@@ -139,8 +139,6 @@
     <ClInclude Include="source\utility\filesystem.h" />
     <ClInclude Include="source\utility\macros.h" />
     <ClInclude Include="source\utility\string.h" />
-    <ClInclude Include="source\utility\thread_pool.h" />
-    <ClInclude Include="source\utility\thread_safe_queue.h" />
     <ClInclude Include="source\utility\timer.h" />
     <ClInclude Include="source\utility\types.h" />
   </ItemGroup>

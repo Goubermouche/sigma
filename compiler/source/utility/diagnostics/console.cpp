@@ -4,12 +4,12 @@ namespace sigma {
 	console& console::out = *new console();
 
 	void console::init() {
-		_setmode(_fileno(stdout), _O_U16TEXT);
-		const HANDLE h_output = GetStdHandle(STD_OUTPUT_HANDLE);
-
-		CONSOLE_SCREEN_BUFFER_INFOEX csbiInfo;
-		csbiInfo.cbSize = sizeof(csbiInfo);
-		GetConsoleScreenBufferInfoEx(h_output, &csbiInfo);
+		// _setmode(_fileno(stdout), _O_U16TEXT);
+		// const HANDLE h_output = GetStdHandle(STD_OUTPUT_HANDLE);
+		// 
+		// CONSOLE_SCREEN_BUFFER_INFOEX csbiInfo;
+		// csbiInfo.cbSize = sizeof(csbiInfo);
+		// GetConsoleScreenBufferInfoEx(h_output, &csbiInfo);
 
 		//const std::string color_palette[11] = {
 		//	"0c0c0c", // background

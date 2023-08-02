@@ -1,7 +1,6 @@
 #pragma once
 #include "parser/parser.h"
 #include "utility/diagnostics/error.h"
-#include "utility/thread_pool.h"
 #include "utility/containers/directed_graph.h"
 
 namespace sigma {

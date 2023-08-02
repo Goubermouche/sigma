@@ -327,12 +327,6 @@
     <ClInclude Include="source\utility\string.h">
       <Filter>source\utility</Filter>
     </ClInclude>
-    <ClInclude Include="source\utility\thread_pool.h">
-      <Filter>source\utility</Filter>
-    </ClInclude>
-    <ClInclude Include="source\utility\thread_safe_queue.h">
-      <Filter>source\utility</Filter>
-    </ClInclude>
     <ClInclude Include="source\utility\timer.h">
       <Filter>source\utility</Filter>
     </ClInclude>

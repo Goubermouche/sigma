@@ -42,8 +42,8 @@ namespace sigma {
 		using u64 = uint64_t;
 
 		// floating point
-		using f32 = float_t;
-		using f64 = double_t;
+		using f32 = float;
+		using f64 = double;
 
 		using filepath = std::filesystem::path;
 	}

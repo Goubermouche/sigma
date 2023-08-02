@@ -1,4 +1,5 @@
 #pragma once
+#include <format>
 #include "utility/macros.h"
 #include "llvm_wrappers/type.h"
 #include "utility/containers/compile_time_hash_map.h"

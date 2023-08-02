@@ -3,6 +3,7 @@
 -- get the LLVM installation path
 local llvm_root = os.getenv("LLVM_ROOT")
 local script_root = path.getabsolute(".")
+print("LLVM_ROOT: " .. llvm_root)
 
 workspace "sigma"
     configurations { "Release" }

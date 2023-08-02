@@ -366,3 +366,5 @@ MigrationBackup/
 FodyWeavers.xsd
 
 .vscode/
+
+Makefile

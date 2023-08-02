@@ -11,16 +11,16 @@ namespace sigma {
 
 	class color {
 	public:
-		static constexpr color_value white;
-		static constexpr color_value pink;
-		static constexpr color_value magenta;
-		static constexpr color_value blue;
-		static constexpr color_value light_blue;
-		static constexpr color_value green;
-		static constexpr color_value light_green ;
-		static constexpr color_value orange;
-		static constexpr color_value yellow;
-		static constexpr color_value red;
+		static constexpr color_value white = {};
+		static constexpr color_value pink= {};
+		static constexpr color_value magenta= {};
+		static constexpr color_value blue= {};
+		static constexpr color_value light_blue= {};
+		static constexpr color_value green= {};
+		static constexpr color_value light_green = {};
+		static constexpr color_value orange= {};
+		static constexpr color_value yellow= {};
+		static constexpr color_value red= {};
 	};
 
 	class precision {
@@ -83,15 +83,15 @@ namespace sigma {
 	// 	return *this;
 	// }
 
-	inline COLORREF hex_to_rgb(const std::string& hex) {
-		if (hex.size() != 6) {
-			throw std::invalid_argument("invalid hex color string");
-		}
+	// inline COLORREF hex_to_rgb(const std::string& hex) {
+	// 	if (hex.size() != 6) {
+	// 		throw std::invalid_argument("invalid hex color string");
+	// 	}
 
-		i32 red, green, blue;
-		sscanf_s(hex.c_str(), "%02x%02x%02x", &red, &green, &blue);
-		return RGB(red, green, blue);
-	}
+	// 	i32 red, green, blue;
+	// 	sscanf_s(hex.c_str(), "%02x%02x%02x", &red, &green, &blue);
+	// 	return RGB(red, green, blue);
+	// }
 
 	/**
 	 * \brief Creates a backslash-escaped version of the \a input string. 

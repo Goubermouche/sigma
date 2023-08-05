@@ -4,42 +4,36 @@ namespace sigma {
 	console& console::out = *new console();
 
 	void console::init() {
-		// _setmode(_fileno(stdout), _O_U16TEXT);
-		// const HANDLE h_output = GetStdHandle(STD_OUTPUT_HANDLE);
-		// 
-		// CONSOLE_SCREEN_BUFFER_INFOEX csbiInfo;
-		// csbiInfo.cbSize = sizeof(csbiInfo);
-		// GetConsoleScreenBufferInfoEx(h_output, &csbiInfo);
+#ifdef _WIN32
+		_setmode(_fileno(stdout), _O_U16TEXT);
+#else
+		std::setlocale(LC_ALL, "");
+		std::ios::sync_with_stdio(false);
+		std::wcout.imbue(std::locale());
+#endif
+	}
 
-		//const std::string color_palette[11] = {
-		//	"0c0c0c", // background
-		//	"d0d0d0", // text
-		//	"ed94c0", // numeric, boolean
-		//	"c191ff", // name
-		//	"6c95eb", // keyword
-		//	"66c3cc", // member
-		//	"39cc8f", // function
-		//	"85c46c", // comment
-		//	"c9a26d", // string literal
-		//	"c9ba6d", // yellow
-		//	"d43434", // red
-		//};
+	console& console::width(i64 width) {
+		std::wcout << std::setw(width);
+		return out;
+	}
 
-		//for (u64 i = 0; i < 11; ++i) {
-		//	csbiInfo.ColorTable[i] = hex_to_rgb(color_palette[i]);
-		//}
-
-		//SetConsoleScreenBufferInfoEx(h_output, &csbiInfo);
-		//SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), color::white);
+	console& console::precision(i64 precision) {
+		std::wcout << std::fixed << std::setprecision(precision);
+		return out;
 	}
 
 	console& console::operator<<(const color_value& color) {
-		set_color(color);
+		std::wcout << color.ansi_code;
 		return *this;
 	}
 
-	console& console::operator<<(const precision& precision) {
-		std::wcout << std::fixed << std::setprecision(precision.get_precision());
+	console& console::operator<<(const left_pad& left) {
+		std::wcout << std::left;
+		return *this;
+	}
+
+	console& console::operator<<(const console& console) {
 		return *this;
 	}
 
@@ -55,9 +49,6 @@ namespace sigma {
 	}
 
 	console& console::operator<<(const char* value) {
-		// int size_needed = MultiByteToWideChar(CP_UTF8, 0, value, -1, NULL, 0);
-		// wchar_t* wstr = new wchar_t[size_needed];
-		// MultiByteToWideChar(CP_UTF8, 0, value, -1, wstr, size_needed);
 		std::wcout << value;
 		return *this;
 	}
@@ -115,16 +106,5 @@ namespace sigma {
 	console& console::operator<<(i64 value) {
 		std::wcout << value;
 		return *this;
-	}
-
-	void console::set_color(const color_value& color) {
-		// SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), color.value);
-	}
-
-	precision::precision(u64 precision)
-		: m_precision(precision) {}
-
-	u64 precision::get_precision() const {
-		return m_precision;
 	}
 }

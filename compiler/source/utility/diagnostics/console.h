@@ -1,43 +1,36 @@
 #pragma once
 #include "utility/types.h"
 
-// #define NOMINMAX
-// #include <Windows.h>
-
 namespace sigma {
 	struct color_value {
-		// WORD value;
+		const char* ansi_code;
 	};
+
+	struct left_pad {};
 
 	class color {
 	public:
-		static constexpr color_value white = {};
-		static constexpr color_value pink= {};
-		static constexpr color_value magenta= {};
-		static constexpr color_value blue= {};
-		static constexpr color_value light_blue= {};
-		static constexpr color_value green= {};
-		static constexpr color_value light_green = {};
-		static constexpr color_value orange= {};
-		static constexpr color_value yellow= {};
-		static constexpr color_value red= {};
+		static constexpr color_value white = { "\033[38;5;231m" };
+		static constexpr color_value magenta = { "\033[38;5;134m" };
+		static constexpr color_value blue = { "\033[38;5;33m" };
+		static constexpr color_value green = { "\033[38;5;41m" };
+		static constexpr color_value yellow = { "\033[38;5;228m" };
+		static constexpr color_value red = { "\033[38;5;197m" };
 	};
 
-	class precision {
-	public:
-		precision(u64 precision);
-		u64 get_precision() const;
-	private:
-		u64 m_precision;
-	};
 
 	class console {
 	public:
+		static constexpr left_pad left = {};
+
 		static void init();
 		static console& out;
+		static console& width(i64 width);
+		static console& precision(i64 precision);
 
 		console& operator<<(const color_value& color);
-		console& operator<<(const precision& precision);
+		console& operator<<(const left_pad& left);
+		console& operator<<(const console& console);
 
 		console& operator<<(const std::string& value);
 		console& operator<<(const filepath& value);
@@ -57,72 +50,7 @@ namespace sigma {
 		console& operator<<(i16 value);
 		console& operator<<(i32 value);
 		console& operator<<(i64 value);
-
-		template<typename type>
-		console& operator<<(std::shared_ptr<type> value);
-
-		// template <typename T>
-		// console& operator<<(const T& value);
 	private:
 		console() = default;
-		static void set_color(const color_value& color);
 	};
-
-	template<typename type>
-	console& console::operator<<(std::shared_ptr<type> value) {
-		if (value) {
-			return *this << *value; // call the << operator for error_message
-		}
-
-		return *this << "null";
-	}
-
-	// template<typename T>
-	// console& console::operator<<(const T& value) {
-	// 	std::wcout << value;
-	// 	return *this;
-	// }
-
-	// inline COLORREF hex_to_rgb(const std::string& hex) {
-	// 	if (hex.size() != 6) {
-	// 		throw std::invalid_argument("invalid hex color string");
-	// 	}
-
-	// 	i32 red, green, blue;
-	// 	sscanf_s(hex.c_str(), "%02x%02x%02x", &red, &green, &blue);
-	// 	return RGB(red, green, blue);
-	// }
-
-	/**
-	 * \brief Creates a backslash-escaped version of the \a input string. 
-	 * \param input String to escape.
-	 * \return Escaped version of the given string. 
-	 */
-	inline std::string escape_string(const std::string& input) {
-		std::string output;
-		for (const char ch : input) {
-			if (ch == '\\' || ch == '\'' || ch == '\"' || ch == '\a' || ch == '\b' || ch == '\f' || ch == '\n' || ch == '\r' || ch == '\t' || ch == '\v' || ch == '\x1b') {
-				output.push_back('\\');
-				switch (ch) {
-				case '\\': output.push_back('\\'); break;
-				case '\'': output.push_back('\''); break;
-				case '\"': output.push_back('\"'); break;
-				case '\a': output.push_back('a'); break;
-				case '\b': output.push_back('b'); break;
-				case '\f': output.push_back('f'); break;
-				case '\n': output.push_back('n'); break;
-				case '\r': output.push_back('r'); break;
-				case '\t': output.push_back('t'); break;
-				case '\v': output.push_back('v'); break;
-				case '\x1b':
-					output.append("x1b");
-					break;
-				}
-			}
-			else {
-				output.push_back(ch);
-			}
-		}
-		return output;
-	}
 }

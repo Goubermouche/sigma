@@ -1,43 +1,54 @@
 #include "warning.h"
+#include "utility/string.h"
 
 namespace sigma {
 	warning_message::warning_message(
-		std::string message,
-		u64 code
-	) : diagnostic_message(std::move(message), code) {}
+		warning_code code,
+		const std::string& message
+	) : diagnostic_message(message),
+		m_code(code) {}
 
-	void warning_message::print() const {
+	void warning_message::print() {
 		console::out
-			<< color::blue
-			<< "warning "
-			<< m_code
-			<< ": "
-			<< m_message
-			<< "\n"
-			<< color::white;
+			<< color::yellow
+			<< "warning:" << static_cast<u64>(m_code)
+			<< color::white << ": " << m_message << '\n';
 	}
 
-	warning_message_position::warning_message_position(
-		std::string message,
-		u64 code,
-		const file_position& position
-	) : warning_message(std::move(message), code),
-	m_position(position) {}
+	warning_message_range::warning_message_range(
+		warning_code code, 
+		const std::string& message,
+		const file_range& range
+	) : warning_message(code, message),
+	m_range(range) {}
 
-	void warning_message_position::print() const {
+	void warning_message_range::print()	{
+		ASSERT(m_range.file != nullptr, "file was nullptr!");
+
 		console::out
-			<< m_position.get_path().string() 
-			<< " ("
-			<< m_position.get_line_index()
-			<< ", "
-			<< m_position.get_char_index()
-			<< "): "
-			<< color::yellow
-			<< "warning "
-			<< m_code
-			<< ": "
-			<< m_message
-			<< "\n"
-			<< color::white;
+			<< color::white
+			<< m_range.file->get_path().string()
+			<< ":" << m_range.start.line_index + 1
+			<< ":" << m_range.start.char_index
+			<< color::yellow << ":warning:" << static_cast<u64>(m_code)
+			<< color::white << ": " << m_message << '\n';
+
+		const auto& [removed_char_count, line] = detail::remove_leading_spaces(
+			m_range.file->get_line(
+				m_range.start.line_index
+			)
+		);
+
+		console::out
+			<< color::white << "    "
+			<< line << '\n';
+
+		console::out
+			<< color::yellow << "    "
+			<< detail::create_caret_underline(
+				line,
+				m_range.start.char_index - removed_char_count,
+				m_range.end.char_index - removed_char_count)
+			<< color::white << '\n';
 	}
 }

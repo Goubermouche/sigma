@@ -1,74 +1,64 @@
 #pragma once
-#include "utility/diagnostics/diagnostic.h"
+#include "utility/diagnostics/diagnostics.h"
 
 namespace sigma {
-	namespace diagnostics {}
-	constexpr auto warning_templates = make_hash_map(
-		// *********************************************************************************************************************
-		// codegen warnings
-		// *********************************************************************************************************************
-		std::pair{ 3000, "'{}': implicit function return generated" },
-		std::pair{ 3001, "'initializing': implicit function type cast '{}' to '{}'" },
-		std::pair{ 3002, "'initializing': implicit type cast '{}' to '{}'" }
-	);
-
-	class warning_message : public diagnostic_message {
-	public:
-		warning_message(std::string message, u64 code);
-
-		void print() const override;
+	enum class warning_code {
+		// ******************************************************************
+		// codegen
+		// ******************************************************************
+		implicit_function_return_generated = 4000,
+		implicit_function_type_cast = 4001,
+		implicit_type_cast = 4002
 	};
 
-	using warning_msg = std::shared_ptr<warning_message>;
-
-	class warning_message_position : public warning_message {
-	public:
-		warning_message_position(
-			std::string message,
-			u64 code, 
-			const file_position& position
+	struct warning_message : public diagnostic_message {
+		warning_message(
+			warning_code code,
+			const std::string& message
 		);
 
-		void print() const override;
+		virtual void print() override;
 	protected:
-		file_position m_position;
+		warning_code m_code;
+	};
+
+	struct warning_message_range : public warning_message {
+		warning_message_range(
+			warning_code code,
+			const std::string& message,
+			const file_range& range
+		);
+
+		void print() override;
+	protected:
+		file_range m_range;
 	};
 
 	class warning {
 	public:
-		template <u64 code, typename... Args>
-		static warning_msg emit(
-			Args&&... args
-		);
+		template<warning_code code, typename...argument_types>
+		static std::shared_ptr<warning_message> emit(argument_types... args) {
+			const auto it = m_error_templates.find(code);
+			if (it == m_error_templates.end()) {}
 
-		template <u64 code, typename... Args>
-		static std::shared_ptr<warning_message_position> emit(
-			file_position position,
-			Args&&... args
-		);
+			return std::make_shared<warning_message>(code, detail::format(it->second, args...));
+		}
+
+		template<warning_code code, typename...argument_types>
+		static std::shared_ptr<warning_message_range> emit(
+			const file_range& range,
+			argument_types... args
+		) {
+			const auto it = m_error_templates.find(code);
+			if (it == m_error_templates.end()) {}
+
+			return std::make_shared<warning_message_range>(code, detail::format(it->second, args...), range);
+		}
+	private:
+		static inline std::unordered_map<warning_code, std::string> m_error_templates = {
+			{ warning_code::implicit_function_return_generated, "'{}': implicit function return generated"                 },
+			{ warning_code::implicit_function_type_cast,        "'initializing': implicit function type cast '{}' to '{}'" },
+			{ warning_code::implicit_type_cast,                 "'initializing': implicit type cast '{}' to '{}'"          }
+		};
 	};
-
-	template<u64 code, typename ...Args>
-	warning_msg warning::emit(
-		Args && ...args
-	) {
-		return std::make_shared<warning_message>(
-			std::format(warning_templates[code],
-			std::forward<Args>(args)...),
-			code
-		);
-	}
-
-	template<u64 code, typename ...Args>
-	std::shared_ptr<warning_message_position> warning::emit(
-		file_position position,
-		Args && ...args
-	) {
-		return std::make_shared<warning_message_position>(
-			std::format(warning_templates[code],
-			std::forward<Args>(args)...),
-			code,
-			position
-		);
-	}
 }

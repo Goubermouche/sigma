@@ -91,13 +91,13 @@ namespace sigma {
 		// global variables
 		for (const auto& variable : other.m_global_variables) {
 			if (m_global_variables.contains(variable.first)) {
-				return outcome::failure(
-					error::emit<4017>(
-						variable.second->get_position(),
-						variable.first,
-						m_global_variables[variable.first]->get_position()
-					)
-				);
+				// return outcome::failure(
+				// 	error::emit<error_code::global_variable_already_defined>(
+				// 		file_range{}, //variable.second->get_position(),
+				// 		variable.first,
+				// 		m_global_variables[variable.first]->get_position()
+				// 	)
+				// );
 			}
 
 			m_global_variables.insert(variable);

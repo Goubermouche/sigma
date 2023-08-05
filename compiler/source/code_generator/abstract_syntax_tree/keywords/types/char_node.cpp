@@ -2,9 +2,9 @@
 
 namespace sigma {
 	char_node::char_node(
-		const file_position& position,
+		const file_range& range,
 		char value
-	) : node(position),
+	) : node(range),
 	m_value(value)	{}
 
 	outcome::result<value_ptr> char_node::accept(

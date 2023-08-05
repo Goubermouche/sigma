@@ -6,8 +6,8 @@
 
 #define AST_NODE_NUMERICAL_LITERAL_COLOR color::blue
 #define AST_NODE_BOOLEAN_LITERAL_COLOR	 color::blue
-#define AST_NODE_TEXT_LITERAL_COLOR		 color::orange
-#define AST_NODE_TYPE_COLOR				 color::light_blue
+#define AST_NODE_TEXT_LITERAL_COLOR		 color::yellow
+#define AST_NODE_TYPE_COLOR				 color::red
 #define AST_NODE_OPERATOR_COLOR			 color::magenta
 #define AST_NODE_VARIABLE_COLOR			 color::green
 
@@ -24,9 +24,9 @@ namespace sigma {
 	public:
 		/**
 		 * \brief Constructs a node with using data about the node's location.
-		 * \param position Token location of the node. 
+		 * \param range Range the node takes up in the source file
 		 */
-		node(const file_position& position);
+		node(const file_range& range);
 		virtual ~node() = default;
 
 		/**
@@ -56,7 +56,7 @@ namespace sigma {
 		 * \brief Gets the declared node location.
 		 * \return Declared node location
 		 */
-		const file_position& get_declared_position() const;
+		const file_range& get_declared_range() const;
 	protected:
 		/**
 		 * \brief Prints a node name with additional formatting relevant to the tree hierarchy.
@@ -85,7 +85,7 @@ namespace sigma {
 			bool is_last
 		);
 	private:
-		file_position m_position;
+		file_range m_range;
 	};
 }
 

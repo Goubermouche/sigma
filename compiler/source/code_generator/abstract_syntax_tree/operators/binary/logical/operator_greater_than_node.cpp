@@ -2,11 +2,11 @@
 
 namespace sigma {
 	operator_greater_than_node::operator_greater_than_node(
-		const file_position& position,
+		const file_range& range,
 		const node_ptr& left_expression_node,
 		const node_ptr& right_expression_node
 	) : operator_binary_base(
-		position,
+		range,
 		left_expression_node,
 		right_expression_node
 	) {}

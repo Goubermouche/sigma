@@ -297,9 +297,6 @@
     <ClInclude Include="source\parser\parser.h">
       <Filter>source\parser</Filter>
     </ClInclude>
-    <ClInclude Include="source\utility\containers\compile_time_hash_map.h">
-      <Filter>source\utility\containers</Filter>
-    </ClInclude>
     <ClInclude Include="source\utility\containers\directed_graph.h">
       <Filter>source\utility\containers</Filter>
     </ClInclude>
@@ -309,7 +306,7 @@
     <ClInclude Include="source\utility\diagnostics\console.h">
       <Filter>source\utility\diagnostics</Filter>
     </ClInclude>
-    <ClInclude Include="source\utility\diagnostics\diagnostic.h">
+    <ClInclude Include="source\utility\diagnostics\diagnostics.h">
       <Filter>source\utility\diagnostics</Filter>
     </ClInclude>
     <ClInclude Include="source\utility\diagnostics\error.h">
@@ -317,9 +314,6 @@
     </ClInclude>
     <ClInclude Include="source\utility\diagnostics\warning.h">
       <Filter>source\utility\diagnostics</Filter>
-    </ClInclude>
-    <ClInclude Include="source\utility\filesystem.h">
-      <Filter>source\utility</Filter>
     </ClInclude>
     <ClInclude Include="source\utility\macros.h">
       <Filter>source\utility</Filter>
@@ -335,6 +329,11 @@
     </ClInclude>
     <ClInclude Include="source\code_generator\abstract_syntax_tree\operators\unary\bitwise\operator_address_of_node.h" />
     <ClInclude Include="source\code_generator\abstract_syntax_tree\operators\unary\bitwise\operator_dereference_node.h" />
+    <ClInclude Include="source\utility\filesystem\file_types\file.h" />
+    <ClInclude Include="source\utility\filesystem\filesystem.h" />
+    <ClInclude Include="source\utility\filesystem\file_types\text_file.h" />
+    <ClInclude Include="source\utility\format.h" />
+    <ClInclude Include="source\utility\filesystem\file_types\raw_file.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp" />
@@ -566,18 +565,6 @@
     <ClCompile Include="source\utility\diagnostics\console.cpp">
       <Filter>source\utility\diagnostics</Filter>
     </ClCompile>
-    <ClCompile Include="source\utility\diagnostics\diagnostic.cpp">
-      <Filter>source\utility\diagnostics</Filter>
-    </ClCompile>
-    <ClCompile Include="source\utility\diagnostics\error.cpp">
-      <Filter>source\utility\diagnostics</Filter>
-    </ClCompile>
-    <ClCompile Include="source\utility\diagnostics\warning.cpp">
-      <Filter>source\utility\diagnostics</Filter>
-    </ClCompile>
-    <ClCompile Include="source\utility\filesystem.cpp">
-      <Filter>source\utility</Filter>
-    </ClCompile>
     <ClCompile Include="source\utility\string.cpp">
       <Filter>source\utility</Filter>
     </ClCompile>
@@ -586,6 +573,12 @@
     </ClCompile>
     <ClCompile Include="source\code_generator\abstract_syntax_tree\operators\unary\bitwise\operator_address_of_node.cpp" />
     <ClCompile Include="source\code_generator\abstract_syntax_tree\operators\unary\bitwise\operator_dereference_node.cpp" />
+    <ClCompile Include="source\utility\filesystem\file_types\file.cpp" />
+    <ClCompile Include="source\utility\filesystem\filesystem.cpp" />
+    <ClCompile Include="source\utility\filesystem\file_types\text_file.cpp" />
+    <ClCompile Include="source\utility\diagnostics\warning.cpp" />
+    <ClCompile Include="source\utility\diagnostics\error.cpp" />
+    <ClCompile Include="source\utility\filesystem\file_types\raw_file.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="test\main.s" />

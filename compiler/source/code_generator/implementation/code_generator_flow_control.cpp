@@ -33,7 +33,7 @@ namespace sigma {
 			llvm::Value* upcasted_return_value = cast_value(
 				return_value_result,
 				parent_function->get_return_type(),
-				node.get_declared_position()
+				node.get_declared_range()
 			);
 
 			// generate the LLVM return instruction with the upcasted value
@@ -53,7 +53,7 @@ namespace sigma {
 		// check if the return type matches the expected return type
 		if(parent_function->get_return_type() != type(type::base::empty, 0)) {
 			return outcome::failure(
-				error::emit<4007>(
+				error::emit<error_code::return_statement_type_mismatch>(
 					parent_function_identifier,
 					type(type::base::empty, 0),
 					parent_function->get_return_type()
@@ -293,8 +293,8 @@ namespace sigma {
 		if (condition_value_result->get_type().get_base() != type::base::boolean ||
 			condition_value_result->get_type().is_pointer()) {
 			return outcome::failure(
-				error::emit<4010>(
-					node.get_declared_position(),
+				error::emit<error_code::for_conditional_operator_not_bool>(
+					file_range{}, // node.get_declared_position()
 					condition_value_result->get_type()
 				)
 			);
@@ -344,8 +344,8 @@ namespace sigma {
 		if (end_block == nullptr) {
 			// emit an error if there's no enclosing loop to break from
 			return outcome::failure(
-				error::emit<4011>(
-					node.get_declared_position()
+				error::emit<error_code::break_statement_out_of_loop_body>(
+					file_range{} //node.get_declared_position()
 				)
 			);
 		}

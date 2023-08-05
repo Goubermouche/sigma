@@ -8,7 +8,7 @@ namespace sigma {
 	class operator_multiplication_assignment_node : public operator_binary_base {
 	public:
 		operator_multiplication_assignment_node(
-			const file_position& position,
+			const file_range& range,
 			const node_ptr& left_expression_node,
 			const node_ptr& right_expression_node
 		);

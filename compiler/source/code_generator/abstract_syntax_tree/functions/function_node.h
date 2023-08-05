@@ -9,7 +9,7 @@ namespace sigma {
 	class function_node : public node {
 	public:
 		function_node(
-			const file_position& position,
+			const file_range& range,
 			const type& function_return_type,
 			bool is_var_arg,
 			const std::string& function_identifier,

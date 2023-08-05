@@ -8,7 +8,7 @@ namespace sigma {
 	class operator_greater_than_equal_to_node : public operator_binary_base {
 	public:
 		operator_greater_than_equal_to_node(
-			const file_position& position,
+			const file_range& range,
 			const node_ptr& left_expression_node,
 			const node_ptr& right_expression_node
 		);

@@ -2,10 +2,10 @@
 
 namespace sigma {
 	assignment_node::assignment_node(
-		const file_position& position,
+		const file_range& range,
 		const node_ptr& variable,
 		const node_ptr& expression_node
-	) : node(position),
+	) : node(range),
 	m_variable_node(variable),
 	m_expression_node(expression_node) {}
 

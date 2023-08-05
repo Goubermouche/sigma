@@ -1,5 +1,5 @@
 #pragma once
-#include "utility/filesystem.h"
+#include "utility/filesystem/filesystem.h"
 
 namespace sigma::detail {
 	/**
@@ -14,6 +14,7 @@ namespace sigma::detail {
 		 * \param string String to use as the base of the string accessor
 		 */
 		string_accessor(const std::string& string);
+		string_accessor(std::shared_ptr<text_file> file);
 
 		/**
 		 * \brief Increments the caret location.

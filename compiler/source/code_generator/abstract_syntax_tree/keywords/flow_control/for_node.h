@@ -8,7 +8,7 @@ namespace sigma {
 	class for_node : public node {
 	public:
 		for_node(
-			const file_position& position,
+			const file_range& range,
 			const node_ptr& loop_initialization_node,
 			const node_ptr& loop_condition_node,
 			const std::vector<node_ptr>& post_iteration_nodes,

@@ -2,10 +2,10 @@
 
 namespace sigma {
 	while_node::while_node(
-		const file_position& position,
+		const file_range& range,
 		const node_ptr& loop_condition_node,
 		const std::vector<node_ptr>& statement_nodes
-	) : node(position),
+	) : node(range),
 	m_loop_condition_node(loop_condition_node),
 	m_loop_body_nodes(statement_nodes) {}
 

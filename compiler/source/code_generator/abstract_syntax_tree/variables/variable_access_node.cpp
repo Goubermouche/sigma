@@ -2,9 +2,9 @@
 
 namespace sigma {
 	variable_access_node::variable_access_node(
-		const file_position& position,
+		const file_range& range,
 		const std::string& identifier
-	) : node(position),
+	) : node(range),
 	m_identifier(identifier) {}
 
 	outcome::result<value_ptr> variable_access_node::accept(

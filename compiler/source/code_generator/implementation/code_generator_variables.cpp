@@ -29,7 +29,7 @@ namespace sigma {
 		llvm::Value* out_cast = cast_value(
 			expression_result,
 			variable_result->get_type(), 
-			node.get_declared_position()
+			node.get_declared_range()
 		);
 		
 		expression_result->set_value(out_cast);
@@ -83,8 +83,8 @@ namespace sigma {
 		// check if the global variable exists
 		if (!global_variable) {
 			return outcome::failure(
-				error::emit<4003>(
-					node.get_declared_position(), 
+				error::emit<error_code::variable_cannot_be_found>(
+					file_range{}, //node.get_declared_position(), 
 					node.get_identifier()
 				)
 			); // return on failure
@@ -141,13 +141,13 @@ namespace sigma {
 					node.get_declaration_type(),
 					alloca
 				),
-				node.get_declared_position()
+				node.get_declared_range()
 			)
 		)) {
 			// insertion operation failed - the variable has already been defined before
 			return outcome::failure(
-				error::emit<4004>(
-					node.get_declared_position(),
+				error::emit<error_code::local_variable_already_defined_in_global_scope>(
+					file_range{}, //node.get_declared_position(),
 					node.get_declaration_identifier()
 				)
 			);
@@ -165,7 +165,7 @@ namespace sigma {
 		llvm::Value* cast_assigned_value = cast_value(
 			declaration_value_result,
 			node.get_declaration_type(),
-			node.get_declared_position()
+			node.get_declared_range()
 		);
 
 		m_context->get_builder().CreateStore(cast_assigned_value, alloca);
@@ -212,7 +212,7 @@ namespace sigma {
 		llvm::Value* cast_assigned_value = cast_value(
 			declaration_value_result,
 			node.get_declaration_type(),
-			node.get_declared_position()
+			node.get_declared_range()
 		);
 
 		// create a global variable
@@ -235,13 +235,13 @@ namespace sigma {
 			node.get_declaration_identifier(),
 			std::make_shared<variable>(
 				global_declaration,
-				node.get_declared_position()
+				node.get_declared_range()
 			)
 		)) {
 			// variable insertion failed - variable has been declared before
 			return outcome::failure(
-				error::emit<4006>(
-					node.get_declared_position(),
+				error::emit<error_code::global_variable_already_defined>(
+					file_range{}, //node.get_declared_position(),
 					node.get_declaration_identifier()
 				)
 			); // return on failure
@@ -286,7 +286,7 @@ namespace sigma {
 
 		std::vector<llvm::Constant*> all_ctors;
 		if (global_ctors_var) {
-			// If the global variable already exists, get all ctors from it
+			// if the global variable already exists, get all ctors from it
 			if (auto* initializer = dyn_cast<llvm::ConstantArray>(global_ctors_var->getInitializer())) {
 				for (unsigned i = 0, e = initializer->getNumOperands(); i != e; ++i) {
 					all_ctors.push_back(cast<llvm::Constant>(initializer->getOperand(i)));
@@ -294,27 +294,33 @@ namespace sigma {
 			}
 		}
 
-		// Add new_ctor to all_ctors
+		// add new_ctor to all_ctors
 		all_ctors.push_back(new_ctor);
 
-		// Create or update the global ctors array
-		llvm::ArrayType* ctor_array_type = llvm::ArrayType::get(llvm::StructType::get(
-			m_context->get_context(), {
-				llvm::Type::getInt32Ty(m_context->get_context()),
-				llvm::Type::getInt8PtrTy(m_context->get_context()),
-				llvm::Type::getInt8PtrTy(m_context->get_context())
-			}
-		), all_ctors.size());
+		// create or update the global ctors array
+		llvm::ArrayType* ctor_array_type = llvm::ArrayType::get(
+			llvm::StructType::get(
+				m_context->get_context(), {
+					llvm::Type::getInt32Ty(m_context->get_context()),
+					llvm::Type::getInt8PtrTy(m_context->get_context()),
+					llvm::Type::getInt8PtrTy(m_context->get_context())
+				}
+			),
+			all_ctors.size()
+		);
 
 		llvm::Constant* updated_ctors = llvm::ConstantArray::get(ctor_array_type, all_ctors);
 
 		if (!global_ctors_var) {
-			// If the global variable does not exist, create a new one
+			// if the global variable does not exist, create a new one
 			new llvm::GlobalVariable(*m_context->get_module(), ctor_array_type, false, llvm::GlobalValue::AppendingLinkage, updated_ctors, "llvm.global_ctors");
 		}
 		else {
-			// If the global variable already exists, update it
-			global_ctors_var->setInitializer(updated_ctors);
+			// todo: temp solution, find a better one down the line
+			auto new_global_ctors_var = new llvm::GlobalVariable(*m_context->get_module(), ctor_array_type, false, llvm::GlobalValue::AppendingLinkage, updated_ctors, "llvm.global_ctors_temp");
+			global_ctors_var->replaceAllUsesWith(new_global_ctors_var);
+			global_ctors_var->eraseFromParent();
+			new_global_ctors_var->setName("llvm.global_ctors");
 		}
 
 		return global_declaration;
@@ -336,7 +342,7 @@ namespace sigma {
 		llvm::Value* element_count_cast = cast_value(
 			element_count_result, 
 			type(type::base::u64, 0),
-			node.get_array_element_count_node()->get_declared_position()
+			node.get_array_element_count_node()->get_declared_range()
 		);
 
 		const llvm::FunctionCallee malloc_func = m_context->get_function_registry().get_function(
@@ -434,7 +440,7 @@ namespace sigma {
 			llvm::Value* index_value_cast = cast_value(
 				index_value_result,
 				type(type::base::u64, 0),
-				node.get_declared_position()
+				index_nodes[i]->get_declared_range()
 			);
 
 			// load the actual pointer value
@@ -494,7 +500,7 @@ namespace sigma {
 			llvm::Value* index_value_cast = cast_value(
 				index_value_result,
 				type(type::base::u64, 0), 
-				node.get_declared_position()
+				index_nodes[i]->get_declared_range()
 			);
 		
 			// load the actual pointer value
@@ -530,7 +536,7 @@ namespace sigma {
 		llvm::Value* expression_llvm_value_cast = cast_value(
 			expression_value_result, 
 			final_element_type, 
-			node.get_declared_position()
+			node.get_declared_range()
 		);
 		
 		value_ptr expression_value = std::make_shared<value>(
@@ -565,8 +571,8 @@ namespace sigma {
 		}
 
 		return outcome::failure(
-			error::emit<4003>(
-				node.get_declared_position(),
+			error::emit<error_code::variable_cannot_be_found>(
+				file_range{}, //node.get_declared_position(),
 				node.get_identifier()
 			)
 		); // return on failure

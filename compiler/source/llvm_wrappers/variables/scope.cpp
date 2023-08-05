@@ -21,7 +21,7 @@ namespace sigma {
 		for (const auto& variable : other->m_variables) {
 			if (m_variables.contains(variable.first)) {
 				return outcome::failure(
-					error::emit<4005>(
+					error::emit<error_code::local_variable_already_defined>(
 						variable.first
 					)
 				);
@@ -110,7 +110,7 @@ namespace sigma {
 
 		console::out
 			<< std::string(indent, ' ')
-			<< color::orange
+			<< color::yellow
 			<< "scope (level " << level << ")\n"
 			<< color::white;
 

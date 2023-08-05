@@ -1,8 +1,8 @@
 #include "break_node.h"
 
 namespace sigma {
-	break_node::break_node(const file_position& position)
-		: node(position) {}
+	break_node::break_node(const file_range& range)
+		: node(range) {}
 
 	outcome::result<value_ptr> break_node::accept(
 		code_generator_template& visitor, 

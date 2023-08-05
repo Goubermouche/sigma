@@ -2,9 +2,9 @@
 
 namespace sigma {
 	bool_node::bool_node(
-		const file_position& position, bool 
+		const file_range& range, bool 
 		value
-	) : node(position),
+	) : node(range),
 	m_value(value) {}
 
 	outcome::result<value_ptr> bool_node::accept(

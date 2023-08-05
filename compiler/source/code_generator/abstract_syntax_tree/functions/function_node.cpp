@@ -2,13 +2,13 @@
 
 namespace sigma {
 	function_node::function_node(
-		const file_position& position,
+		const file_range& range,
 		const type& function_return_type,
 		bool is_var_arg,
 		const std::string& function_identifier,
 		const std::vector<std::pair<std::string, type>>& function_arguments,
 		const std::vector<node_ptr>& function_statements
-	) : node(position),
+	) : node(range),
 	m_function_return_type(function_return_type),
 	m_function_identifier(function_identifier),
 	m_is_var_arg(is_var_arg),

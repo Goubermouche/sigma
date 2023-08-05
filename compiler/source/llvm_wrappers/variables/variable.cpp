@@ -3,15 +3,15 @@
 namespace sigma {
 	variable::variable(
 		value_ptr value,
-		file_position position
+		const file_range& range
 	) : m_value(value),
-	m_position(position) {}
+	m_range(range) {}
 
 	value_ptr variable::get_value() const {
 		return m_value;
 	}
 
-	const file_position& variable::get_position() const {
-		return m_position;
+	const file_range& variable::get_range() const {
+		return m_range;
 	}
 }

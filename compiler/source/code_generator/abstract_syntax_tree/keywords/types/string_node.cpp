@@ -2,9 +2,9 @@
 
 namespace sigma {
 	string_node::string_node(
-		const file_position& position, 
+		const file_range& range, 
 		const std::string& value
-	) : node(position),
+	) : node(range),
 	m_value(value) {}
 
 	outcome::result<value_ptr> string_node::accept(

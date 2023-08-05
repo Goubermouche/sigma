@@ -8,7 +8,7 @@ namespace sigma {
 	class global_declaration_node : public declaration_node {
 	public:
 		global_declaration_node(
-			const file_position& position,
+			const file_range& range,
 			const type& declaration_type,
 			const std::string& declaration_identifier, 
 			const node_ptr& expression_node = nullptr

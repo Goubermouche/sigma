@@ -8,7 +8,7 @@ namespace sigma {
 	class variable_access_node : public node {
 	public:
 		variable_access_node(
-			const file_position& position,
+			const file_range& range,
 			const std::string& identifier
 		);
 

@@ -2,11 +2,11 @@
 
 namespace sigma {
 	declaration_node::declaration_node(
-		const file_position& position,
+		const file_range& range,
 		const type& declaration_type, 
 		const std::string& declaration_identifier,
 		const node_ptr& expression_node
-	) : node(position),
+	) : node(range),
 	m_declaration_type(declaration_type),
 	m_declaration_identifier(declaration_identifier),
 	m_expression_node(expression_node) {}

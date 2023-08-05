@@ -2,11 +2,11 @@
 #include "code_generator/code_generator_template.h"
 
 namespace sigma {
-	node::node(const file_position& position)
-		: m_position(position) {}
+	node::node(const file_range& range)
+		: m_range(range) {}
 
-	const file_position& node::get_declared_position() const {
-		return m_position;
+	const file_range& node::get_declared_range() const {
+		return m_range;
 	}
 
 	void node::print_node_name(

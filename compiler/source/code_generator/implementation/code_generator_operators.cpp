@@ -56,8 +56,8 @@ namespace sigma {
 		// check if the expression is an integer or a floating-point value
 		if (!expression_result->get_type().is_numerical()) {
 			return outcome::failure(
-				error::emit<4100>(
-					node.get_declared_position(), 
+				error::emit<error_code::post_decrement_type_mismatch>(
+					file_range{}, // node.get_declared_position(), 
 					expression_result->get_type()
 				)
 			); // return on failure
@@ -106,8 +106,8 @@ namespace sigma {
 		// check if the expression is an integer or a floating-point value
 		if (!expression_result->get_type().is_numerical()) {
 			return outcome::failure(
-				error::emit<4101>(
-					node.get_declared_position(),
+				error::emit<error_code::post_increment_type_mismatch>(
+					file_range{}, // node.get_declared_position(),
 					expression_result->get_type()
 				)
 			); // return on failure
@@ -155,8 +155,8 @@ namespace sigma {
 		// check if the expression is an integer or a floating-point value
 		if (!expression_result->get_type().is_numerical()) {
 			return outcome::failure(
-				error::emit<4102>(
-					node.get_declared_position(), 
+				error::emit<error_code::pre_decrement_type_mismatch>(
+					file_range{}, //node.get_declared_position(), 
 					expression_result->get_type()
 				)
 			); // return on failure
@@ -210,8 +210,8 @@ namespace sigma {
 		// check if the expression is an integer or a floating-point value
 		if (!expression_result->get_type().is_numerical()) {
 			return outcome::failure(
-				error::emit<4103>(
-					node.get_declared_position(), 
+				error::emit<error_code::pre_increment_type_mismatch>(
+					file_range{}, //node.get_declared_position(), 
 					expression_result->get_type()
 				)
 			); // return on failure
@@ -267,8 +267,8 @@ namespace sigma {
 		// the expression must be integral
 		if (!operand_result->get_type().is_integral()) {
 			return outcome::failure(
-				error::emit<4105>(
-					node.get_declared_position(),
+				error::emit<error_code::bitwise_not_type_mismatch>(
+					file_range{}, //node.get_declared_position(),
 					operand_result->get_type()
 				)
 			); // return on failure
@@ -351,8 +351,8 @@ namespace sigma {
 		if(!operand_result->get_type().is_numerical() && 
 			operand_result->get_type().get_base() != type::base::boolean) {
 			return outcome::failure(
-				error::emit<4104>(
-					node.get_declared_position(),
+				error::emit<error_code::negation_type_mismatch>(
+					file_range{}, //node.get_declared_position(),
 					operand_result->get_type()
 				)
 			); // return on failure
@@ -678,21 +678,21 @@ namespace sigma {
 		llvm::Value* left_value_upcasted = cast_value(
 			left_operand_result,
 			highest_precision,
-			node.get_declared_position()
+			node.get_declared_range()
 		);
 
 		llvm::Value* right_value_upcasted = cast_value(
 			right_operand_result,
 			highest_precision,
-			node.get_declared_position()
+			node.get_declared_range()
 		);
 
 		// both expressions must be integral
 		if (!left_operand_result->get_type().is_integral() ||
 			!right_operand_result->get_type().is_integral()) {
 			return outcome::failure(
-				error::emit<4202>(
-					node.get_declared_position(),
+				error::emit<error_code::bitwise_and_type_mismatch>(
+					file_range{}, //node.get_declared_position(),
 					left_operand_result->get_type(),
 					right_operand_result->get_type()
 				)
@@ -739,21 +739,21 @@ namespace sigma {
 		llvm::Value* left_value_upcasted = cast_value(
 			left_operand_result,
 			highest_precision,
-			node.get_declared_position()
+			node.get_declared_range()
 		);
 
 		llvm::Value* right_value_upcasted = cast_value(
 			right_operand_result,
 			highest_precision,
-			node.get_declared_position()
+			node.get_declared_range()
 		);
 
 		// both expressions must be integral
 		if (!left_operand_result->get_type().is_integral() ||
 			!right_operand_result->get_type().is_integral()) {
 			return outcome::failure(
-				error::emit<4203>(
-					node.get_declared_position(),
+				error::emit<error_code::bitwise_or_type_mismatch>(
+					file_range{}, //node.get_declared_position(),
 					left_operand_result->get_type(),
 					right_operand_result->get_type()
 				)
@@ -802,21 +802,21 @@ namespace sigma {
 		llvm::Value* left_value_upcasted = cast_value(
 			left_operand_result,
 			highest_precision,
-			node.get_declared_position()
+			node.get_declared_range()
 		);
 
 		llvm::Value* right_value_upcasted = cast_value(
 			right_operand_result,
 			highest_precision,
-			node.get_declared_position()
+			node.get_declared_range()
 		);
 
 		// both expressions must be integral
 		if (!left_operand_result->get_type().is_integral() ||
 			!right_operand_result->get_type().is_integral()) {
 			return outcome::failure(
-				error::emit<4204>(
-					node.get_declared_position(),
+				error::emit<error_code::bitwise_left_shift_type_mismatch>(
+					file_range{}, //node.get_declared_position(),
 					left_operand_result->get_type(),
 					right_operand_result->get_type()
 				)
@@ -863,21 +863,21 @@ namespace sigma {
 		llvm::Value* left_value_upcasted = cast_value(
 			left_operand_result,
 			highest_precision,
-			node.get_declared_position()
+			node.get_declared_range()
 		);
 
 		llvm::Value* right_value_upcasted = cast_value(
 			right_operand_result,
 			highest_precision,
-			node.get_declared_position()
+			node.get_declared_range()
 		);
 
 		// both expressions must be integral
 		if (!left_operand_result->get_type().is_integral() ||
 			!right_operand_result->get_type().is_integral()) {
 			return outcome::failure(
-				error::emit<4205>(
-					node.get_declared_position(),
+				error::emit<error_code::bitwise_right_shift_type_mismatch>(
+					file_range{}, //node.get_declared_position(),
 					left_operand_result->get_type(),
 					right_operand_result->get_type()
 				)
@@ -925,21 +925,21 @@ namespace sigma {
 		llvm::Value* left_value_upcasted = cast_value(
 			left_operand_result,
 			highest_precision,
-			node.get_declared_position()
+			node.get_declared_range()
 		);
 
 		llvm::Value* right_value_upcasted = cast_value(
 			right_operand_result,
 			highest_precision,
-			node.get_declared_position()
+			node.get_declared_range()
 		);
 
 		// both expressions must be integral
 		if (!left_operand_result->get_type().is_integral() ||
 			!right_operand_result->get_type().is_integral()) {
 			return outcome::failure(
-				error::emit<4206>(
-					node.get_declared_position(),
+				error::emit<error_code::bitwise_xor_type_mismatch>(
+					file_range{}, //node.get_declared_position(),
 					left_operand_result->get_type(),
 					right_operand_result->get_type()
 				)
@@ -982,8 +982,8 @@ namespace sigma {
 		if (left_operand_result->get_type().get_base() != type::base::boolean || 
 			right_operand_result->get_type().get_base() != type::base::boolean) {
 			return outcome::failure(
-				error::emit<4200>(
-					node.get_declared_position(),
+				error::emit<error_code::conjunction_type_mismatch>(
+					file_range{}, //node.get_declared_position(),
 					left_operand_result->get_type(),
 					right_operand_result->get_type()
 				)
@@ -1026,8 +1026,8 @@ namespace sigma {
 		if (left_operand_result->get_type().get_base() != type::base::boolean ||
 			right_operand_result->get_type().get_base() != type::base::boolean) {
 			return outcome::failure(
-				error::emit<4201>(
-					node.get_declared_position(),
+				error::emit<error_code::disjunction_type_mismatch>(
+					file_range{}, //node.get_declared_position(),
 					left_operand_result->get_type(), 
 					right_operand_result->get_type()
 				)
@@ -1074,13 +1074,13 @@ namespace sigma {
 		llvm::Value* left_value_upcasted = cast_value(
 			left_operand_result,
 			highest_precision,
-			node.get_declared_position()
+			node.get_declared_range()
 		);
 
 		llvm::Value* right_value_upcasted = cast_value(
 			right_operand_result, 
 			highest_precision, 
-			node.get_declared_position()
+			node.get_declared_range()
 		);
 
 		// create a greater than operation based on the highest_precision type
@@ -1140,13 +1140,13 @@ namespace sigma {
 		llvm::Value* left_value_upcasted = cast_value(
 			left_operand_result,
 			highest_precision,
-			node.get_declared_position()
+			node.get_declared_range()
 		);
 
 		llvm::Value* right_value_upcasted = cast_value(
 			right_operand_result, 
 			highest_precision,
-			node.get_declared_position()
+			node.get_declared_range()
 		);
 
 		// create a greater than or equal to operation based on the highest_precision type
@@ -1206,13 +1206,13 @@ namespace sigma {
 		llvm::Value* left_value_upcasted = cast_value(
 			left_operand_result,
 			highest_precision,
-			node.get_declared_position()
+			node.get_declared_range()
 		);
 
 		llvm::Value* right_value_upcasted = cast_value(
 			right_operand_result, 
 			highest_precision,
-			node.get_declared_position()
+			node.get_declared_range()
 		);
 
 		// create a less than operation based on the highest_precision type
@@ -1272,13 +1272,13 @@ namespace sigma {
 		llvm::Value* left_value_upcasted = cast_value(
 			left_operand_result,
 			highest_precision,
-			node.get_declared_position()
+			node.get_declared_range()
 		);
 
 		llvm::Value* right_value_upcasted = cast_value(
 			right_operand_result, 
 			highest_precision, 
-			node.get_declared_position()
+			node.get_declared_range()
 		);
 
 		// create a less than or equal to operation based on the highest_precision type
@@ -1338,13 +1338,13 @@ namespace sigma {
 		llvm::Value* left_value_upcasted = cast_value(
 			left_operand_result,
 			highest_precision,
-			node.get_declared_position()
+			node.get_declared_range()
 		);
 
 		llvm::Value* right_value_upcasted = cast_value(
 			right_operand_result,
 			highest_precision,
-			node.get_declared_position()
+			node.get_declared_range()
 		);
 
 		// create an equals operation based on the highest_precision type
@@ -1396,13 +1396,13 @@ namespace sigma {
 		llvm::Value* left_value_upcasted = cast_value(
 			left_operand_result, 
 			highest_precision,
-			node.get_declared_position()
+			node.get_declared_range()
 		);
 
 		llvm::Value* right_value_upcasted = cast_value(
 			right_operand_result, 
 			highest_precision, 
-			node.get_declared_position()
+			node.get_declared_range()
 		);
 
 		// create a not equals operation based on the highest_precision type
@@ -1452,13 +1452,13 @@ namespace sigma {
 		llvm::Value* left_value_upcasted = cast_value(
 			left_operand_result, 
 			highest_precision, 
-			left_operand->get_declared_position()
+			left_operand->get_declared_range()
 		);
 
 		llvm::Value* right_value_upcasted = cast_value(
 			right_operand_result,
 			highest_precision, 
-			right_operand->get_declared_position()
+			right_operand->get_declared_range()
 		);
 
 		// both types are floating point
@@ -1525,13 +1525,13 @@ namespace sigma {
 		llvm::Value* left_value_upcasted = cast_value(
 			left_operand_result, 
 			highest_precision, 
-			left_operand->get_declared_position()
+			left_operand->get_declared_range()
 		);
 
 		llvm::Value* right_value_upcasted = cast_value(
 			right_operand_result,
 			highest_precision, 
-			right_operand->get_declared_position()
+			right_operand->get_declared_range()
 		);
 
 		// both types are floating point
@@ -1598,13 +1598,13 @@ namespace sigma {
 		llvm::Value* left_value_upcasted = cast_value(
 			left_operand_result, 
 			highest_precision,
-			left_operand->get_declared_position()
+			left_operand->get_declared_range()
 		);
 
 		llvm::Value* right_value_upcasted = cast_value(
 			right_operand_result, 
 			highest_precision,
-			right_operand->get_declared_position()
+			right_operand->get_declared_range()
 		);
 
 		// both types are floating point
@@ -1671,13 +1671,13 @@ namespace sigma {
 		llvm::Value* left_value_upcasted = cast_value(
 			left_operand_result,
 			highest_precision,
-			left_operand->get_declared_position()
+			left_operand->get_declared_range()
 		);
 
 		llvm::Value* right_value_upcasted = cast_value(
 			right_operand_result,
 			highest_precision,
-			right_operand->get_declared_position()
+			right_operand->get_declared_range()
 		);
 
 		// both types are floating point
@@ -1744,13 +1744,13 @@ namespace sigma {
 		llvm::Value* left_value_upcasted = cast_value(
 			left_operand_result, 
 			highest_precision,
-			left_operand->get_declared_position()
+			left_operand->get_declared_range()
 		);
 
 		llvm::Value* right_value_upcasted = cast_value(
 			right_operand_result,
 			highest_precision, 
-			right_operand->get_declared_position()
+			right_operand->get_declared_range()
 		);
 
 		// both types are floating point

@@ -13,19 +13,19 @@ namespace sigma {
 		token_data(
 			token tok,
 			const std::string& value,
-			const file_position& position
+			const file_range& range
 		);
 
 		token get_token() const;
 		const std::string& get_value() const;
-		const file_position& get_position() const;
+		const file_range& get_range() const;
 	private:
 		// token type representation of the given token
 		token m_token = token::unknown;
 		// token value of the given token (ie. the identifier value of an identifier token)
 		std::string m_value;
-		// location of the given token
-		file_position m_position;
+		// location and range the value takes in a certain file
+		file_range m_range;
 	};
 
 	/**
@@ -83,7 +83,7 @@ namespace sigma {
 	 */
 	class lexer {
 	public:
-		lexer(const filepath& path);
+		lexer(std::shared_ptr<text_file> file);
 		/**
 		 * \brief Traverses the entire file and generates a list of tokens which can be traversed later.
 		 * \return Potentially erroneous result.
@@ -94,47 +94,40 @@ namespace sigma {
 		/**
 		 * \brief Helper function that reads the next char in the provided source file and advances the accessor caret.
 		 */
-		void read_char();
+		char get_next_char();
 
-		/**
-		 * \brief Extracts the next token from the given source file and returns it.
-		 * \return Extracted token
-		 */
-		outcome::result<void> extract_next_token(
-			token& tok
+		outcome::result<token> get_next_token();
+		outcome::result<token> get_alphabetical_token();
+		outcome::result<token> get_numerical_token();
+
+		outcome::result<std::string> get_hexadecimal_string(
+			u64 max_length = std::numeric_limits<u64>::max()
 		);
 
-		/**
-		 * \brief Extracts the next numerical token from the source accessor.
-		 * \return Keyword/identifier token, depending on the format and keyword availability
-		 */
-		outcome::result<void> get_identifier_token(
-			token& tok
+		outcome::result<std::string> get_binary_string(
+			u64 max_length = std::numeric_limits<u64>::max()
 		);
 
-		/**
-		 * \brief Extracts the next numerical token from the source accessor.
-		 * \return Best-fitting numerical token
-		 */
-		outcome::result<void> get_numerical_token(
-			token& tok
-		);
+		outcome::result<std::string> get_escaped_character();
 
-		outcome::result<void> get_char_literal_token(
-			token& tok
-		);
+		outcome::result<token> get_character_literal_token(); 
+		outcome::result<token> get_string_literal_token();
 
-		outcome::result<void> get_string_literal_token(
-			token& tok
-		);
+		// todo: check for longer tokens using a while loop.
+		// todo: check for longer tokens in case a short token does not exist.
+		outcome::result<token> get_special_token();
 	private:
 		std::vector<token_data> m_tokens;
-		filepath m_source_path;
+		std::shared_ptr<text_file> m_source_file;
 		detail::string_accessor m_accessor;
 		char m_last_character = ' ';
 		std::string m_value_string;
-		u64 m_current_line = 1;
-		u64 m_current_character = 1;
+
+		u64 m_current_line_index = 0;
+		u64 m_current_char_index = 0;
+
+		u64 m_current_token_start_char_index = 0;
+		u64 m_current_token_end_char_index = 0;
 
 		// tokens that are longer than one character 
 		const std::unordered_map<std::string, token> m_keyword_tokens = {

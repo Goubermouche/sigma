@@ -8,7 +8,7 @@ namespace sigma {
 	class function_call_node : public node {
 	public:
 		function_call_node(
-			const file_position& position,
+			const file_range& range,
 			const std::string& function_identifier,
 			const std::vector<node_ptr>& function_arguments
 		);

@@ -8,7 +8,7 @@ namespace sigma {
 	class array_assignment_node : public node {
 	public:
 		array_assignment_node(
-			const file_position& position,
+			const file_range& range,
 			const node_ptr& array_base,
 			const std::vector<node_ptr>& index_nodes,
 			const node_ptr& expression_node

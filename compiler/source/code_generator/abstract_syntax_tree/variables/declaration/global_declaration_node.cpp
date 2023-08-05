@@ -2,12 +2,12 @@
 
 namespace sigma {
 	global_declaration_node::global_declaration_node(
-		const file_position& position,
+		const file_range& range,
 		const type& declaration_type,
 		const std::string& declaration_identifier,
 		const node_ptr& expression_node
 	) : declaration_node(
-		position,
+		range,
 		declaration_type, 
 		declaration_identifier, 
 		expression_node

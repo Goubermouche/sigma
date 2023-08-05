@@ -18,13 +18,17 @@
 #include <utility>
 #include <vector>
 #include <regex>
+#include <locale>
+#include <numeric>
 
 // platform specific 
 #ifdef _WIN32
+#define NOMINMAX
     #include <io.h>
+	#include <fcntl.h>
+
 #else
     #include <unistd.h>
-    #include <fcntl.h>
 #endif
 
 namespace sigma {

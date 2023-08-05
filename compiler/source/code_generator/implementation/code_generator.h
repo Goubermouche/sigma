@@ -367,7 +367,7 @@ namespace sigma {
 		llvm::Value* cast_value(
 			const value_ptr& source_value,
 			type target_type, 
-			const file_position& position
+			const file_range& range
 		) const;
 	private:
 		std::shared_ptr<abstract_syntax_tree> m_abstract_syntax_tree;

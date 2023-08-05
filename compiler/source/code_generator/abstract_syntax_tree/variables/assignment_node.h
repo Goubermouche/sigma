@@ -8,7 +8,7 @@ namespace sigma {
 	class assignment_node : public node {
 	public:
 		assignment_node(
-			const file_position& position,
+			const file_range& range,
 			const node_ptr& variable,
 			const node_ptr& expression_node
 		);

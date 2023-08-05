@@ -2,12 +2,12 @@
 
 namespace sigma {
 	for_node::for_node(
-		const file_position& position,
+		const file_range& range,
 		const node_ptr& loop_initialization_node,
 		const node_ptr& loop_condition_node,
 		const std::vector<node_ptr>& post_iteration_nodes,
 		const std::vector<node_ptr>& statement_nodes
-	) : node(position),
+	) : node(range),
 	m_loop_initialization_node(loop_initialization_node),
 	m_loop_condition_node(loop_condition_node),
 	m_post_iteration_nodes(post_iteration_nodes),

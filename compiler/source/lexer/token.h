@@ -107,6 +107,8 @@ namespace sigma {
 		number_unsigned,                    // 0u
 		number_f32,                         // 0.0f
 		number_f64,                         // 0.0
+		number_hexadecimal,                 // 0x / 0X
+		number_binary,                      // 0b / 0B
 
 		identifier,
 
@@ -114,42 +116,42 @@ namespace sigma {
 		unknown
 	};
 
-	struct file_position {
-		file_position() = default;
-		file_position(
-			const filepath& path, 
-			u64 line_index,
-			u64 char_index
-		) : m_path(path),
-		m_line_index(line_index),
-		m_char_index(char_index) {}
+	//struct file_position {
+	//	file_position() = default;
+	//	file_position(
+	//		const filepath& path, 
+	//		u64 line_index,
+	//		u64 char_index
+	//	) : m_path(path),
+	//	m_line_index(line_index),
+	//	m_char_index(char_index) {}
 
-		const filepath& get_path() const {
-			return m_path;
-		}
+	//	const filepath& get_path() const {
+	//		return m_path;
+	//	}
 
-		u64 get_line_index() const {
-			return m_line_index;
-		}
+	//	u64 get_line_index() const {
+	//		return m_line_index;
+	//	}
 
-		u64 get_char_index() const {
-			return m_char_index;
-		}
+	//	u64 get_char_index() const {
+	//		return m_char_index;
+	//	}
 
-		friend console& operator<<(
-			console& out, 
-			const file_position& position
-		) {
-			return out
-				<< position.m_path << ":"
-				<< position.m_line_index << ":"
-				<< position.m_char_index;
-		}
-	private:
-		filepath m_path;
-		u64 m_line_index;
-		u64 m_char_index;
-	};
+	//	friend console& operator<<(
+	//		console& out, 
+	//		const file_position& position
+	//	) {
+	//		return out
+	//			<< position.m_path << ":"
+	//			<< position.m_line_index << ":"
+	//			<< position.m_char_index;
+	//	}
+	//private:
+	//	filepath m_path;
+	//	u64 m_line_index;
+	//	u64 m_char_index;
+	//};
 
 	inline std::string token_to_string(token token) {
 		switch (token) {
@@ -309,6 +311,10 @@ namespace sigma {
 			return "number_f32";
 		case token::number_f64:
 			return "number_f64";
+		case token::number_hexadecimal:
+			return "number_hexadecimal";
+		case token::number_binary:
+			return "number_binary";
 
 		// other
 		case token::identifier:

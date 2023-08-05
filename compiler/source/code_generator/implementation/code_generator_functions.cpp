@@ -47,13 +47,13 @@ namespace sigma {
 				func,
 				node.get_function_arguments(),
 				false,
-				node.get_declared_position()
+				node.get_declared_range()
 			)
 		)) {
 			// failed to insert the function into the registry - function has already been defined before
 			return outcome::failure(
-				error::emit<4000>(
-					node.get_declared_position(),
+				error::emit<error_code::function_already_defined>(
+					file_range{}, // node.get_declared_position(),
 					node.get_function_identifier()
 				)
 			); // return on failure
@@ -96,7 +96,7 @@ namespace sigma {
 						arg_type,
 						alloca
 					),
-					node.get_declared_position()
+					node.get_declared_range()
 				)
 			);
 
@@ -116,8 +116,8 @@ namespace sigma {
 			// emit the relevant warning
 			// check if the return type is non-void
 			if(node.get_function_return_type() != type(type::base::empty, 0)) {
-				warning::emit<3000>(
-					node.get_declared_position(),
+				warning::emit<warning_code::implicit_function_return_generated>(
+					node.get_declared_range(),
 					node.get_function_identifier()
 				)->print();
 			}
@@ -156,8 +156,8 @@ namespace sigma {
 		// check if it exists
 		if(!func) {
 			return outcome::failure(
-				error::emit<4001>(
-					node.get_declared_position(),
+				error::emit<error_code::function_cannot_be_found>(
+					file_range{}, //node.get_declared_position(),
 					node.get_function_identifier()
 				)
 			); // return on failure
@@ -169,8 +169,8 @@ namespace sigma {
 		// check if the argument counts match
 		if(!func->is_variadic() && required_arguments.size() != given_arguments.size()) {
 			return outcome::failure(
-				error::emit<4002>(
-					node.get_declared_position(),
+				error::emit<error_code::function_argument_count_mismatch>(
+					file_range{}, //node.get_declared_position(),
 					node.get_function_identifier()
 				)
 			); // return on failure
@@ -189,7 +189,7 @@ namespace sigma {
 			argument_values[i] = cast_value(
 				argument_result, 
 				required_arguments[i].second, 
-				node.get_declared_position()
+				given_arguments[i]->get_declared_range()
 			);
 		}
 
@@ -209,7 +209,7 @@ namespace sigma {
 				llvm::Value* argument_value_cast = cast_value(
 					argument_value,
 					type(type::base::f64, 0),
-					given_arguments[i]->get_declared_position()
+					given_arguments[i]->get_declared_range()
 				);
 
 				argument_value = std::make_shared<value>(
@@ -223,7 +223,7 @@ namespace sigma {
 				llvm::Value* argument_value_cast = cast_value(
 					argument_value,
 					type(type::base::i32, 0), 
-					given_arguments[i]->get_declared_position()
+					given_arguments[i]->get_declared_range()
 				);
 
 				argument_value = std::make_shared<value>(

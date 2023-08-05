@@ -38,7 +38,7 @@ i32 main(i32 argc, char* argv[]) {
 
 	// check for compilation errors
 	if(compilation_result.has_error()) {
-		sigma::console::out << compilation_result.get_error() << '\n';
+		compilation_result.get_error()->print();
 		return 1;
 	}
 

@@ -79,13 +79,13 @@ namespace sigma {
 	) {
 		for(const auto& function : other.m_functions) {
 			if(m_functions.contains(function.first)) {
-				return outcome::failure(
-					error::emit<4018>(
-						function.second->get_position(),
-						function.first,
-						m_functions[function.first]->get_position()
-					)
-				);
+				// return outcome::failure(
+				// 	error::emit<error_code::function_already_defined_at>(
+				// 		file_range{}, //function.second->get_position(),
+				// 		function.first,
+				// 		m_functions[function.first]->get_position()
+				// 	)
+				// );
 			}
 
 			m_functions.insert(function);

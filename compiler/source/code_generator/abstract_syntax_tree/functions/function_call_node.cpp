@@ -2,10 +2,10 @@
 
 namespace sigma {
 	function_call_node::function_call_node(
-		const file_position& position,
+		const file_range& range,
 		const std::string& function_identifier,
 		const std::vector<node_ptr>& function_arguments
-	) : node(position),
+	) : node(range),
 	m_function_name(function_identifier),
 	m_function_arguments(function_arguments) {}
 

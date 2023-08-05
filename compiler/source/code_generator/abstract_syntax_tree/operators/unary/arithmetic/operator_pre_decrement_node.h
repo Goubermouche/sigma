@@ -8,7 +8,7 @@ namespace sigma {
 	class operator_pre_decrement_node : public operator_unary_base {
 	public:
 		operator_pre_decrement_node(
-			const file_position& position,
+			const file_range& range,
 			const node_ptr& expression_node
 		);
 

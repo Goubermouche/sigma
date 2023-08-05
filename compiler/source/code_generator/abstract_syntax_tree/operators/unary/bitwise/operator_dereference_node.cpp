@@ -2,9 +2,9 @@
 
 namespace sigma {
 	operator_dereference_node::operator_dereference_node(
-		const file_position& position,
+		const file_range& range,
 		const node_ptr& expression_node
-	) : operator_unary_base(position, expression_node) {}
+	) : operator_unary_base(range, expression_node) {}
 
 	outcome::result<value_ptr> operator_dereference_node::accept(
 		code_generator_template& visitor, 

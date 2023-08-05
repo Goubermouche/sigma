@@ -75,6 +75,7 @@ namespace sigma {
 		// ******************************************************************
 		target_machine_cannot_emit_file = 5000,
 		clang_compilation_contains_errors,
+		cannot_lookup_target,
 		// dependency graph (5100)
 		circular_dependency = 5100
 	};
@@ -196,6 +197,7 @@ namespace sigma {
 			// ******************************************************************
 			{ error_code::target_machine_cannot_emit_file,                        "the target machine cannot emit a file of this type"                                                       },
 			{ error_code::clang_compilation_contains_errors,                      "clang compilation contains errors"                                                                        },
+			{ error_code::cannot_lookup_target,                                   "unable to lookup target '{}' ('{}')"                                                                      },
 			// dependency graph (5100)
 			{ error_code::circular_dependency,                                    "circular dependency detected"                                                                             }
 		};

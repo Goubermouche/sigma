@@ -148,7 +148,9 @@ namespace sigma {
 			nullptr,
 			llvm::CGFT_ObjectFile
 		)) {
-			return outcome::failure(error::emit<error_code::target_machine_cannot_emit_file>());
+			return outcome::failure(
+				error::emit<error_code::target_machine_cannot_emit_file>()
+			);
 		}
 
 		pass_manager.run(
@@ -192,7 +194,7 @@ namespace sigma {
 		const std::string executable_file_str = executable_file.string();
 
 		// generate clang arguments
-		const std::vector argument_vector{
+		const std::vector argument_vector = {
 			"-g",
 			object_file_str.c_str(),
 			"-o",
@@ -242,6 +244,12 @@ namespace sigma {
 			target_triple,
 			error
 		);
+
+		if(!error.empty()) {
+			return outcome::failure(
+				error::emit<error_code::cannot_lookup_target>(target_triple, error)
+			);
+		}
 
 		constexpr auto cpu = "generic";
 		constexpr auto features = "";

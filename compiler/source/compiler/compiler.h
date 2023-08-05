@@ -3,6 +3,8 @@
 #include "code_generator/implementation/code_generator.h"
 #include "dependency_tree.h"
 
+#include <llvm/Target/TargetMachine.h>
+
 namespace sigma {
 	enum class optimization_level {
 		none = 0,
@@ -50,6 +52,22 @@ namespace sigma {
 			const filepath& target_executable_directory
 		);
 	private:
+		outcome::result<void> create_object_file(
+			const filepath& path,
+			llvm::TargetMachine* machine,
+			const std::shared_ptr<code_generator_context>& context
+		) const;
+
+		outcome::result<void> compile_object_file(
+			const llvm::Triple& target_triple,
+			const filepath& object_file,
+			const filepath& executable_file
+		) const;
+
+		outcome::result<llvm::TargetMachine*> create_target_machine(
+			const std::shared_ptr<code_generator_context>& context
+		) const;
+
 		outcome::result<void> compile_module(
 			const std::shared_ptr<code_generator_context>& llvm_context
 		) const;

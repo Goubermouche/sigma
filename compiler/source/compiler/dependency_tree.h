@@ -53,10 +53,11 @@ namespace sigma {
 		 * \return outcome (void)
 		 */
 		static outcome::result<void> verify_source_file(
-			const filepath& path
+			const std::shared_ptr<text_file>& file
 		);
 	private:
 		filepath m_root_compilation_unit_path;
 		detail::directed_graph<filepath, translation_unit> m_graph;
+		file_registry m_file_registry;
 	};
 }

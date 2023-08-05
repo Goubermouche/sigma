@@ -11,7 +11,7 @@ namespace sigma {
 
 	outcome::result<void> dependency_tree::verify() const {
 		if(m_graph.is_acyclic() == false) {
-			return outcome::failure(error::emit<5100>());
+			return outcome::failure(error::emit<error_code::circular_dependency>());
 		}
 
 		return outcome::success();
@@ -69,10 +69,13 @@ namespace sigma {
 			return outcome::success();
 		}
 
-		OUTCOME_TRY(verify_source_file(path));
+		OUTCOME_TRY(std::shared_ptr<text_file> file, text_file::load(path));
+		OUTCOME_TRY(verify_source_file(file));
+
+		m_file_registry.insert(file, path);
 
 		// tokenize the current file
-		lexer lexer(path);
+		lexer lexer(file);
 		OUTCOME_TRY(auto token_list, lexer.tokenize());
 
 		const filepath parent_path = path.parent_path();
@@ -116,18 +119,12 @@ namespace sigma {
 	}
 
 	outcome::result<void> dependency_tree::verify_source_file(
-		const filepath& path
+		const std::shared_ptr<text_file>& file
 	) {
-		if (!exists(path)) {
-			return outcome::failure(error::emit<1002>(path));
-		}
-
-		if (!detail::is_file(path)) {
-			return outcome::failure(error::emit<1003>(path));
-		}
-
-		if (detail::extract_extension_from_filepath(path) != LANG_FILE_EXTENSION) {
-			return outcome::failure(error::emit<1007>(path, LANG_FILE_EXTENSION));
+		if (file->get_extension() != LANG_FILE_EXTENSION) {
+			return outcome::failure(
+				error::emit<error_code::invalid_file_extension>(file->get_path(), LANG_FILE_EXTENSION)
+			);
 		}
 
 		return outcome::success();

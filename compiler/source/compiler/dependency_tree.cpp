@@ -72,8 +72,6 @@ namespace sigma {
 		OUTCOME_TRY(std::shared_ptr<text_file> file, text_file::load(path));
 		OUTCOME_TRY(verify_source_file(file));
 
-		m_file_registry.insert(file, path);
-
 		// tokenize the current file
 		lexer lexer(file);
 		OUTCOME_TRY(auto token_list, lexer.tokenize());

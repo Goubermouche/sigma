@@ -22,20 +22,16 @@
 #include "utility/timer.h"
 
 namespace sigma {
-	compiler::compiler(
-		compiler_settings settings
-	) : m_settings(settings) {}
+	compiler::compiler() {}
 
 	outcome::result<void> compiler::compile(
-		const filepath& root_source_path,
-		const filepath& target_executable_directory
+		const compiler_settings& settings
 	) {
+		m_settings = settings;
+
 		timer compilation_timer;
 		compilation_timer.start();
 		
-		m_root_source_path = root_source_path;
-		m_target_executable_directory = target_executable_directory;
-
 		console::out
 			<< "sigma: "
 			<< color::yellow
@@ -43,7 +39,7 @@ namespace sigma {
 			<< color::white
 			<< "constructing dependency tree...\n";
 		
-		dependency_tree tree(m_root_source_path);
+		dependency_tree tree(m_settings.root_source_file);
 		OUTCOME_TRY(tree.construct());
 
 		console::out
@@ -81,9 +77,6 @@ namespace sigma {
 			const std::shared_ptr<code_generator_context>& context, 
 			codegen.generate()
 		);
-
-		// verify the executable directory
-		OUTCOME_TRY(verify_folder(m_target_executable_directory));
 
 		console::out
 			<< "sigma: "
@@ -163,9 +156,8 @@ namespace sigma {
 
 	outcome::result<void> compiler::compile_object_file(
 		const llvm::Triple& target_triple,
-		const filepath& object_file,
-		const filepath& executable_file
-	) const {
+		const filepath& object_file
+	) {
 		// create the compiler 
 		const llvm::IntrusiveRefCntPtr diagnostic_options = new clang::DiagnosticOptions;
 		auto* diagnostic_client = new clang::TextDiagnosticPrinter(
@@ -191,7 +183,7 @@ namespace sigma {
 
 		// note: storing a string variant of the path appears to be necessary for some reason
 		const std::string object_file_str = object_file.string();
-		const std::string executable_file_str = executable_file.string();
+		const std::string executable_file_str = m_settings.outputs[file_extension::exe].string();
 
 		// generate clang arguments
 		const std::vector argument_vector = {
@@ -277,9 +269,17 @@ namespace sigma {
 
 	outcome::result<void> compiler::compile_module(
 		const std::shared_ptr<code_generator_context>& context
-	) const {
-		const filepath executable_file = m_target_executable_directory / "a.exe";
-		const filepath object_file = m_target_executable_directory / "a.o";
+	) {
+		filepath object_file;
+		const auto o_it = m_settings.outputs.find(file_extension::o);
+		if(o_it != m_settings.outputs.end()) {
+			object_file = o_it->second;
+		}
+		else {
+			object_file = "./temp.o";
+		}
+
+		filepath executable_file;
 
 		// attempt to create the target machine
 		OUTCOME_TRY(const auto target_machine, create_target_machine(context));
@@ -287,26 +287,15 @@ namespace sigma {
 		// generate the .o file
 		OUTCOME_TRY(create_object_file(object_file, target_machine, context));
 
-		// compile the .o file with clang
-		OUTCOME_TRY(compile_object_file(target_machine->getTargetTriple(), object_file, executable_file));
-
-		// delete the .o file
-		return file::remove(object_file);
-	}
-
-	outcome::result<void> compiler::verify_folder(
-		const filepath& folder_path
-	) {
-		if (!exists(folder_path)) {
-			return outcome::failure(
-				error::emit<error_code::file_does_not_exist>(folder_path)
-			);
+		// only compile to an executable if we have a valid output filepath
+		if(m_settings.outputs.contains(file_extension::exe)) {
+			// compile the .o file with clang
+			OUTCOME_TRY(compile_object_file(target_machine->getTargetTriple(), object_file));
 		}
 
-		if(!is_directory(folder_path)) {
-			return outcome::failure(
-				error::emit<error_code::directory_expected_but_got_file>(folder_path)
-			);
+		if(!m_settings.outputs.contains(file_extension::o)) {
+			// delete .o file if we don't want to emit it 
+			OUTCOME_TRY(file::remove(object_file));
 		}
 
 		return outcome::success();
@@ -348,5 +337,85 @@ namespace sigma {
 			<< color::white;
 
 		return outcome::success();
+	}
+
+	outcome::result<compiler_settings> compiler_settings::parse_argument_list(
+		argument_list& arguments
+	) {
+		compiler_settings settings;
+
+		// files
+		// source file
+		settings.root_source_file = arguments.get<std::string>("source");
+
+		// executable file
+		const auto outputs = arguments.get<std::vector<std::string>>("output");
+
+		for(const auto& output : outputs) {
+			filepath path = output;
+			if(path.extension() == ".exe") {
+				settings.outputs[file_extension::exe] = path;
+			}
+			else if (path.extension() == ".o") {
+				settings.outputs[file_extension::o] = path;
+			}
+			else if (path.extension() == ".llvm") {
+				settings.outputs[file_extension::llvm] = path;
+			}
+			else {
+				return outcome::failure(
+					error::emit<error_code::unrecognized_output_extension>(path.extension())
+				);
+			}
+		}
+
+		// performance optimization levels
+		if(arguments.get<bool>("optimize0")) {
+			settings.optimization_level = optimization_level::none;
+		}
+
+		if (arguments.get<bool>("optimize1")) {
+			settings.optimization_level = optimization_level::low;
+		}
+
+		if (arguments.get<bool>("optimize2")) {
+			settings.optimization_level = optimization_level::medium;
+		}
+
+		if (arguments.get<bool>("optimize3")) {
+			settings.optimization_level = optimization_level::high;
+		}
+
+		// size optimization levels
+		if (arguments.get<bool>("size-optimize0")) {
+			settings.size_optimization_level = size_optimization_level::none;
+		}
+
+		if (arguments.get<bool>("size-optimize1")) {
+			settings.size_optimization_level = size_optimization_level::medium;
+		}
+
+		if (arguments.get<bool>("size-optimize2")) {
+			settings.size_optimization_level = size_optimization_level::high;
+		}
+
+		// vectorization
+		if (arguments.get<bool>("fslp-vectorize")) {
+			settings.vectorize = true;
+		}
+
+		return settings;
+	}
+
+	compiler_emit_types operator|(compiler_emit_types lhs, compiler_emit_types rhs) {
+		return static_cast<compiler_emit_types>(
+			static_cast<std::underlying_type_t<compiler_emit_types>>(lhs) |
+			static_cast<std::underlying_type_t<compiler_emit_types>>(rhs));
+	}
+
+	compiler_emit_types operator&(compiler_emit_types lhs, compiler_emit_types rhs) {
+		return static_cast<compiler_emit_types>(
+			static_cast<std::underlying_type_t<compiler_emit_types>>(lhs) &
+			static_cast<std::underlying_type_t<compiler_emit_types>>(rhs));
 	}
 }

@@ -14,23 +14,4 @@ namespace sigma {
 		file_position start;
 		file_position end;
 	};
-
-	class file_registry {
-	public:
-		void insert(
-			const std::shared_ptr<file>& file,
-			const filepath& path
-		) {
-			m_files[path] = file;
-		}
-
-		template<typename file_type>
-		std::shared_ptr<file_type> get(
-			const filepath& path
-		) {
-			return std::static_pointer_cast<file_type>(m_files[path]);
-		}
-	private:
-		std::unordered_map<filepath, std::shared_ptr<file>> m_files;
-	};
 }

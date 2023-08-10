@@ -1,6 +1,7 @@
 #pragma once
 
 #include "code_generator/implementation/code_generator.h"
+#include "program_aruments/program_options.h"
 #include "dependency_tree.h"
 
 #include <llvm/Target/TargetMachine.h>
@@ -19,13 +20,36 @@ namespace sigma {
 		high = 2
 	};
 
+	enum class compiler_emit_types {
+		llvm_ir    = 1 << 1,
+		object     = 1 << 2
+	};
+
+	enum class file_extension {
+		exe,
+		llvm,
+		o
+	};
+
+	// operator overloads for bitwise operators
+	compiler_emit_types operator|(compiler_emit_types lhs, compiler_emit_types rhs);
+	compiler_emit_types operator&(compiler_emit_types lhs, compiler_emit_types rhs);
+
 	struct compiler_settings {
+		// file paths
+		filepath root_source_file;
+		std::unordered_map<file_extension, filepath> outputs;
+
 		// optimization level, higher optimization levels can result in higher performance
 		optimization_level optimization_level = optimization_level::none;
 		// size optimization levels, higher size optimization levels can result in smaller executable size
 		size_optimization_level size_optimization_level = size_optimization_level::none;
 		// vectorize loops and enable auto vectorization 
 		bool vectorize = false;
+
+		static outcome::result<compiler_settings> parse_argument_list(
+			argument_list& arguments
+		);
 	};
 
 	/**
@@ -35,21 +59,15 @@ namespace sigma {
 	public:
 		/**
 		 * \brief Constructs a new compiler instance using the specified \a settings.
-		 * \param settings Settings to use when compiling 
 		 */
-		compiler(
-			compiler_settings settings
-		);
+		compiler();
 
 		/**
 		 * \brief Compiles the given \a root_source_path using the underlying compiler settings and outputs an executable at the given \a target_executable_directory.
-		 * \param root_source_path Path to the file to be compiled
-		 * \param target_executable_directory Path to the target directory the generated executable should be saved at
 		 * \return Optional error message containing information about a potential error.
 		 */
 		outcome::result<void> compile(
-			const filepath& root_source_path,
-			const filepath& target_executable_directory
+			const compiler_settings& settings
 		);
 	private:
 		outcome::result<void> create_object_file(
@@ -60,9 +78,8 @@ namespace sigma {
 
 		outcome::result<void> compile_object_file(
 			const llvm::Triple& target_triple,
-			const filepath& object_file,
-			const filepath& executable_file
-		) const;
+			const filepath& object_file
+		);
 
 		outcome::result<llvm::TargetMachine*> create_target_machine(
 			const std::shared_ptr<code_generator_context>& context
@@ -70,10 +87,6 @@ namespace sigma {
 
 		outcome::result<void> compile_module(
 			const std::shared_ptr<code_generator_context>& llvm_context
-		) const;
-
-		static outcome::result<void> verify_folder(
-			const filepath& folder_path
 		);
 
 		static outcome::result<void> verify_main_context(
@@ -81,9 +94,5 @@ namespace sigma {
 		);
 	private:
 		compiler_settings m_settings;
-
-		// compilation specific 
-		filepath m_root_source_path;
-		filepath m_target_executable_directory;
 	};
 }

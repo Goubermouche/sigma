@@ -9,3 +9,11 @@ i32 main() {
     *value_ptr = pack_bits(10, 20, 30, 40);
     print("%d\n", value);
 }
+
+// todo:
+// - implement an abstraction for managing output files in the compiler 
+// - clean up the compiler call process 
+// - add Linux support
+// - add Github CI with docker on Linux 
+// - implement a type checker 
+// - reimplement the parser 

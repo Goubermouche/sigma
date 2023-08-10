@@ -334,6 +334,9 @@
     <ClInclude Include="source\utility\filesystem\file_types\text_file.h" />
     <ClInclude Include="source\utility\format.h" />
     <ClInclude Include="source\utility\filesystem\file_types\raw_file.h" />
+    <ClInclude Include="source\program_aruments\program_options.h" />
+    <ClInclude Include="source\program_aruments\argument.h" />
+    <ClInclude Include="source\program_aruments\command.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp" />
@@ -579,6 +582,9 @@
     <ClCompile Include="source\utility\diagnostics\warning.cpp" />
     <ClCompile Include="source\utility\diagnostics\error.cpp" />
     <ClCompile Include="source\utility\filesystem\file_types\raw_file.cpp" />
+    <ClCompile Include="source\program_aruments\program_options.cpp" />
+    <ClCompile Include="source\program_aruments\argument.cpp" />
+    <ClCompile Include="source\program_aruments\command.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="test\main.s" />

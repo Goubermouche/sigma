@@ -11,6 +11,7 @@
     <IgnoreWarnCompileDuplicatedFilename>true</IgnoreWarnCompileDuplicatedFilename>
     <Keyword>Win32Proj</Keyword>
     <RootNamespace>compiler</RootNamespace>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
@@ -58,6 +59,9 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="source\program_aruments\command.h" />
+    <ClInclude Include="source\program_aruments\argument.h" />
+    <ClInclude Include="source\program_aruments\program_options.h" />
     <ClInclude Include="source\utility\filesystem\file_types\raw_file.h" />
     <ClInclude Include="source\utility\filesystem\filesystem.h" />
     <ClInclude Include="source\utility\filesystem\file_types\file.h" />
@@ -146,6 +150,9 @@
     <ClInclude Include="source\utility\filesystem\file_types\text_file.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="source\program_aruments\command.cpp" />
+    <ClCompile Include="source\program_aruments\argument.cpp" />
+    <ClCompile Include="source\program_aruments\program_options.cpp" />
     <ClCompile Include="source\utility\filesystem\file_types\raw_file.cpp" />
     <ClCompile Include="source\utility\diagnostics\error.cpp" />
     <ClCompile Include="source\utility\diagnostics\warning.cpp" />

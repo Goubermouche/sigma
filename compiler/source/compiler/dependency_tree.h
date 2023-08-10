@@ -58,6 +58,5 @@ namespace sigma {
 	private:
 		filepath m_root_compilation_unit_path;
 		detail::directed_graph<filepath, translation_unit> m_graph;
-		file_registry m_file_registry;
 	};
 }

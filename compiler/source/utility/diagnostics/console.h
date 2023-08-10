@@ -18,7 +18,6 @@ namespace sigma {
 		static constexpr color_value red = { "\033[38;5;197m" };
 	};
 
-
 	class console {
 	public:
 		static constexpr left_pad left = {};

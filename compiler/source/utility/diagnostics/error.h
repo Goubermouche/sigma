@@ -77,7 +77,10 @@ namespace sigma {
 		clang_compilation_contains_errors,
 		cannot_lookup_target,
 		// dependency graph (5100)
-		circular_dependency = 5100
+		circular_dependency = 5100,
+		// settings parser
+		unrecognized_argument_value = 5200,
+		unrecognized_output_extension = 5201,
 	};
 
 	struct error_message : public diagnostic_message {
@@ -199,9 +202,12 @@ namespace sigma {
 			{ error_code::clang_compilation_contains_errors,                      "clang compilation contains errors"                                                                        },
 			{ error_code::cannot_lookup_target,                                   "unable to lookup target '{}' ('{}')"                                                                      },
 			// dependency graph (5100)
-			{ error_code::circular_dependency,                                    "circular dependency detected"                                                                             }
+			{ error_code::circular_dependency,                                    "circular dependency detected"                                                                             },
+			// settings parser
+			{ error_code::unrecognized_argument_value,                            "unrecognized value '{}' received for argument '{}'"                                                       },
+			{ error_code::unrecognized_output_extension,                          "unrecognized filepath received for output argument"                                                       },
 		};
-	};
+	}; 
 
 	namespace outcome {
 		/**

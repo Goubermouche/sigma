@@ -21,9 +21,9 @@ namespace sigma {
 
 	struct compiler_settings {
 		// optimization level, higher optimization levels can result in higher performance
-		optimization_level optimization_level = optimization_level::none;
+		optimization_level opt_level = optimization_level::none;
 		// size optimization levels, higher size optimization levels can result in smaller executable size
-		size_optimization_level size_optimization_level = size_optimization_level::none;
+		size_optimization_level size_opt_level = size_optimization_level::none;
 		// vectorize loops and enable auto vectorization 
 		bool vectorize = false;
 	};

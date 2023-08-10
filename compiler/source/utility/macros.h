@@ -2,14 +2,23 @@
 
 #include "utility/diagnostics/console.h"
 
+#ifdef _WIN32
+    #include <intrin.h>
+    #define DEBUG_BREAK() __debugbreak()
+#elif __linux__
+    #include <signal.h>
+    #define DEBUG_BREAK() raise(SIGTRAP)
+#else
+    #error "Unsupported platform!"
+#endif
+
 #define LANG_VERIFY(cond, mesg)                                     \
-	do {                                                            \
-		if (cond) { /* contextually convertible to bool paranoia */ \
-		} else {                                                    \
-			console::out << mesg << '\n';                           \
-			__debugbreak();                                         \
+    do {                                                            \
+        if (!(cond)) {                                              \
+            std::cerr << mesg << '\n';                              \
+			DEBUG_BREAK();                                          \
 		}                                                           \
-	} while (false)
+    } while (false)
 
 /**
  * \brief Basic assertion macro, asserts whenever \a cond evaluates to false and prints \a message.

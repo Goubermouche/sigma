@@ -1,4 +1,5 @@
-#include "string_node.h"	
+#include "string_node.h"
+#include "utility/string.h"	
 
 namespace sigma {
 	string_node::string_node(
@@ -37,7 +38,7 @@ namespace sigma {
 			<< color::white 
 			<< "]' '"
 			<< AST_NODE_TEXT_LITERAL_COLOR
-			<< escape_string(m_value)
+			<< detail::escape_string(m_value)
 			<< color::white
 			<< "'\n";
 	}

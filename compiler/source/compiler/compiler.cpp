@@ -121,8 +121,8 @@ namespace sigma {
 		llvm::PassManagerBuilder builder;
 
 		// add optimization passes
-		builder.OptLevel = static_cast<u32>(m_settings.optimization_level);
-		builder.SizeLevel = static_cast<u32>(m_settings.size_optimization_level);
+		builder.OptLevel = static_cast<u32>(m_settings.opt_level);
+		builder.SizeLevel = static_cast<u32>(m_settings.size_opt_level);
 		builder.Inliner = llvm::createFunctionInliningPass(
 			builder.OptLevel,
 			builder.SizeLevel,

@@ -371,32 +371,32 @@ namespace sigma {
 
 		// performance optimization levels
 		if(arguments.get<bool>("optimize0")) {
-			settings.optimization_level = optimization_level::none;
+			settings.opt_level = optimization_level::none;
 		}
 
 		if (arguments.get<bool>("optimize1")) {
-			settings.optimization_level = optimization_level::low;
+			settings.opt_level = optimization_level::low;
 		}
 
 		if (arguments.get<bool>("optimize2")) {
-			settings.optimization_level = optimization_level::medium;
+			settings.opt_level = optimization_level::medium;
 		}
 
 		if (arguments.get<bool>("optimize3")) {
-			settings.optimization_level = optimization_level::high;
+			settings.opt_level = optimization_level::high;
 		}
 
 		// size optimization levels
 		if (arguments.get<bool>("size-optimize0")) {
-			settings.size_optimization_level = size_optimization_level::none;
+			settings.size_opt_level = size_optimization_level::none;
 		}
 
 		if (arguments.get<bool>("size-optimize1")) {
-			settings.size_optimization_level = size_optimization_level::medium;
+			settings.size_opt_level = size_optimization_level::medium;
 		}
 
 		if (arguments.get<bool>("size-optimize2")) {
-			settings.size_optimization_level = size_optimization_level::high;
+			settings.size_opt_level = size_optimization_level::high;
 		}
 
 		// vectorization

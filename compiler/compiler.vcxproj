@@ -11,7 +11,6 @@
     <IgnoreWarnCompileDuplicatedFilename>true</IgnoreWarnCompileDuplicatedFilename>
     <Keyword>Win32Proj</Keyword>
     <RootNamespace>compiler</RootNamespace>
-    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
@@ -54,18 +53,11 @@
       <SubSystem>Console</SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalDependencies>LLVMAArch64AsmParser.lib;LLVMAArch64CodeGen.lib;LLVMAArch64Desc.lib;LLVMAArch64Disassembler.lib;LLVMAArch64Info.lib;LLVMAArch64Utils.lib;LLVMAMDGPUAsmParser.lib;LLVMAMDGPUCodeGen.lib;LLVMAMDGPUDesc.lib;LLVMAMDGPUDisassembler.lib;LLVMAMDGPUInfo.lib;LLVMAMDGPUTargetMCA.lib;LLVMAMDGPUUtils.lib;LLVMARMAsmParser.lib;LLVMARMCodeGen.lib;LLVMARMDesc.lib;LLVMARMDisassembler.lib;LLVMARMInfo.lib;LLVMARMUtils.lib;LLVMAVRAsmParser.lib;LLVMAVRCodeGen.lib;LLVMAVRDesc.lib;LLVMAVRDisassembler.lib;LLVMAVRInfo.lib;LLVMAggressiveInstCombine.lib;LLVMAnalysis.lib;LLVMAsmParser.lib;LLVMAsmPrinter.lib;LLVMBPFAsmParser.lib;LLVMBPFCodeGen.lib;LLVMBPFDesc.lib;LLVMBPFDisassembler.lib;LLVMBPFInfo.lib;LLVMBinaryFormat.lib;LLVMBitReader.lib;LLVMBitWriter.lib;LLVMBitstreamReader.lib;LLVMCFGuard.lib;LLVMCodeGen.lib;LLVMCore.lib;LLVMCoroutines.lib;LLVMCoverage.lib;LLVMDWARFLinker.lib;LLVMDWARFLinkerParallel.lib;LLVMDWP.lib;LLVMDebugInfoCodeView.lib;LLVMDebugInfoDWARF.lib;LLVMDebugInfoGSYM.lib;LLVMDebugInfoLogicalView.lib;LLVMDebugInfoMSF.lib;LLVMDebugInfoPDB.lib;LLVMDemangle.lib;LLVMDlltoolDriver.lib;LLVMExecutionEngine.lib;LLVMExtensions.lib;LLVMFileCheck.lib;LLVMFrontendHLSL.lib;LLVMFrontendOpenACC.lib;LLVMFrontendOpenMP.lib;LLVMFuzzMutate.lib;LLVMFuzzerCLI.lib;LLVMGlobalISel.lib;LLVMHexagonAsmParser.lib;LLVMHexagonCodeGen.lib;LLVMHexagonDesc.lib;LLVMHexagonDisassembler.lib;LLVMHexagonInfo.lib;LLVMIRPrinter.lib;LLVMIRReader.lib;LLVMInstCombine.lib;LLVMInstrumentation.lib;LLVMInterfaceStub.lib;LLVMInterpreter.lib;LLVMJITLink.lib;LLVMLTO.lib;LLVMLanaiAsmParser.lib;LLVMLanaiCodeGen.lib;LLVMLanaiDesc.lib;LLVMLanaiDisassembler.lib;LLVMLanaiInfo.lib;LLVMLibDriver.lib;LLVMLineEditor.lib;LLVMLinker.lib;LLVMLoongArchAsmParser.lib;LLVMLoongArchCodeGen.lib;LLVMLoongArchDesc.lib;LLVMLoongArchDisassembler.lib;LLVMLoongArchInfo.lib;LLVMMC.lib;LLVMMCA.lib;LLVMMCDisassembler.lib;LLVMMCJIT.lib;LLVMMCParser.lib;LLVMMIRParser.lib;LLVMMSP430AsmParser.lib;LLVMMSP430CodeGen.lib;LLVMMSP430Desc.lib;LLVMMSP430Disassembler.lib;LLVMMSP430Info.lib;LLVMMipsAsmParser.lib;LLVMMipsCodeGen.lib;LLVMMipsDesc.lib;LLVMMipsDisassembler.lib;LLVMMipsInfo.lib;LLVMNVPTXCodeGen.lib;LLVMNVPTXDesc.lib;LLVMNVPTXInfo.lib;LLVMObjCARCOpts.lib;LLVMObjCopy.lib;LLVMObject.lib;LLVMObjectYAML.lib;LLVMOption.lib;LLVMOrcJIT.lib;LLVMOrcShared.lib;LLVMOrcTargetProcess.lib;LLVMPasses.lib;LLVMPowerPCAsmParser.lib;LLVMPowerPCCodeGen.lib;LLVMPowerPCDesc.lib;LLVMPowerPCDisassembler.lib;LLVMPowerPCInfo.lib;LLVMProfileData.lib;LLVMRISCVAsmParser.lib;LLVMRISCVCodeGen.lib;LLVMRISCVDesc.lib;LLVMRISCVDisassembler.lib;LLVMRISCVInfo.lib;LLVMRISCVTargetMCA.lib;LLVMRemarks.lib;LLVMRuntimeDyld.lib;LLVMScalarOpts.lib;LLVMSelectionDAG.lib;LLVMSparcAsmParser.lib;LLVMSparcCodeGen.lib;LLVMSparcDesc.lib;LLVMSparcDisassembler.lib;LLVMSparcInfo.lib;LLVMSupport.lib;LLVMSymbolize.lib;LLVMSystemZAsmParser.lib;LLVMSystemZCodeGen.lib;LLVMSystemZDesc.lib;LLVMSystemZDisassembler.lib;LLVMSystemZInfo.lib;LLVMTableGen.lib;LLVMTarget.lib;LLVMTargetParser.lib;LLVMTextAPI.lib;LLVMTransformUtils.lib;LLVMVEAsmParser.lib;LLVMVECodeGen.lib;LLVMVEDesc.lib;LLVMVEDisassembler.lib;LLVMVEInfo.lib;LLVMVectorize.lib;LLVMWebAssemblyAsmParser.lib;LLVMWebAssemblyCodeGen.lib;LLVMWebAssemblyDesc.lib;LLVMWebAssemblyDisassembler.lib;LLVMWebAssemblyInfo.lib;LLVMWebAssemblyUtils.lib;LLVMWindowsDriver.lib;LLVMWindowsManifest.lib;LLVMX86AsmParser.lib;LLVMX86CodeGen.lib;LLVMX86Desc.lib;LLVMX86Disassembler.lib;LLVMX86Info.lib;LLVMX86TargetMCA.lib;LLVMXCoreCodeGen.lib;LLVMXCoreDesc.lib;LLVMXCoreDisassembler.lib;LLVMXCoreInfo.lib;LLVMXRay.lib;LLVMipo.lib;advapi32.lib;clangAPINotes.lib;clangARCMigrate.lib;clangAST.lib;clangASTMatchers.lib;clangAnalysis.lib;clangAnalysisFlowSensitive.lib;clangAnalysisFlowSensitiveModels.lib;clangBasic.lib;clangCodeGen.lib;clangCrossTU.lib;clangDependencyScanning.lib;clangDirectoryWatcher.lib;clangDriver.lib;clangDynamicASTMatchers.lib;clangEdit.lib;clangExtractAPI.lib;clangFormat.lib;clangFrontend.lib;clangFrontendTool.lib;clangHandleCXX.lib;clangHandleLLVM.lib;clangIndex.lib;clangIndexSerialization.lib;clangInterpreter.lib;clangLex.lib;clangParse.lib;clangRewrite.lib;clangRewriteFrontend.lib;clangSema.lib;clangSerialization.lib;clangStaticAnalyzerCheckers.lib;clangStaticAnalyzerCore.lib;clangStaticAnalyzerFrontend.lib;clangSupport.lib;clangTooling.lib;clangToolingASTDiff.lib;clangToolingCore.lib;clangToolingInclusions.lib;clangToolingInclusionsStdlib.lib;clangToolingRefactoring.lib;clangToolingSyntax.lib;clangTransformer.lib;comdlg32.lib;delayimp.lib;gdi32.lib;kernel32.lib;ole32.lib;oleaut32.lib;psapi.lib;shell32.lib;user32.lib;uuid.lib;version.lib;winspool.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>..\..\..\thirdparty\llvm\llvm-16.0.0\llvm-install\lib;..\..\..\thirdparty\llvm\llvm-16.0.0\llvm-install\Release\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>LLVMAArch64AsmParser.lib;LLVMAArch64CodeGen.lib;LLVMAArch64Desc.lib;LLVMAArch64Disassembler.lib;LLVMAArch64Info.lib;LLVMAArch64Utils.lib;LLVMAMDGPUAsmParser.lib;LLVMAMDGPUCodeGen.lib;LLVMAMDGPUDesc.lib;LLVMAMDGPUDisassembler.lib;LLVMAMDGPUInfo.lib;LLVMAMDGPUTargetMCA.lib;LLVMAMDGPUUtils.lib;LLVMARMAsmParser.lib;LLVMARMCodeGen.lib;LLVMARMDesc.lib;LLVMARMDisassembler.lib;LLVMARMInfo.lib;LLVMARMUtils.lib;LLVMAVRAsmParser.lib;LLVMAVRCodeGen.lib;LLVMAVRDesc.lib;LLVMAVRDisassembler.lib;LLVMAVRInfo.lib;LLVMAggressiveInstCombine.lib;LLVMAnalysis.lib;LLVMAsmParser.lib;LLVMAsmPrinter.lib;LLVMBPFAsmParser.lib;LLVMBPFCodeGen.lib;LLVMBPFDesc.lib;LLVMBPFDisassembler.lib;LLVMBPFInfo.lib;LLVMBinaryFormat.lib;LLVMBitReader.lib;LLVMBitWriter.lib;LLVMBitstreamReader.lib;LLVMCFGuard.lib;LLVMCodeGen.lib;LLVMCore.lib;LLVMCoroutines.lib;LLVMCoverage.lib;LLVMDWARFLinker.lib;LLVMDWARFLinkerParallel.lib;LLVMDWP.lib;LLVMDebugInfoCodeView.lib;LLVMDebugInfoDWARF.lib;LLVMDebugInfoGSYM.lib;LLVMDebugInfoLogicalView.lib;LLVMDebugInfoMSF.lib;LLVMDebugInfoPDB.lib;LLVMDemangle.lib;LLVMDlltoolDriver.lib;LLVMExecutionEngine.lib;LLVMExtensions.lib;LLVMFileCheck.lib;LLVMFrontendHLSL.lib;LLVMFrontendOpenACC.lib;LLVMFrontendOpenMP.lib;LLVMFuzzMutate.lib;LLVMFuzzerCLI.lib;LLVMGlobalISel.lib;LLVMHexagonAsmParser.lib;LLVMHexagonCodeGen.lib;LLVMHexagonDesc.lib;LLVMHexagonDisassembler.lib;LLVMHexagonInfo.lib;LLVMIRPrinter.lib;LLVMIRReader.lib;LLVMInstCombine.lib;LLVMInstrumentation.lib;LLVMInterfaceStub.lib;LLVMInterpreter.lib;LLVMJITLink.lib;LLVMLTO.lib;LLVMLanaiAsmParser.lib;LLVMLanaiCodeGen.lib;LLVMLanaiDesc.lib;LLVMLanaiDisassembler.lib;LLVMLanaiInfo.lib;LLVMLibDriver.lib;LLVMLineEditor.lib;LLVMLinker.lib;LLVMLoongArchAsmParser.lib;LLVMLoongArchCodeGen.lib;LLVMLoongArchDesc.lib;LLVMLoongArchDisassembler.lib;LLVMLoongArchInfo.lib;LLVMMC.lib;LLVMMCA.lib;LLVMMCDisassembler.lib;LLVMMCJIT.lib;LLVMMCParser.lib;LLVMMIRParser.lib;LLVMMSP430AsmParser.lib;LLVMMSP430CodeGen.lib;LLVMMSP430Desc.lib;LLVMMSP430Disassembler.lib;LLVMMSP430Info.lib;LLVMMipsAsmParser.lib;LLVMMipsCodeGen.lib;LLVMMipsDesc.lib;LLVMMipsDisassembler.lib;LLVMMipsInfo.lib;LLVMNVPTXCodeGen.lib;LLVMNVPTXDesc.lib;LLVMNVPTXInfo.lib;LLVMObjCARCOpts.lib;LLVMObjCopy.lib;LLVMObject.lib;LLVMObjectYAML.lib;LLVMOption.lib;LLVMOrcJIT.lib;LLVMOrcShared.lib;LLVMOrcTargetProcess.lib;LLVMPasses.lib;LLVMPowerPCAsmParser.lib;LLVMPowerPCCodeGen.lib;LLVMPowerPCDesc.lib;LLVMPowerPCDisassembler.lib;LLVMPowerPCInfo.lib;LLVMProfileData.lib;LLVMRISCVAsmParser.lib;LLVMRISCVCodeGen.lib;LLVMRISCVDesc.lib;LLVMRISCVDisassembler.lib;LLVMRISCVInfo.lib;LLVMRISCVTargetMCA.lib;LLVMRemarks.lib;LLVMRuntimeDyld.lib;LLVMScalarOpts.lib;LLVMSelectionDAG.lib;LLVMSparcAsmParser.lib;LLVMSparcCodeGen.lib;LLVMSparcDesc.lib;LLVMSparcDisassembler.lib;LLVMSparcInfo.lib;LLVMSupport.lib;LLVMSymbolize.lib;LLVMSystemZAsmParser.lib;LLVMSystemZCodeGen.lib;LLVMSystemZDesc.lib;LLVMSystemZDisassembler.lib;LLVMSystemZInfo.lib;LLVMTableGen.lib;LLVMTarget.lib;LLVMTargetParser.lib;LLVMTextAPI.lib;LLVMTransformUtils.lib;LLVMVEAsmParser.lib;LLVMVECodeGen.lib;LLVMVEDesc.lib;LLVMVEDisassembler.lib;LLVMVEInfo.lib;LLVMVectorize.lib;LLVMWebAssemblyAsmParser.lib;LLVMWebAssemblyCodeGen.lib;LLVMWebAssemblyDesc.lib;LLVMWebAssemblyDisassembler.lib;LLVMWebAssemblyInfo.lib;LLVMWebAssemblyUtils.lib;LLVMWindowsDriver.lib;LLVMWindowsManifest.lib;LLVMX86AsmParser.lib;LLVMX86CodeGen.lib;LLVMX86Desc.lib;LLVMX86Disassembler.lib;LLVMX86Info.lib;LLVMX86TargetMCA.lib;LLVMXCoreCodeGen.lib;LLVMXCoreDesc.lib;LLVMXCoreDisassembler.lib;LLVMXCoreInfo.lib;LLVMXRay.lib;LLVMipo.lib;clangAPINotes.lib;clangARCMigrate.lib;clangAST.lib;clangASTMatchers.lib;clangAnalysis.lib;clangAnalysisFlowSensitive.lib;clangAnalysisFlowSensitiveModels.lib;clangBasic.lib;clangCodeGen.lib;clangCrossTU.lib;clangDependencyScanning.lib;clangDirectoryWatcher.lib;clangDriver.lib;clangDynamicASTMatchers.lib;clangEdit.lib;clangExtractAPI.lib;clangFormat.lib;clangFrontend.lib;clangFrontendTool.lib;clangHandleCXX.lib;clangHandleLLVM.lib;clangIndex.lib;clangIndexSerialization.lib;clangInterpreter.lib;clangLex.lib;clangParse.lib;clangRewrite.lib;clangRewriteFrontend.lib;clangSema.lib;clangSerialization.lib;clangStaticAnalyzerCheckers.lib;clangStaticAnalyzerCore.lib;clangStaticAnalyzerFrontend.lib;clangSupport.lib;clangTooling.lib;clangToolingASTDiff.lib;clangToolingCore.lib;clangToolingInclusions.lib;clangToolingInclusionsStdlib.lib;clangToolingRefactoring.lib;clangToolingSyntax.lib;clangTransformer.lib;comdlg32.lib;delayimp.lib;gdi32.lib;kernel32.lib;ole32.lib;oleaut32.lib;psapi.lib;shell32.lib;user32.lib;uuid.lib;version.lib;winspool.lib;advapi32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>..\..\..\thirdparty\llvm\llvm-16.0.0\llvm-install\lib;..\..\..\thirdparty\llvm\llvm-16.0.0\llvm-install\bin;..\..\..\thirdparty\llvm\llvm-16.0.0\llvm-install\Release\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="source\program_aruments\command.h" />
-    <ClInclude Include="source\program_aruments\argument.h" />
-    <ClInclude Include="source\program_aruments\program_options.h" />
-    <ClInclude Include="source\utility\filesystem\file_types\raw_file.h" />
-    <ClInclude Include="source\utility\filesystem\filesystem.h" />
-    <ClInclude Include="source\utility\filesystem\file_types\file.h" />
-    <ClInclude Include="source\code_generator\abstract_syntax_tree\operators\unary\bitwise\operator_address_of_node.h" />
     <ClInclude Include="source\code_generator\abstract_syntax_tree\abstract_syntax_tree.h" />
     <ClInclude Include="source\code_generator\abstract_syntax_tree\functions\function_call_node.h" />
     <ClInclude Include="source\code_generator\abstract_syntax_tree\functions\function_node.h" />
@@ -107,6 +99,7 @@
     <ClInclude Include="source\code_generator\abstract_syntax_tree\operators\unary\arithmetic\operator_post_increment_node.h" />
     <ClInclude Include="source\code_generator\abstract_syntax_tree\operators\unary\arithmetic\operator_pre_decrement_node.h" />
     <ClInclude Include="source\code_generator\abstract_syntax_tree\operators\unary\arithmetic\operator_pre_increment_node.h" />
+    <ClInclude Include="source\code_generator\abstract_syntax_tree\operators\unary\bitwise\operator_address_of_node.h" />
     <ClInclude Include="source\code_generator\abstract_syntax_tree\operators\unary\bitwise\operator_bitwise_not_node.h" />
     <ClInclude Include="source\code_generator\abstract_syntax_tree\operators\unary\bitwise\operator_dereference_node.h" />
     <ClInclude Include="source\code_generator\abstract_syntax_tree\operators\unary\logical\operator_not_node.h" />
@@ -136,30 +129,27 @@
     <ClInclude Include="source\llvm_wrappers\variables\variable.h" />
     <ClInclude Include="source\llvm_wrappers\variables\variable_registry.h" />
     <ClInclude Include="source\parser\parser.h" />
+    <ClInclude Include="source\program_aruments\argument.h" />
+    <ClInclude Include="source\program_aruments\command.h" />
+    <ClInclude Include="source\program_aruments\program_options.h" />
     <ClInclude Include="source\utility\containers\directed_graph.h" />
     <ClInclude Include="source\utility\containers\string_accessor.h" />
     <ClInclude Include="source\utility\diagnostics\console.h" />
     <ClInclude Include="source\utility\diagnostics\diagnostics.h" />
     <ClInclude Include="source\utility\diagnostics\error.h" />
     <ClInclude Include="source\utility\diagnostics\warning.h" />
+    <ClInclude Include="source\utility\filesystem\file_types\file.h" />
+    <ClInclude Include="source\utility\filesystem\file_types\raw_file.h" />
+    <ClInclude Include="source\utility\filesystem\file_types\text_file.h" />
+    <ClInclude Include="source\utility\filesystem\filesystem.h" />
     <ClInclude Include="source\utility\format.h" />
     <ClInclude Include="source\utility\macros.h" />
     <ClInclude Include="source\utility\string.h" />
     <ClInclude Include="source\utility\timer.h" />
     <ClInclude Include="source\utility\types.h" />
-    <ClInclude Include="source\utility\filesystem\file_types\text_file.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="source\program_aruments\command.cpp" />
-    <ClCompile Include="source\program_aruments\argument.cpp" />
-    <ClCompile Include="source\program_aruments\program_options.cpp" />
-    <ClCompile Include="source\utility\filesystem\file_types\raw_file.cpp" />
-    <ClCompile Include="source\utility\diagnostics\error.cpp" />
-    <ClCompile Include="source\utility\diagnostics\warning.cpp" />
-    <ClCompile Include="source\utility\filesystem\filesystem.cpp" />
-    <ClCompile Include="source\utility\filesystem\file_types\file.cpp" />
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="source\code_generator\abstract_syntax_tree\operators\unary\bitwise\operator_address_of_node.cpp" />
     <ClCompile Include="source\code_generator\abstract_syntax_tree\abstract_syntax_tree.cpp" />
     <ClCompile Include="source\code_generator\abstract_syntax_tree\functions\function_call_node.cpp" />
     <ClCompile Include="source\code_generator\abstract_syntax_tree\functions\function_node.cpp" />
@@ -201,6 +191,7 @@
     <ClCompile Include="source\code_generator\abstract_syntax_tree\operators\unary\arithmetic\operator_post_increment_node.cpp" />
     <ClCompile Include="source\code_generator\abstract_syntax_tree\operators\unary\arithmetic\operator_pre_decrement_node.cpp" />
     <ClCompile Include="source\code_generator\abstract_syntax_tree\operators\unary\arithmetic\operator_pre_increment_node.cpp" />
+    <ClCompile Include="source\code_generator\abstract_syntax_tree\operators\unary\bitwise\operator_address_of_node.cpp" />
     <ClCompile Include="source\code_generator\abstract_syntax_tree\operators\unary\bitwise\operator_bitwise_not_node.cpp" />
     <ClCompile Include="source\code_generator\abstract_syntax_tree\operators\unary\bitwise\operator_dereference_node.cpp" />
     <ClCompile Include="source\code_generator\abstract_syntax_tree\operators\unary\logical\operator_not_node.cpp" />
@@ -234,15 +225,20 @@
     <ClCompile Include="source\llvm_wrappers\variables\variable.cpp" />
     <ClCompile Include="source\llvm_wrappers\variables\variable_registry.cpp" />
     <ClCompile Include="source\parser\parser.cpp" />
+    <ClCompile Include="source\program_aruments\argument.cpp" />
+    <ClCompile Include="source\program_aruments\command.cpp" />
+    <ClCompile Include="source\program_aruments\program_options.cpp" />
     <ClCompile Include="source\utility\containers\directed_graph.cpp" />
     <ClCompile Include="source\utility\containers\string_accessor.cpp" />
     <ClCompile Include="source\utility\diagnostics\console.cpp" />
+    <ClCompile Include="source\utility\diagnostics\error.cpp" />
+    <ClCompile Include="source\utility\diagnostics\warning.cpp" />
+    <ClCompile Include="source\utility\filesystem\file_types\file.cpp" />
+    <ClCompile Include="source\utility\filesystem\file_types\raw_file.cpp" />
+    <ClCompile Include="source\utility\filesystem\file_types\text_file.cpp" />
+    <ClCompile Include="source\utility\filesystem\filesystem.cpp" />
     <ClCompile Include="source\utility\string.cpp" />
     <ClCompile Include="source\utility\timer.cpp" />
-    <ClCompile Include="source\utility\filesystem\file_types\text_file.cpp" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="test\main.s" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

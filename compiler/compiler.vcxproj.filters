@@ -79,6 +79,9 @@
     <Filter Include="source\parser">
       <UniqueIdentifier>{52EFAC7E-BEAF-28B5-87EA-7132F3696D91}</UniqueIdentifier>
     </Filter>
+    <Filter Include="source\program_aruments">
+      <UniqueIdentifier>{0B553AF1-778C-8288-8096-E6ABEC4CA981}</UniqueIdentifier>
+    </Filter>
     <Filter Include="source\utility">
       <UniqueIdentifier>{D96BD900-C539-CD06-AECD-3D2D9A3AA96B}</UniqueIdentifier>
     </Filter>
@@ -87,6 +90,12 @@
     </Filter>
     <Filter Include="source\utility\diagnostics">
       <UniqueIdentifier>{800C941C-6C1C-40ED-D5D5-A40BC1042F86}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="source\utility\filesystem">
+      <UniqueIdentifier>{8DCC5F5C-F98E-93E6-423F-2273AE406CC4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="source\utility\filesystem\file_types">
+      <UniqueIdentifier>{F0664937-DC4D-0B2F-859E-714C71648495}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -213,7 +222,13 @@
     <ClInclude Include="source\code_generator\abstract_syntax_tree\operators\unary\arithmetic\operator_pre_increment_node.h">
       <Filter>source\code_generator\abstract_syntax_tree\operators\unary\arithmetic</Filter>
     </ClInclude>
+    <ClInclude Include="source\code_generator\abstract_syntax_tree\operators\unary\bitwise\operator_address_of_node.h">
+      <Filter>source\code_generator\abstract_syntax_tree\operators\unary\bitwise</Filter>
+    </ClInclude>
     <ClInclude Include="source\code_generator\abstract_syntax_tree\operators\unary\bitwise\operator_bitwise_not_node.h">
+      <Filter>source\code_generator\abstract_syntax_tree\operators\unary\bitwise</Filter>
+    </ClInclude>
+    <ClInclude Include="source\code_generator\abstract_syntax_tree\operators\unary\bitwise\operator_dereference_node.h">
       <Filter>source\code_generator\abstract_syntax_tree\operators\unary\bitwise</Filter>
     </ClInclude>
     <ClInclude Include="source\code_generator\abstract_syntax_tree\operators\unary\logical\operator_not_node.h">
@@ -297,6 +312,15 @@
     <ClInclude Include="source\parser\parser.h">
       <Filter>source\parser</Filter>
     </ClInclude>
+    <ClInclude Include="source\program_aruments\argument.h">
+      <Filter>source\program_aruments</Filter>
+    </ClInclude>
+    <ClInclude Include="source\program_aruments\command.h">
+      <Filter>source\program_aruments</Filter>
+    </ClInclude>
+    <ClInclude Include="source\program_aruments\program_options.h">
+      <Filter>source\program_aruments</Filter>
+    </ClInclude>
     <ClInclude Include="source\utility\containers\directed_graph.h">
       <Filter>source\utility\containers</Filter>
     </ClInclude>
@@ -315,6 +339,21 @@
     <ClInclude Include="source\utility\diagnostics\warning.h">
       <Filter>source\utility\diagnostics</Filter>
     </ClInclude>
+    <ClInclude Include="source\utility\filesystem\file_types\file.h">
+      <Filter>source\utility\filesystem\file_types</Filter>
+    </ClInclude>
+    <ClInclude Include="source\utility\filesystem\file_types\raw_file.h">
+      <Filter>source\utility\filesystem\file_types</Filter>
+    </ClInclude>
+    <ClInclude Include="source\utility\filesystem\file_types\text_file.h">
+      <Filter>source\utility\filesystem\file_types</Filter>
+    </ClInclude>
+    <ClInclude Include="source\utility\filesystem\filesystem.h">
+      <Filter>source\utility\filesystem</Filter>
+    </ClInclude>
+    <ClInclude Include="source\utility\format.h">
+      <Filter>source\utility</Filter>
+    </ClInclude>
     <ClInclude Include="source\utility\macros.h">
       <Filter>source\utility</Filter>
     </ClInclude>
@@ -327,16 +366,6 @@
     <ClInclude Include="source\utility\types.h">
       <Filter>source\utility</Filter>
     </ClInclude>
-    <ClInclude Include="source\code_generator\abstract_syntax_tree\operators\unary\bitwise\operator_address_of_node.h" />
-    <ClInclude Include="source\code_generator\abstract_syntax_tree\operators\unary\bitwise\operator_dereference_node.h" />
-    <ClInclude Include="source\utility\filesystem\file_types\file.h" />
-    <ClInclude Include="source\utility\filesystem\filesystem.h" />
-    <ClInclude Include="source\utility\filesystem\file_types\text_file.h" />
-    <ClInclude Include="source\utility\format.h" />
-    <ClInclude Include="source\utility\filesystem\file_types\raw_file.h" />
-    <ClInclude Include="source\program_aruments\program_options.h" />
-    <ClInclude Include="source\program_aruments\argument.h" />
-    <ClInclude Include="source\program_aruments\command.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp" />
@@ -463,7 +492,13 @@
     <ClCompile Include="source\code_generator\abstract_syntax_tree\operators\unary\arithmetic\operator_pre_increment_node.cpp">
       <Filter>source\code_generator\abstract_syntax_tree\operators\unary\arithmetic</Filter>
     </ClCompile>
+    <ClCompile Include="source\code_generator\abstract_syntax_tree\operators\unary\bitwise\operator_address_of_node.cpp">
+      <Filter>source\code_generator\abstract_syntax_tree\operators\unary\bitwise</Filter>
+    </ClCompile>
     <ClCompile Include="source\code_generator\abstract_syntax_tree\operators\unary\bitwise\operator_bitwise_not_node.cpp">
+      <Filter>source\code_generator\abstract_syntax_tree\operators\unary\bitwise</Filter>
+    </ClCompile>
+    <ClCompile Include="source\code_generator\abstract_syntax_tree\operators\unary\bitwise\operator_dereference_node.cpp">
       <Filter>source\code_generator\abstract_syntax_tree\operators\unary\bitwise</Filter>
     </ClCompile>
     <ClCompile Include="source\code_generator\abstract_syntax_tree\operators\unary\logical\operator_not_node.cpp">
@@ -559,6 +594,15 @@
     <ClCompile Include="source\parser\parser.cpp">
       <Filter>source\parser</Filter>
     </ClCompile>
+    <ClCompile Include="source\program_aruments\argument.cpp">
+      <Filter>source\program_aruments</Filter>
+    </ClCompile>
+    <ClCompile Include="source\program_aruments\command.cpp">
+      <Filter>source\program_aruments</Filter>
+    </ClCompile>
+    <ClCompile Include="source\program_aruments\program_options.cpp">
+      <Filter>source\program_aruments</Filter>
+    </ClCompile>
     <ClCompile Include="source\utility\containers\directed_graph.cpp">
       <Filter>source\utility\containers</Filter>
     </ClCompile>
@@ -568,25 +612,29 @@
     <ClCompile Include="source\utility\diagnostics\console.cpp">
       <Filter>source\utility\diagnostics</Filter>
     </ClCompile>
+    <ClCompile Include="source\utility\diagnostics\error.cpp">
+      <Filter>source\utility\diagnostics</Filter>
+    </ClCompile>
+    <ClCompile Include="source\utility\diagnostics\warning.cpp">
+      <Filter>source\utility\diagnostics</Filter>
+    </ClCompile>
+    <ClCompile Include="source\utility\filesystem\file_types\file.cpp">
+      <Filter>source\utility\filesystem\file_types</Filter>
+    </ClCompile>
+    <ClCompile Include="source\utility\filesystem\file_types\raw_file.cpp">
+      <Filter>source\utility\filesystem\file_types</Filter>
+    </ClCompile>
+    <ClCompile Include="source\utility\filesystem\file_types\text_file.cpp">
+      <Filter>source\utility\filesystem\file_types</Filter>
+    </ClCompile>
+    <ClCompile Include="source\utility\filesystem\filesystem.cpp">
+      <Filter>source\utility\filesystem</Filter>
+    </ClCompile>
     <ClCompile Include="source\utility\string.cpp">
       <Filter>source\utility</Filter>
     </ClCompile>
     <ClCompile Include="source\utility\timer.cpp">
       <Filter>source\utility</Filter>
     </ClCompile>
-    <ClCompile Include="source\code_generator\abstract_syntax_tree\operators\unary\bitwise\operator_address_of_node.cpp" />
-    <ClCompile Include="source\code_generator\abstract_syntax_tree\operators\unary\bitwise\operator_dereference_node.cpp" />
-    <ClCompile Include="source\utility\filesystem\file_types\file.cpp" />
-    <ClCompile Include="source\utility\filesystem\filesystem.cpp" />
-    <ClCompile Include="source\utility\filesystem\file_types\text_file.cpp" />
-    <ClCompile Include="source\utility\diagnostics\warning.cpp" />
-    <ClCompile Include="source\utility\diagnostics\error.cpp" />
-    <ClCompile Include="source\utility\filesystem\file_types\raw_file.cpp" />
-    <ClCompile Include="source\program_aruments\program_options.cpp" />
-    <ClCompile Include="source\program_aruments\argument.cpp" />
-    <ClCompile Include="source\program_aruments\command.cpp" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="test\main.s" />
   </ItemGroup>
 </Project>

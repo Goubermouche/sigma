@@ -1,3 +1,21 @@
+function split(inputstr, sep)
+    if sep == nil then
+        sep = "%s" -- default to splitting on spaces
+    end
+    local t = {}
+    for str in string.gmatch(inputstr, "([^" .. sep .. "]+)") do
+        table.insert(t, str)
+    end
+    return t
+end
+
+function concat_tables(t1,t2)
+    for i=1,#t2 do
+        t1[#t1+1] = t2[i]
+    end
+    return t1
+end
+
 -- get the LLVM installation path
 local llvm_root = os.getenv("LLVM_ROOT")
 local script_root = path.getabsolute(".")
@@ -42,182 +60,10 @@ project "compiler"
         path.join(llvm_root, "Release/lib")
     }
 
-    links {
-        "LLVMAArch64AsmParser",
-        "LLVMAArch64CodeGen",
-        "LLVMAArch64Desc",
-        "LLVMAArch64Disassembler",
-        "LLVMAArch64Info",
-        "LLVMAArch64Utils",
-        "LLVMAMDGPUAsmParser",
-        "LLVMAMDGPUCodeGen",
-        "LLVMAMDGPUDesc",
-        "LLVMAMDGPUDisassembler",
-        "LLVMAMDGPUInfo",
-        "LLVMAMDGPUTargetMCA",
-        "LLVMAMDGPUUtils",
-        "LLVMARMAsmParser",
-        "LLVMARMCodeGen",
-        "LLVMARMDesc",
-        "LLVMARMDisassembler",
-        "LLVMARMInfo",
-        "LLVMARMUtils",
-        "LLVMAVRAsmParser",
-        "LLVMAVRCodeGen",
-        "LLVMAVRDesc",
-        "LLVMAVRDisassembler",
-        "LLVMAVRInfo",
-        "LLVMAggressiveInstCombine",
-        "LLVMAnalysis",
-        "LLVMAsmParser",
-        "LLVMAsmPrinter",
-        "LLVMBPFAsmParser",
-        "LLVMBPFCodeGen",
-        "LLVMBPFDesc",
-        "LLVMBPFDisassembler",
-        "LLVMBPFInfo",
-        "LLVMBinaryFormat",
-        "LLVMBitReader",
-        "LLVMBitWriter",
-        "LLVMBitstreamReader",
-        "LLVMCFGuard",
-        "LLVMCodeGen",
-        "LLVMCore",
-        "LLVMCoroutines",
-        "LLVMCoverage",
-        "LLVMDWARFLinker",
-        "LLVMDWARFLinkerParallel",
-        "LLVMDWP",
-        "LLVMDebugInfoCodeView",
-        "LLVMDebugInfoDWARF",
-        "LLVMDebugInfoGSYM",
-        "LLVMDebugInfoLogicalView",
-        "LLVMDebugInfoMSF",
-        "LLVMDebugInfoPDB",
-        "LLVMDemangle",
-        "LLVMDlltoolDriver",
-        "LLVMExecutionEngine",
-        "LLVMExtensions",
-        "LLVMFileCheck",
-        "LLVMFrontendHLSL",
-        "LLVMFrontendOpenACC",
-        "LLVMFrontendOpenMP",
-        "LLVMFuzzMutate",
-        "LLVMFuzzerCLI",
-        "LLVMGlobalISel",
-        "LLVMHexagonAsmParser",
-        "LLVMHexagonCodeGen",
-        "LLVMHexagonDesc",
-        "LLVMHexagonDisassembler",
-        "LLVMHexagonInfo",
-        "LLVMIRPrinter",
-        "LLVMIRReader",
-        "LLVMInstCombine",
-        "LLVMInstrumentation",
-        "LLVMInterfaceStub",
-        "LLVMInterpreter",
-        "LLVMJITLink",
-        "LLVMLTO",
-        "LLVMLanaiAsmParser",
-        "LLVMLanaiCodeGen",
-        "LLVMLanaiDesc",
-        "LLVMLanaiDisassembler",
-        "LLVMLanaiInfo",
-        "LLVMLibDriver",
-        "LLVMLineEditor",
-        "LLVMLinker",
-        "LLVMLoongArchAsmParser",
-        "LLVMLoongArchCodeGen",
-        "LLVMLoongArchDesc",
-        "LLVMLoongArchDisassembler",
-        "LLVMLoongArchInfo",
-        "LLVMMC",
-        "LLVMMCA",
-        "LLVMMCDisassembler",
-        "LLVMMCJIT",
-        "LLVMMCParser",
-        "LLVMMIRParser",
-        "LLVMMSP430AsmParser",
-        "LLVMMSP430CodeGen",
-        "LLVMMSP430Desc",
-        "LLVMMSP430Disassembler",
-        "LLVMMSP430Info",
-        "LLVMMipsAsmParser",
-        "LLVMMipsCodeGen",
-        "LLVMMipsDesc",
-        "LLVMMipsDisassembler",
-        "LLVMMipsInfo",
-        "LLVMNVPTXCodeGen",
-        "LLVMNVPTXDesc",
-        "LLVMNVPTXInfo",
-        "LLVMObjCARCOpts",
-        "LLVMObjCopy",
-        "LLVMObject",
-        "LLVMObjectYAML",
-        "LLVMOption",
-        "LLVMOrcJIT",
-        "LLVMOrcShared",
-        "LLVMOrcTargetProcess",
-        "LLVMPasses",
-        "LLVMPowerPCAsmParser",
-        "LLVMPowerPCCodeGen",
-        "LLVMPowerPCDesc",
-        "LLVMPowerPCDisassembler",
-        "LLVMPowerPCInfo",
-        "LLVMProfileData",
-        "LLVMRISCVAsmParser",
-        "LLVMRISCVCodeGen",
-        "LLVMRISCVDesc",
-        "LLVMRISCVDisassembler",
-        "LLVMRISCVInfo",
-        "LLVMRISCVTargetMCA",
-        "LLVMRemarks",
-        "LLVMRuntimeDyld",
-        "LLVMScalarOpts",
-        "LLVMSelectionDAG",
-        "LLVMSparcAsmParser",
-        "LLVMSparcCodeGen",
-        "LLVMSparcDesc",
-        "LLVMSparcDisassembler",
-        "LLVMSparcInfo",
-        "LLVMSupport",
-        "LLVMSymbolize",
-        "LLVMSystemZAsmParser",
-        "LLVMSystemZCodeGen",
-        "LLVMSystemZDesc",
-        "LLVMSystemZDisassembler",
-        "LLVMSystemZInfo",
-        "LLVMTableGen",
-        "LLVMTarget",
-        "LLVMTargetParser",
-        "LLVMTextAPI",
-        "LLVMTransformUtils",
-        "LLVMVEAsmParser",
-        "LLVMVECodeGen",
-        "LLVMVEDesc",
-        "LLVMVEDisassembler",
-        "LLVMVEInfo",
-        "LLVMVectorize",
-        "LLVMWebAssemblyAsmParser",
-        "LLVMWebAssemblyCodeGen",
-        "LLVMWebAssemblyDesc",
-        "LLVMWebAssemblyDisassembler",
-        "LLVMWebAssemblyInfo",
-        "LLVMWebAssemblyUtils",
-        "LLVMWindowsDriver",
-        "LLVMWindowsManifest",
-        "LLVMX86AsmParser",
-        "LLVMX86CodeGen",
-        "LLVMX86Desc",
-        "LLVMX86Disassembler",
-        "LLVMX86Info",
-        "LLVMX86TargetMCA",
-        "LLVMXCoreCodeGen",
-        "LLVMXCoreDesc",
-        "LLVMXCoreDisassembler",
-        "LLVMXCoreInfo",
-        "LLVMXRay",
-        "LLVMipo",
+    local llvm_libs = os.outputof("llvm-config --libs all")
+    local llvm_libs_table = split(llvm_libs)
+
+    local clang_libs = { 
         "clangAPINotes",
         "clangARCMigrate",
         "clangAST",
@@ -259,33 +105,17 @@ project "compiler"
         "clangToolingInclusionsStdlib",
         "clangToolingRefactoring",
         "clangToolingSyntax",
-        "clangTransformer"
-    }
+        "clangTransformer",
+
+        "Version"
+    } 
+    
+    links(concat_tables(llvm_libs_table, clang_libs))
 
     filter "configurations:Release"
         defines { "NDEBUG" }
         optimize "On"
         warnings "High"
-
-    filter "system:windows"
-        links {
-            "comdlg32.lib",
-            "delayimp.lib",
-            "gdi32.lib",
-            "kernel32.lib",
-            "ole32.dll",
-            "ole32.lib",
-            "oleaut32.lib",
-            "psapi.lib",
-            "shell32.dll",
-            "shell32.lib",
-            "user32.lib",
-            "uuid.lib",
-            "version.lib",
-            "winspool.lib",
-            "advapi32.lib"
-        }
-
         
     filter { "system:linux", "action:gmake" }
         links {

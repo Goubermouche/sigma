@@ -1,5 +1,5 @@
 #pragma once
-#include "format.h"
+#include <utility/format.h>
 
 namespace sigma {
 	enum class token {

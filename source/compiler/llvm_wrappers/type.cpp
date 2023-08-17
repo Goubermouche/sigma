@@ -1,5 +1,5 @@
 #include "type.h"
-#include "macros.h"
+#include <utility/macros.h>
 
 namespace sigma {
 	type::type(base base, u16 pointer_level)

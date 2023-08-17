@@ -1,5 +1,5 @@
 #include "warning.h"
-#include "string_helper.h"
+#include "utility/string_helper.h"
 
 namespace sigma {
 	warning_message::warning_message(

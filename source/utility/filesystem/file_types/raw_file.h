@@ -1,6 +1,6 @@
 #pragma once
 
-#include "filesystem/file_types/file.h"
+#include "utility/filesystem/file_types/file.h"
 #include <llvm/Support/raw_ostream.h>
 
 namespace sigma {

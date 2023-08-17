@@ -1,5 +1,5 @@
 #include "file.h"
-#include "diagnostics/error.h"
+#include "utility/diagnostics/error.h"
 
 namespace sigma {
 	file::file(const filepath& path)

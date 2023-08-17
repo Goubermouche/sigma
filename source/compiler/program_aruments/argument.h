@@ -1,6 +1,6 @@
 #pragma once
-#include "macros.h"
-#include "diagnostics/error.h"
+#include <utility/macros.h>
+#include <utility/diagnostics/error.h>
 
 namespace sigma {
 #define SHORT_TAG(value) '-' + value

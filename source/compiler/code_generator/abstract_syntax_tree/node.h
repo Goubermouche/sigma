@@ -1,8 +1,9 @@
 #pragma once
 #include "llvm_wrappers/value.h"
 #include "llvm_wrappers/code_generation_context.h"
-#include "diagnostics/error.h"
-#include "diagnostics/warning.h"
+
+#include <utility/diagnostics/error.h>
+#include <utility/diagnostics/warning.h>
 
 #define AST_NODE_NUMERICAL_LITERAL_COLOR color::blue
 #define AST_NODE_BOOLEAN_LITERAL_COLOR	 color::blue

@@ -79,12 +79,6 @@
     <Filter Include="program_aruments">
       <UniqueIdentifier>{ABBB5897-97B4-77E9-C0E6-5C6EAC3E57F5}</UniqueIdentifier>
     </Filter>
-    <Filter Include="utility">
-      <UniqueIdentifier>{79DE5C48-E5BD-DBE3-EED5-66BA5A344245}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="utility\containers">
-      <UniqueIdentifier>{7E2789E2-6A0B-4A38-D36B-448BBF6E34BA}</UniqueIdentifier>
-    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="code_generator\abstract_syntax_tree\abstract_syntax_tree.h">

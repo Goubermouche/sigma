@@ -1,7 +1,7 @@
 #pragma once
-#include "macros.h"
-#include "format.h"
-#include "filesystem/filesystem.h"
+#include "utility/macros.h"
+#include "utility/format.h"
+#include "utility/filesystem/filesystem.h"
 
 namespace sigma {
 	namespace detail {

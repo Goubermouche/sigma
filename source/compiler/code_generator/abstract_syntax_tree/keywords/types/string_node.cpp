@@ -1,5 +1,5 @@
 #include "string_node.h"
-#include "string_helper.h"	
+#include <utility/string_helper.h>
 
 namespace sigma {
 	string_node::string_node(

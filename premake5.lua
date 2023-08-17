@@ -49,7 +49,7 @@ project "utility"
     } 
 
     includedirs {
-        "source/utility",
+        "source",
         path.join(llvm_root, "include")
     }
 
@@ -72,6 +72,8 @@ project "compiler"
     kind "ConsoleApp"
     location "source/compiler"
 
+    debugargs { "compile", "-s", "test/main.s", "-o", "test/app.exe" }
+
     files {
         "source/compiler/**.h",
         "source/compiler/**.cpp"
@@ -79,7 +81,7 @@ project "compiler"
 
     includedirs {
         "source/compiler",
-        "source/utility",
+        "source",
         path.join(llvm_root, "include")
     }
 

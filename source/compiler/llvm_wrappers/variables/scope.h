@@ -1,6 +1,6 @@
 #pragma once
 #include "llvm_wrappers/variables/variable.h"
-#include "diagnostics/error.h"
+#include <utility/diagnostics/error.h>
 
 namespace sigma {
 	class scope;

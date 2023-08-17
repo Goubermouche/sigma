@@ -1,5 +1,5 @@
 #include "console.h"
-#include "macros.h"
+#include "utility/macros.h"
 
 namespace sigma {
 	console& console::out = *new console();

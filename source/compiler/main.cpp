@@ -1,4 +1,4 @@
-#include "source/compiler/compiler.h"
+#include "compiler/compiler.h"
 using namespace sigma::types;
 
 /**

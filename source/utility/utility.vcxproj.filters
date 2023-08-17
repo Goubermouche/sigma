@@ -15,71 +15,71 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="source\containers\directed_graph.h">
+    <ClInclude Include="containers\directed_graph.h">
       <Filter>containers</Filter>
     </ClInclude>
-    <ClInclude Include="source\containers\string_accessor.h">
+    <ClInclude Include="containers\string_accessor.h">
       <Filter>containers</Filter>
     </ClInclude>
-    <ClInclude Include="source\diagnostics\console.h">
+    <ClInclude Include="diagnostics\console.h">
       <Filter>diagnostics</Filter>
     </ClInclude>
-    <ClInclude Include="source\diagnostics\diagnostics.h">
+    <ClInclude Include="diagnostics\diagnostics.h">
       <Filter>diagnostics</Filter>
     </ClInclude>
-    <ClInclude Include="source\diagnostics\error.h">
+    <ClInclude Include="diagnostics\error.h">
       <Filter>diagnostics</Filter>
     </ClInclude>
-    <ClInclude Include="source\diagnostics\warning.h">
+    <ClInclude Include="diagnostics\warning.h">
       <Filter>diagnostics</Filter>
     </ClInclude>
-    <ClInclude Include="source\filesystem\file_types\file.h">
+    <ClInclude Include="filesystem\file_types\file.h">
       <Filter>filesystem\file_types</Filter>
     </ClInclude>
-    <ClInclude Include="source\filesystem\file_types\raw_file.h">
+    <ClInclude Include="filesystem\file_types\raw_file.h">
       <Filter>filesystem\file_types</Filter>
     </ClInclude>
-    <ClInclude Include="source\filesystem\file_types\text_file.h">
+    <ClInclude Include="filesystem\file_types\text_file.h">
       <Filter>filesystem\file_types</Filter>
     </ClInclude>
-    <ClInclude Include="source\filesystem\filesystem.h">
+    <ClInclude Include="filesystem\filesystem.h">
       <Filter>filesystem</Filter>
     </ClInclude>
-    <ClInclude Include="source\format.h" />
-    <ClInclude Include="source\macros.h" />
-    <ClInclude Include="source\string_helper.h" />
-    <ClInclude Include="source\timer.h" />
-    <ClInclude Include="source\types.h" />
+    <ClInclude Include="format.h" />
+    <ClInclude Include="macros.h" />
+    <ClInclude Include="string_helper.h" />
+    <ClInclude Include="timer.h" />
+    <ClInclude Include="types.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="source\containers\directed_graph.cpp">
+    <ClCompile Include="containers\directed_graph.cpp">
       <Filter>containers</Filter>
     </ClCompile>
-    <ClCompile Include="source\containers\string_accessor.cpp">
+    <ClCompile Include="containers\string_accessor.cpp">
       <Filter>containers</Filter>
     </ClCompile>
-    <ClCompile Include="source\diagnostics\console.cpp">
+    <ClCompile Include="diagnostics\console.cpp">
       <Filter>diagnostics</Filter>
     </ClCompile>
-    <ClCompile Include="source\diagnostics\error.cpp">
+    <ClCompile Include="diagnostics\error.cpp">
       <Filter>diagnostics</Filter>
     </ClCompile>
-    <ClCompile Include="source\diagnostics\warning.cpp">
+    <ClCompile Include="diagnostics\warning.cpp">
       <Filter>diagnostics</Filter>
     </ClCompile>
-    <ClCompile Include="source\filesystem\file_types\file.cpp">
+    <ClCompile Include="filesystem\file_types\file.cpp">
       <Filter>filesystem\file_types</Filter>
     </ClCompile>
-    <ClCompile Include="source\filesystem\file_types\raw_file.cpp">
+    <ClCompile Include="filesystem\file_types\raw_file.cpp">
       <Filter>filesystem\file_types</Filter>
     </ClCompile>
-    <ClCompile Include="source\filesystem\file_types\text_file.cpp">
+    <ClCompile Include="filesystem\file_types\text_file.cpp">
       <Filter>filesystem\file_types</Filter>
     </ClCompile>
-    <ClCompile Include="source\filesystem\filesystem.cpp">
+    <ClCompile Include="filesystem\filesystem.cpp">
       <Filter>filesystem</Filter>
     </ClCompile>
-    <ClCompile Include="source\string_helper.cpp" />
-    <ClCompile Include="source\timer.cpp" />
+    <ClCompile Include="string_helper.cpp" />
+    <ClCompile Include="timer.cpp" />
   </ItemGroup>
 </Project>

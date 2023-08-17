@@ -27,8 +27,8 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <OutDir>..\bin\Release\</OutDir>
-    <IntDir>obj\</IntDir>
+    <OutDir>..\..\output\bin\Release\</OutDir>
+    <IntDir>..\..\output\obj\Release\Release\utility\</IntDir>
     <TargetName>utility</TargetName>
     <TargetExt>.lib</TargetExt>
   </PropertyGroup>
@@ -37,7 +37,7 @@
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <WarningLevel>Level4</WarningLevel>
       <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>source;..\..\..\thirdparty\llvm\llvm-16.0.0\llvm-install\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>.;..\..\..\..\thirdparty\llvm\llvm-16.0.0\llvm-install\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <Optimization>Full</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
@@ -55,38 +55,38 @@
     </Link>
     <Lib>
       <AdditionalDependencies>C:\dev\thirdparty\llvm-16.0.0\llvm-build\Release\lib\LLVMCore.lib;C:\dev\thirdparty\llvm-16.0.0\llvm-build\Release\lib\LLVMRemarks.lib;C:\dev\thirdparty\llvm-16.0.0\llvm-build\Release\lib\LLVMBitstreamReader.lib;C:\dev\thirdparty\llvm-16.0.0\llvm-build\Release\lib\LLVMBinaryFormat.lib;C:\dev\thirdparty\llvm-16.0.0\llvm-build\Release\lib\LLVMTargetParser.lib;C:\dev\thirdparty\llvm-16.0.0\llvm-build\Release\lib\LLVMSupport.lib;C:\dev\thirdparty\llvm-16.0.0\llvm-build\Release\lib\LLVMDemangle.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>..\..\..\thirdparty\llvm\llvm-16.0.0\llvm-install\lib;..\..\..\thirdparty\llvm\llvm-16.0.0\llvm-install\bin;..\..\..\thirdparty\llvm\llvm-16.0.0\llvm-build\lib;..\..\..\thirdparty\llvm\llvm-16.0.0\llvm-install\Release\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>..\..\..\..\thirdparty\llvm\llvm-16.0.0\llvm-install\lib;..\..\..\..\thirdparty\llvm\llvm-16.0.0\llvm-install\bin;..\..\..\..\thirdparty\llvm\llvm-16.0.0\llvm-build\lib;..\..\..\..\thirdparty\llvm\llvm-16.0.0\llvm-install\Release\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Lib>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="source\containers\directed_graph.h" />
-    <ClInclude Include="source\containers\string_accessor.h" />
-    <ClInclude Include="source\diagnostics\console.h" />
-    <ClInclude Include="source\diagnostics\diagnostics.h" />
-    <ClInclude Include="source\diagnostics\error.h" />
-    <ClInclude Include="source\diagnostics\warning.h" />
-    <ClInclude Include="source\filesystem\file_types\file.h" />
-    <ClInclude Include="source\filesystem\file_types\raw_file.h" />
-    <ClInclude Include="source\filesystem\file_types\text_file.h" />
-    <ClInclude Include="source\filesystem\filesystem.h" />
-    <ClInclude Include="source\format.h" />
-    <ClInclude Include="source\macros.h" />
-    <ClInclude Include="source\string_helper.h" />
-    <ClInclude Include="source\timer.h" />
-    <ClInclude Include="source\types.h" />
+    <ClInclude Include="containers\directed_graph.h" />
+    <ClInclude Include="containers\string_accessor.h" />
+    <ClInclude Include="diagnostics\console.h" />
+    <ClInclude Include="diagnostics\diagnostics.h" />
+    <ClInclude Include="diagnostics\error.h" />
+    <ClInclude Include="diagnostics\warning.h" />
+    <ClInclude Include="filesystem\file_types\file.h" />
+    <ClInclude Include="filesystem\file_types\raw_file.h" />
+    <ClInclude Include="filesystem\file_types\text_file.h" />
+    <ClInclude Include="filesystem\filesystem.h" />
+    <ClInclude Include="format.h" />
+    <ClInclude Include="macros.h" />
+    <ClInclude Include="string_helper.h" />
+    <ClInclude Include="timer.h" />
+    <ClInclude Include="types.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="source\containers\directed_graph.cpp" />
-    <ClCompile Include="source\containers\string_accessor.cpp" />
-    <ClCompile Include="source\diagnostics\console.cpp" />
-    <ClCompile Include="source\diagnostics\error.cpp" />
-    <ClCompile Include="source\diagnostics\warning.cpp" />
-    <ClCompile Include="source\filesystem\file_types\file.cpp" />
-    <ClCompile Include="source\filesystem\file_types\raw_file.cpp" />
-    <ClCompile Include="source\filesystem\file_types\text_file.cpp" />
-    <ClCompile Include="source\filesystem\filesystem.cpp" />
-    <ClCompile Include="source\string_helper.cpp" />
-    <ClCompile Include="source\timer.cpp" />
+    <ClCompile Include="containers\directed_graph.cpp" />
+    <ClCompile Include="containers\string_accessor.cpp" />
+    <ClCompile Include="diagnostics\console.cpp" />
+    <ClCompile Include="diagnostics\error.cpp" />
+    <ClCompile Include="diagnostics\warning.cpp" />
+    <ClCompile Include="filesystem\file_types\file.cpp" />
+    <ClCompile Include="filesystem\file_types\raw_file.cpp" />
+    <ClCompile Include="filesystem\file_types\text_file.cpp" />
+    <ClCompile Include="filesystem\filesystem.cpp" />
+    <ClCompile Include="string_helper.cpp" />
+    <ClCompile Include="timer.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

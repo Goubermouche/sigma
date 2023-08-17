@@ -16,9 +16,9 @@ print("LLVM_ROOT: " .. llvm_root)
 
 workspace "sigma"
     configurations { "Release" }
-    architecture "x64"
     startproject "compiler"
 
+    architecture "x64"
     language "C++"
     cppdialect "C++latest"
 
@@ -29,24 +29,27 @@ workspace "sigma"
         "MultiProcessorCompile"
     }
 
--- utility 
-project "utility"
-    kind "StaticLib"
-    location "utility"
-    targetdir "bin/%{cfg.buildcfg}"
-
-    files {
-        "utility/source/**.h",
-        "utility/source/**.cpp"
-    } 
-
     filter "configurations:Release"
         defines { "NDEBUG" }
         optimize "On"
         warnings "High"
 
+    -- output directories 
+    targetdir "output/bin/%{cfg.buildcfg}"
+    objdir "output/obj/%{cfg.buildcfg}"
+
+-- utility 
+project "utility"
+    kind "StaticLib"
+    location "source/utility"
+
+    files {
+        "source/utility/**.h",
+        "source/utility/**.cpp"
+    } 
+
     includedirs {
-        "utility/source",
+        "source/utility",
         path.join(llvm_root, "include")
     }
 
@@ -67,17 +70,16 @@ project "utility"
 -- compiler
 project "compiler"
     kind "ConsoleApp"
-    location "compiler"
-    targetdir "bin/%{cfg.buildcfg}"
+    location "source/compiler"
 
     files {
-        "compiler/source/**.*",
-        "compiler/main.cpp"
+        "source/compiler/**.h",
+        "source/compiler/**.cpp"
     }
 
     includedirs {
-        "compiler/source",
-        "utility/source",
+        "source/compiler",
+        "source/utility",
         path.join(llvm_root, "include")
     }
 

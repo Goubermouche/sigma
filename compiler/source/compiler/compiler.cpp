@@ -18,8 +18,8 @@
 #include <llvm/IR/Verifier.h>
 
 // utility
-#include "utility/string.h"
-#include "utility/timer.h"
+#include "string_helper.h"
+#include "timer.h"
 
 namespace sigma {
 	compiler::compiler() {}

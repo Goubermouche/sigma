@@ -1,5 +1,5 @@
 #include "raw_file.h"
-#include "utility/diagnostics/error.h"
+#include "diagnostics/error.h"
 #include <llvm/Support/VirtualFileSystem.h>
 
 namespace sigma {

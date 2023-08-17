@@ -53,6 +53,7 @@ namespace sigma {
 		std::ostream& stream, 
 		const code_generator_context& context
 	) {
+		SUPPRESS_C4100(context);
 		stream << "not implemented";
 		return stream;
 	}

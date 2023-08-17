@@ -1,7 +1,7 @@
 #pragma once
 // file types
-#include "utility/filesystem/file_types/text_file.h"
-#include "utility/filesystem/file_types/raw_file.h"
+#include "filesystem/file_types/text_file.h"
+#include "filesystem/file_types/raw_file.h"
 
 namespace sigma {
 	struct file_position {

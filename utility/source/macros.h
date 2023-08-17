@@ -1,6 +1,6 @@
 #pragma once
 
-#include "utility/diagnostics/console.h"
+#include "diagnostics/console.h"
 
 #ifdef _WIN32
     #include <intrin.h>

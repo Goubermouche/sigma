@@ -1,7 +1,7 @@
 #pragma once
 
-#include "utility/filesystem/file_types/file.h"
-#include "llvm/Support/raw_ostream.h"
+#include "filesystem/file_types/file.h"
+#include <llvm/Support/raw_ostream.h>
 
 namespace sigma {
 	class raw_file : public file {

@@ -1,7 +1,7 @@
 #pragma once
 #include "parser/parser.h"
-#include "utility/diagnostics/error.h"
-#include "utility/containers/directed_graph.h"
+#include "diagnostics/error.h"
+#include "containers/directed_graph.h"
 
 namespace sigma {
 	class translation_unit {

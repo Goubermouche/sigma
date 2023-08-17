@@ -1,5 +1,5 @@
 #pragma once
-#include "utility/types.h"
+#include "types.h"
 
 namespace sigma::detail {
 	template<typename type>

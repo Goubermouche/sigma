@@ -9,13 +9,6 @@ function split(inputstr, sep)
     return t
 end
 
-function concat_tables(t1,t2)
-    for i=1,#t2 do
-        t1[#t1+1] = t2[i]
-    end
-    return t1
-end
-
 -- get the LLVM installation path
 local llvm_root = os.getenv("LLVM_ROOT")
 local script_root = path.getabsolute(".")
@@ -25,23 +18,57 @@ workspace "sigma"
     configurations { "Release" }
     architecture "x64"
     startproject "compiler"
-    
-project "compiler"
-    kind "ConsoleApp"
+
     language "C++"
     cppdialect "C++latest"
 
-    location "compiler"
-
-    targetdir ("bin/%{cfg.buildcfg}/%{prj.name}")
-    objdir ("bin-int/%{cfg.buildcfg}/%{prj.name}")
-
     externalanglebrackets "On"
     externalwarnings "Off"
-    
+
     flags {
         "MultiProcessorCompile"
     }
+
+-- utility 
+project "utility"
+    kind "StaticLib"
+    location "utility"
+    targetdir "bin/%{cfg.buildcfg}"
+
+    files {
+        "utility/source/**.h",
+        "utility/source/**.cpp"
+    } 
+
+    filter "configurations:Release"
+        defines { "NDEBUG" }
+        optimize "On"
+        warnings "High"
+
+    includedirs {
+        "utility/source",
+        path.join(llvm_root, "include")
+    }
+
+    libdirs {   
+        path.join(llvm_root, "lib"),
+        path.join(llvm_root, "bin"),
+        path.join(llvm_root, "../llvm-build/lib"),
+        path.join(llvm_root, "Release/lib")
+    }
+
+    local llvm_libs = os.outputof("llvm-config --libs support core")
+    local llvm_libs_table = split(llvm_libs)
+
+    links {
+        llvm_libs_table
+    }
+
+-- compiler
+project "compiler"
+    kind "ConsoleApp"
+    location "compiler"
+    targetdir "bin/%{cfg.buildcfg}"
 
     files {
         "compiler/source/**.*",
@@ -50,6 +77,7 @@ project "compiler"
 
     includedirs {
         "compiler/source",
+        "utility/source",
         path.join(llvm_root, "include")
     }
 
@@ -105,12 +133,16 @@ project "compiler"
         "clangToolingInclusionsStdlib",
         "clangToolingRefactoring",
         "clangToolingSyntax",
-        "clangTransformer",
-
-        "Version"
+        "clangTransformer"
     } 
     
-    links(concat_tables(llvm_libs_table, clang_libs))
+    links {
+        llvm_libs_table,
+        clang_libs,
+        "Version",
+
+        "utility"
+    }
 
     filter "configurations:Release"
         defines { "NDEBUG" }

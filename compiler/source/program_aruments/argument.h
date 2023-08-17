@@ -1,6 +1,6 @@
 #pragma once
-#include "utility/macros.h"
-#include "utility/diagnostics/error.h"
+#include "macros.h"
+#include "diagnostics/error.h"
 
 namespace sigma {
 #define SHORT_TAG(value) '-' + value
@@ -115,6 +115,7 @@ namespace sigma {
 		}
 
 		ASSERT(false, "no value provided for argument");
+		return type();
 	}
 
 	class argument_list {
@@ -157,5 +158,6 @@ namespace sigma {
 		}
 
 		ASSERT(false, "cannot find argument with name '" + name + "'");
+		return type();
 	}
 }

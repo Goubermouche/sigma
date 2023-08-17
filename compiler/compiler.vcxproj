@@ -28,8 +28,8 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
-    <OutDir>..\bin\Release\compiler\</OutDir>
-    <IntDir>..\bin-int\Release\compiler\</IntDir>
+    <OutDir>..\bin\Release\</OutDir>
+    <IntDir>obj\</IntDir>
     <TargetName>compiler</TargetName>
     <TargetExt>.exe</TargetExt>
   </PropertyGroup>
@@ -38,7 +38,7 @@
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <WarningLevel>Level4</WarningLevel>
       <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>source;..\..\..\thirdparty\llvm\llvm-16.0.0\llvm-install\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>source;..\utility\source;..\..\..\thirdparty\llvm\llvm-16.0.0\llvm-install\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <Optimization>Full</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
@@ -134,19 +134,6 @@
     <ClInclude Include="source\program_aruments\program_options.h" />
     <ClInclude Include="source\utility\containers\directed_graph.h" />
     <ClInclude Include="source\utility\containers\string_accessor.h" />
-    <ClInclude Include="source\utility\diagnostics\console.h" />
-    <ClInclude Include="source\utility\diagnostics\diagnostics.h" />
-    <ClInclude Include="source\utility\diagnostics\error.h" />
-    <ClInclude Include="source\utility\diagnostics\warning.h" />
-    <ClInclude Include="source\utility\filesystem\file_types\file.h" />
-    <ClInclude Include="source\utility\filesystem\file_types\raw_file.h" />
-    <ClInclude Include="source\utility\filesystem\file_types\text_file.h" />
-    <ClInclude Include="source\utility\filesystem\filesystem.h" />
-    <ClInclude Include="source\utility\format.h" />
-    <ClInclude Include="source\utility\macros.h" />
-    <ClInclude Include="source\utility\string.h" />
-    <ClInclude Include="source\utility\timer.h" />
-    <ClInclude Include="source\utility\types.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp" />
@@ -230,15 +217,11 @@
     <ClCompile Include="source\program_aruments\program_options.cpp" />
     <ClCompile Include="source\utility\containers\directed_graph.cpp" />
     <ClCompile Include="source\utility\containers\string_accessor.cpp" />
-    <ClCompile Include="source\utility\diagnostics\console.cpp" />
-    <ClCompile Include="source\utility\diagnostics\error.cpp" />
-    <ClCompile Include="source\utility\diagnostics\warning.cpp" />
-    <ClCompile Include="source\utility\filesystem\file_types\file.cpp" />
-    <ClCompile Include="source\utility\filesystem\file_types\raw_file.cpp" />
-    <ClCompile Include="source\utility\filesystem\file_types\text_file.cpp" />
-    <ClCompile Include="source\utility\filesystem\filesystem.cpp" />
-    <ClCompile Include="source\utility\string.cpp" />
-    <ClCompile Include="source\utility\timer.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\utility\utility.vcxproj">
+      <Project>{79DE5C48-E5BD-DBE3-EED5-66BA5A344245}</Project>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

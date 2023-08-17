@@ -338,6 +338,7 @@ namespace sigma {
 		break_node& node, 
 		const code_generation_context& context
 	) {
+		SUPPRESS_C4100(node);
 		SUPPRESS_C4100(context);
 
 		llvm::BasicBlock* end_block = m_context->get_variable_registry().get_loop_end_block();

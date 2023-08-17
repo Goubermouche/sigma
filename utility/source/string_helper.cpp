@@ -1,4 +1,4 @@
-#include "string.h"
+#include "string_helper.h"
 
 namespace sigma::detail {
     std::string format_ending(

@@ -1,5 +1,5 @@
 #include "text_file.h"
-#include "utility/diagnostics/error.h"
+#include "diagnostics/error.h"
 
 namespace sigma {
 	text_file::text_file(

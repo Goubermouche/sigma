@@ -1,5 +1,5 @@
 #include "lexer.h"
-#include "utility/string.h"
+#include "string_helper.h"
 
 namespace sigma {
 	token_list::token_list(std::vector<token_data> tokens)

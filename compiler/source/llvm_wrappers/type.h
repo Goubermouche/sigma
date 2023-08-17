@@ -184,4 +184,13 @@ namespace sigma {
 		const type& left_type, 
 		const type& right_type
 	);
+
+	namespace detail {
+		template<>
+		struct formatter<type> {
+			static std::string format(const type& value) {
+				return value.to_string();
+			}
+		};
+	}
 }

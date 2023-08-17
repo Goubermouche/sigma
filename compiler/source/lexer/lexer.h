@@ -1,7 +1,7 @@
 #pragma once
 #include "lexer/token.h"
-#include "utility/diagnostics/error.h"
-#include "utility/containers/string_accessor.h"
+#include "diagnostics/error.h"
+#include "containers/string_accessor.h"
 
 namespace sigma {
 	/**

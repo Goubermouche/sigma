@@ -30,6 +30,8 @@ namespace sigma {
 
 		m_arguments.traverse_ordered(
 			[&](const std::string& key, const std::shared_ptr<argument>& argument) {
+				SUPPRESS_C4100(key);
+
 				std::stringstream argument_ss;
 				argument_ss << " [" << argument->get_long_tag();
 
@@ -75,6 +77,8 @@ namespace sigma {
 		console::out << "required arguments:\n";
 		m_arguments.traverse_ordered(
 			[max_length](const std::string& key, const std::shared_ptr<argument>& argument) {
+				SUPPRESS_C4100(key);
+
 				if (argument->is_required()) {
 					std::stringstream tag_section;
 					tag_section << "   " << argument->get_long_tag();
@@ -98,6 +102,8 @@ namespace sigma {
 
 		m_arguments.traverse_ordered(
 			[max_length](const std::string& key, const std::shared_ptr<argument>& argument) {
+				SUPPRESS_C4100(key);
+
 				if (argument->is_required() == false) {
 					std::stringstream tag_section;
 					tag_section << "   " << argument->get_long_tag();

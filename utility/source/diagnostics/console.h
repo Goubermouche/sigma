@@ -1,5 +1,5 @@
 #pragma once
-#include "utility/types.h"
+#include "types.h"
 
 namespace sigma {
 	struct color_value {
@@ -28,7 +28,7 @@ namespace sigma {
 		static console& precision(i64 precision);
 
 		console& operator<<(const color_value& color);
-		console& operator<<(const left_pad& left);
+		console& operator<<(const left_pad& left_pad);
 		console& operator<<(const console& console);
 
 		console& operator<<(const std::string& value);

@@ -1,7 +1,7 @@
 #pragma once
 #include "llvm_wrappers/type.h"
 #include "llvm_wrappers/functions/function.h"
-#include "utility/diagnostics/error.h"
+#include "diagnostics/error.h"
 
 namespace sigma {
 	using function_ptr = std::shared_ptr<function>;

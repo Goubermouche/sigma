@@ -1,5 +1,5 @@
 #include "error.h"
-#include "utility/string.h"
+#include "string_helper.h"
 
 namespace sigma {
 	error_message::error_message(

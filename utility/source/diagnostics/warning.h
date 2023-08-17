@@ -1,5 +1,5 @@
 #pragma once
-#include "utility/diagnostics/diagnostics.h"
+#include "diagnostics/diagnostics.h"
 
 namespace sigma {
 	enum class warning_code {

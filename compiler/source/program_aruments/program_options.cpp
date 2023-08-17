@@ -6,6 +6,7 @@ namespace sigma {
 			"help", {
 				.description = "show help message",
 				.action = [&](argument_list& arguments) -> i32 {
+					SUPPRESS_C4100(arguments);
 					display_help();
 					return 0;
 				}
@@ -59,6 +60,8 @@ namespace sigma {
 
 		command_it->second.get_arguments().traverse_ordered(
 			[&](const std::string& key, const std::shared_ptr<argument>& argument) {
+				SUPPRESS_C4100(key);
+
 				if (argument->is_required() && argument->is_used() == false) {
 					missing_arguments.emplace_back(argument);
 				}

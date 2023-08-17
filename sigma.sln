@@ -3,6 +3,8 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "compiler", "compiler\compiler.vcxproj", "{60661140-4C33-6C4B-754C-5AF36178A1D9}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "utility", "utility\utility.vcxproj", "{79DE5C48-E5BD-DBE3-EED5-66BA5A344245}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Release|x64 = Release|x64
@@ -10,6 +12,8 @@ Global
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{60661140-4C33-6C4B-754C-5AF36178A1D9}.Release|x64.ActiveCfg = Release|x64
 		{60661140-4C33-6C4B-754C-5AF36178A1D9}.Release|x64.Build.0 = Release|x64
+		{79DE5C48-E5BD-DBE3-EED5-66BA5A344245}.Release|x64.ActiveCfg = Release|x64
+		{79DE5C48-E5BD-DBE3-EED5-66BA5A344245}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

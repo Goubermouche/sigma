@@ -88,15 +88,6 @@
     <Filter Include="source\utility\containers">
       <UniqueIdentifier>{DE98363B-4A5B-6AC5-930B-F951FF0C43A3}</UniqueIdentifier>
     </Filter>
-    <Filter Include="source\utility\diagnostics">
-      <UniqueIdentifier>{800C941C-6C1C-40ED-D5D5-A40BC1042F86}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="source\utility\filesystem">
-      <UniqueIdentifier>{8DCC5F5C-F98E-93E6-423F-2273AE406CC4}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="source\utility\filesystem\file_types">
-      <UniqueIdentifier>{F0664937-DC4D-0B2F-859E-714C71648495}</UniqueIdentifier>
-    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="source\code_generator\abstract_syntax_tree\abstract_syntax_tree.h">
@@ -326,45 +317,6 @@
     </ClInclude>
     <ClInclude Include="source\utility\containers\string_accessor.h">
       <Filter>source\utility\containers</Filter>
-    </ClInclude>
-    <ClInclude Include="source\utility\diagnostics\console.h">
-      <Filter>source\utility\diagnostics</Filter>
-    </ClInclude>
-    <ClInclude Include="source\utility\diagnostics\diagnostics.h">
-      <Filter>source\utility\diagnostics</Filter>
-    </ClInclude>
-    <ClInclude Include="source\utility\diagnostics\error.h">
-      <Filter>source\utility\diagnostics</Filter>
-    </ClInclude>
-    <ClInclude Include="source\utility\diagnostics\warning.h">
-      <Filter>source\utility\diagnostics</Filter>
-    </ClInclude>
-    <ClInclude Include="source\utility\filesystem\file_types\file.h">
-      <Filter>source\utility\filesystem\file_types</Filter>
-    </ClInclude>
-    <ClInclude Include="source\utility\filesystem\file_types\raw_file.h">
-      <Filter>source\utility\filesystem\file_types</Filter>
-    </ClInclude>
-    <ClInclude Include="source\utility\filesystem\file_types\text_file.h">
-      <Filter>source\utility\filesystem\file_types</Filter>
-    </ClInclude>
-    <ClInclude Include="source\utility\filesystem\filesystem.h">
-      <Filter>source\utility\filesystem</Filter>
-    </ClInclude>
-    <ClInclude Include="source\utility\format.h">
-      <Filter>source\utility</Filter>
-    </ClInclude>
-    <ClInclude Include="source\utility\macros.h">
-      <Filter>source\utility</Filter>
-    </ClInclude>
-    <ClInclude Include="source\utility\string.h">
-      <Filter>source\utility</Filter>
-    </ClInclude>
-    <ClInclude Include="source\utility\timer.h">
-      <Filter>source\utility</Filter>
-    </ClInclude>
-    <ClInclude Include="source\utility\types.h">
-      <Filter>source\utility</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -608,33 +560,6 @@
     </ClCompile>
     <ClCompile Include="source\utility\containers\string_accessor.cpp">
       <Filter>source\utility\containers</Filter>
-    </ClCompile>
-    <ClCompile Include="source\utility\diagnostics\console.cpp">
-      <Filter>source\utility\diagnostics</Filter>
-    </ClCompile>
-    <ClCompile Include="source\utility\diagnostics\error.cpp">
-      <Filter>source\utility\diagnostics</Filter>
-    </ClCompile>
-    <ClCompile Include="source\utility\diagnostics\warning.cpp">
-      <Filter>source\utility\diagnostics</Filter>
-    </ClCompile>
-    <ClCompile Include="source\utility\filesystem\file_types\file.cpp">
-      <Filter>source\utility\filesystem\file_types</Filter>
-    </ClCompile>
-    <ClCompile Include="source\utility\filesystem\file_types\raw_file.cpp">
-      <Filter>source\utility\filesystem\file_types</Filter>
-    </ClCompile>
-    <ClCompile Include="source\utility\filesystem\file_types\text_file.cpp">
-      <Filter>source\utility\filesystem\file_types</Filter>
-    </ClCompile>
-    <ClCompile Include="source\utility\filesystem\filesystem.cpp">
-      <Filter>source\utility\filesystem</Filter>
-    </ClCompile>
-    <ClCompile Include="source\utility\string.cpp">
-      <Filter>source\utility</Filter>
-    </ClCompile>
-    <ClCompile Include="source\utility\timer.cpp">
-      <Filter>source\utility</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

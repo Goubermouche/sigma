@@ -1,4 +1,5 @@
 #include "console.h"
+#include "macros.h"
 
 namespace sigma {
 	console& console::out = *new console();
@@ -28,12 +29,14 @@ namespace sigma {
 		return *this;
 	}
 
-	console& console::operator<<(const left_pad& left) {
+	console& console::operator<<(const left_pad& left_pad) {
+		SUPPRESS_C4100(left_pad);
 		std::wcout << std::left;
 		return *this;
 	}
 
 	console& console::operator<<(const console& console) {
+		SUPPRESS_C4100(console);
 		return *this;
 	}
 

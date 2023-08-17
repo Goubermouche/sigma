@@ -1,5 +1,5 @@
 #pragma once
-#include "utility/macros.h"
+#include "format.h"
 
 namespace sigma {
 	enum class token {
@@ -361,5 +361,14 @@ namespace sigma {
 		default:
 			return false;
 		}
+	}
+
+	namespace detail {
+		template<>
+		struct formatter<token> {
+			static std::string format(const token& value) {
+				return token_to_string(value);
+			}
+		};
 	}
 }

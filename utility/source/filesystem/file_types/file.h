@@ -1,5 +1,5 @@
 #pragma once
-#include "utility/macros.h"
+#include "macros.h"
 
 namespace sigma {
 	namespace outcome {

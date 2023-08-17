@@ -1,5 +1,5 @@
 #include "char_node.h"
-#include "utility/string.h"
+#include "string_helper.h"
 
 namespace sigma {
 	char_node::char_node(

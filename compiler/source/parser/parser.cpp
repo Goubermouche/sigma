@@ -1,5 +1,5 @@
 #include "parser.h"
-#include "utility/macros.h"
+#include "macros.h"
 
 // functions
 #include "code_generator/abstract_syntax_tree/functions/function_call_node.h"
@@ -203,7 +203,7 @@ namespace sigma {
 		m_token_list.get_token(); // keyword_include (guaranteed)
 		OUTCOME_TRY(m_token_list.expect_token(token::string_literal));
 		const std::string include_str = m_token_list.get_current_token().get_value();
-		outcome::success();
+		return outcome::success();
 	}
 
 	outcome::result<std::vector<node_ptr>> parser::parse_local_statements() {

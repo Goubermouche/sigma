@@ -1,5 +1,5 @@
 #pragma once
-#include "utility/filesystem/file_types/file.h"
+#include "filesystem/file_types/file.h"
 
 namespace sigma {
 	class text_file : public file {

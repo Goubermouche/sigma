@@ -79,6 +79,9 @@
     <ProjectReference Include="..\parser\parser.vcxproj">
       <Project>{F28D3C14-DE2F-67EA-C7EA-7A3EB32BEE3A}</Project>
     </ProjectReference>
+    <ProjectReference Include="..\code_generator\code_generator.vcxproj">
+      <Project>{C6E670B8-B2B4-64BE-9B48-D5E487B54023}</Project>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

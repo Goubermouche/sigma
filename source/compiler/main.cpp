@@ -1,4 +1,6 @@
 #include "compiler/compiler.h"
+#include "code_generator/temp.h"
+
 using namespace sigma::types;
 
 /**
@@ -9,6 +11,8 @@ using namespace sigma::types;
  */
 i32 main(i32 argc, char* argv[]) {
 	sigma::console::init();
+
+	sigma::temp_codegen();
 
 	sigma::program_options options;
 	sigma::command& compile_command = options.add_command(

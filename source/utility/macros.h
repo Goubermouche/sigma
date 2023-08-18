@@ -12,10 +12,10 @@
     #error "Unsupported platform!"
 #endif
 
-#define LANG_VERIFY(cond, mesg)                                     \
+#define LANG_VERIFY(cond, msg)                                     \
     do {                                                            \
         if (!(cond)) {                                              \
-            std::cerr << mesg << '\n';                              \
+            std::cerr << msg << '\n';                              \
 			DEBUG_BREAK();                                          \
 		}                                                           \
     } while (false)

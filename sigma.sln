@@ -5,6 +5,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "compiler", "source\compiler
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "abstract_syntax_tree", "source\abstract_syntax_tree\abstract_syntax_tree.vcxproj", "{6E6184C2-5AF0-0D8C-030F-2287EF7C1E32}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "code_generator", "source\code_generator\code_generator.vcxproj", "{C6E670B8-B2B4-64BE-9B48-D5E487B54023}"
+EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "lexer", "source\lexer\lexer.vcxproj", "{C5C4DA0F-31D9-02C1-FA5A-A620662EFFF1}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "parser", "source\parser\parser.vcxproj", "{F28D3C14-DE2F-67EA-C7EA-7A3EB32BEE3A}"
@@ -20,6 +22,8 @@ Global
 		{60661140-4C33-6C4B-754C-5AF36178A1D9}.Release|x64.Build.0 = Release|x64
 		{6E6184C2-5AF0-0D8C-030F-2287EF7C1E32}.Release|x64.ActiveCfg = Release|x64
 		{6E6184C2-5AF0-0D8C-030F-2287EF7C1E32}.Release|x64.Build.0 = Release|x64
+		{C6E670B8-B2B4-64BE-9B48-D5E487B54023}.Release|x64.ActiveCfg = Release|x64
+		{C6E670B8-B2B4-64BE-9B48-D5E487B54023}.Release|x64.Build.0 = Release|x64
 		{C5C4DA0F-31D9-02C1-FA5A-A620662EFFF1}.Release|x64.ActiveCfg = Release|x64
 		{C5C4DA0F-31D9-02C1-FA5A-A620662EFFF1}.Release|x64.Build.0 = Release|x64
 		{F28D3C14-DE2F-67EA-C7EA-7A3EB32BEE3A}.Release|x64.ActiveCfg = Release|x64

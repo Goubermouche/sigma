@@ -126,6 +126,25 @@ project "parser"
         "utility"
     }
 
+    
+-- code_generator
+project "code_generator"
+    kind "StaticLib"
+    location "source/code_generator"
+
+    files {
+        "source/code_generator/**.h",
+        "source/code_generator/**.cpp"
+    } 
+
+    includedirs {
+        "source"
+    }
+
+    links {
+        "utility"
+    }
+
 -- compiler
 project "compiler"
     kind "ConsoleApp"
@@ -203,7 +222,8 @@ project "compiler"
         clang_libs,
         "Version",
         "lexer",
-        "parser"
+        "parser",
+        "code_generator"
     }
 
     filter "configurations:Release"

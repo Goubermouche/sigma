@@ -27,7 +27,6 @@
 #define NOMINMAX
     #include <io.h>
 	#include <fcntl.h>
-
 #else
     #include <unistd.h>
 	#include <signal.h>

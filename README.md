@@ -125,6 +125,8 @@ The expected output, after running the generated .exe, looks like this:
 ,,,,,,,,,--------~~~~~~~~~~~~~~~~~~~~~~~~~~~::::::::::;;;;==!#~$#@!=;:::::::~~~~~~~~----------------
 ```
 ## Todo: 
+- [ ] Clean up the project structure and utilize modules 
+- [ ] Replace LLVM by a custom code generator
 - [ ] Full C function toolset
 - [X] Support for external files and linking
 - [ ] Integral formats (base-16 HEX, base-8 HEX)

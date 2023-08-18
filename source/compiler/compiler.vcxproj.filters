@@ -61,9 +61,6 @@
     <Filter Include="compiler">
       <UniqueIdentifier>{60661140-4C33-6C4B-754C-5AF36178A1D9}</UniqueIdentifier>
     </Filter>
-    <Filter Include="lexer">
-      <UniqueIdentifier>{C5C4DA0F-31D9-02C1-FA5A-A620662EFFF1}</UniqueIdentifier>
-    </Filter>
     <Filter Include="llvm_wrappers">
       <UniqueIdentifier>{134A9FFF-7F0A-1B36-4845-64B3B4C45F12}</UniqueIdentifier>
     </Filter>
@@ -260,12 +257,6 @@
     </ClInclude>
     <ClInclude Include="compiler\dependency_tree.h">
       <Filter>compiler</Filter>
-    </ClInclude>
-    <ClInclude Include="lexer\lexer.h">
-      <Filter>lexer</Filter>
-    </ClInclude>
-    <ClInclude Include="lexer\token.h">
-      <Filter>lexer</Filter>
     </ClInclude>
     <ClInclude Include="llvm_wrappers\code_generation_context.h">
       <Filter>llvm_wrappers</Filter>
@@ -499,9 +490,6 @@
     </ClCompile>
     <ClCompile Include="compiler\dependency_tree.cpp">
       <Filter>compiler</Filter>
-    </ClCompile>
-    <ClCompile Include="lexer\lexer.cpp">
-      <Filter>lexer</Filter>
     </ClCompile>
     <ClCompile Include="llvm_wrappers\code_generation_context.cpp">
       <Filter>llvm_wrappers</Filter>

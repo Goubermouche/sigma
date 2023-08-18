@@ -118,8 +118,6 @@
     <ClInclude Include="code_generator\implementation\code_generator.h" />
     <ClInclude Include="compiler\compiler.h" />
     <ClInclude Include="compiler\dependency_tree.h" />
-    <ClInclude Include="lexer\lexer.h" />
-    <ClInclude Include="lexer\token.h" />
     <ClInclude Include="llvm_wrappers\code_generation_context.h" />
     <ClInclude Include="llvm_wrappers\functions\function.h" />
     <ClInclude Include="llvm_wrappers\functions\function_registry.h" />
@@ -199,7 +197,6 @@
     <ClCompile Include="code_generator\implementation\code_generator_variables.cpp" />
     <ClCompile Include="compiler\compiler.cpp" />
     <ClCompile Include="compiler\dependency_tree.cpp" />
-    <ClCompile Include="lexer\lexer.cpp" />
     <ClCompile Include="llvm_wrappers\code_generation_context.cpp" />
     <ClCompile Include="llvm_wrappers\functions\function.cpp" />
     <ClCompile Include="llvm_wrappers\functions\function_registry.cpp" />
@@ -215,8 +212,8 @@
     <ClCompile Include="program_aruments\program_options.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\utility\utility.vcxproj">
-      <Project>{79DE5C48-E5BD-DBE3-EED5-66BA5A344245}</Project>
+    <ProjectReference Include="..\lexer\lexer.vcxproj">
+      <Project>{C5C4DA0F-31D9-02C1-FA5A-A620662EFFF1}</Project>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

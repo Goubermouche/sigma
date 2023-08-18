@@ -1,0 +1,97 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{79DE5C48-E5BD-DBE3-EED5-66BA5A344245}</ProjectGuid>
+    <IgnoreWarnCompileDuplicatedFilename>true</IgnoreWarnCompileDuplicatedFilename>
+    <Keyword>Win32Proj</Keyword>
+    <RootNamespace>utility</RootNamespace>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <CharacterSet>Unicode</CharacterSet>
+    <PlatformToolset>v143</PlatformToolset>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <OutDir>..\..\output\bin\Release\</OutDir>
+    <IntDir>..\..\output\obj\Release\Release\utility\</IntDir>
+    <TargetName>utility</TargetName>
+    <TargetExt>.lib</TargetExt>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <WarningLevel>Level4</WarningLevel>
+      <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>..\..\..\..\thirdparty\llvm\llvm-16.0.0\llvm-install\include;..;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <Optimization>Full</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <MinimalRebuild>false</MinimalRebuild>
+      <StringPooling>true</StringPooling>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <LanguageStandard>stdcpplatest</LanguageStandard>
+      <ExternalWarningLevel>TurnOffAllWarnings</ExternalWarningLevel>
+      <TreatAngleIncludeAsExternal>true</TreatAngleIncludeAsExternal>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+    </Link>
+    <Lib>
+      <AdditionalDependencies>..\..\output\bin\Release\utility.lib;C:\dev\thirdparty\llvm-16.0.0\llvm-build\Release\lib\LLVMCore.lib;C:\dev\thirdparty\llvm-16.0.0\llvm-build\Release\lib\LLVMRemarks.lib;C:\dev\thirdparty\llvm-16.0.0\llvm-build\Release\lib\LLVMBitstreamReader.lib;C:\dev\thirdparty\llvm-16.0.0\llvm-build\Release\lib\LLVMBinaryFormat.lib;C:\dev\thirdparty\llvm-16.0.0\llvm-build\Release\lib\LLVMTargetParser.lib;C:\dev\thirdparty\llvm-16.0.0\llvm-build\Release\lib\LLVMSupport.lib;C:\dev\thirdparty\llvm-16.0.0\llvm-build\Release\lib\LLVMDemangle.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>..\..\..\..\thirdparty\llvm\llvm-16.0.0\llvm-install\lib;..\..\..\..\thirdparty\llvm\llvm-16.0.0\llvm-install\bin;..\..\..\..\thirdparty\llvm\llvm-16.0.0\llvm-build\lib;..\..\..\..\thirdparty\llvm\llvm-16.0.0\llvm-install\Release\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+    </Lib>
+    <ProjectReference>
+      <LinkLibraryDependencies>false</LinkLibraryDependencies>
+    </ProjectReference>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClInclude Include="..\utility\containers\directed_graph.h" />
+    <ClInclude Include="..\utility\containers\string_accessor.h" />
+    <ClInclude Include="..\utility\diagnostics\console.h" />
+    <ClInclude Include="..\utility\diagnostics\diagnostics.h" />
+    <ClInclude Include="..\utility\diagnostics\error.h" />
+    <ClInclude Include="..\utility\diagnostics\warning.h" />
+    <ClInclude Include="..\utility\filesystem\file_types\file.h" />
+    <ClInclude Include="..\utility\filesystem\file_types\raw_file.h" />
+    <ClInclude Include="..\utility\filesystem\file_types\text_file.h" />
+    <ClInclude Include="..\utility\filesystem\filesystem.h" />
+    <ClInclude Include="..\utility\format.h" />
+    <ClInclude Include="..\utility\macros.h" />
+    <ClInclude Include="..\utility\string_helper.h" />
+    <ClInclude Include="..\utility\timer.h" />
+    <ClInclude Include="..\utility\types.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\utility\containers\directed_graph.cpp" />
+    <ClCompile Include="..\utility\containers\string_accessor.cpp" />
+    <ClCompile Include="..\utility\diagnostics\console.cpp" />
+    <ClCompile Include="..\utility\diagnostics\error.cpp" />
+    <ClCompile Include="..\utility\diagnostics\warning.cpp" />
+    <ClCompile Include="..\utility\filesystem\file_types\file.cpp" />
+    <ClCompile Include="..\utility\filesystem\file_types\raw_file.cpp" />
+    <ClCompile Include="..\utility\filesystem\file_types\text_file.cpp" />
+    <ClCompile Include="..\utility\filesystem\filesystem.cpp" />
+    <ClCompile Include="..\utility\string_helper.cpp" />
+    <ClCompile Include="..\utility\timer.cpp" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

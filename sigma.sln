@@ -3,6 +3,8 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "compiler", "source\compiler\compiler.vcxproj", "{60661140-4C33-6C4B-754C-5AF36178A1D9}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "lexer", "source\lexer\lexer.vcxproj", "{C5C4DA0F-31D9-02C1-FA5A-A620662EFFF1}"
+EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "utility", "source\utility\utility.vcxproj", "{79DE5C48-E5BD-DBE3-EED5-66BA5A344245}"
 EndProject
 Global
@@ -12,6 +14,8 @@ Global
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{60661140-4C33-6C4B-754C-5AF36178A1D9}.Release|x64.ActiveCfg = Release|x64
 		{60661140-4C33-6C4B-754C-5AF36178A1D9}.Release|x64.Build.0 = Release|x64
+		{C5C4DA0F-31D9-02C1-FA5A-A620662EFFF1}.Release|x64.ActiveCfg = Release|x64
+		{C5C4DA0F-31D9-02C1-FA5A-A620662EFFF1}.Release|x64.Build.0 = Release|x64
 		{79DE5C48-E5BD-DBE3-EED5-66BA5A344245}.Release|x64.ActiveCfg = Release|x64
 		{79DE5C48-E5BD-DBE3-EED5-66BA5A344245}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection

@@ -67,6 +67,25 @@ project "utility"
         llvm_libs_table
     }
 
+-- lexer
+project "lexer"
+    kind "StaticLib"
+    location "source/lexer"
+
+    files {
+        "source/lexer/**.h",
+        "source/lexer/**.cpp"
+    } 
+
+    includedirs {
+        "source",
+        path.join(llvm_root, "include")
+    }
+
+    links {
+        "utility"
+    }
+
 -- compiler
 project "compiler"
     kind "ConsoleApp"
@@ -144,8 +163,7 @@ project "compiler"
         llvm_libs_table,
         clang_libs,
         "Version",
-
-        "utility"
+        "lexer"
     }
 
     filter "configurations:Release"

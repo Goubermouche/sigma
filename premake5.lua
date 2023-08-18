@@ -86,6 +86,46 @@ project "lexer"
         "utility"
     }
 
+-- abstract_syntax_tree
+project "abstract_syntax_tree"
+    kind "StaticLib"
+    location "source/abstract_syntax_tree"
+
+    files {
+        "source/abstract_syntax_tree/**.h",
+        "source/abstract_syntax_tree/**.cpp"
+    } 
+
+    includedirs {
+        "source",
+        path.join(llvm_root, "include")
+    }
+
+    links {
+        "utility"
+    }
+
+
+-- parser
+project "parser"
+    kind "StaticLib"
+    location "source/parser"
+
+    files {
+        "source/parser/**.h",
+        "source/parser/**.cpp"
+    } 
+
+    includedirs {
+        "source",
+        path.join(llvm_root, "include")
+    }
+
+    links {
+        "abstract_syntax_tree",
+        "utility"
+    }
+
 -- compiler
 project "compiler"
     kind "ConsoleApp"
@@ -99,7 +139,6 @@ project "compiler"
     }
 
     includedirs {
-        "source/compiler",
         "source",
         path.join(llvm_root, "include")
     }
@@ -163,7 +202,8 @@ project "compiler"
         llvm_libs_table,
         clang_libs,
         "Version",
-        "lexer"
+        "lexer",
+        "parser"
     }
 
     filter "configurations:Release"

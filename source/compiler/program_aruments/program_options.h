@@ -1,5 +1,5 @@
 #pragma once
-#include "program_aruments/command.h"
+#include "compiler/program_aruments/command.h"
 
 namespace sigma {
 	class program_options {

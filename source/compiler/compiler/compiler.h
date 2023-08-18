@@ -1,7 +1,7 @@
 #pragma once
 
-#include "code_generator/implementation/code_generator.h"
-#include "program_aruments/program_options.h"
+#include "abstract_syntax_tree/implementation/code_generator.h"
+#include "compiler/program_aruments/program_options.h"
 #include "dependency_tree.h"
 
 #include <llvm/Target/TargetMachine.h>

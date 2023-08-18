@@ -1,0 +1,206 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{6E6184C2-5AF0-0D8C-030F-2287EF7C1E32}</ProjectGuid>
+    <IgnoreWarnCompileDuplicatedFilename>true</IgnoreWarnCompileDuplicatedFilename>
+    <Keyword>Win32Proj</Keyword>
+    <RootNamespace>abstract_syntax_tree</RootNamespace>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <CharacterSet>Unicode</CharacterSet>
+    <PlatformToolset>v143</PlatformToolset>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <OutDir>..\..\output\bin\Release\</OutDir>
+    <IntDir>..\..\output\obj\Release\Release\abstract_syntax_tree\</IntDir>
+    <TargetName>abstract_syntax_tree</TargetName>
+    <TargetExt>.lib</TargetExt>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <WarningLevel>Level4</WarningLevel>
+      <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>..;..\..\..\..\thirdparty\llvm\llvm-16.0.0\llvm-install\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <Optimization>Full</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <MinimalRebuild>false</MinimalRebuild>
+      <StringPooling>true</StringPooling>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <LanguageStandard>stdcpplatest</LanguageStandard>
+      <ExternalWarningLevel>TurnOffAllWarnings</ExternalWarningLevel>
+      <TreatAngleIncludeAsExternal>true</TreatAngleIncludeAsExternal>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClInclude Include="abstract_syntax_tree.h" />
+    <ClInclude Include="code_generator_context.h" />
+    <ClInclude Include="code_generator_template.h" />
+    <ClInclude Include="functions\function_call_node.h" />
+    <ClInclude Include="functions\function_node.h" />
+    <ClInclude Include="implementation\code_generator.h" />
+    <ClInclude Include="keywords\flow_control\break_node.h" />
+    <ClInclude Include="keywords\flow_control\for_node.h" />
+    <ClInclude Include="keywords\flow_control\if_else_node.h" />
+    <ClInclude Include="keywords\flow_control\return_node.h" />
+    <ClInclude Include="keywords\flow_control\while_node.h" />
+    <ClInclude Include="keywords\types\bool_node.h" />
+    <ClInclude Include="keywords\types\char_node.h" />
+    <ClInclude Include="keywords\types\numerical_literal_node.h" />
+    <ClInclude Include="keywords\types\string_node.h" />
+    <ClInclude Include="llvm_wrappers\code_generation_context.h" />
+    <ClInclude Include="llvm_wrappers\functions\function.h" />
+    <ClInclude Include="llvm_wrappers\functions\function_registry.h" />
+    <ClInclude Include="llvm_wrappers\type.h" />
+    <ClInclude Include="llvm_wrappers\value.h" />
+    <ClInclude Include="llvm_wrappers\variables\scope.h" />
+    <ClInclude Include="llvm_wrappers\variables\variable.h" />
+    <ClInclude Include="llvm_wrappers\variables\variable_registry.h" />
+    <ClInclude Include="node.h" />
+    <ClInclude Include="operators\binary\arithmetic\operator_addition_assignment_node.h" />
+    <ClInclude Include="operators\binary\arithmetic\operator_addition_node.h" />
+    <ClInclude Include="operators\binary\arithmetic\operator_division_assignment_node.h" />
+    <ClInclude Include="operators\binary\arithmetic\operator_division_node.h" />
+    <ClInclude Include="operators\binary\arithmetic\operator_modulo_assignment_node.h" />
+    <ClInclude Include="operators\binary\arithmetic\operator_modulo_node.h" />
+    <ClInclude Include="operators\binary\arithmetic\operator_multiplication_assignment_node.h" />
+    <ClInclude Include="operators\binary\arithmetic\operator_multiplication_node.h" />
+    <ClInclude Include="operators\binary\arithmetic\operator_subtraction_assignment_node.h" />
+    <ClInclude Include="operators\binary\arithmetic\operator_subtraction_node.h" />
+    <ClInclude Include="operators\binary\bitwise\operator_bitwise_and_node.h" />
+    <ClInclude Include="operators\binary\bitwise\operator_bitwise_left_shift_node.h" />
+    <ClInclude Include="operators\binary\bitwise\operator_bitwise_or_node.h" />
+    <ClInclude Include="operators\binary\bitwise\operator_bitwise_right_shift_node.h" />
+    <ClInclude Include="operators\binary\bitwise\operator_bitwise_xor_node.h" />
+    <ClInclude Include="operators\binary\logical\operator_conjunction_node.h" />
+    <ClInclude Include="operators\binary\logical\operator_disjunction_node.h" />
+    <ClInclude Include="operators\binary\logical\operator_equals_node.h" />
+    <ClInclude Include="operators\binary\logical\operator_greater_than_equal_to_node.h" />
+    <ClInclude Include="operators\binary\logical\operator_greater_than_node.h" />
+    <ClInclude Include="operators\binary\logical\operator_less_than_equal_to_node.h" />
+    <ClInclude Include="operators\binary\logical\operator_less_than_node.h" />
+    <ClInclude Include="operators\binary\logical\operator_not_equals_node.h" />
+    <ClInclude Include="operators\binary\operator_binary_base.h" />
+    <ClInclude Include="operators\unary\arithmetic\operator_post_decrement_node.h" />
+    <ClInclude Include="operators\unary\arithmetic\operator_post_increment_node.h" />
+    <ClInclude Include="operators\unary\arithmetic\operator_pre_decrement_node.h" />
+    <ClInclude Include="operators\unary\arithmetic\operator_pre_increment_node.h" />
+    <ClInclude Include="operators\unary\bitwise\operator_address_of_node.h" />
+    <ClInclude Include="operators\unary\bitwise\operator_bitwise_not_node.h" />
+    <ClInclude Include="operators\unary\bitwise\operator_dereference_node.h" />
+    <ClInclude Include="operators\unary\logical\operator_not_node.h" />
+    <ClInclude Include="operators\unary\operator_unary_base.h" />
+    <ClInclude Include="variables\array\array_access_node.h" />
+    <ClInclude Include="variables\array\array_allocation_node.h" />
+    <ClInclude Include="variables\array\array_assignment_node.h" />
+    <ClInclude Include="variables\assignment_node.h" />
+    <ClInclude Include="variables\declaration\declaration_node.h" />
+    <ClInclude Include="variables\declaration\global_declaration_node.h" />
+    <ClInclude Include="variables\declaration\local_declaration_node.h" />
+    <ClInclude Include="variables\variable_access_node.h" />
+    <ClInclude Include="variables\variable_node.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="abstract_syntax_tree.cpp" />
+    <ClCompile Include="code_generator_context.cpp" />
+    <ClCompile Include="code_generator_template.cpp" />
+    <ClCompile Include="functions\function_call_node.cpp" />
+    <ClCompile Include="functions\function_node.cpp" />
+    <ClCompile Include="implementation\code_generator.cpp" />
+    <ClCompile Include="implementation\code_generator_flow_control.cpp" />
+    <ClCompile Include="implementation\code_generator_functions.cpp" />
+    <ClCompile Include="implementation\code_generator_operators.cpp" />
+    <ClCompile Include="implementation\code_generator_types.cpp" />
+    <ClCompile Include="implementation\code_generator_variables.cpp" />
+    <ClCompile Include="keywords\flow_control\break_node.cpp" />
+    <ClCompile Include="keywords\flow_control\for_node.cpp" />
+    <ClCompile Include="keywords\flow_control\if_else_node.cpp" />
+    <ClCompile Include="keywords\flow_control\return_node.cpp" />
+    <ClCompile Include="keywords\flow_control\while_node.cpp" />
+    <ClCompile Include="keywords\types\bool_node.cpp" />
+    <ClCompile Include="keywords\types\char_node.cpp" />
+    <ClCompile Include="keywords\types\numerical_literal_node.cpp" />
+    <ClCompile Include="keywords\types\string_node.cpp" />
+    <ClCompile Include="llvm_wrappers\code_generation_context.cpp" />
+    <ClCompile Include="llvm_wrappers\functions\function.cpp" />
+    <ClCompile Include="llvm_wrappers\functions\function_registry.cpp" />
+    <ClCompile Include="llvm_wrappers\type.cpp" />
+    <ClCompile Include="llvm_wrappers\value.cpp" />
+    <ClCompile Include="llvm_wrappers\variables\scope.cpp" />
+    <ClCompile Include="llvm_wrappers\variables\variable.cpp" />
+    <ClCompile Include="llvm_wrappers\variables\variable_registry.cpp" />
+    <ClCompile Include="node.cpp" />
+    <ClCompile Include="operators\binary\arithmetic\operator_addition_assignment_node.cpp" />
+    <ClCompile Include="operators\binary\arithmetic\operator_addition_node.cpp" />
+    <ClCompile Include="operators\binary\arithmetic\operator_division_assignment_node.cpp" />
+    <ClCompile Include="operators\binary\arithmetic\operator_division_node.cpp" />
+    <ClCompile Include="operators\binary\arithmetic\operator_modulo_assignment_node.cpp" />
+    <ClCompile Include="operators\binary\arithmetic\operator_modulo_node.cpp" />
+    <ClCompile Include="operators\binary\arithmetic\operator_multiplication_assignment_node.cpp" />
+    <ClCompile Include="operators\binary\arithmetic\operator_multiplication_node.cpp" />
+    <ClCompile Include="operators\binary\arithmetic\operator_subtraction_assignment_node.cpp" />
+    <ClCompile Include="operators\binary\arithmetic\operator_subtraction_node.cpp" />
+    <ClCompile Include="operators\binary\bitwise\operator_bitwise_and_node.cpp" />
+    <ClCompile Include="operators\binary\bitwise\operator_bitwise_left_shift_node.cpp" />
+    <ClCompile Include="operators\binary\bitwise\operator_bitwise_or_node.cpp" />
+    <ClCompile Include="operators\binary\bitwise\operator_bitwise_right_shift_node.cpp" />
+    <ClCompile Include="operators\binary\bitwise\operator_bitwise_xor_node.cpp" />
+    <ClCompile Include="operators\binary\logical\operator_conjunction_node.cpp" />
+    <ClCompile Include="operators\binary\logical\operator_disjunction_node.cpp" />
+    <ClCompile Include="operators\binary\logical\operator_equals_node.cpp" />
+    <ClCompile Include="operators\binary\logical\operator_greater_than_equal_to_node.cpp" />
+    <ClCompile Include="operators\binary\logical\operator_greater_than_node.cpp" />
+    <ClCompile Include="operators\binary\logical\operator_less_than_equal_to_node.cpp" />
+    <ClCompile Include="operators\binary\logical\operator_less_than_node.cpp" />
+    <ClCompile Include="operators\binary\logical\operator_not_equals_node.cpp" />
+    <ClCompile Include="operators\binary\operator_binary_base.cpp" />
+    <ClCompile Include="operators\unary\arithmetic\operator_post_decrement_node.cpp" />
+    <ClCompile Include="operators\unary\arithmetic\operator_post_increment_node.cpp" />
+    <ClCompile Include="operators\unary\arithmetic\operator_pre_decrement_node.cpp" />
+    <ClCompile Include="operators\unary\arithmetic\operator_pre_increment_node.cpp" />
+    <ClCompile Include="operators\unary\bitwise\operator_address_of_node.cpp" />
+    <ClCompile Include="operators\unary\bitwise\operator_bitwise_not_node.cpp" />
+    <ClCompile Include="operators\unary\bitwise\operator_dereference_node.cpp" />
+    <ClCompile Include="operators\unary\logical\operator_not_node.cpp" />
+    <ClCompile Include="operators\unary\operator_unary_base.cpp" />
+    <ClCompile Include="variables\array\array_access_node.cpp" />
+    <ClCompile Include="variables\array\array_allocation_node.cpp" />
+    <ClCompile Include="variables\array\array_assignment_node.cpp" />
+    <ClCompile Include="variables\assignment_node.cpp" />
+    <ClCompile Include="variables\declaration\declaration_node.cpp" />
+    <ClCompile Include="variables\declaration\global_declaration_node.cpp" />
+    <ClCompile Include="variables\declaration\local_declaration_node.cpp" />
+    <ClCompile Include="variables\variable_access_node.cpp" />
+    <ClCompile Include="variables\variable_node.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\utility\utility.vcxproj">
+      <Project>{79DE5C48-E5BD-DBE3-EED5-66BA5A344245}</Project>
+    </ProjectReference>
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

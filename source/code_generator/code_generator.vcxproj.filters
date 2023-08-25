@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="executable">
+      <UniqueIdentifier>{2721427C-13D9-83C9-7CE0-5C2568B71EBA}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="executable\windows">
+      <UniqueIdentifier>{819A1D8D-6D7E-DEE2-D6DE-D835C2E1C864}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="instructions">
+      <UniqueIdentifier>{3A3578A6-2698-074B-CF1D-4001BB5FD3CD}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="code_generator.h" />
+    <ClInclude Include="executable\windows\dos_header.h">
+      <Filter>executable\windows</Filter>
+    </ClInclude>
+    <ClInclude Include="executable\windows\file_header.h">
+      <Filter>executable\windows</Filter>
+    </ClInclude>
+    <ClInclude Include="executable\windows\optional_header_64_bit.h">
+      <Filter>executable\windows</Filter>
+    </ClInclude>
+    <ClInclude Include="executable\windows\section_header.h">
+      <Filter>executable\windows</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="code_generator.cpp" />
+    <ClCompile Include="executable\windows\dos_header.cpp">
+      <Filter>executable\windows</Filter>
+    </ClCompile>
+    <ClCompile Include="executable\windows\file_header.cpp">
+      <Filter>executable\windows</Filter>
+    </ClCompile>
+    <ClCompile Include="executable\windows\optional_header_64_bit.cpp">
+      <Filter>executable\windows</Filter>
+    </ClCompile>
+    <ClCompile Include="executable\windows\section_header.cpp">
+      <Filter>executable\windows</Filter>
+    </ClCompile>
+  </ItemGroup>
+</Project>

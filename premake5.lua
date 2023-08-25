@@ -126,6 +126,24 @@ project "parser"
         "utility"
     }
 
+-- intermediate code
+project "intermediate_code"
+    kind "StaticLib"
+    location "source/intermediate_code"
+
+    files {
+        "source/intermediate_code/**.h",
+        "source/intermediate_code/**.cpp"
+    } 
+
+    includedirs {
+        "source",
+        path.join(llvm_root, "include")
+    }
+
+    links {
+        "utility"
+    }
     
 -- code_generator
 project "code_generator"
@@ -138,7 +156,8 @@ project "code_generator"
     } 
 
     includedirs {
-        "source"
+        "source",
+        path.join(llvm_root, "include")
     }
 
     links {
@@ -223,6 +242,7 @@ project "compiler"
         "Version",
         "lexer",
         "parser",
+        "intermediate_code",
         "code_generator"
     }
 

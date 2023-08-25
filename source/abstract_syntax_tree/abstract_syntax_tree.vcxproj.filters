@@ -64,15 +64,15 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="abstract_syntax_tree.h" />
-    <ClInclude Include="code_generator_context.h" />
-    <ClInclude Include="code_generator_template.h" />
+    <ClInclude Include="abstract_syntax_tree_context.h" />
+    <ClInclude Include="abstract_syntax_tree_visitor_template.h" />
     <ClInclude Include="functions\function_call_node.h">
       <Filter>functions</Filter>
     </ClInclude>
     <ClInclude Include="functions\function_node.h">
       <Filter>functions</Filter>
     </ClInclude>
-    <ClInclude Include="implementation\code_generator.h">
+    <ClInclude Include="implementation\abstract_syntax_tree_visitor.h">
       <Filter>implementation</Filter>
     </ClInclude>
     <ClInclude Include="keywords\flow_control\break_node.h">
@@ -256,15 +256,15 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="abstract_syntax_tree.cpp" />
-    <ClCompile Include="code_generator_context.cpp" />
-    <ClCompile Include="code_generator_template.cpp" />
+    <ClCompile Include="abstract_syntax_tree_context.cpp" />
+    <ClCompile Include="abstract_syntax_tree_visitor_template.cpp" />
     <ClCompile Include="functions\function_call_node.cpp">
       <Filter>functions</Filter>
     </ClCompile>
     <ClCompile Include="functions\function_node.cpp">
       <Filter>functions</Filter>
     </ClCompile>
-    <ClCompile Include="implementation\code_generator.cpp">
+    <ClCompile Include="implementation\abstract_syntax_tree_visitor.cpp">
       <Filter>implementation</Filter>
     </ClCompile>
     <ClCompile Include="implementation\code_generator_flow_control.cpp">

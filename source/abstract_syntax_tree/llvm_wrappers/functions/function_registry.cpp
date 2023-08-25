@@ -1,10 +1,10 @@
 #include "function_registry.h"
-#include "abstract_syntax_tree/code_generator_context.h"
+#include "abstract_syntax_tree/abstract_syntax_tree_context.h"
 
 namespace sigma {
 	function_ptr function_registry::get_function(
 		const std::string& identifier,
-		const std::shared_ptr<code_generator_context>& context
+		const ptr<abstract_syntax_tree_context>& context
 	) {
 		// locate a defined function
 		const auto it = m_functions.find(identifier);
@@ -74,7 +74,7 @@ namespace sigma {
 		return nullptr;
 	}
 
-	outcome::result<void> function_registry::concatenate(
+	utility::outcome::result<void> function_registry::concatenate(
 		const function_registry& other
 	) {
 		for(const auto& function : other.m_functions) {
@@ -91,7 +91,7 @@ namespace sigma {
 			m_functions.insert(function);
 		}
 
-		return outcome::success();
+		return utility::outcome::success();
 	}
 
 	bool function_registry::insert_function(

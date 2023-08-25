@@ -14,19 +14,19 @@ namespace sigma {
 		token_data(
 			token tok,
 			const std::string& value,
-			const file_range& range
+			const utility::file_range& range
 		);
 
 		token get_token() const;
 		const std::string& get_value() const;
-		const file_range& get_range() const;
+		const utility::file_range& get_range() const;
 	private:
 		// token type representation of the given token
 		token m_token = token::unknown;
 		// token value of the given token (ie. the identifier value of an identifier token)
 		std::string m_value;
 		// location and range the value takes in a certain file
-		file_range m_range;
+		utility::file_range m_range;
 	};
 
 	/**
@@ -58,7 +58,7 @@ namespace sigma {
 
 		const token_data& get_current_token() const;
 
-		outcome::result<void> expect_token(token token);
+		utility::outcome::result<void> expect_token(token token);
 
 		std::vector<token_data>::iterator begin();
 		std::vector<token_data>::iterator end();
@@ -84,12 +84,12 @@ namespace sigma {
 	 */
 	class lexer {
 	public:
-		lexer(std::shared_ptr<text_file> file);
+		lexer(ptr<utility::text_file> file);
 		/**
 		 * \brief Traverses the entire file and generates a list of tokens which can be traversed later.
 		 * \return Potentially erroneous result.
 		 */
-		outcome::result<token_list> tokenize();
+		utility::outcome::result<token_list> tokenize();
 		virtual ~lexer() = default;
 	private:
 		/**
@@ -97,30 +97,30 @@ namespace sigma {
 		 */
 		char get_next_char();
 
-		outcome::result<token> get_next_token();
-		outcome::result<token> get_alphabetical_token();
-		outcome::result<token> get_numerical_token();
+		utility::outcome::result<token> get_next_token();
+		utility::outcome::result<token> get_alphabetical_token();
+		utility::outcome::result<token> get_numerical_token();
 
-		outcome::result<std::string> get_hexadecimal_string(
+		utility::outcome::result<std::string> get_hexadecimal_string(
 			u64 max_length = std::numeric_limits<u64>::max()
 		);
 
-		outcome::result<std::string> get_binary_string(
+		utility::outcome::result<std::string> get_binary_string(
 			u64 max_length = std::numeric_limits<u64>::max()
 		);
 
-		outcome::result<std::string> get_escaped_character();
+		utility::outcome::result<std::string> get_escaped_character();
 
-		outcome::result<token> get_character_literal_token(); 
-		outcome::result<token> get_string_literal_token();
+		utility::outcome::result<token> get_character_literal_token(); 
+		utility::outcome::result<token> get_string_literal_token();
 
 		// todo: check for longer tokens using a while loop.
 		// todo: check for longer tokens in case a short token does not exist.
-		outcome::result<token> get_special_token();
+		utility::outcome::result<token> get_special_token();
 	private:
 		std::vector<token_data> m_tokens;
-		std::shared_ptr<text_file> m_source_file;
-		detail::string_accessor m_accessor;
+		ptr<utility::text_file> m_source_file;
+		utility::detail::string_accessor m_accessor;
 		char m_last_character = ' ';
 		std::string m_value_string;
 

@@ -5,15 +5,15 @@
 #include <utility/diagnostics/error.h>
 #include <utility/diagnostics/warning.h>
 
-#define AST_NODE_NUMERICAL_LITERAL_COLOR color::blue
-#define AST_NODE_BOOLEAN_LITERAL_COLOR	 color::blue
-#define AST_NODE_TEXT_LITERAL_COLOR		 color::yellow
-#define AST_NODE_TYPE_COLOR				 color::red
-#define AST_NODE_OPERATOR_COLOR			 color::magenta
-#define AST_NODE_VARIABLE_COLOR			 color::green
+#define AST_NODE_NUMERICAL_LITERAL_COLOR utility::color::blue
+#define AST_NODE_BOOLEAN_LITERAL_COLOR	 utility::color::blue
+#define AST_NODE_TEXT_LITERAL_COLOR		 utility::color::yellow
+#define AST_NODE_TYPE_COLOR				 utility::color::red
+#define AST_NODE_OPERATOR_COLOR			 utility::color::magenta
+#define AST_NODE_VARIABLE_COLOR			 utility::color::green
 
 namespace sigma {
-	class code_generator_template;
+	class abstract_syntax_tree_visitor_template;
 	class node;
 
 	using node_ptr = node*;
@@ -27,7 +27,7 @@ namespace sigma {
 		 * \brief Constructs a node with using data about the node's location.
 		 * \param range Range the node takes up in the source file
 		 */
-		node(const file_range& range);
+		node(const utility::file_range& range);
 		virtual ~node() = default;
 
 		/**
@@ -36,8 +36,8 @@ namespace sigma {
 		 * \param context Context provided by the previous accept call
 		 * \return Result of the acceptation operation, either an error or a pointer to the generated value.
 		 */
-		virtual outcome::result<value_ptr> accept(
-			code_generator_template& visitor,
+		virtual utility::outcome::result<value_ptr> accept(
+			abstract_syntax_tree_visitor_template& visitor,
 			const code_generation_context& context
 		) = 0;
 
@@ -57,7 +57,7 @@ namespace sigma {
 		 * \brief Gets the declared node location.
 		 * \return Declared node location
 		 */
-		const file_range& get_declared_range() const;
+		const utility::file_range& get_declared_range() const;
 	protected:
 		/**
 		 * \brief Prints a node name with additional formatting relevant to the tree hierarchy.
@@ -86,8 +86,8 @@ namespace sigma {
 			bool is_last
 		);
 	private:
-		file_range m_range;
+		utility::file_range m_range;
 	};
 }
 
-#include "abstract_syntax_tree/code_generator_template.h"
+#include "abstract_syntax_tree/abstract_syntax_tree_visitor_template.h"

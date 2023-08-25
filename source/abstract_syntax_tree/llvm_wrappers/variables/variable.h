@@ -15,15 +15,15 @@ namespace sigma {
 		 */
 		variable(
 			value_ptr value,
-			const file_range& range
+			const utility::file_range& range
 		);
 
 		value_ptr get_value() const;
-		const file_range& get_range() const;
+		const utility::file_range& get_range() const;
 	private:
 		value_ptr m_value;
-		file_range m_range;
+		utility::file_range m_range;
 	};
 
-	using variable_ptr = std::shared_ptr<variable>;
+	using variable_ptr = ptr<variable>;
 }

@@ -6,7 +6,7 @@ namespace sigma {
 		const std::vector<std::pair<std::string, type>>& arguments,
 		bool is_variadic,
 		const std::string& external_function_name,
-		const file_range& range
+		const utility::file_range& range
 	) : m_return_type(return_type),
 	m_arguments(arguments),
 	m_is_variadic(is_variadic),
@@ -25,7 +25,7 @@ namespace sigma {
 		return m_external_function_name;
 	}
 
-	const file_range& function_declaration::get_range() const {
+	const utility::file_range& function_declaration::get_range() const {
 		return m_range;
 	}
 
@@ -38,7 +38,7 @@ namespace sigma {
 		llvm::Function* function,
 		const std::vector<std::pair<std::string, type>>& arguments,
 		bool is_variadic,
-		const file_range& range
+		const utility::file_range& range
 	) : function_declaration(
 		return_type, 
 		arguments, 

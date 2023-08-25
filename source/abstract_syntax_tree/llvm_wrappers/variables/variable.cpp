@@ -3,7 +3,7 @@
 namespace sigma {
 	variable::variable(
 		value_ptr value,
-		const file_range& range
+		const utility::file_range& range
 	) : m_value(value),
 	m_range(range) {}
 
@@ -11,7 +11,7 @@ namespace sigma {
 		return m_value;
 	}
 
-	const file_range& variable::get_range() const {
+	const utility::file_range& variable::get_range() const {
 		return m_range;
 	}
 }

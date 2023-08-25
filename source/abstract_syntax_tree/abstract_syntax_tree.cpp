@@ -6,7 +6,7 @@ namespace sigma {
 	}
 
 	void abstract_syntax_tree::print_nodes() const {
-		console::out << "abstract syntax tree\n";
+		utility::console::out << "abstract syntax tree\n";
 
 		for(u64 i = 0;i < m_nodes.size(); i++) {
 			m_nodes[i]->print(1, L"", i == m_nodes.size() - 1);
@@ -27,7 +27,7 @@ namespace sigma {
 
 	void abstract_syntax_tree::move_insert(
 		std::vector<node_ptr>::iterator where,
-		std::shared_ptr<abstract_syntax_tree> other
+		ptr<abstract_syntax_tree> other
 	) {
 		std::move(
 			std::make_move_iterator(other->m_nodes.begin()),

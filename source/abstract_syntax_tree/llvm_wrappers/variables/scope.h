@@ -4,7 +4,7 @@
 
 namespace sigma {
 	class scope;
-	using scope_ptr = std::shared_ptr<scope>;
+	using scope_ptr = ptr<scope>;
 
 	/**
 	 * \brief Base scope class, contains information about the current, parent, and child scopes,
@@ -36,7 +36,7 @@ namespace sigma {
 		 * \param other Second scope to concatenate with. 
 		 * \return Outcome (void) 
 		 */
-		outcome::result<void> concatenate(
+		utility::outcome::result<void> concatenate(
 			const scope_ptr& other
 		);
 

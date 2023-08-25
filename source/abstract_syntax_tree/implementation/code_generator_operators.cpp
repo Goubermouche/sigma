@@ -1,4 +1,4 @@
-#include "code_generator.h"
+#include "abstract_syntax_tree_visitor.h"
 
 // unary
 // arithmetic
@@ -43,7 +43,7 @@
 namespace sigma {
 	// unary
 	// arithmetic
-	outcome::result<value_ptr> code_generator::visit_operator_post_decrement_node(
+	utility::outcome::result<value_ptr> abstract_syntax_tree_visitor::visit_operator_post_decrement_node(
 		operator_post_decrement_node& node,
 		const code_generation_context& context
 	) {
@@ -55,9 +55,9 @@ namespace sigma {
 
 		// check if the expression is an integer or a floating-point value
 		if (!expression_result->get_type().is_numerical()) {
-			return outcome::failure(
-				error::emit<error_code::post_decrement_type_mismatch>(
-					file_range{}, // node.get_declared_position(), 
+			return utility::outcome::failure(
+				utility::error::emit<utility::error_code::post_decrement_type_mismatch>(
+					utility::file_range{}, // node.get_declared_position(), 
 					expression_result->get_type()
 				)
 			); // return on failure
@@ -93,7 +93,7 @@ namespace sigma {
 		return expression_result;
 	}
 
-	outcome::result<value_ptr> code_generator::visit_operator_post_increment_node(
+	utility::outcome::result<value_ptr> abstract_syntax_tree_visitor::visit_operator_post_increment_node(
 		operator_post_increment_node& node,
 		const code_generation_context& context
 	) {
@@ -105,9 +105,9 @@ namespace sigma {
 
 		// check if the expression is an integer or a floating-point value
 		if (!expression_result->get_type().is_numerical()) {
-			return outcome::failure(
-				error::emit<error_code::post_increment_type_mismatch>(
-					file_range{}, // node.get_declared_position(),
+			return utility::outcome::failure(
+				utility::error::emit<utility::error_code::post_increment_type_mismatch>(
+					utility::file_range{}, // node.get_declared_position(),
 					expression_result->get_type()
 				)
 			); // return on failure
@@ -141,7 +141,7 @@ namespace sigma {
 		return expression_result;
 	}
 
-	outcome::result<value_ptr> code_generator::visit_operator_pre_decrement_node(
+	utility::outcome::result<value_ptr> abstract_syntax_tree_visitor::visit_operator_pre_decrement_node(
 		operator_pre_decrement_node& node, 
 		const code_generation_context& context
 	) {
@@ -154,9 +154,9 @@ namespace sigma {
 
 		// check if the expression is an integer or a floating-point value
 		if (!expression_result->get_type().is_numerical()) {
-			return outcome::failure(
-				error::emit<error_code::pre_decrement_type_mismatch>(
-					file_range{}, //node.get_declared_position(), 
+			return utility::outcome::failure(
+				utility::error::emit<utility::error_code::pre_decrement_type_mismatch>(
+					utility::file_range{}, //node.get_declared_position(), 
 					expression_result->get_type()
 				)
 			); // return on failure
@@ -196,7 +196,7 @@ namespace sigma {
 		);
 	}
 
-	outcome::result<value_ptr> code_generator::visit_operator_pre_increment_node(
+	utility::outcome::result<value_ptr> abstract_syntax_tree_visitor::visit_operator_pre_increment_node(
 		operator_pre_increment_node& node, 
 		const code_generation_context& context
 	) {
@@ -209,9 +209,9 @@ namespace sigma {
 
 		// check if the expression is an integer or a floating-point value
 		if (!expression_result->get_type().is_numerical()) {
-			return outcome::failure(
-				error::emit<error_code::pre_increment_type_mismatch>(
-					file_range{}, //node.get_declared_position(), 
+			return utility::outcome::failure(
+				utility::error::emit<utility::error_code::pre_increment_type_mismatch>(
+					utility::file_range{}, //node.get_declared_position(), 
 					expression_result->get_type()
 				)
 			); // return on failure
@@ -252,7 +252,7 @@ namespace sigma {
 	}
 
 	// bitwise
-	outcome::result<value_ptr> code_generator::visit_operator_bitwise_not_node(
+	utility::outcome::result<value_ptr> abstract_syntax_tree_visitor::visit_operator_bitwise_not_node(
 		operator_bitwise_not_node& node,
 		const code_generation_context& context
 	) {
@@ -266,9 +266,9 @@ namespace sigma {
 
 		// the expression must be integral
 		if (!operand_result->get_type().is_integral()) {
-			return outcome::failure(
-				error::emit<error_code::bitwise_not_type_mismatch>(
-					file_range{}, //node.get_declared_position(),
+			return utility::outcome::failure(
+				utility::error::emit<utility::error_code::bitwise_not_type_mismatch>(
+					utility::file_range{}, //node.get_declared_position(),
 					operand_result->get_type()
 				)
 			); // return on failure
@@ -286,7 +286,7 @@ namespace sigma {
 		);
 	}
 
-	outcome::result<value_ptr> code_generator::visit_operator_address_of_node(
+	utility::outcome::result<value_ptr> abstract_syntax_tree_visitor::visit_operator_address_of_node(
 		operator_address_of_node& node,
 		const code_generation_context& context
 	) {
@@ -308,7 +308,7 @@ namespace sigma {
 		);
 	}
 
-	outcome::result<value_ptr> code_generator::visit_operator_dereference_node(
+	utility::outcome::result<value_ptr> abstract_syntax_tree_visitor::visit_operator_dereference_node(
 		operator_dereference_node& node,
 		const code_generation_context& context
 	) {
@@ -336,7 +336,7 @@ namespace sigma {
 	}
 
 	// logical
-	outcome::result<value_ptr> code_generator::visit_operator_not_node(
+	utility::outcome::result<value_ptr> abstract_syntax_tree_visitor::visit_operator_not_node(
 		operator_not_node& node, 
 		const code_generation_context& context
 	) {
@@ -350,9 +350,9 @@ namespace sigma {
 
 		if(!operand_result->get_type().is_numerical() && 
 			operand_result->get_type().get_base() != type::base::boolean) {
-			return outcome::failure(
-				error::emit<error_code::negation_type_mismatch>(
-					file_range{}, //node.get_declared_position(),
+			return utility::outcome::failure(
+				utility::error::emit<utility::error_code::negation_type_mismatch>(
+					utility::file_range{}, //node.get_declared_position(),
 					operand_result->get_type()
 				)
 			); // return on failure
@@ -376,7 +376,7 @@ namespace sigma {
 
 	// binary
 	// arithmetic
-	outcome::result<value_ptr> code_generator::visit_operator_addition_assignment_node(
+	utility::outcome::result<value_ptr> abstract_syntax_tree_visitor::visit_operator_addition_assignment_node(
 		operator_addition_assignment_node& node,
 		const code_generation_context& context
 	) {
@@ -408,7 +408,7 @@ namespace sigma {
 		return assignment_value;
 	}
 
-	outcome::result<value_ptr> code_generator::visit_operator_addition_node(
+	utility::outcome::result<value_ptr> abstract_syntax_tree_visitor::visit_operator_addition_node(
 		operator_addition_node& node,
 		const code_generation_context& context
 	) {
@@ -431,7 +431,7 @@ namespace sigma {
 		);
 	}
 
-	outcome::result<value_ptr> code_generator::visit_operator_subtraction_assignment_node(
+	utility::outcome::result<value_ptr> abstract_syntax_tree_visitor::visit_operator_subtraction_assignment_node(
 		operator_subtraction_assignment_node& node,
 		const code_generation_context& context
 	) {
@@ -463,7 +463,7 @@ namespace sigma {
 		return assignment_value;
 	}
 
-	outcome::result<value_ptr> code_generator::visit_operator_subtraction_node(
+	utility::outcome::result<value_ptr> abstract_syntax_tree_visitor::visit_operator_subtraction_node(
 		operator_subtraction_node& node,
 		const code_generation_context& context
 	) {
@@ -486,7 +486,7 @@ namespace sigma {
 		);
 	}
 
-	outcome::result<value_ptr> code_generator::visit_operator_multiplication_assignment_node(
+	utility::outcome::result<value_ptr> abstract_syntax_tree_visitor::visit_operator_multiplication_assignment_node(
 		operator_multiplication_assignment_node& node, 
 		const code_generation_context& context
 	) {
@@ -518,7 +518,7 @@ namespace sigma {
 		return assignment_value;
 	}
 
-	outcome::result<value_ptr> code_generator::visit_operator_multiplication_node(
+	utility::outcome::result<value_ptr> abstract_syntax_tree_visitor::visit_operator_multiplication_node(
 		operator_multiplication_node& node,
 		const code_generation_context& context
 	) {
@@ -541,7 +541,7 @@ namespace sigma {
 		);
 	}
 
-	outcome::result<value_ptr> code_generator::visit_operator_division_assignment_node(
+	utility::outcome::result<value_ptr> abstract_syntax_tree_visitor::visit_operator_division_assignment_node(
 		operator_division_assignment_node& node, 
 		const code_generation_context& context
 	) {
@@ -573,7 +573,7 @@ namespace sigma {
 		return assignment_value;
 	}
 
-	outcome::result<value_ptr> code_generator::visit_operator_division_node(
+	utility::outcome::result<value_ptr> abstract_syntax_tree_visitor::visit_operator_division_node(
 		operator_division_node& node, 
 		const code_generation_context& context
 	) {
@@ -596,7 +596,7 @@ namespace sigma {
 		);
 	}
 
-	outcome::result<value_ptr> code_generator::visit_operator_modulo_assignment_node(
+	utility::outcome::result<value_ptr> abstract_syntax_tree_visitor::visit_operator_modulo_assignment_node(
 		operator_modulo_assignment_node& node,
 		const code_generation_context& context
 	) {
@@ -628,7 +628,7 @@ namespace sigma {
 		return assignment_value;
 	}
 
-	outcome::result<value_ptr> code_generator::visit_operator_modulo_node(
+	utility::outcome::result<value_ptr> abstract_syntax_tree_visitor::visit_operator_modulo_node(
 		operator_modulo_node& node,
 		const code_generation_context& context
 	) {
@@ -651,7 +651,7 @@ namespace sigma {
 		);
 	}
 
-	outcome::result<value_ptr> code_generator::visit_operator_bitwise_and_node(
+	utility::outcome::result<value_ptr> abstract_syntax_tree_visitor::visit_operator_bitwise_and_node(
 		operator_bitwise_and_node& node, 
 		const code_generation_context& context
 	) {
@@ -690,9 +690,9 @@ namespace sigma {
 		// both expressions must be integral
 		if (!left_operand_result->get_type().is_integral() ||
 			!right_operand_result->get_type().is_integral()) {
-			return outcome::failure(
-				error::emit<error_code::bitwise_and_type_mismatch>(
-					file_range{}, //node.get_declared_position(),
+			return utility::outcome::failure(
+				utility::error::emit<utility::error_code::bitwise_and_type_mismatch>(
+					utility::file_range{}, //node.get_declared_position(),
 					left_operand_result->get_type(),
 					right_operand_result->get_type()
 				)
@@ -712,7 +712,7 @@ namespace sigma {
 		);
 	}
 
-	outcome::result<value_ptr> code_generator::visit_operator_bitwise_or_node(
+	utility::outcome::result<value_ptr> abstract_syntax_tree_visitor::visit_operator_bitwise_or_node(
 		operator_bitwise_or_node& node,
 		const code_generation_context& context
 	) {
@@ -751,9 +751,9 @@ namespace sigma {
 		// both expressions must be integral
 		if (!left_operand_result->get_type().is_integral() ||
 			!right_operand_result->get_type().is_integral()) {
-			return outcome::failure(
-				error::emit<error_code::bitwise_or_type_mismatch>(
-					file_range{}, //node.get_declared_position(),
+			return utility::outcome::failure(
+				utility::error::emit<utility::error_code::bitwise_or_type_mismatch>(
+					utility::file_range{}, //node.get_declared_position(),
 					left_operand_result->get_type(),
 					right_operand_result->get_type()
 				)
@@ -774,7 +774,7 @@ namespace sigma {
 		);
 	}
 
-	outcome::result<value_ptr> code_generator::visit_operator_bitwise_left_shift_node(
+	utility::outcome::result<value_ptr> abstract_syntax_tree_visitor::visit_operator_bitwise_left_shift_node(
 		operator_bitwise_left_shift_node& node, 
 		const code_generation_context& context
 	) {
@@ -814,9 +814,9 @@ namespace sigma {
 		// both expressions must be integral
 		if (!left_operand_result->get_type().is_integral() ||
 			!right_operand_result->get_type().is_integral()) {
-			return outcome::failure(
-				error::emit<error_code::bitwise_left_shift_type_mismatch>(
-					file_range{}, //node.get_declared_position(),
+			return utility::outcome::failure(
+				utility::error::emit<utility::error_code::bitwise_left_shift_type_mismatch>(
+					utility::file_range{}, //node.get_declared_position(),
 					left_operand_result->get_type(),
 					right_operand_result->get_type()
 				)
@@ -836,7 +836,7 @@ namespace sigma {
 		);
 	}
 
-	outcome::result<value_ptr> code_generator::visit_operator_bitwise_right_shift_node(
+	utility::outcome::result<value_ptr> abstract_syntax_tree_visitor::visit_operator_bitwise_right_shift_node(
 		operator_bitwise_right_shift_node& node,
 		const code_generation_context& context
 	) {
@@ -875,9 +875,9 @@ namespace sigma {
 		// both expressions must be integral
 		if (!left_operand_result->get_type().is_integral() ||
 			!right_operand_result->get_type().is_integral()) {
-			return outcome::failure(
-				error::emit<error_code::bitwise_right_shift_type_mismatch>(
-					file_range{}, //node.get_declared_position(),
+			return utility::outcome::failure(
+				utility::error::emit<utility::error_code::bitwise_right_shift_type_mismatch>(
+					utility::file_range{}, //node.get_declared_position(),
 					left_operand_result->get_type(),
 					right_operand_result->get_type()
 				)
@@ -898,7 +898,7 @@ namespace sigma {
 		);
 	}
 
-	outcome::result<value_ptr> code_generator::visit_operator_bitwise_xor_node(
+	utility::outcome::result<value_ptr> abstract_syntax_tree_visitor::visit_operator_bitwise_xor_node(
 		operator_bitwise_xor_node& node,
 		const code_generation_context& context
 	) {
@@ -937,9 +937,9 @@ namespace sigma {
 		// both expressions must be integral
 		if (!left_operand_result->get_type().is_integral() ||
 			!right_operand_result->get_type().is_integral()) {
-			return outcome::failure(
-				error::emit<error_code::bitwise_xor_type_mismatch>(
-					file_range{}, //node.get_declared_position(),
+			return utility::outcome::failure(
+				utility::error::emit<utility::error_code::bitwise_xor_type_mismatch>(
+					utility::file_range{}, //node.get_declared_position(),
 					left_operand_result->get_type(),
 					right_operand_result->get_type()
 				)
@@ -960,7 +960,7 @@ namespace sigma {
 	}
 
 	// logical
-	outcome::result<value_ptr> code_generator::visit_operator_logical_conjunction_node(
+	utility::outcome::result<value_ptr> abstract_syntax_tree_visitor::visit_operator_logical_conjunction_node(
 		operator_conjunction_node& node,
 		const code_generation_context& context
 	) {
@@ -981,9 +981,9 @@ namespace sigma {
 		// both expressions must be boolean
 		if (left_operand_result->get_type().get_base() != type::base::boolean || 
 			right_operand_result->get_type().get_base() != type::base::boolean) {
-			return outcome::failure(
-				error::emit<error_code::conjunction_type_mismatch>(
-					file_range{}, //node.get_declared_position(),
+			return utility::outcome::failure(
+				utility::error::emit<utility::error_code::conjunction_type_mismatch>(
+					utility::file_range{}, //node.get_declared_position(),
 					left_operand_result->get_type(),
 					right_operand_result->get_type()
 				)
@@ -1004,7 +1004,7 @@ namespace sigma {
 		);
 	}
 
-	outcome::result<value_ptr> code_generator::visit_operator_logical_disjunction_node(
+	utility::outcome::result<value_ptr> abstract_syntax_tree_visitor::visit_operator_logical_disjunction_node(
 		operator_disjunction_node& node, 
 		const code_generation_context& context
 	) {
@@ -1025,9 +1025,9 @@ namespace sigma {
 		// both expressions must be boolean
 		if (left_operand_result->get_type().get_base() != type::base::boolean ||
 			right_operand_result->get_type().get_base() != type::base::boolean) {
-			return outcome::failure(
-				error::emit<error_code::disjunction_type_mismatch>(
-					file_range{}, //node.get_declared_position(),
+			return utility::outcome::failure(
+				utility::error::emit<utility::error_code::disjunction_type_mismatch>(
+					utility::file_range{}, //node.get_declared_position(),
 					left_operand_result->get_type(), 
 					right_operand_result->get_type()
 				)
@@ -1047,7 +1047,7 @@ namespace sigma {
 		);
 	}
 
-	outcome::result<value_ptr> code_generator::visit_operator_greater_than_node(
+	utility::outcome::result<value_ptr> abstract_syntax_tree_visitor::visit_operator_greater_than_node(
 		operator_greater_than_node& node, 
 		const code_generation_context& context
 	) {
@@ -1113,7 +1113,7 @@ namespace sigma {
 		);
 	}
 
-	outcome::result<value_ptr> code_generator::visit_operator_greater_than_equal_to_node(
+	utility::outcome::result<value_ptr> abstract_syntax_tree_visitor::visit_operator_greater_than_equal_to_node(
 		operator_greater_than_equal_to_node& node, 
 		const code_generation_context& context
 	) {
@@ -1179,7 +1179,7 @@ namespace sigma {
 		);
 	}
 
-	outcome::result<value_ptr> code_generator::visit_operator_less_than_node(
+	utility::outcome::result<value_ptr> abstract_syntax_tree_visitor::visit_operator_less_than_node(
 		operator_less_than_node& node, 
 		const code_generation_context& context
 	) {
@@ -1245,7 +1245,7 @@ namespace sigma {
 		);
 	}
 
-	outcome::result<value_ptr> code_generator::visit_operator_less_than_equal_to_node(
+	utility::outcome::result<value_ptr> abstract_syntax_tree_visitor::visit_operator_less_than_equal_to_node(
 		operator_less_than_equal_to_node& node,
 		const code_generation_context& context
 	) {
@@ -1311,7 +1311,7 @@ namespace sigma {
 		);
 	}
 
-	outcome::result<value_ptr> code_generator::visit_operator_equals_node(
+	utility::outcome::result<value_ptr> abstract_syntax_tree_visitor::visit_operator_equals_node(
 		operator_equals_node& node, 
 		const code_generation_context& context
 	) {
@@ -1369,7 +1369,7 @@ namespace sigma {
 		);
 	}
 
-	outcome::result<value_ptr> code_generator::visit_operator_not_equals_node(
+	utility::outcome::result<value_ptr> abstract_syntax_tree_visitor::visit_operator_not_equals_node(
 		operator_not_equals_node& node, 
 		const code_generation_context& context
 	) {
@@ -1427,7 +1427,7 @@ namespace sigma {
 		);
 	}
 
-	outcome::result<std::tuple<llvm::Value*, type, value_ptr>> code_generator::create_add_operation(
+	utility::outcome::result<std::tuple<llvm::Value*, type, value_ptr>> abstract_syntax_tree_visitor::create_add_operation(
 		node_ptr left_operand,
 		node_ptr right_operand
 	) {
@@ -1500,7 +1500,7 @@ namespace sigma {
 		);
 	}
 
-	outcome::result<std::tuple<llvm::Value*, type, value_ptr>> code_generator::create_sub_operation(
+	utility::outcome::result<std::tuple<llvm::Value*, type, value_ptr>> abstract_syntax_tree_visitor::create_sub_operation(
 		node_ptr left_operand, 
 		node_ptr right_operand
 	) {
@@ -1573,7 +1573,7 @@ namespace sigma {
 		);
 	}
 
-	outcome::result<std::tuple<llvm::Value*, type, value_ptr>> code_generator::create_mul_operation(
+	utility::outcome::result<std::tuple<llvm::Value*, type, value_ptr>> abstract_syntax_tree_visitor::create_mul_operation(
 		node_ptr left_operand,
 		node_ptr right_operand
 	) {
@@ -1646,7 +1646,7 @@ namespace sigma {
 		);
 	}
 
-	outcome::result<std::tuple<llvm::Value*, type, value_ptr>> code_generator::create_div_operation(
+	utility::outcome::result<std::tuple<llvm::Value*, type, value_ptr>> abstract_syntax_tree_visitor::create_div_operation(
 		node_ptr left_operand,
 		node_ptr right_operand
 	) {
@@ -1719,7 +1719,7 @@ namespace sigma {
 		);
 	}
 
-	outcome::result<std::tuple<llvm::Value*, type, value_ptr>> code_generator::create_mod_operation(
+	utility::outcome::result<std::tuple<llvm::Value*, type, value_ptr>> abstract_syntax_tree_visitor::create_mod_operation(
 		node_ptr left_operand, 
 		node_ptr right_operand
 	) {

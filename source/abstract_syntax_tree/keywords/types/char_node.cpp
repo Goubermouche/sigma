@@ -3,13 +3,13 @@
 
 namespace sigma {
 	char_node::char_node(
-		const file_range& range,
+		const utility::file_range& range,
 		char value
 	) : node(range),
 	m_value(value)	{}
 
-	outcome::result<value_ptr> char_node::accept(
-		code_generator_template& visitor,
+	utility::outcome::result<value_ptr> char_node::accept(
+		abstract_syntax_tree_visitor_template& visitor,
 		const code_generation_context& context
 	)	{
 		return visitor.visit_keyword_char_node(*this, context);
@@ -27,15 +27,15 @@ namespace sigma {
 			is_last
 		);
 
-		console::out
+		utility::console::out
 			<< '\''
 			<< AST_NODE_TYPE_COLOR
 			<< "char"
-			<< color::white 
+			<< utility::color::white
 			<< "' '"
 			<< AST_NODE_TEXT_LITERAL_COLOR
-			<< detail::escape_string(std::string(1, m_value))
-			<< color::white
+			<< utility::detail::escape_string(std::string(1, m_value))
+			<< utility::color::white
 			<< "'\n";
 	}
 

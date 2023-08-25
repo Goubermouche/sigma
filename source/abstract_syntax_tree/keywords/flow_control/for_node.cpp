@@ -2,7 +2,7 @@
 
 namespace sigma {
 	for_node::for_node(
-		const file_range& range,
+		const utility::file_range& range,
 		const node_ptr& loop_initialization_node,
 		const node_ptr& loop_condition_node,
 		const std::vector<node_ptr>& post_iteration_nodes,
@@ -13,8 +13,8 @@ namespace sigma {
 	m_post_iteration_nodes(post_iteration_nodes),
 	m_loop_body_nodes(statement_nodes) {}
 
-	outcome::result<value_ptr> for_node::accept(
-		code_generator_template& visitor,
+	utility::outcome::result<value_ptr> for_node::accept(
+		abstract_syntax_tree_visitor_template& visitor,
 		const code_generation_context& context
 	) {
 		return visitor.visit_for_node(*this, context);
@@ -26,7 +26,7 @@ namespace sigma {
 		bool is_last
 	) {
 		print_node_name(depth, prefix, "for statement", is_last);
-		console::out << "\n";
+		utility::console::out << "\n";
 
 		const std::wstring new_prefix = get_new_prefix(depth, prefix, is_last);
 

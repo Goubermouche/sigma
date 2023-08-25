@@ -1,7 +1,7 @@
 #pragma once
 #include "utility/filesystem/filesystem.h"
 
-namespace sigma::detail {
+namespace utility::detail {
 	/**
 	 * \brief Utility string container class with support for caret movements.
 	 */
@@ -14,7 +14,7 @@ namespace sigma::detail {
 		 * \param string String to use as the base of the string accessor
 		 */
 		string_accessor(const std::string& string);
-		string_accessor(std::shared_ptr<text_file> file);
+		string_accessor(ptr<text_file> file);
 
 		/**
 		 * \brief Increments the caret location.

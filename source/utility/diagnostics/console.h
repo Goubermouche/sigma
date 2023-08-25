@@ -1,7 +1,7 @@
 #pragma once
 #include "utility/types.h"
 
-namespace sigma {
+namespace utility {
 	struct color_value {
 		const char* ansi_code;
 	};

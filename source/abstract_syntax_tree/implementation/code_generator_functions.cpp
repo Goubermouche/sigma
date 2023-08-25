@@ -1,10 +1,10 @@
-#include "code_generator.h"
+#include "abstract_syntax_tree_visitor.h"
 
 #include "abstract_syntax_tree/functions/function_call_node.h"
 #include "abstract_syntax_tree/functions/function_node.h"
 
 namespace sigma {
-	outcome::result<value_ptr> code_generator::visit_function_node(
+	utility::outcome::result<value_ptr> abstract_syntax_tree_visitor::visit_function_node(
 		function_node& node, 
 		const code_generation_context& context
 	) {
@@ -51,9 +51,9 @@ namespace sigma {
 			)
 		)) {
 			// failed to insert the function into the registry - function has already been defined before
-			return outcome::failure(
-				error::emit<error_code::function_already_defined>(
-					file_range{}, // node.get_declared_position(),
+			return utility::outcome::failure(
+				utility::error::emit<utility::error_code::function_already_defined>(
+					utility::file_range{}, // node.get_declared_position(),
 					node.get_function_identifier()
 				)
 			); // return on failure
@@ -116,7 +116,7 @@ namespace sigma {
 			// emit the relevant warning
 			// check if the return type is non-void
 			if(node.get_function_return_type() != type(type::base::empty, 0)) {
-				warning::emit<warning_code::implicit_function_return_generated>(
+				utility::warning::emit<utility::warning_code::implicit_function_return_generated>(
 					node.get_declared_range(),
 					node.get_function_identifier()
 				)->print();
@@ -142,7 +142,7 @@ namespace sigma {
 		);
 	}
 
-	outcome::result<value_ptr> code_generator::visit_function_call_node(
+	utility::outcome::result<value_ptr> abstract_syntax_tree_visitor::visit_function_call_node(
 		function_call_node& node, 
 		const code_generation_context& context
 	) {
@@ -155,9 +155,9 @@ namespace sigma {
 
 		// check if it exists
 		if(!func) {
-			return outcome::failure(
-				error::emit<error_code::function_cannot_be_found>(
-					file_range{}, //node.get_declared_position(),
+			return utility::outcome::failure(
+				utility::error::emit<utility::error_code::function_cannot_be_found>(
+					utility::file_range{}, //node.get_declared_position(),
 					node.get_function_identifier()
 				)
 			); // return on failure
@@ -168,9 +168,9 @@ namespace sigma {
 
 		// check if the argument counts match
 		if(!func->is_variadic() && required_arguments.size() != given_arguments.size()) {
-			return outcome::failure(
-				error::emit<error_code::function_argument_count_mismatch>(
-					file_range{}, //node.get_declared_position(),
+			return utility::outcome::failure(
+				utility::error::emit<utility::error_code::function_argument_count_mismatch>(
+					utility::file_range{}, //node.get_declared_position(),
 					node.get_function_identifier()
 				)
 			); // return on failure

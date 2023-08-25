@@ -71,6 +71,7 @@
     <ClInclude Include="filesystem\filesystem.h" />
     <ClInclude Include="format.h" />
     <ClInclude Include="macros.h" />
+    <ClInclude Include="memory.h" />
     <ClInclude Include="string_helper.h" />
     <ClInclude Include="timer.h" />
     <ClInclude Include="types.h" />
@@ -85,6 +86,7 @@
     <ClCompile Include="filesystem\file_types\raw_file.cpp" />
     <ClCompile Include="filesystem\file_types\text_file.cpp" />
     <ClCompile Include="filesystem\filesystem.cpp" />
+    <ClCompile Include="memory.cpp" />
     <ClCompile Include="string_helper.cpp" />
     <ClCompile Include="timer.cpp" />
   </ItemGroup>

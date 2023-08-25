@@ -1,7 +1,7 @@
 #pragma once
 #include "utility/macros.h"
 
-namespace sigma::detail {
+namespace utility::detail {
 	template<typename key_type, typename value_type>
 	class directed_graph_node {
     public:

@@ -2,15 +2,15 @@
 
 namespace sigma {
 	numerical_literal_node::numerical_literal_node(
-		const file_range& range,
+		const utility::file_range& range,
 		const std::string& value,
 		type preferred_type
 	) : node(range),
 	m_value(value),
 	m_preferred_type(preferred_type) {}
 
-	outcome::result<value_ptr> numerical_literal_node::accept(
-		code_generator_template& visitor, 
+	utility::outcome::result<value_ptr> numerical_literal_node::accept(
+		abstract_syntax_tree_visitor_template& visitor, 
 		const code_generation_context& context
 	) {
 		return visitor.visit_numerical_literal_node(*this, context);
@@ -28,15 +28,15 @@ namespace sigma {
 			is_last
 		);
 
-		console::out
+		utility::console::out
 			<< "'"
 			<< AST_NODE_TYPE_COLOR
 			<< m_preferred_type.to_string()
-			<< color::white
+			<< utility::color::white
 			<< "' '"
 			<< AST_NODE_NUMERICAL_LITERAL_COLOR
 			<< m_value
-			<< color::white
+			<< utility::color::white
 			<< "'\n";
 	}
 

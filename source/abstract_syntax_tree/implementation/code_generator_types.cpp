@@ -1,4 +1,4 @@
-#include "code_generator.h"
+#include "abstract_syntax_tree_visitor.h"
 
 #include "abstract_syntax_tree/keywords/types/char_node.h"
 #include "abstract_syntax_tree/keywords/types/string_node.h"
@@ -6,7 +6,7 @@
 #include "abstract_syntax_tree/keywords/types/numerical_literal_node.h"
 
 namespace sigma {
-	outcome::result<value_ptr> code_generator::visit_numerical_literal_node(
+	utility::outcome::result<value_ptr> abstract_syntax_tree_visitor::visit_numerical_literal_node(
 		numerical_literal_node& node,
 		const code_generation_context& context
 	) {
@@ -14,9 +14,9 @@ namespace sigma {
 		const type literal_type = contextually_derived_type == type::unknown() ? node.get_preferred_type() : contextually_derived_type;
 
 		if (literal_type.get_pointer_level() > 0) {
-			return outcome::failure(
-				error::emit<error_code::cannot_declare_numerical_using_pointer>(
-					file_range{} // node.get_declared_position()
+			return utility::outcome::failure(
+				utility::error::emit<utility::error_code::cannot_declare_numerical_using_pointer>(
+					utility::file_range{} // node.get_declared_position()
 				)
 			); // return on failure
 		}
@@ -127,16 +127,16 @@ namespace sigma {
 				)
 			);
 		default:
-			return outcome::failure(
-				error::emit<error_code::cannot_declare_numerical_using_type>(
-					file_range{}, //node.get_declared_position(), 
+			return utility::outcome::failure(
+				utility::error::emit<utility::error_code::cannot_declare_numerical_using_type>(
+					utility::file_range{}, //node.get_declared_position(), 
 					literal_type
 				)
 			); // return on failure
 		}
 	}
 
-	outcome::result<value_ptr> code_generator::visit_keyword_string_node(
+	utility::outcome::result<value_ptr> abstract_syntax_tree_visitor::visit_keyword_string_node(
 		string_node& node,
 		const code_generation_context& context
 	) {
@@ -179,7 +179,7 @@ namespace sigma {
 		);
 	}
 
-	outcome::result<value_ptr> code_generator::visit_keyword_char_node(
+	utility::outcome::result<value_ptr> abstract_syntax_tree_visitor::visit_keyword_char_node(
 		char_node& node,
 		const code_generation_context& context
 	) {
@@ -188,7 +188,7 @@ namespace sigma {
 		return create_character(node.get_value());
 	}
 
-	outcome::result<value_ptr> code_generator::visit_keyword_bool_node(
+	utility::outcome::result<value_ptr> abstract_syntax_tree_visitor::visit_keyword_bool_node(
 		bool_node& node, 
 		const code_generation_context& context
 	) {
@@ -197,7 +197,7 @@ namespace sigma {
 		return create_boolean(node.get_value());
 	}
 
-	value_ptr code_generator::create_boolean(bool val) const {
+	value_ptr abstract_syntax_tree_visitor::create_boolean(bool val) const {
 		return std::make_shared<value>(
 			"__bool",
 			type(type::base::boolean, 0),
@@ -208,7 +208,7 @@ namespace sigma {
 		);
 	}
 
-	value_ptr code_generator::create_character(char val) const {
+	value_ptr abstract_syntax_tree_visitor::create_character(char val) const {
 		return std::make_shared<value>(
 			"__char",
 			type(type::base::character, 0),

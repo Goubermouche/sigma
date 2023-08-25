@@ -1,6 +1,6 @@
 #pragma once
 
-#include "abstract_syntax_tree/implementation/code_generator.h"
+#include "abstract_syntax_tree/implementation/abstract_syntax_tree_visitor.h"
 #include "compiler/program_aruments/program_options.h"
 #include "dependency_tree.h"
 
@@ -47,7 +47,7 @@ namespace sigma {
 		// vectorize loops and enable auto vectorization 
 		bool vectorize = false;
 
-		static outcome::result<compiler_settings> parse_argument_list(
+		static utility::outcome::result<compiler_settings> parse_argument_list(
 			argument_list& arguments
 		);
 	};
@@ -66,31 +66,31 @@ namespace sigma {
 		 * \brief Compiles the given \a root_source_path using the underlying compiler settings and outputs an executable at the given \a target_executable_directory.
 		 * \return Optional error message containing information about a potential error.
 		 */
-		outcome::result<void> compile(
+		utility::outcome::result<void> compile(
 			const compiler_settings& settings
 		);
 	private:
-		outcome::result<void> create_object_file(
+		utility::outcome::result<void> create_object_file(
 			const filepath& path,
 			llvm::TargetMachine* machine,
-			const std::shared_ptr<code_generator_context>& context
+			const ptr<abstract_syntax_tree_context>& context
 		) const;
 
-		outcome::result<void> compile_object_file(
+		utility::outcome::result<void> compile_object_file(
 			const llvm::Triple& target_triple,
 			const filepath& object_file
 		);
 
-		outcome::result<llvm::TargetMachine*> create_target_machine(
-			const std::shared_ptr<code_generator_context>& context
+		utility::outcome::result<llvm::TargetMachine*> create_target_machine(
+			const ptr<abstract_syntax_tree_context>& context
 		) const;
 
-		outcome::result<void> compile_module(
-			const std::shared_ptr<code_generator_context>& llvm_context
+		utility::outcome::result<void> compile_module(
+			const ptr<abstract_syntax_tree_context>& llvm_context
 		);
 
-		static outcome::result<void> verify_main_context(
-			const std::shared_ptr<code_generator_context>& context
+		static utility::outcome::result<void> verify_main_context(
+			const ptr<abstract_syntax_tree_context>& context
 		);
 	private:
 		compiler_settings m_settings;

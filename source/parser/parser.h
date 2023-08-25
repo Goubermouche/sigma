@@ -9,85 +9,85 @@ namespace sigma {
 		parser(const token_list& token_list);
 		virtual ~parser() = default;
 
-		outcome::result<std::shared_ptr<abstract_syntax_tree>> parse();
-		std::shared_ptr<abstract_syntax_tree> get_abstract_syntax_tree() const;
+		utility::outcome::result<ptr<abstract_syntax_tree>> parse();
+		ptr<abstract_syntax_tree> get_abstract_syntax_tree() const;
 		const std::vector<u64>& get_include_directive_indices() const;
 	private:
-		outcome::result<node_ptr> parse_function_definition();
-		outcome::result<node_ptr> parse_global_statement();
-		outcome::result<void> parse_include_directive();
-		outcome::result<std::vector<node_ptr>> parse_local_statements();
-		outcome::result<node_ptr> parse_local_statement();
-		outcome::result<node_ptr> parse_local_statement_identifier();
-		outcome::result<node_ptr> parse_if_else_statement();
-		outcome::result<node_ptr> parse_while_loop();
-		outcome::result<node_ptr> parse_loop_increment();
-		outcome::result<node_ptr> parse_for_loop();
-		outcome::result<node_ptr> parse_compound_operation(
+		utility::outcome::result<node_ptr> parse_function_definition();
+		utility::outcome::result<node_ptr> parse_global_statement();
+		utility::outcome::result<void> parse_include_directive();
+		utility::outcome::result<std::vector<node_ptr>> parse_local_statements();
+		utility::outcome::result<node_ptr> parse_local_statement();
+		utility::outcome::result<node_ptr> parse_local_statement_identifier();
+		utility::outcome::result<node_ptr> parse_if_else_statement();
+		utility::outcome::result<node_ptr> parse_while_loop();
+		utility::outcome::result<node_ptr> parse_loop_increment();
+		utility::outcome::result<node_ptr> parse_for_loop();
+		utility::outcome::result<node_ptr> parse_compound_operation(
 			node_ptr left_operand
 		);
 
-		outcome::result<node_ptr> parse_variable_access();
-		outcome::result<node_ptr> parse_variable();
-		outcome::result<node_ptr> parse_assignment();
-		outcome::result<node_ptr> parse_array_assignment();
-		outcome::result<node_ptr> parse_array_access();
-		outcome::result<node_ptr> parse_function_call();
-		outcome::result<node_ptr> parse_return_statement();
-		outcome::result<node_ptr> parse_declaration(
+		utility::outcome::result<node_ptr> parse_variable_access();
+		utility::outcome::result<node_ptr> parse_variable();
+		utility::outcome::result<node_ptr> parse_assignment();
+		utility::outcome::result<node_ptr> parse_array_assignment();
+		utility::outcome::result<node_ptr> parse_array_access();
+		utility::outcome::result<node_ptr> parse_function_call();
+		utility::outcome::result<node_ptr> parse_return_statement();
+		utility::outcome::result<node_ptr> parse_declaration(
 			bool is_global
 		);
 
-		outcome::result<node_ptr> parse_expression(
+		utility::outcome::result<node_ptr> parse_expression(
 			type expression_type = type::unknown()
 		);
 
-		outcome::result<node_ptr> parse_logical_conjunction(
+		utility::outcome::result<node_ptr> parse_logical_conjunction(
 			type expression_type
 		);
 
-		outcome::result<node_ptr> parse_logical_disjunction(
+		utility::outcome::result<node_ptr> parse_logical_disjunction(
 			type expression_type
 		);
 
-		outcome::result<node_ptr> parse_comparison(
+		utility::outcome::result<node_ptr> parse_comparison(
 			type expression_type
 		);
 
-		outcome::result<node_ptr> parse_term(
+		utility::outcome::result<node_ptr> parse_term(
 			type expression_type
 		);
 
-		outcome::result<node_ptr> parse_factor(
+		utility::outcome::result<node_ptr> parse_factor(
 			type expression_type
 		);
 
-		outcome::result<node_ptr> parse_pre_operator();
+		utility::outcome::result<node_ptr> parse_pre_operator();
 
-		outcome::result<node_ptr> parse_post_operator(
+		utility::outcome::result<node_ptr> parse_post_operator(
 			node_ptr operand
 		);
 
-		outcome::result<node_ptr> parse_primary(
+		utility::outcome::result<node_ptr> parse_primary(
 			type expression_type
 		);
 
-		outcome::result<node_ptr> parse_number(
+		utility::outcome::result<node_ptr> parse_number(
 			type expression_type = type::unknown()
 		);
 
-		outcome::result<node_ptr> parse_char();
-		outcome::result<node_ptr> parse_string();
-		outcome::result<node_ptr> parse_bool();
-		outcome::result<node_ptr> parse_break_keyword();
+		utility::outcome::result<node_ptr> parse_char();
+		utility::outcome::result<node_ptr> parse_string();
+		utility::outcome::result<node_ptr> parse_bool();
+		utility::outcome::result<node_ptr> parse_break_keyword();
 
-		outcome::result<node_ptr> parse_negative_number(
+		utility::outcome::result<node_ptr> parse_negative_number(
 			type expression_type = type::unknown()
 		);
 
-		outcome::result<node_ptr> parse_new_allocation();
-		outcome::result<node_ptr> parse_primary_identifier();
-		outcome::result<node_ptr> parse_deep_expression(
+		utility::outcome::result<node_ptr> parse_new_allocation();
+		utility::outcome::result<node_ptr> parse_primary_identifier();
+		utility::outcome::result<node_ptr> parse_deep_expression(
 			type expression_type
 		);
 
@@ -107,10 +107,10 @@ namespace sigma {
 			type expression_type
 		) const;
 
-		outcome::result<type> parse_type();
+		utility::outcome::result<type> parse_type();
 	private:
 		token_list m_token_list;
-		std::shared_ptr<abstract_syntax_tree> m_abstract_syntax_tree;
+		ptr<abstract_syntax_tree> m_abstract_syntax_tree;
 		std::vector<u64> m_include_directive_indices;
 		u64 m_top_level_abstract_syntax_tree_node_count = 0;
 	};

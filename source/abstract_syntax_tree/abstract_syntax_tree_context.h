@@ -7,23 +7,23 @@ namespace sigma {
 	/**
 	 * \brief Code generator context, holds LLVM variables that are relevant to the code generation process. 
 	 */
-	class code_generator_context {
+	class abstract_syntax_tree_context {
 	public:
-		code_generator_context();
+		abstract_syntax_tree_context();
 
 		llvm::LLVMContext& get_context();
 		llvm::IRBuilder<>& get_builder();
-		std::shared_ptr<llvm::Module> get_module();
-		std::shared_ptr<llvm::Module> get_module() const;
+		ptr<llvm::Module> get_module();
+		ptr<llvm::Module> get_module() const;
 
 		function_registry& get_function_registry();
 		variable_registry& get_variable_registry();
 
-		outcome::result<void> concatenate_function_registry(
+		utility::outcome::result<void> concatenate_function_registry(
 			const function_registry& registry
 		);
 
-		outcome::result<void> concatenate_variable_registry(
+		utility::outcome::result<void> concatenate_variable_registry(
 			const variable_registry& registry
 		);
 
@@ -31,7 +31,7 @@ namespace sigma {
 	private:
 		llvm::LLVMContext m_context;
 		llvm::IRBuilder<> m_builder;
-		std::shared_ptr<llvm::Module> m_module;
+		ptr<llvm::Module> m_module;
 		
 		function_registry m_function_registry;
 		variable_registry m_variable_registry;

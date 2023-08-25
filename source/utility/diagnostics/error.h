@@ -1,7 +1,7 @@
 #pragma once
 #include "utility/diagnostics/diagnostics.h"
 
-namespace sigma {
+namespace utility {
 	enum class error_code {
 		// ******************************************************************
 		// system
@@ -109,7 +109,7 @@ namespace sigma {
 	class error {
 	public:
 		template<error_code code, typename...argument_types>
-		static std::shared_ptr<error_message> emit(argument_types... args) {
+		static ptr<error_message> emit(argument_types... args) {
 			const auto it = m_error_templates.find(code);
 			if (it == m_error_templates.end()) {}
 
@@ -117,7 +117,7 @@ namespace sigma {
 		}
 
 		template<error_code code, typename...argument_types>
-		static std::shared_ptr<error_message_range> emit(
+		static ptr<error_message_range> emit(
 			const file_range& range,
 			argument_types... args
 		) {
@@ -222,17 +222,17 @@ namespace sigma {
 			 * \param error Error to use as the reason for failure
 			 */
 			failure(
-				std::shared_ptr<error_message> error
+				ptr<error_message> error
 			) : m_error(error) {}
 
 			/**
 			 * \brief Returns the contained error.
 			 */
-			std::shared_ptr<error_message> get_error() const {
+			ptr<error_message> get_error() const {
 				return m_error;
 			}
 		private:
-			std::shared_ptr<error_message> m_error;
+			ptr<error_message> m_error;
 		};
 
 		/**
@@ -302,11 +302,11 @@ namespace sigma {
 			/**
 			 * \brief Returns the encapsulated error.
 			 */
-			const std::shared_ptr<error_message> get_error() const {
+			const ptr<error_message> get_error() const {
 				return m_value.error();
 			}
 		private:
-			std::expected<type, std::shared_ptr<error_message>> m_value;
+			std::expected<type, ptr<error_message>> m_value;
 		};
 
 		/**
@@ -339,11 +339,11 @@ namespace sigma {
 				return m_value.has_value();
 			}
 
-			std::shared_ptr<error_message> get_error() const {
+			ptr<error_message> get_error() const {
 				return m_value.error();
 			}
 		private:
-			std::expected<void, std::shared_ptr<error_message>> m_value;
+			std::expected<void, ptr<error_message>> m_value;
 		};
 	}
 }

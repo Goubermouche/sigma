@@ -2,7 +2,7 @@
 
 namespace sigma {
 	operator_binary_base::operator_binary_base(
-		const file_range& range,
+		const utility::file_range& range,
 		const node_ptr& left_expression_node,
 		const node_ptr& right_expression_node
 	) : node(range),

@@ -1,7 +1,7 @@
 #include "text_file.h"
 #include "utility/diagnostics/error.h"
 
-namespace sigma {
+namespace utility {
 	text_file::text_file(
 		const filepath& path, 
 		const std::vector<std::string>& lines
@@ -16,7 +16,7 @@ namespace sigma {
 		return m_lines;
 	}
 
-	 outcome::result<std::shared_ptr<text_file>> text_file::load(
+	 outcome::result<ptr<text_file>> text_file::load(
 	 	const filepath& path
 	 ) {
 		 OUTCOME_TRY(verify(path));

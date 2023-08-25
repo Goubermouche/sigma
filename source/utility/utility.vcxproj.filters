@@ -47,6 +47,7 @@
     </ClInclude>
     <ClInclude Include="format.h" />
     <ClInclude Include="macros.h" />
+    <ClInclude Include="memory.h" />
     <ClInclude Include="string_helper.h" />
     <ClInclude Include="timer.h" />
     <ClInclude Include="types.h" />
@@ -79,6 +80,7 @@
     <ClCompile Include="filesystem\filesystem.cpp">
       <Filter>filesystem</Filter>
     </ClCompile>
+    <ClCompile Include="memory.cpp" />
     <ClCompile Include="string_helper.cpp" />
     <ClCompile Include="timer.cpp" />
   </ItemGroup>

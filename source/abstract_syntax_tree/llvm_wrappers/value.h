@@ -3,7 +3,7 @@
 
 namespace sigma {
 	class value;
-	using value_ptr = std::shared_ptr<value>;
+	using value_ptr = ptr<value>;
 
 	/**
 	 * \brief Wrapper around an llvm::Value*, provides utilities such as additional type information

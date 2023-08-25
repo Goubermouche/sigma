@@ -1,7 +1,7 @@
 #pragma once
 
 #include "parser/parser.h"
-#include "abstract_syntax_tree/code_generator_template.h"
+#include "abstract_syntax_tree/abstract_syntax_tree_visitor_template.h"
 #include "abstract_syntax_tree/llvm_wrappers/code_generation_context.h"
 
 #define CTOR_STRUCT_TYPE                                \
@@ -17,24 +17,24 @@ namespace sigma {
 	/**
 	 * \brief Evaluator that implements the codegen visitor to generate LLVM IR.
 	 */
-	class code_generator : public code_generator_template {
+	class abstract_syntax_tree_visitor : public abstract_syntax_tree_visitor_template {
 	public:
-		code_generator(
-			const std::shared_ptr<abstract_syntax_tree>& abstract_syntax_tree
+		abstract_syntax_tree_visitor(
+			const ptr<abstract_syntax_tree>& abstract_syntax_tree
 		);
 
-		outcome::result<std::shared_ptr<code_generator_context>> generate();
+		utility::outcome::result<ptr<abstract_syntax_tree_context>> generate();
 	private:
 		// void initialize_global_variables() const;
 
 		// functions
 		// codegen_visitor_functions.cpp
-		outcome::result<value_ptr> visit_function_node(
+		utility::outcome::result<value_ptr> visit_function_node(
 			function_node& node, 
 			const code_generation_context& context
 		) override;
 
-		outcome::result<value_ptr> visit_function_call_node(
+		utility::outcome::result<value_ptr> visit_function_call_node(
 			function_call_node& node,
 			const code_generation_context& context
 		) override;
@@ -43,48 +43,48 @@ namespace sigma {
 
 		// variables
 		// codegen_visitor_variables.cpp
-		outcome::result<value_ptr> visit_assignment_node(
+		utility::outcome::result<value_ptr> visit_assignment_node(
 			assignment_node& node,
 			const code_generation_context& context
 		) override;
 
-		outcome::result<value_ptr> visit_variable_access_node(
+		utility::outcome::result<value_ptr> visit_variable_access_node(
 			variable_access_node& node, 
 			const code_generation_context& context
 		) override;
 
-		outcome::result<value_ptr> visit_local_declaration_node(
+		utility::outcome::result<value_ptr> visit_local_declaration_node(
 			local_declaration_node& node,
 			const code_generation_context& context
 		) override;
 
-		outcome::result<value_ptr> visit_global_declaration_node(
+		utility::outcome::result<value_ptr> visit_global_declaration_node(
 			global_declaration_node& node,
 			const code_generation_context& context
 		) override;
 
-		outcome::result<value_ptr> visit_allocation_node(
+		utility::outcome::result<value_ptr> visit_allocation_node(
 			array_allocation_node& node, 
 			const code_generation_context& context
 		) override;
 
-		outcome::result<value_ptr> visit_array_access_node(
+		utility::outcome::result<value_ptr> visit_array_access_node(
 			array_access_node& node,
 			const code_generation_context& context
 		) override;
 
-		outcome::result<value_ptr> visit_array_assignment_node(
+		utility::outcome::result<value_ptr> visit_array_assignment_node(
 			array_assignment_node& node, 
 			const code_generation_context& context
 		) override;
 
-		outcome::result<value_ptr> visit_variable_node(
+		utility::outcome::result<value_ptr> visit_variable_node(
 			variable_node& node, 
 			const code_generation_context& context
 		) override;
 
 		// utility
-		outcome::result<value_ptr> get_declaration_value(
+		utility::outcome::result<value_ptr> get_declaration_value(
 			const declaration_node& node,
 			const code_generation_context& context
 		);
@@ -95,7 +95,7 @@ namespace sigma {
 		 * \param right_operand Right operand
 		 * \return Expected - value(operation result, operation precision, left operand result), error received from inner accept invocations.
 		 */
-		outcome::result<std::tuple<llvm::Value*, type, value_ptr>> create_add_operation(
+		utility::outcome::result<std::tuple<llvm::Value*, type, value_ptr>> create_add_operation(
 			node_ptr left_operand,
 			node_ptr right_operand
 		);
@@ -106,7 +106,7 @@ namespace sigma {
 		 * \param right_operand Right operand
 		 * \return Expected - value(operation result, operation precision, left operand result), error received from inner accept invocations.
 		 */
-		outcome::result<std::tuple<llvm::Value*, type, value_ptr>> create_sub_operation(
+		utility::outcome::result<std::tuple<llvm::Value*, type, value_ptr>> create_sub_operation(
 			node_ptr left_operand,
 			node_ptr right_operand
 		);
@@ -117,7 +117,7 @@ namespace sigma {
 		 * \param right_operand Right operand
 		 * \return Expected - value(operation result, operation precision, left operand result), error received from inner accept invocations.
 		 */
-		outcome::result<std::tuple<llvm::Value*, type, value_ptr>> create_mul_operation(
+		utility::outcome::result<std::tuple<llvm::Value*, type, value_ptr>> create_mul_operation(
 			node_ptr left_operand,
 			node_ptr right_operand
 		);
@@ -128,7 +128,7 @@ namespace sigma {
 		 * \param right_operand Right operand
 		 * \return Expected - value(operation result, operation precision, left operand result), error received from inner accept invocations.
 		 */
-		outcome::result<std::tuple<llvm::Value*, type, value_ptr>> create_div_operation(
+		utility::outcome::result<std::tuple<llvm::Value*, type, value_ptr>> create_div_operation(
 			node_ptr left_operand,
 			node_ptr right_operand
 		);
@@ -139,56 +139,56 @@ namespace sigma {
 		 * \param right_operand Right operand
 		 * \return Expected - value(operation result, operation precision, left operand result), error received from inner accept invocations.
 		 */
-		outcome::result<std::tuple<llvm::Value*, type, value_ptr>> create_mod_operation(
+		utility::outcome::result<std::tuple<llvm::Value*, type, value_ptr>> create_mod_operation(
 			node_ptr left_operand,
 			node_ptr right_operand
 		);
 
 		// flow control
 		// codegen_visitor_flow_control.cpp
-		outcome::result<value_ptr> visit_return_node(
+		utility::outcome::result<value_ptr> visit_return_node(
 			return_node& node,
 			const code_generation_context& context
 		) override;
 
-		outcome::result<value_ptr> visit_if_else_node(
+		utility::outcome::result<value_ptr> visit_if_else_node(
 			if_else_node& node, 
 			const code_generation_context& context
 		) override;
 
-		outcome::result<value_ptr> visit_while_node(
+		utility::outcome::result<value_ptr> visit_while_node(
 			while_node& node, 
 			const code_generation_context& context
 		) override;
 
-		outcome::result<value_ptr> visit_for_node(
+		utility::outcome::result<value_ptr> visit_for_node(
 			for_node& node,
 			const code_generation_context& context
 		) override;
 
-		outcome::result<value_ptr> visit_break_node(
+		utility::outcome::result<value_ptr> visit_break_node(
 			break_node& node, 
 			const code_generation_context& context
 		) override;
 
 		// types
 		// codegen_visitor_types.cpp
-		outcome::result<value_ptr> visit_numerical_literal_node(
+		utility::outcome::result<value_ptr> visit_numerical_literal_node(
 			numerical_literal_node& node, 
 			const code_generation_context& context
 		) override;
 
-		outcome::result<value_ptr> visit_keyword_char_node(
+		utility::outcome::result<value_ptr> visit_keyword_char_node(
 			char_node& node, 
 			const code_generation_context& context
 		) override;
 
-		outcome::result<value_ptr> visit_keyword_string_node(
+		utility::outcome::result<value_ptr> visit_keyword_string_node(
 			string_node& node,
 			const code_generation_context& context
 		) override;
 
-		outcome::result<value_ptr> visit_keyword_bool_node(
+		utility::outcome::result<value_ptr> visit_keyword_bool_node(
 			bool_node& node, 
 			const code_generation_context& context
 		) override;
@@ -202,163 +202,163 @@ namespace sigma {
 		// codegen_visitor_operators.cpp
 		// unary
 		// arithmetic
-		outcome::result<value_ptr> visit_operator_post_decrement_node(
+		utility::outcome::result<value_ptr> visit_operator_post_decrement_node(
 			operator_post_decrement_node& node,
 			const code_generation_context& context
 		) override;
 
-		outcome::result<value_ptr> visit_operator_post_increment_node(
+		utility::outcome::result<value_ptr> visit_operator_post_increment_node(
 			operator_post_increment_node& node, 
 			const code_generation_context& context
 		) override;
 
-		outcome::result<value_ptr> visit_operator_pre_decrement_node(
+		utility::outcome::result<value_ptr> visit_operator_pre_decrement_node(
 			operator_pre_decrement_node& node,
 			const code_generation_context& context
 		) override;
 
-		outcome::result<value_ptr> visit_operator_pre_increment_node(
+		utility::outcome::result<value_ptr> visit_operator_pre_increment_node(
 			operator_pre_increment_node& node,
 			const code_generation_context& context
 		) override;
 
 		// bitwise
-		outcome::result<value_ptr> visit_operator_bitwise_not_node(
+		utility::outcome::result<value_ptr> visit_operator_bitwise_not_node(
 			operator_bitwise_not_node& node,
 			const code_generation_context& context
 		) override;
 
-		outcome::result<value_ptr> visit_operator_address_of_node(
+		utility::outcome::result<value_ptr> visit_operator_address_of_node(
 			operator_address_of_node& node,
 			const code_generation_context& context
 		) override;
 
-		outcome::result<value_ptr> visit_operator_dereference_node(
+		utility::outcome::result<value_ptr> visit_operator_dereference_node(
 			operator_dereference_node& node,
 			const code_generation_context& context
 		) override;
 
 		// logical
-		outcome::result<value_ptr> visit_operator_not_node(
+		utility::outcome::result<value_ptr> visit_operator_not_node(
 			operator_not_node& node,
 			const code_generation_context& context
 		) override;
 
 		// binary
 		// arithmetic
-		outcome::result<value_ptr> visit_operator_addition_assignment_node(
+		utility::outcome::result<value_ptr> visit_operator_addition_assignment_node(
 			operator_addition_assignment_node& node,
 			const code_generation_context& context
 		) override;
 
-		outcome::result<value_ptr> visit_operator_addition_node(
+		utility::outcome::result<value_ptr> visit_operator_addition_node(
 			operator_addition_node& node, 
 			const code_generation_context& context
 		) override;
 
-		outcome::result<value_ptr> visit_operator_subtraction_assignment_node(
+		utility::outcome::result<value_ptr> visit_operator_subtraction_assignment_node(
 			operator_subtraction_assignment_node& node,
 			const code_generation_context& context
 		) override;
 
-		outcome::result<value_ptr> visit_operator_subtraction_node(
+		utility::outcome::result<value_ptr> visit_operator_subtraction_node(
 			operator_subtraction_node& node, 
 			const code_generation_context& context
 		) override;
 
-		outcome::result<value_ptr> visit_operator_multiplication_assignment_node(
+		utility::outcome::result<value_ptr> visit_operator_multiplication_assignment_node(
 			operator_multiplication_assignment_node& node,
 			const code_generation_context& context
 		) override;
 
-		outcome::result<value_ptr> visit_operator_multiplication_node(
+		utility::outcome::result<value_ptr> visit_operator_multiplication_node(
 			operator_multiplication_node& node, 
 			const code_generation_context& context
 		) override;
 
-		outcome::result<value_ptr> visit_operator_division_assignment_node(
+		utility::outcome::result<value_ptr> visit_operator_division_assignment_node(
 			operator_division_assignment_node& node,
 			const code_generation_context& context
 		) override;
 
-		outcome::result<value_ptr> visit_operator_division_node(
+		utility::outcome::result<value_ptr> visit_operator_division_node(
 			operator_division_node& node, 
 			const code_generation_context& context
 		) override;
 
-		outcome::result<value_ptr> visit_operator_modulo_assignment_node(
+		utility::outcome::result<value_ptr> visit_operator_modulo_assignment_node(
 			operator_modulo_assignment_node& node, 
 			const code_generation_context& context
 		) override;
 
-		outcome::result<value_ptr> visit_operator_modulo_node(
+		utility::outcome::result<value_ptr> visit_operator_modulo_node(
 			operator_modulo_node& node,
 			const code_generation_context& context
 		) override;
 
 		// bitwise
-		outcome::result<value_ptr> visit_operator_bitwise_and_node(
+		utility::outcome::result<value_ptr> visit_operator_bitwise_and_node(
 			operator_bitwise_and_node& node,
 			const code_generation_context& context
 		) override;
 
-		outcome::result<value_ptr> visit_operator_bitwise_or_node(
+		utility::outcome::result<value_ptr> visit_operator_bitwise_or_node(
 			operator_bitwise_or_node& node,
 			const code_generation_context& context
 		) override;
 
-		outcome::result<value_ptr> visit_operator_bitwise_left_shift_node(
+		utility::outcome::result<value_ptr> visit_operator_bitwise_left_shift_node(
 			operator_bitwise_left_shift_node& node,
 			const code_generation_context& context
 		) override;
 
-		outcome::result<value_ptr> visit_operator_bitwise_right_shift_node(
+		utility::outcome::result<value_ptr> visit_operator_bitwise_right_shift_node(
 			operator_bitwise_right_shift_node& node,
 			const code_generation_context& context
 		) override;
 
-		outcome::result<value_ptr> visit_operator_bitwise_xor_node(
+		utility::outcome::result<value_ptr> visit_operator_bitwise_xor_node(
 			operator_bitwise_xor_node& node,
 			const code_generation_context& context
 		) override;
 
 		// logical
-		outcome::result<value_ptr> visit_operator_logical_conjunction_node(
+		utility::outcome::result<value_ptr> visit_operator_logical_conjunction_node(
 			operator_conjunction_node& node, 
 			const code_generation_context& context
 		) override;
 
-		outcome::result<value_ptr> visit_operator_logical_disjunction_node(
+		utility::outcome::result<value_ptr> visit_operator_logical_disjunction_node(
 			operator_disjunction_node& node,
 			const code_generation_context& context
 		) override;
 
-		outcome::result<value_ptr> visit_operator_greater_than_node(
+		utility::outcome::result<value_ptr> visit_operator_greater_than_node(
 			operator_greater_than_node& node,
 			const code_generation_context& context
 		) override;
 
-		outcome::result<value_ptr> visit_operator_greater_than_equal_to_node(
+		utility::outcome::result<value_ptr> visit_operator_greater_than_equal_to_node(
 			operator_greater_than_equal_to_node& node,
 			const code_generation_context& context
 		) override;
 
-		outcome::result<value_ptr> visit_operator_less_than_node(
+		utility::outcome::result<value_ptr> visit_operator_less_than_node(
 			operator_less_than_node& node, 
 			const code_generation_context& context
 		) override;
 
-		outcome::result<value_ptr> visit_operator_less_than_equal_to_node(
+		utility::outcome::result<value_ptr> visit_operator_less_than_equal_to_node(
 			operator_less_than_equal_to_node& node, 
 			const code_generation_context& context
 		) override;
 
-		outcome::result<value_ptr> visit_operator_equals_node(
+		utility::outcome::result<value_ptr> visit_operator_equals_node(
 			operator_equals_node& node,
 			const code_generation_context& context
 		) override;
 
-		outcome::result<value_ptr> visit_operator_not_equals_node(
+		utility::outcome::result<value_ptr> visit_operator_not_equals_node(
 			operator_not_equals_node& node, 
 			const code_generation_context& context
 		) override;
@@ -367,10 +367,10 @@ namespace sigma {
 		llvm::Value* cast_value(
 			const value_ptr& source_value,
 			type target_type, 
-			const file_range& range
+			const utility::file_range& range
 		) const;
 	private:
-		std::shared_ptr<abstract_syntax_tree> m_abstract_syntax_tree;
-		std::shared_ptr<code_generator_context> m_context;
+		ptr<abstract_syntax_tree> m_abstract_syntax_tree;
+		ptr<abstract_syntax_tree_context> m_context;
 	};
 }

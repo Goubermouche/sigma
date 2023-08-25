@@ -2,7 +2,7 @@
 
 namespace sigma {
 	local_declaration_node::local_declaration_node(
-		const file_range& range,
+		const utility::file_range& range,
 		const type& declaration_type,
 		const std::string& declaration_identifier, 
 		const node_ptr& expression_node
@@ -13,8 +13,8 @@ namespace sigma {
 		expression_node
 	) {}
 
-	outcome::result<value_ptr> local_declaration_node::accept(
-		code_generator_template& visitor, 
+	utility::outcome::result<value_ptr> local_declaration_node::accept(
+		abstract_syntax_tree_visitor_template& visitor, 
 		const code_generation_context& context
 	) {
 		return visitor.visit_local_declaration_node(*this, context);
@@ -32,15 +32,15 @@ namespace sigma {
 			is_last
 		);
 
-		console::out
+		utility::console::out
 			<< "'"
 			<< AST_NODE_VARIABLE_COLOR 
 			<< get_declaration_identifier()
-			<< color::white
+			<< utility::color::white
 			<< "' '"
 			<< AST_NODE_TYPE_COLOR
 			<< get_declaration_type().to_string()
-			<< color::white
+			<< utility::color::white
 			<< "'\n";
 
 		const std::wstring new_prefix = get_new_prefix(depth, prefix, is_last);

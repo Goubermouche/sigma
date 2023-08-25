@@ -3,7 +3,7 @@
 #include "utility/format.h"
 #include "utility/filesystem/filesystem.h"
 
-namespace sigma {
+namespace utility {
 	namespace detail {
 		template<>
 		struct formatter<filepath> {

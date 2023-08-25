@@ -2,7 +2,7 @@
 
 namespace sigma {
 	operator_bitwise_left_shift_node::operator_bitwise_left_shift_node(
-		const file_range& range,
+		const utility::file_range& range,
 		const node_ptr& left_expression_node,
 		const node_ptr& right_expression_node
 	) : operator_binary_base(
@@ -11,8 +11,8 @@ namespace sigma {
 		right_expression_node
 	) {}
 
-	outcome::result<value_ptr> operator_bitwise_left_shift_node::accept(
-		code_generator_template& visitor, 
+	utility::outcome::result<value_ptr> operator_bitwise_left_shift_node::accept(
+		abstract_syntax_tree_visitor_template& visitor, 
 		const code_generation_context& context
 	) {
 		return visitor.visit_operator_bitwise_left_shift_node(*this, context);
@@ -24,11 +24,11 @@ namespace sigma {
 		bool is_last
 	) {
 		print_node_name(depth, prefix, "binary operator", is_last);
-		console::out
+		utility::console::out
 			<< '\''
 			<< AST_NODE_OPERATOR_COLOR
 			<< "<<"
-			<< color::white
+			<< utility::color::white
 			<< "'\n";
 
 		const std::wstring new_prefix = get_new_prefix(depth, prefix, is_last);

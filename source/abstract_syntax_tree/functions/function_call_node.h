@@ -8,13 +8,13 @@ namespace sigma {
 	class function_call_node : public node {
 	public:
 		function_call_node(
-			const file_range& range,
+			const utility::file_range& range,
 			const std::string& function_identifier,
 			const std::vector<node_ptr>& function_arguments
 		);
 
-		outcome::result<value_ptr> accept(
-			code_generator_template& visitor,
+		utility::outcome::result<value_ptr> accept(
+			abstract_syntax_tree_visitor_template& visitor,
 			const code_generation_context& context
 		) override;
 

@@ -2,13 +2,13 @@
 #include "utility/diagnostics/error.h"
 #include <llvm/Support/VirtualFileSystem.h>
 
-namespace sigma {
+namespace utility {
 	raw_file::raw_file(
 		const filepath& path, 
-		std::shared_ptr<llvm::raw_fd_ostream> stream
+		ptr<llvm::raw_fd_ostream> stream
 	) : file(path), m_stream(stream) {}
 
-	outcome::result<std::shared_ptr<raw_file>> raw_file::create(
+	outcome::result<ptr<raw_file>> raw_file::create(
 		const filepath& path
 	) {
 		OUTCOME_TRY(verify(path));
@@ -36,7 +36,7 @@ namespace sigma {
 		);
 	}
 
-	std::shared_ptr<llvm::raw_fd_ostream> raw_file::get_stream() const {
+	ptr<llvm::raw_fd_ostream> raw_file::get_stream() const {
 		return m_stream;
 	}
 

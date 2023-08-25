@@ -29,7 +29,7 @@ namespace sigma {
 		std::string current_line = intro;
 
 		m_arguments.traverse_ordered(
-			[&](const std::string& key, const std::shared_ptr<argument>& argument) {
+			[&](const std::string& key, const ptr<argument>& argument) {
 				SUPPRESS_C4100(key);
 
 				std::stringstream argument_ss;
@@ -45,7 +45,7 @@ namespace sigma {
 
 				// if adding this argument would make the line too long, print the current line and start a new one.
 				if (current_line.length() + 1 + argument_str.length() > max_line_length) {
-					console::out << current_line << '\n';
+					utility::console::out << current_line << '\n';
 					current_line = std::string(first_arg_padding, ' ') + argument_str;
 				}
 				else {
@@ -57,13 +57,13 @@ namespace sigma {
 
 		// print any remaining content on the current line.
 		if (!current_line.empty()) {
-			console::out << current_line << '\n';
+			utility::console::out << current_line << '\n';
 		}
 
-		console::out << '\n';
+		utility::console::out << '\n';
 
 		if (!m_description.empty()) {
-			console::out << m_description << "\n\n";
+			utility::console::out << m_description << "\n\n";
 		}
 
 		// print individual arguments
@@ -74,9 +74,9 @@ namespace sigma {
 		}
 
 		// required arguments
-		console::out << "required arguments:\n";
+		utility::console::out << "required arguments:\n";
 		m_arguments.traverse_ordered(
-			[max_length](const std::string& key, const std::shared_ptr<argument>& argument) {
+			[max_length](const std::string& key, const ptr<argument>& argument) {
 				SUPPRESS_C4100(key);
 
 				if (argument->is_required()) {
@@ -87,21 +87,21 @@ namespace sigma {
 						tag_section << ", " << argument->get_short_tag();
 					}
 
-					console::out
-						<< console::left << console::width(max_length + 8)
+					utility::console::out
+						<< utility::console::left << utility::console::width(max_length + 8)
 						<< tag_section.str() << argument->get_description() << '\n';
 				}
 			}
 		);
 
 		// optional arguments
-		console::out << "\noptional arguments:\n";
-		console::out
-			<< console::left << console::width(max_length + 8)
+		utility::console::out << "\noptional arguments:\n";
+		utility::console::out
+			<< utility::console::left << utility::console::width(max_length + 8)
 			<< "   --help, -h" << "show help message\n";
 
 		m_arguments.traverse_ordered(
-			[max_length](const std::string& key, const std::shared_ptr<argument>& argument) {
+			[max_length](const std::string& key, const ptr<argument>& argument) {
 				SUPPRESS_C4100(key);
 
 				if (argument->is_required() == false) {
@@ -112,8 +112,8 @@ namespace sigma {
 						tag_section << ", " << argument->get_short_tag();
 					}
 
-					console::out
-						<< console::left << console::width(max_length + 8)
+					utility::console::out
+						<< utility::console::left << utility::console::width(max_length + 8)
 						<< tag_section.str() << argument->get_description() << '\n';
 				}
 			}
@@ -132,7 +132,7 @@ namespace sigma {
 			const auto argument_it = m_arguments.find(current_argument_tag);
 
 			if (argument_it == m_arguments.end()) {
-				console::out << "cannot find argument '" << current_argument_tag << "' within the '" << m_name << "' command\n";
+				utility::console::out << "cannot find argument '" << current_argument_tag << "' within the '" << m_name << "' command\n";
 				return 1;
 			}
 

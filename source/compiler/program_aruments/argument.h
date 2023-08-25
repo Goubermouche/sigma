@@ -2,6 +2,8 @@
 #include <utility/macros.h>
 #include <utility/diagnostics/error.h>
 
+using namespace utility::types;
+
 namespace sigma {
 #define SHORT_TAG(value) '-' + value
 #define LONG_TAG(value) "--" + value
@@ -98,16 +100,16 @@ namespace sigma {
 			}
 
 			// check if the type is a container
-			if constexpr (detail::is_container<type>()) {
+			if constexpr (utility::detail::is_container<type>()) {
 				return any_cast_container<type>(m_values);
 			}
 
-			console::out << "HER€\n";
+			utility::console::out << "HERï¿½\n";
 			return std::any_cast<type>(m_values.front());
 		}
 
 		if (m_default_value.has_value()) {
-			if constexpr (detail::is_container<type>()) {
+			if constexpr (utility::detail::is_container<type>()) {
 				return any_cast_container<type>({ m_default_value });
 			}
 
@@ -126,21 +128,21 @@ namespace sigma {
 		);
 
 		void traverse_ordered(
-			const std::function<void(const std::string&, const std::shared_ptr<argument>&)>& visitor
+			const std::function<void(const std::string&, const ptr<argument>&)>& visitor
 		) const;
 
 		template<typename type>
 		type get(const std::string& name) const;
 
 		bool empty() const;
-		std::unordered_map<std::string, std::shared_ptr<argument>>::iterator find(const std::string& key);
-		std::shared_ptr<argument>& operator[](const std::string& key);
+		std::unordered_map<std::string, ptr<argument>>::iterator find(const std::string& key);
+		ptr<argument>& operator[](const std::string& key);
 
-		std::unordered_map<std::string, std::shared_ptr<argument>>::iterator begin();
-		std::unordered_map<std::string, std::shared_ptr<argument>>::iterator end();
+		std::unordered_map<std::string, ptr<argument>>::iterator begin();
+		std::unordered_map<std::string, ptr<argument>>::iterator end();
 	private:
 		std::vector<std::string> m_insertion_order;
-		std::unordered_map<std::string, std::shared_ptr<argument>> m_arguments;
+		std::unordered_map<std::string, ptr<argument>> m_arguments;
 	};
 
 	template<typename type>

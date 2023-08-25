@@ -2,15 +2,15 @@
 
 namespace sigma {
 	if_else_node::if_else_node(
-		const file_range& range,
+		const utility::file_range& range,
 		const std::vector<node_ptr>& condition_nodes,
 		const std::vector<std::vector<node_ptr>>& branch_nodes
 	) : node(range),
 	m_condition_nodes(condition_nodes),
 	m_branch_nodes(branch_nodes) {}
 
-	outcome::result<value_ptr> if_else_node::accept(
-		code_generator_template& visitor,
+	utility::outcome::result<value_ptr> if_else_node::accept(
+		abstract_syntax_tree_visitor_template& visitor,
 		const code_generation_context& context
 	) {
 		return visitor.visit_if_else_node(*this, context);
@@ -22,7 +22,7 @@ namespace sigma {
 		bool is_last
 	) {
 		print_node_name(depth, prefix, "if statement", is_last);
-		console::out << "\n";
+		utility::console::out << "\n";
 
 		const std::wstring new_prefix = get_new_prefix(depth, prefix, is_last);
 

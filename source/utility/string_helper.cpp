@@ -1,6 +1,6 @@
 #include "string_helper.h"
 
-namespace sigma::detail {
+namespace utility::detail {
     std::string format_ending(
         u64 count,
         const std::string& singular,

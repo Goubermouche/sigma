@@ -1,7 +1,7 @@
 #include "file.h"
 #include "utility/diagnostics/error.h"
 
-namespace sigma {
+namespace utility {
 	file::file(const filepath& path)
 		: m_path(path) {}
 

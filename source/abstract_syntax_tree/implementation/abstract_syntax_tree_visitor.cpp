@@ -1,13 +1,13 @@
-#include "code_generator.h"
+#include "abstract_syntax_tree_visitor.h"
 #include <llvm/IR/Verifier.h>
 
 namespace sigma {
-	code_generator::code_generator(
-		const std::shared_ptr<abstract_syntax_tree>& abstract_syntax_tree
+	abstract_syntax_tree_visitor::abstract_syntax_tree_visitor(
+		const ptr<abstract_syntax_tree>& abstract_syntax_tree
 	) : m_abstract_syntax_tree(abstract_syntax_tree),
-	m_context(std::make_shared<code_generator_context>()) {}
+	m_context(std::make_shared<abstract_syntax_tree_context>()) {}
 
-	outcome::result<std::shared_ptr<code_generator_context>> code_generator::generate() {
+	utility::outcome::result<ptr<abstract_syntax_tree_context>> abstract_syntax_tree_visitor::generate() {
 		// walk the abstract syntax tree
 		for (const node_ptr node : *m_abstract_syntax_tree) {
 			OUTCOME_TRY(node->accept(*this, {}));
@@ -16,10 +16,10 @@ namespace sigma {
 		return m_context;
 	}
 
-	llvm::Value* code_generator::cast_value(
+	llvm::Value* abstract_syntax_tree_visitor::cast_value(
 		const value_ptr& source_value,
 		type target_type, 
-		const file_range& range
+		const utility::file_range& range
 	) const {
 		// both types are the same
 		if (source_value->get_type() == target_type) {
@@ -45,7 +45,7 @@ namespace sigma {
 			//	return false;
 			//}
 
-			warning::emit<warning_code::implicit_function_type_cast>(
+			utility::warning::emit<utility::warning_code::implicit_function_type_cast>(
 				range,
 				function_return_type,
 				target_type
@@ -81,7 +81,7 @@ namespace sigma {
 		//	return false;
 		//}
 
-		warning::emit<warning_code::implicit_type_cast>(
+		utility::warning::emit<utility::warning_code::implicit_type_cast>(
 			range,
 			source_value->get_type(),
 			target_type

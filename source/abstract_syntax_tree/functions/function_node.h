@@ -9,7 +9,7 @@ namespace sigma {
 	class function_node : public node {
 	public:
 		function_node(
-			const file_range& range,
+			const utility::file_range& range,
 			const type& function_return_type,
 			bool is_var_arg,
 			const std::string& function_identifier,
@@ -17,8 +17,8 @@ namespace sigma {
 			const std::vector<node_ptr>& function_statements
 		);
 
-		outcome::result<value_ptr> accept(
-			code_generator_template& visitor,
+		utility::outcome::result<value_ptr> accept(
+			abstract_syntax_tree_visitor_template& visitor,
 			const code_generation_context& context
 		) override;
 

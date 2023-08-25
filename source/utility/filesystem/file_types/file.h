@@ -1,7 +1,7 @@
 #pragma once
 #include "utility/macros.h"
 
-namespace sigma {
+namespace utility {
 	namespace outcome {
 		template<typename type>
 		class result;

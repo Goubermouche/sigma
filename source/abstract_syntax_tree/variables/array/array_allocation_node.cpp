@@ -2,15 +2,15 @@
 
 namespace sigma {
 	array_allocation_node::array_allocation_node(
-		const file_range& range,
+		const utility::file_range& range,
 		const type& array_element_type, 
 		const node_ptr& array_element_count_node
 	) : node(range),
 	m_array_element_type(array_element_type),
 	m_array_element_count(array_element_count_node) {}
 
-	outcome::result<value_ptr> array_allocation_node::accept(
-		code_generator_template& visitor,
+	utility::outcome::result<value_ptr> array_allocation_node::accept(
+		abstract_syntax_tree_visitor_template& visitor,
 		const code_generation_context& context
 	) {
 		return visitor.visit_allocation_node(*this, context);
@@ -28,7 +28,7 @@ namespace sigma {
 			is_last
 		);
 
-		console::out << "'" + m_array_element_type.to_string() + "'\n";
+		utility::console::out << "'" + m_array_element_type.to_string() + "'\n";
 
 		const std::wstring new_prefix = get_new_prefix(depth, prefix, is_last);
 

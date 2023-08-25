@@ -9,15 +9,15 @@ namespace sigma {
 		m_graph.print();
 	}
 
-	outcome::result<void> dependency_tree::verify() const {
+	utility::outcome::result<void> dependency_tree::verify() const {
 		if(m_graph.is_acyclic() == false) {
-			return outcome::failure(error::emit<error_code::circular_dependency>());
+			return utility::outcome::failure(utility::error::emit<utility::error_code::circular_dependency>());
 		}
 
-		return outcome::success();
+		return utility::outcome::success();
 	}
 
-	outcome::result<void> dependency_tree::construct() {
+	utility::outcome::result<void> dependency_tree::construct() {
 		// recursively walk the user-defined dependencies and construct the dependency tree
 		return construct(m_root_compilation_unit_path);
 	}
@@ -26,7 +26,7 @@ namespace sigma {
 		return m_graph.size();
 	}
 
-	outcome::result<std::shared_ptr<abstract_syntax_tree>> dependency_tree::parse() {
+	utility::outcome::result<ptr<abstract_syntax_tree>> dependency_tree::parse() {
 		// parse individual files
 		for(const auto& [filepath, node] : m_graph) {
 			OUTCOME_TRY(node->get_value().parse());
@@ -61,15 +61,15 @@ namespace sigma {
 		return m_graph[m_root_compilation_unit_path].get_abstract_syntax_tree();
 	}
 
-	outcome::result<void> dependency_tree::construct(
+	utility::outcome::result<void> dependency_tree::construct(
 		const filepath& path
 	) {
 		// skip already visited files
 		if (m_graph.contains(path)) {
-			return outcome::success();
+			return utility::outcome::success();
 		}
 
-		OUTCOME_TRY(std::shared_ptr<text_file> file, text_file::load(path));
+		OUTCOME_TRY(ptr<utility::text_file> file, utility::text_file::load(path));
 		OUTCOME_TRY(verify_source_file(file));
 
 		// tokenize the current file
@@ -113,35 +113,35 @@ namespace sigma {
 			OUTCOME_TRY(construct(include));
 		}
 		
-		return outcome::success();
+		return utility::outcome::success();
 	}
 
-	outcome::result<void> dependency_tree::verify_source_file(
-		const std::shared_ptr<text_file>& file
+	utility::outcome::result<void> dependency_tree::verify_source_file(
+		const ptr<utility::text_file>& file
 	) {
 		if (file->get_extension() != LANG_FILE_EXTENSION) {
-			return outcome::failure(
-				error::emit<error_code::invalid_file_extension>(file->get_path(), LANG_FILE_EXTENSION)
+			return utility::outcome::failure(
+				utility::error::emit<utility::error_code::invalid_file_extension>(file->get_path(), LANG_FILE_EXTENSION)
 			);
 		}
 
-		return outcome::success();
+		return utility::outcome::success();
 	}
 
 	translation_unit::translation_unit(
 		const token_list& token_list
 	) : m_token_list(token_list) {}
 
-	outcome::result<void> translation_unit::parse() {
+	utility::outcome::result<void> translation_unit::parse() {
 		parser parser(m_token_list);
 
 		OUTCOME_TRY(m_abstract_syntax_tree, parser.parse());
 		m_include_directive_indices = parser.get_include_directive_indices();
 
-		return outcome::success();
+		return utility::outcome::success();
 	}
 
-	std::shared_ptr<abstract_syntax_tree> translation_unit::get_abstract_syntax_tree() const {
+	ptr<abstract_syntax_tree> translation_unit::get_abstract_syntax_tree() const {
 		return m_abstract_syntax_tree;
 	}
 

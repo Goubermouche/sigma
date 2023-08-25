@@ -1,7 +1,7 @@
 #pragma once
 #include "utility/filesystem/file_types/file.h"
 
-namespace sigma {
+namespace utility {
 	class text_file : public file {
 	public:
 		text_file() = default;
@@ -14,7 +14,7 @@ namespace sigma {
 		const std::string& get_line(uint64_t index) const;
 		const std::vector<std::string>& get_lines() const;
 
-		 static outcome::result<std::shared_ptr<text_file>> load(
+		 static outcome::result<ptr<text_file>> load(
 		 	const filepath& path
 		 );
 	protected:

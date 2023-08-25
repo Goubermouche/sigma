@@ -7,14 +7,14 @@ namespace sigma {
 
 	void token_list::print_tokens() const {
 		for (const token_data& t : m_tokens) {
-			console::out << console::left << console::width(50) << token_to_string(t.get_token());
+			utility::console::out << utility::console::left << utility::console::width(50) << token_to_string(t.get_token());
 
 			if (!t.get_value().empty()) {
 				// the value string may contain escape sequences 
-				console::out << detail::escape_string(t.get_value());
+				utility::console::out << utility::detail::escape_string(t.get_value());
 			}
 
-			console::out << '\n';
+			utility::console::out << '\n';
 		}
 	}
 
@@ -32,15 +32,15 @@ namespace sigma {
 		return m_current_token;
 	}
 
-	outcome::result<void> token_list::expect_token(token token) {
+	utility::outcome::result<void> token_list::expect_token(token token) {
 		get_token();
 
 		if (m_current_token.get_token() == token) {
-			return outcome::success();
+			return utility::outcome::success();
 		}
 
-		return outcome::failure(error::emit<error_code::parser_unexpected_token>(
-			file_range{}, // m_current_token.get_position(),
+		return utility::outcome::failure(utility::error::emit<utility::error_code::parser_unexpected_token>(
+			utility::file_range{}, // m_current_token.get_position(),
 			token,
 			m_current_token.get_token()
 		));
@@ -65,11 +65,11 @@ namespace sigma {
 		m_peek_token_index = m_main_token_index;
 	}
 
-	lexer::lexer(std::shared_ptr<text_file> file)
+	lexer::lexer(ptr<utility::text_file> file)
 		: m_source_file(file) {}
 
-	outcome::result<token_list> lexer::tokenize() {
-		m_accessor = detail::string_accessor(m_source_file);
+	utility::outcome::result<token_list> lexer::tokenize() {
+		m_accessor = utility::detail::string_accessor(m_source_file);
 
 		token tok = token::unknown;
 		while(tok != token::end_of_file) {
@@ -79,13 +79,13 @@ namespace sigma {
 				token_data{
 					tok,
 					m_value_string,
-					file_range {
+					utility::file_range {
 						m_source_file,
-						file_position {
+						utility::file_position {
 							m_current_line_index,
 							m_current_token_start_char_index
 						},
-						file_position {
+						utility::file_position {
 							m_current_line_index,
 							m_current_token_end_char_index
 						}
@@ -111,7 +111,7 @@ namespace sigma {
 		return m_last_character;
 	}
 
-	outcome::result<token> lexer::get_next_token() {
+	utility::outcome::result<token> lexer::get_next_token() {
 		// consume empty space
 		while (isspace(m_last_character) && !m_accessor.end()) {
 			get_next_char();
@@ -149,8 +149,8 @@ namespace sigma {
 		// prevent '.' characters from being located at the beginning of a token
 		// note: we may want to allow this in some cases (ie. when calling member functions)
 		if (m_last_character == '.') {
-			return outcome::failure(
-				error::emit<error_code::lexer_invalid_dot_at_start>()
+			return utility::outcome::failure(
+				utility::error::emit<utility::error_code::lexer_invalid_dot_at_start>()
 			);
 		}
 
@@ -158,7 +158,7 @@ namespace sigma {
 		return get_special_token();
 	}
 
-	outcome::result<token> lexer::get_special_token() {
+	utility::outcome::result<token> lexer::get_special_token() {
 		m_value_string = m_last_character;
 
 		const auto operator_token_short = m_special_tokens.find(m_value_string);
@@ -201,7 +201,7 @@ namespace sigma {
 		return token::identifier;
 	}
 
-	outcome::result<token> lexer::get_alphabetical_token() {
+	utility::outcome::result<token> lexer::get_alphabetical_token() {
 		m_value_string = m_last_character; // prime the value string
 
 		// consume a sequence of alphanumeric characters
@@ -211,7 +211,7 @@ namespace sigma {
 
 		// don't allow 3 or more consecutive underscore characters
 		if (m_value_string.find("___") != std::string::npos) {
-			return outcome::failure(error::emit<error_code::lexer_double_underscore>());
+			return utility::outcome::failure(utility::error::emit<utility::error_code::lexer_double_underscore>());
 		}
 
 		m_current_token_end_char_index = m_current_char_index - 2;
@@ -227,7 +227,7 @@ namespace sigma {
 		return token::identifier;
 	}
 
-	outcome::result<token> lexer::get_numerical_token() {
+	utility::outcome::result<token> lexer::get_numerical_token() {
 		m_value_string = m_last_character; // prime the value string
 		const char first_character = m_last_character; // store the first char of the sequence
 		bool dot_met = false; // keep track of whether we've met the '.' character
@@ -253,8 +253,8 @@ namespace sigma {
 		while(!isspace(m_last_character) && !m_accessor.end()) {
 			if(m_last_character == '.') {
 				if(dot_met) {
-					return outcome::failure(
-						error::emit<error_code::lexer_invalid_number_format_more_than_one_dot>()
+					return utility::outcome::failure(
+						utility::error::emit<utility::error_code::lexer_invalid_number_format_more_than_one_dot>()
 					);
 				}
 
@@ -262,8 +262,8 @@ namespace sigma {
 			}
 			else if(m_last_character == 'u') {
 				if(dot_met) {
-					return outcome::failure(
-						error::emit<error_code::lexer_invalid_number_format_unsigned_containing_dot>()
+					return utility::outcome::failure(
+						utility::error::emit<utility::error_code::lexer_invalid_number_format_unsigned_containing_dot>()
 					);
 				}
 
@@ -273,8 +273,8 @@ namespace sigma {
 			}
 			else if(m_last_character == 'f') {
 				if(!dot_met) {
-					return outcome::failure(
-						error::emit<error_code::lexer_invalid_number_format_floating_point_without_dot>()
+					return utility::outcome::failure(
+						utility::error::emit<utility::error_code::lexer_invalid_number_format_floating_point_without_dot>()
 					);
 				}
 
@@ -301,7 +301,7 @@ namespace sigma {
 		return token::number_signed;
 	}
 
-	outcome::result<std::string> lexer::get_hexadecimal_string(
+	utility::outcome::result<std::string> lexer::get_hexadecimal_string(
 		u64 max_length
 	) {
 		// the last character, at this point is an x
@@ -309,7 +309,7 @@ namespace sigma {
 		u64 parsed_count = 0;
 
 		// consume all valid hex characters within the specified range
-		while (parsed_count < max_length && detail::is_hex(get_next_char()) && !m_accessor.end()) {
+		while (parsed_count < max_length && utility::detail::is_hex(get_next_char()) && !m_accessor.end()) {
 			buffer += m_last_character;
 			parsed_count++;
 		}
@@ -317,13 +317,13 @@ namespace sigma {
 		return buffer;
 	}
 
-	outcome::result<std::string> lexer::get_binary_string(
+	utility::outcome::result<std::string> lexer::get_binary_string(
 		u64 max_length
 	) {
 		std::string buffer;
 		u64 parsed_count = 0;
 
-		while (parsed_count < max_length && detail::is_bin(get_next_char()) && !m_accessor.end()) {
+		while (parsed_count < max_length && utility::detail::is_bin(get_next_char()) && !m_accessor.end()) {
 			buffer += m_last_character;
 			parsed_count++;
 		}
@@ -331,7 +331,7 @@ namespace sigma {
 		return buffer;
 	}
 
-	outcome::result<std::string> lexer::get_escaped_character() {
+	utility::outcome::result<std::string> lexer::get_escaped_character() {
 		// handle escape sequences
 		if (m_last_character == '\\') {
 			get_next_char();
@@ -340,7 +340,7 @@ namespace sigma {
 			// note: don's use std::to_lower as the C standard doesn't allow \X escape sequences for hexadecimals
 			if (m_last_character == 'x') {
 				OUTCOME_TRY(const std::string & hex_string, get_hexadecimal_string(2));
-				OUTCOME_TRY(const u64 hex_value, detail::string_to_hex(hex_string));
+				OUTCOME_TRY(const u64 hex_value, utility::detail::string_to_hex(hex_string));
 				return std::string() + static_cast<char>(hex_value);
 			}
 
@@ -358,8 +358,8 @@ namespace sigma {
 			case 'v':  return "\v";
 			case '0':  return "\0";
 			default:
-				return outcome::failure(
-					error::emit<error_code::lexer_unknown_escape_sequence>(m_last_character)
+				return utility::outcome::failure(
+					utility::error::emit<utility::error_code::lexer_unknown_escape_sequence>(m_last_character)
 				);
 			}
 		}
@@ -367,14 +367,14 @@ namespace sigma {
 		return std::string() + m_last_character;
 	}
 
-	outcome::result<token> lexer::get_character_literal_token() {
+	utility::outcome::result<token> lexer::get_character_literal_token() {
 		get_next_char(); // read the character after the opening quote
 		OUTCOME_TRY(m_value_string, get_escaped_character());
 		get_next_char(); // consume the single quote after the character literal
 
 		if(m_last_character != '\'') {
-			return outcome::failure(
-				error::emit<error_code::lexer_unterminated_character_literal>()
+			return utility::outcome::failure(
+				utility::error::emit<utility::error_code::lexer_unterminated_character_literal>()
 			);
 		}
 
@@ -383,7 +383,7 @@ namespace sigma {
 		return token::char_literal;
 	}
 
-	outcome::result<token> lexer::get_string_literal_token() {
+	utility::outcome::result<token> lexer::get_string_literal_token() {
 		m_value_string.clear();
 		get_next_char(); // read the character after the opening double quote
 
@@ -394,8 +394,8 @@ namespace sigma {
 		}
 
 		if(m_last_character != '"') {
-			return outcome::failure(
-				error::emit<error_code::lexer_unterminated_string_literal>()
+			return utility::outcome::failure(
+				utility::error::emit<utility::error_code::lexer_unterminated_string_literal>()
 			);
 		}
 
@@ -407,7 +407,7 @@ namespace sigma {
 	token_data::token_data(
 		token tok,
 		const std::string& value,
-		const file_range& range
+		const utility::file_range& range
 	) : m_token(tok), m_value(value), m_range(range) {}
 
 	token token_data::get_token() const {
@@ -418,7 +418,7 @@ namespace sigma {
 		return m_value;
 	}
 
-	const file_range& token_data::get_range() const {
+	const utility::file_range& token_data::get_range() const {
 		return m_range;
 	}
 }

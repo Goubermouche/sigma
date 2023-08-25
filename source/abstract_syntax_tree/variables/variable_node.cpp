@@ -2,13 +2,13 @@
 
 namespace sigma {
 	variable_node::variable_node(
-		const file_range& range,
+		const utility::file_range& range,
 		const std::string& identifier
 	) : node(range),
 	m_identifier(identifier) {}
 
-	outcome::result<value_ptr> variable_node::accept(
-		code_generator_template& visitor, 
+	utility::outcome::result<value_ptr> variable_node::accept(
+		abstract_syntax_tree_visitor_template& visitor, 
 		const code_generation_context& context
 	) {
 		return visitor.visit_variable_node(*this, context);
@@ -26,7 +26,7 @@ namespace sigma {
 			is_last
 		);
 
-		console::out << "'" + m_identifier + "'\n";
+		utility::console::out << "'" + m_identifier + "'\n";
 	}
 
 	const std::string& variable_node::get_identifier() const {

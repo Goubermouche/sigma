@@ -52,7 +52,7 @@ namespace sigma {
 	) {
 		// check if the argument is used
 		if (m_is_used) {
-			console::out << "argument '" << specified_tag << "' has already been defined before\n";
+			utility::console::out << "argument '" << specified_tag << "' has already been defined before\n";
 			return 1;
 		}
 
@@ -80,7 +80,7 @@ namespace sigma {
 
 				// check if we haven't exceeded our max argument range
 				if (parsed_argument_value_count == m_value_range.max) {
-					console::out << "too many argument values passed for argument '" << specified_tag << "'\n";
+					utility::console::out << "too many argument values passed for argument '" << specified_tag << "'\n";
 					return 1;
 				}
 
@@ -92,7 +92,7 @@ namespace sigma {
 		// we've finished parsing
 		// first we should check if we've parsed enough values
 		if (m_values.size() < m_value_range.min) {
-			console::out << "too few argument values passed for argument '" << specified_tag << "'\n";
+			utility::console::out << "too few argument values passed for argument '" << specified_tag << "'\n";
 			return 1;
 		}
 
@@ -117,7 +117,7 @@ namespace sigma {
 
 	void argument_list::traverse_ordered(const std::function<void(
 		const std::string&, 
-		const std::shared_ptr<argument>&)>& visitor
+		const ptr<argument>&)>& visitor
 	) const {
 		for (const auto& key : m_insertion_order) {
 			visitor(key, m_arguments.at(key));
@@ -128,21 +128,21 @@ namespace sigma {
 		return m_arguments.empty();
 	}
 
-	std::unordered_map<std::string, std::shared_ptr<argument>>::iterator argument_list::find(
+	std::unordered_map<std::string, ptr<argument>>::iterator argument_list::find(
 		const std::string& key
 	) {
 		return m_arguments.find(key);
 	}
 
-	std::shared_ptr<argument>& argument_list::operator[](const std::string& key) {
+	ptr<argument>& argument_list::operator[](const std::string& key) {
 		return m_arguments[key];
 	}
 
-	std::unordered_map<std::string, std::shared_ptr<argument>>::iterator argument_list::begin() {
+	std::unordered_map<std::string, ptr<argument>>::iterator argument_list::begin() {
 		return m_arguments.begin();
 	}
 
-	std::unordered_map<std::string, std::shared_ptr<argument>>::iterator argument_list::end() {
+	std::unordered_map<std::string, ptr<argument>>::iterator argument_list::end() {
 		return m_arguments.end();
 	}
 }

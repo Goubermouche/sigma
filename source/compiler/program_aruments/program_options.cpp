@@ -37,7 +37,7 @@ namespace sigma {
 		const auto command_it = m_commands.find(command);
 
 		if (command_it == m_commands.end()) {
-			console::out << "cannot find command '" << command << "'\n";
+			utility::console::out << "cannot find command '" << command << "'\n";
 			return 1;
 		}
 
@@ -56,10 +56,10 @@ namespace sigma {
 		}
 
 		// verify that all required arguments were provided
-		std::vector<std::shared_ptr<argument>> missing_arguments;
+		std::vector<ptr<argument>> missing_arguments;
 
 		command_it->second.get_arguments().traverse_ordered(
-			[&](const std::string& key, const std::shared_ptr<argument>& argument) {
+			[&](const std::string& key, const ptr<argument>& argument) {
 				SUPPRESS_C4100(key);
 
 				if (argument->is_required() && argument->is_used() == false) {
@@ -70,20 +70,20 @@ namespace sigma {
 
 		// print missing arguments
 		if (!missing_arguments.empty()) {
-			console::out
+			utility::console::out
 				<< missing_arguments.size()
 				<< " missing "
 				<< (missing_arguments.size() == 1 ? "argument" : "arguments")
 				<< " detected:\n";
 
 			for (const auto& missing_argument : missing_arguments) {
-				console::out << "   " << missing_argument->get_long_tag();
+				utility::console::out << "   " << missing_argument->get_long_tag();
 
 				if (!missing_argument->get_short_tag().empty()) {
-					console::out << " (" << missing_argument->get_short_tag() << ')';
+					utility::console::out << " (" << missing_argument->get_short_tag() << ')';
 				}
 
-				console::out << '\n';
+				utility::console::out << '\n';
 			}
 
 			return 1;
@@ -94,15 +94,15 @@ namespace sigma {
 
 	void program_options::display_help() const {
 		// usage section
-		console::out << "usage: " << m_application_name << " {";
+		utility::console::out << "usage: " << m_application_name << " {";
 
 		std::string separator = "";
 		for (const auto& [command_tag, command] : m_commands) {
-			console::out << separator << command_tag;
+			utility::console::out << separator << command_tag;
 			separator = ", ";
 		}
 
-		console::out << "}\n\n";
+		utility::console::out << "}\n\n";
 
 		// print individual commands
 	   // find the largest command tag
@@ -112,10 +112,10 @@ namespace sigma {
 		}
 
 		// individual commands
-		console::out << "commands: \n";
+		utility::console::out << "commands: \n";
 		for (const auto& [command_tag, command] : m_commands) {
-			console::out
-				<< "  " << console::left << console::width(max_length + 3)
+			utility::console::out
+				<< "  " << utility::console::left << utility::console::width(max_length + 3)
 				<< command_tag << command.get_description() << '\n';
 		}
 	}

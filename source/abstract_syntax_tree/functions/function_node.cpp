@@ -2,7 +2,7 @@
 
 namespace sigma {
 	function_node::function_node(
-		const file_range& range,
+		const utility::file_range& range,
 		const type& function_return_type,
 		bool is_var_arg,
 		const std::string& function_identifier,
@@ -15,8 +15,8 @@ namespace sigma {
 	m_function_arguments(function_arguments),
 	m_function_statements(function_statements) {}
 
-	outcome::result<value_ptr> function_node::accept(
-		code_generator_template& visitor, 
+	utility::outcome::result<value_ptr> function_node::accept(
+		abstract_syntax_tree_visitor_template& visitor, 
 		const code_generation_context& context
 	) {
 		return visitor.visit_function_node(*this, context);
@@ -35,29 +35,29 @@ namespace sigma {
 			is_last
 		);
 
-		console::out
+		utility::console::out
 			<< "'"
 			<< AST_NODE_TYPE_COLOR
 			<< m_function_return_type.to_string()
-			<< color::white
+			<< utility::color::white
 			<< "' '"
 			<< AST_NODE_VARIABLE_COLOR
 			<< m_function_identifier
-			<< color::white
+			<< utility::color::white
 			<< "' (";
 
 		const std::wstring new_prefix = get_new_prefix(depth, prefix, is_last);
 
 		// print function arguments 
 		for (u64 i = 0; i < m_function_arguments.size(); ++i) {
-			console::out
+			utility::console::out
 				<< AST_NODE_TYPE_COLOR
 				<< m_function_arguments[i].second.to_string()
-				<< color::white
+				<< utility::color::white
 				<< (i == m_function_arguments.size() - 1 ? "" : ", ");
 		}
 
-		console::out  << ")\n";
+		utility::console::out  << ")\n";
 
 		// print inner statements 
 		for (u64 i = 0; i < m_function_statements.size(); ++i) {

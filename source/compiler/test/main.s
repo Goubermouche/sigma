@@ -17,3 +17,12 @@ i32 main() {
 // - add Github CI with docker on Linux 
 // - implement a type checker 
 // - reimplement the parser 
+
+
+// AST
+// -----------
+// intermediate_context
+// code_generator
+// pe_builder
+// -----------
+// executable

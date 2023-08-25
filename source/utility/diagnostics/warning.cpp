@@ -1,7 +1,7 @@
 #include "warning.h"
 #include "utility/string_helper.h"
 
-namespace sigma {
+namespace utility {
 	warning_message::warning_message(
 		warning_code code,
 		const std::string& message

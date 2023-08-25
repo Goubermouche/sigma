@@ -1,7 +1,7 @@
 #include "console.h"
 #include "utility/macros.h"
 
-namespace sigma {
+namespace utility {
 	console& console::out = *new console();
 
 	void console::init() {

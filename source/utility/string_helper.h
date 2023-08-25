@@ -1,7 +1,7 @@
 #pragma once
 #include "diagnostics/error.h"
 
-namespace sigma::detail {
+namespace utility::detail {
 	/**
 	 * \brief Chooses a string based on \a count (plural vs. singular).
 	 * \param count Count

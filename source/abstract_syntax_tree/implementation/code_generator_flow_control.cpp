@@ -1,4 +1,4 @@
-#include "code_generator.h"
+#include "abstract_syntax_tree_visitor.h"
 
 #include "abstract_syntax_tree/keywords/flow_control/return_node.h"
 #include "abstract_syntax_tree/keywords/flow_control/if_else_node.h"
@@ -7,7 +7,7 @@
 #include "abstract_syntax_tree/keywords/flow_control/break_node.h"
 
 namespace sigma {
-	outcome::result<value_ptr> code_generator::visit_return_node(
+	utility::outcome::result<value_ptr> abstract_syntax_tree_visitor::visit_return_node(
 		return_node& node, 
 		const code_generation_context& context
 	) {
@@ -52,8 +52,8 @@ namespace sigma {
 		// if we don't we want to check for a void return expression
 		// check if the return type matches the expected return type
 		if(parent_function->get_return_type() != type(type::base::empty, 0)) {
-			return outcome::failure(
-				error::emit<error_code::return_statement_type_mismatch>(
+			return utility::outcome::failure(
+				utility::error::emit<utility::error_code::return_statement_type_mismatch>(
 					parent_function_identifier,
 					type(type::base::empty, 0),
 					parent_function->get_return_type()
@@ -70,12 +70,11 @@ namespace sigma {
 		);
 	}
 
-	outcome::result<value_ptr> code_generator::visit_if_else_node(
+	utility::outcome::result<value_ptr> abstract_syntax_tree_visitor::visit_if_else_node(
 		if_else_node& node, 
 		const code_generation_context& context
 	) {
 		SUPPRESS_C4100(context);
-
 
 		llvm::BasicBlock* entry_block = m_context->get_builder().GetInsertBlock();
 		llvm::Function* parent_function = entry_block->getParent();
@@ -168,7 +167,7 @@ namespace sigma {
 		return nullptr;
 	}
 
-	outcome::result<value_ptr> code_generator::visit_while_node(
+	utility::outcome::result<value_ptr> abstract_syntax_tree_visitor::visit_while_node(
 		while_node& node, 
 		const code_generation_context& context
 	) {
@@ -237,7 +236,7 @@ namespace sigma {
 		return nullptr;
 	}
 
-	outcome::result<value_ptr> code_generator::visit_for_node(
+	utility::outcome::result<value_ptr> abstract_syntax_tree_visitor::visit_for_node(
 		for_node& node,
 		const code_generation_context& context
 	) {
@@ -292,9 +291,9 @@ namespace sigma {
 		// check if the conditional operator evaluates to a boolean
 		if (condition_value_result->get_type().get_base() != type::base::boolean ||
 			condition_value_result->get_type().is_pointer()) {
-			return outcome::failure(
-				error::emit<error_code::for_conditional_operator_not_bool>(
-					file_range{}, // node.get_declared_position()
+			return utility::outcome::failure(
+				utility::error::emit<utility::error_code::for_conditional_operator_not_bool>(
+					utility::file_range{}, // node.get_declared_position()
 					condition_value_result->get_type()
 				)
 			);
@@ -334,7 +333,7 @@ namespace sigma {
 		return nullptr;
 	}
 
-	outcome::result<value_ptr> code_generator::visit_break_node(
+	utility::outcome::result<value_ptr> abstract_syntax_tree_visitor::visit_break_node(
 		break_node& node, 
 		const code_generation_context& context
 	) {
@@ -344,9 +343,9 @@ namespace sigma {
 		llvm::BasicBlock* end_block = m_context->get_variable_registry().get_loop_end_block();
 		if (end_block == nullptr) {
 			// emit an error if there's no enclosing loop to break from
-			return outcome::failure(
-				error::emit<error_code::break_statement_out_of_loop_body>(
-					file_range{} //node.get_declared_position()
+			return utility::outcome::failure(
+				utility::error::emit<utility::error_code::break_statement_out_of_loop_body>(
+					utility::file_range{} //node.get_declared_position()
 				)
 			);
 		}

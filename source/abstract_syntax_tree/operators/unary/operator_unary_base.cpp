@@ -2,7 +2,7 @@
 
 namespace sigma {
 	operator_unary_base::operator_unary_base(
-		const file_range& range,
+		const utility::file_range& range,
 		const node_ptr& expression_node
 	) : node(range),
 	m_expression_node(expression_node) {}

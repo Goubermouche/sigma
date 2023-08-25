@@ -1,7 +1,7 @@
 #include "error.h"
 #include "utility/string_helper.h"
 
-namespace sigma {
+namespace utility {
 	error_message::error_message(
 		error_code code,
 		const std::string& message

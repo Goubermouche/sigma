@@ -56,11 +56,11 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="abstract_syntax_tree.h" />
-    <ClInclude Include="code_generator_context.h" />
-    <ClInclude Include="code_generator_template.h" />
+    <ClInclude Include="abstract_syntax_tree_context.h" />
+    <ClInclude Include="abstract_syntax_tree_visitor_template.h" />
     <ClInclude Include="functions\function_call_node.h" />
     <ClInclude Include="functions\function_node.h" />
-    <ClInclude Include="implementation\code_generator.h" />
+    <ClInclude Include="implementation\abstract_syntax_tree_visitor.h" />
     <ClInclude Include="keywords\flow_control\break_node.h" />
     <ClInclude Include="keywords\flow_control\for_node.h" />
     <ClInclude Include="keywords\flow_control\if_else_node.h" />
@@ -124,11 +124,11 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="abstract_syntax_tree.cpp" />
-    <ClCompile Include="code_generator_context.cpp" />
-    <ClCompile Include="code_generator_template.cpp" />
+    <ClCompile Include="abstract_syntax_tree_context.cpp" />
+    <ClCompile Include="abstract_syntax_tree_visitor_template.cpp" />
     <ClCompile Include="functions\function_call_node.cpp" />
     <ClCompile Include="functions\function_node.cpp" />
-    <ClCompile Include="implementation\code_generator.cpp" />
+    <ClCompile Include="implementation\abstract_syntax_tree_visitor.cpp" />
     <ClCompile Include="implementation\code_generator_flow_control.cpp" />
     <ClCompile Include="implementation\code_generator_functions.cpp" />
     <ClCompile Include="implementation\code_generator_operators.cpp" />

@@ -185,12 +185,11 @@ namespace sigma {
 		const type& right_type
 	);
 
-	namespace detail {
-		template<>
-		struct formatter<type> {
-			static std::string format(const type& value) {
-				return value.to_string();
-			}
-		};
-	}
 }
+
+template<>
+struct utility::detail::formatter<sigma::type> {
+	static std::string format(const sigma::type& value) {
+		return value.to_string();
+	}
+};

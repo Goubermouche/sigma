@@ -18,7 +18,7 @@ namespace sigma {
 
 		void move_insert(
 			std::vector<node_ptr>::iterator where,
-			std::shared_ptr<abstract_syntax_tree> other
+			ptr<abstract_syntax_tree> other
 		);
 	private:
 		std::vector<node_ptr> m_nodes;

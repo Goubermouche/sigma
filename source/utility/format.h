@@ -1,7 +1,7 @@
 #pragma once
 #include "types.h"
 
-namespace sigma::detail {
+namespace utility::detail {
 	template<typename type>
 	struct formatter {
 		static std::string format(const type& value) {

@@ -11,17 +11,17 @@ namespace sigma {
 	) : m_parent(parent),
 	m_loop_end_block(loop_end_block) {}
 
-	outcome::result<void> scope::concatenate(
+	utility::outcome::result<void> scope::concatenate(
 		const scope_ptr& other
 	) {
 		if (!other) {
-			return outcome::success();
+			return utility::outcome::success();
 		}
 
 		for (const auto& variable : other->m_variables) {
 			if (m_variables.contains(variable.first)) {
-				return outcome::failure(
-					error::emit<error_code::local_variable_already_defined>(
+				return utility::outcome::failure(
+					utility::error::emit<utility::error_code::local_variable_already_defined>(
 						variable.first
 					)
 				);
@@ -42,7 +42,7 @@ namespace sigma {
 			m_children.push_back(new_child);
 		}
 
-		return outcome::success();
+		return utility::outcome::success();
 	}
 
 	void scope::add_child(
@@ -108,14 +108,14 @@ namespace sigma {
 	void scope::print(u64 level) const {
 		const u64 indent = level * 2;
 
-		console::out
+		utility::console::out
 			<< std::string(indent, ' ')
-			<< color::yellow
+			<< utility::color::yellow
 			<< "scope (level " << level << ")\n"
-			<< color::white;
+			<< utility::color::white;
 
 		for (const auto& [identifier, variable] : m_variables) {
-			console::out
+			utility::console::out
 				<< std::string(indent, ' ')
 				<< identifier << ": "
 				<< variable->get_value()->get_type().to_string() << '\n';

@@ -74,7 +74,7 @@ namespace sigma {
 		}
 	}
 
-	outcome::result<void> variable_registry::concatenate(
+	utility::outcome::result<void> variable_registry::concatenate(
 		const variable_registry& other
 	) {
 		// local variables
@@ -103,7 +103,7 @@ namespace sigma {
 			m_global_variables.insert(variable);
 		}
 
-		return outcome::success();
+		return utility::outcome::success();
 	}
 
 	llvm::BasicBlock* variable_registry::get_loop_end_block() const {
@@ -111,25 +111,25 @@ namespace sigma {
 	}
 
 	void variable_registry::print() const {
-		console::out
-			<< color::red
+		utility::console::out
+			<< utility::color::red
 			<< "variable registry:\n"
-			<< color::white;
+			<< utility::color::white;
 
-		console::out
-			<< color::yellow
+		utility::console::out
+			<< utility::color::yellow
 			<< "local variables:\n"
-			<< color::white;
+			<< utility::color::white;
 
 		m_scopes[0]->print(0);
 
-		console::out
-			<< color::yellow
+		utility::console::out
+			<< utility::color::yellow
 			<< "global variables:\n"
-			<< color::white;
+			<< utility::color::white;
 
 		for(const auto& [identifier, variable] : m_global_variables) {
-			console::out
+			utility::console::out
 				<< std::string(2, ' ')
 				<< identifier << ": "
 				<< variable->get_value()->get_type().to_string() << '\n';

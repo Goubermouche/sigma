@@ -1,6 +1,8 @@
 #pragma once
 #include <utility/format.h>
 
+using namespace utility::types;
+
 namespace sigma {
 	enum class token {
 		l_parenthesis,                      // (
@@ -362,13 +364,11 @@ namespace sigma {
 			return false;
 		}
 	}
-
-	namespace detail {
-		template<>
-		struct formatter<token> {
-			static std::string format(const token& value) {
-				return token_to_string(value);
-			}
-		};
-	}
 }
+
+template<>
+struct utility::detail::formatter<sigma::token> {
+	static std::string format(const sigma::token& value) {
+		return token_to_string(value);
+	}
+};

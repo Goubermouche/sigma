@@ -1,10 +1,10 @@
 #include "string_accessor.h"
 
-namespace sigma::detail {
+namespace utility::detail {
 	string_accessor::string_accessor(const std::string& string)
 		: m_string(string) {}
 
-	string_accessor::string_accessor(std::shared_ptr<text_file> file) {
+	string_accessor::string_accessor(ptr<text_file> file) {
 		// compute total length of the result string
 		const u64 total_length = std::accumulate(file->get_lines().begin(), file->get_lines().end(), size_t{},
 			[](u64 sum, const std::string& str) {

@@ -24,69 +24,69 @@
 namespace sigma {
 	compiler::compiler() {}
 
-	outcome::result<void> compiler::compile(
+	utility::outcome::result<void> compiler::compile(
 		const compiler_settings& settings
 	) {
 		m_settings = settings;
 
-		timer compilation_timer;
+		utility::timer compilation_timer;
 		compilation_timer.start();
 		
-		console::out
+		utility::console::out
 			<< "sigma: "
-			<< color::yellow
+			<< utility::color::yellow
 			<< "info: "
-			<< color::white
+			<< utility::color::white
 			<< "constructing dependency tree...\n";
 		
 		dependency_tree tree(m_settings.root_source_file);
 		OUTCOME_TRY(tree.construct());
 
-		console::out
+		utility::console::out
 			<< "sigma: "
-			<< color::yellow
+			<< utility::color::yellow
 			<< "info: "
-			<< color::white
+			<< utility::color::white
 			<< "verifying dependency tree...\n";
 
 		OUTCOME_TRY(tree.verify());
 
-		console::out
+		utility::console::out
 			<< "sigma: "
-			<< color::yellow
+			<< utility::color::yellow
 			<< "info: "
-			<< color::white
+			<< utility::color::white
 			<< "parsing dependency tree...\n";
 
 		OUTCOME_TRY(
-			const std::shared_ptr<abstract_syntax_tree>& abstract_syntax_tree, 
+			const ptr<abstract_syntax_tree>& abstract_syntax_tree, 
 			tree.parse()
 		);
 
 		// abstract_syntax_tree->print_nodes();
 
-		console::out
+		utility::console::out
 			<< "sigma: "
-			<< color::yellow
+			<< utility::color::yellow
 			<< "info: "
-			<< color::white
+			<< utility::color::white
 			<< "generating code...\n";
 
-		code_generator codegen(abstract_syntax_tree);
+		abstract_syntax_tree_visitor codegen(abstract_syntax_tree);
 		OUTCOME_TRY(
-			const std::shared_ptr<code_generator_context>& context, 
+			const ptr<abstract_syntax_tree_context>& context, 
 			codegen.generate()
 		);
 
-		console::out
+		utility::console::out
 			<< "sigma: "
-			<< color::yellow
+			<< utility::color::yellow
 			<< "info: "
-			<< color::white
+			<< utility::color::white
 			<< "compiling "
 			<< tree.size()
 			<< ' '
-			<< detail::format_ending(tree.size(), "file", "files")
+			<< utility::detail::format_ending(tree.size(), "file", "files")
 			<< "...\n";
 
 		// context->get_module()->print(llvm::outs(), nullptr);
@@ -97,25 +97,25 @@ namespace sigma {
 		// compile the module into an executable
 		OUTCOME_TRY(compile_module(context));
 
-		console::out
+		utility::console::out
 			<< "sigma: "
-			<< color::yellow
+			<< utility::color::yellow
 			<< "info: "
-			<< color::white
+			<< utility::color::white
 			<< "compilation finished ("
-			<< console::precision(3)
+			<< utility::console::precision(3)
 			<< compilation_timer.elapsed<std::chrono::duration<f64>>()
 			<< "s)\n";
 
-		return outcome::success();
+		return utility::outcome::success();
 	}
 
-	outcome::result<void> compiler::create_object_file(
+	utility::outcome::result<void> compiler::create_object_file(
 		const filepath& path,
 		llvm::TargetMachine* machine,
-		const std::shared_ptr<code_generator_context>& context
+		const ptr<abstract_syntax_tree_context>& context
 	) const {
-		OUTCOME_TRY(const auto & object_file, raw_file::create(path));
+		OUTCOME_TRY(const auto & object_file, utility::raw_file::create(path));
 
 		llvm::legacy::PassManager pass_manager;
 		llvm::PassManagerBuilder builder;
@@ -141,8 +141,8 @@ namespace sigma {
 			nullptr,
 			llvm::CGFT_ObjectFile
 		)) {
-			return outcome::failure(
-				error::emit<error_code::target_machine_cannot_emit_file>()
+			return utility::outcome::failure(
+				utility::error::emit<utility::error_code::target_machine_cannot_emit_file>()
 			);
 		}
 
@@ -151,10 +151,10 @@ namespace sigma {
 		);
 
 		object_file->write();
-		return outcome::success();
+		return utility::outcome::success();
 	}
 
-	outcome::result<void> compiler::compile_object_file(
+	utility::outcome::result<void> compiler::compile_object_file(
 		const llvm::Triple& target_triple,
 		const filepath& object_file
 	) {
@@ -205,7 +205,7 @@ namespace sigma {
 		// check for compilation errors
 		if (compilation) {
 			if (compilation->containsError()) {
-				error::emit<error_code::clang_compilation_contains_errors>();
+				utility::error::emit<utility::error_code::clang_compilation_contains_errors>();
 			}
 
 			llvm::SmallVector<std::pair<i32, const clang::driver::Command*>, 4> failing_commands;
@@ -215,11 +215,11 @@ namespace sigma {
 			);
 		}
 
-		return outcome::success();
+		return utility::outcome::success();
 	}
 
-	outcome::result<llvm::TargetMachine*> compiler::create_target_machine(
-		const std::shared_ptr<code_generator_context>& context
+	utility::outcome::result<llvm::TargetMachine*> compiler::create_target_machine(
+		const ptr<abstract_syntax_tree_context>& context
 	) const {
 		const std::string target_triple = llvm::sys::getDefaultTargetTriple();
 
@@ -238,8 +238,8 @@ namespace sigma {
 		);
 
 		if(!error.empty()) {
-			return outcome::failure(
-				error::emit<error_code::cannot_lookup_target>(target_triple, error)
+			return utility::outcome::failure(
+				utility::error::emit<utility::error_code::cannot_lookup_target>(target_triple, error)
 			);
 		}
 
@@ -267,8 +267,8 @@ namespace sigma {
 		return target_machine;
 	}
 
-	outcome::result<void> compiler::compile_module(
-		const std::shared_ptr<code_generator_context>& context
+	utility::outcome::result<void> compiler::compile_module(
+		const ptr<abstract_syntax_tree_context>& context
 	) {
 		filepath object_file;
 		const auto o_it = m_settings.outputs.find(file_extension::o);
@@ -295,51 +295,51 @@ namespace sigma {
 
 		if(!m_settings.outputs.contains(file_extension::o)) {
 			// delete .o file if we don't want to emit it 
-			OUTCOME_TRY(file::remove(object_file));
+			OUTCOME_TRY(utility::file::remove(object_file));
 		}
 
-		return outcome::success();
+		return utility::outcome::success();
 	}
 
-	outcome::result<void> compiler::verify_main_context(
-		const std::shared_ptr<code_generator_context>& context
+	utility::outcome::result<void> compiler::verify_main_context(
+		const ptr<abstract_syntax_tree_context>& context
 	) {
 		// check if we have a valid 'main' function
 		if(const auto main_func = context->get_function_registry().get_function("main", context)) {
 			if (main_func->get_return_type() != type(type::base::i32, 0)) {
-				return outcome::failure(
-					error::emit<error_code::cannot_find_main_with_correct_return_type>(main_func->get_return_type())
+				return utility::outcome::failure(
+					utility::error::emit<utility::error_code::cannot_find_main_with_correct_return_type>(main_func->get_return_type())
 				); // return on failure
 			}
 		}
 		else {
-			return outcome::failure(
-				error::emit<error_code::cannot_find_main>()
+			return utility::outcome::failure(
+				utility::error::emit<utility::error_code::cannot_find_main>()
 			); // return on failure
 		}
 
 		if (verifyModule(*context->get_module(), &llvm::errs())) {
-			console::out
+			utility::console::out
 				<< "sigma: "
-				<< color::yellow
+				<< utility::color::yellow
 				<< "info: "
-				<< color::red
+				<< utility::color::red
 				<< "module verification failed\n";
-			return outcome::success();
+			return utility::outcome::success();
 		}
 		
-		console::out
+		utility::console::out
 			<< "sigma: "
-			<< color::yellow
+			<< utility::color::yellow
 			<< "info: "
-			<< color::green
+			<< utility::color::green
 			<< "module verified successfully\n"
-			<< color::white;
+			<< utility::color::white;
 
-		return outcome::success();
+		return utility::outcome::success();
 	}
 
-	outcome::result<compiler_settings> compiler_settings::parse_argument_list(
+	utility::outcome::result<compiler_settings> compiler_settings::parse_argument_list(
 		argument_list& arguments
 	) {
 		compiler_settings settings;
@@ -363,8 +363,8 @@ namespace sigma {
 				settings.outputs[file_extension::llvm] = path;
 			}
 			else {
-				return outcome::failure(
-					error::emit<error_code::unrecognized_output_extension>(path.extension())
+				return utility::outcome::failure(
+					utility::error::emit<utility::error_code::unrecognized_output_extension>(path.extension())
 				);
 			}
 		}

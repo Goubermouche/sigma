@@ -1,7 +1,7 @@
 #pragma once
 #include "utility/diagnostics/diagnostics.h"
 
-namespace sigma {
+namespace utility {
 	enum class warning_code {
 		// ******************************************************************
 		// codegen
@@ -37,7 +37,7 @@ namespace sigma {
 	class warning {
 	public:
 		template<warning_code code, typename...argument_types>
-		static std::shared_ptr<warning_message> emit(argument_types... args) {
+		static ptr<warning_message> emit(argument_types... args) {
 			const auto it = m_error_templates.find(code);
 			if (it == m_error_templates.end()) {}
 
@@ -45,7 +45,7 @@ namespace sigma {
 		}
 
 		template<warning_code code, typename...argument_types>
-		static std::shared_ptr<warning_message_range> emit(
+		static ptr<warning_message_range> emit(
 			const file_range& range,
 			argument_types... args
 		) {

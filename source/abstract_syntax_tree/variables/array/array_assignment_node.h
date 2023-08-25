@@ -8,14 +8,14 @@ namespace sigma {
 	class array_assignment_node : public node {
 	public:
 		array_assignment_node(
-			const file_range& range,
+			const utility::file_range& range,
 			const node_ptr& array_base,
 			const std::vector<node_ptr>& index_nodes,
 			const node_ptr& expression_node
 		);
 
-		outcome::result<value_ptr> accept(
-			code_generator_template& visitor,
+		utility::outcome::result<value_ptr> accept(
+			abstract_syntax_tree_visitor_template& visitor,
 			const code_generation_context& context
 		) override;
 

@@ -2,15 +2,15 @@
 
 namespace sigma {
 	array_access_node::array_access_node(
-		const file_range& range,
+		const utility::file_range& range,
 		const node_ptr& array_base,
 		const std::vector<node_ptr>& array_element_index_nodes
 	) : node(range),
 	m_array_base(array_base),
 	m_array_element_index_nodes(array_element_index_nodes) {}
 
-	outcome::result<value_ptr> array_access_node::accept(
-		code_generator_template& visitor, 
+	utility::outcome::result<value_ptr> array_access_node::accept(
+		abstract_syntax_tree_visitor_template& visitor, 
 		const code_generation_context& context
 	) {
 		return visitor.visit_array_access_node(*this, context);
@@ -22,7 +22,7 @@ namespace sigma {
 		bool is_last
 	) {
 		print_node_name(depth, prefix, "array access", is_last);
-		console::out << "\n";
+		utility::console::out << "\n";
 
 		const std::wstring new_prefix = get_new_prefix(depth, prefix, is_last);
 

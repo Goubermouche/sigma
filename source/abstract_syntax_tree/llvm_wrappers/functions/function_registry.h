@@ -5,8 +5,8 @@
 #include <utility/diagnostics/error.h>
 
 namespace sigma {
-	using function_ptr = std::shared_ptr<function>;
-	using function_declaration_ptr = std::shared_ptr<function_declaration>;
+	using function_ptr = ptr<function>;
+	using function_declaration_ptr = ptr<function_declaration>;
 
 	// external function declarations
 	static inline const std::unordered_map<std::string, function_declaration_ptr> g_external_function_declarations = {
@@ -85,7 +85,7 @@ namespace sigma {
 		}
 	};
 
-	class code_generator_context;
+	class abstract_syntax_tree_context;
 
 	/**
 	 * \brief Function registry, contains a set of various function types for the given compilation unit. 
@@ -103,7 +103,7 @@ namespace sigma {
 		 */
 		function_ptr get_function(
 			const std::string& identifier,
-			const std::shared_ptr<code_generator_context>& context
+			const ptr<abstract_syntax_tree_context>& context
 		);
 
 		static function_declaration_ptr get_external_function_declaration(
@@ -116,7 +116,7 @@ namespace sigma {
 		 * \param other Second registry to concatenate with.
 		 * \return Outcome (void)
 		 */
-		outcome::result<void> concatenate(
+		utility::outcome::result<void> concatenate(
 			const function_registry& other
 		);
 

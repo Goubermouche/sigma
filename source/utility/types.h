@@ -21,6 +21,7 @@
 #include <regex>
 #include <locale>
 #include <numeric>
+#include <variant>
 
 // platform specific 
 #ifdef _WIN32
@@ -32,7 +33,7 @@
 	#include <signal.h>
 #endif
 
-namespace sigma {
+namespace utility {
 	namespace types {
 		// signed integers
 		using i8 = int8_t;
@@ -51,6 +52,12 @@ namespace sigma {
 		using f64 = double;
 
 		using filepath = std::filesystem::path;
+
+        template<typename type>
+        using ptr = std::shared_ptr<type>;
+
+        template<typename type>
+        using u_ptr = std::unique_ptr<type>;
 	}
 
 	using namespace types;

@@ -8,12 +8,12 @@ namespace sigma {
 	class string_node : public node {
 	public:
 		string_node(
-			const file_range& range,
+			const utility::file_range& range,
 			const std::string& value
 		);
 
-		outcome::result<value_ptr> accept(
-			code_generator_template& visitor,
+		utility::outcome::result<value_ptr> accept(
+			abstract_syntax_tree_visitor_template& visitor,
 			const code_generation_context& context
 		) override;
 

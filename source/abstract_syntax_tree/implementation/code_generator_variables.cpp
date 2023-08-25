@@ -1,4 +1,4 @@
-#include "code_generator.h"
+#include "abstract_syntax_tree_visitor.h"
 
 #include "abstract_syntax_tree/variables/assignment_node.h"
 #include "abstract_syntax_tree/variables/variable_access_node.h"
@@ -10,7 +10,7 @@
 #include "abstract_syntax_tree/variables/declaration/global_declaration_node.h"
 
 namespace sigma {
-	outcome::result<value_ptr> code_generator::visit_assignment_node(
+	utility::outcome::result<value_ptr> abstract_syntax_tree_visitor::visit_assignment_node(
 		assignment_node& node, 
 		const code_generation_context& context
 	) {
@@ -42,7 +42,7 @@ namespace sigma {
 		return expression_result;
 	}
 
-	outcome::result<value_ptr> code_generator::visit_variable_access_node(
+	utility::outcome::result<value_ptr> abstract_syntax_tree_visitor::visit_variable_access_node(
 		variable_access_node& node, 
 		const code_generation_context& context
 	) {
@@ -82,9 +82,9 @@ namespace sigma {
 		const variable_ptr global_variable = m_context->get_variable_registry().get_global_variable(node.get_identifier());
 		// check if the global variable exists
 		if (!global_variable) {
-			return outcome::failure(
-				error::emit<error_code::variable_cannot_be_found>(
-					file_range{}, //node.get_declared_position(), 
+			return utility::outcome::failure(
+				utility::error::emit<utility::error_code::variable_cannot_be_found>(
+					utility::file_range{}, //node.get_declared_position(), 
 					node.get_identifier()
 				)
 			); // return on failure
@@ -111,7 +111,7 @@ namespace sigma {
 		);
 	}
 
-	outcome::result<value_ptr> code_generator::visit_local_declaration_node(
+	utility::outcome::result<value_ptr> abstract_syntax_tree_visitor::visit_local_declaration_node(
 		local_declaration_node& node, 
 		const code_generation_context& context
 	) {
@@ -145,9 +145,9 @@ namespace sigma {
 			)
 		)) {
 			// insertion operation failed - the variable has already been defined before
-			return outcome::failure(
-				error::emit<error_code::local_variable_already_defined_in_global_scope>(
-					file_range{}, //node.get_declared_position(),
+			return utility::outcome::failure(
+				utility::error::emit<utility::error_code::local_variable_already_defined_in_global_scope>(
+					utility::file_range{}, //node.get_declared_position(),
 					node.get_declaration_identifier()
 				)
 			);
@@ -174,7 +174,7 @@ namespace sigma {
 		return declaration_value_result;
 	}
 
-	outcome::result<value_ptr> code_generator::visit_global_declaration_node(
+	utility::outcome::result<value_ptr> abstract_syntax_tree_visitor::visit_global_declaration_node(
 		global_declaration_node& node,
 		const code_generation_context& context
 	) {
@@ -239,9 +239,9 @@ namespace sigma {
 			)
 		)) {
 			// variable insertion failed - variable has been declared before
-			return outcome::failure(
-				error::emit<error_code::global_variable_already_defined>(
-					file_range{}, //node.get_declared_position(),
+			return utility::outcome::failure(
+				utility::error::emit<utility::error_code::global_variable_already_defined>(
+					utility::file_range{}, //node.get_declared_position(),
 					node.get_declaration_identifier()
 				)
 			); // return on failure
@@ -326,7 +326,7 @@ namespace sigma {
 		return global_declaration;
 	}
 
-	outcome::result<value_ptr> code_generator::visit_allocation_node(
+	utility::outcome::result<value_ptr> abstract_syntax_tree_visitor::visit_allocation_node(
 		array_allocation_node& node,
 		const code_generation_context& context
 	) {
@@ -418,7 +418,7 @@ namespace sigma {
 		return array_value;
 	}
 
-	outcome::result<value_ptr> code_generator::visit_array_access_node(
+	utility::outcome::result<value_ptr> abstract_syntax_tree_visitor::visit_array_access_node(
 		array_access_node& node, 
 		const code_generation_context& context
 	) {
@@ -478,7 +478,7 @@ namespace sigma {
 		return element_value;
 	}
 
-	outcome::result<value_ptr> code_generator::visit_array_assignment_node(
+	utility::outcome::result<value_ptr> abstract_syntax_tree_visitor::visit_array_assignment_node(
 		array_assignment_node& node,
 		const code_generation_context& context
 	) {
@@ -557,7 +557,7 @@ namespace sigma {
 		return nullptr;
 	}
 
-	outcome::result<value_ptr> code_generator::visit_variable_node(
+	utility::outcome::result<value_ptr> abstract_syntax_tree_visitor::visit_variable_node(
 		variable_node& node, 
 		const code_generation_context& context
 	) {
@@ -570,15 +570,15 @@ namespace sigma {
 			return variable->get_value();
 		}
 
-		return outcome::failure(
-			error::emit<error_code::variable_cannot_be_found>(
-				file_range{}, //node.get_declared_position(),
+		return utility::outcome::failure(
+			utility::error::emit<utility::error_code::variable_cannot_be_found>(
+				utility::file_range{}, //node.get_declared_position(),
 				node.get_identifier()
 			)
 		); // return on failure
 	}
 
-	outcome::result<value_ptr> code_generator::get_declaration_value(
+	utility::outcome::result<value_ptr> abstract_syntax_tree_visitor::get_declaration_value(
 		const declaration_node& node,
 		const code_generation_context& context
 	) {

@@ -80,7 +80,7 @@ namespace sigma {
 		std::make_shared<abstract_syntax_tree>()
 	) {}
 
-	outcome::result<std::shared_ptr<abstract_syntax_tree>> parser::parse() {
+	utility::outcome::result<ptr<abstract_syntax_tree>> parser::parse() {
 		while (true) {
 			if (peek_next_token() == token::end_of_file) {
 				return m_abstract_syntax_tree;
@@ -110,7 +110,7 @@ namespace sigma {
 		}
 	}
 
-	std::shared_ptr<abstract_syntax_tree> parser::get_abstract_syntax_tree() const {
+	ptr<abstract_syntax_tree> parser::get_abstract_syntax_tree() const {
 		return m_abstract_syntax_tree;
 	}
 
@@ -118,11 +118,11 @@ namespace sigma {
 		return m_include_directive_indices;
 	}
 
-	outcome::result<node_ptr> parser::parse_function_definition() {
+	utility::outcome::result<node_ptr> parser::parse_function_definition() {
 		OUTCOME_TRY(const type return_type, parse_type());
 
 		m_token_list.get_token(); // identifier (guaranteed)
-		const file_range range = m_token_list.get_current_token().get_range();
+		const utility::file_range range = m_token_list.get_current_token().get_range();
 		const std::string identifier = m_token_list.get_current_token().get_value();
 
 		m_token_list.get_token(); // l_parenthesis (guaranteed)
@@ -145,8 +145,8 @@ namespace sigma {
 					m_token_list.get_token(); // comma (guaranteed)
 				}
 				else if (next_token != token::r_parenthesis) {
-					return outcome::failure(error::emit<error_code::parser_unexpected_token>(
-						file_range{}, //m_token_list.get_current_token().get_position(),
+					return utility::outcome::failure(utility::error::emit<utility::error_code::parser_unexpected_token>(
+						utility::file_range{}, //m_token_list.get_current_token().get_position(),
 						token::r_parenthesis,
 						m_token_list.get_current_token().get_token()
 					)); // return on failure
@@ -173,7 +173,7 @@ namespace sigma {
 		);
 	}
 
-	outcome::result<node_ptr> parser::parse_global_statement() {
+	utility::outcome::result<node_ptr> parser::parse_global_statement() {
 		const token token = peek_next_token(); // identifier | type | keyword
 		node_ptr global_statement_node;
 
@@ -188,8 +188,8 @@ namespace sigma {
 			else {
 				m_token_list.get_token(); // read the erroneous token
 
-				return outcome::failure(error::emit<error_code::parser_unhandled_token>(
-					file_range{}, //m_token_list.get_current_token().get_position(),
+				return utility::outcome::failure(utility::error::emit<utility::error_code::parser_unhandled_token>(
+					utility::file_range{}, //m_token_list.get_current_token().get_position(),
 					token
 				));
 			}
@@ -199,15 +199,15 @@ namespace sigma {
 		return global_statement_node;
 	}
 
-	outcome::result<void> parser::parse_include_directive() {
+	utility::outcome::result<void> parser::parse_include_directive() {
 		m_token_list.get_token(); // hash (guaranteed)
 		m_token_list.get_token(); // keyword_include (guaranteed)
 		OUTCOME_TRY(m_token_list.expect_token(token::string_literal));
 		const std::string include_str = m_token_list.get_current_token().get_value();
-		return outcome::success();
+		return utility::outcome::success();
 	}
 
-	outcome::result<std::vector<node_ptr>> parser::parse_local_statements() {
+	utility::outcome::result<std::vector<node_ptr>> parser::parse_local_statements() {
 		OUTCOME_TRY(m_token_list.expect_token(token::l_brace));
 
 		std::vector<node_ptr> local_statement_nodes;
@@ -233,7 +233,7 @@ namespace sigma {
 		return local_statement_nodes;
 	}
 
-	outcome::result<node_ptr> parser::parse_local_statement() {
+	utility::outcome::result<node_ptr> parser::parse_local_statement() {
 		const token next_token = peek_next_token(); // identifier || type || keyword
 		node_ptr local_statement_node;
 
@@ -270,8 +270,8 @@ namespace sigma {
 					OUTCOME_TRY(local_statement_node, parse_pre_operator());
 				}
 				else {
-					return outcome::failure(error::emit<error_code::parser_cannot_apply_unary_to_non_identifier>(
-						file_range{} //m_token_list.get_current_token().get_position()
+					return utility::outcome::failure(utility::error::emit<utility::error_code::parser_cannot_apply_unary_to_non_identifier>(
+						utility::file_range{} //m_token_list.get_current_token().get_position()
 					)); // return on failure
 				}
 
@@ -295,8 +295,8 @@ namespace sigma {
 				// return right away since we don't want to check for a semicolon at the end of the statement
 				return parse_for_loop();
 			default:
-				return outcome::failure(error::emit<error_code::parser_unhandled_token>(
-					file_range{}, //m_token_list.get_current_token().get_position(),
+				return utility::outcome::failure(utility::error::emit<utility::error_code::parser_unhandled_token>(
+					utility::file_range{}, //m_token_list.get_current_token().get_position(),
 					next_token
 				)); // return on failure
 			}
@@ -306,7 +306,7 @@ namespace sigma {
 		return local_statement_node;
 	}
 
-	outcome::result<node_ptr> parser::parse_local_statement_identifier() {
+	utility::outcome::result<node_ptr> parser::parse_local_statement_identifier() {
 		node_ptr local_statement_identifier_node;
 
 		if (peek_is_function_call()) {
@@ -340,10 +340,10 @@ namespace sigma {
 		return local_statement_identifier_node;
 	}
 
-	outcome::result<node_ptr> parser::parse_if_else_statement() {
+	utility::outcome::result<node_ptr> parser::parse_if_else_statement() {
 		std::vector<node_ptr> conditions;
 		std::vector<std::vector<node_ptr>> branches;
-		const file_range range = m_token_list.get_current_token().get_range();
+		const utility::file_range range = m_token_list.get_current_token().get_range();
 		bool has_else = false;
 
 		while (true) {
@@ -383,9 +383,9 @@ namespace sigma {
 		return new if_else_node(range, conditions, branches);
 	}
 
-	outcome::result<node_ptr> parser::parse_while_loop() {
+	utility::outcome::result<node_ptr> parser::parse_while_loop() {
 		m_token_list.get_token(); // keyword_while (guaranteed)
-		const file_range range = m_token_list.get_current_token().get_range();
+		const utility::file_range range = m_token_list.get_current_token().get_range();
 
 		OUTCOME_TRY(m_token_list.expect_token(token::l_parenthesis));
 
@@ -404,7 +404,7 @@ namespace sigma {
 		return new while_node(range, loop_condition_node, loop_statements);
 	}
 
-	outcome::result<node_ptr> parser::parse_loop_increment() {
+	utility::outcome::result<node_ptr> parser::parse_loop_increment() {
 		node_ptr loop_increment_node;
 
 		switch (const token next_token = peek_next_token()) {
@@ -427,16 +427,16 @@ namespace sigma {
 				OUTCOME_TRY(loop_increment_node, parse_pre_operator());
 			}
 			else {
-				return outcome::failure(error::emit<error_code::parser_cannot_apply_unary_to_non_identifier>(
-					file_range{} //m_token_list.get_current_token().get_position()
+				return utility::outcome::failure(utility::error::emit<utility::error_code::parser_cannot_apply_unary_to_non_identifier>(
+					utility::file_range{} //m_token_list.get_current_token().get_position()
 				)); // return on failure
 			}
 			break;
 		case token::r_parenthesis:
 			break;
 		default:
-			return outcome::failure(error::emit<error_code::parser_unhandled_token>(
-				file_range{}, //m_token_list.get_current_token().get_position(),
+			return utility::outcome::failure(utility::error::emit<utility::error_code::parser_unhandled_token>(
+				utility::file_range{}, //m_token_list.get_current_token().get_position(),
 				next_token
 			)); // return on failure
 		}
@@ -444,9 +444,9 @@ namespace sigma {
 		return loop_increment_node;
 	}
 
-	outcome::result<node_ptr> parser::parse_for_loop() {
+	utility::outcome::result<node_ptr> parser::parse_for_loop() {
 		m_token_list.get_token(); // keyword_for (guaranteed)
-		const file_range range = m_token_list.get_current_token().get_range();
+		const utility::file_range range = m_token_list.get_current_token().get_range();
 
 		OUTCOME_TRY(m_token_list.expect_token(token::l_parenthesis));
 
@@ -462,8 +462,8 @@ namespace sigma {
 			OUTCOME_TRY(loop_initialization_node, parse_local_statement_identifier());
 		}
 		else {
-			return outcome::failure(error::emit<error_code::parser_unhandled_token>(
-				file_range{}, //m_token_list.get_current_token().get_position(),
+			return utility::outcome::failure(utility::error::emit<utility::error_code::parser_unhandled_token>(
+				utility::file_range{}, //m_token_list.get_current_token().get_position(),
 				next_token
 			)); // return on failure
 		}
@@ -512,7 +512,7 @@ namespace sigma {
 		);
 	}
 
-	outcome::result<node_ptr> parser::parse_compound_operation(node_ptr left_operand) {
+	utility::outcome::result<node_ptr> parser::parse_compound_operation(node_ptr left_operand) {
 		// operator_addition_assignment ||
 		// operator_subtraction_assignment || 
 		// operator_multiplication_assignment || 
@@ -562,10 +562,10 @@ namespace sigma {
 		return nullptr;
 	}
 
-	outcome::result<node_ptr> parser::parse_array_assignment() {
+	utility::outcome::result<node_ptr> parser::parse_array_assignment() {
 		m_token_list.get_token(); // identifier (guaranteed)
 		const std::string identifier = m_token_list.get_current_token().get_value();
-		const file_range range = m_token_list.get_current_token().get_range();
+		const utility::file_range range = m_token_list.get_current_token().get_range();
 
 		std::vector<node_ptr> index_nodes;
 		while (peek_next_token() == token::l_bracket) {
@@ -605,7 +605,7 @@ namespace sigma {
 		return nullptr;
 	}
 
-	outcome::result<node_ptr> parser::parse_variable_access() {
+	utility::outcome::result<node_ptr> parser::parse_variable_access() {
 		const token next = peek_next_token();
 
 		if(next == token::asterisk) {
@@ -625,7 +625,7 @@ namespace sigma {
 		);
 	}
 
-	outcome::result<node_ptr> parser::parse_variable() {
+	utility::outcome::result<node_ptr> parser::parse_variable() {
 		const token next = peek_next_token();
 
 		if (next == token::asterisk) {
@@ -645,10 +645,10 @@ namespace sigma {
 		);
 	}
 
-	outcome::result<node_ptr> parser::parse_assignment() {
+	utility::outcome::result<node_ptr> parser::parse_assignment() {
 		OUTCOME_TRY(const node_ptr variable, parse_variable());
 		OUTCOME_TRY(m_token_list.expect_token(token::operator_assignment));
-		const file_range range = m_token_list.get_current_token().get_range();
+		const utility::file_range range = m_token_list.get_current_token().get_range();
 
 		// parse access-assignment
 		node_ptr value;
@@ -662,7 +662,7 @@ namespace sigma {
 		return new assignment_node(range, variable, value);
 	}
 
-	outcome::result<node_ptr> parser::parse_array_access() {
+	utility::outcome::result<node_ptr> parser::parse_array_access() {
 		m_token_list.get_token(); // identifier (guaranteed)
 		const std::string identifier = m_token_list.get_current_token().get_value();
 
@@ -670,7 +670,7 @@ namespace sigma {
 		std::vector<node_ptr> index_nodes;
 
 		m_token_list.get_token(); // l_bracket (guaranteed)
-		const file_range range = m_token_list.get_current_token().get_range();
+		const utility::file_range range = m_token_list.get_current_token().get_range();
 
 		// parse access indices for multiple dimensions
 		while (m_token_list.get_current_token().get_token() == token::l_bracket) {
@@ -689,7 +689,7 @@ namespace sigma {
 		return new array_access_node(range, array_node, index_nodes);
 	}
 
-	outcome::result<node_ptr> parser::parse_function_call() {
+	utility::outcome::result<node_ptr> parser::parse_function_call() {
 		m_token_list.get_token(); // identifier (guaranteed)
 		const std::string identifier = m_token_list.get_current_token().get_value();
 		m_token_list.get_token(); // l_parenthesis (guaranteed)
@@ -710,8 +710,8 @@ namespace sigma {
 					break;
 				}
 				else {
-					return outcome::failure(error::emit<error_code::parser_unhandled_token>(
-						file_range{}, //m_token_list.get_current_token().get_position(),
+					return utility::outcome::failure(utility::error::emit<utility::error_code::parser_unhandled_token>(
+						utility::file_range{}, //m_token_list.get_current_token().get_position(),
 						m_token_list.get_current_token().get_token()
 					));  // return on failure
 				}
@@ -722,8 +722,8 @@ namespace sigma {
 		return new function_call_node(m_token_list.get_current_token().get_range(), identifier, arguments);
 	}
 
-	outcome::result<node_ptr> parser::parse_return_statement() {
-		const file_range range = m_token_list.get_current_token().get_range();
+	utility::outcome::result<node_ptr> parser::parse_return_statement() {
+		const utility::file_range range = m_token_list.get_current_token().get_range();
 		m_token_list.get_token(); // keyword_return (guaranteed)
 
 		// allow return statements without any expressions
@@ -735,10 +735,10 @@ namespace sigma {
 		return new return_node(range, expression);
 	}
 
-	outcome::result<node_ptr> parser::parse_declaration(bool is_global) {
+	utility::outcome::result<node_ptr> parser::parse_declaration(bool is_global) {
 		OUTCOME_TRY(const type declaration_type, parse_type());
 		OUTCOME_TRY(m_token_list.expect_token(token::identifier));
-		const file_range range = m_token_list.get_current_token().get_range();
+		const utility::file_range range = m_token_list.get_current_token().get_range();
 
 		const std::string identifier = m_token_list.get_current_token().get_value();
 
@@ -755,11 +755,11 @@ namespace sigma {
 		return new local_declaration_node(range, declaration_type, identifier, value);
 	}
 
-	outcome::result<node_ptr> parser::parse_expression(type expression_type) {
+	utility::outcome::result<node_ptr> parser::parse_expression(type expression_type) {
 		return parse_logical_conjunction(expression_type);
 	}
 
-	outcome::result<node_ptr> parser::parse_logical_conjunction(type expression_type) {
+	utility::outcome::result<node_ptr> parser::parse_logical_conjunction(type expression_type) {
 		OUTCOME_TRY(node_ptr left, parse_logical_disjunction(expression_type));
 
 		while (peek_next_token() == token::operator_logical_conjunction) {
@@ -774,7 +774,7 @@ namespace sigma {
 		return left;
 	}
 
-	outcome::result<node_ptr> parser::parse_logical_disjunction(type expression_type) {
+	utility::outcome::result<node_ptr> parser::parse_logical_disjunction(type expression_type) {
 		OUTCOME_TRY(node_ptr left, parse_comparison(expression_type));
 
 		while (peek_next_token() == token::operator_logical_disjunction) {
@@ -789,7 +789,7 @@ namespace sigma {
 		return left;
 	}
 
-	outcome::result<node_ptr> parser::parse_comparison(type expression_type) {
+	utility::outcome::result<node_ptr> parser::parse_comparison(type expression_type) {
 		OUTCOME_TRY(node_ptr left, parse_term(expression_type));
 
 		while (
@@ -801,7 +801,7 @@ namespace sigma {
 			peek_next_token() == token::operator_not_equals) {
 			m_token_list.get_token();
 			const token_data op = m_token_list.get_current_token();
-			const file_range range = m_token_list.get_current_token().get_range();
+			const utility::file_range range = m_token_list.get_current_token().get_range();
 
 			OUTCOME_TRY(node_ptr right, parse_term(expression_type));
 
@@ -830,7 +830,7 @@ namespace sigma {
 		return left;
 	}
 
-	outcome::result<node_ptr> parser::parse_term(type expression_type) {
+	utility::outcome::result<node_ptr> parser::parse_term(type expression_type) {
 		OUTCOME_TRY(node_ptr left, parse_factor(expression_type));
 
 		while (
@@ -854,7 +854,7 @@ namespace sigma {
 		return left;
 	}
 
-	outcome::result<node_ptr> parser::parse_factor(type expression_type) {
+	utility::outcome::result<node_ptr> parser::parse_factor(type expression_type) {
 		OUTCOME_TRY(node_ptr left, parse_primary(expression_type));
 
 		while (
@@ -902,7 +902,7 @@ namespace sigma {
 		return left;
 	}
 
-	outcome::result<node_ptr> parser::parse_primary(type expression_type) {
+	utility::outcome::result<node_ptr> parser::parse_primary(type expression_type) {
 		const token next_token = peek_next_token();
 
 		if (is_token_numerical(next_token)) {
@@ -928,8 +928,8 @@ namespace sigma {
 				return parse_pre_operator();
 			}
 
-			return outcome::failure(error::emit<error_code::parser_cannot_apply_unary_to_non_identifier>(
-				file_range{} //m_token_list.get_current_token().get_position()
+			return utility::outcome::failure(utility::error::emit<utility::error_code::parser_cannot_apply_unary_to_non_identifier>(
+				utility::file_range{} //m_token_list.get_current_token().get_position()
 			)); // return on failure
 		case token::identifier:
 			// parse a function call or an assignment
@@ -952,40 +952,40 @@ namespace sigma {
 			return parse_bool();
 		}
 
-		return outcome::failure(error::emit<error_code::parser_unhandled_token>(
-			file_range{}, //m_token_list.get_current_token().get_position(),
+		return utility::outcome::failure(utility::error::emit<utility::error_code::parser_unhandled_token>(
+			utility::file_range{}, //m_token_list.get_current_token().get_position(),
 			m_token_list.get_current_token().get_token()
 		)); // return on failure
 	}
 
-	outcome::result<node_ptr> parser::parse_number(type expression_type) {
+	utility::outcome::result<node_ptr> parser::parse_number(type expression_type) {
 		m_token_list.get_token(); // type
 		const std::string str_value = m_token_list.get_current_token().get_value();
 		const type ty = expression_type.is_unknown() ? type(m_token_list.get_current_token().get_token(), 0) : expression_type;
 		return new numerical_literal_node(m_token_list.get_current_token().get_range(), str_value, ty);
 	}
 
-	outcome::result<node_ptr> parser::parse_char() {
+	utility::outcome::result<node_ptr> parser::parse_char() {
 		m_token_list.get_token(); // char_literal (guaranteed)
 		return new char_node(m_token_list.get_current_token().get_range(), m_token_list.get_current_token().get_value()[0]);
 	}
 
-	outcome::result<node_ptr> parser::parse_string() {
+	utility::outcome::result<node_ptr> parser::parse_string() {
 		m_token_list.get_token(); // string_literal (guaranteed)
 		return new string_node(m_token_list.get_current_token().get_range(), m_token_list.get_current_token().get_value());
 	}
 
-	outcome::result<node_ptr> parser::parse_bool() {
+	utility::outcome::result<node_ptr> parser::parse_bool() {
 		m_token_list.get_token(); // bool_literal_true || bool_literal_false (guaranteed)
 		return new bool_node(m_token_list.get_current_token().get_range(), m_token_list.get_current_token().get_token() == token::bool_literal_true);
 	}
 
-	outcome::result<node_ptr> parser::parse_break_keyword() {
+	utility::outcome::result<node_ptr> parser::parse_break_keyword() {
 		m_token_list.get_token(); // keyword_break (guaranteed)
 		return new break_node(m_token_list.get_current_token().get_range());
 	}
 
-	outcome::result<node_ptr> parser::parse_post_operator(node_ptr operand) {
+	utility::outcome::result<node_ptr> parser::parse_post_operator(node_ptr operand) {
 		m_token_list.get_token();
 
 		if (m_token_list.get_current_token().get_token() == token::operator_increment) {
@@ -995,7 +995,7 @@ namespace sigma {
 		return new operator_post_decrement_node(m_token_list.get_current_token().get_range(), operand);
 	}
 
-	outcome::result<node_ptr> parser::parse_pre_operator() {
+	utility::outcome::result<node_ptr> parser::parse_pre_operator() {
 		m_token_list.get_token();
 		const token_data op = m_token_list.get_current_token();
 		OUTCOME_TRY(const node_ptr operand, parse_primary(type::unknown()));
@@ -1017,7 +1017,7 @@ namespace sigma {
 		return nullptr;
 	}
 
-	outcome::result<node_ptr> parser::parse_negative_number(type expression_type) {
+	utility::outcome::result<node_ptr> parser::parse_negative_number(type expression_type) {
 		m_token_list.get_token(); // operator_subtraction (guaranteed)
 
 		// negate the number by subtracting it from 0
@@ -1027,9 +1027,9 @@ namespace sigma {
 		return new operator_subtraction_node(m_token_list.get_current_token().get_range(), zero_node, number);
 	}
 
-	outcome::result<node_ptr> parser::parse_new_allocation() {
+	utility::outcome::result<node_ptr> parser::parse_new_allocation() {
 		m_token_list.get_token(); // keyword_new (guaranteed)
-		const file_range range = m_token_list.get_current_token().get_range();
+		const utility::file_range range = m_token_list.get_current_token().get_range();
 		OUTCOME_TRY(const type allocation_type, parse_type());
 
 		// l_bracket
@@ -1043,7 +1043,7 @@ namespace sigma {
 		return new array_allocation_node(range, allocation_type, array_size);
 	}
 
-	outcome::result<node_ptr> parser::parse_primary_identifier() {
+	utility::outcome::result<node_ptr> parser::parse_primary_identifier() {
 		node_ptr primary_identifier_node;
 
 		if (peek_is_function_call()) {
@@ -1075,7 +1075,7 @@ namespace sigma {
 		return primary_identifier_node;
 	}
 
-	outcome::result<node_ptr> parser::parse_deep_expression(type expression_type) {
+	utility::outcome::result<node_ptr> parser::parse_deep_expression(type expression_type) {
 		m_token_list.get_token(); // l_parenthesis (guaranteed)
 
 		// nested expression
@@ -1202,12 +1202,12 @@ namespace sigma {
 		return new numerical_literal_node(m_token_list.get_current_token().get_range(), "0", expression_type);
 	}
 
-	outcome::result<type> parser::parse_type() {
+	utility::outcome::result<type> parser::parse_type() {
 		m_token_list.get_token();
 
 		if (!is_token_type(m_token_list.get_current_token().get_token())) {
-			return outcome::failure(error::emit<error_code::parser_cannot_apply_unary_to_non_identifier>(
-				file_range{}, //m_token_list.get_current_token().get_position(),
+			return utility::outcome::failure(utility::error::emit<utility::error_code::parser_cannot_apply_unary_to_non_identifier>(
+				utility::file_range{}, //m_token_list.get_current_token().get_position(),
 				m_token_list.get_current_token().get_token()
 			)); // return on failure
 		}

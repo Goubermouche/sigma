@@ -91,7 +91,7 @@ namespace sigma {
 		 * \param other Second registry to concatenate with.
 		 * \return Outcome (void)
 		 */
-		outcome::result<void> concatenate(
+		utility::outcome::result<void> concatenate(
 			const variable_registry& other
 		);
 

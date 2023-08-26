@@ -1,84 +1,78 @@
 #pragma once
-#include "utility/diagnostics/error.h"
-#include "utility/memory.h"
-
-#include "executable/windows/file_header.h"
-#include "executable/windows/dos_header.h"
-#include "executable/windows/optional_header_64_bit.h"
-#include "executable/windows/section_header.h"
+#include "intermediate_code/intermediate_code.h"
 
 using namespace utility::types;
 
 namespace sigma {
-	constexpr u32 g_pe_signature = 0x00004550;  // "PE\0\0"
+	//constexpr u32 g_pe_signature = 0x00004550;  // "PE\0\0"
 
-	struct import_by_name {
-		import_by_name(
-			const std::string& name
-		);
+	//struct import_by_name {
+	//	import_by_name(
+	//		const std::string& name
+	//	);
 
-		ptr<IMAGE_IMPORT_BY_NAME> get_value() const;
-	private:
-		ptr<IMAGE_IMPORT_BY_NAME> m_value;
-	};
+	//	ptr<IMAGE_IMPORT_BY_NAME> get_value() const;
+	//private:
+	//	ptr<IMAGE_IMPORT_BY_NAME> m_value;
+	//};
 
-	template<typename type>
-	std::vector<unsigned char> serialize(const type& value) {
-		std::vector<unsigned char> vec(sizeof(value));
-		std::memcpy(vec.data(), &value, sizeof(value));
-		return vec;
-	}
+	//template<typename type>
+	//std::vector<unsigned char> serialize(const type& value) {
+	//	std::vector<unsigned char> vec(sizeof(value));
+	//	std::memcpy(vec.data(), &value, sizeof(value));
+	//	return vec;
+	//}
 
-	class import_table {
-	public:
-		void add_import(
-			const std::string& dll_name,
-			const std::vector<std::string>& imports,
-			u64 start_RVA
-		);
+	//class import_table {
+	//public:
+	//	void add_import(
+	//		const std::string& dll_name,
+	//		const std::vector<std::string>& imports,
+	//		u64 start_RVA
+	//	);
 
-		const std::vector<unsigned char>& get_bytecode() const;
-	private:
+	//	const std::vector<unsigned char>& get_bytecode() const;
+	//private:
 
-		std::vector<unsigned char> m_bytecode;
-	};
+	//	std::vector<unsigned char> m_bytecode;
+	//};
 
-	class pe_builder {
-	public:
-		pe_builder();
+	//class pe_builder {
+	//public:
+	//	pe_builder();
 
-		void add_section(
-			const std::string& name,
-			std::vector<unsigned char> data,
-			windows::section_header_characteristics characteristics
-		);
+	//	void add_section(
+	//		const std::string& name,
+	//		std::vector<unsigned char> data,
+	//		windows::section_header_characteristics characteristics
+	//	);
 
-		u64 get_current_RVA() const;
+	//	u64 get_current_RVA() const;
 
-		void emit_to_file(
-			const filepath& path
-		);
-	private:
-		windows::dos_header m_dos_header = {};
-		windows::file_header m_file_header = {};
-		windows::optional_header_64_bit m_optional_header = {};
+	//	void emit_to_file(
+	//		const filepath& path
+	//	);
+	//private:
+	//	windows::dos_header m_dos_header = {};
+	//	windows::file_header m_file_header = {};
+	//	windows::optional_header_64_bit m_optional_header = {};
 
-		std::vector<windows::section_header> m_sections;
-		std::vector<std::vector<unsigned char>> m_section_data;
-		u64 m_current_RVA;
-	};
+	//	std::vector<windows::section_header> m_sections;
+	//	std::vector<std::vector<unsigned char>> m_section_data;
+	//	u64 m_current_RVA;
+	//};
 
-	class context {
-	public:
-		utility::outcome::result<void> compile(
-			const filepath& path
-		);
-	private:
-	};
+	//class context {
+	//public:
+	//	utility::outcome::result<void> compile(
+	//		const filepath& path
+	//	);
+	//private:
+	//};
 
-	class target {
-		
-	};
+	//class target {
+	//	
+	//};
 
 
 
@@ -122,4 +116,13 @@ namespace sigma {
 	//	std::vector<utility::byte> m_code;
 	//	std::unique_ptr<backend> m_backend;
 	//};
+
+	class code_generator {
+	public:
+		code_generator(const ir::builder& builder);
+
+		void allocate_registers();
+	private:
+		ir::builder m_builder;
+	};
 }

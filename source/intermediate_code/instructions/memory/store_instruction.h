@@ -15,14 +15,16 @@ namespace ir {
 		store_instruction(
 			value_ptr destination,
 			constant_ptr value_to_store,
+			alignment alignment,
 			const std::string& name
 		);
 
 		value_ptr get_value_to_store() const;
+		alignment get_alignment() const;
 
 		std::string to_string() override;
 	protected:
 		constant_ptr m_value_to_store;
+		alignment m_alignment;
 	};
 }
-

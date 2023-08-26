@@ -15,4 +15,17 @@ namespace ir {
 	std::string integer_type::to_string() {
 		return (m_is_signed ? "i" : "u") + std::to_string(m_bit_width);
 	}
+
+	alignment integer_type::get_alignment(const data_layout& layout) {
+		const u64 byte_alignment = layout.get_alignment_for_bit_width(m_bit_width);
+		return { byte_alignment };
+	}
+
+	u16 integer_type::get_bit_width() const {
+		return m_bit_width;
+	}
+
+	bool integer_type::is_signed() const {
+		return m_is_signed;
+	}
 }

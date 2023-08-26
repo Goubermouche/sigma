@@ -11,5 +11,7 @@ namespace ir {
 	class type : public value {
 	public:
 		type(const std::string& name);
+
+		virtual alignment get_alignment(const data_layout& layout) { return { 0 }; }
 	};
 }

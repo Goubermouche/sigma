@@ -21,6 +21,10 @@ namespace ir {
 		static integer_type_ptr create(u16 bit_width, bool is_signed);
 
 		std::string to_string() override;
+
+		alignment get_alignment(const data_layout& layout) override;
+		u16 get_bit_width() const;
+		bool is_signed() const;
 	private:
 		u16 m_bit_width;
 		bool m_is_signed;

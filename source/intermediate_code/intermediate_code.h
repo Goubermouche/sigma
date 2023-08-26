@@ -1,8 +1,17 @@
 // Root intermediate code file, contains the main builder class which functions as a general
 // facade during the process of generating an intermediate representation of a given AST.
+// After an intermediate representation is built it can be converted into machine byte code
+// using the code_generator class. 
+//
+//         +----------------------+   +-------------------+   +----------------+
+//  ... -->| abstract_syntax_tree +-->+ intermediate_code |-->| code_generator |--> ...
+//         +----------------------+   +-------------------+   +----------------+
 
 #pragma once
+// types
 #include "intermediate_code/types/integer_type.h"
+
+// constants 
 #include "intermediate_code/constants/integer_constant.h"
 
 // instructions
@@ -10,9 +19,10 @@
 #include "intermediate_code/instructions/flow_control/function/function.h"
 #include "intermediate_code/instructions/memory/stack_allocation.h"
 #include "intermediate_code/instructions/memory/store_instruction.h"
+#include "intermediate_code/instructions/memory/load_instruction.h"
 #include "intermediate_code/instructions/operations/add_instruction.h"
 
-using namespace utility::types;
+using namespace utility::types; // gain access to types from utility/types (un, ptr etc.)
 
 namespace ir {
 	/**
@@ -23,7 +33,7 @@ namespace ir {
 	 */
 	class builder {
 	public:
-		// todo: add support for specifying alignment
+		builder();
 
 		/**
 		 * \brief Creates a new stack allocation instruction, with the given alignment .
@@ -47,6 +57,19 @@ namespace ir {
 		store_instruction_ptr create_store(
 			stack_allocation_instruction_ptr allocation,
 			constant_ptr value_to_store,
+			const std::string& name = ""
+		);
+
+		/**
+		 * \brief Creates a new load instruction
+		 * \param value_type Type of the value to load
+		 * \param value_to_load Value to load (ie. an allocation)
+		 * \param name Optional debug name of the operation
+		 * \return Result of the load operation, which can be further used. 
+		 */
+		load_instruction_ptr create_load(
+			type_ptr value_type, 
+			value_ptr value_to_load,
 			const std::string& name = ""
 		);
 
@@ -144,6 +167,9 @@ namespace ir {
 
 		std::vector<function_ptr> m_functions;
 		block_ptr m_insert_point;
+
+		// data
+		data_layout m_data_layout;
 	};
 
 	template<typename type>

@@ -5,7 +5,7 @@
 using namespace utility::types;
 
 /**
- * \brief Runs the compiler. Generates an exe from the given file (\a argv[1]) at the given location (\a argv[2])
+ * \brief Runs the compiler. 
  * \param argc Argument count
  * \param argv Argument values
  * \return Status code.
@@ -24,7 +24,7 @@ i32 main(i32 argc, char* argv[]) {
 	builder.set_insert_point(block);
 
 	const auto allocation = builder.create_stack_allocation(
-		ir::integer_type::create(16, true)
+		ir::integer_type::create(32, true)
 	);
 
 	const auto store = builder.create_store(
@@ -35,31 +35,21 @@ i32 main(i32 argc, char* argv[]) {
 		)
 	);
 
+	const auto load = builder.create_load(
+		ir::integer_type::create(32, true), 
+		allocation
+	);
+
 	const auto add = builder.create_add(
-		store,
+		load,
 		function->get_arguments().front()
 	);
 
 	const auto ret = builder.create_ret(add);
 	builder.print();
 
-	// sigma::ir::builder builder
-	// 
-	// auto func = function::create(
-	//     integer_type::create(32, true), {
-	//        integer_type::create(32, true)
-	//     },
-	//     "main"
-	// ));
-	//
-	// auto block = func.create_block(func);
-	// builder.set_insert_point(block);
-	//
-	// auto alloc = stack_allocation::create(
-	//     integer_type::create(32, true),
-	//     builder
-	// );
-
+	sigma::code_generator generator(builder);
+	generator.allocate_registers();
 
 	//sigma::program_options options;
 	//sigma::command& compile_command = options.add_command(

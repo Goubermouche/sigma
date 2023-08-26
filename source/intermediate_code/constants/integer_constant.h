@@ -24,7 +24,6 @@ namespace ir {
 		std::string to_string() override;
 		std::string get_value_string() override;
 	private:
-		integer_type_ptr m_type;
 		u64 m_value;
 	};
 }

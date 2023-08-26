@@ -1,5 +1,5 @@
 #pragma once
-#include "intermediate_code/value.h"
+#include "intermediate_code/types/type.h"
 
 namespace ir {
 	class constant;
@@ -10,6 +10,10 @@ namespace ir {
 	 */
 	class constant : public value {
 	public:
-		constant(const std::string& name);
+		constant(type_ptr type, const std::string& name);
+
+		type_ptr get_type() const;
+	protected:
+		type_ptr m_type;
 	};
 }

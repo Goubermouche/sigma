@@ -71,6 +71,7 @@
     <ClInclude Include="instructions\instruction.h" />
     <ClInclude Include="instructions\memory\store_instruction.h" />
     <ClInclude Include="instructions\flow_control\ret_instruction.h" />
+    <ClInclude Include="instructions\memory\load_instruction.h" />
     <ClInclude Include="types\integer_type.h" />
     <ClInclude Include="intermediate_code.h" />
     <ClInclude Include="types\type.h" />
@@ -89,6 +90,7 @@
     <ClCompile Include="instructions\instruction.cpp" />
     <ClCompile Include="instructions\memory\store_instruction.cpp" />
     <ClCompile Include="instructions\flow_control\ret_instruction.cpp" />
+    <ClCompile Include="instructions\memory\load_instruction.cpp" />
     <ClCompile Include="types\integer_type.cpp" />
     <ClCompile Include="intermediate_code.cpp" />
     <ClCompile Include="types\type.cpp" />

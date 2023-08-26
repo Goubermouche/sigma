@@ -4,8 +4,7 @@ namespace ir {
 	integer_constant::integer_constant(
 		integer_type_ptr type,
 		u64 value
-	) : constant(""),
-	m_type(type),
+	) : constant(type, ""),
 	m_value(value) {}
 
 	integer_constant_ptr integer_constant::create(integer_type_ptr type, u64 value) {

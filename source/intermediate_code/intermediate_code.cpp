@@ -1,14 +1,20 @@
 #include "intermediate_code.h"
 
 namespace ir {
+	builder::builder()
+		: m_data_layout(data_layout(8)) {} // default to 8 bytes for now
+
 	stack_allocation_instruction_ptr builder::create_stack_allocation(
 		type_ptr type, 
 		const std::string& name
 	) {
 		value_ptr destination = std::make_shared<value>(create_debug_name(name));
+		alignment align = type->get_alignment(m_data_layout);
+
 		const stack_allocation_instruction_ptr allocation = std::make_shared<stack_allocation>(
 			destination,
 			type,
+			align,
 			""
 		);
 
@@ -20,11 +26,33 @@ namespace ir {
 		constant_ptr value_to_store, 
 		const std::string& name
 	) {
+		alignment align = value_to_store->get_type()->get_alignment(m_data_layout);
+
 		return append(std::make_shared<store_instruction>(
 			allocation->get_destination(),
 			value_to_store,
+			align,
 			create_debug_name(name)
 		));
+	}
+
+	load_instruction_ptr builder::create_load(
+		type_ptr value_type,
+		value_ptr value_to_load, 
+		const std::string& name
+	) {
+		value_ptr destination = std::make_shared<value>(create_debug_name(name));
+		alignment align = value_type->get_alignment(m_data_layout);
+
+		const load_instruction_ptr load = std::make_shared<load_instruction>(
+			destination,
+			value_to_load,
+			value_type,
+			align,
+			create_debug_name(name)
+		);
+
+		return append(load);
 	}
 
 	add_instruction_ptr builder::create_add(
@@ -116,7 +144,6 @@ namespace ir {
 			utility::console::out << (function_blocks.empty() ? "\n" : "}\n\n");
 		}
 	}
-
 
 	std::string builder::create_debug_name(
 		const std::string& name

@@ -15,9 +15,7 @@
 //                   +---------------+
 
 #pragma once
-#include <utility/macros.h>
-
-using namespace utility::types;
+#include "intermediate_code/data_layout.h"
 
 namespace ir {
 	class value;
@@ -62,40 +60,5 @@ namespace ir {
 		virtual std::string get_value_string();
 	protected:
 		std::string m_name;
-	};
-
-	struct alignment {
-		alignment(u64 value)
-			: m_value(value) {}
-
-		u64 get_value() const {
-			return m_value;
-		}
-	private:
-		u64 m_value; // alignment, in bytes
-	};
-
-	class data_layout {
-	public:
-		data_layout(u64 preferred_alignment)
-			: m_preferred_alignment(preferred_alignment) {}
-
-		u64 get_alignment_for_bit_width(u64 bit_width) const {
-			if(bit_width == 0) {
-				return 1; // default to 1 byte alignment
-			}
-
-			const u64 byte_width = (bit_width + 7) / 8;
-			u64 alignment = 1;
-
-			// determine alignment as the next power of two, capped at m_preferred_alignment.
-			while (alignment < byte_width && alignment < m_preferred_alignment) {
-				alignment *= 2;
-			}
-
-			return alignment;
-		}
-	private:
-		u64 m_preferred_alignment;
 	};
 }

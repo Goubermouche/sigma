@@ -60,6 +60,7 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="data_layout.h" />
     <ClInclude Include="instructions\flow_control\function\argument.h" />
     <ClInclude Include="instructions\flow_control\function\function.h" />
     <ClInclude Include="instructions\flow_control\block.h" />
@@ -79,6 +80,7 @@
     <ClInclude Include="value.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="data_layout.cpp" />
     <ClCompile Include="instructions\flow_control\function\argument.cpp" />
     <ClCompile Include="instructions\flow_control\function\function.cpp" />
     <ClCompile Include="instructions\flow_control\block.cpp" />

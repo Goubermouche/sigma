@@ -55,14 +55,12 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="code_generator.h" />
     <ClInclude Include="executable\windows\dos_header.h" />
     <ClInclude Include="executable\windows\file_header.h" />
     <ClInclude Include="executable\windows\optional_header_64_bit.h" />
     <ClInclude Include="executable\windows\section_header.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="code_generator.cpp" />
     <ClCompile Include="executable\windows\dos_header.cpp" />
     <ClCompile Include="executable\windows\file_header.cpp" />
     <ClCompile Include="executable\windows\optional_header_64_bit.cpp" />

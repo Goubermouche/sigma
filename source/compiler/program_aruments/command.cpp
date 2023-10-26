@@ -29,7 +29,7 @@ namespace sigma {
 		std::string current_line = intro;
 
 		m_arguments.traverse_ordered(
-			[&](const std::string& key, const ptr<argument>& argument) {
+			[&](const std::string& key, const s_ptr<argument>& argument) {
 				SUPPRESS_C4100(key);
 
 				std::stringstream argument_ss;
@@ -76,7 +76,7 @@ namespace sigma {
 		// required arguments
 		utility::console::out << "required arguments:\n";
 		m_arguments.traverse_ordered(
-			[max_length](const std::string& key, const ptr<argument>& argument) {
+			[max_length](const std::string& key, const s_ptr<argument>& argument) {
 				SUPPRESS_C4100(key);
 
 				if (argument->is_required()) {
@@ -101,7 +101,7 @@ namespace sigma {
 			<< "   --help, -h" << "show help message\n";
 
 		m_arguments.traverse_ordered(
-			[max_length](const std::string& key, const ptr<argument>& argument) {
+			[max_length](const std::string& key, const s_ptr<argument>& argument) {
 				SUPPRESS_C4100(key);
 
 				if (argument->is_required() == false) {

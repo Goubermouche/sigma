@@ -117,7 +117,7 @@ namespace sigma {
 
 	void argument_list::traverse_ordered(const std::function<void(
 		const std::string&, 
-		const ptr<argument>&)>& visitor
+		const s_ptr<argument>&)>& visitor
 	) const {
 		for (const auto& key : m_insertion_order) {
 			visitor(key, m_arguments.at(key));
@@ -128,21 +128,21 @@ namespace sigma {
 		return m_arguments.empty();
 	}
 
-	std::unordered_map<std::string, ptr<argument>>::iterator argument_list::find(
+	std::unordered_map<std::string, s_ptr<argument>>::iterator argument_list::find(
 		const std::string& key
 	) {
 		return m_arguments.find(key);
 	}
 
-	ptr<argument>& argument_list::operator[](const std::string& key) {
+	s_ptr<argument>& argument_list::operator[](const std::string& key) {
 		return m_arguments[key];
 	}
 
-	std::unordered_map<std::string, ptr<argument>>::iterator argument_list::begin() {
+	std::unordered_map<std::string, s_ptr<argument>>::iterator argument_list::begin() {
 		return m_arguments.begin();
 	}
 
-	std::unordered_map<std::string, ptr<argument>>::iterator argument_list::end() {
+	std::unordered_map<std::string, s_ptr<argument>>::iterator argument_list::end() {
 		return m_arguments.end();
 	}
 }

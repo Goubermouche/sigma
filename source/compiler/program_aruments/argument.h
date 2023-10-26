@@ -128,21 +128,21 @@ namespace sigma {
 		);
 
 		void traverse_ordered(
-			const std::function<void(const std::string&, const ptr<argument>&)>& visitor
+			const std::function<void(const std::string&, const s_ptr<argument>&)>& visitor
 		) const;
 
 		template<typename type>
 		type get(const std::string& name) const;
 
 		bool empty() const;
-		std::unordered_map<std::string, ptr<argument>>::iterator find(const std::string& key);
-		ptr<argument>& operator[](const std::string& key);
+		std::unordered_map<std::string, s_ptr<argument>>::iterator find(const std::string& key);
+		s_ptr<argument>& operator[](const std::string& key);
 
-		std::unordered_map<std::string, ptr<argument>>::iterator begin();
-		std::unordered_map<std::string, ptr<argument>>::iterator end();
+		std::unordered_map<std::string, s_ptr<argument>>::iterator begin();
+		std::unordered_map<std::string, s_ptr<argument>>::iterator end();
 	private:
 		std::vector<std::string> m_insertion_order;
-		std::unordered_map<std::string, ptr<argument>> m_arguments;
+		std::unordered_map<std::string, s_ptr<argument>> m_arguments;
 	};
 
 	template<typename type>

@@ -56,10 +56,10 @@ namespace sigma {
 		}
 
 		// verify that all required arguments were provided
-		std::vector<ptr<argument>> missing_arguments;
+		std::vector<s_ptr<argument>> missing_arguments;
 
 		command_it->second.get_arguments().traverse_ordered(
-			[&](const std::string& key, const ptr<argument>& argument) {
+			[&](const std::string& key, const s_ptr<argument>& argument) {
 				SUPPRESS_C4100(key);
 
 				if (argument->is_required() && argument->is_used() == false) {

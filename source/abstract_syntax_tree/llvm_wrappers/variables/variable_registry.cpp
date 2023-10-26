@@ -110,7 +110,14 @@ namespace sigma {
 		return m_scopes.back()->get_loop_end_block();
 	}
 
-	void variable_registry::print() const {
+	u64 variable_registry::get_global_variable_count() const {
+		return m_global_variables.size();
+	}
+
+	utility::console& operator<<(
+		utility::console& console, 
+		const variable_registry& r
+	) {
 		utility::console::out
 			<< utility::color::red
 			<< "variable registry:\n"
@@ -121,22 +128,20 @@ namespace sigma {
 			<< "local variables:\n"
 			<< utility::color::white;
 
-		m_scopes[0]->print(0);
+		r.m_scopes[0]->print(0);
 
 		utility::console::out
 			<< utility::color::yellow
 			<< "global variables:\n"
 			<< utility::color::white;
 
-		for(const auto& [identifier, variable] : m_global_variables) {
+		for (const auto& [identifier, variable] : r.m_global_variables) {
 			utility::console::out
 				<< std::string(2, ' ')
 				<< identifier << ": "
 				<< variable->get_value()->get_type().to_string() << '\n';
 		}
-	}
 
-	u64 variable_registry::get_global_variable_count() const {
-		return m_global_variables.size();
+		return console;
 	}
 }

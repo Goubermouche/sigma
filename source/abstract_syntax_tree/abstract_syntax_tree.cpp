@@ -5,14 +5,6 @@ namespace sigma {
 		m_nodes.push_back(node);
 	}
 
-	void abstract_syntax_tree::print_nodes() const {
-		utility::console::out << "abstract syntax tree\n";
-
-		for(u64 i = 0;i < m_nodes.size(); i++) {
-			m_nodes[i]->print(1, L"", i == m_nodes.size() - 1);
-		}
-	}
-
 	u64 abstract_syntax_tree::size() const {
 		return m_nodes.size();
 	}
@@ -27,7 +19,7 @@ namespace sigma {
 
 	void abstract_syntax_tree::move_insert(
 		std::vector<node_ptr>::iterator where,
-		ptr<abstract_syntax_tree> other
+		s_ptr<abstract_syntax_tree> other
 	) {
 		std::move(
 			std::make_move_iterator(other->m_nodes.begin()),
@@ -36,5 +28,18 @@ namespace sigma {
 		);
 
 		other->m_nodes.clear();
+	}
+
+	utility::console& operator<<(
+		utility::console& console,
+		const abstract_syntax_tree& t
+	) {
+		utility::console::out << "abstract syntax tree\n";
+
+		for (u64 i = 0; i < t.m_nodes.size(); i++) {
+			t.m_nodes[i]->print(1, L"", i == t.m_nodes.size() - 1);
+		}
+
+		return console;
 	}
 }

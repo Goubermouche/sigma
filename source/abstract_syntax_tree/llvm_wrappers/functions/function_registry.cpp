@@ -4,7 +4,7 @@
 namespace sigma {
 	function_ptr function_registry::get_function(
 		const std::string& identifier,
-		const ptr<abstract_syntax_tree_context>& context
+		const s_ptr<abstract_syntax_tree_context>& context
 	) {
 		// locate a defined function
 		const auto it = m_functions.find(identifier);

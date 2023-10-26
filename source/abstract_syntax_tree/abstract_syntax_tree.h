@@ -10,7 +10,11 @@ namespace sigma {
 			node_ptr node
 		);
 
-		void print_nodes() const;
+		friend utility::console& operator<<(
+			utility::console& console,
+			const abstract_syntax_tree& t
+		);
+
 		u64 size() const;
 
 		std::vector<node_ptr>::iterator begin();
@@ -18,7 +22,7 @@ namespace sigma {
 
 		void move_insert(
 			std::vector<node_ptr>::iterator where,
-			ptr<abstract_syntax_tree> other
+			s_ptr<abstract_syntax_tree> other
 		);
 	private:
 		std::vector<node_ptr> m_nodes;

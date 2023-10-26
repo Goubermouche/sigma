@@ -3,7 +3,7 @@
 
 namespace sigma {
 	class value;
-	using value_ptr = ptr<value>;
+	using value_ptr = s_ptr<value>;
 
 	/**
 	 * \brief Wrapper around an llvm::Value*, provides utilities such as additional type information

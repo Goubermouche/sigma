@@ -4,7 +4,7 @@
 
 namespace sigma {
 	class scope;
-	using scope_ptr = ptr<scope>;
+	using scope_ptr = s_ptr<scope>;
 
 	/**
 	 * \brief Base scope class, contains information about the current, parent, and child scopes,

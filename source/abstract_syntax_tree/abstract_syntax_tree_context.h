@@ -13,8 +13,8 @@ namespace sigma {
 
 		llvm::LLVMContext& get_context();
 		llvm::IRBuilder<>& get_builder();
-		ptr<llvm::Module> get_module();
-		ptr<llvm::Module> get_module() const;
+		s_ptr<llvm::Module> get_module();
+		s_ptr<llvm::Module> get_module() const;
 
 		function_registry& get_function_registry();
 		variable_registry& get_variable_registry();
@@ -27,11 +27,14 @@ namespace sigma {
 			const variable_registry& registry
 		);
 
-		void print() const;
+		friend utility::console& operator<<(
+			utility::console& console,
+			const abstract_syntax_tree_context& c
+		);
 	private:
 		llvm::LLVMContext m_context;
 		llvm::IRBuilder<> m_builder;
-		ptr<llvm::Module> m_module;
+		s_ptr<llvm::Module> m_module;
 		
 		function_registry m_function_registry;
 		variable_registry m_variable_registry;

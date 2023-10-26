@@ -105,7 +105,10 @@ namespace sigma {
 		 */
 		void pop_scope();
 
-		void print() const;
+		friend utility::console& operator<<(
+			utility::console& console,
+			const variable_registry& r
+		);
 
 		u64 get_global_variable_count() const;
 

@@ -25,5 +25,5 @@ namespace sigma {
 		utility::file_range m_range;
 	};
 
-	using variable_ptr = ptr<variable>;
+	using variable_ptr = s_ptr<variable>;
 }

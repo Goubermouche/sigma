@@ -5,8 +5,8 @@
 #include <utility/diagnostics/error.h>
 
 namespace sigma {
-	using function_ptr = ptr<function>;
-	using function_declaration_ptr = ptr<function_declaration>;
+	using function_ptr = s_ptr<function>;
+	using function_declaration_ptr = s_ptr<function_declaration>;
 
 	// external function declarations
 	static inline const std::unordered_map<std::string, function_declaration_ptr> g_external_function_declarations = {
@@ -103,7 +103,7 @@ namespace sigma {
 		 */
 		function_ptr get_function(
 			const std::string& identifier,
-			const ptr<abstract_syntax_tree_context>& context
+			const s_ptr<abstract_syntax_tree_context>& context
 		);
 
 		static function_declaration_ptr get_external_function_declaration(

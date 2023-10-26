@@ -26,7 +26,7 @@ namespace sigma {
 		return m_graph.size();
 	}
 
-	utility::outcome::result<ptr<abstract_syntax_tree>> dependency_tree::parse() {
+	utility::outcome::result<s_ptr<abstract_syntax_tree>> dependency_tree::parse() {
 		// parse individual files
 		for(const auto& [filepath, node] : m_graph) {
 			OUTCOME_TRY(node->get_value().parse());
@@ -69,7 +69,7 @@ namespace sigma {
 			return utility::outcome::success();
 		}
 
-		OUTCOME_TRY(ptr<utility::text_file> file, utility::text_file::load(path));
+		OUTCOME_TRY(s_ptr<utility::text_file> file, utility::text_file::load(path));
 		OUTCOME_TRY(verify_source_file(file));
 
 		// tokenize the current file
@@ -117,7 +117,7 @@ namespace sigma {
 	}
 
 	utility::outcome::result<void> dependency_tree::verify_source_file(
-		const ptr<utility::text_file>& file
+		const s_ptr<utility::text_file>& file
 	) {
 		if (file->get_extension() != LANG_FILE_EXTENSION) {
 			return utility::outcome::failure(
@@ -141,7 +141,7 @@ namespace sigma {
 		return utility::outcome::success();
 	}
 
-	ptr<abstract_syntax_tree> translation_unit::get_abstract_syntax_tree() const {
+	s_ptr<abstract_syntax_tree> translation_unit::get_abstract_syntax_tree() const {
 		return m_abstract_syntax_tree;
 	}
 

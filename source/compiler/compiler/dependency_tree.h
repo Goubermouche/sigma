@@ -11,12 +11,12 @@ namespace sigma {
 
 		utility::outcome::result<void> parse();
 
-		ptr<abstract_syntax_tree> get_abstract_syntax_tree() const;
+		s_ptr<abstract_syntax_tree> get_abstract_syntax_tree() const;
 		u64 get_include_directive_index(u64 index) const;
 	private:
 		token_list m_token_list;
 		std::vector<u64> m_include_directive_indices;
-		ptr<abstract_syntax_tree> m_abstract_syntax_tree;
+		s_ptr<abstract_syntax_tree> m_abstract_syntax_tree;
 	};
 
 	class dependency_tree {
@@ -33,7 +33,7 @@ namespace sigma {
 		 * \brief Parses all contained compilation units and creates the parent abstract syntax tree.
 		 * \return outcome (abstract syntax tree containing all relevant dependencies in the user-defined order)
 		 */
-		utility::outcome::result<ptr<abstract_syntax_tree>> parse();
+		utility::outcome::result<s_ptr<abstract_syntax_tree>> parse();
 
 		/**
 		 * \brief Verifies the dependency tree structure and checks for any circular dependencies. 
@@ -53,7 +53,7 @@ namespace sigma {
 		 * \return outcome (void)
 		 */
 		static utility::outcome::result<void> verify_source_file(
-			const ptr<utility::text_file>& file
+			const s_ptr<utility::text_file>& file
 		);
 	private:
 		filepath m_root_compilation_unit_path;

@@ -59,7 +59,7 @@ namespace sigma {
 			<< "parsing dependency tree...\n";
 
 		OUTCOME_TRY(
-			const ptr<abstract_syntax_tree>& abstract_syntax_tree, 
+			const s_ptr<abstract_syntax_tree>& abstract_syntax_tree, 
 			tree.parse()
 		);
 
@@ -74,7 +74,7 @@ namespace sigma {
 
 		abstract_syntax_tree_visitor codegen(abstract_syntax_tree);
 		OUTCOME_TRY(
-			const ptr<abstract_syntax_tree_context>& context, 
+			const s_ptr<abstract_syntax_tree_context>& context, 
 			codegen.generate()
 		);
 
@@ -113,7 +113,7 @@ namespace sigma {
 	utility::outcome::result<void> compiler::create_object_file(
 		const filepath& path,
 		llvm::TargetMachine* machine,
-		const ptr<abstract_syntax_tree_context>& context
+		const s_ptr<abstract_syntax_tree_context>& context
 	) const {
 		OUTCOME_TRY(const auto & object_file, utility::raw_file::create(path));
 
@@ -219,7 +219,7 @@ namespace sigma {
 	}
 
 	utility::outcome::result<llvm::TargetMachine*> compiler::create_target_machine(
-		const ptr<abstract_syntax_tree_context>& context
+		const s_ptr<abstract_syntax_tree_context>& context
 	) const {
 		const std::string target_triple = llvm::sys::getDefaultTargetTriple();
 
@@ -268,7 +268,7 @@ namespace sigma {
 	}
 
 	utility::outcome::result<void> compiler::compile_module(
-		const ptr<abstract_syntax_tree_context>& context
+		const s_ptr<abstract_syntax_tree_context>& context
 	) {
 		filepath object_file;
 		const auto o_it = m_settings.outputs.find(file_extension::o);
@@ -302,7 +302,7 @@ namespace sigma {
 	}
 
 	utility::outcome::result<void> compiler::verify_main_context(
-		const ptr<abstract_syntax_tree_context>& context
+		const s_ptr<abstract_syntax_tree_context>& context
 	) {
 		// check if we have a valid 'main' function
 		if(const auto main_func = context->get_function_registry().get_function("main", context)) {

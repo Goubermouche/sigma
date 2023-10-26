@@ -80,7 +80,7 @@ namespace sigma {
 		std::make_shared<abstract_syntax_tree>()
 	) {}
 
-	utility::outcome::result<ptr<abstract_syntax_tree>> parser::parse() {
+	utility::outcome::result<s_ptr<abstract_syntax_tree>> parser::parse() {
 		while (true) {
 			if (peek_next_token() == token::end_of_file) {
 				return m_abstract_syntax_tree;
@@ -110,7 +110,7 @@ namespace sigma {
 		}
 	}
 
-	ptr<abstract_syntax_tree> parser::get_abstract_syntax_tree() const {
+	s_ptr<abstract_syntax_tree> parser::get_abstract_syntax_tree() const {
 		return m_abstract_syntax_tree;
 	}
 

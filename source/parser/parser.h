@@ -9,8 +9,8 @@ namespace sigma {
 		parser(const token_list& token_list);
 		virtual ~parser() = default;
 
-		utility::outcome::result<ptr<abstract_syntax_tree>> parse();
-		ptr<abstract_syntax_tree> get_abstract_syntax_tree() const;
+		utility::outcome::result<s_ptr<abstract_syntax_tree>> parse();
+		s_ptr<abstract_syntax_tree> get_abstract_syntax_tree() const;
 		const std::vector<u64>& get_include_directive_indices() const;
 	private:
 		utility::outcome::result<node_ptr> parse_function_definition();
@@ -110,7 +110,7 @@ namespace sigma {
 		utility::outcome::result<type> parse_type();
 	private:
 		token_list m_token_list;
-		ptr<abstract_syntax_tree> m_abstract_syntax_tree;
+		s_ptr<abstract_syntax_tree> m_abstract_syntax_tree;
 		std::vector<u64> m_include_directive_indices;
 		u64 m_top_level_abstract_syntax_tree_node_count = 0;
 	};

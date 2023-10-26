@@ -65,7 +65,7 @@ namespace sigma {
 		m_peek_token_index = m_main_token_index;
 	}
 
-	lexer::lexer(ptr<utility::text_file> file)
+	lexer::lexer(s_ptr<utility::text_file> file)
 		: m_source_file(file) {}
 
 	utility::outcome::result<token_list> lexer::tokenize() {

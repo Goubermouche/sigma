@@ -84,7 +84,7 @@ namespace sigma {
 	 */
 	class lexer {
 	public:
-		lexer(ptr<utility::text_file> file);
+		lexer(s_ptr<utility::text_file> file);
 		/**
 		 * \brief Traverses the entire file and generates a list of tokens which can be traversed later.
 		 * \return Potentially erroneous result.
@@ -119,7 +119,7 @@ namespace sigma {
 		utility::outcome::result<token> get_special_token();
 	private:
 		std::vector<token_data> m_tokens;
-		ptr<utility::text_file> m_source_file;
+		s_ptr<utility::text_file> m_source_file;
 		utility::detail::string_accessor m_accessor;
 		char m_last_character = ' ';
 		std::string m_value_string;

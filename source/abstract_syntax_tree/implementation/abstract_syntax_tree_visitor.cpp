@@ -3,11 +3,11 @@
 
 namespace sigma {
 	abstract_syntax_tree_visitor::abstract_syntax_tree_visitor(
-		const ptr<abstract_syntax_tree>& abstract_syntax_tree
+		const s_ptr<abstract_syntax_tree>& abstract_syntax_tree
 	) : m_abstract_syntax_tree(abstract_syntax_tree),
 	m_context(std::make_shared<abstract_syntax_tree_context>()) {}
 
-	utility::outcome::result<ptr<abstract_syntax_tree_context>> abstract_syntax_tree_visitor::generate() {
+	utility::outcome::result<s_ptr<abstract_syntax_tree_context>> abstract_syntax_tree_visitor::generate() {
 		// walk the abstract syntax tree
 		for (const node_ptr node : *m_abstract_syntax_tree) {
 			OUTCOME_TRY(node->accept(*this, {}));
@@ -45,11 +45,11 @@ namespace sigma {
 			//	return false;
 			//}
 
-			utility::warning::emit<utility::warning_code::implicit_function_type_cast>(
+			utility::console::out << *utility::warning::emit<utility::warning_code::implicit_function_type_cast>(
 				range,
 				function_return_type,
 				target_type
-			)->print();
+			);
 
 			llvm::Value* function_call_result = source_value->get_value();
 			llvm::Type* target_llvm_type = target_type.get_llvm_type(function_call_result->getContext());
@@ -81,11 +81,11 @@ namespace sigma {
 		//	return false;
 		//}
 
-		utility::warning::emit<utility::warning_code::implicit_type_cast>(
+		utility::console::out << *utility::warning::emit<utility::warning_code::implicit_type_cast>(
 			range,
 			source_value->get_type(),
 			target_type
-		)->print();
+		);
 
 		// get the LLVM value and type for source and target
 		llvm::Value* source_llvm_value = source_value->get_value();

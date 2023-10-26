@@ -20,10 +20,10 @@ namespace sigma {
 	class abstract_syntax_tree_visitor : public abstract_syntax_tree_visitor_template {
 	public:
 		abstract_syntax_tree_visitor(
-			const ptr<abstract_syntax_tree>& abstract_syntax_tree
+			const s_ptr<abstract_syntax_tree>& abstract_syntax_tree
 		);
 
-		utility::outcome::result<ptr<abstract_syntax_tree_context>> generate();
+		utility::outcome::result<s_ptr<abstract_syntax_tree_context>> generate();
 	private:
 		// void initialize_global_variables() const;
 
@@ -370,7 +370,7 @@ namespace sigma {
 			const utility::file_range& range
 		) const;
 	private:
-		ptr<abstract_syntax_tree> m_abstract_syntax_tree;
-		ptr<abstract_syntax_tree_context> m_context;
+		s_ptr<abstract_syntax_tree> m_abstract_syntax_tree;
+		s_ptr<abstract_syntax_tree_context> m_context;
 	};
 }

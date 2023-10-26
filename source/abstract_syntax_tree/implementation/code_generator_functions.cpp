@@ -116,10 +116,10 @@ namespace sigma {
 			// emit the relevant warning
 			// check if the return type is non-void
 			if(node.get_function_return_type() != type(type::base::empty, 0)) {
-				utility::warning::emit<utility::warning_code::implicit_function_return_generated>(
+				utility::console::out << *utility::warning::emit<utility::warning_code::implicit_function_return_generated>(
 					node.get_declared_range(),
 					node.get_function_identifier()
-				)->print();
+				);
 			}
 
 			if (return_type->isVoidTy()) {

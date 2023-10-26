@@ -1,0 +1,36 @@
+digraph test{
+  rankdir=TB
+  subgraph {
+    r1473321373420[style = "filled"; shape=box; fillcolor=lightblue1; label="12: End"]
+    r1473321373300 -> r1473321373420
+    r1473321373300 [style="filled"; shape=box; fillcolor=antiquewhite1; label="11: Region"]
+    { rank=max; r1473321373420 }
+  }
+  r1473321373738 -> r1473321373300
+  r1473321373608 [style="filled"; ordering=in; shape=box; fillcolor=lightgrey; label="13: phi"];
+  r1473321373300 -> r1473321373608
+  r1473321373140 -> r1473321373608
+    r1473321373608 -> r1473321373420
+  r1473321372712 [style="filled"; ordering=in; shape=box; fillcolor=lightgrey; label="3: proj"];
+  r1473321372464 -> r1473321372712
+    r1473321372712 -> r1473321373420
+  r1473321373673 [style="filled"; ordering=in; shape=box; fillcolor=lightgrey; label="14: phi"];
+  r1473321373300 -> r1473321373673
+  r1473321373224 -> r1473321373673
+  r1473321373224 [style="filled"; ordering=in; shape=box; fillcolor=lightgrey; label="10: add"];
+  r1473321372776 -> r1473321373224
+  r1473321372776 [style="filled"; ordering=in; shape=box; fillcolor=lightgrey; label="4: local"];
+  r1473321372464 -> r1473321372776
+  r1473321372844 -> r1473321373224
+  r1473321372844 [style="filled"; ordering=in; shape=box; fillcolor=lightgrey; label="5: local"];
+  r1473321372464 -> r1473321372844
+    r1473321373673 -> r1473321373420
+  subgraph {
+    r1473321373738[style = "filled"; shape=box; fillcolor=antiquewhite1; label="15: Effect"]
+    r1473321372584 -> r1473321373738
+    r1473321372584[style = "filled"; shape=box; fillcolor=antiquewhite1; label="1: Effect"]
+    r1473321372464 -> r1473321372584
+    r1473321372464 [style="filled"; shape=box; fillcolor=lightblue1; label="0: Start"]
+    { rank=min; r1473321372464 }
+  }
+}

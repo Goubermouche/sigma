@@ -50,13 +50,9 @@ namespace ir::cg {
 			void* inst_allocation = instruction_allocator.allocate(sizeof(instruction));
 			const handle inst_ptr = static_cast<instruction*>(inst_allocation);
 
-			// allocate enough space for operands
-			const utility::slice<i32> operands(instruction_allocator.allocate(sizeof(i32) * operand_count), operand_count);
-			memset(operands.get_data(), 0, operand_count * sizeof(i32));
-
 			// assign data
+			inst_ptr->set_operands(utility::slice<i32>(instruction_allocator, operand_count));
 			inst_ptr->set_property(instruction_allocator.allocate(sizeof(extra_type)));
-			inst_ptr->set_operands(operands);
 
 			return inst_ptr;
 		}

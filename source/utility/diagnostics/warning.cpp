@@ -6,13 +6,18 @@ namespace utility {
 		warning_code code,
 		const std::string& message
 	) : diagnostic_message(message),
-		m_code(code) {}
+		m_bytes(code) {}
 
-	void warning_message::print() {
+	console& operator<<(
+		console& console,
+		const warning_message& m
+		) {
 		console::out
 			<< color::yellow
-			<< "warning:" << static_cast<u64>(m_code)
-			<< color::white << ": " << m_message << '\n';
+			<< "warning:" << static_cast<u64>(m.m_bytes)
+			<< color::white << ": " << m.m_message << '\n';
+
+		return console;
 	}
 
 	warning_message_range::warning_message_range(
@@ -22,20 +27,23 @@ namespace utility {
 	) : warning_message(code, message),
 	m_range(range) {}
 
-	void warning_message_range::print()	{
-		ASSERT(m_range.file != nullptr, "file was nullptr!");
+	console& operator<<(
+		console& console, 
+		const warning_message_range& m
+	) {
+		ASSERT(m.m_range.file != nullptr, "file was nullptr!");
 
 		console::out
 			<< color::white
-			<< m_range.file->get_path().string()
-			<< ":" << m_range.start.line_index + 1
-			<< ":" << m_range.start.char_index
-			<< color::yellow << ":warning:" << static_cast<u64>(m_code)
-			<< color::white << ": " << m_message << '\n';
+			<< m.m_range.file->get_path().string()
+			<< ":" << m.m_range.start.line_index + 1
+			<< ":" << m.m_range.start.char_index
+			<< color::yellow << ":warning:" << static_cast<u64>(m.m_bytes)
+			<< color::white << ": " << m.m_message << '\n';
 
 		const auto& [removed_char_count, line] = detail::remove_leading_spaces(
-			m_range.file->get_line(
-				m_range.start.line_index
+			m.m_range.file->get_line(
+				m.m_range.start.line_index
 			)
 		);
 
@@ -47,8 +55,10 @@ namespace utility {
 			<< color::yellow << "    "
 			<< detail::create_caret_underline(
 				line,
-				m_range.start.char_index - removed_char_count,
-				m_range.end.char_index - removed_char_count)
+				m.m_range.start.char_index - removed_char_count,
+				m.m_range.end.char_index - removed_char_count)
 			<< color::white << '\n';
+
+		return console;
 	}
 }

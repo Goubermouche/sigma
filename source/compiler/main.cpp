@@ -1,8 +1,13 @@
 //#include "compiler/compiler.h"
-#include "code_generator/code_generator.h"
-#include "intermediate_code/intermediate_code.h"
+#include <intermediate_representation/module.h>
+#include <utility/filesystem/new/file.h>
 
 using namespace utility::types;
+
+// todo: 
+// - rework the console so that it supports multiple stream types
+// - make the pe executable format derive from the file class
+// - replace print methods with overloaded friend methods
 
 /**
  * \brief Runs the compiler. 
@@ -11,45 +16,67 @@ using namespace utility::types;
  * \return Status code.
  */
 i32 main(i32 argc, char* argv[]) {
-	utility::console::init();
-	ir::builder builder;
+	SUPPRESS_C4100(argc);
+	SUPPRESS_C4100(argv);
 
-	const auto function = builder.create_function(
-		ir::integer_type::create(32, true), {
-			ir::integer_type::create(32, true)
-		}, "main"
+	utility::console::set_output_stream(std::cout);
+	ir::module m;
+
+	m.create_function("test", { I32_TYPE });
+
+	const auto temporary_a = m.create_local(4, 4);
+	const auto temporary_b = m.create_local(4, 4);
+	const auto integer_a = m.create_signed_integer(100, 32);
+	const auto integer_b = m.create_signed_integer(200, 32);
+
+	m.create_store(temporary_a, integer_a, 4, false);
+	m.create_store(temporary_b, integer_b, 4, false);
+	m.create_ret({ m.create_add(temporary_a, temporary_b) });
+	const auto print_result = m.print_node_graph("./test/app.dot");
+	ASSERT(!print_result.has_error(), "unhandled error encountered");
+
+	const auto compilation_result = m.compile(
+		ir::arch::x64, ir::system::windows
 	);
 
-	const auto block = builder.create_block(function, "entry");
-	builder.set_insert_point(block);
+	ASSERT(!compilation_result.has_error(), "unhandled error encountered");
 
-	const auto allocation = builder.create_stack_allocation(
-		ir::integer_type::create(32, true)
+	const auto serialization_result_asm = utility::file::write(
+		compilation_result.get_value()->assembly_output, "./test/assembly.txt"
 	);
 
-	const auto store = builder.create_store(
-		allocation,
-		ir::integer_constant::create(
-			ir::integer_type::create(32, true),
-			999
-		)
+	ASSERT(!serialization_result_asm.has_error(), "unhandled error encountered");
+
+	const auto serialization_result_code = utility::file::write(
+		compilation_result.get_value()->bytecode, "./test/bytecode.txt"
 	);
 
-	const auto load = builder.create_load(
-		ir::integer_type::create(32, true), 
-		allocation
-	);
+	ASSERT(!serialization_result_code.has_error(), "unhandled error encountered");
 
-	const auto add = builder.create_add(
-		load,
-		function->get_arguments().front()
-	);
 
-	const auto ret = builder.create_ret(add);
-	builder.print();
+	// utility::console::out << "\nbyte code:\n\n";
+	// for(const utility::byte b : compilation_result.get_value()) {
+	// 	utility::console::out << b.to_hex() << ' ';
+	// }
 
-	sigma::code_generator generator(builder);
-	generator.allocate_registers();
+	return 0;
+
+
+
+
+
+
+
+
+
+
+	//const std::vector<utility::byte> bytes = assembly.get_code();
+
+	//for (const auto& byte : bytes) {
+	//	utility::console::out << "0x" << byte.to_hex() << '\n';
+	//}
+
+	//code_generator::executable exe("./test/app.exe", bytes);
 
 	//sigma::program_options options;
 	//sigma::command& compile_command = options.add_command(

@@ -5,10 +5,10 @@
 namespace utility {
 	raw_file::raw_file(
 		const filepath& path, 
-		ptr<llvm::raw_fd_ostream> stream
-	) : file(path), m_stream(stream) {}
+		s_ptr<llvm::raw_fd_ostream> stream
+	) : old_file(path), m_stream(stream) {}
 
-	outcome::result<ptr<raw_file>> raw_file::create(
+	outcome::result<s_ptr<raw_file>> raw_file::create(
 		const filepath& path
 	) {
 		OUTCOME_TRY(verify(path));
@@ -23,7 +23,7 @@ namespace utility {
 		// check for errors 
 		if(error_code) {
 			return outcome::failure(
-				error::emit<error_code::unable_to_open_file_reason>(
+				error::emit_assembly<error_code::unable_to_open_file_reason>(
 					path,
 					error_code.message()
 				)
@@ -36,7 +36,7 @@ namespace utility {
 		);
 	}
 
-	ptr<llvm::raw_fd_ostream> raw_file::get_stream() const {
+	s_ptr<llvm::raw_fd_ostream> raw_file::get_stream() const {
 		return m_stream;
 	}
 

@@ -17,9 +17,12 @@ namespace utility {
 			const std::string& message
 		);
 
-		virtual void print() override;
+		friend console& operator<<(
+			console& console,
+			const warning_message& m
+		);
 	protected:
-		warning_code m_code;
+		warning_code m_bytes;
 	};
 
 	struct warning_message_range : public warning_message {
@@ -29,7 +32,10 @@ namespace utility {
 			const file_range& range
 		);
 
-		void print() override;
+		friend console& operator<<(
+			console& console,
+			const warning_message_range& m
+		);
 	protected:
 		file_range m_range;
 	};
@@ -37,7 +43,7 @@ namespace utility {
 	class warning {
 	public:
 		template<warning_code code, typename...argument_types>
-		static ptr<warning_message> emit(argument_types... args) {
+		static s_ptr<warning_message> emit_assembly(argument_types... args) {
 			const auto it = m_error_templates.find(code);
 			if (it == m_error_templates.end()) {}
 
@@ -45,7 +51,7 @@ namespace utility {
 		}
 
 		template<warning_code code, typename...argument_types>
-		static ptr<warning_message_range> emit(
+		static s_ptr<warning_message_range> emit_assembly(
 			const file_range& range,
 			argument_types... args
 		) {

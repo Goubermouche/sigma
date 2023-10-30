@@ -7,6 +7,7 @@ namespace utility {
 	};
 
 	struct left_pad {};
+	struct right_pad {};
 
 	class color {
 	public:
@@ -18,17 +19,22 @@ namespace utility {
 		static constexpr color_value red = { "\033[38;5;197m" };
 	};
 
+	class text_file;
 	class console {
 	public:
 		static constexpr left_pad left = {};
+		static constexpr right_pad right = {};
 
-		static void init();
+		static void set_output_stream(std::ostream& stream);
+		static void set_output_stream(s_ptr<text_file> file);
+
 		static console& out;
 		static console& width(i64 width);
 		static console& precision(i64 precision);
 
 		console& operator<<(const color_value& color);
 		console& operator<<(const left_pad& left_pad);
+		console& operator<<(const right_pad& right_pad);
 		console& operator<<(const console& console);
 
 		console& operator<<(const std::string& value);
@@ -36,6 +42,8 @@ namespace utility {
 
 		console& operator<<(const char* value);
 		console& operator<<(char value);
+
+		console& operator<<(bool value);
 
 		console& operator<<(f32 value);
 		console& operator<<(f64 value);
@@ -51,5 +59,7 @@ namespace utility {
 		console& operator<<(i64 value);
 	private:
 		console() = default;
+	private:
+		std::ostream* m_stream;
 	};
 }

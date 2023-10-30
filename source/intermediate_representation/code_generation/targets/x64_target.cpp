@@ -6,15 +6,17 @@ namespace ir::cg {
 
 	void x64_target::emit_code(
 		code_generator_context& context, 
-		code_buffer& buffer
+		s_ptr<cg::code_generation_result> result
 	) {
+		// TODO: replace by a unified output struct 
+		m_assembly_output = &result->assembly_output;
+
 		// resolve stack usage
 		context.stack_usage = utility::align(context.stack_usage, 16);
 
-		emit("\nassembly:\n\n");
-		emit_prologue(context, buffer);
-		emit_function_body(context, buffer);
-		emit_epilogue(context, buffer);
+		emit_prologue(context, result->bytecode);
+		emit_function_body(context, result->bytecode);
+		emit_epilogue(context, result->bytecode);
 	}
 
 	void x64_target::allocate_base_registers(
@@ -58,23 +60,23 @@ namespace ir::cg {
 
 	void x64_target::emit_prologue(
 		code_generator_context& context,
-		code_buffer& buffer
+		utility::byte_buffer& bytecode
 	) {
-		emit("{}:\n", context.function->get_symbol().get_name());
+		emit_assembly("{}:\n", context.function->get_symbol().get_name());
 
 		if(context.stack_usage <= 16) {
 			return;
 		}
 
 		// push RBP
-		emit("  push RBP\n");
-		buffer.append_byte(0x50 + static_cast<u8>(gpr::rbp));
+		emit_assembly("  push RBP\n");
+		bytecode.append_byte(0x50 + static_cast<u8>(gpr::rbp));
 
 		// mov RBP, RSP
-		emit("  mov RBP, RSP\n");
-		buffer.append_byte(rex(true, static_cast<u8>(gpr::rsp), static_cast<u8>(gpr::rbp), 0));
-		buffer.append_byte(0x89);
-		buffer.append_byte(mod_rx_rm(direct, static_cast<u8>(gpr::rsp), static_cast<u8>(gpr::rbp)));
+		emit_assembly("  mov RBP, RSP\n");
+		bytecode.append_byte(rex(true, static_cast<u8>(gpr::rsp), static_cast<u8>(gpr::rbp), 0));
+		bytecode.append_byte(0x89);
+		bytecode.append_byte(mod_rx_rm(direct, static_cast<u8>(gpr::rsp), static_cast<u8>(gpr::rbp)));
 
 		// if there's more than 4096 bytes of stack, we need to insert a chkstk
 		// function
@@ -82,27 +84,27 @@ namespace ir::cg {
 			ASSERT(false, "not implemented");
 		}
 		else {
-			emit("  sub RSP, {}\n", context.stack_usage);
-			buffer.append_byte(rex(true, 0x00, static_cast<u8>(gpr::rsp), 0));
+			emit_assembly("  sub RSP, {}\n", context.stack_usage);
+			bytecode.append_byte(rex(true, 0x00, static_cast<u8>(gpr::rsp), 0));
 
 			if (context.stack_usage == static_cast<i8>(context.stack_usage)) {
 				// sub RSP, stack_usage
-				buffer.append_byte(0x83);
-				buffer.append_byte(mod_rx_rm(direct, 0x05, static_cast<u8>(gpr::rsp)));
-				buffer.append_byte(static_cast<u8>(context.stack_usage));
+				bytecode.append_byte(0x83);
+				bytecode.append_byte(mod_rx_rm(direct, 0x05, static_cast<u8>(gpr::rsp)));
+				bytecode.append_byte(static_cast<u8>(context.stack_usage));
 			}
 			else {
 				// sub RSP, stack_usage
-				buffer.append_byte(0x81);
-				buffer.append_byte(mod_rx_rm(direct, 0x05, static_cast<u8>(gpr::rsp)));
-				buffer.append_dword(static_cast<u32>(context.stack_usage));
+				bytecode.append_byte(0x81);
+				bytecode.append_byte(mod_rx_rm(direct, 0x05, static_cast<u8>(gpr::rsp)));
+				bytecode.append_dword(static_cast<u32>(context.stack_usage));
 			}
 		}
 	}
 
 	void x64_target::emit_function_body(
 		code_generator_context& context,
-		code_buffer& buffer
+		utility::byte_buffer& bytecode
 	) {
 		for (handle<instruction> inst = context.first; inst; inst = inst->get_next_instruction()) {
 			const u64 in_base = inst->get_out_count();
@@ -119,14 +121,14 @@ namespace ir::cg {
 			else if (inst->get_type() == instruction::type::label) {
 				handle<node> block = inst->get<node_prop>()->value;
 
-				buffer.resolve_relocation_dword(
+				bytecode.resolve_relocation_dword(
 					&context.labels.at(block), 
-					static_cast<u32>(buffer.get_size())
+					static_cast<u32>(bytecode.get_size())
 				);
 
 				if(block != context.function->get_entry_node()) {
 					ASSERT(block->get_type() == node::region, "invalid block type");
-					emit("L{}:\n", block->get<region_property>()->post_order_id);
+					emit_assembly("L{}:\n", block->get<region_property>()->post_order_id);
 				}
 			}
 			else if (inst->get_type() == instruction::type::inl) {
@@ -134,10 +136,10 @@ namespace ir::cg {
 			}
 			else if (inst->get_type() == instruction::type::epilogue) {
 				// return label goes here
-				emit(".ret:\n");
-				buffer.resolve_relocation_dword(
+				emit_assembly(".ret:\n");
+				bytecode.resolve_relocation_dword(
 					&context.return_label,
-					static_cast<u32>(buffer.get_size())
+					static_cast<u32>(bytecode.get_size())
 				);
 			}
 			else if (inst->get_type() == instruction::type::line) {
@@ -148,11 +150,11 @@ namespace ir::cg {
 				cat == instruction::category::byte_ext
 			) {
 				if(inst->get_flags() & instruction::rep) {
-					buffer.append_byte(0xF3);
+					bytecode.append_byte(0xF3);
 				}
 
-				emit("  {}\n", g_x64_instruction_table[inst->get_type()].mnemonic);
-				emit_instruction_0(inst->get_type(), inst->get_data_type(), buffer);
+				emit_assembly("  {}\n", g_x64_instruction_table[inst->get_type()].mnemonic);
+				emit_instruction_0(inst->get_type(), inst->get_data_type(), bytecode);
 			}
 			else if (inst->get_type() == instruction::type::zero) {
 				ASSERT(false, "not implemented 7");
@@ -169,7 +171,7 @@ namespace ir::cg {
 					ASSERT(false, "not implemented");
 				}
 
-				emit_instruction_1_print(inst->get_type(), target, inst->get_data_type(), buffer);
+				emit_instruction_1_print(inst->get_type(), target, inst->get_data_type(), bytecode);
 			}
 			else if (inst->get_type() == instruction::type::call) {
 				ASSERT(false, "not implemented 9");
@@ -180,8 +182,8 @@ namespace ir::cg {
 
 				// prefix
 				if(inst->get_flags() & instruction::lock) {
-					emit("  LOCK");
-					buffer.append_byte(0xF0);
+					emit_assembly("  LOCK");
+					bytecode.append_byte(0xF0);
 				}
 
 				// resolve output
@@ -223,7 +225,7 @@ namespace ir::cg {
 						inst->get_type() == instruction::type::integral_div ||
 						inst->get_type() == instruction::type::div
 					) {
-						emit_instruction_1_print(inst->get_type(), left, inst->get_data_type(), buffer);
+						emit_instruction_1_print(inst->get_type(), left, inst->get_data_type(), bytecode);
 						continue;
 					}
 					else {
@@ -233,24 +235,24 @@ namespace ir::cg {
 							inst->get_type() == instruction::floating_point_mov
 						) {
 							if (out->matches(left) == false) {
-								emit_instruction_2_print(static_cast<instruction::type>(mov_op), out, left, inst->get_data_type(), buffer);
+								emit_instruction_2_print(static_cast<instruction::type>(mov_op), out, left, inst->get_data_type(), bytecode);
 							}
 						}
 						else {
-							emit_instruction_2_print(inst->get_type(), out, left, inst->get_data_type(), buffer);
+							emit_instruction_2_print(inst->get_type(), out, left, inst->get_data_type(), bytecode);
 						}
 					}
 				}
 
 				// unary ops
 				if(cat == instruction::unary || cat == instruction::unary_ext) {
-					emit_instruction_1_print(inst->get_type(), out, inst->get_data_type(), buffer);
+					emit_instruction_1_print(inst->get_type(), out, inst->get_data_type(), bytecode);
 					continue;
 				}
 
 				if(inst->get_flags() & instruction::immediate) {
 					const handle<value> right = value::create_imm(inst->get<immediate_prop>()->value);
-					emit_instruction_2_print(inst->get_type(), out, right, inst->get_data_type(), buffer);
+					emit_instruction_2_print(inst->get_type(), out, right, inst->get_data_type(), bytecode);
 				}
 				else if (inst->get_flags() & instruction::absolute) {
 					ASSERT(false, "not implemented abs");
@@ -263,7 +265,7 @@ namespace ir::cg {
 						inst->get_type() != instruction::mov ||
 						(inst->get_type() == instruction::mov && out->matches(right) == false)
 					) {
-						emit_instruction_2_print(inst->get_type(), out, right, inst->get_data_type(), buffer);
+						emit_instruction_2_print(inst->get_type(), out, right, inst->get_data_type(), bytecode);
 					}
 				}
 			}
@@ -272,31 +274,31 @@ namespace ir::cg {
 
 	void x64_target::emit_epilogue(
 		code_generator_context& context,
-		code_buffer& buffer
+		utility::byte_buffer& bytecode
 	) {
 		if(context.stack_usage <= 16) {
-			emit("  ret\n");
-			buffer.append_byte(0xC3);
+			emit_assembly("  ret\n");
+			bytecode.append_byte(0xC3);
 			return;
 		}
 
 		// add RSP, stack_usage
-		emit("  add RSP, {}\n", context.stack_usage);
-		buffer.append_byte(rex(true, 0x00, static_cast<u8>(gpr::rsp), 0));
+		emit_assembly("  add RSP, {}\n", context.stack_usage);
+		bytecode.append_byte(rex(true, 0x00, static_cast<u8>(gpr::rsp), 0));
 		if (context.stack_usage == static_cast<i8>(context.stack_usage)) {
-			buffer.append_byte(0x83);
-			buffer.append_byte(mod_rx_rm(direct, 0x00, static_cast<u8>(gpr::rsp)));
-			buffer.append_byte(static_cast<i8>(context.stack_usage));
+			bytecode.append_byte(0x83);
+			bytecode.append_byte(mod_rx_rm(direct, 0x00, static_cast<u8>(gpr::rsp)));
+			bytecode.append_byte(static_cast<i8>(context.stack_usage));
 		}
 		else {
-			buffer.append_byte(0x81);
-			buffer.append_byte(mod_rx_rm(direct, 0x00, static_cast<u8>(gpr::rsp)));
-			buffer.append_dword(static_cast<u32>(context.stack_usage));
+			bytecode.append_byte(0x81);
+			bytecode.append_byte(mod_rx_rm(direct, 0x00, static_cast<u8>(gpr::rsp)));
+			bytecode.append_dword(static_cast<u32>(context.stack_usage));
 		}
 
 		// pop RBP
-		emit("  pop RBP\n");
-		buffer.append_byte(0x58 + static_cast<u8>(gpr::rbp));
+		emit_assembly("  pop RBP\n");
+		bytecode.append_byte(0x58 + static_cast<u8>(gpr::rbp));
 
 		// ret
 		const handle<node> rpc = context.function->get_exit_node()->get_input(2);
@@ -306,40 +308,40 @@ namespace ir::cg {
 			rpc->get_input(0)->get_type() == node::entry &&
 			rpc->get<projection_property>()->index == 2
 		) {
-			emit("  ret\n");
-			buffer.append_byte(0xC3);
+			emit_assembly("  ret\n");
+			bytecode.append_byte(0xC3);
 		}
 	}
 
 	void x64_target::emit_instruction_0(
-		instruction::type type, i32 data_type, code_buffer& buffer
+		instruction::type type, i32 data_type, utility::byte_buffer& bytecode
 	) {
 		ASSERT(type < g_x64_instruction_table.size(), "type out of range");
 		const instruction::description* description = &g_x64_instruction_table[type];
 
 		if(data_type == qword) {
-			buffer.append_byte(0x48);
+			bytecode.append_byte(0x48);
 		}
 
 		if(description->cat == instruction::byte_ext) {
-			buffer.append_byte(0x0F);
+			bytecode.append_byte(0x0F);
 		}
 
 		if(description->op) {
-			buffer.append_byte(description->op);
+			bytecode.append_byte(description->op);
 		}
 		else {
-			buffer.append_byte(description->op);
-			buffer.append_byte(description->rx_i);
+			bytecode.append_byte(description->op);
+			bytecode.append_byte(description->rx_i);
 		}
 	}
 
 	void x64_target::emit_instruction_1_print(
-		instruction::type type, handle<value> src, i32 data_type, code_buffer& buffer
+		instruction::type type, handle<value> src, i32 data_type, utility::byte_buffer& bytecode
 	) {
-		emit("  {} ", g_x64_instruction_table[type].mnemonic);
+		emit_assembly("  {} ", g_x64_instruction_table[type].mnemonic);
 		print_operand(src, data_type);
-		emit("\n");
+		emit_assembly("\n");
 
 		// TODO: emit_instruction_1
 	}
@@ -349,28 +351,28 @@ namespace ir::cg {
 		handle<value> dst,
 		handle<value> src,
 		i32 data_type, 
-		code_buffer& buffer
+		utility::byte_buffer& bytecode
 	) {
 		if(data_type == xmmword) {
-			data_type == sse_pd;
+			data_type = sse_pd;
 		}
 
-		emit("  {}", g_x64_instruction_table[static_cast<i32>(type)].mnemonic);
+		emit_assembly("  {}", g_x64_instruction_table[static_cast<i32>(type)].mnemonic);
 		if(g_x64_instruction_table[type].cat == instruction::binop_ext3) {
-			emit("{} ", data_type == qword ? 'q' : 'd');
+			emit_assembly("{} ", data_type == qword ? 'q' : 'd');
 		}
 		else if(data_type >= sse_ss && data_type <= sse_pd) {
 			static constexpr char suffixes[4][3] = { "ss", "sd", "ps", "pd" };
-			emit("{} ", suffixes[data_type - sse_ss]);
+			emit_assembly("{} ", suffixes[data_type - sse_ss]);
 		}
 		else {
-			emit(" ");
+			emit_assembly(" ");
 		}
 
 		print_operand(dst, data_type);
-		emit(", ");
+		emit_assembly(", ");
 		print_operand(src, data_type);
-		emit("\n");
+		emit_assembly("\n");
 
 		if(data_type >= sse_ss && data_type <= sse_pd) {
 			ASSERT(false, "not implemented");
@@ -400,36 +402,36 @@ namespace ir::cg {
 					"invalid register"
 				);
 
-				emit("{}", gpr_names[val->get_reg()]);
+				emit_assembly("{}", gpr_names[val->get_reg()]);
 				break;
 			}
 			case value::xmm: {
-				emit("XMM{}", val->get_reg());
+				emit_assembly("XMM{}", val->get_reg());
 				break;
 			}
 			case value::imm: {
-				emit("{}", val->get_imm());
+				emit_assembly("{}", val->get_imm());
 				break;
 			}
 			case value::abs: {
-				emit("{}", val->get<abs_prop>()->value);
+				emit_assembly("{}", val->get<abs_prop>()->value);
 				break;
 			}
 			case value::mem: {
-				emit("{} ", type_names[data_type]);
+				emit_assembly("{} ", type_names[data_type]);
 
 				if (val->get_index() == -1) {
-					emit("[{}", gpr_names[val->get_reg()]);
+					emit_assembly("[{}", gpr_names[val->get_reg()]);
 				}
 				else {
-					emit("[{} + {} * {}", gpr_names[val->get_reg()], gpr_names[val->get_index()], 1u << static_cast<unsigned>(val->get_scale()));
+					emit_assembly("[{} + {} * {}", gpr_names[val->get_reg()], gpr_names[val->get_index()], 1u << static_cast<unsigned>(val->get_scale()));
 				}
 
 				if (val->get_imm() != 0) {
-					emit(" + {}", val->get_imm());
+					emit_assembly(" + {}", val->get_imm());
 				}
 
-				emit("]");
+				emit_assembly("]");
 				break;
 			}
 			case value::global: {
@@ -439,7 +441,7 @@ namespace ir::cg {
 				const handle<node> target = val->get<target_prop>()->target;
 
 				if (target == nullptr) {
-					emit(".ret");
+					emit_assembly(".ret");
 				}
 				else {
 					ASSERT(
@@ -447,7 +449,7 @@ namespace ir::cg {
 						"invalid node type"
 					);
 
-					emit("L{}", target->get<region_property>()->post_order_id);
+					emit_assembly("L{}", target->get<region_property>()->post_order_id);
 				}
 				break;
 			}

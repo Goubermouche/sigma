@@ -1,24 +1,24 @@
 #pragma once
 
-#include "utility/filesystem/file_types/file.h"
+#include "utility/filesystem/file_types/old_file.h"
 #include <llvm/Support/raw_ostream.h>
 
 namespace utility {
-	class raw_file : public file {
+	class raw_file : public old_file {
 	public:
 		raw_file(
 			const filepath& path,
-			ptr<llvm::raw_fd_ostream> stream
+			s_ptr<llvm::raw_fd_ostream> stream
 		);
 
-		static outcome::result<ptr<raw_file>> create(
+		static outcome::result<s_ptr<raw_file>> create(
 			const filepath& path
 		);
 
-		ptr<llvm::raw_fd_ostream> get_stream() const;
+		s_ptr<llvm::raw_fd_ostream> get_stream() const;
 
 		void write() const;
 	private:
-		ptr<llvm::raw_fd_ostream> m_stream;
+		s_ptr<llvm::raw_fd_ostream> m_stream;
 	};
 }

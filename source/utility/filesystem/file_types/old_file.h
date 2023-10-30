@@ -7,11 +7,11 @@ namespace utility {
 		class result;
 	}
 
-	class file {
+	class old_file {
 	public:
-		file() = default;
+		old_file() = default;
 
-		file(
+		old_file(
 			const filepath& path
 		);
 

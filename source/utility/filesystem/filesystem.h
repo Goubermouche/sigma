@@ -10,7 +10,7 @@ namespace utility {
 	};
 
 	struct file_range {
-		ptr<text_file> file;
+		s_ptr<text_file> file;
 		file_position start;
 		file_position end;
 	};

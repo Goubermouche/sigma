@@ -17,7 +17,6 @@ namespace utility {
 		diagnostic_message(
 			const std::string& message
 		) : m_message(message) {}
-		virtual void print() = 0;
 	protected:
 		std::string m_message;
 	};

@@ -1,37 +1,42 @@
 #include "console.h"
 #include "utility/macros.h"
+#include "utility/filesystem/file_types/text_file.h"
 
 namespace utility {
 	console& console::out = *new console();
 
-	void console::init() {
-#ifdef _WIN32
-		_setmode(_fileno(stdout), _O_U16TEXT);
-#else
-		std::setlocale(LC_ALL, "");
-		std::ios::sync_with_stdio(false);
-		std::wcout.imbue(std::locale());
-#endif
+	void console::set_output_stream(std::ostream& stream) {
+		out.m_stream = &stream;
+	}
+
+	void console::set_output_stream(s_ptr<text_file> file) {
+		out.m_stream = &file->m_stream;
 	}
 
 	console& console::width(i64 width) {
-		std::wcout << std::setw(width);
+		*out.m_stream << std::setw(width);
 		return out;
 	}
 
 	console& console::precision(i64 precision) {
-		std::wcout << std::fixed << std::setprecision(precision);
+		*out.m_stream << std::fixed << std::setprecision(precision);
 		return out;
 	}
 
 	console& console::operator<<(const color_value& color) {
-		std::wcout << color.ansi_code;
+		*m_stream << color.ansi_code;
 		return *this;
 	}
 
 	console& console::operator<<(const left_pad& left_pad) {
 		SUPPRESS_C4100(left_pad);
-		std::wcout << std::left;
+		*m_stream << std::left;
+		return *this;
+	}
+
+	console& console::operator<<(const right_pad& right_pad) {
+		SUPPRESS_C4100(right_pad);
+		*m_stream << std::right;
 		return *this;
 	}
 
@@ -41,73 +46,84 @@ namespace utility {
 	}
 
 	console& console::operator<<(const std::string& value) {
-		const std::wstring wide_string(value.begin(), value.end());
-		std::wcout << wide_string;
+		// const std::wstring wide_string(value.begin(), value.end());
+		*m_stream << value;
 		return *this;
 	}
 
 	console& console::operator<<(const filepath& value) {
-		std::wcout << value.wstring();
+		*m_stream << value.string();
 		return *this;
 	}
 
 	console& console::operator<<(const char* value) {
-		std::wcout << value;
+		*m_stream << value;
 		return *this;
 	}
 
 	console& console::operator<<(char value) {
-		std::wcout << value;
+		*m_stream << value;
+		return *this;
+	}
+
+	console& console::operator<<(bool value) {
+		if(value) {
+			*m_stream << "true";
+		}
+		else {
+			*m_stream << "false";
+		}
+
 		return *this;
 	}
 
 	console& console::operator<<(f32 value) {
-		std::wcout << value;
+		*m_stream << value;
 		return *this;
 	}
 
 	console& console::operator<<(f64 value) {
-		std::wcout << value;
+		*m_stream << value;
 		return *this;
 	}
 
 	console& console::operator<<(u8 value) {
-		std::wcout << value;
+		*m_stream << value;
 		return *this;
 	}
 
 	console& console::operator<<(u16 value) {
-		std::wcout << value;
+		*m_stream << value;
 		return *this;
 	}
 
 	console& console::operator<<(u32 value) {
-		std::wcout << value;
+		*m_stream << value;
 		return *this;
 	}
 
 	console& console::operator<<(u64 value) {
-		std::wcout << value;
+		*m_stream << value;
 		return *this;
 	}
 
 	console& console::operator<<(i8 value) {
-		std::wcout << value;
+		*m_stream << value;
 		return *this;
 	}
 
 	console& console::operator<<(i16 value) {
-		std::wcout << value;
+		*m_stream << value;
 		return *this;
 	}
 
 	console& console::operator<<(i32 value) {
-		std::wcout << value;
+		*m_stream << value;
 		return *this;
 	}
 
 	console& console::operator<<(i64 value) {
-		std::wcout << value;
+		*m_stream << value;
 		return *this;
 	}
 }

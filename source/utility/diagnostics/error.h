@@ -89,9 +89,12 @@ namespace utility {
 			const std::string& message
 		);
 
-		virtual void print() override;
+		friend console& operator<<(
+			console& console,
+			const error_message& m
+		);
 	protected:
-		error_code m_code;
+		error_code m_bytes;
 	};
 
 	struct error_message_range : public error_message {
@@ -101,7 +104,10 @@ namespace utility {
 			const file_range& range
 		);
 
-		void print() override;
+		friend console& operator<<(
+			console& console,
+			const error_message_range& m
+		);
 	protected:
 		file_range m_range;
 	};
@@ -109,7 +115,7 @@ namespace utility {
 	class error {
 	public:
 		template<error_code code, typename...argument_types>
-		static ptr<error_message> emit(argument_types... args) {
+		static s_ptr<error_message> emit_assembly(argument_types... args) {
 			const auto it = m_error_templates.find(code);
 			if (it == m_error_templates.end()) {}
 
@@ -117,7 +123,7 @@ namespace utility {
 		}
 
 		template<error_code code, typename...argument_types>
-		static ptr<error_message_range> emit(
+		static s_ptr<error_message_range> emit_assembly(
 			const file_range& range,
 			argument_types... args
 		) {
@@ -146,7 +152,7 @@ namespace utility {
 			// ******************************************************************
 			{ error_code::lexer_invalid_dot_at_start,                             "'lexer': invalid '.' character detected at token start"                                                   },
 			{ error_code::lexer_double_underscore,                                "'lexer': two '_' characters immediately one after another are not allowed"                                },
-			{ error_code::lexer_invalid_number_format_more_than_one_dot,      "'lexer': invalid number format - cannot declare a number with more that one '.' character"                    },
+			{ error_code::lexer_invalid_number_format_more_than_one_dot,          "'lexer': invalid number format - cannot declare a number with more that one '.' character"                    },
 			{ error_code::lexer_invalid_number_format_unsigned_containing_dot,    "'lexer': invalid number format - cannot declare an unsigned number containing '.' characters"             },
 			{ error_code::lexer_invalid_number_format_floating_point_without_dot, "'lexer': invalid number format - floating point number must contain a '.' character"                      },
 			{ error_code::lexer_unterminated_character_literal,                   "'lexer': invalid unterminated character literal detected"                                                 }, 
@@ -222,17 +228,17 @@ namespace utility {
 			 * \param error Error to use as the reason for failure
 			 */
 			failure(
-				ptr<error_message> error
+				s_ptr<error_message> error
 			) : m_error(error) {}
 
 			/**
 			 * \brief Returns the contained error.
 			 */
-			ptr<error_message> get_error() const {
+			s_ptr<error_message> get_error() const {
 				return m_error;
 			}
 		private:
-			ptr<error_message> m_error;
+			s_ptr<error_message> m_error;
 		};
 
 		/**
@@ -292,6 +298,14 @@ namespace utility {
 				return m_value.has_value();
 			}
 
+
+			/**
+			 * \brief Returns the encapsulated value.
+			 */
+			type& get_value() {
+				return m_value.value();
+			}
+
 			/**
 			 * \brief Returns the encapsulated value.
 			 */
@@ -302,11 +316,11 @@ namespace utility {
 			/**
 			 * \brief Returns the encapsulated error.
 			 */
-			const ptr<error_message> get_error() const {
+			const s_ptr<error_message> get_error() const {
 				return m_value.error();
 			}
 		private:
-			std::expected<type, ptr<error_message>> m_value;
+			std::expected<type, s_ptr<error_message>> m_value;
 		};
 
 		/**
@@ -339,11 +353,11 @@ namespace utility {
 				return m_value.has_value();
 			}
 
-			ptr<error_message> get_error() const {
+			s_ptr<error_message> get_error() const {
 				return m_value.error();
 			}
 		private:
-			std::expected<void, ptr<error_message>> m_value;
+			std::expected<void, s_ptr<error_message>> m_value;
 		};
 	}
 }

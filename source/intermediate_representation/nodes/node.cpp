@@ -4,7 +4,8 @@
 #include "intermediate_representation/nodes/user.h"
 
 namespace ir {
-	utility::block_allocator node::s_user_allocator = utility::block_allocator(1024);
+	node::node(type type, utility::block_allocator& allocator) 
+	: m_type(type), m_allocator(allocator) {}
 
 	utility::slice<handle<node>> node::get_inputs() const {
 		return m_inputs;
@@ -16,6 +17,10 @@ namespace ir {
 
 	u64 node::get_input_count() const {
 		return m_inputs.get_size();
+	}
+
+	void node::set_inputs(const utility::slice<handle<node>>& inputs) {
+		m_inputs = inputs;
 	}
 
 	void node::set_input(u64 input, handle<node> node) {
@@ -294,7 +299,7 @@ namespace ir {
 	}
 
 	void node::add_user(handle<node> in, i64 slot, handle<user> recycled) {
-		const auto use = recycled ? recycled : static_cast<user*>(s_user_allocator.allocate(sizeof(user)));
+		const auto use = recycled ? recycled : static_cast<user*>(m_allocator.allocate(sizeof(user)));
 		 
 		use->set_node(this);
 		use->set_slot(static_cast<i32>(slot));

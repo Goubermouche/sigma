@@ -21,15 +21,15 @@ namespace ir {
 	 * in a slice which is also stored right next to them.
 	 */
 	class node : public utility::property<
-		region_property,
-		branch_property,
+		binary_integer_op_property,
+		memory_access_property,
 		projection_property,
 		integer_property,
-		fp32_property,
-		fp64_property,
-		binary_integer_op_property,
+		region_property,
+		branch_property,
 		local_property,
-		memory_access_property
+		fp32_property,
+		fp64_property
 	> {
 	public:
 		/**
@@ -192,37 +192,40 @@ namespace ir {
 			x86_intrinsic_rsqrt
 		};
 
-		utility::slice<handle<node>> get_inputs() const;
-		handle<node> get_input(u64 index) const;
-		u64 get_input_count() const;
-		type get_type() const;
-		u64 get_global_value_index() const;
-		data_type& get_data();
-		data_type get_data() const;
-		std::string get_name() const;
-		std::forward_list<handle<user>>& get_users();
-		const std::forward_list<handle<user>>& get_users() const;
+		node(type type, utility::block_allocator& allocator);
 
+		const std::forward_list<handle<user>>& get_users() const;
+		utility::slice<handle<node>> get_inputs() const;
+		std::forward_list<handle<user>>& get_users();
+		handle<node> get_input(u64 index) const;
+		u64 get_global_value_index() const;
+		std::string get_name() const;
+		u64 get_input_count() const;
+		data_type get_data() const;
+		type get_type() const;
+		data_type& get_data();
+
+		void set_inputs(const utility::slice<handle<node>>& inputs);
 		void set_input(u64 input, handle<node> node);
-		void set_type(type type);
 		void set_global_value_index(u64 debug_id);
 		void set_data(data_type data);
+		void set_type(type type);
 
 		void add_user(handle<node> in, i64 slot, handle<user> recycled);
 		void replace_input_node(handle<node> input, i64 slot);
+		handle<node> get_immediate_dominator();
 		handle<user> remove_user(i64 slot);
 		handle<node> get_parent_region();
-		handle<node> get_immediate_dominator();
 		handle<node> get_block_begin();
 		i32 resolve_dominator_depth();
 		i32 get_dominator_depth();
 
-		bool has_effects() const;
-		bool is_pinned() const;
-		bool is_block_end() const;
+		bool should_rematerialize() const;
 		bool is_block_begin() const;
 		bool is_mem_out_op() const;
-		bool should_rematerialize() const;
+		bool is_block_end() const;
+		bool has_effects() const;
+		bool is_pinned() const;
 	private:
 		void print_as_basic_block(
 			std::unordered_set<handle<node>>& visited,
@@ -236,14 +239,17 @@ namespace ir {
 	private:
 		friend class function;
 
-		utility::slice<handle<node>> m_inputs;   // inputs for the given node
+		// NOTE: it might be worth it to switch over to an unordered map
+		//       instead of using the linked list for storing users, we'd 
+		//       have to profile this though, either way we'll have to 
+		//       rework the current memory strategy 
+
 		std::forward_list<handle<user>> m_users; // users of the current node
+		utility::block_allocator& m_allocator;   // allocator used for allocating users
+		utility::slice<handle<node>> m_inputs;   // inputs for the given node
+		u64 m_global_value_index;                // value number used for optimizations
 		type m_type = none;                      // underlying node type
 		data_type m_data;                        // additional data 
-		u64 m_global_value_index;                // value number used for optimizations 
-
-		// TODO: get rid of this
-		static utility::block_allocator s_user_allocator;
 	};
 
 	/**

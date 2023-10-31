@@ -11,26 +11,26 @@ namespace ir {
 	public:
 		function(const symbol& symbol);
 
+		void set_parameter(u64 index, handle<node> value);
+		void set_active_control_node(handle<node> node);
+		void set_return_count(u64 return_count);
+		void set_control_node_count(u64 count);
 		void set_entry_node(handle<node> node);
 		void set_exit_node(handle<node> node);
-		void set_active_control_node(handle<node> node);
-		void set_control_node_count(u64 count);
-		void set_node_count(u64 node_count);
 		void set_symbol(const symbol& symbol);
-		void set_return_count(i32 return_count);
-		void set_parameter(u64 index, handle<node> value);
+		void set_node_count(u64 node_count);
 
-		handle<node> get_entry_node() const;
-		handle<node> get_exit_node() const;
 		handle<node> get_active_control_node() const;
-		u64 get_control_node_count() const;
-		u64 get_node_count() const;
-		symbol& get_symbol();
-		const symbol& get_symbol() const;
-		i32 get_parameter_count() const;
-		i32 get_return_count() const;
 		std::vector<handle<node>>& get_parameters();
 		handle<node> get_parameter(u64 index) const;
+		handle<node> get_entry_node() const;
+		handle<node> get_exit_node() const;
+		u64 get_control_node_count() const;
+		const symbol& get_symbol() const;
+		u64 get_parameter_count() const;
+		u64 get_return_count() const;
+		u64 get_node_count() const;
+		symbol& get_symbol();
 
 		void print_node_graph(s_ptr<utility::text_file> file) const;
 
@@ -59,8 +59,8 @@ namespace ir {
 		handle<node> m_exit_node;
 
 		u64 m_control_node_count = 0;
-		i32 m_parameter_count = 0;
-		i32 m_return_count = 0;
+		u64 m_parameter_count = 0;
+		u64 m_return_count = 0;
 		u64 m_node_count = 0;
 
 		// list of nodes which are considered parameters
@@ -76,14 +76,10 @@ namespace ir {
 	template<typename extra_type>
 	handle<node> function::allocate_node(node::type type, u64 input_count) {
 		void* node_allocation = m_allocator.allocate(sizeof(node));
-		const handle node_ptr = static_cast<node*>(node_allocation);
+		const handle node_ptr = new (node_allocation) node(type, m_allocator);
 
-		// allocate enough space for input nodes
-		node_ptr->m_inputs = utility::slice<handle<node>>(m_allocator.allocate(sizeof(handle<node>) * input_count), input_count);
-		memset(node_ptr->m_inputs.get_data(), 0, input_count * sizeof(handle<node>));
-
-		// assign data
-		node_ptr->set_type(type);
+		// initialize the base sea of nodes layout 
+		node_ptr->set_inputs(utility::slice<handle<node>>(m_allocator, input_count));
 		node_ptr->set_property(m_allocator.allocate(sizeof(extra_type)));
 		node_ptr->set_global_value_index(m_node_count++);
 

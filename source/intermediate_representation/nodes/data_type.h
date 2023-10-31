@@ -16,6 +16,7 @@ namespace ir {
 			continuation    // continuation (usually just the return addresses)
 		};
 
+		data_type() = default;
 		data_type(id type, u8 bit_width);
 		data_type(id type);
 

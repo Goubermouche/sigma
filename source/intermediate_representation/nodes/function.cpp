@@ -70,11 +70,11 @@ namespace ir {
 		m_symbol = symbol;
 	}
 
-	i32 function::get_parameter_count() const {
+	u64 function::get_parameter_count() const {
 		return m_parameter_count;
 	}
 
-	void function::set_return_count(i32 return_count) {
+	void function::set_return_count(u64 return_count) {
 		m_return_count = return_count;
 	}
 
@@ -82,7 +82,7 @@ namespace ir {
 		m_parameters[index] = value;
 	}
 
-	i32 function::get_return_count() const {
+	u64 function::get_return_count() const {
 		return m_return_count;
 	}
 
@@ -117,5 +117,4 @@ namespace ir {
 	handle<node> function::get_parameter(u64 index) const {
 		return m_parameters[index];
 	}
-
 }

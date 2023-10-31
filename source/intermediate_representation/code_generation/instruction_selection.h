@@ -30,7 +30,7 @@ namespace ir::cg {
 	void select_instruction(
 		code_generator_context& context,
 		handle<node> n,
-		i32 destination
+		u8 destination
 	);
 
 	/**
@@ -110,7 +110,7 @@ namespace ir::cg {
 	 * \param n Node to obtain the virtual register ID for
 	 * \return ID of the virtual register
 	 */
-	i32 input_reg(
+	u8 input_reg(
 		code_generator_context& context,
 		handle<node> n
 	);
@@ -154,7 +154,7 @@ namespace ir::cg {
 	 * \param interval_index Index of the interval for which a register hint is to be provided
 	 * \param reg Register ID to be set as the hint
 	 */
-	void hint_reg(code_generator_context& context, i32 interval_index, i32 reg);
+	void hint_reg(code_generator_context& context, i32 interval_index, u8 reg);
 
 	/**
 	 * \brief Allocates a virtual register for a given node \a n and data type.
@@ -163,7 +163,7 @@ namespace ir::cg {
 	 * \param data_type Data type of the node for which the register is being allocated
 	 * \return ID of the allocated virtual registers.
 	 */
-	i32 allocate_virtual_register(
+	u8 allocate_virtual_register(
 		code_generator_context& context,
 		handle<node> n,
 		const data_type& data_type
@@ -262,8 +262,8 @@ namespace ir::cg {
 	handle<instruction> create_move_instruction(
 		code_generator_context& context,
 		const data_type& data_type,
-		i32 destination,
-		i32 source
+		u8 destination,
+		u8 source
 	);
 
 	/**
@@ -279,7 +279,7 @@ namespace ir::cg {
 		code_generator_context& context,
 		instruction::type type,
 		const data_type& data_type,
-		i32 destination,
+		u8 destination,
 		u64 imm
 	);
 
@@ -293,7 +293,7 @@ namespace ir::cg {
 	handle<instruction> create_zero_instruction(
 		code_generator_context& context,
 		const data_type& data_type,
-		i32 destination
+		u8 destination
 	);
 
 	/**
@@ -309,7 +309,7 @@ namespace ir::cg {
 		code_generator_context& context,
 		instruction::type type,
 		const data_type& data_type,
-		i32 destination,
+		u8 destination,
 		i32 imm
 	);
 
@@ -327,8 +327,8 @@ namespace ir::cg {
 		code_generator_context& context,
 		instruction::type type,
 		const data_type& data_type,
-		i32 destination,
-		i32 source,
+		u8 destination,
+		u8 source,
 		i32 imm
 	);
 
@@ -346,9 +346,9 @@ namespace ir::cg {
 		code_generator_context& context,
 		instruction::type type,
 		const data_type& data_type,
-		i32 destination,
-		i32 left,
-		i32 right
+		u8 destination,
+		u8 left,
+		u8 right
 	);
 
 	/**

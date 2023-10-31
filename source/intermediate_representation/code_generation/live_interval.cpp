@@ -1,10 +1,11 @@
 #include "live_interval.h"
 
 namespace ir::cg {
-	reg::reg(i32 id, i32 reg_class)
-		: m_id(id), m_class(reg_class) {}
+	reg::reg(u8 id, i32 reg_class)
+		: m_id(id), m_class(reg_class) {
+	}
 
-	i32 reg::get_id() const {
+	u8 reg::get_id() const {
 		return m_id;
 	}
 
@@ -12,7 +13,7 @@ namespace ir::cg {
 		return m_class;
 	}
 
-	void reg::set_id(i32 id) {
+	void reg::set_id(u8 id) {
 		m_id = id;
 	}
 
@@ -50,13 +51,13 @@ namespace ir::cg {
 		return m_kind;
 	}
 
-	live_interval::live_interval(reg reg, i32 data_type, i32 assigned)
+	live_interval::live_interval(reg reg, i32 data_type, u8 assigned)
 		: m_start(std::numeric_limits<i32>::max()),
-	m_assigned(assigned),
-	m_data_type(data_type),
-	m_reg(reg) {}
+		m_assigned(assigned),
+		m_data_type(data_type),
+		m_reg(reg) {}
 
-	i32 live_interval::get_hint() const {
+	u8 live_interval::get_hint() const {
 		return m_hint;
 	}
 
@@ -72,7 +73,7 @@ namespace ir::cg {
 		return m_spill;
 	}
 
-	i32 live_interval::get_assigned() const {
+	u8 live_interval::get_assigned() const {
 		return m_assigned;
 	}
 
@@ -132,7 +133,7 @@ namespace ir::cg {
 		return m_split_kid;
 	}
 
-	void live_interval::set_hint(i32 hint) {
+	void live_interval::set_hint(u8 hint) {
 		m_hint = hint;
 	}
 
@@ -148,7 +149,7 @@ namespace ir::cg {
 		m_active_range = active_range;
 	}
 
-	void live_interval::set_assigned(i32 assigned) {
+	void live_interval::set_assigned(u8 assigned) {
 		m_assigned = assigned;
 	}
 
@@ -198,7 +199,7 @@ namespace ir::cg {
 		return m_use_count;
 	}
 
-	i32 value_description::get_virtual_register() const {
+	u8 value_description::get_virtual_register() const {
 		return m_virtual_register;
 	}
 
@@ -206,7 +207,7 @@ namespace ir::cg {
 		m_use_count = use_count;
 	}
 
-	void value_description::set_virtual_register(i32 virtual_register) {
+	void value_description::set_virtual_register(u8 virtual_register) {
 		m_virtual_register = virtual_register;
 	}
 

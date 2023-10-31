@@ -13,11 +13,11 @@ namespace ir::cg {
 		m_memory_slot = slot;
 	}
 
-	void instruction::set_disp(i32 disp) {
-		m_disp = disp;
+	void instruction::set_displacement(i32 displacement) {
+		m_displacement = displacement;
 	}
 
-	void instruction::set_scale(u8 scale) {
+	void instruction::set_scale(scale scale) {
 		m_scale = scale;
 	}
 
@@ -101,12 +101,12 @@ namespace ir::cg {
 		return m_data_type;
 	}
 
-	u8 instruction::get_scale() const {
+	scale instruction::get_scale() const {
 		return m_scale;
 	}
 
-	i32 instruction::get_disp() const {
-		return m_disp;
+	i32 instruction::get_displacement() const {
+		return m_displacement;
 	}
 
 	i32 instruction::get_memory_slot() const {
@@ -117,8 +117,15 @@ namespace ir::cg {
 		return m_type == terminator || m_type == INT3 || m_type == UD2;
 	}
 
-	phi_value::phi_value(handle<node> n, handle<node> phi, i32 source, i32 destination)
-		: m_node(n), m_phi(phi), m_source(source), m_destination(destination) {}
+	phi_value::phi_value(
+		handle<node> n, 
+		handle<node> phi,
+		u8 source,
+		u8 destination
+	) : m_node(n),
+		m_phi(phi), 
+		m_source(source),
+		m_destination(destination) {}
 
 	void phi_value::set_node(handle<node> node) {
 		m_node = node;
@@ -128,11 +135,11 @@ namespace ir::cg {
 		m_phi = phi;
 	}
 
-	void phi_value::set_source(i32 source) {
+	void phi_value::set_source(u8 source) {
 		m_source = source;
 	}
 
-	void phi_value::set_destination(i32 dst) {
+	void phi_value::set_destination(u8 dst) {
 		m_destination = dst;
 	}
 
@@ -144,7 +151,7 @@ namespace ir::cg {
 		return m_node;
 	}
 
-	i32 phi_value::get_destination() const {
+	u8 phi_value::get_destination() const {
 		return m_destination;
 	}
 }

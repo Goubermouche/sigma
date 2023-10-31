@@ -29,7 +29,7 @@ namespace ir::cg {
 					) {
 					value_description& value = context.values[user_node->get_global_value_index()];
 					value.set_use_count(std::numeric_limits<i32>::max());
-					value.set_virtual_register(-1);
+					value.set_virtual_register(reg_none);
 					context.work_list.visit(user_node);
 				}
 			}
@@ -127,7 +127,7 @@ namespace ir::cg {
 
 			value_description& value = context.values[item->get_global_value_index()];
 			value.set_use_count(static_cast<i32>(use_count));
-			value.set_virtual_register(-1);
+			value.set_virtual_register(reg_none);
 		}
 
 		// reorder phi nodes
@@ -148,15 +148,15 @@ namespace ir::cg {
 			if (
 				user_node->get_type() == node::phi &&
 				user_node->get_data().get_id() != data_type::id::memory
-				) {
+			) {
 				value_description& value = context.values[user_node->get_global_value_index()];
-				const i32 destination = input_reg(context, user_node);
+				const u8 destination = input_reg(context, user_node);
 
 				// copy the phi value into a temporary
-				context.phi_values.emplace_back(phi_value(nullptr, user_node, -1, destination));
+				context.phi_values.emplace_back(phi_value(nullptr, user_node, reg_none, destination));
 
 				data_type data_type = user_node->get_data();
-				const i32 tmp = allocate_virtual_register(context, nullptr, data_type);
+				const u8 tmp = allocate_virtual_register(context, nullptr, data_type);
 
 				append_instruction(
 					context,
@@ -175,7 +175,7 @@ namespace ir::cg {
 			"invalid node type encountered"
 		);
 
-		select_instruction(context, top, -1);
+		select_instruction(context, top, reg_none);
 
 		const handle<instruction> head = context.head;
 		handle<instruction> last = nullptr;
@@ -187,7 +187,10 @@ namespace ir::cg {
 			const handle<node> item = context.work_list.get_item(i);
 			value_description* value = context.lookup_value(item);
 
-			if(value->get_virtual_register() < 0 && item->should_rematerialize()) {
+			if(
+				value->get_virtual_register() == reg_none &&
+				item->should_rematerialize()
+			) {
 				continue;
 			}
 
@@ -197,16 +200,16 @@ namespace ir::cg {
 			context.head = &dummy;
 
 			if(
-				item->get_data().get_id() == data_type::id::tuple ||
-				item->get_data().get_id() == data_type::id::control ||
-				item->get_data().get_id() == data_type::id::memory
+				item->get_data().get_id() == data_type::tuple ||
+				item->get_data().get_id() == data_type::control ||
+				item->get_data().get_id() == data_type::memory
 			) {
 				if(item->get_type() == node::branch) {
 					// write back the phi values after a branch
 					for(u64 j = 0; j < phi_count; ++j) {
 						phi_value& phi = context.phi_values[j];
 						data_type data_type = phi.get_phi()->get_data();
-						const i32 source = input_reg(context, phi.get_node());
+						const u8 source = input_reg(context, phi.get_node());
 						hint_reg(context, phi.get_destination(), source);
 
 						append_instruction(
@@ -229,9 +232,9 @@ namespace ir::cg {
 			}
 			else if(
 				value->get_use_count() > 0 || 
-				value->get_virtual_register() >= 0
+				value->get_virtual_register() != reg_none
 			) {
-				if(value->get_virtual_register() < 0) {
+				if(value->get_virtual_register() == reg_none) {
 					value->set_virtual_register(
 						allocate_virtual_register(context, item, item->get_data())
 					);
@@ -297,7 +300,7 @@ namespace ir::cg {
 	void select_instruction(
 		code_generator_context& context,
 		handle<node> n, 
-		i32 destination
+		u8 destination
 	) {
 		switch (const node::type node_type = n->get_type()) {
 			case node::phi:
@@ -402,7 +405,7 @@ namespace ir::cg {
 				};
 
 				const instruction::type operation = operations[node_type - node::conjunction];
-				const i32 left = input_reg(context, n->get_input(1));
+				const u8 left = input_reg(context, n->get_input(1));
 				hint_reg(context, destination, left);
 				i32 immediate;
 
@@ -425,7 +428,7 @@ namespace ir::cg {
 					);
 				}
 				else {
-					const i32 right = input_reg(context, n->get_input(2));
+					const u8 right = input_reg(context, n->get_input(2));
 
 					append_instruction(
 						context,
@@ -452,9 +455,7 @@ namespace ir::cg {
 				append_instruction(
 					context,
 					context.create_instruction<empty_property>(
-						instruction::terminator,
-						VOID_TYPE,
-						0, 0, 0
+						instruction::terminator, VOID_TYPE, 0, 0, 0
 					)
 				);
 
@@ -479,7 +480,7 @@ namespace ir::cg {
 				if(n->get_input_count() > 3) {
 					ASSERT(n->get_input_count() <= 4, "multiple returns not supported");
 
-					const i32 source = input_reg(context, n->get_input(3));
+					const u8 source = input_reg(context, n->get_input(3));
 					const data_type data_type = n->get_input(3)->get_data();
 
 					// copy to the return register
@@ -487,12 +488,12 @@ namespace ir::cg {
 						ASSERT(false, "not implemented");
 					}
 					else {
-						hint_reg(context, source, static_cast<i32>(gpr::rax));
+						hint_reg(context, source, rax);
 
 						append_instruction(
 							context,
 							create_move_instruction(
-								context, data_type, static_cast<i32>(gpr::rax),
+								context, data_type, static_cast<i32>(rax),
 								source
 							)
 						);
@@ -529,7 +530,7 @@ namespace ir::cg {
 			}
 
 			case node::store: {
-				if(destination >= 0) {
+				if(destination != reg_none) {
 					use(context, n->get_input(2));
 					use(context, n->get_input(3));
 					break;
@@ -585,7 +586,7 @@ namespace ir::cg {
 					append_instruction(context, store_inst);
 				}
 				else {
-					const i32 source_reg = input_reg(context, source);
+					const u8 source_reg = input_reg(context, source);
 					const handle<instruction> store_inst = select_array_access_instruction(
 						context, address, destination, store_op, source_reg
 					);
@@ -639,7 +640,7 @@ namespace ir::cg {
 		if (n->get_type() == node::local) {
 			use(context, n);
 			offset += get_stack_slot(context, n);
-			base = static_cast<i32>(gpr::rbp);
+			base = static_cast<i32>(rbp);
 		}
 		else {
 			base = input_reg(context, n);
@@ -676,9 +677,10 @@ namespace ir::cg {
 		// compute base
 		if(
 			n->get_type() == node::array_access &&
-			(context.values[n->get_global_value_index()].get_use_count() > 2 || context.values[n->get_global_value_index()].get_virtual_register() >= 0)
+			(context.values[n->get_global_value_index()].get_use_count() > 2 ||
+			 context.values[n->get_global_value_index()].get_virtual_register() != reg_none)
 		) {
-			const i32 base = input_reg(context, n);
+			const u8 base = input_reg(context, n);
 
 			if (store_op < 0) {
 				if (source >= 0) {
@@ -829,7 +831,7 @@ namespace ir::cg {
 		context.head = inst;
 	}
 
-	i32 input_reg(
+	u8 input_reg(
 		code_generator_context& context,
 		handle<node> n
 	) {
@@ -838,7 +840,7 @@ namespace ir::cg {
 
 		// no value was found, allocate a new virtual register
 		if(value == nullptr) {
-			const i32 tmp = allocate_virtual_register(context, n, n->get_data());
+			const u8 tmp = allocate_virtual_register(context, n, n->get_data());
 			select_instruction(context, n, tmp);
 			return tmp;
 		}
@@ -846,19 +848,19 @@ namespace ir::cg {
 		value->unuse();
 
 		// if we have a virtual register, return its ID
-		if(value->get_virtual_register() >= 0) {
+		if(value->get_virtual_register() != reg_none) {
 			return value->get_virtual_register();
 		}
 
 		// if the node should rematerialize we allocate a new virtual register
 		if(n->should_rematerialize()) {
-			const i32 tmp = allocate_virtual_register(context, n, n->get_data());
+			const u8 tmp = allocate_virtual_register(context, n, n->get_data());
 			select_instruction(context, n, tmp);
 			return tmp;
 		}
 
 		// fallback to just allocating a new virtual register
-		const i32 i = allocate_virtual_register(context, n, n->get_data());
+		const u8 i = allocate_virtual_register(context, n, n->get_data());
 		value->set_virtual_register(i);
 		return i;
 	}
@@ -901,13 +903,13 @@ namespace ir::cg {
 		return position;
 	}
 
-	void hint_reg(code_generator_context& context, i32 interval_index, i32 reg) {
-		if(context.intervals[interval_index].get_hint() < 0) {
+	void hint_reg(code_generator_context& context, i32 interval_index, u8 reg) {
+		if(context.intervals[interval_index].get_hint() == reg_none) {
 			context.intervals[interval_index].set_hint(reg);
 		}
 	}
 
-	i32 allocate_virtual_register(
+	u8 allocate_virtual_register(
 		code_generator_context& context, 
 		handle<node> n, 
 		const data_type& data_type
@@ -916,14 +918,15 @@ namespace ir::cg {
 
 		// create a new live interval with an uninitialized register
 		live_interval interval(
-			reg(-1, context.target->classify_register_class(data_type)),
+			reg(reg_none, context.target->classify_register_class(data_type)),
 			context.target->legalize_data_type(data_type),
-			-1
+			reg_none
 		);
 
 		interval.set_node(n);
 		context.intervals.emplace_back(interval);
-		return static_cast<i32>(index);
+		ASSERT(index < std::numeric_limits<u8>::max(), "invalid virtual register");
+		return static_cast<u8>(index);
 	}
 
 	handle<instruction> create_rrm_instruction(
@@ -942,8 +945,8 @@ namespace ir::cg {
 		);
 
 		inst->set_flags(instruction::mem | (index >= 0 ? instruction::indexed : instruction::none));
-		inst->set_scale(static_cast<u8>(scale));
-		inst->set_disp(displacement);
+		inst->set_scale(scale);
+		inst->set_displacement(displacement);
 		inst->set_memory_slot(2);
 
 		inst->set_operand(0, destination);
@@ -980,8 +983,8 @@ namespace ir::cg {
 			inst->set_operand(2, index);
 		}
 
-		inst->set_disp(displacement);
-		inst->set_scale(static_cast<u8>(scale));
+		inst->set_displacement(displacement);
+		inst->set_scale(scale);
 		return inst;
 	}
 
@@ -1012,8 +1015,8 @@ namespace ir::cg {
 			inst->set_operand(1, source);
 		}
 
-		inst->set_disp(displacement);
-		inst->set_scale(static_cast<u8>(scale));
+		inst->set_displacement(displacement);
+		inst->set_scale(scale);
 		return inst;
 	}
 
@@ -1031,8 +1034,8 @@ namespace ir::cg {
 	handle<instruction> create_move_instruction(
 		code_generator_context& context, 
 		const data_type& data_type,
-		i32 destination, 
-		i32 source
+		u8 destination, 
+		u8 source
 	) {
 		const i32 machine_data_type = context.target->legalize_data_type(data_type);
 		const handle<instruction> inst = context.create_instruction<empty_property>(2);
@@ -1052,7 +1055,7 @@ namespace ir::cg {
 		code_generator_context& context, 
 		instruction::type type, 
 		const data_type& data_type, 
-		i32 destination,
+		u8 destination,
 		u64 imm
 	) {
 		const handle<instruction> inst = context.create_instruction<immediate_prop>(
@@ -1068,7 +1071,7 @@ namespace ir::cg {
 	handle<instruction> create_zero_instruction(
 		code_generator_context& context,
 		const data_type& data_type,
-		i32 destination
+		u8 destination
 	) {
 		const handle<instruction> inst = context.create_instruction<empty_property>(
 			instruction::zero, data_type, 1, 0, 0
@@ -1082,7 +1085,7 @@ namespace ir::cg {
 		code_generator_context& context, 
 		instruction::type type,
 		const data_type& data_type,
-		i32 destination,
+		u8 destination,
 		i32 imm
 	) {
 		const handle<instruction> inst = context.create_instruction<immediate_prop>(
@@ -1099,8 +1102,8 @@ namespace ir::cg {
 		code_generator_context& context, 
 		instruction::type type,
 		const data_type& data_type, 
-		i32 destination, 
-		i32 source, 
+		u8 destination, 
+		u8 source, 
 		i32 imm
 	) {
 		const handle<instruction> inst = context.create_instruction<immediate_prop>(
@@ -1118,9 +1121,9 @@ namespace ir::cg {
 		code_generator_context& context,
 		instruction::type type,
 		const data_type& data_type, 
-		i32 destination,
-		i32 left,
-		i32 right
+		u8 destination,
+		u8 left,
+		u8 right
 	) {
 		const handle<instruction> inst = context.create_instruction<immediate_prop>(
 			type, data_type, 1, 2, 0
@@ -1138,7 +1141,7 @@ namespace ir::cg {
 		handle<node> target
 	) {
 		ASSERT(
-			target->get_type() > ir::node::none, 
+			target->get_type() > ir::node::none,
 			"invalid target type for a jump instruction"
 		);
 

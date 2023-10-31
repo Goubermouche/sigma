@@ -1,6 +1,4 @@
 #pragma once
-#include <utility/containers/allocators/block_allocator.h>
-
 #include "intermediate_representation/nodes/user.h"
 #include "intermediate_representation/nodes/symbol.h"
 

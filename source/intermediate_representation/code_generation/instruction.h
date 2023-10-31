@@ -1,24 +1,30 @@
 #pragma once
 #include "intermediate_representation/nodes/node.h"
+#include "intermediate_representation/code_generation/live_interval.h"
 
 namespace ir::cg {
 	class phi_value {
 	public:
-		phi_value(handle<node> n, handle<node> phi, i32 source = -1, i32 destination = -1);
+		phi_value(
+			handle<node> n,
+			handle<node> phi,
+			u8 source = reg_none, 
+			u8 destination = reg_none
+		);
 
 		void set_node(handle<node> node);
 		void set_phi(handle<node> phi);
-		void set_source(i32 source);
-		void set_destination(i32 dst);
+		void set_source(u8 source);
+		void set_destination(u8 dst);
 
 		handle<node> get_phi() const;
 		handle<node> get_node() const;
-		i32 get_destination() const;
+		u8 get_destination() const;
 	private:
 		handle<node> m_node;
 		handle<node> m_phi;
-		i32 m_source;
-		i32 m_destination;
+		u8 m_source;
+		u8 m_destination;
 	};
 
 	struct immediate_prop {
@@ -222,8 +228,8 @@ namespace ir::cg {
 		void set_type(type type);
 		void set_flags(flags flags);
 		void set_memory_slot(i32 slot);
-		void set_disp(i32 disp);
-		void set_scale(u8 scale);
+		void set_displacement(i32 displacement);
+		void set_scale(scale scale);
 		void set_next_instruction(handle<instruction> next);
 		void set_operands(const utility::slice<i32>& operands);
 		void set_operand(u64 index, i32 value);
@@ -245,8 +251,8 @@ namespace ir::cg {
 		type get_type() const;
 		i32 get_time() const;
 		i32 get_data_type() const;
-		u8 get_scale() const;
-		i32 get_disp() const;
+		scale get_scale() const;
+		i32 get_displacement() const;
 		i32 get_memory_slot() const;
 
 		bool is_terminator() const;
@@ -257,9 +263,9 @@ namespace ir::cg {
 		u8 m_out_count = 0;
 		u8 m_tmp_count = 0;
 		i32 m_memory_slot;
-		i32 m_disp;
+		i32 m_displacement;
 		i32 m_time = 0;
-		u8 m_scale;
+		scale m_scale;
 		i32 m_data_type = 0;            // x64_data_type 
 		handle<instruction> m_next;
 		utility::slice<i32> m_operands;

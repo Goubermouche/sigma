@@ -25,21 +25,19 @@ namespace ir::cg {
 		context.intervals.reserve(2 * 16);
 
 		// initialize general purpose registers
-		for (u64 i = 0; i < 16; ++i) {
+		for (u8 i = 0; i < 16; ++i) {
 			context.intervals.emplace_back(
 				live_interval(
-					reg(static_cast<i32>(i), static_cast<i32>(register_class::gpr)),
-					qword, static_cast<i32>(i)
+					reg(i, gpr), qword, i
 				)
 			);
 		}
 
 		// initialize xmm registers
-		for (u64 i = 0; i < 16; ++i) {
+		for (u8 i = 0; i < 16; ++i) {
 			context.intervals.emplace_back(
 				live_interval(
-					reg(static_cast<i32>(i), static_cast<i32>(register_class::xmm)),
-					xmmword, static_cast<i32>(i)
+					reg(i, xmm), xmmword, i
 				)
 			);
 		}
@@ -55,7 +53,7 @@ namespace ir::cg {
 	}
 
 	i32 x64_target::classify_register_class(const data_type& data_type) {
-		return data_type.get_id() == data_type::id::floating_point ? static_cast<i32>(register_class::xmm) : static_cast<i32>(register_class::gpr);
+		return data_type.get_id() == data_type::floating_point ? xmm : gpr;
 	}
 
 	void x64_target::emit_prologue(
@@ -70,13 +68,13 @@ namespace ir::cg {
 
 		// push RBP
 		emit_assembly("  push RBP\n");
-		bytecode.append_byte(0x50 + static_cast<u8>(gpr::rbp));
+		bytecode.append_byte(0x50 + rbp);
 
 		// mov RBP, RSP
 		emit_assembly("  mov RBP, RSP\n");
-		bytecode.append_byte(rex(true, static_cast<u8>(gpr::rsp), static_cast<u8>(gpr::rbp), 0));
+		bytecode.append_byte(rex(true, rsp, rbp, 0));
 		bytecode.append_byte(0x89);
-		bytecode.append_byte(mod_rx_rm(direct, static_cast<u8>(gpr::rsp), static_cast<u8>(gpr::rbp)));
+		bytecode.append_byte(mod_rx_rm(direct, rsp, rbp));
 
 		// if there's more than 4096 bytes of stack, we need to insert a chkstk
 		// function
@@ -85,18 +83,18 @@ namespace ir::cg {
 		}
 		else {
 			emit_assembly("  sub RSP, {}\n", context.stack_usage);
-			bytecode.append_byte(rex(true, 0x00, static_cast<u8>(gpr::rsp), 0));
+			bytecode.append_byte(rex(true, 0x00, rsp, 0));
 
 			if (context.stack_usage == static_cast<i8>(context.stack_usage)) {
 				// sub RSP, stack_usage
 				bytecode.append_byte(0x83);
-				bytecode.append_byte(mod_rx_rm(direct, 0x05, static_cast<u8>(gpr::rsp)));
+				bytecode.append_byte(mod_rx_rm(direct, 0x05, rsp));
 				bytecode.append_byte(static_cast<u8>(context.stack_usage));
 			}
 			else {
 				// sub RSP, stack_usage
 				bytecode.append_byte(0x81);
-				bytecode.append_byte(mod_rx_rm(direct, 0x05, static_cast<u8>(gpr::rsp)));
+				bytecode.append_byte(mod_rx_rm(direct, 0x05, rsp));
 				bytecode.append_dword(static_cast<u32>(context.stack_usage));
 			}
 		}
@@ -131,10 +129,10 @@ namespace ir::cg {
 					emit_assembly("L{}:\n", block->get<region_property>()->post_order_id);
 				}
 			}
-			else if (inst->get_type() == instruction::type::inl) {
+			else if (inst->get_type() == instruction::inl) {
 				ASSERT(false, "not implemented 3");
 			}
-			else if (inst->get_type() == instruction::type::epilogue) {
+			else if (inst->get_type() == instruction::epilogue) {
 				// return label goes here
 				emit_assembly(".ret:\n");
 				bytecode.resolve_relocation_dword(
@@ -142,12 +140,12 @@ namespace ir::cg {
 					static_cast<u32>(bytecode.get_size())
 				);
 			}
-			else if (inst->get_type() == instruction::type::line) {
+			else if (inst->get_type() == instruction::line) {
 				ASSERT(false, "not implemented 5");
 			}
 			else if (
-				cat == instruction::category::byte ||
-				cat == instruction::category::byte_ext
+				cat == instruction::byte ||
+				cat == instruction::byte_ext
 			) {
 				if(inst->get_flags() & instruction::rep) {
 					bytecode.append_byte(0xF3);
@@ -156,12 +154,12 @@ namespace ir::cg {
 				emit_assembly("  {}\n", g_x64_instruction_table[inst->get_type()].mnemonic);
 				emit_instruction_0(inst->get_type(), inst->get_data_type(), bytecode);
 			}
-			else if (inst->get_type() == instruction::type::zero) {
+			else if (inst->get_type() == instruction::zero) {
 				ASSERT(false, "not implemented 7");
 			}
 			else if (
-				inst->get_type() >= instruction::type::jmp &&
-				inst->get_type() <= instruction::type::JG
+				inst->get_type() >= instruction::jmp &&
+				inst->get_type() <= instruction::JG
 			) {
 				handle<value> target;
 				if(inst->get_flags() & instruction::node) {
@@ -173,7 +171,7 @@ namespace ir::cg {
 
 				emit_instruction_1_print(inst->get_type(), target, inst->get_data_type(), bytecode);
 			}
-			else if (inst->get_type() == instruction::type::call) {
+			else if (inst->get_type() == instruction::call) {
 				ASSERT(false, "not implemented 9");
 			}
 			else {
@@ -210,7 +208,7 @@ namespace ir::cg {
 
 					if (
 						ternary &&
-						inst->get_type() == instruction::type::integral_multiplication &&
+						inst->get_type() == instruction::integral_multiplication &&
 						inst->get_flags() & instruction::immediate
 					) {
 						// there's a special case for ternary IMUL r64, r/m64, imm32
@@ -222,8 +220,8 @@ namespace ir::cg {
 						out = left;
 					}
 					else if (
-						inst->get_type() == instruction::type::integral_div ||
-						inst->get_type() == instruction::type::div
+						inst->get_type() == instruction::integral_div ||
+						inst->get_type() == instruction::div
 					) {
 						emit_instruction_1_print(inst->get_type(), left, inst->get_data_type(), bytecode);
 						continue;
@@ -235,11 +233,15 @@ namespace ir::cg {
 							inst->get_type() == instruction::floating_point_mov
 						) {
 							if (out->matches(left) == false) {
-								emit_instruction_2_print(static_cast<instruction::type>(mov_op), out, left, inst->get_data_type(), bytecode);
+								emit_instruction_2_print(
+									static_cast<instruction::type>(mov_op), out, left, inst->get_data_type(), bytecode
+								);
 							}
 						}
 						else {
-							emit_instruction_2_print(inst->get_type(), out, left, inst->get_data_type(), bytecode);
+							emit_instruction_2_print(
+								inst->get_type(), out, left, inst->get_data_type(), bytecode
+							);
 						}
 					}
 				}
@@ -265,7 +267,9 @@ namespace ir::cg {
 						inst->get_type() != instruction::mov ||
 						(inst->get_type() == instruction::mov && out->matches(right) == false)
 					) {
-						emit_instruction_2_print(inst->get_type(), out, right, inst->get_data_type(), bytecode);
+						emit_instruction_2_print(
+							inst->get_type(), out, right, inst->get_data_type(), bytecode
+						);
 					}
 				}
 			}
@@ -284,21 +288,21 @@ namespace ir::cg {
 
 		// add RSP, stack_usage
 		emit_assembly("  add RSP, {}\n", context.stack_usage);
-		bytecode.append_byte(rex(true, 0x00, static_cast<u8>(gpr::rsp), 0));
+		bytecode.append_byte(rex(true, 0x00, rsp, 0));
 		if (context.stack_usage == static_cast<i8>(context.stack_usage)) {
 			bytecode.append_byte(0x83);
-			bytecode.append_byte(mod_rx_rm(direct, 0x00, static_cast<u8>(gpr::rsp)));
+			bytecode.append_byte(mod_rx_rm(direct, 0x00, rsp));
 			bytecode.append_byte(static_cast<i8>(context.stack_usage));
 		}
 		else {
 			bytecode.append_byte(0x81);
-			bytecode.append_byte(mod_rx_rm(direct, 0x00, static_cast<u8>(gpr::rsp)));
+			bytecode.append_byte(mod_rx_rm(direct, 0x00, rsp));
 			bytecode.append_dword(static_cast<u32>(context.stack_usage));
 		}
 
 		// pop RBP
 		emit_assembly("  pop RBP\n");
-		bytecode.append_byte(0x58 + static_cast<u8>(gpr::rbp));
+		bytecode.append_byte(0x58 + rbp);
 
 		// ret
 		const handle<node> rpc = context.function->get_exit_node()->get_input(2);
@@ -378,7 +382,234 @@ namespace ir::cg {
 			ASSERT(false, "not implemented");
 		}
 		else {
-			// TODO: emit_instruction_2
+			emit_instruction_2(type, dst, src, data_type, bytecode);
+		}
+	}
+
+	void x64_target::emit_instruction_2(
+		instruction::type type,
+		handle<value> a,
+		handle<value> b,
+		i32 dt, 
+		utility::byte_buffer& bytecode
+	) {
+		ASSERT(dt >= byte && dt <= qword, "invalid data type");
+		ASSERT(type < g_x64_instruction_table.size(), "invalid type");
+
+		const instruction::description& descriptor = g_x64_instruction_table[type];
+
+		if (type == instruction::movabs) {
+			ASSERT(
+				a->get_type() == value::gpr && b->get_type() == value::abs,
+				"invalid data types for a movabs operation"
+			);
+
+			bytecode.append_byte(rex(true, a->get_reg(), 0, 0));
+			bytecode.append_byte(descriptor.op + (a->get_reg() & 0b111));
+			bytecode.append_qword(b->get<abs_prop>()->value);
+		}
+
+		bool dir = b->get_type() == value::mem || b->get_type() == value::global;
+		if (
+			dir ||
+			descriptor.op == 0x63 ||
+			descriptor.op == 0x69 ||
+			descriptor.op == 0x6E ||
+			(type >= instruction::CMOVO && type <= instruction::CMOVG) ||
+			descriptor.op == 0xAF ||
+			descriptor.cat == instruction::binop_ext2
+		) {
+			std::swap(a, b);
+		}
+
+		// operand size 
+		bool sz = dt != byte;
+
+		// uses an imm value that works as a sign extended 8 bit number
+		bool short_imm =
+			sz && b->get_type() == value::imm &&
+			b->get_imm() == static_cast<i8>(b->get_imm()) &&
+			descriptor.op_i == 0x80;
+
+		// the destination can only be a GPR, no direction flag
+		bool is_gpr_only_dst = descriptor.op & 1;
+		bool dir_flag = dir != is_gpr_only_dst && descriptor.op != 0x69;
+
+		if (descriptor.cat != instruction::binop_ext3) {
+			// address size prefix
+			if (dt == word && descriptor.cat != instruction::binop_ext2) {
+				bytecode.append_byte(0x66);
+			}
+
+			ASSERT(
+				b->get_type() == value::gpr || b->get_type() == value::imm,
+				"secondary operand is invalid!"
+			);
+		}
+		else {
+			bytecode.append_byte(0x66);
+		}
+
+		// REX PREFIX
+		//  0 1 0 0 W R X B
+		//          ^ ^ ^ ^
+		//          | | | 4th bit on base.
+		//          | | 4th bit on index.
+		//          | 4th bit on rx.
+		//          is 64bit?
+
+		u8 base = 0;
+		u8 rex_prefix = 0x40 | (dt == qword ? 8 : 0);
+
+		if (a->get_type() == value::mem || a->get_type() == value::gpr) {
+			base = a->get_reg();
+		}
+		else {
+			base = rbp;
+		}
+
+		if (a->get_type() == value::mem && a->get_index() != reg_none) {
+			rex_prefix |= ((a->get_index() >> 3) << 1);
+		}
+
+		u8 rx = (b->get_type() == value::gpr || b->get_type() == value::xmm) ? b->get_reg() : descriptor.rx_i;
+		if (descriptor.cat == instruction::binop_cl) {
+			ASSERT(
+				b->get_type() == value::imm || (b->get_type() == value::gpr && b->get_reg() == rcx),
+				"invalid binary operation"
+			);
+
+			dt = byte;
+			rx = descriptor.rx_i;
+		}
+
+		rex_prefix |= (base >> 3);
+		rex_prefix |= (rx >> 3) << 2;
+
+		// if the REX stays as 0x40 then it's default and doesn't need to be here
+		if (rex_prefix != 0x40 || dt == byte || type == instruction::MOVZXB) {
+			bytecode.append_byte(rex_prefix);
+		}
+
+		if (descriptor.cat == instruction::binop_ext3) {
+			// movd/movq add the ADDR16 prefix for reasons?
+			bytecode.append_byte(0x0F);
+			bytecode.append_byte(descriptor.op);
+		}
+		else {
+			// opcode
+			if (
+				descriptor.cat == instruction::binop_ext || 
+				descriptor.cat == instruction::binop_ext2
+			) {
+				// DEF instructions can only be 32bit and 64bit... maybe?
+				if (type != instruction::XADD) {
+					sz = false;
+				}
+
+				bytecode.append_byte(0x0F);
+			}
+
+			// immediates have a custom opcode
+			ASSERT(
+				b->get_type() != value::imm || descriptor.op_i != 0 || descriptor.rx_i != 0, 
+				"no immediate variant of instruction"
+			);
+
+			u8 opcode = b->get_type() == value::imm ? descriptor.op_i : descriptor.op;
+
+			// the bottom bit usually means size, 0 for 8bit, 1 for everything else
+			opcode |= sz;
+
+			// you can't actually be flipped in the immediates because it would mean
+			// you're storing into an immediate so they reuse that direction bit for size
+			opcode |= dir_flag << 1;
+			opcode |= short_imm << 1;
+
+			bytecode.append_byte(opcode);
+		}
+
+		emit_memory_operand(rx, a, bytecode);
+
+		// memory displacements go before immediates
+		ptr_diff disp_patch = bytecode.get_size() - 4;
+		if (b->get_type() == value::imm) {
+			if (dt == byte || short_imm) {
+				if (short_imm) {
+					ASSERT(
+						b->get_imm() == static_cast<i8>(b->get_imm()), 
+						"invalid short immediate"
+					);
+				}
+
+				bytecode.append_byte(static_cast<i8>(b->get_imm()));
+			}
+			else if (dt == word) {
+				uint32_t imm = b->get_imm();
+				ASSERT(
+					(imm & 0xFFFF0000) == 0xFFFF0000 || (imm & 0xFFFF0000) == 0,
+					"invalid immediate"
+				);
+
+				bytecode.append_word(imm);
+			}
+			else {
+				bytecode.append_dword(static_cast<i32>(b->get_imm()));
+			}
+		}
+
+		if (a->get_type() == value::global && 
+			disp_patch + 4 != bytecode.get_size()
+		) {
+			bytecode.patch_dword(
+				disp_patch, (disp_patch + 4) - bytecode.get_size()
+			);
+		}
+	}
+
+	void x64_target::emit_memory_operand(
+		u8 rx, handle<value> a, utility::byte_buffer& bytecode
+	) {
+		// operand encoding
+		if (a->get_type() == value::gpr || a->get_type() == value::xmm) {
+			bytecode.append_byte(mod_rx_rm(direct, rx, a->get_reg()));
+		}
+		else if (a->get_type() == value::mem) {
+			u8 base = a->get_reg();
+			u8 index = a->get_index();
+			scale scale = a->get_scale();
+			i32 disp = a->get_imm();
+			bool needs_index = (index != -1) || (base & 7) == rsp;
+
+			// If it needs an index, it'll put RSP into the base slot
+			// and write the real base into the SIB
+			mod m = indirect_displacement_32;
+
+			if (disp == 0 && (base & 7) != rbp) {
+				m = indirect;
+			}
+			else if (disp == static_cast<i8>(disp)) {
+				m = indirect_displacement_8;
+			}
+
+			bytecode.append_byte(mod_rx_rm(m, rx, needs_index ? rsp : base));
+
+			if (needs_index) {
+				bytecode.append_byte(mod_rx_rm(static_cast<mod>(scale), (base & 7) == rsp ? rsp : index, base));
+			}
+
+			if (m == indirect_displacement_8) {
+				bytecode.append_byte(static_cast<i8>(disp));
+			}
+			else if (m == indirect_displacement_32) {
+				bytecode.append_dword(disp);
+			}
+		}
+		else if (a->get_type() == value::global) {
+			ASSERT(false, "not implemented");
+		}
+		else {
+			ASSERT(false, "not implemented");
 		}
 	}
 
@@ -398,7 +629,7 @@ namespace ir::cg {
 		switch (val->get_type()) {
 			case value::gpr: {
 				ASSERT(
-					val->get_reg() >= 0 && val->get_reg() < 16, 
+					val->get_reg() != reg_none && val->get_reg() < 16,
 					"invalid register"
 				);
 
@@ -420,11 +651,14 @@ namespace ir::cg {
 			case value::mem: {
 				emit_assembly("{} ", type_names[data_type]);
 
-				if (val->get_index() == -1) {
+				if (val->get_index() == reg_none) {
 					emit_assembly("[{}", gpr_names[val->get_reg()]);
 				}
 				else {
-					emit_assembly("[{} + {} * {}", gpr_names[val->get_reg()], gpr_names[val->get_index()], 1u << static_cast<unsigned>(val->get_scale()));
+					emit_assembly(
+						"[{} + {} * {}", 
+						gpr_names[val->get_reg()], gpr_names[val->get_index()], 1u << static_cast<unsigned>(val->get_scale())
+					);
 				}
 
 				if (val->get_imm() != 0) {
@@ -436,6 +670,7 @@ namespace ir::cg {
 			}
 			case value::global: {
 				ASSERT(false, "not implemented - global");
+				break;
 			}
 			case value::label: {
 				const handle<node> target = val->get<target_prop>()->target;
@@ -475,16 +710,16 @@ namespace ir::cg {
 
 			if(inst->get_flags() & instruction::mem) {
 				val->set_type(value::mem);
-				val->set_reg(static_cast<i8>(interval->get_assigned()));
-				val->set_index(static_cast<i8>(gpr::none));
-				val->set_scale(static_cast<scale>(inst->get_scale()));
-				val->set_imm(inst->get_disp());
+				val->set_reg(interval->get_assigned());
+				val->set_index(reg_none);
+				val->set_scale(inst->get_scale());
+				val->set_imm(inst->get_displacement());
 
 				if(inst->get_flags() & instruction::indexed) {
 					interval = &context.intervals[inst->get_operand(i + 1)];
 					ASSERT(interval->get_spill() <= 0, "cannot use spilled value for a memory operand");
 
-					val->set_index(static_cast<i8>(interval->get_assigned()));
+					val->set_index(interval->get_assigned());
 					return 2;
 				}
 
@@ -498,16 +733,16 @@ namespace ir::cg {
 
 		if(interval->get_spill() > 0) {
 			val->set_type(value::mem);
-			val->set_reg(static_cast<i8>(gpr::rbp));
-			val->set_index(static_cast<i8>(gpr::none));
+			val->set_reg(rbp);
+			val->set_index(reg_none);
 			val->set_imm(-interval->get_spill());
 		}
 		else {
-			val->set_type(static_cast<register_class>(
-				interval->get_register().get_class()) == register_class::xmm ? value::xmm : value::gpr
+			val->set_type(
+				interval->get_register().get_class() == xmm ? value::xmm : value::gpr
 			);
 
-			val->set_reg(static_cast<i8>(interval->get_assigned()));
+			val->set_reg(interval->get_assigned());
 		}
 
 		return 1;
@@ -525,11 +760,11 @@ namespace ir::cg {
 		const data_type::id type = data_type.get_id();
 
 		ASSERT(
-			type == data_type::id::integer || type == data_type::id::pointer,
+			type == data_type::integer || type == data_type::pointer,
 			"invalid type for integer legalization"
 		);
 
-		if (type == data_type::id::pointer) {
+		if (type == data_type::pointer) {
 			*out_mask = 0;
 			return qword;
 		}
@@ -715,11 +950,11 @@ namespace ir::cg {
 		return m_type;
 	}
 
-	i8 value::get_reg() const {
+	u8 value::get_reg() const {
 		return m_reg;
 	}
 
-	i8 value::get_index() const {
+	u8 value::get_index() const {
 		return m_index;
 	}
 
@@ -735,11 +970,11 @@ namespace ir::cg {
 		m_type = type;
 	}
 
-	void value::set_reg(i8 reg) {
+	void value::set_reg(u8 reg) {
 		m_reg = reg;
 	}
 
-	void value::set_index(i8 index) {
+	void value::set_index(u8 index) {
 		m_index = index;
 	}
 

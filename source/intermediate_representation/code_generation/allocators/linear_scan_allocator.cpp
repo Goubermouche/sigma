@@ -59,12 +59,12 @@ namespace ir::cg {
 		}
 
 		// ignore RBP and RSP registers
-		context.intervals[static_cast<i32>(gpr::rbp)].get_ranges().clear();
-		context.intervals[static_cast<i32>(gpr::rsp)].get_ranges().clear();
+		context.intervals[rbp].get_ranges().clear();
+		context.intervals[rsp].get_ranges().clear();
 
 		mark_callee_saved_constraints();
 
-		// generate unhandled interval list (sorted by starting point)
+		// generate unhandled interval list (sorted by their starting point)
 		m_unhandled.reserve((interval_count * 4) / 3);
 		for(u64 i = 0; i < interval_count; ++i) {
 			m_unhandled.push_back(static_cast<i32>(i));
@@ -90,11 +90,11 @@ namespace ir::cg {
 				continue;
 			}
 
-			i32 time = interval->get_start();
-
-			if(interval->get_register().get_id() >= 0) {}
+			if(interval->get_register().get_id() != reg_none) {}
 			else if(interval->get_spill() > 0) { continue; }
 			else {}
+
+			i32 time = interval->get_start();
 
 			// expire intervals
 			for(u64 register_class = 0; register_class < REGISTER_CLASS_COUNT; ++register_class) {
@@ -121,24 +121,23 @@ namespace ir::cg {
 				++i;
 			}
 
-			ptr_diff reg = interval->get_register().get_id();
-			if(reg < 0) {
+			u8 reg = interval->get_register().get_id();
+
+			if(reg == reg_none) {
 				// find a register for the virtual interval
-				if(reg < 0) {
-					reg = allocate_free_reg(context, interval);
-					interval = &context.intervals[register_index];
-				}
+				reg = allocate_free_reg(context, interval);
+				interval = &context.intervals[register_index];
 
 				// allocation failure
-				if(reg < 0) {
+				if(reg == reg_none) {
 					reg = allocate_blocked_reg(context, interval);
 					interval = &context.intervals[register_index];
 				}
 			}
 
 			// add to active set
-			if(reg >= 0) {
-				interval->set_assigned(static_cast<i32>(reg));
+			if(reg != reg_none) {
+				interval->set_assigned(reg);
 				interval->set_active_range(static_cast<i32>(interval->get_ranges().size()) - 1);
 				move_to_active(context, interval);
 			}
@@ -189,16 +188,16 @@ namespace ir::cg {
 							insert_split_move(
 								context,
 								target_block.get_start() + 1,
-								start - context.intervals.data(),
-								end - context.intervals.data()
+								static_cast<i32>(start - context.intervals.data()),
+								static_cast<i32>(end - context.intervals.data())
 							);
 						}
 						else {
 							insert_split_move(
 								context,
 								main_machine_block.get_terminator() - 1,
-								start - context.intervals.data(),
-								end - context.intervals.data()
+								static_cast<i32>(start - context.intervals.data()),
+								static_cast<i32>(end - context.intervals.data())
 							);
 						}
 					}
@@ -213,14 +212,15 @@ namespace ir::cg {
 			}
 
 			const i32 pos = inst->get_time();
+
 			for(i32& operand : inst->get_operands()) {
-				operand = split_interval_at(
+				operand = static_cast<i32>(split_interval_at(
 					context, &context.intervals[operand], pos
-				) - context.intervals.data();
+				) - context.intervals.data());
 			}
 		}
 
-		// free intervals
+		// free our intervals
 		for(live_interval& interval : context.intervals) {
 			interval.get_ranges().clear();
 			interval.get_uses().clear();
@@ -292,8 +292,8 @@ namespace ir::cg {
 
 		// don't include RBP and RSP registers
 		u32 callee_saved_gp_registers = ~descriptor.caller_saved_gpr_count;
-		callee_saved_gp_registers &= ~(1u << static_cast<i32>(gpr::rbp));
-		callee_saved_gp_registers &= ~(1u << static_cast<i32>(gpr::rsp));
+		callee_saved_gp_registers &= ~(1u << rbp);
+		callee_saved_gp_registers &= ~(1u << rsp);
 		m_callee_saved[0] = callee_saved_gp_registers;
 
 		// mark XMM callees
@@ -358,7 +358,7 @@ namespace ir::cg {
 		i32 time,
 		i32 inactive_index
 	) {
-		const i32 register_index = interval - context.intervals.data();
+		const i32 register_index = static_cast<i32>(interval - context.intervals.data());
 
 		// get to the right range first
 		while(interval->get_range(interval->get_active_range()).get_end() <= time) {
@@ -367,7 +367,7 @@ namespace ir::cg {
 
 		const i32 hole_end = interval->get_range(interval->get_active_range()).get_start();
 		const i32 register_class = interval->get_register().get_class();
-		const i32 register_id = interval->get_assigned();
+		const u8 register_id = interval->get_assigned();
 		const bool is_currently_active = time >= hole_end;
 
 		if(time >= interval->get_end()) {
@@ -400,8 +400,8 @@ namespace ir::cg {
 		const code_generator_context& context, live_interval* interval
 	) {
 		const i32 register_class = interval->get_register().get_class();
-		const i32 register_index = interval - context.intervals.data();
-		const i32 register_id = interval->get_assigned();
+		const i32 register_index = static_cast<i32>(interval - context.intervals.data());
+		const u8 register_id = interval->get_assigned();
 
 		if(m_active_set[register_class].get(register_id)) {
 			ASSERT(false, "intervals should never be forced out");
@@ -475,9 +475,9 @@ namespace ir::cg {
 		live_interval* interval, 
 		bool is_spill
 	) {
-		ASSERT(interval->get_register().get_id() < 0, "invalid register");
+		ASSERT(interval->get_register().get_id() == reg_none, "invalid register");
 
-		const i32 register_index = interval - context.intervals.data();
+		const i32 register_index = static_cast<i32>(interval - context.intervals.data());
 
 		if(interval->get_spill() > 0) {}
 		else {
@@ -506,8 +506,8 @@ namespace ir::cg {
 			new_interval.set_spill(-1);
 		}
 
-		new_interval.get_register().set_id(-1);
-		new_interval.set_assigned(-1);
+		new_interval.get_register().set_id(reg_none);
+		new_interval.set_assigned(reg_none);
 		new_interval.set_start(pos);
 		new_interval.set_end(interval->get_end());
 		new_interval.set_split_kid(-1);
@@ -619,7 +619,7 @@ namespace ir::cg {
 		}
 
 		ASSERT(
-			interval->get_register().get_id() >= 0 || pos <= interval->get_end(),
+			interval->get_register().get_id() != reg_none || pos <= interval->get_end(),
 			"panic"
 		);
 
@@ -642,7 +642,7 @@ namespace ir::cg {
 		}
 	}
 
-	ptr_diff linear_scan_allocator::allocate_free_reg(
+	u8 linear_scan_allocator::allocate_free_reg(
 		code_generator_context& context, live_interval* interval
 	) {
 		const i32 register_class = interval->get_register().get_class();
@@ -652,8 +652,7 @@ namespace ir::cg {
 		constexpr i32 half_free = 1 << 16;
 		for(i32 i = 0; i < 16; ++i) {
 			m_free_positions[i] = (m_callee_saved[register_class] & (1ull << i)) ? 
-				half_free :
-				std::numeric_limits<i32>::max();
+				half_free : std::numeric_limits<i32>::max();
 		}
 
 		// for each active reg, set the free position to 0
@@ -679,15 +678,15 @@ namespace ir::cg {
 		}
 
 		// clear reserved registers
-		if (register_class == static_cast<i32>(register_class::gpr)) {
-			m_free_positions[static_cast<i32>(gpr::rbp)] = 0;
-			m_free_positions[static_cast<i32>(gpr::rsp)] = 0;
+		if (register_class == gpr) {
+			m_free_positions[rbp] = 0;
+			m_free_positions[rsp] = 0;
 		}
 
 		// check if we have a valid hint
-		i32 highest = -1;
+		u8 highest = reg_none;
 
-		if(interval->get_hint() >= 0) {
+		if(interval->get_hint() != reg_none) {
 			live_interval& hint = context.intervals[interval->get_hint()];
 
 			ASSERT(
@@ -695,7 +694,7 @@ namespace ir::cg {
 				"invalid register class"
 			);
 
-			const i32 hint_reg = hint.get_assigned();
+			const u8 hint_reg = hint.get_assigned();
 
 			if(interval->get_end() <= m_free_positions[hint_reg]) {
 				highest = hint_reg;
@@ -703,10 +702,10 @@ namespace ir::cg {
 		}
 
 		// pick the highest free position
-		if(highest < 0) {
+		if(highest == reg_none) {
 			highest = 0;
 
-			for(i32 i = 1; i < 16; ++i) {
+			for(u8 i = 1; i < 16; ++i) {
 				if(m_free_positions[i] > m_free_positions[highest]) {
 					highest = i;
 				}
@@ -716,7 +715,7 @@ namespace ir::cg {
 		const i32 position = m_free_positions[highest];
 		if(position == 0) {
 			// allocation failure
-			return -1;
+			return reg_none;
 		}
 
 		if(m_callee_saved[register_class] & (1ull << highest)) {
@@ -727,12 +726,12 @@ namespace ir::cg {
 			context.stack_usage = utility::align(context.stack_usage + size, size);
 
 			const live_interval new_interval(
-				reg(-1, -1),
+				reg(reg_none, -1),
 				context.intervals[virtual_register].get_data_type(),
-				-1
+				reg_none
 			);
 
-			const i32 register_index = interval - context.intervals.data();
+			const i32 register_index = static_cast<i32>(interval - context.intervals.data());
 			const u64 spill_slot = context.intervals.size();
 
 			context.intervals.push_back(new_interval);
@@ -762,12 +761,12 @@ namespace ir::cg {
 		return highest;
 	}
 
-	ptr_diff linear_scan_allocator::allocate_blocked_reg(
+	u8 linear_scan_allocator::allocate_blocked_reg(
 		code_generator_context& context, live_interval* interval
 	) {
 		const i32 register_class = interval->get_register().get_class();
 
-		for(u64 i = 0; i < 16; ++i) {
+		for(u8 i = 0; i < 16; ++i) {
 			m_block_positions[i] = std::numeric_limits<i32>::max();
 			m_free_positions[i] = std::numeric_limits<i32>::max();
 		}
@@ -778,7 +777,7 @@ namespace ir::cg {
 
 			if (
 				it.get_register().get_class() == register_class && 
-				it.get_register().get_id() < 0
+				it.get_register().get_id() == reg_none
 			) {
 				m_free_positions[i] = next_use(
 					context, &it, interval->get_start()
@@ -791,7 +790,7 @@ namespace ir::cg {
 
 			if (
 				inactive_interval.get_register().get_class() == register_class &&
-				inactive_interval.get_register().get_id() < 0
+				inactive_interval.get_register().get_id() == reg_none
 			) {
 				m_free_positions[i] = next_use(
 					context, &inactive_interval, interval->get_start()
@@ -807,7 +806,7 @@ namespace ir::cg {
 
 			if (
 				fixed_intervals.get_register().get_class() == register_class && 
-				fixed_intervals.get_register().get_id() >= 0
+				fixed_intervals.get_register().get_id() != reg_none
 			) {
 				m_free_positions[i] = 0;
 				m_block_positions[i] = 0;
@@ -819,7 +818,7 @@ namespace ir::cg {
 
 			if (
 				inactive_interval.get_register().get_class() == register_class && 
-				inactive_interval.get_register().get_id() >= 0
+				inactive_interval.get_register().get_id() != reg_none
 			) {
 				const i32 block_position = m_block_positions[
 					inactive_interval.get_assigned()
@@ -840,14 +839,14 @@ namespace ir::cg {
 			}
 		}
 
-		if (register_class == static_cast<i32>(register_class::gpr)) {
-			m_free_positions[static_cast<i32>(gpr::rbp)] = 0;
-			m_free_positions[static_cast<i32>(gpr::rsp)] = 0;
+		if (register_class == gpr) {
+			m_free_positions[rbp] = 0;
+			m_free_positions[rsp] = 0;
 		}
 
 		// pick highest use pos
-		i32 highest = 0;
-		for (int i = 1; i < 16; ++i) {
+		u8 highest = 0;
+		for (u8 i = 1; i < 16; ++i) {
 			if (m_free_positions[i] > m_free_positions[highest]) {
 				highest = i;
 			}
@@ -915,7 +914,7 @@ namespace ir::cg {
 
 		// split active reg if it intersects with fixed interval
 		live_interval* fix_interval = &context.intervals[
-			static_cast<i32>((register_class ? register_class::first_xmm : register_class::first_gpr)) + highest
+			(register_class ? first_xmm : first_gpr) + highest
 		];
 
 		if (!fix_interval->get_ranges().empty()) {
@@ -932,6 +931,6 @@ namespace ir::cg {
 			}
 		}
 
-		return spilled ? -1 : highest;
+		return spilled ? reg_none : highest;
 	}
 }

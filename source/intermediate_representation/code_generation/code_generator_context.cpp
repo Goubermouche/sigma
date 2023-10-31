@@ -12,7 +12,7 @@ namespace ir::cg {
 
 	i32 code_generator_context::can_folded_store(
 		handle<node> memory,
-		handle<node> address, 
+		handle<node> address,
 		handle<node> source
 	) {
 		switch (source->get_type()) {
@@ -31,7 +31,7 @@ namespace ir::cg {
 					source->get_input(1)->get_input(2) == address &&
 					on_last_use(source) &&
 					on_last_use(source->get_input(1))
-					) {
+				) {
 					constexpr static instruction::type operations[] = {
 						instruction::AND,
 						instruction::OR,
@@ -47,6 +47,7 @@ namespace ir::cg {
 			}
 		}
 	}
+
 	bool code_generator_context::on_last_use(handle<node> n) {
 		const value_description* value = lookup_value(n);
 		return value ? value->get_use_count() == 1 : false;

@@ -4,7 +4,7 @@
 #include <utility/containers/dense_set.h>
 
 #define REGISTER_CLASS_COUNT 2
-#define WIN64_ABI_CALLER_SAVED ((1u << static_cast<int>(gpr::rax)) | (1u << static_cast<int>(gpr::rcx)) | (1u << static_cast<int>(gpr::rdx)) | (1u << static_cast<int>(gpr::r8)) | (1u << static_cast<int>(gpr::r9)) | (1u << static_cast<int>(gpr::r10)) | (1u << static_cast<int>(gpr::r11)))
+#define WIN64_ABI_CALLER_SAVED ((1u << static_cast<int>(rax)) | (1u << static_cast<int>(rcx)) | (1u << static_cast<int>(rdx)) | (1u << static_cast<int>(r8)) | (1u << static_cast<int>(r9)) | (1u << static_cast<int>(r10)) | (1u << static_cast<int>(r11)))
 
 namespace ir::cg {
 	struct parameter_descriptor {
@@ -13,13 +13,13 @@ namespace ir::cg {
 		u16 caller_saved_xmm_count;
 		u16 caller_saved_gpr_count;
 
-		gpr gprs[6];
+		i32 gprs[6];
 	};
 
 	static constexpr parameter_descriptor g_parameter_descriptors[] = {
 		{
 			4, 4, 6, WIN64_ABI_CALLER_SAVED,
-			{ gpr::rcx, gpr::rdx, gpr::r8, gpr::r9, gpr::none, gpr::none }
+			{ rcx, rdx, r8, r9, reg_none, reg_none }
 		}
 	};
 
@@ -99,12 +99,12 @@ namespace ir::cg {
 			i32 time
 		);
 
-		ptr_diff allocate_free_reg(
+		u8 allocate_free_reg(
 			code_generator_context& context,
 			live_interval* interval
 		);
 
-		ptr_diff allocate_blocked_reg(
+		u8 allocate_blocked_reg(
 			code_generator_context& context,
 			live_interval* interval
 		);

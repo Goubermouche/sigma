@@ -22,6 +22,9 @@ namespace ir {
             return "control";
         case memory:
             return "memory";
+        default:
+            ASSERT(false, "not implemented");
+            return "";
         }
     }
 

@@ -60,14 +60,14 @@ namespace ir::cg {
 		static handle<value> create_imm(i32 imm);
 
 		type get_type() const;
-		i8 get_reg() const;
-		i8 get_index() const;
+		u8 get_reg() const;
+		u8 get_index() const;
 		i32 get_imm() const;
 		scale get_scale() const;
 
 		void set_type(type type);
-		void set_reg(i8 reg);
-		void set_index(i8 index);
+		void set_reg(u8 reg);
+		void set_index(u8 index);
 		void set_scale(scale scale);
 		void set_imm(i32 imm);
 
@@ -84,8 +84,8 @@ namespace ir::cg {
 		bool matches(handle<value> b) const;
 	private:
 		type m_type;
-		i8 m_reg;
-		i8 m_index;
+		u8 m_reg;
+		u8 m_index;
 		scale m_scale;
 		i32 m_imm;
 		static utility::block_allocator s_value_allocator;
@@ -182,6 +182,18 @@ namespace ir::cg {
 			handle<value> src,
 			i32 data_type,
 			utility::byte_buffer& bytecode
+		);
+
+		void emit_instruction_2(
+			instruction::type type,
+			handle<value> a,
+			handle<value> b,
+			i32 dt,
+			utility::byte_buffer& bytecode
+		);
+
+		void emit_memory_operand(
+			u8 rx, handle<value> a, utility::byte_buffer& bytecode
 		);
 
 		/**

@@ -1,9 +1,9 @@
 #pragma once
-#include "intermediate_representation/nodes/function.h"
 #include "intermediate_representation/code_generation/work_list.h"
 #include "intermediate_representation/code_generation/live_interval.h"
 #include "intermediate_representation/code_generation/machine_block.h"
 #include "intermediate_representation/code_generation/targets/target_base.h"
+#include "intermediate_representation/nodes/function.h"
 
 namespace ir::cg {
 	struct code_generator_context {

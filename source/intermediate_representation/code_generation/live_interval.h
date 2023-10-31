@@ -2,72 +2,43 @@
 #include "intermediate_representation/nodes/node.h"
 
 namespace ir::cg {
-	enum class register_class {
-		gpr,
+	enum register_class {
+		gpr, 
 		xmm,
 		first_gpr = 0,
 		first_xmm = 16
 	};
 
-	enum scale : i8 {
-		x1,
-		x2,
-		x4,
-		x8
+	enum scale : u8 {
+		x1, x2, x4, x8
 	};
 
-	enum class gpr {
-		rax,
-		rcx,
-		rdx,
-		rbx,
-		rsp,
-		rbp,
-		rsi,
-		rdi,
-		r8,
-		r9,
-		r10,
-		r11,
-		r12,
-		r13,
-		r14,
-		r15,
-		none = -1
+	enum : u8 {
+		reg_none = std::numeric_limits<u8>::max()
 	};
 
-	enum class xmm {
-		xmm0,
-		xmm1,
-		xmm2,
-		xmm3,
-		xmm4,
-		xmm5,
-		xmm6,
-		xmm7,
-		xmm8,
-		xmm9,
-		xmm10,
-		xmm11,
-		xmm12,
-		xmm13,
-		xmm14,
-		xmm15,
-		none = -1
+	enum gpr : u8 {
+		rax, rcx, rdx, rbx, rsp, rbp, rsi, rdi,
+		r8,  r9,  r10, r11, r12, r13, r14, r15,
+	};
+
+	enum xmm : u8 {
+		xmm0, xmm1, xmm2,  xmm3,  xmm4,  xmm5,  xmm6,  xmm7,
+		xmm8, xmm9, xmm10, xmm11, xmm12, xmm13, xmm14, xmm15
 	};
 
 	class value_description {
 	public:
 		i32 get_use_count() const;
-		i32 get_virtual_register() const;
+		u8 get_virtual_register() const;
 
 		void set_use_count(i32 use_count);
-		void set_virtual_register(i32 virtual_register);
+		void set_virtual_register(u8 virtual_register);
 
 		void unuse();
 	private:
 		i32 m_use_count;
-		i32 m_virtual_register;
+		u8 m_virtual_register;
 	};
 
 	class range {
@@ -102,37 +73,37 @@ namespace ir::cg {
 
 	class reg {
 	public:
-		reg(i32 id, i32 reg_class);
+		reg(u8 id, i32 reg_class);
 
-		i32 get_id() const;
+		u8 get_id() const;
 		i32 get_class() const;
 
-		void set_id(i32 id);
+		void set_id(u8 id);
 		void set_class(i32 reg_class);
 	private:
-		i32 m_id;
+		u8 m_id;
 		i32 m_class;
 	};
 
 	class live_interval {
 	public:
-		live_interval(reg reg, i32 data_type, i32 assigned);
+		live_interval(reg reg, i32 data_type, u8 assigned);
 
-		void set_hint(i32 hint);
+		void set_hint(u8 hint);
 		void set_start(i32 start);
 		void set_end(i32 end);
 		void set_active_range(i32 active_range);
-		void set_assigned(i32 assigned);
+		void set_assigned(u8 assigned);
 		void set_spill(i32 spill);
 		void set_split_kid(i32 split_kid);
 		void set_uses(const std::vector<use_position>& uses);
 		void set_node(handle<node> n);
 
-		i32 get_hint() const;
+		u8 get_hint() const;
 		i32 get_start() const;
 		i32 get_end() const;
 		i32 get_spill() const;
-		i32 get_assigned() const;
+		u8 get_assigned() const;
 		reg& get_register();
 		const reg& get_register() const;
 		std::vector<range>& get_ranges();
@@ -154,11 +125,11 @@ namespace ir::cg {
 	private:
 		i32 m_start = 0;
 		i32 m_end = 0;
-		i32 m_assigned;
+		u8 m_assigned;
 		i32 m_spill = -1;
 		i32 m_active_range = 0;
 		i32 m_split_kid = -1;
-		i32 m_hint = -1;
+		u8 m_hint = reg_none;
 		i32 m_data_type;
 
 		reg m_reg;

@@ -4,7 +4,6 @@
 #include <utility/containers/allocators/block_allocator.h>
 
 #include "intermediate_representation/nodes/data_type.h"
-#include "intermediate_representation/nodes/properties/types.h"
 #include "intermediate_representation/nodes/properties/operations.h"
 #include "intermediate_representation/nodes/properties/memory.h"
 #include "intermediate_representation/nodes/properties/control_flow.h"
@@ -19,7 +18,7 @@ namespace ir {
 	 * respective function in an allocation strategy which stores them and their
 	 * respective data right next to each other. \n\n
 	 * Nodes also store a list of their inputs (nodes which precede the given node)
-	 * in a slice which is also stored right next to them. 
+	 * in a slice which is also stored right next to them.
 	 */
 	class node : public utility::property<
 		region_property,
@@ -239,7 +238,7 @@ namespace ir {
 
 		utility::slice<handle<node>> m_inputs;   // inputs for the given node
 		std::forward_list<handle<user>> m_users; // users of the current node
-		type m_type =  none;                     // underlying node type
+		type m_type = none;                      // underlying node type
 		data_type m_data;                        // additional data 
 		u64 m_global_value_index;                // value number used for optimizations 
 

@@ -2,7 +2,7 @@
 #include "intermediate_representation/nodes/node.h"
 
 namespace ir::cg {
-	enum register_class {
+	enum register_class : u8 {
 		gpr, 
 		xmm,
 		first_gpr = 0,
@@ -73,16 +73,16 @@ namespace ir::cg {
 
 	class reg {
 	public:
-		reg(u8 id, i32 reg_class);
+		reg(u8 id, u8 reg_class);
 
 		u8 get_id() const;
-		i32 get_class() const;
+		u8 get_class() const;
 
 		void set_id(u8 id);
-		void set_class(i32 reg_class);
+		void set_class(u8 reg_class);
 	private:
 		u8 m_id;
-		i32 m_class;
+		u8 m_class;
 	};
 
 	class live_interval {

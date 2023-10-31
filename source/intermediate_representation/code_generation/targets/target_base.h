@@ -24,6 +24,6 @@ namespace ir::cg {
 		) = 0;
 
 		virtual i32 legalize_data_type(const data_type& data_type) = 0;
-		virtual i32 classify_register_class(const data_type& data_type) = 0;
+		virtual u8 classify_register_class(const data_type& data_type) = 0;
 	};
 }

@@ -52,7 +52,7 @@ namespace ir::cg {
 		return legalize_integer_data_type(&mask, data_type);
 	}
 
-	i32 x64_target::classify_register_class(const data_type& data_type) {
+	u8 x64_target::classify_register_class(const data_type& data_type) {
 		return data_type.get_id() == data_type::floating_point ? xmm : gpr;
 	}
 

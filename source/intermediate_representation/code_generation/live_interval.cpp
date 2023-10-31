@@ -1,15 +1,14 @@
 #include "live_interval.h"
 
 namespace ir::cg {
-	reg::reg(u8 id, i32 reg_class)
-		: m_id(id), m_class(reg_class) {
-	}
+	reg::reg(u8 id, u8 reg_class)
+		: m_id(id), m_class(reg_class) {}
 
 	u8 reg::get_id() const {
 		return m_id;
 	}
 
-	i32 reg::get_class() const {
+	u8 reg::get_class() const {
 		return m_class;
 	}
 
@@ -17,7 +16,7 @@ namespace ir::cg {
 		m_id = id;
 	}
 
-	void reg::set_class(i32 reg_class) {
+	void reg::set_class(u8 reg_class) {
 		m_class = reg_class;
 	}
 

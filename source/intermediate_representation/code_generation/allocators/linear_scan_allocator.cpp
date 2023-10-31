@@ -366,7 +366,7 @@ namespace ir::cg {
 		}
 
 		const i32 hole_end = interval->get_range(interval->get_active_range()).get_start();
-		const i32 register_class = interval->get_register().get_class();
+		const u8 register_class = interval->get_register().get_class();
 		const u8 register_id = interval->get_assigned();
 		const bool is_currently_active = time >= hole_end;
 
@@ -399,7 +399,7 @@ namespace ir::cg {
 	void linear_scan_allocator::move_to_active(
 		const code_generator_context& context, live_interval* interval
 	) {
-		const i32 register_class = interval->get_register().get_class();
+		const u8 register_class = interval->get_register().get_class();
 		const i32 register_index = static_cast<i32>(interval - context.intervals.data());
 		const u8 register_id = interval->get_assigned();
 
@@ -486,7 +486,7 @@ namespace ir::cg {
 			context.stack_usage = utility::align(context.stack_usage + size, size);
 
 			if(current_time >= pos && interval->get_assigned() >= 0) {
-				const i32 register_class = interval->get_register().get_class();
+				const u8 register_class = interval->get_register().get_class();
 
 				if(m_active_set[register_class].get(interval->get_assigned())) {
 					if(m_active[register_class][interval->get_assigned()] == register_index) {
@@ -645,7 +645,7 @@ namespace ir::cg {
 	u8 linear_scan_allocator::allocate_free_reg(
 		code_generator_context& context, live_interval* interval
 	) {
-		const i32 register_class = interval->get_register().get_class();
+		const u8 register_class = interval->get_register().get_class();
 
 		// callee saved will be biased to have nearer free positions to avoid
 		// incurring a spill on them early
@@ -722,7 +722,7 @@ namespace ir::cg {
 			m_callee_saved[register_class] &= ~(1ull << highest);
 
 			const u64 size = register_class ? 16 : 8;
-			const i32 virtual_register = static_cast<i32>((register_class ? register_class::first_xmm : register_class::first_gpr)) + highest;
+			const i32 virtual_register = static_cast<i32>((register_class ? first_xmm : first_gpr)) + highest;
 			context.stack_usage = utility::align(context.stack_usage + size, size);
 
 			const live_interval new_interval(
@@ -764,7 +764,7 @@ namespace ir::cg {
 	u8 linear_scan_allocator::allocate_blocked_reg(
 		code_generator_context& context, live_interval* interval
 	) {
-		const i32 register_class = interval->get_register().get_class();
+		const u8 register_class = interval->get_register().get_class();
 
 		for(u8 i = 0; i < 16; ++i) {
 			m_block_positions[i] = std::numeric_limits<i32>::max();

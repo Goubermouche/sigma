@@ -113,7 +113,7 @@ namespace ir::cg {
 		) override;
 
 		i32 legalize_data_type(const data_type& data_type) override;
-		i32 classify_register_class(const data_type& data_type) override;
+		u8 classify_register_class(const data_type& data_type) override;
 	private:
 		/**
 		 * \brief Emits the function prologue (sets up the stack frame and

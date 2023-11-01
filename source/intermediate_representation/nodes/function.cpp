@@ -8,14 +8,13 @@ namespace ir {
 		m_parameters.resize(3);
 	}
 
-	void function::print_node_graph(s_ptr<utility::text_file> file) const {
-		file << "digraph " << m_symbol.get_name() << "{\n";
-		file << "  rankdir=TB\n";
+	void function::print_node_graph(utility::long_string& string) const {
+		string.append("digraph {}{{\n  rankdir=TB\n", m_symbol.get_name());
 
 		std::unordered_set<handle<node>> visited;
-		m_entry_node->print_as_basic_block(visited, file);
+		m_entry_node->print_as_basic_block(visited, string);
 
-		file << "}\n";
+		string.append("}\n");
 	}
 
 	void function::set_entry_node(handle<node> node) {

@@ -32,8 +32,15 @@ i32 main(i32 argc, char* argv[]) {
 	m.create_store(temporary_a, integer_a, 4, false);
 	m.create_store(temporary_b, integer_b, 4, false);
 	m.create_ret({ m.create_add(temporary_a, temporary_b) });
-	const auto print_result = m.print_node_graph("./test/app.dot");
-	ASSERT(!print_result.has_error(), "unhandled error encountered");
+
+	utility::long_string dot_str;
+	m.print_node_graph(dot_str);
+
+	const auto serialization_result_dot = utility::file::write(
+		dot_str, "./test/module.dot"
+	);
+
+	ASSERT(!serialization_result_dot.has_error(), "unhandled error encountered");
 
 	const auto compilation_result = m.compile(
 		ir::arch::x64, ir::system::windows
@@ -47,28 +54,14 @@ i32 main(i32 argc, char* argv[]) {
 
 	ASSERT(!serialization_result_asm.has_error(), "unhandled error encountered");
 
-	const auto serialization_result_code = utility::file::write(
-		compilation_result.get_value()->bytecode, "./test/bytecode.txt"
-	);
+	// 55 48 89 e5 48 83 ec 20 c7 44 3d ec 64 00 00 00 c7 44 3d e8 c8 00 00 00 48 8d 44 3d ec 48 8d 4c 3d e8 48 01 c8 48 83 c4 20 5d c3
+	for (const utility::byte byte : compilation_result.get_value()->bytecode) {
+		utility::console::out << byte.to_hex() << ' ';
+	}
 
-	ASSERT(!serialization_result_code.has_error(), "unhandled error encountered");
-
-
-	// utility::console::out << "\nbyte code:\n\n";
-	// for(const utility::byte b : compilation_result.get_value()) {
-	// 	utility::console::out << b.to_hex() << ' ';
-	// }
+	utility::console::out << '\n';
 
 	return 0;
-
-
-
-
-
-
-
-
-
 
 	//const std::vector<utility::byte> bytes = assembly.get_code();
 

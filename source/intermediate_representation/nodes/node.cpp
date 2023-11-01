@@ -309,142 +309,115 @@ namespace ir {
 	
 	void node::print_as_basic_block(
 		std::unordered_set<handle<node>>& visited,
-		s_ptr<utility::text_file> file
+		utility::long_string& string
 	) {
-		// TODO: replace C-style casts
 		if(!visited.insert(this).second) {
 			return;
 		}
 
 		// walk control edges (aka predecessors)
-		handle<region_property> r = get<region_property>();
-		if(r->end->get_type() == branch) {
-			handle<branch_property> br = r->end->get<branch_property>();
-			for (int i = static_cast<int>(br->successors.size()); i-- > 0;) {
-				br->successors[i]->print_as_basic_block(visited, file);
+		handle<region_property> region = get<region_property>();
+		if(region->end->get_type() == branch) {
+			handle<branch_property> branch = region->end->get<branch_property>();
+			
+			for (u64 i = branch->successors.size(); i-- > 0;) {
+				branch->successors[i]->print_as_basic_block(visited, string);
 			}
 		}
 
-		file << "  subgraph {\n";
-		handle<node> curr = r->end;
-		do {
-			visited.insert(curr);
-			file
-				<< "    r"
-				<< (u64)curr.get()
-				<< "[style = \"filled\"; shape=box; ";
+		string.append("  subgraph {\n");
+		handle<node> current = region->end;
 
-			if(curr->get_type() == exit) {
-				file << "fillcolor=lightblue1; label=\""
-					<< curr->get_global_value_index()
-					<< ": End";
+		do {
+			visited.insert(current);
+			string.append("    r{} [style = \"filled\"; shape=box; ", current);
+			
+			if(current->get_type() == exit) {
+				string.append(
+					"fillcolor=lightblue1; label=\"{}: End",
+					current->get_global_value_index()
+				);
 			}
 			else {
-				file << "fillcolor=antiquewhite1; label=\""
-					<< curr->get_global_value_index()
-					<< ": Effect";
+				string.append(
+					"fillcolor=antiquewhite1; label=\"{}: Effect",
+					current->get_global_value_index()
+				);
 			}
 
-			file
-				<< "\"]\n    r"
-				<< (u64)curr->get_input(0).get()
-				<< " -> r"
-				<< (u64)curr.get()
-				<< "\n";
-
-			curr = curr->get_input(0);
-		} while (curr != this);
+			string.append("\"]\n    r{} -> r{}\n", current->get_input(0), current);
+			current = current->get_input(0);
+		} while (current != this);
 
 		// basic block header
-		file
-			<< "    r"
-			<< (u64)this
-			<< " [style=\"filled\"; shape=box; ";
-
+		string.append("    r{} [style=\"filled\"; shape=box; ", handle(this));
+		
 		if(m_type == entry) {
-			file
-				<< "fillcolor=lightblue1; label=\""
-				<< m_global_value_index
-				<< ": Start";
+			string.append(
+				"fillcolor=lightblue1; label=\"{}: Start",
+				m_global_value_index
+			);
 		}
 		else {
-			file
-				<< "fillcolor=antiquewhite1; label=\""
-				<< m_global_value_index
-				<< ": Region";
+			string.append(
+				"fillcolor=antiquewhite1; label=\"{}: Region", 
+				m_global_value_index
+			);
 		}
 		
-		file << "\"]\n";
+		string.append("\"]\n");
 
 		if(m_type == entry) {
-			file << "    { rank=min; r" << (u64)this << " }\n";
+			string.append("    {{ rank=min; r{} }}\n", handle(this));
 		}
-		else if (r->end->get_type() == exit) {
-			file << "    { rank=max; r" << (u64)r->end.get() << " }\n";
+		else if (region->end->get_type() == exit) {
+			string.append("    {{ rank=max; r{} }}\n", region->end);
 		}
 
-		file << "  }\n";
+		string.append("  }\n");
 
 		// write predecessor edges
 		for (handle<node> pred : m_inputs) {
 			if(pred->get_type() == projection) {
-				file << "  r" << (u64)pred->get_input(0).get() <<" -> r" << (u64)this << "\n";
+				string.append(
+					"  r{} -> r{}\n", pred->get_input(0), handle(this)
+				);
 			}
 			else {
-				file << "  r" << (u64)pred.get() << " -> r" << (u64)this << "\n";
+				string.append(
+					"  r{} -> r{}\n", pred, handle(this)
+				);
 			}
 		}
 
+		current = region->end;
+
 		// process adjacent nodes
-		curr = r->end;
 		do {
-			for (int i = 1; i < static_cast<int>(curr->get_input_count()); ++i) {
-				curr->get_input(i)->print_as_node(visited, file);
-				file
-					<< "    r"
-					<< (u64)curr->get_input(i).get()
-					<< " -> r"
-					<< (u64)curr.get()
-					<< "\n";
+			for (u64 i = 1; i < current->get_input_count(); ++i) {
+				current->get_input(i)->print_as_node(visited, string);
+				string.append("    r{} -> r{}\n", current->get_input(i), current);
 			}
-			curr = curr->get_input(0);
-		} while (curr != this);
+
+			current = current->get_input(0);
+		} while (current != this);
  	}
 
 	void node::print_as_node(
 		std::unordered_set<handle<node>>& visited,
-		s_ptr<utility::text_file> file
+		utility::long_string& string
 	) {
-		// TODO: replace C-style casts
-
-		if (!visited.insert(this).second) {
+		if (!visited.insert(this).second || has_effects()) {
 			return;
 		}
 
-		if(has_effects()) {
-			return;
-		}
-
-		file
-			<< "  r"
-			<< (u64)this
-			<< " [style=\"filled\"; ordering=in; shape=box; fillcolor=lightgrey; label=\"";
-
-		file
-			<< m_global_value_index << ": " << get_name();
-			
-		file << "\"];\n";
+		string.append("  r{} [style=\"filled\"; ordering=in; shape=box; fillcolor=lightgrey; label=\"", (u64)this);
+		string.append("{}: {}\"];\n", m_global_value_index, get_name());
 
 		for(const handle<node> input : m_inputs) {
 			if(input) {
-				file
-					<< "  r"
-					<< (u64)input.get() <<
-					" -> r"
-					<< (u64)this
-					<< "\n";
-
-				input->print_as_node(visited, file);
+				string.append("  r{} -> r{}\n", input, handle(this));
+				input->print_as_node(visited, string);
 			}
 		}
 	}

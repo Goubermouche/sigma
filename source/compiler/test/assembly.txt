@@ -1,0 +1,15 @@
+test:
+  push RBP
+  mov RBP, RSP
+  sub RSP, 32
+  mov dword [RBP + -20], 100
+  mov dword [RBP + -24], 200
+  lea RAX, qword [RBP + -20]
+  lea RCX, qword [RBP + -24]
+  add RAX, RCX
+  jmp L0
+L0:
+.ret:
+  add RSP, 32
+  pop RBP
+  ret

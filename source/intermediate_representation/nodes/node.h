@@ -1,6 +1,7 @@
 #pragma once
 #include <utility/containers/slice.h>
 #include <utility/containers/property.h>
+#include <utility/containers/long_string.h>
 #include <utility/containers/allocators/block_allocator.h>
 
 #include "intermediate_representation/nodes/data_type.h"
@@ -229,12 +230,12 @@ namespace ir {
 	private:
 		void print_as_basic_block(
 			std::unordered_set<handle<node>>& visited,
-			s_ptr<utility::text_file> file
+			utility::long_string& string
 		);
 
 		void print_as_node(
 			std::unordered_set<handle<node>>& visited,
-			s_ptr<utility::text_file> file
+			utility::long_string& string
 		);
 	private:
 		friend class function;

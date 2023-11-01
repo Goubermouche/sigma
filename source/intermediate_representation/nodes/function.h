@@ -1,4 +1,6 @@
 #pragma once
+#include <utility/containers/long_string.h>
+
 #include "intermediate_representation/nodes/user.h"
 #include "intermediate_representation/nodes/symbol.h"
 
@@ -32,7 +34,7 @@ namespace ir {
 		u64 get_node_count() const;
 		symbol& get_symbol();
 
-		void print_node_graph(s_ptr<utility::text_file> file) const;
+		void print_node_graph(utility::long_string& string) const;
 
 		/**
 		 * \brief Allocates a new node, including enough space for the \a extra

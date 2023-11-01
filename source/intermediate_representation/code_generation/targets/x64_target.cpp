@@ -17,6 +17,34 @@ namespace ir::cg {
 		emit_prologue(context, result->bytecode);
 		emit_function_body(context, result->bytecode);
 		emit_epilogue(context, result->bytecode);
+
+		// pad to 16 bytes
+		static const u8 nops[8][8] = {
+			{ 0x90 },
+			{ 0x66, 0x90 },
+			{ 0x0F, 0x1F, 0x00 },
+			{ 0x0F, 0x1F, 0x40, 0x00 },
+			{ 0x0F, 0x1F, 0x44, 0x00, 0x00 },
+			{ 0x66, 0x0F, 0x1F, 0x44, 0x00, 0x00 },
+			{ 0x0F, 0x1F, 0x80, 0x00, 0x00, 0x00, 0x00 },
+			{ 0x0F, 0x1F, 0x84, 0x00, 0x00, 0x00, 0x00, 0x00 },
+		};
+
+		//u64 pad = 16 - (result->bytecode.get_size() & 15);
+
+		//if (pad > 8) {
+		//	uint64_t rem = pad - 8;
+		//	for (uint64_t i = 0; i < rem; ++i) {
+		//		result->bytecode.append_byte(0x66);
+		//	}
+
+		//	pad -= rem;
+		//}
+
+		//// copy NOPs into the reserved space
+		//for (uint64_t i = 0; i < pad; ++i) {
+		//	result->bytecode.append_byte(nops[pad - 1][i]);
+		//}
 	}
 
 	void x64_target::allocate_base_registers(
@@ -169,7 +197,9 @@ namespace ir::cg {
 					ASSERT(false, "not implemented");
 				}
 
-				emit_instruction_1_print(inst->get_type(), target, inst->get_data_type(), bytecode);
+				emit_instruction_1_print(
+					context, inst->get_type(), target, inst->get_data_type(), bytecode
+				);
 			}
 			else if (inst->get_type() == instruction::call) {
 				ASSERT(false, "not implemented 9");
@@ -223,7 +253,10 @@ namespace ir::cg {
 						inst->get_type() == instruction::integral_div ||
 						inst->get_type() == instruction::div
 					) {
-						emit_instruction_1_print(inst->get_type(), left, inst->get_data_type(), bytecode);
+						emit_instruction_1_print(
+							context, inst->get_type(), left, inst->get_data_type(), bytecode
+						);
+
 						continue;
 					}
 					else {
@@ -248,7 +281,10 @@ namespace ir::cg {
 
 				// unary ops
 				if(cat == instruction::unary || cat == instruction::unary_ext) {
-					emit_instruction_1_print(inst->get_type(), out, inst->get_data_type(), bytecode);
+					emit_instruction_1_print(
+						context, inst->get_type(), out, inst->get_data_type(), bytecode
+					);
+
 					continue;
 				}
 
@@ -341,13 +377,115 @@ namespace ir::cg {
 	}
 
 	void x64_target::emit_instruction_1_print(
-		instruction::type type, handle<value> src, i32 data_type, utility::byte_buffer& bytecode
+		code_generator_context& context,
+		instruction::type type,
+		handle<value> src,
+		i32 data_type, 
+		utility::byte_buffer& bytecode
 	) {
 		emit_assembly("  {} ", g_x64_instruction_table[type].mnemonic);
 		print_operand(src, data_type);
 		emit_assembly("\n");
 
-		// TODO: emit_instruction_1
+		emit_instruction_1(context, type, src, data_type, bytecode);
+	}
+
+	void x64_target::emit_instruction_1(
+		code_generator_context& context,
+		instruction::type type,
+		handle<value> r, 
+		i32 dt, 
+		utility::byte_buffer& bytecode
+	) {
+		ASSERT(type < g_x64_instruction_table.size(), "invalid type");
+		const instruction::description& descriptor = g_x64_instruction_table[type];
+
+		bool is_rex = dt == byte || dt == qword;
+		bool is_rexw = dt == qword;
+		u8 op = descriptor.op_i;
+		u8 rx = descriptor.rx_i;
+
+		if (r->get_type() == value::gpr) {
+			if (is_rex || r->get_reg() >= 8) {
+				bytecode.append_byte(rex(is_rexw, 0x00, r->get_reg(), 0x00));
+			}
+
+			if (descriptor.cat == instruction::unary_ext) {
+				bytecode.append_byte(0x0F);
+			}
+
+			bytecode.append_byte(op ? op : descriptor.op);
+			bytecode.append_byte(mod_rx_rm(direct, rx, r->get_reg()));
+		}
+		else if (r->get_type() == value::mem) {
+			u8 base = r->get_reg();
+			u8 index = r->get_index();
+			scale s = r->get_scale();
+			i32 disp = r->get_imm();
+
+			bool needs_index = (index != reg_none) || (base & 7) == rsp;
+			bytecode.append_byte(rex(is_rexw, 0x00, base, index != reg_none ? index : 0));
+
+			if (descriptor.cat == instruction::unary_ext) {
+				bytecode.append_byte(0x0F);
+			}
+
+			bytecode.append_byte(op);
+
+			// if it needs an index, it'll put RSP into the base slot
+			// and write the real base into the SIB
+
+			mod m = indirect_displacement_32;
+			if (disp == 0) {
+				m = indirect_displacement_8;
+			}
+			else if (disp == static_cast<i8>(disp)) {
+				m = indirect_displacement_8;
+			}
+
+			bytecode.append_byte(mod_rx_rm(m, rx, needs_index ? rsp : base));
+
+			if (needs_index) {
+				bytecode.append_byte(mod_rx_rm(static_cast<mod>(s), (base & 7) == rsp ? rsp : index, base));
+			}
+
+			if (m == indirect_displacement_8) {
+				bytecode.append_byte(static_cast<i8>(disp));
+			}
+			else if (m == indirect_displacement_32) {
+				bytecode.append_dword(static_cast<i32>(disp));
+			}
+		}
+		else if (r->get_type() == value::global) {
+			ASSERT(false, "not implemented");
+		}
+		else if (r->get_type() == value::label) {
+			if (descriptor.cat == instruction::unary_ext) {
+				bytecode.append_byte(0x0F);
+			}
+
+			bytecode.append_byte(descriptor.op);
+			bytecode.append_dword(0);
+
+			utility::console::out << "WARNING: UNSAFE MEMORY CAST\n";
+
+			// if has target? 
+			if (true) {
+				bytecode.emit_relocation_dword(
+					&context.labels.at(r->get<target_prop>()->target), bytecode.get_size() - 4
+				);
+			}
+	
+			// else
+			if (false) {
+				bytecode.emit_relocation_dword(
+					&context.return_label, bytecode.get_size() - 4
+				);
+			}
+		}
+		else {
+			ASSERT(false, "not implemented");
+		}
 	}
 
 	void x64_target::emit_instruction_2_print(
@@ -531,7 +669,7 @@ namespace ir::cg {
 
 		emit_memory_operand(rx, a, bytecode);
 
-		// memory displacements go before immediates
+		//// memory displacements go before immediates
 		ptr_diff disp_patch = bytecode.get_size() - 4;
 		if (b->get_type() == value::imm) {
 			if (dt == byte || short_imm) {
@@ -551,7 +689,7 @@ namespace ir::cg {
 					"invalid immediate"
 				);
 
-				bytecode.append_word(imm);
+				bytecode.append_word(static_cast<u16>(imm));
 			}
 			else {
 				bytecode.append_dword(static_cast<i32>(b->get_imm()));
@@ -579,12 +717,12 @@ namespace ir::cg {
 			u8 index = a->get_index();
 			scale scale = a->get_scale();
 			i32 disp = a->get_imm();
-			bool needs_index = (index != -1) || (base & 7) == rsp;
-
+			bool needs_index = (index != reg_none) || (base & 7) == rsp;
+			
 			// If it needs an index, it'll put RSP into the base slot
 			// and write the real base into the SIB
 			mod m = indirect_displacement_32;
-
+			
 			if (disp == 0 && (base & 7) != rbp) {
 				m = indirect;
 			}
@@ -593,11 +731,11 @@ namespace ir::cg {
 			}
 
 			bytecode.append_byte(mod_rx_rm(m, rx, needs_index ? rsp : base));
-
+			
 			if (needs_index) {
 				bytecode.append_byte(mod_rx_rm(static_cast<mod>(scale), (base & 7) == rsp ? rsp : index, base));
 			}
-
+			
 			if (m == indirect_displacement_8) {
 				bytecode.append_byte(static_cast<i8>(disp));
 			}
@@ -673,6 +811,8 @@ namespace ir::cg {
 				break;
 			}
 			case value::label: {
+				utility::console::out << "WARNING: UNSAFE MEMORY CAST\n";
+
 				const handle<node> target = val->get<target_prop>()->target;
 
 				if (target == nullptr) {

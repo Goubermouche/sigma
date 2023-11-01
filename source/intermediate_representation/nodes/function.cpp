@@ -86,8 +86,7 @@ namespace ir {
 	}
 
 	void function::add_input_late(
-		handle<node> n,
-		handle<node> input
+		handle<node> n, handle<node> input
 	) {
 		ASSERT(
 			n->get_type() == node::type::region || 
@@ -99,13 +98,13 @@ namespace ir {
 		const u64 new_count = n->m_inputs.get_size() + 1;
 
 		// reallocate the necessary space again
-		utility::slice<handle<node>> new_inputs(
-			m_allocator.allocate(sizeof(handle<node>) * new_count), new_count
-		);
+		utility::slice<handle<node>> new_inputs(m_allocator, new_count);
 
+		// copy the old data over to the new slice
 		memcpy(new_inputs.get_data(), n->get_inputs().get_data(), old_count * sizeof(handle<node>));
-		new_inputs[old_count] = input;
 
+		// add the late input node
+		new_inputs[old_count] = input;
 		n->m_inputs = new_inputs;
 	}
 

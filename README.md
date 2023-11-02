@@ -125,6 +125,9 @@ The expected output, after running the generated .exe, looks like this:
 ,,,,,,,,,--------~~~~~~~~~~~~~~~~~~~~~~~~~~~::::::::::;;;;==!#~$#@!=;:::::::~~~~~~~~----------------
 ```
 ## Todo: 
+- [ ] Replace LLVM by a TB-like code generator
+- [ ] Rework the AST structure (Carbon-style)
+     
 - [ ] Clean up the project structure and utilize modules 
 - [ ] Replace LLVM by a custom code generator
 - [ ] Full C function toolset

@@ -121,7 +121,7 @@ namespace ir::cg {
 
 		handle<instruction> m_cache;
 
-		i32 m_end_point;
+		i32 m_end_point = 0;
 	};
 }
 

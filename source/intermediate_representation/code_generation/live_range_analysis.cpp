@@ -34,7 +34,7 @@ namespace ir::cg {
 					mbb->set_end(timeline);
 
 					ASSERT(
-						inst->get_flags() & instruction::node,
+						inst->get_flags() & instruction::node_f,
 						"label instruction has no node for the region"
 					);
 

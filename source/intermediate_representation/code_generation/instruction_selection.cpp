@@ -50,7 +50,7 @@ namespace ir::cg {
 			);
 
 			if(block != exit_block) {
-				const handle<instruction> label_inst = create_label_instruction(context, block);
+				const auto label_inst = instruction::create_label(context, block);
 				context.fallthrough = i > 0 ? context.work_list.get_item(i - 1) : nullptr;
 
 				if(context.fallthrough == exit_block) {
@@ -75,7 +75,7 @@ namespace ir::cg {
 		// schedule the exit node at the end of the generated instructions 
 		if(has_exit) {
 			context.fallthrough = nullptr;
-			const handle<instruction> label = create_label_instruction(context, exit_block);
+			const auto label = instruction::create_label(context, exit_block);
 
 			if(context.first == nullptr) {
 				context.first = context.head = label;
@@ -160,7 +160,7 @@ namespace ir::cg {
 
 				append_instruction(
 					context,
-					create_move_instruction(
+					instruction::create_move(
 						context, data_type, tmp, destination
 					)
 				);
@@ -214,7 +214,7 @@ namespace ir::cg {
 
 						append_instruction(
 							context,
-							create_move_instruction(
+							instruction::create_move(
 								context, data_type, phi.get_destination(), source
 							)
 						);
@@ -362,7 +362,7 @@ namespace ir::cg {
 					// append a 64-bit version of the integer
 					append_instruction(
 						context,
-						create_abs_instruction(
+						instruction::create_abs(
 							context, instruction::movabs, n->get_data(), 
 							destination, value
 						)
@@ -372,7 +372,7 @@ namespace ir::cg {
 					// append a zero instruction
 					append_instruction(
 						context,
-						create_zero_instruction(
+						instruction::create_zero(
 							context, n->get_data(), destination
 						)
 					);
@@ -381,7 +381,7 @@ namespace ir::cg {
 					// append a 32-bit instruction
 					append_instruction(
 						context,
-						create_immediate_instruction(
+						instruction::create_immediate(
 							context, instruction::mov, n->get_data(), 
 							destination, static_cast<i32>(value)
 						)
@@ -414,14 +414,14 @@ namespace ir::cg {
 
 					append_instruction(
 						context,
-						create_move_instruction(
+						instruction::create_move(
 							context, n->get_data(), destination, left
 						)
 					);
 
 					append_instruction(
 						context,
-						create_rri_instruction(
+						instruction::create_rri(
 							context, operation, n->get_data(), destination,
 							destination, immediate
 						)
@@ -432,14 +432,14 @@ namespace ir::cg {
 
 					append_instruction(
 						context,
-						create_move_instruction(
+						instruction::create_move(
 							context, n->get_data(), destination, left
 						)
 					);
 
 					append_instruction(
 						context,
-						create_rrr_instruction(
+						instruction::create_rrr(
 							context, operation, n->get_data(), destination,
 							destination, right
 						)
@@ -463,7 +463,7 @@ namespace ir::cg {
 					if(context.fallthrough != branch->successors[0]) {
 						append_instruction(
 							context,
-							create_jump_instruction(context, branch->successors[0])
+							instruction::create_jump(context, branch->successors[0])
 						);
 					}
 				}
@@ -492,8 +492,8 @@ namespace ir::cg {
 
 						append_instruction(
 							context,
-							create_move_instruction(
-								context, data_type, static_cast<i32>(rax),
+							instruction::create_move(
+								context, data_type, rax,
 								source
 							)
 						);
@@ -649,19 +649,19 @@ namespace ir::cg {
 		// compute the base
 		if(store_op < 0) {
 			if(has_second_in) {
-				return create_rrm_instruction(
+				return instruction::create_rrm(
 					context, instruction::lea, n->get_data(), destination,
 					source, base, index, scale, static_cast<i32>(offset)
 				);
 			}
 
-			return create_rm_instruction(
+			return instruction::create_rm(
 				context, instruction::lea, n->get_data(), destination,
 				base, index, scale, static_cast<i32>(offset)
 			);
 		}
 
-		return create_mr_instruction(
+		return instruction::create_mr(
 			context, static_cast<instruction::type>(store_op), n->get_data(),
 			base, index, scale, static_cast<i32>(offset), source
 		);
@@ -684,19 +684,19 @@ namespace ir::cg {
 
 			if (store_op < 0) {
 				if (source >= 0) {
-					return create_rrm_instruction(
+					return instruction::create_rrm(
 						context, instruction::lea, PTR_TYPE,
 						destination, source, base, -1, x1, 0
 					);
 				}
 
-				return create_rm_instruction(
+				return instruction::create_rm(
 					context, instruction::type::lea, PTR_TYPE,
 					destination, base, -1, x1, 0
 				);
 			}
 
-			return create_mr_instruction(
+			return instruction::create_mr(
 				context, static_cast<instruction::type>(store_op),
 				PTR_TYPE, base, -1, x1, 0, source
 			);
@@ -927,230 +927,5 @@ namespace ir::cg {
 		context.intervals.emplace_back(interval);
 		ASSERT(index < std::numeric_limits<u8>::max(), "invalid virtual register");
 		return static_cast<u8>(index);
-	}
-
-	handle<instruction> create_rrm_instruction(
-		code_generator_context& context, 
-		instruction::type type, 
-		const data_type& data_type,
-		i32 destination,
-		i32 source,
-		i32 base, 
-		i32 index,
-		scale scale,
-		i32 displacement
-	) {
-		const handle<instruction> inst = context.create_instruction<empty_property>(
-			type, data_type, 1, index >= 0 ? 3 : 2, 0
-		);
-
-		inst->set_flags(instruction::mem | (index >= 0 ? instruction::indexed : instruction::none));
-		inst->set_scale(scale);
-		inst->set_displacement(displacement);
-		inst->set_memory_slot(2);
-
-		inst->set_operand(0, destination);
-		inst->set_operand(1, source);
-		inst->set_operand(2, base);
-
-		if(index >= 0) {
-			inst->set_operand(4, index);
-		}
-
-		return inst;
-	}
-
-	handle<instruction> create_rm_instruction(
-		code_generator_context& context,
-		instruction::type type, 
-		const data_type& data_type, 
-		i32 destination, 
-		i32 base, 
-		i32 index,
-		scale scale, 
-		i32 displacement
-	) {
-		const handle<instruction> inst = context.create_instruction<empty_property>(
-			type, data_type, 1, index >= 0 ? 2 : 1, 0
-		);
-
-		inst->set_flags(instruction::mem | (index >= 0 ? instruction::indexed : instruction::none));
-		inst->set_memory_slot(1);
-		inst->set_operand(0, destination);
-		inst->set_operand(1, base);
-
-		if(index >= 0) {
-			inst->set_operand(2, index);
-		}
-
-		inst->set_displacement(displacement);
-		inst->set_scale(scale);
-		return inst;
-	}
-
-	handle<instruction> create_mr_instruction(
-		code_generator_context& context,
-		instruction::type type, 
-		const data_type& data_type, 
-		i32 base, 
-		i32 index,
-		scale scale,
-		i32 displacement,
-		i32 source
-	) {
-		const handle<instruction> inst = context.create_instruction<empty_property>(
-			type, data_type, 0, index >= 0 ? 3 : 2, 0
-		);
-
-		inst->set_flags(instruction::mem | (index >= 0 ? instruction::indexed : instruction::none));
-		inst->set_memory_slot(0);
-
-		inst->set_operand(0, base);
-
-		if(index >= 0) {
-			inst->set_operand(1, index);
-			inst->set_operand(2, source);
-		}
-		else {
-			inst->set_operand(1, source);
-		}
-
-		inst->set_displacement(displacement);
-		inst->set_scale(scale);
-		return inst;
-	}
-
-	handle<instruction> create_label_instruction(
-		code_generator_context& context,
-		handle<node> n
-	) {
-		const handle<instruction> inst = context.create_instruction<node_prop>(0);
-		inst->get<node_prop>()->value = n;
-		inst->set_type(instruction::label);
-		inst->set_flags(instruction::node);
-		return inst;
-	}
-
-	handle<instruction> create_move_instruction(
-		code_generator_context& context, 
-		const data_type& data_type,
-		u8 destination, 
-		u8 source
-	) {
-		const i32 machine_data_type = context.target->legalize_data_type(data_type);
-		const handle<instruction> inst = context.create_instruction<empty_property>(2);
-
-		inst->set_type(machine_data_type >= sse_ss ? instruction::floating_point_mov : instruction::mov);
-		inst->set_data_type(machine_data_type);
-
-		inst->set_out_count(1);
-		inst->set_in_count(1);
-		inst->set_operand(0, destination);
-		inst->set_operand(1, source);
-
-		return inst;
-	}
-
-	handle<instruction> create_abs_instruction(
-		code_generator_context& context, 
-		instruction::type type, 
-		const data_type& data_type, 
-		u8 destination,
-		u64 imm
-	) {
-		const handle<instruction> inst = context.create_instruction<immediate_prop>(
-			type, data_type, 1, 0, 0
-		);
-
-		inst->get<immediate_prop>()->value = static_cast<i32>(imm);
-		inst->set_flags(instruction::absolute);
-		inst->set_operand(0, destination);
-		return inst;
-	}
-
-	handle<instruction> create_zero_instruction(
-		code_generator_context& context,
-		const data_type& data_type,
-		u8 destination
-	) {
-		const handle<instruction> inst = context.create_instruction<empty_property>(
-			instruction::zero, data_type, 1, 0, 0
-		);
-
-		inst->set_operand(0, destination);
-		return inst;
-	}
-
-	handle<instruction> create_immediate_instruction(
-		code_generator_context& context, 
-		instruction::type type,
-		const data_type& data_type,
-		u8 destination,
-		i32 imm
-	) {
-		const handle<instruction> inst = context.create_instruction<immediate_prop>(
-			type, data_type, 1, 0, 0
-		);
-
-		inst->get<immediate_prop>()->value = imm;
-		inst->set_flags(instruction::immediate);
-		inst->set_operand(0, destination);
-		return inst;
-	}
-
-	handle<instruction> create_rri_instruction(
-		code_generator_context& context, 
-		instruction::type type,
-		const data_type& data_type, 
-		u8 destination, 
-		u8 source, 
-		i32 imm
-	) {
-		const handle<instruction> inst = context.create_instruction<immediate_prop>(
-			type, data_type, 1, 1, 0
-		);
-
-		inst->get<immediate_prop>()->value = imm;
-		inst->set_flags(instruction::immediate);
-		inst->set_operand(0, destination);
-		inst->set_operand(1, source);
-		return inst;
-	}
-
-	handle<instruction> create_rrr_instruction(
-		code_generator_context& context,
-		instruction::type type,
-		const data_type& data_type, 
-		u8 destination,
-		u8 left,
-		u8 right
-	) {
-		const handle<instruction> inst = context.create_instruction<immediate_prop>(
-			type, data_type, 1, 2, 0
-		);
-
-		inst->set_operand(0, destination);
-		inst->set_operand(1, left);
-		inst->set_operand(2, right);
-
-		return inst;
-	}
-
-	handle<instruction> create_jump_instruction(
-		code_generator_context& context,
-		handle<node> target
-	) {
-		ASSERT(
-			target->get_type() > ir::node::none,
-			"invalid target type for a jump instruction"
-		);
-
-		const handle<instruction> inst = context.create_instruction<node_prop>(
-			instruction::jmp, VOID_TYPE, 0, 0, 0
-		);
-
-		inst->get<node_prop>()->value = target;
-		inst->set_flags(instruction::node);
-		return inst;
 	}
 }

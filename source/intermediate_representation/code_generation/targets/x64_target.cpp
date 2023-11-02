@@ -190,7 +190,7 @@ namespace ir::cg {
 				inst->get_type() <= instruction::JG
 			) {
 				handle<value> target;
-				if(inst->get_flags() & instruction::node) {
+				if(inst->get_flags() & instruction::node_f) {
 					target = value::create_label(inst->get<node_prop>()->value);
 				}
 				else {

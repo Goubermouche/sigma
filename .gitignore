@@ -368,3 +368,6 @@ FodyWeavers.xsd
 .vscode/
 
 Makefile
+
+
+/source/compiler/test/

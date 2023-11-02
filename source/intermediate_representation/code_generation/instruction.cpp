@@ -1,4 +1,6 @@
 #include "instruction.h"
+#include "intermediate_representation/code_generation/code_generator_context.h"
+#include "intermediate_representation/code_generation/targets/x64_target.h"
 
 namespace ir::cg {
 	void instruction::set_type(type type) {
@@ -97,6 +99,230 @@ namespace ir::cg {
 		return m_time;
 	}
 
+	handle<instruction> instruction::create_label(
+		code_generator_context& context, handle<node> target
+	) {
+		const handle<instruction> inst = context.create_instruction<node_prop>(0);
+		inst->get<node_prop>()->value = target;
+		inst->set_type(instruction::label);
+		inst->set_flags(instruction::node_f);
+		return inst;
+	}
+
+	handle<instruction> instruction::create_jump(
+		code_generator_context& context,
+		handle<node> target
+	) {
+		ASSERT(
+			target->get_type() > ir::node::none,
+			"invalid target type for a jump instruction"
+		);
+
+		const handle<instruction> inst = context.create_instruction<node_prop>(
+			instruction::jmp, VOID_TYPE, 0, 0, 0
+		);
+
+		inst->get<node_prop>()->value = target;
+		inst->set_flags(instruction::node_f);
+		return inst;
+	}
+
+	handle<instruction> instruction::create_rrr(
+		code_generator_context& context, 
+		instruction::type type, 
+		const data_type& data_type, 
+		u8 destination,
+		u8 left, 
+		u8 right
+	) {
+		const handle<instruction> inst = context.create_instruction<immediate_prop>(
+			type, data_type, 1, 2, 0
+		);
+
+		inst->set_operand(0, destination);
+		inst->set_operand(1, left);
+		inst->set_operand(2, right);
+
+		return inst;
+	}
+
+	handle<instruction> instruction::create_rri(
+		code_generator_context& context, 
+		instruction::type type, 
+		const data_type& data_type,
+		u8 destination, 
+		u8 source,
+		i32 imm
+	) {
+		const handle<instruction> inst = context.create_instruction<immediate_prop>(
+			type, data_type, 1, 1, 0
+		);
+
+		inst->get<immediate_prop>()->value = imm;
+		inst->set_flags(instruction::immediate);
+		inst->set_operand(0, destination);
+		inst->set_operand(1, source);
+		return inst;
+	}
+
+	handle<instruction> instruction::create_rrm(
+		code_generator_context& context, 
+		instruction::type type,
+		const data_type& data_type, 
+		i32 destination,
+		i32 source, 
+		i32 base, 
+		i32 index,
+		scale scale,
+		i32 displacement
+	) {
+		const handle<instruction> inst = context.create_instruction<empty_property>(
+			type, data_type, 1, index >= 0 ? 3 : 2, 0
+		);
+
+		inst->set_flags(instruction::mem | (index >= 0 ? instruction::indexed : instruction::none));
+		inst->set_scale(scale);
+		inst->set_displacement(displacement);
+		inst->set_memory_slot(2);
+
+		inst->set_operand(0, destination);
+		inst->set_operand(1, source);
+		inst->set_operand(2, base);
+
+		if (index >= 0) {
+			inst->set_operand(4, index);
+		}
+
+		return inst;
+	}
+
+	handle<instruction> instruction::create_rm(
+		code_generator_context& context, 
+		instruction::type type, 
+		const data_type& data_type, 
+		i32 destination, 
+		i32 base, 
+		i32 index,
+		scale scale, 
+		i32 displacement
+	) {
+		const handle<instruction> inst = context.create_instruction<empty_property>(
+			type, data_type, 1, index >= 0 ? 2 : 1, 0
+		);
+
+		inst->set_flags(instruction::mem | (index >= 0 ? instruction::indexed : instruction::none));
+		inst->set_memory_slot(1);
+		inst->set_operand(0, destination);
+		inst->set_operand(1, base);
+
+		if (index >= 0) {
+			inst->set_operand(2, index);
+		}
+
+		inst->set_displacement(displacement);
+		inst->set_scale(scale);
+		return inst;
+	}
+
+	handle<instruction> instruction::create_mr(
+		code_generator_context& context, 
+		instruction::type type, 
+		const data_type& data_type,
+		i32 base,
+		i32 index,
+		scale scale,
+		i32 displacement,
+		i32 source
+	) {
+		const handle<instruction> inst = context.create_instruction<empty_property>(
+			type, data_type, 0, index >= 0 ? 3 : 2, 0
+		);
+
+		inst->set_flags(instruction::mem | (index >= 0 ? instruction::indexed : instruction::none));
+		inst->set_memory_slot(0);
+
+		inst->set_operand(0, base);
+
+		if (index >= 0) {
+			inst->set_operand(1, index);
+			inst->set_operand(2, source);
+		}
+		else {
+			inst->set_operand(1, source);
+		}
+
+		inst->set_displacement(displacement);
+		inst->set_scale(scale);
+		return inst;
+	}
+
+	handle<instruction> instruction::create_move(
+		code_generator_context& context, 
+		const data_type& data_type, 
+		u8 destination,
+		u8 source
+	) {
+		const i32 machine_data_type = context.target->legalize_data_type(data_type);
+		const handle<instruction> inst = context.create_instruction<empty_property>(2);
+
+		inst->set_type(machine_data_type >= sse_ss ? instruction::floating_point_mov : instruction::mov);
+		inst->set_data_type(machine_data_type);
+
+		inst->set_out_count(1);
+		inst->set_in_count(1);
+		inst->set_operand(0, destination);
+		inst->set_operand(1, source);
+
+		return inst;
+	}
+
+	handle<instruction> instruction::create_abs(
+		code_generator_context& context, 
+		instruction::type type,
+		const data_type& data_type,
+		u8 destination, 
+		u64 imm
+	) {
+		const handle<instruction> inst = context.create_instruction<immediate_prop>(
+			type, data_type, 1, 0, 0
+		);
+
+		inst->get<immediate_prop>()->value = static_cast<i32>(imm);
+		inst->set_flags(instruction::absolute);
+		inst->set_operand(0, destination);
+		return inst;
+	}
+
+	handle<instruction> instruction::create_zero(
+		code_generator_context& context, 
+		const data_type& data_type,
+		u8 destination
+	) {
+		const handle<instruction> inst = context.create_instruction<empty_property>(
+			instruction::zero, data_type, 1, 0, 0
+		);
+
+		inst->set_operand(0, destination);
+		return inst;
+	}
+
+	handle<instruction> instruction::create_immediate(
+		code_generator_context& context, 
+		instruction::type type, 
+		const data_type& data_type,
+		u8 destination, 
+		i32 imm
+	) {
+		const handle<instruction> inst = context.create_instruction<immediate_prop>(
+			type, data_type, 1, 0, 0
+		);
+
+		inst->get<immediate_prop>()->value = imm;
+		inst->set_flags(instruction::immediate);
+		inst->set_operand(0, destination);
+		return inst;
+	}
+
 	i32 instruction::get_data_type() const {
 		return m_data_type;
 	}
@@ -115,43 +341,5 @@ namespace ir::cg {
 
 	bool instruction::is_terminator() const {
 		return m_type == terminator || m_type == INT3 || m_type == UD2;
-	}
-
-	phi_value::phi_value(
-		handle<node> n, 
-		handle<node> phi,
-		u8 source,
-		u8 destination
-	) : m_node(n),
-		m_phi(phi), 
-		m_source(source),
-		m_destination(destination) {}
-
-	void phi_value::set_node(handle<node> node) {
-		m_node = node;
-	}
-
-	void phi_value::set_phi(handle<node> phi) {
-		m_phi = phi;
-	}
-
-	void phi_value::set_source(u8 source) {
-		m_source = source;
-	}
-
-	void phi_value::set_destination(u8 dst) {
-		m_destination = dst;
-	}
-
-	handle<node> phi_value::get_phi() const {
-		return m_phi;
-	}
-
-	handle<node> phi_value::get_node() const {
-		return m_node;
-	}
-
-	u8 phi_value::get_destination() const {
-		return m_destination;
 	}
 }

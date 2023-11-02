@@ -3,7 +3,12 @@
 #include "intermediate_representation/code_generation/live_interval.h"
 #include "intermediate_representation/code_generation/machine_block.h"
 #include "intermediate_representation/code_generation/targets/target_base.h"
+#include "intermediate_representation/code_generation/phi_value.h"
 #include "intermediate_representation/nodes/function.h"
+
+// Core code generation context structure. Code generation operations for every 
+// function create a new instance of this structure, which is then passed around
+// and modified by several functions related to codegen.
 
 namespace ir::cg {
 	struct code_generator_context {
@@ -25,10 +30,10 @@ namespace ir::cg {
 		std::vector<phi_value> phi_values;
 		std::vector<handle<node>> locals;
 
-		u32 return_label;
-		u64 block_count;
-		u64 stack_usage;
-		i32 epilogue;
+		u32 return_label = 0;
+		u64 block_count = 0;
+		u64 stack_usage = 0;
+		i32 epilogue = 0;
 
 		s_ptr<target_base> target;
 

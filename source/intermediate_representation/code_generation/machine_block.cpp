@@ -11,15 +11,15 @@ namespace ir::cg {
 		m_first = first;
 	}
 
-	void machine_block::set_start(i32 start) {
+	void machine_block::set_start(u64 start) {
 		m_start = start;
 	}
 
-	void machine_block::set_end(i32 end) {
+	void machine_block::set_end(u64 end) {
 		m_end = end;
 	}
 
-	void machine_block::set_terminator(i32 terminator) {
+	void machine_block::set_terminator(u64 terminator) {
 		m_terminator = terminator;
 	}
 
@@ -31,15 +31,15 @@ namespace ir::cg {
 		return m_first;
 	}
 
-	i32 machine_block::get_terminator() const {
+	u64 machine_block::get_terminator() const {
 		return m_terminator;
 	}
 
-	i32 machine_block::get_start() const {
+	u64 machine_block::get_start() const {
 		return m_start;
 	}
 
-	i32 machine_block::get_end() const {
+	u64 machine_block::get_end() const {
 		return m_end;
 	}
 

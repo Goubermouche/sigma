@@ -4,8 +4,8 @@ namespace ir::cg {
 	phi_value::phi_value(
 		handle<node> n,
 		handle<node> phi,
-		u8 source,
-		u8 destination
+		reg source,
+		reg destination
 	) : m_node(n),
 		m_phi(phi),
 		m_source(source),
@@ -19,11 +19,11 @@ namespace ir::cg {
 		m_phi = phi;
 	}
 
-	void phi_value::set_source(u8 source) {
+	void phi_value::set_source(reg source) {
 		m_source = source;
 	}
 
-	void phi_value::set_destination(u8 destination) {
+	void phi_value::set_destination(reg destination) {
 		m_destination = destination;
 	}
 
@@ -35,7 +35,7 @@ namespace ir::cg {
 		return m_node;
 	}
 
-	u8 phi_value::get_destination() const {
+	reg phi_value::get_destination() const {
 		return m_destination;
 	}
 }

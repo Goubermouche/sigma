@@ -21,6 +21,10 @@ namespace ir::cg {
 		handle<node> value;
 	};
 
+	enum scale : u8 {
+		x1, x2, x4, x8
+	};
+
 	class instruction : public utility::property<
 		immediate_prop,
 		absolute_prop,
@@ -221,7 +225,7 @@ namespace ir::cg {
 		void set_flags(flags flags);
 		void set_scale(scale scale);
 		void set_type(type type);
-		void set_time(i32 time);
+		void set_time(u64 time);
 
 		handle<instruction> get_next_instruction() const;
 		const utility::slice<i32>& get_operands() const;
@@ -238,7 +242,7 @@ namespace ir::cg {
 		flags get_flags() const;
 		scale get_scale() const;
 		type get_type() const;
-		i32 get_time() const;
+		u64 get_time() const;
 
 		/**
 		 * \brief Creates a label instruction.
@@ -276,11 +280,10 @@ namespace ir::cg {
 			code_generator_context& context,
 			instruction::type type,
 			const data_type& data_type,
-			u8 destination,
-			u8 left,
-			u8 right
+			reg destination,
+			reg left,
+			reg right
 		);
-
 
 		/**
 		 * \brief Creates a register-register-immediate (RRI) instruction.
@@ -296,8 +299,8 @@ namespace ir::cg {
 			code_generator_context& context,
 			instruction::type type,
 			const data_type& data_type,
-			u8 destination,
-			u8 source,
+			reg destination,
+			reg source,
 			i32 imm
 		);
 
@@ -318,9 +321,9 @@ namespace ir::cg {
 			code_generator_context& context,
 			instruction::type type,
 			const data_type& data_type,
-			i32 destination,
-			i32 source,
-			i32 base,
+			reg destination,
+			reg source,
+			reg base,
 			i32 index,
 			scale scale,
 			i32 displacement
@@ -342,8 +345,8 @@ namespace ir::cg {
 			code_generator_context& context,
 			instruction::type type,
 			const data_type& data_type,
-			i32 destination,
-			i32 base,
+			reg destination,
+			reg base,
 			i32 index,
 			scale scale,
 			i32 displacement
@@ -365,7 +368,7 @@ namespace ir::cg {
 			code_generator_context& context,
 			instruction::type type,
 			const data_type& data_type,
-			i32 base,
+			reg base,
 			i32 index,
 			scale scale,
 			i32 displacement,
@@ -383,8 +386,8 @@ namespace ir::cg {
 		static handle<instruction> create_move(
 			code_generator_context& context,
 			const data_type& data_type,
-			u8 destination,
-			u8 source
+			reg destination,
+			reg source
 		);
 
 		/**
@@ -400,7 +403,7 @@ namespace ir::cg {
 			code_generator_context& context,
 			instruction::type type,
 			const data_type& data_type,
-			u8 destination,
+			reg destination,
 			u64 imm
 		);
 
@@ -414,7 +417,7 @@ namespace ir::cg {
 		static handle<instruction> create_zero(
 			code_generator_context& context,
 			const data_type& data_type,
-			u8 destination
+			reg destination
 		);
 
 		/**
@@ -430,11 +433,9 @@ namespace ir::cg {
 			code_generator_context& context,
 			instruction::type type,
 			const data_type& data_type,
-			u8 destination,
+			reg destination,
 			i32 imm
 		);
-
-
 	private:
 		utility::slice<i32> m_operands; // TODO: storing operands as u8's? 
 		handle<instruction> m_next;     // TODO: replace by a linked list
@@ -450,7 +451,7 @@ namespace ir::cg {
 		i32 m_data_type = 0;
 		i32 m_displacement;
 		i32 m_memory_slot;
-		i32 m_time = 0;
+		u64 m_time = 0;
 		scale m_scale;
 	};
 

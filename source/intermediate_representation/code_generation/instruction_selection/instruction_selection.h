@@ -16,9 +16,7 @@ namespace ir::cg {
 	 * \param end Last node of the region
 	 */
 	void select_instructions_region(
-		code_generator_context& context,
-		handle<node> block,
-		handle<node> end
+		code_generator_context& context, handle<node> block, handle<node> end
 	);
 
 	/**
@@ -28,9 +26,7 @@ namespace ir::cg {
 	 * \param destination Potential destination id of a virtual register
 	 */
 	void select_instruction(
-		code_generator_context& context,
-		handle<node> n,
-		u8 destination
+		code_generator_context& context, handle<node> n, reg destination
 	);
 
 	/**
@@ -45,7 +41,7 @@ namespace ir::cg {
 	handle<instruction> select_memory_access_instruction(
 		code_generator_context& context,
 		handle<node> n,
-		i32 destination,
+		reg destination,
 		i32 store_op,
 		i32 source
 	);
@@ -62,7 +58,7 @@ namespace ir::cg {
 	handle<instruction> select_array_access_instruction(
 		code_generator_context& context,
 		handle<node> n,
-		i32 destination,
+		reg destination,
 		i32 store_op,
 		i32 source
 	);
@@ -74,9 +70,7 @@ namespace ir::cg {
 	 * \param n Currently visited node
 	 */
 	void dfs_schedule(
-		code_generator_context& context,
-		handle<node> block,
-		handle<node> n
+		code_generator_context& context, handle<node> block, handle<node> n
 	);
 
 	/**
@@ -99,8 +93,7 @@ namespace ir::cg {
 	 * \param inst Instruction to append
 	 */
 	void append_instruction(
-		code_generator_context& context,
-		handle<instruction> inst
+		code_generator_context& context, handle<instruction> inst
 	);
 
 	/**
@@ -110,10 +103,7 @@ namespace ir::cg {
 	 * \param n Node to obtain the virtual register ID for
 	 * \return ID of the virtual register
 	 */
-	u8 input_reg(
-		code_generator_context& context,
-		handle<node> n
-	);
+	reg input_reg(code_generator_context& context, handle<node> n);
 
 	/**
 	 * \brief Checks if a node represents a 32-bit integer constant, if it does,
@@ -143,9 +133,7 @@ namespace ir::cg {
 	 * \param n Node for which a stack slot is needed
 	 * \return Position of the stack node.
 	 */
-	i32 get_stack_slot(
-		code_generator_context& context,
-		handle<node> n
+	i32 get_stack_slot(code_generator_context& context,handle<node> n
 	);
 
 	/**
@@ -154,7 +142,7 @@ namespace ir::cg {
 	 * \param interval_index Index of the interval for which a register hint is to be provided
 	 * \param reg Register ID to be set as the hint
 	 */
-	void hint_reg(code_generator_context& context, i32 interval_index, u8 reg);
+	void hint_reg(code_generator_context& context, i32 interval_index, reg reg);
 
 	/**
 	 * \brief Allocates a virtual register for a given node \a n and data type.
@@ -163,7 +151,7 @@ namespace ir::cg {
 	 * \param data_type Data type of the node for which the register is being allocated
 	 * \return ID of the allocated virtual registers.
 	 */
-	u8 allocate_virtual_register(
+	reg allocate_virtual_register(
 		code_generator_context& context,
 		handle<node> n,
 		const data_type& data_type

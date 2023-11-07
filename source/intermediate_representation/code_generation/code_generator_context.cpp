@@ -1,8 +1,10 @@
 #include "code_generator_context.h"
 
 namespace ir::cg {
-	value_description* code_generator_context::lookup_value(handle<node> n) {
-		return work_list.get_visited().contains(n) ? &values[n->get_global_value_index()] : nullptr;
+	virtual_value* code_generator_context::lookup_value(handle<node> n) {
+		// return work_list.get_visited().contains(n) ? &values[n->get_global_value_index()] : nullptr;
+		// return values.contains(n->get_global_value_index()) ? &values[n->get_global_value_index()] : nullptr;
+		return &virtual_values.find(n->get_global_value_index())->second;
 	}
 
 	i32 code_generator_context::allocate_stack(u32 size, u32 alignment) {
@@ -49,7 +51,7 @@ namespace ir::cg {
 	}
 
 	bool code_generator_context::on_last_use(handle<node> n) {
-		const value_description* value = lookup_value(n);
+		const virtual_value* value = lookup_value(n);
 		return value ? value->get_use_count() == 1 : false;
 	}
 }

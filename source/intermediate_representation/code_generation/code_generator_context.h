@@ -18,14 +18,15 @@ namespace ir::cg {
 		handle<node> fallthrough;
 
 		utility::block_allocator instruction_allocator;
+		s_ptr<target_base> target;
 		work_list work_list;
 
 		std::unordered_map<handle<node>, machine_block> machine_blocks;
+		std::unordered_map<u64, virtual_value> virtual_values;
 		std::unordered_map<handle<node>, i32> stack_slots;
 		std::unordered_map<handle<node>, u32> labels;
 		std::unordered_map<handle<node>, i32> uses;
 
-		std::vector<value_description> values;
 		std::vector<live_interval> intervals;
 		std::vector<phi_value> phi_values;
 		std::vector<handle<node>> locals;
@@ -33,17 +34,13 @@ namespace ir::cg {
 		u32 return_label = 0;
 		u64 block_count = 0;
 		u64 stack_usage = 0;
-		i32 epilogue = 0;
+		u64 epilogue = 0;
 
-		s_ptr<target_base> target;
-
-		value_description* lookup_value(handle<node> n);
+		virtual_value* lookup_value(handle<node> n);
 		i32 allocate_stack(u32 size, u32 alignment);
 
 		i32 can_folded_store(
-			handle<node> memory,
-			handle<node> address,
-			handle<node> source
+			handle<node> memory, handle<node> address, handle<node> source
 		);
 
 		bool on_last_use(handle<node> n);

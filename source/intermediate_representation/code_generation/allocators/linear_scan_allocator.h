@@ -1,6 +1,8 @@
 #pragma once
 #include "intermediate_representation/code_generation/allocators/allocator_base.h"
 #include "intermediate_representation/code_generation/live_interval.h"
+#include "intermediate_representation/code_generation/targets/x64/registers.h"
+
 #include <utility/containers/dense_set.h>
 
 #define REGISTER_CLASS_COUNT 2
@@ -19,7 +21,7 @@ namespace ir::cg {
 	static constexpr parameter_descriptor g_parameter_descriptors[] = {
 		{
 			4, 4, 6, WIN64_ABI_CALLER_SAVED,
-			{ rcx, rdx, r8, r9, reg_none, reg_none }
+			{ rcx, rdx, r8, r9, reg::invalid_id, reg::invalid_id }
 		}
 	};
 
@@ -61,7 +63,7 @@ namespace ir::cg {
 			const code_generator_context& context,
 			live_interval* interval,
 			bool is_active,
-			i32 time,
+			u64 time,
 			i32 inactive_index
 		);
 
@@ -70,41 +72,34 @@ namespace ir::cg {
 			live_interval* interval
 		);
 
-		static i32 range_intersect(i32 start, i32 end, range& b);
+		static i32 range_intersect(u64 start, u64 end, range& b);
 
 		void insert_split_move(
-			code_generator_context& context,
-			i32 t,
-			i32 old_reg,
-			i32 new_reg
+			code_generator_context& context, u64 t, i32 old_reg, i32 new_reg
 		);
 
 		i32 split_intersecting(
 			code_generator_context& context,
-			i32 current_time,
-			i32 pos,
+			u64 current_time,
+			u64 pos,
 			live_interval* interval,
 			bool is_spill
 		);
 
 		static live_interval* split_interval_at(
-			code_generator_context& context,
-			live_interval* interval,
-			i32 pos
+			code_generator_context& context, live_interval* interval, u64 pos
 		);
 
-		static i32 next_use(
-			code_generator_context& context,
-			live_interval* interval,
-			i32 time
+		static u64 next_use(
+			code_generator_context& context, live_interval* interval, u64 time
 		);
 
-		u8 allocate_free_reg(
+		reg allocate_free_reg(
 			code_generator_context& context,
 			live_interval* interval
 		);
 
-		u8 allocate_blocked_reg(
+		reg allocate_blocked_reg(
 			code_generator_context& context,
 			live_interval* interval
 		);
@@ -114,8 +109,9 @@ namespace ir::cg {
 		i32 m_active[REGISTER_CLASS_COUNT][16];
 		u64 m_callee_saved[REGISTER_CLASS_COUNT];
 
+		std::vector<u64> m_free_positions;
+
 		std::vector<i32> m_unhandled;
-		std::vector<i32> m_free_positions;
 		std::vector<i32> m_block_positions;
 		std::vector<i32> m_inactive;
 

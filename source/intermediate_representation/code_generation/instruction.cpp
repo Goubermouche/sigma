@@ -51,7 +51,7 @@ namespace ir::cg {
 		m_tmp_count = tmp_count;
 	}
 
-	void instruction::set_time(i32 time) {
+	void instruction::set_time(u64 time) {
 		m_time = time;
 	}
 
@@ -95,7 +95,7 @@ namespace ir::cg {
 		return m_type;
 	}
 
-	i32 instruction::get_time() const {
+	u64 instruction::get_time() const {
 		return m_time;
 	}
 
@@ -131,17 +131,17 @@ namespace ir::cg {
 		code_generator_context& context, 
 		instruction::type type, 
 		const data_type& data_type, 
-		u8 destination,
-		u8 left, 
-		u8 right
+		reg destination,
+		reg left, 
+		reg right
 	) {
 		const handle<instruction> inst = context.create_instruction<immediate_prop>(
 			type, data_type, 1, 2, 0
 		);
 
-		inst->set_operand(0, destination);
-		inst->set_operand(1, left);
-		inst->set_operand(2, right);
+		inst->set_operand(0, destination.get_id());
+		inst->set_operand(1, left.get_id());
+		inst->set_operand(2, right.get_id());
 
 		return inst;
 	}
@@ -150,8 +150,8 @@ namespace ir::cg {
 		code_generator_context& context, 
 		instruction::type type, 
 		const data_type& data_type,
-		u8 destination, 
-		u8 source,
+		reg destination, 
+		reg source,
 		i32 imm
 	) {
 		const handle<instruction> inst = context.create_instruction<immediate_prop>(
@@ -160,8 +160,8 @@ namespace ir::cg {
 
 		inst->get<immediate_prop>()->value = imm;
 		inst->set_flags(instruction::immediate);
-		inst->set_operand(0, destination);
-		inst->set_operand(1, source);
+		inst->set_operand(0, destination.get_id());
+		inst->set_operand(1, source.get_id());
 		return inst;
 	}
 
@@ -169,9 +169,9 @@ namespace ir::cg {
 		code_generator_context& context, 
 		instruction::type type,
 		const data_type& data_type, 
-		i32 destination,
-		i32 source, 
-		i32 base, 
+		reg destination,
+		reg source, 
+		reg base, 
 		i32 index,
 		scale scale,
 		i32 displacement
@@ -185,9 +185,9 @@ namespace ir::cg {
 		inst->set_displacement(displacement);
 		inst->set_memory_slot(2);
 
-		inst->set_operand(0, destination);
-		inst->set_operand(1, source);
-		inst->set_operand(2, base);
+		inst->set_operand(0, destination.get_id());
+		inst->set_operand(1, source.get_id());
+		inst->set_operand(2, base.get_id());
 
 		if (index >= 0) {
 			inst->set_operand(4, index);
@@ -200,8 +200,8 @@ namespace ir::cg {
 		code_generator_context& context, 
 		instruction::type type, 
 		const data_type& data_type, 
-		i32 destination, 
-		i32 base, 
+		reg destination, 
+		reg base, 
 		i32 index,
 		scale scale, 
 		i32 displacement
@@ -212,8 +212,8 @@ namespace ir::cg {
 
 		inst->set_flags(instruction::mem | (index >= 0 ? instruction::indexed : instruction::none));
 		inst->set_memory_slot(1);
-		inst->set_operand(0, destination);
-		inst->set_operand(1, base);
+		inst->set_operand(0, destination.get_id());
+		inst->set_operand(1, base.get_id());
 
 		if (index >= 0) {
 			inst->set_operand(2, index);
@@ -228,7 +228,7 @@ namespace ir::cg {
 		code_generator_context& context, 
 		instruction::type type, 
 		const data_type& data_type,
-		i32 base,
+		reg base,
 		i32 index,
 		scale scale,
 		i32 displacement,
@@ -241,7 +241,7 @@ namespace ir::cg {
 		inst->set_flags(instruction::mem | (index >= 0 ? instruction::indexed : instruction::none));
 		inst->set_memory_slot(0);
 
-		inst->set_operand(0, base);
+		inst->set_operand(0, base.get_id());
 
 		if (index >= 0) {
 			inst->set_operand(1, index);
@@ -259,8 +259,8 @@ namespace ir::cg {
 	handle<instruction> instruction::create_move(
 		code_generator_context& context, 
 		const data_type& data_type, 
-		u8 destination,
-		u8 source
+		reg destination,
+		reg source
 	) {
 		const i32 machine_data_type = context.target->legalize_data_type(data_type);
 		const handle<instruction> inst = context.create_instruction<empty_property>(2);
@@ -270,8 +270,8 @@ namespace ir::cg {
 
 		inst->set_out_count(1);
 		inst->set_in_count(1);
-		inst->set_operand(0, destination);
-		inst->set_operand(1, source);
+		inst->set_operand(0, destination.get_id());
+		inst->set_operand(1, source.get_id());
 
 		return inst;
 	}
@@ -280,7 +280,7 @@ namespace ir::cg {
 		code_generator_context& context, 
 		instruction::type type,
 		const data_type& data_type,
-		u8 destination, 
+		reg destination,
 		u64 imm
 	) {
 		const handle<instruction> inst = context.create_instruction<immediate_prop>(
@@ -289,20 +289,20 @@ namespace ir::cg {
 
 		inst->get<immediate_prop>()->value = static_cast<i32>(imm);
 		inst->set_flags(instruction::absolute);
-		inst->set_operand(0, destination);
+		inst->set_operand(0, destination.get_id());
 		return inst;
 	}
 
 	handle<instruction> instruction::create_zero(
 		code_generator_context& context, 
 		const data_type& data_type,
-		u8 destination
+		reg destination
 	) {
 		const handle<instruction> inst = context.create_instruction<empty_property>(
 			instruction::zero, data_type, 1, 0, 0
 		);
 
-		inst->set_operand(0, destination);
+		inst->set_operand(0, destination.get_id());
 		return inst;
 	}
 
@@ -310,7 +310,7 @@ namespace ir::cg {
 		code_generator_context& context, 
 		instruction::type type, 
 		const data_type& data_type,
-		u8 destination, 
+		reg destination,
 		i32 imm
 	) {
 		const handle<instruction> inst = context.create_instruction<immediate_prop>(
@@ -319,7 +319,7 @@ namespace ir::cg {
 
 		inst->get<immediate_prop>()->value = imm;
 		inst->set_flags(instruction::immediate);
-		inst->set_operand(0, destination);
+		inst->set_operand(0, destination.get_id());
 		return inst;
 	}
 

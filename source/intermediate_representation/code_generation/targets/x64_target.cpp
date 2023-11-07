@@ -55,18 +55,14 @@ namespace ir::cg {
 		// initialize general purpose registers
 		for (u8 i = 0; i < 16; ++i) {
 			context.intervals.emplace_back(
-				live_interval(
-					reg(i, gpr), qword, i
-				)
+				live_interval(classified_reg(i, gpr), qword, i)
 			);
 		}
 
 		// initialize xmm registers
 		for (u8 i = 0; i < 16; ++i) {
 			context.intervals.emplace_back(
-				live_interval(
-					reg(i, xmm), xmmword, i
-				)
+				live_interval(classified_reg(i, xmm), xmmword, i)
 			);
 		}
 	}
@@ -423,8 +419,8 @@ namespace ir::cg {
 			scale s = r->get_scale();
 			i32 disp = r->get_imm();
 
-			bool needs_index = (index != reg_none) || (base & 7) == rsp;
-			bytecode.append_byte(rex(is_rexw, 0x00, base, index != reg_none ? index : 0));
+			bool needs_index = (index != reg::invalid_id) || (base & 7) == rsp;
+			bytecode.append_byte(rex(is_rexw, 0x00, base, index != reg::invalid_id ? index : 0));
 
 			if (descriptor.cat == instruction::unary_ext) {
 				bytecode.append_byte(0x0F);
@@ -525,7 +521,7 @@ namespace ir::cg {
 	}
 
 	void x64_target::emit_instruction_2(
-		instruction::type type,
+		instruction::type type, 
 		handle<value> a,
 		handle<value> b,
 		i32 dt, 
@@ -606,7 +602,7 @@ namespace ir::cg {
 			base = rbp;
 		}
 
-		if (a->get_type() == value::mem && a->get_index() != reg_none) {
+		if (a->get_type() == value::mem && a->get_index() != reg::invalid_id) {
 			rex_prefix |= ((a->get_index() >> 3) << 1);
 		}
 
@@ -669,7 +665,7 @@ namespace ir::cg {
 
 		emit_memory_operand(rx, a, bytecode);
 
-		//// memory displacements go before immediates
+		// memory displacements go before immediates
 		ptr_diff disp_patch = bytecode.get_size() - 4;
 		if (b->get_type() == value::imm) {
 			if (dt == byte || short_imm) {
@@ -697,10 +693,10 @@ namespace ir::cg {
 		}
 
 		if (a->get_type() == value::global && 
-			disp_patch + 4 != bytecode.get_size()
+			disp_patch + 4 != static_cast<ptr_diff>(bytecode.get_size())
 		) {
 			bytecode.patch_dword(
-				disp_patch, (disp_patch + 4) - bytecode.get_size()
+				disp_patch, static_cast<u32>((disp_patch + 4) - bytecode.get_size())
 			);
 		}
 	}
@@ -717,7 +713,7 @@ namespace ir::cg {
 			u8 index = a->get_index();
 			scale scale = a->get_scale();
 			i32 disp = a->get_imm();
-			bool needs_index = (index != reg_none) || (base & 7) == rsp;
+			bool needs_index = (index != reg::invalid_id) || (base & 7) == rsp;
 			
 			// If it needs an index, it'll put RSP into the base slot
 			// and write the real base into the SIB
@@ -767,7 +763,7 @@ namespace ir::cg {
 		switch (val->get_type()) {
 			case value::gpr: {
 				ASSERT(
-					val->get_reg() != reg_none && val->get_reg() < 16,
+					val->get_reg() != reg::invalid_id && val->get_reg() < 16,
 					"invalid register"
 				);
 
@@ -789,7 +785,7 @@ namespace ir::cg {
 			case value::mem: {
 				emit_assembly("{} ", type_names[data_type]);
 
-				if (val->get_index() == reg_none) {
+				if (val->get_index() == reg::invalid_id) {
 					emit_assembly("[{}", gpr_names[val->get_reg()]);
 				}
 				else {
@@ -850,8 +846,8 @@ namespace ir::cg {
 
 			if(inst->get_flags() & instruction::mem) {
 				val->set_type(value::mem);
-				val->set_reg(interval->get_assigned());
-				val->set_index(reg_none);
+				val->set_reg(interval->get_assigned().get_id());
+				val->set_index(reg::invalid_id);
 				val->set_scale(inst->get_scale());
 				val->set_imm(inst->get_displacement());
 
@@ -859,7 +855,7 @@ namespace ir::cg {
 					interval = &context.intervals[inst->get_operand(i + 1)];
 					ASSERT(interval->get_spill() <= 0, "cannot use spilled value for a memory operand");
 
-					val->set_index(interval->get_assigned());
+					val->set_index(interval->get_assigned().get_id());
 					return 2;
 				}
 
@@ -874,7 +870,7 @@ namespace ir::cg {
 		if(interval->get_spill() > 0) {
 			val->set_type(value::mem);
 			val->set_reg(rbp);
-			val->set_index(reg_none);
+			val->set_index(reg::invalid_id);
 			val->set_imm(-interval->get_spill());
 		}
 		else {
@@ -882,7 +878,7 @@ namespace ir::cg {
 				interval->get_register().get_class() == xmm ? value::xmm : value::gpr
 			);
 
-			val->set_reg(interval->get_assigned());
+			val->set_reg(interval->get_assigned().get_id());
 		}
 
 		return 1;

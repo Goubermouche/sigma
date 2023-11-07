@@ -1,6 +1,6 @@
 #include "instruction_selection.h"
 
-#include "targets/x64_target.h"
+#include "intermediate_representation/code_generation/targets/x64_target.h"
 
 namespace ir::cg {
 	void select_instructions(code_generator_context& context) {
@@ -26,10 +26,8 @@ namespace ir::cg {
 				if (
 					user_node->get_type() == node::phi &&
 					user_node->get_data().get_id() != data_type::id::memory
-					) {
-					value_description& value = context.values[user_node->get_global_value_index()];
-					value.set_use_count(std::numeric_limits<i32>::max());
-					value.set_virtual_register(reg_none);
+				) {
+					context.virtual_values[user_node->get_global_value_index()] = virtual_value();
 					context.work_list.visit(user_node);
 				}
 			}
@@ -101,9 +99,7 @@ namespace ir::cg {
 	}
 
 	void select_instructions_region(
-		code_generator_context& context,
-		handle<node> block,
-		handle<node> end
+		code_generator_context& context, handle<node> block, handle<node> end
 	) {
 		ASSERT(
 			context.work_list.get_item_count() == context.block_count,
@@ -125,9 +121,9 @@ namespace ir::cg {
 				}
 			}
 
-			value_description& value = context.values[item->get_global_value_index()];
+			virtual_value& value = context.virtual_values[item->get_global_value_index()];
 			value.set_use_count(static_cast<i32>(use_count));
-			value.set_virtual_register(reg_none);
+			value.set_virtual_register(reg(reg::invalid_id));
 		}
 
 		// reorder phi nodes
@@ -149,24 +145,28 @@ namespace ir::cg {
 				user_node->get_type() == node::phi &&
 				user_node->get_data().get_id() != data_type::id::memory
 			) {
-				value_description& value = context.values[user_node->get_global_value_index()];
-				const u8 destination = input_reg(context, user_node);
+				const reg destination = input_reg(context, user_node);
 
-				// copy the phi value into a temporary
-				context.phi_values.emplace_back(phi_value(nullptr, user_node, reg_none, destination));
+				// copy the phi value into a virtual value
+				context.phi_values.emplace_back(
+					phi_value(nullptr, user_node, reg::invalid_id, destination)
+				);
 
 				data_type data_type = user_node->get_data();
-				const u8 tmp = allocate_virtual_register(context, nullptr, data_type);
+				const reg virtual_reg = allocate_virtual_register(
+					context, nullptr, data_type
+				);
 
 				append_instruction(
-					context,
-					instruction::create_move(
-						context, data_type, tmp, destination
+					context, instruction::create_move(
+						context, data_type, virtual_reg, destination
 					)
 				);
 
 				// assign the temporary value to the phi node
-				value.set_virtual_register(tmp);
+				context.virtual_values.at(
+					user_node->get_global_value_index()
+				).set_virtual_register(virtual_reg);
 			}
 		}
 
@@ -175,7 +175,7 @@ namespace ir::cg {
 			"invalid node type encountered"
 		);
 
-		select_instruction(context, top, reg_none);
+		select_instruction(context, top, reg(reg::invalid_id));
 
 		const handle<instruction> head = context.head;
 		handle<instruction> last = nullptr;
@@ -185,10 +185,10 @@ namespace ir::cg {
 		// process each node, allowing for potential node folding
 		for(auto i = static_cast<ptr_diff>(context.work_list.get_item_count()); i-- > start;) {
 			const handle<node> item = context.work_list.get_item(i);
-			value_description* value = context.lookup_value(item);
+			virtual_value* value = context.lookup_value(item);
 
 			if(
-				value->get_virtual_register() == reg_none &&
+				value->get_virtual_register().is_valid() == false &&
 				item->should_rematerialize()
 			) {
 				continue;
@@ -209,12 +209,11 @@ namespace ir::cg {
 					for(u64 j = 0; j < phi_count; ++j) {
 						phi_value& phi = context.phi_values[j];
 						data_type data_type = phi.get_phi()->get_data();
-						const u8 source = input_reg(context, phi.get_node());
-						hint_reg(context, phi.get_destination(), source);
+						const reg source = input_reg(context, phi.get_node());
+						hint_reg(context, phi.get_destination().get_id(), source);
 
 						append_instruction(
-							context,
-							instruction::create_move(
+							context, instruction::create_move(
 								context, data_type, phi.get_destination(), source
 							)
 						);
@@ -232,9 +231,9 @@ namespace ir::cg {
 			}
 			else if(
 				value->get_use_count() > 0 || 
-				value->get_virtual_register() != reg_none
+				value->get_virtual_register().is_valid()
 			) {
-				if(value->get_virtual_register() == reg_none) {
+				if(value->get_virtual_register().is_valid() == false) {
 					value->set_virtual_register(
 						allocate_virtual_register(context, item, item->get_data())
 					);
@@ -298,9 +297,7 @@ namespace ir::cg {
 	}
 
 	void select_instruction(
-		code_generator_context& context,
-		handle<node> n, 
-		u8 destination
+		code_generator_context& context, handle<node> n, reg destination
 	) {
 		switch (const node::type node_type = n->get_type()) {
 			case node::phi:
@@ -361,8 +358,7 @@ namespace ir::cg {
 				if(!utility::fits_into_i32(value)) {
 					// append a 64-bit version of the integer
 					append_instruction(
-						context,
-						instruction::create_abs(
+						context, instruction::create_abs(
 							context, instruction::movabs, n->get_data(), 
 							destination, value
 						)
@@ -371,8 +367,7 @@ namespace ir::cg {
 				else if(value == 0) {
 					// append a zero instruction
 					append_instruction(
-						context,
-						instruction::create_zero(
+						context, instruction::create_zero(
 							context, n->get_data(), destination
 						)
 					);
@@ -380,8 +375,7 @@ namespace ir::cg {
 				else {
 					// append a 32-bit instruction
 					append_instruction(
-						context,
-						instruction::create_immediate(
+						context, instruction::create_immediate(
 							context, instruction::mov, n->get_data(), 
 							destination, static_cast<i32>(value)
 						)
@@ -405,41 +399,38 @@ namespace ir::cg {
 				};
 
 				const instruction::type operation = operations[node_type - node::conjunction];
-				const u8 left = input_reg(context, n->get_input(1));
-				hint_reg(context, destination, left);
+				const reg left = input_reg(context, n->get_input(1));
 				i32 immediate;
+
+				hint_reg(context, destination.get_id(), left);
 
 				if(try_for_imm32(n->get_input(2), immediate)) {
 					use(context, n->get_input(2));
 
 					append_instruction(
-						context,
-						instruction::create_move(
+						context, instruction::create_move(
 							context, n->get_data(), destination, left
 						)
 					);
 
 					append_instruction(
-						context,
-						instruction::create_rri(
+						context, instruction::create_rri(
 							context, operation, n->get_data(), destination,
 							destination, immediate
 						)
 					);
 				}
 				else {
-					const u8 right = input_reg(context, n->get_input(2));
+					const reg right = input_reg(context, n->get_input(2));
 
 					append_instruction(
-						context,
-						instruction::create_move(
+						context, instruction::create_move(
 							context, n->get_data(), destination, left
 						)
 					);
 
 					append_instruction(
-						context,
-						instruction::create_rrr(
+						context, instruction::create_rrr(
 							context, operation, n->get_data(), destination,
 							destination, right
 						)
@@ -453,8 +444,7 @@ namespace ir::cg {
 				const handle<branch_property> branch = n->get<branch_property>();
 
 				append_instruction(
-					context,
-					context.create_instruction<empty_property>(
+					context, context.create_instruction<empty_property>(
 						instruction::terminator, VOID_TYPE, 0, 0, 0
 					)
 				);
@@ -480,7 +470,7 @@ namespace ir::cg {
 				if(n->get_input_count() > 3) {
 					ASSERT(n->get_input_count() <= 4, "multiple returns not supported");
 
-					const u8 source = input_reg(context, n->get_input(3));
+					const reg source = input_reg(context, n->get_input(3));
 					const data_type data_type = n->get_input(3)->get_data();
 
 					// copy to the return register
@@ -488,13 +478,11 @@ namespace ir::cg {
 						ASSERT(false, "not implemented");
 					}
 					else {
-						hint_reg(context, source, rax);
+						hint_reg(context, source.get_id(), rax);
 
 						append_instruction(
-							context,
-							instruction::create_move(
-								context, data_type, rax,
-								source
+							context, instruction::create_move(
+								context, data_type, rax, source
 							)
 						);
 					}
@@ -504,11 +492,8 @@ namespace ir::cg {
 				// need to mark that it's the epilogue to tell the register
 				// allocator where callee registers need to get restored
 				append_instruction(
-					context,
-					context.create_instruction<empty_property>(
-						instruction::epilogue,
-						VOID_TYPE,
-						0, 0, 0
+					context, context.create_instruction<empty_property>(
+						instruction::epilogue, VOID_TYPE, 0, 0, 0
 					)
 				);
 
@@ -520,8 +505,7 @@ namespace ir::cg {
 			case node::member_access:
 			case node::array_access: {
 				append_instruction(
-					context,
-					select_memory_access_instruction(
+					context, select_memory_access_instruction(
 						context, n, destination, -1, -1
 					)
 				);
@@ -530,31 +514,30 @@ namespace ir::cg {
 			}
 
 			case node::store: {
-				if(destination != reg_none) {
+				if(destination.is_valid()) {
 					use(context, n->get_input(2));
 					use(context, n->get_input(3));
+
 					break;
 				}
 
 				const data_type store_data_type = n->get_input(3)->get_data();
 				const handle<node> address = n->get_input(2);
-				handle<node> source = n->get_input(3);
+				handle<node> source_node = n->get_input(3);
 				i32 immediate;
 
 				// check if we can couple the load and the store operations
 				i32 store_op = context.can_folded_store(
-					n->get_input(1), 
-					address,
-					n->get_input(3)
+					n->get_input(1), address, n->get_input(3)
 				);
 
 				if(store_op >= 0) {
-					use(context, source);
+					use(context, source_node);
 					use(context, address);
-					use(context, source->get_input(1));
-					use(context, source->get_input(1)->get_input(1));
+					use(context, source_node->get_input(1));
+					use(context, source_node->get_input(1)->get_input(1));
 
-					source = source->get_input(2);
+					source_node = source_node->get_input(2);
 				}
 				else {
 					if(store_data_type.get_id() == data_type::id::floating_point) {
@@ -565,8 +548,8 @@ namespace ir::cg {
 					}
 				}
 
-				if(try_for_imm32(source, immediate)) {
-					use(context, source);
+				if(try_for_imm32(source_node, immediate)) {
+					use(context, source_node);
 
 					const handle<instruction> store_inst = select_array_access_instruction(
 						context, address, destination, store_op, -1
@@ -586,9 +569,9 @@ namespace ir::cg {
 					append_instruction(context, store_inst);
 				}
 				else {
-					const u8 source_reg = input_reg(context, source);
+					const reg source = input_reg(context, source_node);
 					const handle<instruction> store_inst = select_array_access_instruction(
-						context, address, destination, store_op, source_reg
+						context, address, destination, store_op, source.get_id()
 					);
 
 					store_inst->set_data_type(context.target->legalize_data_type(store_data_type));
@@ -613,7 +596,7 @@ namespace ir::cg {
 	handle<instruction> select_memory_access_instruction(
 		code_generator_context& context, 
 		handle<node> n,
-		i32 destination, 
+		reg destination, 
 		i32 store_op, 
 		i32 source
 	) {
@@ -621,7 +604,7 @@ namespace ir::cg {
 		i64 offset = 0;
 		scale scale = x1;
 		i32 index = -1;
-		i32 base;
+		reg base;
 
 		if (n->get_type() == node::symbol) {
 			ASSERT(false, "not implemented");
@@ -640,7 +623,7 @@ namespace ir::cg {
 		if (n->get_type() == node::local) {
 			use(context, n);
 			offset += get_stack_slot(context, n);
-			base = static_cast<i32>(rbp);
+			base = rbp;
 		}
 		else {
 			base = input_reg(context, n);
@@ -651,7 +634,7 @@ namespace ir::cg {
 			if(has_second_in) {
 				return instruction::create_rrm(
 					context, instruction::lea, n->get_data(), destination,
-					source, base, index, scale, static_cast<i32>(offset)
+					static_cast<u8>(source), base, index, scale, static_cast<i32>(offset)
 				);
 			}
 
@@ -670,35 +653,35 @@ namespace ir::cg {
 	handle<instruction> select_array_access_instruction(
 		code_generator_context& context,
 		handle<node> n,
-		i32 destination, 
+		reg destination, 
 		i32 store_op,
 		i32 source
 	) {
 		// compute base
 		if(
 			n->get_type() == node::array_access &&
-			(context.values[n->get_global_value_index()].get_use_count() > 2 ||
-			 context.values[n->get_global_value_index()].get_virtual_register() != reg_none)
+			(context.virtual_values[n->get_global_value_index()].get_use_count() > 2 ||
+			 context.virtual_values[n->get_global_value_index()].get_virtual_register().is_valid())
 		) {
-			const u8 base = input_reg(context, n);
+			const reg base = input_reg(context, n);
 
 			if (store_op < 0) {
 				if (source >= 0) {
 					return instruction::create_rrm(
-						context, instruction::lea, PTR_TYPE,
-						destination, source, base, -1, x1, 0
+						context, instruction::lea, PTR_TYPE, destination, 
+						static_cast<u8>(source), base, -1, x1, 0
 					);
 				}
 
 				return instruction::create_rm(
-					context, instruction::type::lea, PTR_TYPE,
-					destination, base, -1, x1, 0
+					context, instruction::type::lea, PTR_TYPE, destination,
+					base, -1, x1, 0
 				);
 			}
 
 			return instruction::create_mr(
-				context, static_cast<instruction::type>(store_op),
-				PTR_TYPE, base, -1, x1, 0, source
+				context, static_cast<instruction::type>(store_op), PTR_TYPE, 
+				base, -1, x1, 0, source
 			);
 		}
 
@@ -708,9 +691,7 @@ namespace ir::cg {
 	}
 
 	void dfs_schedule(
-		code_generator_context& context, 
-		handle<node> block, 
-		handle<node> n
+		code_generator_context& context, handle<node> block, handle<node> n
 	) {
 		// check if we are in a different block and that we haven't visited this node yet
 		if(!is_same_block(block, n) || !context.work_list.visit(n)) {
@@ -719,15 +700,15 @@ namespace ir::cg {
 
 		// if we're in a branch, push our phi nodes
 		if(n->get_type() == node::branch) {
-			const handle<branch_property> b = n->get<branch_property>();
+			const handle<branch_property> branch = n->get<branch_property>();
 
 			// TODO: we can probably get away with using a node handle instead
 			//       of the phi index
-			for(const handle<node> dst : b->successors) {
+			for(const handle<node> successor : branch->successors) {
 				// find predecessor index and visit that edge
 				ptr_diff phi_index = -1;
-				for(ptr_diff i = 0; i < static_cast<ptr_diff>(dst->get_input_count()); ++i) {
-					const handle<node> predecessor = dst->get_input(i)->get_parent_region();
+				for(ptr_diff i = 0; i < static_cast<ptr_diff>(successor->get_input_count()); ++i) {
+					const handle<node> predecessor = successor->get_input(i)->get_parent_region();
 
 					if(predecessor == block) {
 						phi_index = i;
@@ -740,25 +721,25 @@ namespace ir::cg {
 				}
 
 				// schedule memory phis
-				for(const handle<user> user : dst->get_users()) {
+				for(const handle<user> user : successor->get_users()) {
 					const handle<node> phi = user->get_node();
 
 					if (
 						phi->get_type() == node::phi &&
 						phi->get_data().get_id() == data_type::id::memory
-						) {
+					) {
 						dfs_schedule_phi(context, block, phi, phi_index);
 					}
 				}
 
 				// schedule data phis
-				for(const handle<user> user : dst->get_users()) {
+				for(const handle<user> user : successor->get_users()) {
 					const handle<node> phi = user->get_node();
 
 					if (
 						phi->get_type() == node::phi &&
 						phi->get_data().get_id() != data_type::id::memory
-						) {
+					) {
 						dfs_schedule_phi(context, block, phi, phi_index);
 					}
 				}
@@ -824,23 +805,19 @@ namespace ir::cg {
 	}
 
 	void append_instruction(
-		code_generator_context& context,
-		handle<instruction> inst
+		code_generator_context& context, handle<instruction> inst
 	) {
 		context.head->set_next_instruction(inst);
 		context.head = inst;
 	}
 
-	u8 input_reg(
-		code_generator_context& context,
-		handle<node> n
-	) {
+	reg input_reg(code_generator_context& context, handle<node> n) {
 		// attempt to lookup an existing value
-		value_description* value = context.lookup_value(n);
+		virtual_value* value = context.lookup_value(n);
 
 		// no value was found, allocate a new virtual register
 		if(value == nullptr) {
-			const u8 tmp = allocate_virtual_register(context, n, n->get_data());
+			const reg tmp = allocate_virtual_register(context, n, n->get_data());
 			select_instruction(context, n, tmp);
 			return tmp;
 		}
@@ -848,19 +825,19 @@ namespace ir::cg {
 		value->unuse();
 
 		// if we have a virtual register, return its ID
-		if(value->get_virtual_register() != reg_none) {
+		if(value->get_virtual_register().is_valid()) {
 			return value->get_virtual_register();
 		}
 
 		// if the node should rematerialize we allocate a new virtual register
 		if(n->should_rematerialize()) {
-			const u8 tmp = allocate_virtual_register(context, n, n->get_data());
+			const reg tmp = allocate_virtual_register(context, n, n->get_data());
 			select_instruction(context, n, tmp);
 			return tmp;
 		}
 
 		// fallback to just allocating a new virtual register
-		const u8 i = allocate_virtual_register(context, n, n->get_data());
+		const reg i = allocate_virtual_register(context, n, n->get_data());
 		value->set_virtual_register(i);
 		return i;
 	}
@@ -879,15 +856,12 @@ namespace ir::cg {
 	}
 
 	void use(code_generator_context& context, handle<node> n) {
-		if(value_description* value = context.lookup_value(n)) {
+		if(virtual_value* value = context.lookup_value(n)) {
 			value->set_use_count(value->get_use_count() - 1);
 		}
 	}
 
-	i32 get_stack_slot(
-		code_generator_context& context,
-		handle<node> n
-	) {
+	i32 get_stack_slot(code_generator_context& context, handle<node> n) {
 		// check if a stack slot for the node already exists 
 		const auto it = context.stack_slots.find(n);
 
@@ -903,13 +877,13 @@ namespace ir::cg {
 		return position;
 	}
 
-	void hint_reg(code_generator_context& context, i32 interval_index, u8 reg) {
-		if(context.intervals[interval_index].get_hint() == reg_none) {
+	void hint_reg(code_generator_context& context, i32 interval_index, reg reg) {
+		if(context.intervals[interval_index].get_hint().is_valid() == false) {
 			context.intervals[interval_index].set_hint(reg);
 		}
 	}
 
-	u8 allocate_virtual_register(
+	reg allocate_virtual_register(
 		code_generator_context& context, 
 		handle<node> n, 
 		const data_type& data_type
@@ -918,14 +892,13 @@ namespace ir::cg {
 
 		// create a new live interval with an uninitialized register
 		live_interval interval(
-			reg(reg_none, context.target->classify_register_class(data_type)),
-			context.target->legalize_data_type(data_type),
-			reg_none
+			classified_reg(reg::invalid_id, context.target->classify_register_class(data_type)),
+			context.target->legalize_data_type(data_type), reg::invalid_id
 		);
 
 		interval.set_node(n);
 		context.intervals.emplace_back(interval);
 		ASSERT(index < std::numeric_limits<u8>::max(), "invalid virtual register");
-		return static_cast<u8>(index);
+		return reg(static_cast<u8>(index));
 	}
 }

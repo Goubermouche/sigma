@@ -17,8 +17,8 @@ namespace ir::cg {
 		for(u64 i = 0; i < context.block_count; ++i) {
 			handle<node> block = context.work_list.get_item(i);
 			machine_block& machine_block = context.machine_blocks[block];
-			i32 block_start = machine_block.get_start();
-			i32 block_end = machine_block.get_end();
+			u64 block_start = machine_block.get_start();
+			u64 block_end = machine_block.get_end();
 
 			// for anything that's live out, add the entire range
 			utility::dense_set& live_out = machine_block.get_live_out();
@@ -90,11 +90,11 @@ namespace ir::cg {
 				continue;
 			}
 
-			if(interval->get_register().get_id() != reg_none) {}
+			if(interval->get_register().is_valid()) {}
 			else if(interval->get_spill() > 0) { continue; }
 			else {}
 
-			i32 time = interval->get_start();
+			u64 time = interval->get_start();
 
 			// expire intervals
 			for(u64 register_class = 0; register_class < REGISTER_CLASS_COUNT; ++register_class) {
@@ -121,23 +121,23 @@ namespace ir::cg {
 				++i;
 			}
 
-			u8 reg = interval->get_register().get_id();
+			reg current = interval->get_register().get_id();
 
-			if(reg == reg_none) {
+			if(current.is_valid() == false) {
 				// find a register for the virtual interval
-				reg = allocate_free_reg(context, interval);
+				current = allocate_free_reg(context, interval);
 				interval = &context.intervals[register_index];
 
 				// allocation failure
-				if(reg == reg_none) {
-					reg = allocate_blocked_reg(context, interval);
+				if(current.is_valid() == false) {
+					current = allocate_blocked_reg(context, interval);
 					interval = &context.intervals[register_index];
 				}
 			}
 
 			// add to active set
-			if(reg != reg_none) {
-				interval->set_assigned(reg);
+			if(current.is_valid()) {
+				interval->set_assigned(current);
 				interval->set_active_range(static_cast<i32>(interval->get_ranges().size()) - 1);
 				move_to_active(context, interval);
 			}
@@ -211,7 +211,7 @@ namespace ir::cg {
 				continue;
 			}
 
-			const i32 pos = inst->get_time();
+			const u64 pos = inst->get_time();
 
 			for(i32& operand : inst->get_operands()) {
 				operand = static_cast<i32>(split_interval_at(
@@ -256,7 +256,10 @@ namespace ir::cg {
 			live_interval& interval = context.intervals[*ops++];
 
 			if(interval.get_ranges().empty()) {
-				interval.add_range({ inst->get_time(), inst->get_time() });
+				interval.add_range({ 
+					static_cast<u64>(inst->get_time()),
+					static_cast<u64>(inst->get_time())
+				});
 			}
 			else {
 				interval.get_ranges().back().set_start(inst->get_time());
@@ -269,7 +272,7 @@ namespace ir::cg {
 		for (u8 i = 0; i < inst->get_in_count(); ++i) {
 			live_interval& interval = context.intervals[*ops++];
 
-			interval.add_range({ block.get_start(), inst->get_time() });
+			interval.add_range({ static_cast<u64>(block.get_start()), static_cast<u64>(inst->get_time()) });
 			interval.add_use_position({ inst->get_time(), use_position::reg });
 		}
 
@@ -280,7 +283,7 @@ namespace ir::cg {
 		for (u8 i = 0; i < inst->get_tmp_count(); ++i) {
 			live_interval& interval = context.intervals[*ops++];
 
-			interval.add_range({ inst->get_time(), inst->get_time() + 1 });
+			interval.add_range({ static_cast<u64>(inst->get_time()), static_cast<u64>(inst->get_time()) + 1 });
 			if(!is_call) {
 				interval.add_use_position({ inst->get_time(), use_position::reg });
 			}
@@ -308,7 +311,7 @@ namespace ir::cg {
 		ptr_diff hi,
 		std::vector<i32>& arr
 	) const {
-		const i32 pivot = intervals[arr[(hi - lo) / 2 + lo]].get_start(); // middle
+		const u64 pivot = intervals[arr[(hi - lo) / 2 + lo]].get_start(); // middle
 
 		ptr_diff i = lo - 1;
 		ptr_diff j = hi + 1;
@@ -355,7 +358,7 @@ namespace ir::cg {
 		const code_generator_context& context,
 		live_interval* interval, 
 		bool is_active,
-		i32 time,
+		u64 time,
 		i32 inactive_index
 	) {
 		const i32 register_index = static_cast<i32>(interval - context.intervals.data());
@@ -365,15 +368,15 @@ namespace ir::cg {
 			interval->decrement_active_range();
 		}
 
-		const i32 hole_end = interval->get_range(interval->get_active_range()).get_start();
+		const u64 hole_end = interval->get_range(interval->get_active_range()).get_start();
 		const u8 register_class = interval->get_register().get_class();
-		const u8 register_id = interval->get_assigned();
+		const reg register_id = interval->get_assigned();
 		const bool is_currently_active = time >= hole_end;
 
 		if(time >= interval->get_end()) {
 			// expired
 			if(is_active) {
-				m_active_set[register_class].remove(register_id);
+				m_active_set[register_class].remove(register_id.get_id());
 			}
 			else {
 				m_inactive.erase(m_inactive.begin() + inactive_index);
@@ -389,7 +392,7 @@ namespace ir::cg {
 			}
 
 			// active -> inactive
-			m_active_set[register_class].remove(register_id);
+			m_active_set[register_class].remove(register_id.get_id());
 			m_inactive.push_back(register_index);
 		}
 
@@ -401,26 +404,27 @@ namespace ir::cg {
 	) {
 		const u8 register_class = interval->get_register().get_class();
 		const i32 register_index = static_cast<i32>(interval - context.intervals.data());
-		const u8 register_id = interval->get_assigned();
+		const reg register_id = interval->get_assigned();
 
-		if(m_active_set[register_class].get(register_id)) {
+		if(m_active_set[register_class].get(register_id.get_id())) {
 			ASSERT(false, "intervals should never be forced out");
 		}
 
-		m_active[register_class][register_id] = register_index;
-		m_active_set[register_class].put(register_id);
+		m_active[register_class][register_id.get_id()] = register_index;
+		m_active_set[register_class].put(register_id.get_id());
 	}
 
-	i32 linear_scan_allocator::range_intersect(i32 start, i32 end, range& b) {
+	i32 linear_scan_allocator::range_intersect(u64 start, u64 end, range& b) {
 		if(b.get_start() <= end && start <= b.get_end()) {
-			return start > b.get_start() ? start : b.get_start();
+			// TODO: get rid of the -1 (?)
+			return static_cast<i32>(start > b.get_start() ? start : b.get_start());
 		}
 
 		return -1;
 	}
 
 	void linear_scan_allocator::insert_split_move(
-		code_generator_context& context, i32 t, i32 old_reg, i32 new_reg
+		code_generator_context& context, u64 t, i32 old_reg, i32 new_reg
 	) {
 		// invalidate
 		if (m_cache->get_time() >= t) {
@@ -470,12 +474,12 @@ namespace ir::cg {
 
 	i32 linear_scan_allocator::split_intersecting(
 		code_generator_context& context,
-		i32 current_time,
-		i32 pos, 
+		u64 current_time,
+		u64 pos, 
 		live_interval* interval, 
 		bool is_spill
 	) {
-		ASSERT(interval->get_register().get_id() == reg_none, "invalid register");
+		ASSERT(interval->get_register().is_valid() == false, "invalid register");
 
 		const i32 register_index = static_cast<i32>(interval - context.intervals.data());
 
@@ -485,12 +489,12 @@ namespace ir::cg {
 			constexpr u64 size = 8;
 			context.stack_usage = utility::align(context.stack_usage + size, size);
 
-			if(current_time >= pos && interval->get_assigned() >= 0) {
+			if(current_time >= pos && interval->get_assigned().is_valid()) {
 				const u8 register_class = interval->get_register().get_class();
 
-				if(m_active_set[register_class].get(interval->get_assigned())) {
-					if(m_active[register_class][interval->get_assigned()] == register_index) {
-						m_active_set[register_class].remove(interval->get_assigned());
+				if(m_active_set[register_class].get(interval->get_assigned().get_id())) {
+					if(m_active[register_class][interval->get_assigned().get_id()] == register_index) {
+						m_active_set[register_class].remove(interval->get_assigned().get_id());
 					}
 				}
 			}
@@ -506,8 +510,8 @@ namespace ir::cg {
 			new_interval.set_spill(-1);
 		}
 
-		new_interval.get_register().set_id(reg_none);
-		new_interval.set_assigned(reg_none);
+		new_interval.get_register().set_id(reg::invalid_id);
+		new_interval.set_assigned(reg(reg::invalid_id));
 		new_interval.set_start(pos);
 		new_interval.set_end(interval->get_end());
 		new_interval.set_split_kid(-1);
@@ -571,7 +575,7 @@ namespace ir::cg {
 			}
 			else if(interval_range.get_end() > pos) {
 				// intersects pos, we need to split the range
-				range new_interval_range = { pos, interval_range.get_end() };
+				range new_interval_range = { static_cast<u64>(pos), interval_range.get_end() };
 				interval_range.set_end(pos);
 
 				// add the new range to it ranges
@@ -595,10 +599,12 @@ namespace ir::cg {
 		// reload before next use
 		if(is_spill) {
 			for(auto i = new_interval.get_uses().rbegin(); i != new_interval.get_uses().rend(); ++i) {
-				if((*i).get_kind() == use_position::reg) {
+				use_position& interval_use = *i;
+
+				if(interval_use.get_kind() == use_position::reg) {
 					// new split
 					split_intersecting(
-						context, current_time, (*i).get_position() - 1,
+						context, current_time, interval_use.get_position() - 1,
 						&context.intervals[new_register_index], false
 					);
 
@@ -611,7 +617,7 @@ namespace ir::cg {
 	}
 
 	live_interval* linear_scan_allocator::split_interval_at(
-		code_generator_context& context, live_interval* interval, i32 pos
+		code_generator_context& context, live_interval* interval, u64 pos
 	) {
 		// skip past previous intervals
 		while(interval->get_split_kid() >= 0 && pos > interval->get_end()) {
@@ -619,15 +625,15 @@ namespace ir::cg {
 		}
 
 		ASSERT(
-			interval->get_register().get_id() != reg_none || pos <= interval->get_end(),
+			interval->get_register().is_valid() || pos <= interval->get_end(),
 			"panic"
 		);
 
 		return interval;
 	}
 
-	i32 linear_scan_allocator::next_use(
-		code_generator_context& context, live_interval* interval, i32 time
+	u64 linear_scan_allocator::next_use(
+		code_generator_context& context, live_interval* interval, u64 time
 	) {
 		while (true) {
 			for(const use_position& use : interval->get_uses()) {
@@ -642,7 +648,7 @@ namespace ir::cg {
 		}
 	}
 
-	u8 linear_scan_allocator::allocate_free_reg(
+	reg linear_scan_allocator::allocate_free_reg(
 		code_generator_context& context, live_interval* interval
 	) {
 		const u8 register_class = interval->get_register().get_class();
@@ -663,18 +669,18 @@ namespace ir::cg {
 		// for each inactive which intersects current
 		for (u64 i = 0; i < m_inactive.size(); ++i) {
 			live_interval& inactive_interval = context.intervals[m_inactive[i]];
-			const i32 free_position = m_free_positions[inactive_interval.get_assigned()];
+			const u64 free_position = m_free_positions[inactive_interval.get_assigned().get_id()];
 
-			if (free_position > 0) {
+			// if (free_position > 0) {
 				const i32 position = range_intersect(
 					interval->get_start(), interval->get_end(), 
 					inactive_interval.get_range(inactive_interval.get_active_range())
 				);
 
 				if (position >= 0 && position < free_position) {
-					m_free_positions[inactive_interval.get_assigned()] = position;
+					m_free_positions[inactive_interval.get_assigned().get_id()] = position;
 				}
-			}
+			// }
 		}
 
 		// clear reserved registers
@@ -684,51 +690,51 @@ namespace ir::cg {
 		}
 
 		// check if we have a valid hint
-		u8 highest = reg_none;
+		reg highest;
 
-		if(interval->get_hint() != reg_none) {
-			live_interval& hint = context.intervals[interval->get_hint()];
+		if(interval->get_hint().is_valid()) {
+			live_interval& hint = context.intervals[interval->get_hint().get_id()];
 
 			ASSERT(
 				hint.get_register().get_class() == register_class,
 				"invalid register class"
 			);
 
-			const u8 hint_reg = hint.get_assigned();
+			const reg hint_reg = hint.get_assigned();
 
-			if(interval->get_end() <= m_free_positions[hint_reg]) {
+			if(interval->get_end() <= m_free_positions[hint_reg.get_id()]) {
 				highest = hint_reg;
 			}
 		}
 
 		// pick the highest free position
-		if(highest == reg_none) {
-			highest = 0;
+		if(highest.is_valid() == false) {
+			highest.set_id(0);
 
 			for(u8 i = 1; i < 16; ++i) {
-				if(m_free_positions[i] > m_free_positions[highest]) {
-					highest = i;
+				if(m_free_positions[i] > m_free_positions[highest.get_id()]) {
+					highest.set_id(i);
 				}
 			}
 		}
 
-		const i32 position = m_free_positions[highest];
+		const u64 position = m_free_positions[highest.get_id()];
 		if(position == 0) {
 			// allocation failure
-			return reg_none;
+			return reg(reg::invalid_id);
 		}
 
-		if(m_callee_saved[register_class] & (1ull << highest)) {
-			m_callee_saved[register_class] &= ~(1ull << highest);
+		if(m_callee_saved[register_class] & (1ull << highest.get_id())) {
+			m_callee_saved[register_class] &= ~(1ull << highest.get_id());
 
 			const u64 size = register_class ? 16 : 8;
-			const i32 virtual_register = static_cast<i32>((register_class ? first_xmm : first_gpr)) + highest;
+			const i32 virtual_register = static_cast<i32>((register_class ? first_xmm : first_gpr)) + highest.get_id();
 			context.stack_usage = utility::align(context.stack_usage + size, size);
 
 			const live_interval new_interval(
-				reg(reg_none, -1),
+				classified_reg(),
 				context.intervals[virtual_register].get_data_type(),
-				reg_none
+				reg::invalid_id
 			);
 
 			const i32 register_index = static_cast<i32>(interval - context.intervals.data());
@@ -761,7 +767,7 @@ namespace ir::cg {
 		return highest;
 	}
 
-	u8 linear_scan_allocator::allocate_blocked_reg(
+	reg linear_scan_allocator::allocate_blocked_reg(
 		code_generator_context& context, live_interval* interval
 	) {
 		const u8 register_class = interval->get_register().get_class();
@@ -777,7 +783,7 @@ namespace ir::cg {
 
 			if (
 				it.get_register().get_class() == register_class && 
-				it.get_register().get_id() == reg_none
+				it.get_register().is_valid() == false
 			) {
 				m_free_positions[i] = next_use(
 					context, &it, interval->get_start()
@@ -790,7 +796,7 @@ namespace ir::cg {
 
 			if (
 				inactive_interval.get_register().get_class() == register_class &&
-				inactive_interval.get_register().get_id() == reg_none
+				inactive_interval.get_register().is_valid() == false
 			) {
 				m_free_positions[i] = next_use(
 					context, &inactive_interval, interval->get_start()
@@ -806,7 +812,7 @@ namespace ir::cg {
 
 			if (
 				fixed_intervals.get_register().get_class() == register_class && 
-				fixed_intervals.get_register().get_id() != reg_none
+				fixed_intervals.get_register().is_valid()
 			) {
 				m_free_positions[i] = 0;
 				m_block_positions[i] = 0;
@@ -818,10 +824,10 @@ namespace ir::cg {
 
 			if (
 				inactive_interval.get_register().get_class() == register_class && 
-				inactive_interval.get_register().get_id() != reg_none
+				inactive_interval.get_register().is_valid()
 			) {
 				const i32 block_position = m_block_positions[
-					inactive_interval.get_assigned()
+					inactive_interval.get_assigned().get_id()
 				];
 
 				if (block_position > 0) {
@@ -833,7 +839,7 @@ namespace ir::cg {
 					);
 
 					if (position >= 0 && position < block_position) {
-						m_block_positions[inactive_interval.get_assigned()] = position;
+						m_block_positions[inactive_interval.get_assigned().get_id()] = position;
 					}
 				}
 			}
@@ -845,15 +851,15 @@ namespace ir::cg {
 		}
 
 		// pick highest use pos
-		u8 highest = 0;
+		u8 highest_use_pos = 0;
 		for (u8 i = 1; i < 16; ++i) {
-			if (m_free_positions[i] > m_free_positions[highest]) {
-				highest = i;
+			if (m_free_positions[i] > m_free_positions[highest_use_pos]) {
+				highest_use_pos = i;
 			}
 		}
 
-		const i32 position = m_free_positions[highest];
-		const i32 first_use_position = interval->get_uses().back().get_position();
+		const u64 position = m_free_positions[highest_use_pos];
+		const u64 first_use_position = interval->get_uses().back().get_position();
 		bool spilled = false;
 
 		if (first_use_position > position) {
@@ -884,10 +890,10 @@ namespace ir::cg {
 			const i32 split_position = (interval->get_start() & ~1) - 1;
 
 			// split active or inactive interval reg
-			if (m_active_set[register_class].get(highest)) {
+			if (m_active_set[register_class].get(highest_use_pos)) {
 				split_intersecting(
 					context, interval->get_start(), split_position, 
-					&context.intervals[m_active[register_class][highest]], true
+					&context.intervals[m_active[register_class][highest_use_pos]], true
 				);
 			}
 
@@ -900,7 +906,7 @@ namespace ir::cg {
 
 				if (
 					inactive_interval->get_register().get_class() == register_class &&
-					inactive_interval->get_assigned() == highest &&
+					inactive_interval->get_assigned().get_id() == highest_use_pos &&
 					interval_range.get_start() <= position + 1 &&
 					position <= interval_range.get_end()
 				) {
@@ -914,7 +920,7 @@ namespace ir::cg {
 
 		// split active reg if it intersects with fixed interval
 		live_interval* fix_interval = &context.intervals[
-			(register_class ? first_xmm : first_gpr) + highest
+			(register_class ? first_xmm : first_gpr) + highest_use_pos
 		];
 
 		if (!fix_interval->get_ranges().empty()) {
@@ -931,6 +937,6 @@ namespace ir::cg {
 			}
 		}
 
-		return spilled ? reg_none : highest;
+		return spilled ? reg(reg::invalid_id) : reg(highest_use_pos);
 	}
 }

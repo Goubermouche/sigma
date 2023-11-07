@@ -1,48 +1,30 @@
 #include "live_interval.h"
 
 namespace ir::cg {
-	reg::reg(u8 id, u8 reg_class)
-		: m_id(id), m_class(reg_class) {}
-
-	u8 reg::get_id() const {
-		return m_id;
+	range::range(u64 start, u64 end)
+		: m_start(start), m_end(end) {
 	}
 
-	u8 reg::get_class() const {
-		return m_class;
-	}
-
-	void reg::set_id(u8 id) {
-		m_id = id;
-	}
-
-	void reg::set_class(u8 reg_class) {
-		m_class = reg_class;
-	}
-
-	range::range(i32 start, i32 end)
-		: m_start(start), m_end(end) {}
-
-	i32 range::get_start() const {
+	u64 range::get_start() const {
 		return m_start;
 	}
 
-	i32 range::get_end() const {
+	u64 range::get_end() const {
 		return m_end;
 	}
 
-	void range::set_start(i32 start) {
+	void range::set_start(u64 start) {
 		m_start = start;
 	}
 
-	void range::set_end(i32 end) {
+	void range::set_end(u64 end) {
 		m_end = end;
 	}
 
-	use_position::use_position(i32 position, kind kind)
+	use_position::use_position(u64 position, kind kind)
 		: m_position(position), m_kind(kind) {}
 
-	i32 use_position::get_position() const {
+	u64 use_position::get_position() const {
 		return m_position;
 	}
 
@@ -50,21 +32,21 @@ namespace ir::cg {
 		return m_kind;
 	}
 
-	live_interval::live_interval(reg reg, i32 data_type, u8 assigned)
+	live_interval::live_interval(classified_reg reg, i32 data_type, u8 assigned)
 		: m_start(std::numeric_limits<i32>::max()),
 		m_assigned(assigned),
 		m_data_type(data_type),
 		m_reg(reg) {}
 
-	u8 live_interval::get_hint() const {
+	reg live_interval::get_hint() const {
 		return m_hint;
 	}
 
-	i32 live_interval::get_start() const {
+	u64 live_interval::get_start() const {
 		return m_start;
 	}
 
-	i32 live_interval::get_end() const {
+	u64 live_interval::get_end() const {
 		return m_end;
 	}
 
@@ -72,15 +54,15 @@ namespace ir::cg {
 		return m_spill;
 	}
 
-	u8 live_interval::get_assigned() const {
+	reg live_interval::get_assigned() const {
 		return m_assigned;
 	}
 
-	reg& live_interval::get_register() {
+	classified_reg& live_interval::get_register() {
 		return m_reg;
 	}
 
-	const reg& live_interval::get_register() const {
+	const classified_reg& live_interval::get_register() const {
 		return m_reg;
 	}
 
@@ -132,15 +114,15 @@ namespace ir::cg {
 		return m_split_kid;
 	}
 
-	void live_interval::set_hint(u8 hint) {
+	void live_interval::set_hint(reg hint) {
 		m_hint = hint;
 	}
 
-	void live_interval::set_start(i32 start) {
+	void live_interval::set_start(u64 start) {
 		m_start = start;
 	}
 
-	void live_interval::set_end(i32 end) {
+	void live_interval::set_end(u64 end) {
 		m_end = end;
 	}
 
@@ -148,7 +130,7 @@ namespace ir::cg {
 		m_active_range = active_range;
 	}
 
-	void live_interval::set_assigned(u8 assigned) {
+	void live_interval::set_assigned(reg assigned) {
 		m_assigned = assigned;
 	}
 
@@ -194,23 +176,26 @@ namespace ir::cg {
 		m_active_range--;
 	}
 
-	i32 value_description::get_use_count() const {
+	virtual_value::virtual_value() :
+		m_use_count(std::numeric_limits<u64>::max()) {}
+
+	u64 virtual_value::get_use_count() const {
 		return m_use_count;
 	}
 
-	u8 value_description::get_virtual_register() const {
+	reg virtual_value::get_virtual_register() const {
 		return m_virtual_register;
 	}
 
-	void value_description::set_use_count(i32 use_count) {
+	void virtual_value::set_use_count(u64 use_count) {
 		m_use_count = use_count;
 	}
 
-	void value_description::set_virtual_register(u8 virtual_register) {
+	void virtual_value::set_virtual_register(reg virtual_register) {
 		m_virtual_register = virtual_register;
 	}
 
-	void value_description::unuse() {
+	void virtual_value::unuse() {
 		m_use_count--;
 	}
 }

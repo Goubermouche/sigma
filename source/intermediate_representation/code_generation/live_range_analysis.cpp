@@ -5,7 +5,7 @@ namespace ir::cg {
 		code_generator_context& context
 	) {
 		const u64 interval_count = context.intervals.size();
-		context.epilogue = -1;
+		context.epilogue = std::numeric_limits<u64>::max();
 
 		// find block boundaries in sequences
 		for(u64 i = 0; i < context.block_count; ++i) {
@@ -14,7 +14,7 @@ namespace ir::cg {
 
 		if(context.first) {
 			handle<instruction> inst = context.first;
-			i32 timeline = 4;
+			u64 timeline = 4;
 
 			ASSERT(
 				inst->get_type() == instruction::type::label,
@@ -134,7 +134,7 @@ namespace ir::cg {
 		}
 
 		// context.work_list.get_items().resize(context.block_count);
-		ASSERT(context.epilogue >= 0, "invalid epilogue");
+		ASSERT(context.epilogue != std::numeric_limits<u64>::max(), "invalid epilogue");
 	}
 }
 

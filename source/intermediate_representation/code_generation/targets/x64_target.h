@@ -2,6 +2,7 @@
 #include "intermediate_representation/code_generation/targets/target_base.h"
 #include "intermediate_representation/code_generation/instruction.h"
 #include "intermediate_representation/code_generation/live_interval.h"
+#include "intermediate_representation/code_generation/targets/x64/registers.h"
 
 #define INSTRUCTION_COUNT 120
 

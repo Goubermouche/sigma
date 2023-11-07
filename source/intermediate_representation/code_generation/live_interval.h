@@ -1,6 +1,7 @@
 #pragma once
 #include "intermediate_representation/nodes/node.h"
-#include "intermediate_representation/code_generation/registers/reg.h"
+#include "intermediate_representation/code_generation/memory/reg.h"
+#include "intermediate_representation/code_generation/memory/mem.h"
 
 namespace ir::cg {
 	class virtual_value {
@@ -55,7 +56,7 @@ namespace ir::cg {
 
 		void set_hint(reg hint);
 
-		void set_active_range(i32 active_range);
+		void set_active_range(u64 active_range);
 		void set_assigned(reg assigned);
 		void set_spill(i32 spill);
 		void set_split_kid(i32 split_kid);
@@ -71,7 +72,7 @@ namespace ir::cg {
 		const std::vector<range>& get_ranges() const;
 		range& get_range(u64 index);
 		const range& get_range(u64 index) const;
-		i32 get_active_range() const;
+		u64 get_active_range() const;
 		i32 get_data_type() const;
 		u64 get_use_count() const;
 		use_position& get_use(u64 index);
@@ -90,7 +91,7 @@ namespace ir::cg {
 		void add_use_position(const use_position& position);
 		void decrement_active_range();
 	private:
-		i32 m_active_range = 0;
+		u64 m_active_range = 0;
 		i32 m_data_type;
 		i32 m_split_kid = -1;
 		i32 m_spill = -1;

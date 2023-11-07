@@ -562,7 +562,7 @@ namespace ir::cg {
 					store_inst->get<immediate_prop>()->value = immediate;
 
 					ASSERT(
-						store_inst->get_flags() & (instruction::mem | instruction::global),
+						store_inst->get_flags() & (instruction::mem_f | instruction::global),
 						"invalid store instruction flags"
 					);
 
@@ -577,7 +577,7 @@ namespace ir::cg {
 					store_inst->set_data_type(context.target->legalize_data_type(store_data_type));
 
 					ASSERT(
-						store_inst->get_flags() & (instruction::mem | instruction::global),
+						store_inst->get_flags() & (instruction::mem_f | instruction::global),
 						"invalid store instruction flags"
 					);
 
@@ -602,7 +602,7 @@ namespace ir::cg {
 	) {
 		const bool has_second_in = store_op < 0 && source >= 0;
 		i64 offset = 0;
-		scale scale = x1;
+		scale scale = scale::x1;
 		i32 index = -1;
 		reg base;
 
@@ -634,19 +634,19 @@ namespace ir::cg {
 			if(has_second_in) {
 				return instruction::create_rrm(
 					context, instruction::lea, n->get_data(), destination,
-					static_cast<u8>(source), base, index, scale, static_cast<i32>(offset)
+					static_cast<u8>(source), base, mem(index, scale, static_cast<i32>(offset))
 				);
 			}
 
 			return instruction::create_rm(
 				context, instruction::lea, n->get_data(), destination,
-				base, index, scale, static_cast<i32>(offset)
+				base, mem(index, scale, static_cast<i32>(offset))
 			);
 		}
 
 		return instruction::create_mr(
 			context, static_cast<instruction::type>(store_op), n->get_data(),
-			base, index, scale, static_cast<i32>(offset), source
+			base, mem(index, scale, static_cast<i32>(offset)), source
 		);
 	}
 
@@ -664,24 +664,25 @@ namespace ir::cg {
 			 context.virtual_values[n->get_global_value_index()].get_virtual_register().is_valid())
 		) {
 			const reg base = input_reg(context, n);
+			const mem memory(-1, scale::x1, 0);
 
 			if (store_op < 0) {
 				if (source >= 0) {
 					return instruction::create_rrm(
 						context, instruction::lea, PTR_TYPE, destination, 
-						static_cast<u8>(source), base, -1, x1, 0
+						static_cast<u8>(source), base, memory
 					);
 				}
 
 				return instruction::create_rm(
 					context, instruction::type::lea, PTR_TYPE, destination,
-					base, -1, x1, 0
+					base, memory
 				);
 			}
 
 			return instruction::create_mr(
-				context, static_cast<instruction::type>(store_op), PTR_TYPE, 
-				base, -1, x1, 0, source
+				context, static_cast<instruction::type>(store_op), PTR_TYPE,
+				base, memory, source
 			);
 		}
 

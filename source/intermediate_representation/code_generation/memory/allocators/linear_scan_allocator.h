@@ -1,5 +1,5 @@
 #pragma once
-#include "intermediate_representation/code_generation/allocators/allocator_base.h"
+#include "intermediate_representation/code_generation/memory/allocators/allocator_base.h"
 #include "intermediate_representation/code_generation/live_interval.h"
 #include "intermediate_representation/code_generation/targets/x64/registers.h"
 
@@ -18,12 +18,10 @@ namespace ir::cg {
 		i32 gprs[6];
 	};
 
-	static constexpr parameter_descriptor g_parameter_descriptors[] = {
-		{
-			4, 4, 6, WIN64_ABI_CALLER_SAVED,
-			{ rcx, rdx, r8, r9, reg::invalid_id, reg::invalid_id }
-		}
-	};
+	static constexpr parameter_descriptor g_parameter_descriptors[] = {{
+		4, 4, 6, WIN64_ABI_CALLER_SAVED,
+		{ rcx, rdx, r8, r9, reg::invalid_id, reg::invalid_id }
+	}};
 
 	class linear_scan_allocator : public allocator_base {
 	public:
@@ -46,44 +44,34 @@ namespace ir::cg {
 		void mark_callee_saved_constraints();
 
 		u64 partition(
-			const std::vector<live_interval>& intervals,
-			ptr_diff lo,
-			ptr_diff hi,
-			std::vector<i32>& arr
+			const std::vector<live_interval>& intervals, ptr_diff lo,
+			ptr_diff hi, std::vector<u64>& arr
 		) const;
 
 		void quick_sort_definitions(
-			std::vector<live_interval>& intervals,
-			ptr_diff lo,
-			ptr_diff hi,
-			std::vector<i32>& arr
+			std::vector<live_interval>& intervals, ptr_diff lo, 
+			ptr_diff hi, std::vector<u64>& arr
 		);
 
 		bool update_interval(
-			const code_generator_context& context,
-			live_interval* interval,
-			bool is_active,
-			u64 time,
-			i32 inactive_index
+			const code_generator_context& context, live_interval* interval,
+			bool is_active, u64 time, i32 inactive_index
 		);
 
 		void move_to_active(
-			const code_generator_context& context,
-			live_interval* interval
+			const code_generator_context& context, live_interval* interval
 		);
 
 		static i32 range_intersect(u64 start, u64 end, range& b);
 
 		void insert_split_move(
-			code_generator_context& context, u64 t, i32 old_reg, i32 new_reg
+			code_generator_context& context, u64 t, ptr_diff old_reg,
+			ptr_diff new_reg
 		);
 
 		i32 split_intersecting(
-			code_generator_context& context,
-			u64 current_time,
-			u64 pos,
-			live_interval* interval,
-			bool is_spill
+			code_generator_context& context, u64 current_time, u64 pos,
+			live_interval* interval, bool is_spill
 		);
 
 		static live_interval* split_interval_at(
@@ -95,29 +83,24 @@ namespace ir::cg {
 		);
 
 		reg allocate_free_reg(
-			code_generator_context& context,
-			live_interval* interval
+			code_generator_context& context, live_interval* interval
 		);
 
 		reg allocate_blocked_reg(
-			code_generator_context& context,
-			live_interval* interval
+			code_generator_context& context, live_interval* interval
 		);
 	private:
 		utility::dense_set m_active_set[REGISTER_CLASS_COUNT];
 
-		i32 m_active[REGISTER_CLASS_COUNT][16];
+		ptr_diff m_active[REGISTER_CLASS_COUNT][16];
 		u64 m_callee_saved[REGISTER_CLASS_COUNT];
 
+		std::vector<u64> m_block_positions;
 		std::vector<u64> m_free_positions;
-
-		std::vector<i32> m_unhandled;
-		std::vector<i32> m_block_positions;
-		std::vector<i32> m_inactive;
+		std::vector<u64> m_unhandled;
+		std::vector<u64> m_inactive;
 
 		handle<instruction> m_cache;
-
-		i32 m_end_point = 0;
 	};
 }
 

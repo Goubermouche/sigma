@@ -82,7 +82,7 @@ namespace ir::cg {
 		return m_ranges[index];
 	}
 
-	i32 live_interval::get_active_range() const {
+	u64 live_interval::get_active_range() const {
 		return m_active_range;
 	}
 
@@ -126,7 +126,7 @@ namespace ir::cg {
 		m_end = end;
 	}
 
-	void live_interval::set_active_range(i32 active_range) {
+	void live_interval::set_active_range(u64 active_range) {
 		m_active_range = active_range;
 	}
 

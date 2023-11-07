@@ -21,10 +21,6 @@ namespace ir::cg {
 		handle<node> value;
 	};
 
-	enum scale : u8 {
-		x1, x2, x4, x8
-	};
-
 	class instruction : public utility::property<
 		immediate_prop,
 		absolute_prop,
@@ -191,7 +187,7 @@ namespace ir::cg {
 			rep = 2,
 			repne = 4,
 
-			mem = 16,
+			mem_f = 16,
 			global = 32,
 			node_f = 64,
 			attribute = 128,
@@ -301,7 +297,7 @@ namespace ir::cg {
 			const data_type& data_type,
 			reg destination,
 			reg source,
-			i32 imm
+			i32 immediate
 		);
 
 		/**
@@ -312,9 +308,7 @@ namespace ir::cg {
 		 * \param destination Destination register of the instruction
 		 * \param source Source register of the instruction
 		 * \param base Base register for the memory operand
-		 * \param index Index register for the memory operand
-		 * \param scale Scale factor for the memory operand
-		 * \param displacement Displacement for the memory operand
+		 * \param memory Memory operand
 		 * \return Handle to the newly created instruction.
 		 */
 		static handle<instruction> create_rrm(
@@ -324,9 +318,7 @@ namespace ir::cg {
 			reg destination,
 			reg source,
 			reg base,
-			i32 index,
-			scale scale,
-			i32 displacement
+			mem memory
 		);
 
 		/**
@@ -336,9 +328,7 @@ namespace ir::cg {
 		 * \param data_type Data type associated with the operation
 		 * \param destination Destination register of the instruction
 		 * \param base Base register for the memory operand
-		 * \param index Index register for the memory operand
-		 * \param scale Scale factor for the memory operand
-		 * \param displacement Displacement for the memory operand
+		 * \param memory Memory operand
 		 * \return Handle to the newly created instruction.
 		 */
 		static handle<instruction> create_rm(
@@ -347,9 +337,7 @@ namespace ir::cg {
 			const data_type& data_type,
 			reg destination,
 			reg base,
-			i32 index,
-			scale scale,
-			i32 displacement
+			mem memory
 		);
 
 		/**
@@ -358,9 +346,7 @@ namespace ir::cg {
 		 * \param type The type of the instruction to be created
 		 * \param data_type Data type associated with the operation
 		 * \param base Base register for the memory operand
-		 * \param index Index register for the memory operand
-		 * \param scale Scale factor for the memory operand
-		 * \param displacement Displacement for the memory operand
+		 * \param memory Memory operand
 		 * \param source Source register of the instruction
 		 * \return Handle to the newly created instruction.
 		 */
@@ -369,9 +355,7 @@ namespace ir::cg {
 			instruction::type type,
 			const data_type& data_type,
 			reg base,
-			i32 index,
-			scale scale,
-			i32 displacement,
+			mem memory,
 			i32 source
 		);
 
@@ -404,7 +388,7 @@ namespace ir::cg {
 			instruction::type type,
 			const data_type& data_type,
 			reg destination,
-			u64 imm
+			u64 immediate
 		);
 
 		/**
@@ -426,7 +410,7 @@ namespace ir::cg {
 		 * \param type The type of the instruction to be created
 		 * \param data_type Data type associated with the operation
 		 * \param destination Destination register
-		 * \param imm The immediate value to be used
+		 * \param immediate The immediate value to be used
 		 * \return Handle to the newly created instruction.
 		 */
 		static handle<instruction> create_immediate(
@@ -434,13 +418,13 @@ namespace ir::cg {
 			instruction::type type,
 			const data_type& data_type,
 			reg destination,
-			i32 imm
+			i32 immediate
 		);
 	private:
 		utility::slice<i32> m_operands; // TODO: storing operands as u8's? 
 		handle<instruction> m_next;     // TODO: replace by a linked list
-		type m_type = zero;             // instruction type
 		flags m_flags = none;           // instruction flags
+		type m_type = zero;             // instruction type
 
 		// output, input, and temp counts of the instruction operands
 		u8 m_out_count = 0;

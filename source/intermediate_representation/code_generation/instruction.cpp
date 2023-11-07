@@ -152,13 +152,13 @@ namespace ir::cg {
 		const data_type& data_type,
 		reg destination, 
 		reg source,
-		i32 imm
+		i32 immediate
 	) {
 		const handle<instruction> inst = context.create_instruction<immediate_prop>(
 			type, data_type, 1, 1, 0
 		);
 
-		inst->get<immediate_prop>()->value = imm;
+		inst->get<immediate_prop>()->value = immediate;
 		inst->set_flags(instruction::immediate);
 		inst->set_operand(0, destination.get_id());
 		inst->set_operand(1, source.get_id());
@@ -172,25 +172,23 @@ namespace ir::cg {
 		reg destination,
 		reg source, 
 		reg base, 
-		i32 index,
-		scale scale,
-		i32 displacement
+		mem memory
 	) {
 		const handle<instruction> inst = context.create_instruction<empty_property>(
-			type, data_type, 1, index >= 0 ? 3 : 2, 0
+			type, data_type, 1, memory.get_index() >= 0 ? 3 : 2, 0
 		);
 
-		inst->set_flags(instruction::mem | (index >= 0 ? instruction::indexed : instruction::none));
-		inst->set_scale(scale);
-		inst->set_displacement(displacement);
+		inst->set_flags(instruction::mem_f | (memory.get_index() >= 0 ? instruction::indexed : instruction::none));
+		inst->set_scale(memory.get_scale());
+		inst->set_displacement(memory.get_displacement());
 		inst->set_memory_slot(2);
 
 		inst->set_operand(0, destination.get_id());
 		inst->set_operand(1, source.get_id());
 		inst->set_operand(2, base.get_id());
 
-		if (index >= 0) {
-			inst->set_operand(4, index);
+		if (memory.get_index() >= 0) {
+			inst->set_operand(4, memory.get_index());
 		}
 
 		return inst;
@@ -202,25 +200,23 @@ namespace ir::cg {
 		const data_type& data_type, 
 		reg destination, 
 		reg base, 
-		i32 index,
-		scale scale, 
-		i32 displacement
+		mem memory
 	) {
 		const handle<instruction> inst = context.create_instruction<empty_property>(
-			type, data_type, 1, index >= 0 ? 2 : 1, 0
+			type, data_type, 1, memory.get_index() >= 0 ? 2 : 1, 0
 		);
 
-		inst->set_flags(instruction::mem | (index >= 0 ? instruction::indexed : instruction::none));
+		inst->set_flags(instruction::mem_f | (memory.get_index() >= 0 ? instruction::indexed : instruction::none));
 		inst->set_memory_slot(1);
 		inst->set_operand(0, destination.get_id());
 		inst->set_operand(1, base.get_id());
 
-		if (index >= 0) {
-			inst->set_operand(2, index);
+		if (memory.get_index() >= 0) {
+			inst->set_operand(2, memory.get_index());
 		}
 
-		inst->set_displacement(displacement);
-		inst->set_scale(scale);
+		inst->set_displacement(memory.get_displacement());
+		inst->set_scale(memory.get_scale());
 		return inst;
 	}
 
@@ -229,30 +225,28 @@ namespace ir::cg {
 		instruction::type type, 
 		const data_type& data_type,
 		reg base,
-		i32 index,
-		scale scale,
-		i32 displacement,
+		mem memory,
 		i32 source
 	) {
 		const handle<instruction> inst = context.create_instruction<empty_property>(
-			type, data_type, 0, index >= 0 ? 3 : 2, 0
+			type, data_type, 0, memory.get_index() >= 0 ? 3 : 2, 0
 		);
 
-		inst->set_flags(instruction::mem | (index >= 0 ? instruction::indexed : instruction::none));
+		inst->set_flags(instruction::mem_f | (memory.get_index() >= 0 ? instruction::indexed : instruction::none));
 		inst->set_memory_slot(0);
 
 		inst->set_operand(0, base.get_id());
 
-		if (index >= 0) {
-			inst->set_operand(1, index);
+		if (memory.get_index() >= 0) {
+			inst->set_operand(1, memory.get_index());
 			inst->set_operand(2, source);
 		}
 		else {
 			inst->set_operand(1, source);
 		}
 
-		inst->set_displacement(displacement);
-		inst->set_scale(scale);
+		inst->set_displacement(memory.get_displacement());
+		inst->set_scale(memory.get_scale());
 		return inst;
 	}
 
@@ -281,13 +275,13 @@ namespace ir::cg {
 		instruction::type type,
 		const data_type& data_type,
 		reg destination,
-		u64 imm
+		u64 immediate
 	) {
 		const handle<instruction> inst = context.create_instruction<immediate_prop>(
 			type, data_type, 1, 0, 0
 		);
 
-		inst->get<immediate_prop>()->value = static_cast<i32>(imm);
+		inst->get<immediate_prop>()->value = static_cast<i32>(immediate);
 		inst->set_flags(instruction::absolute);
 		inst->set_operand(0, destination.get_id());
 		return inst;
@@ -311,13 +305,13 @@ namespace ir::cg {
 		instruction::type type, 
 		const data_type& data_type,
 		reg destination,
-		i32 imm
+		i32 immediate
 	) {
 		const handle<instruction> inst = context.create_instruction<immediate_prop>(
 			type, data_type, 1, 0, 0
 		);
 
-		inst->get<immediate_prop>()->value = imm;
+		inst->get<immediate_prop>()->value = immediate;
 		inst->set_flags(instruction::immediate);
 		inst->set_operand(0, destination.get_id());
 		return inst;

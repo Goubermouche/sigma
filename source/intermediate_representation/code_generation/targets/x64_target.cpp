@@ -839,12 +839,12 @@ namespace ir::cg {
 		handle interval = &context.intervals[inst->get_operand(i)];
 
 		if(
-			(inst->get_flags() & (instruction::mem | instruction::global)) && 
+			(inst->get_flags() & (instruction::mem_f | instruction::global)) && 
 			i == inst->get_memory_slot()
 		) {
 			ASSERT(interval->get_spill() <= 0, "cannot use spilled value for a memory operand");
 
-			if(inst->get_flags() & instruction::mem) {
+			if(inst->get_flags() & instruction::mem_f) {
 				val->set_type(value::mem);
 				val->set_reg(interval->get_assigned().get_id());
 				val->set_index(reg::invalid_id);

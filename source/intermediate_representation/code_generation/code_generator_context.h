@@ -13,23 +13,26 @@
 namespace ir::cg {
 	struct code_generator_context {
 		handle<function> function;
+
+		handle<node> fallthrough;
+
 		handle<instruction> first;
 		handle<instruction> head;
-		handle<node> fallthrough;
 
 		utility::block_allocator instruction_allocator;
 		s_ptr<target_base> target;
 		work_list work_list;
 
-		std::unordered_map<handle<node>, machine_block> machine_blocks;
 		std::unordered_map<u64, virtual_value> virtual_values;
+
+		std::unordered_map<handle<node>, machine_block> machine_blocks;
 		std::unordered_map<handle<node>, i32> stack_slots;
 		std::unordered_map<handle<node>, u32> labels;
 		std::unordered_map<handle<node>, i32> uses;
 
 		std::vector<live_interval> intervals;
-		std::vector<phi_value> phi_values;
 		std::vector<handle<node>> locals;
+		std::vector<phi_value> phi_values;
 
 		u32 return_label = 0;
 		u64 block_count = 0;

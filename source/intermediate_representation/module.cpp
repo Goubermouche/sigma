@@ -1,31 +1,36 @@
 #include "module.h"
-#include <utility/containers/ptr.h>
 
 #include "intermediate_representation/code_generation/use_list.h"
-#include "intermediate_representation/code_generation/scheduler.h"
-#include "intermediate_representation/code_generation/instruction_selection.h"
+#include "intermediate_representation/code_generation/instruction_selection/instruction_selection.h"
 #include "intermediate_representation/code_generation/live_range_analysis.h"
 
 #include "intermediate_representation/code_generation/targets/x64_target.h"
-#include "intermediate_representation/code_generation/allocators/linear_scan_allocator.h"
+#include "intermediate_representation/code_generation/memory/allocators/linear_scan_allocator.h"
+
+#include "intermediate_representation/code_generation/optimization/optimization_pass.h"
+#include "intermediate_representation/code_generation/optimization/passes/scheduler.h"
 
 namespace ir {
-	utility::outcome::result<code_buffer> module::compile(
-		arch arch,
-		system system
+	utility::outcome::result<s_ptr<cg::code_generation_result>> module::compile(
+		arch arch, system system
 	) {
 		ASSERT(
 			system == system::windows && arch == arch::x64,
 			"unsupported ABI detected"
 		);
 
+		// specify individual optimization passes
+		cg::optimization_pass_list pass_list({
+			std::make_shared<cg::schedule_pass>()
+		});
+
+		const s_ptr<cg::code_generation_result> result = std::make_shared<cg::code_generation_result>();
 		const s_ptr<cg::allocator_base> allocator = std::make_shared<cg::linear_scan_allocator>();
-		const s_ptr<cg::target_base>    target    = std::make_shared<cg::x64_target>();
-		code_buffer buffer;
+		const s_ptr<cg::target_base> target = std::make_shared<cg::x64_target>();
 
 		// go through all declared functions and generate byte code for them
 		// TODO: add multithreading, as long as the symbol system allows for it
-		for(auto& function : m_functions) {
+		for (auto& function : m_functions) {
 			cg::code_generator_context context; // each function has its own context
 			context.instruction_allocator = utility::block_allocator(1024);
 			context.function = &function;
@@ -37,14 +42,14 @@ namespace ir {
 			context.work_list = cg::work_list::post_order(function.get_entry_node());
 			context.block_count = context.work_list.get_item_count();
 			context.work_list.compute_dominators(function.get_entry_node(), context.block_count);
-
-			// initialize data
 			generate_use_lists(context);
-			schedule_nodes(context);
+
+			// run optimization passes
+			pass_list.apply(context);
+
 			target->allocate_base_registers(context);
 
 			// instruction selection
-			context.values.reserve(function.get_node_count());
 			context.work_list = cg::work_list::post_order(function.get_entry_node());
 			select_instructions(context);
 
@@ -55,22 +60,18 @@ namespace ir {
 			allocator->allocate(context);
 
 			// emit bytecode for the target architecture
-			target->emit_code(context, buffer);
+			target->emit_code(context, result);
 		}
 
-		return buffer;
+		return result;
 	}
 
-	utility::outcome::result<void> module::print_node_graph(
-		const filepath& path
+	void module::print_node_graph(
+		utility::long_string& string
 	) const {
-		OUTCOME_TRY(const auto& file, utility::text_file::create(path));
-
-		for(auto& function : m_functions) {
-			function.print_node_graph(file);
+		for (auto& function : m_functions) {
+			function.print_node_graph(string);
 		}
-
-		return utility::outcome::success();
 	}
 
 	handle<function> module::create_function(
@@ -105,7 +106,7 @@ namespace ir {
 		func.set_parameter(1, create_projection(MEMORY_TYPE, entry_node, 1));
 		func.set_parameter(2, create_projection(CONTINUATION_TYPE, entry_node, 2));
 
-		func.set_return_count(static_cast<i32>(returns.size()));
+		func.set_return_count(returns.size());
 		func.set_active_control_node(projection_node);
 
 		// mark the input memory as both mem_in and mem_out
@@ -116,18 +117,18 @@ namespace ir {
 		return &func;
 	}
 
-	void module::create_ret(const std::vector<handle<node>>& values) {
+	void module::create_ret(const std::vector<handle<node>>& virtual_values) {
 		const handle<node> memory_state = peek_memory(m_functions.back().get_active_control_node());
 		handle<node> exit_node = m_functions.back().get_exit_node();
 
 		// allocate a new return node
-		if(exit_node == nullptr) {
+		if (exit_node == nullptr) {
 			const handle<node> exit_region_node = create_node<region_property>(
 				node::region, 0
 			);
 
 			exit_node = create_node<region_property>(
-				node::exit, values.size() + 3
+				node::exit, virtual_values.size() + 3
 			);
 
 			const handle<node> phi_node = create_node(
@@ -145,14 +146,14 @@ namespace ir {
 			phi_node->set_input(0, exit_region_node);
 			phi_node->set_input(1, memory_state);
 
-			for(u64 i = 0; i < values.size(); ++i) {
+			for (u64 i = 0; i < virtual_values.size(); ++i) {
 				const handle<node> value_phi_node = create_node(
 					node::phi, 2
 				);
 
-				value_phi_node->set_data(values[i]->get_data());
+				value_phi_node->set_data(virtual_values[i]->get_data());
 				value_phi_node->set_input(0, exit_region_node);
-				value_phi_node->set_input(1, values[i]);
+				value_phi_node->set_input(1, virtual_values[i]);
 
 				// add the phi node to the exit node
 				exit_node->set_input(i + 3, value_phi_node);
@@ -207,7 +208,7 @@ namespace ir {
 	}
 
 	void module::create_store(
-		handle<node> destination, 
+		handle<node> destination,
 		handle<node> value,
 		u32 alignment,
 		bool is_volatile
@@ -240,7 +241,7 @@ namespace ir {
 
 	handle<node> module::create_add(
 		handle<node> left,
-		handle<node> right, 
+		handle<node> right,
 		arithmetic_behaviour behaviour
 	) {
 		return create_binary_arithmetic_operation(
@@ -252,7 +253,7 @@ namespace ir {
 	}
 
 	handle<node> module::create_sub(
-		handle<node> left, 
+		handle<node> left,
 		handle<node> right,
 		arithmetic_behaviour behaviour
 	) {
@@ -280,7 +281,7 @@ namespace ir {
 	}
 
 	std::vector<handle<node>>& module::add_successors(
-		handle<node> terminator, 
+		handle<node> terminator,
 		u64 count
 	) const {
 		const handle<node> basic_block = m_functions.back().get_active_control_node()->get_parent_region();
@@ -295,11 +296,11 @@ namespace ir {
 	handle<node> module::create_binary_arithmetic_operation(
 		node::type type,
 		handle<node> left,
-		handle<node> right, 
+		handle<node> right,
 		arithmetic_behaviour behaviour
 	) {
 		ASSERT(
-			left->get_data() == right->get_data(), 
+			left->get_data() == right->get_data(),
 			"data types of the two operands do not match"
 		);
 

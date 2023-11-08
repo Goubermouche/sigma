@@ -133,7 +133,7 @@ namespace ir::cg {
 			}
 		}
 
-		// context.work_list.get_items().resize(context.block_count);
+		context.work_list.get_items().resize(context.block_count);
 		ASSERT(context.epilogue != std::numeric_limits<u64>::max(), "invalid epilogue");
 	}
 }

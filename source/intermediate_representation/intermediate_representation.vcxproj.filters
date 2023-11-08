@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="constants">
+      <UniqueIdentifier>{6215F996-CE7F-AD0D-17BE-5EB383678B62}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="instructions">
+      <UniqueIdentifier>{3A3578A6-2698-074B-CF1D-4001BB5FD3CD}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="instructions\flow_control">
+      <UniqueIdentifier>{01760FDB-6D38-4365-B6E8-D1F122EA1B43}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="instructions\flow_control\function">
+      <UniqueIdentifier>{9674285A-82B0-2BC4-EBC2-43BBD71DD4DE}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="instructions\memory">
+      <UniqueIdentifier>{829B09FF-EEFC-E60C-776A-2DBFE3CA1DCC}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="instructions\operations">
+      <UniqueIdentifier>{6DE616C0-D91D-5F57-E227-C37A4EDE8550}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="types">
+      <UniqueIdentifier>{5A5E7610-C672-9EC1-8FF4-4121FBC79AF2}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="nodes\node.h" />
+    <ClInclude Include="nodes\properties\types.h" />
+    <ClInclude Include="nodes\properties\operations.h" />
+    <ClInclude Include="module.h" />
+    <ClInclude Include="nodes\function.h" />
+    <ClInclude Include="nodes\data_type.h" />
+    <ClInclude Include="nodes\user.h" />
+    <ClInclude Include="nodes\symbol.h" />
+    <ClInclude Include="nodes\properties\memory.h" />
+    <ClInclude Include="nodes\properties\control_flow.h" />
+    <ClInclude Include="code_generation\code_generator_context.h" />
+    <ClInclude Include="code_generation\targets\x64_target.h" />
+    <ClInclude Include="code_generation\targets\target_base.h" />
+    <ClInclude Include="code_generation\memory\allocators\allocator_base.h" />
+    <ClInclude Include="code_generation\memory\allocators\linear_scan_allocator.h" />
+    <ClInclude Include="code_generation\work_list.h" />
+    <ClInclude Include="code_generation\use_list.h" />
+    <ClInclude Include="code_generation\optimization\passes\scheduler.h" />
+    <ClInclude Include="code_generation\live_interval.h" />
+    <ClInclude Include="code_generation\instruction_selection\instruction_selection.h" />
+    <ClInclude Include="code_generation\instruction.h" />
+    <ClInclude Include="code_generation\live_range_analysis.h" />
+    <ClInclude Include="code_generation\machine_block.h" />
+    <ClInclude Include="code_generation\phi_value.h" />
+    <ClInclude Include="code_generation\memory\reg.h" />
+    <ClInclude Include="code_generation\targets\x64\registers.h" />
+    <ClInclude Include="code_generation\optimization\optimization_pass.h" />
+    <ClInclude Include="code_generation\memory\mem.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="nodes\node.cpp" />
+    <ClCompile Include="module.cpp" />
+    <ClCompile Include="nodes\function.cpp" />
+    <ClCompile Include="nodes\data_type.cpp" />
+    <ClCompile Include="nodes\user.cpp" />
+    <ClCompile Include="nodes\symbol.cpp" />
+    <ClCompile Include="code_generation\targets\x64_target.cpp" />
+    <ClCompile Include="code_generation\targets\target_base.cpp" />
+    <ClCompile Include="code_generation\memory\allocators\allocator_base.cpp" />
+    <ClCompile Include="code_generation\memory\allocators\linear_scan_allocator.cpp" />
+    <ClCompile Include="code_generation\work_list.cpp" />
+    <ClCompile Include="code_generation\use_list.cpp" />
+    <ClCompile Include="code_generation\optimization\passes\scheduler.cpp" />
+    <ClCompile Include="code_generation\live_interval.cpp" />
+    <ClCompile Include="code_generation\instruction_selection\instruction_selection.cpp" />
+    <ClCompile Include="code_generation\instruction.cpp" />
+    <ClCompile Include="code_generation\code_generator_context.cpp" />
+    <ClCompile Include="code_generation\live_range_analysis.cpp" />
+    <ClCompile Include="code_generation\machine_block.cpp" />
+    <ClCompile Include="code_generation\phi_value.cpp" />
+    <ClCompile Include="code_generation\memory\reg.cpp" />
+    <ClCompile Include="code_generation\optimization\optimization_pass.cpp" />
+    <ClCompile Include="code_generation\memory\mem.cpp" />
+  </ItemGroup>
+</Project>

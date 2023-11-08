@@ -19,16 +19,16 @@ namespace ir::cg {
 		emit_epilogue(context, result->bytecode);
 
 		// pad to 16 bytes
-		static const u8 nops[8][8] = {
-			{ 0x90 },
-			{ 0x66, 0x90 },
-			{ 0x0F, 0x1F, 0x00 },
-			{ 0x0F, 0x1F, 0x40, 0x00 },
-			{ 0x0F, 0x1F, 0x44, 0x00, 0x00 },
-			{ 0x66, 0x0F, 0x1F, 0x44, 0x00, 0x00 },
-			{ 0x0F, 0x1F, 0x80, 0x00, 0x00, 0x00, 0x00 },
-			{ 0x0F, 0x1F, 0x84, 0x00, 0x00, 0x00, 0x00, 0x00 },
-		};
+		//static const u8 nops[8][8] = {
+		//	{ 0x90 },
+		//	{ 0x66, 0x90 },
+		//	{ 0x0F, 0x1F, 0x00 },
+		//	{ 0x0F, 0x1F, 0x40, 0x00 },
+		//	{ 0x0F, 0x1F, 0x44, 0x00, 0x00 },
+		//	{ 0x66, 0x0F, 0x1F, 0x44, 0x00, 0x00 },
+		//	{ 0x0F, 0x1F, 0x80, 0x00, 0x00, 0x00, 0x00 },
+		//	{ 0x0F, 0x1F, 0x84, 0x00, 0x00, 0x00, 0x00, 0x00 },
+		//};
 
 		//u64 pad = 16 - (result->bytecode.get_size() & 15);
 
@@ -81,8 +81,7 @@ namespace ir::cg {
 	}
 
 	void x64_target::emit_prologue(
-		code_generator_context& context,
-		utility::byte_buffer& bytecode
+		code_generator_context& context, utility::byte_buffer& bytecode
 	) {
 		emit_assembly("{}:\n", context.function->get_symbol().get_name());
 
@@ -100,8 +99,8 @@ namespace ir::cg {
 		bytecode.append_byte(0x89);
 		bytecode.append_byte(mod_rx_rm(direct, rsp, rbp));
 
-		// if there's more than 4096 bytes of stack, we need to insert a chkstk
-		// function
+		// if there's more than 4096 bytes of stack, we need to insert a
+		// chkstk function
 		if(context.stack_usage >= 4096) {
 			ASSERT(false, "not implemented");
 		}
@@ -125,8 +124,7 @@ namespace ir::cg {
 	}
 
 	void x64_target::emit_function_body(
-		code_generator_context& context,
-		utility::byte_buffer& bytecode
+		code_generator_context& context, utility::byte_buffer& bytecode
 	) {
 		for (handle<instruction> inst = context.first; inst; inst = inst->get_next_instruction()) {
 			const u64 in_base = inst->get_out_count();
@@ -309,8 +307,7 @@ namespace ir::cg {
 	}
 
 	void x64_target::emit_epilogue(
-		code_generator_context& context,
-		utility::byte_buffer& bytecode
+		code_generator_context& context, utility::byte_buffer& bytecode
 	) {
 		if(context.stack_usage <= 16) {
 			emit_assembly("  ret\n");
@@ -321,6 +318,7 @@ namespace ir::cg {
 		// add RSP, stack_usage
 		emit_assembly("  add RSP, {}\n", context.stack_usage);
 		bytecode.append_byte(rex(true, 0x00, rsp, 0));
+
 		if (context.stack_usage == static_cast<i8>(context.stack_usage)) {
 			bytecode.append_byte(0x83);
 			bytecode.append_byte(mod_rx_rm(direct, 0x00, rsp));
@@ -373,11 +371,8 @@ namespace ir::cg {
 	}
 
 	void x64_target::emit_instruction_1_print(
-		code_generator_context& context,
-		instruction::type type,
-		handle<value> src,
-		i32 data_type, 
-		utility::byte_buffer& bytecode
+		code_generator_context& context, instruction::type type,
+		handle<value> src, i32 data_type, utility::byte_buffer& bytecode
 	) {
 		emit_assembly("  {} ", g_x64_instruction_table[type].mnemonic);
 		print_operand(src, data_type);
@@ -387,11 +382,8 @@ namespace ir::cg {
 	}
 
 	void x64_target::emit_instruction_1(
-		code_generator_context& context,
-		instruction::type type,
-		handle<value> r, 
-		i32 dt, 
-		utility::byte_buffer& bytecode
+		code_generator_context& context, instruction::type type,
+		handle<value> r, i32 dt, utility::byte_buffer& bytecode
 	) {
 		ASSERT(type < g_x64_instruction_table.size(), "invalid type");
 		const instruction::description& descriptor = g_x64_instruction_table[type];
@@ -485,11 +477,8 @@ namespace ir::cg {
 	}
 
 	void x64_target::emit_instruction_2_print(
-		instruction::type type, 
-		handle<value> dst,
-		handle<value> src,
-		i32 data_type, 
-		utility::byte_buffer& bytecode
+		instruction::type type, handle<value> dst, handle<value> src,
+		i32 data_type, utility::byte_buffer& bytecode
 	) {
 		if(data_type == xmmword) {
 			data_type = sse_pd;
@@ -521,11 +510,8 @@ namespace ir::cg {
 	}
 
 	void x64_target::emit_instruction_2(
-		instruction::type type, 
-		handle<value> a,
-		handle<value> b,
-		i32 dt, 
-		utility::byte_buffer& bytecode
+		instruction::type type, handle<value> a, handle<value> b,
+		i32 dt, utility::byte_buffer& bytecode
 	) {
 		ASSERT(dt >= byte && dt <= qword, "invalid data type");
 		ASSERT(type < g_x64_instruction_table.size(), "invalid type");
@@ -831,10 +817,8 @@ namespace ir::cg {
 	}
 
 	i32 x64_target::resolve_interval(
-		code_generator_context& context, 
-		handle<instruction> inst,
-		i32 i, 
-		handle<value> val
+		code_generator_context& context, handle<instruction> inst,
+		i32 i, handle<value> val
 	) {
 		handle interval = &context.intervals[inst->get_operand(i)];
 

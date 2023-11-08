@@ -90,9 +90,7 @@ namespace ir::cg {
 			append_instruction(
 				context,
 				context.create_instruction<empty_property>(
-					instruction::epilogue,
-					VOID_TYPE,
-					0, 0, 0
+					instruction::epilogue, VOID_TYPE, 0, 0, 0
 				)
 			);
 		}
@@ -130,11 +128,9 @@ namespace ir::cg {
 		const u64 phi_count = context.phi_values.size();
 		const handle<node> top = context.work_list.get_item(context.block_count);
 
-		for(u64 i = 0; i < phi_count; ++i) {
-			phi_value& value = context.phi_values[i];
-
-			// mark the proper output
-			value.set_destination(input_reg(context, value.get_phi()));
+		// mark proper outputs
+		for (auto& phi : context.phi_values) {
+			phi.set_destination(input_reg(context, phi.get_phi()));
 		}
 
 		// handle non-memory phi nodes
@@ -594,11 +590,8 @@ namespace ir::cg {
 	}
 
 	handle<instruction> select_memory_access_instruction(
-		code_generator_context& context, 
-		handle<node> n,
-		reg destination, 
-		i32 store_op, 
-		i32 source
+		code_generator_context& context, handle<node> n, reg destination, 
+		i32 store_op, i32 source
 	) {
 		const bool has_second_in = store_op < 0 && source >= 0;
 		i64 offset = 0;
@@ -629,33 +622,32 @@ namespace ir::cg {
 			base = input_reg(context, n);
 		}
 
+		mem memory(index, scale, static_cast<i32>(offset));
+
 		// compute the base
 		if(store_op < 0) {
 			if(has_second_in) {
 				return instruction::create_rrm(
 					context, instruction::lea, n->get_data(), destination,
-					static_cast<u8>(source), base, mem(index, scale, static_cast<i32>(offset))
+					static_cast<u8>(source), base, memory
 				);
 			}
 
 			return instruction::create_rm(
 				context, instruction::lea, n->get_data(), destination,
-				base, mem(index, scale, static_cast<i32>(offset))
+				base, memory
 			);
 		}
 
 		return instruction::create_mr(
 			context, static_cast<instruction::type>(store_op), n->get_data(),
-			base, mem(index, scale, static_cast<i32>(offset)), source
+			base, memory, source
 		);
 	}
 
 	handle<instruction> select_array_access_instruction(
-		code_generator_context& context,
-		handle<node> n,
-		reg destination, 
-		i32 store_op,
-		i32 source
+		code_generator_context& context, handle<node> n, reg destination, 
+		i32 store_op, i32 source
 	) {
 		// compute base
 		if(
@@ -790,9 +782,7 @@ namespace ir::cg {
 	}
 
 	void dfs_schedule_phi(
-		code_generator_context& context, 
-		handle<node> block, 
-		handle<node> phi,
+		code_generator_context& context, handle<node> block, handle<node> phi,
 		ptr_diff phi_index
 	) {
 		const handle<node> value = phi->get_input(1 + phi_index);
@@ -885,8 +875,7 @@ namespace ir::cg {
 	}
 
 	reg allocate_virtual_register(
-		code_generator_context& context, 
-		handle<node> n, 
+		code_generator_context& context, handle<node> n, 
 		const data_type& data_type
 	) {
 		const u64 index = context.intervals.size();

@@ -65,10 +65,8 @@ namespace ir::cg {
 		mark_callee_saved_constraints();
 
 		// generate unhandled interval list (sorted by their starting point)
-		// m_unhandled.reserve((interval_count * 4) / 3);
-		for(u64 i = 0; i < interval_count; ++i) {
-			m_unhandled.push_back(i);
-		}
+		m_unhandled.resize(interval_count);
+		std::iota(m_unhandled.begin(), m_unhandled.end(), 0u);
 
 		quick_sort_definitions(
 			context.intervals, 0, static_cast<ptr_diff>(interval_count) - 1,

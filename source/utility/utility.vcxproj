@@ -44,6 +44,7 @@
       <MinimalRebuild>false</MinimalRebuild>
       <StringPooling>true</StringPooling>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <AdditionalOptions>/wd5054 %(AdditionalOptions)</AdditionalOptions>
       <LanguageStandard>stdcpplatest</LanguageStandard>
       <ExternalWarningLevel>TurnOffAllWarnings</ExternalWarningLevel>
       <TreatAngleIncludeAsExternal>true</TreatAngleIncludeAsExternal>
@@ -59,16 +60,28 @@
     </Lib>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="containers\allocators\block_allocator.h" />
+    <ClInclude Include="containers\byte_buffer.h" />
+    <ClInclude Include="containers\contiguous_container.h" />
+    <ClInclude Include="containers\dense_set.h" />
     <ClInclude Include="containers\directed_graph.h" />
+    <ClInclude Include="containers\handle.h" />
+    <ClInclude Include="containers\iterators\const_iterator.h" />
+    <ClInclude Include="containers\iterators\iterator.h" />
+    <ClInclude Include="containers\property.h" />
+    <ClInclude Include="containers\range.h" />
+    <ClInclude Include="containers\slice.h" />
+    <ClInclude Include="containers\string.h" />
     <ClInclude Include="containers\string_accessor.h" />
     <ClInclude Include="diagnostics\console.h" />
     <ClInclude Include="diagnostics\diagnostics.h" />
     <ClInclude Include="diagnostics\error.h" />
     <ClInclude Include="diagnostics\warning.h" />
-    <ClInclude Include="filesystem\file_types\file.h" />
+    <ClInclude Include="filesystem\file_types\old_file.h" />
     <ClInclude Include="filesystem\file_types\raw_file.h" />
     <ClInclude Include="filesystem\file_types\text_file.h" />
     <ClInclude Include="filesystem\filesystem.h" />
+    <ClInclude Include="filesystem\new\file.h" />
     <ClInclude Include="format.h" />
     <ClInclude Include="macros.h" />
     <ClInclude Include="memory.h" />
@@ -77,12 +90,14 @@
     <ClInclude Include="types.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="containers\allocators\block_allocator.cpp" />
+    <ClCompile Include="containers\dense_set.cpp" />
     <ClCompile Include="containers\directed_graph.cpp" />
     <ClCompile Include="containers\string_accessor.cpp" />
     <ClCompile Include="diagnostics\console.cpp" />
     <ClCompile Include="diagnostics\error.cpp" />
     <ClCompile Include="diagnostics\warning.cpp" />
-    <ClCompile Include="filesystem\file_types\file.cpp" />
+    <ClCompile Include="filesystem\file_types\old_file.cpp" />
     <ClCompile Include="filesystem\file_types\raw_file.cpp" />
     <ClCompile Include="filesystem\file_types\text_file.cpp" />
     <ClCompile Include="filesystem\filesystem.cpp" />

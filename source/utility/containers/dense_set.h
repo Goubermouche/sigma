@@ -3,7 +3,8 @@
 
 namespace utility {
 	// TODO: add documentation
-	// TODO: explore alternate datastructures which may result
+	// TODO: rework using the contiguous container system
+	// TODO: explore alternate data structures which may result
 	//       in better performance/cleaner code
 
 	class dense_set {
@@ -13,17 +14,17 @@ namespace utility {
 
 		void clear();
 
-		bool set_union(const dense_set& src);
+		auto set_union(const dense_set& src) -> bool;
 		void copy(const dense_set& src);
 
 		void put(u64 index);
 		void remove(u64 index);
-		bool get(u64 index) const;
+		auto get(u64 index) const -> bool;
 
-		u64 data(u64 index) const;
-		u64& data(u64 index);
+		auto data(u64 index) const -> u64;
+		auto data(u64 index) -> u64&;
 
-		u64 capacity() const;
+		auto capacity() const ->u64;
 	private:
 		std::vector<u64> m_data;
 		u64 m_capacity;

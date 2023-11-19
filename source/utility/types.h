@@ -14,6 +14,8 @@
 #include <iostream>
 #include <iterator>
 #include <string>
+#include <set>
+#include <stack>
 #include <unordered_map>
 #include <unordered_set>
 #include <utility>
@@ -21,7 +23,12 @@
 #include <regex>
 #include <locale>
 #include <numeric>
+#include <map>
 #include <variant>
+#include <typeindex>
+#include <type_traits>
+#include <bitset>
+#include <cstdlib>
 
 // platform specific 
 #ifdef _WIN32
@@ -52,9 +59,10 @@ namespace utility {
 		using f64 = double;
 
 		using filepath = std::filesystem::path;
+        using ptr_diff = ptrdiff_t;
 
         template<typename type>
-        using ptr = std::shared_ptr<type>;
+        using s_ptr = std::shared_ptr<type>;
 
         template<typename type>
         using u_ptr = std::unique_ptr<type>;
@@ -79,13 +87,13 @@ namespace utility {
         struct has_begin_end {
             template<typename container_type> static char(&f(typename std::enable_if<
                 std::is_same<decltype(static_cast<typename container_type::const_iterator(container_type::*)() const>(&container_type::begin)),
-                typename container_type::const_iterator(container_type::*)() const>::value, void>::type*))[1];
+                typename container_type::const_iterator(container_type::*)() const>::value, void>::id*))[1];
 
             template<typename container_type> static char(&f(...))[2];
 
             template<typename container_type> static char(&g(typename std::enable_if<
                 std::is_same<decltype(static_cast<typename container_type::const_iterator(container_type::*)() const>(&container_type::end)),
-                typename container_type::const_iterator(container_type::*)() const>::value, void>::type*))[1];
+                typename container_type::const_iterator(container_type::*)() const>::value, void>::id*))[1];
 
             template<typename container_type> static char(&g(...))[2];
 

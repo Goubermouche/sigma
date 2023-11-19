@@ -44,7 +44,7 @@ namespace utility::detail {
         u64 hex_value;
         if (!(ss >> (hex_value))) {
             return outcome::failure(
-                error::emit<error_code::string_to_hexadecimal_failed>(str)
+                error::emit_assembly<error_code::string_to_hexadecimal_failed>(str)
             );
         }
 
@@ -100,5 +100,17 @@ namespace utility::detail {
         }
 
         return { first_non_space, str.substr(first_non_space) };
+    }
+
+    void string_replace(
+        std::string& str,
+        const std::string& from,
+        const std::string& to
+    ) {
+        u64 start_pos = 0;
+        while ((start_pos = str.find(from, start_pos)) != std::string::npos) {
+            str.replace(start_pos, from.length(), to);
+            start_pos += to.length();
+        }
     }
 }

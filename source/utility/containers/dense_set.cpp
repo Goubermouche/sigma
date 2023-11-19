@@ -10,7 +10,7 @@ namespace utility {
 		std::fill(m_data.begin(), m_data.end(), 0);
 	}
 
-	bool dense_set::set_union(const dense_set& src) {
+	auto dense_set::set_union(const dense_set& src) -> bool {
 		ASSERT(m_capacity >= src.m_capacity, "panic");
 		u64 n = (src.m_capacity + 63) / 64;
 		u64 changes = 0;
@@ -53,7 +53,7 @@ namespace utility {
 		}
 	}
 
-	bool dense_set::get(u64 index) const {
+	auto dense_set::get(u64 index) const -> bool {
 		u64 slot = index / 64;
 		u64 pos = index % 64;
 
@@ -64,15 +64,15 @@ namespace utility {
 		return m_data[slot] & (1ull << pos);
 	}
 
-	u64 dense_set::data(u64 index) const {
+	auto dense_set::data(u64 index) const -> u64 {
 		return m_data[index];
 	}
 
-	u64& dense_set::data(u64 index) {
+	auto dense_set::data(u64 index) -> u64& {
 		return m_data[index];
 	}
 
-	u64 dense_set::capacity() const {
+	auto dense_set::capacity() const -> u64 {
 		return m_capacity;
 	}
 }

@@ -12,12 +12,12 @@
     #error "Unsupported platform!"
 #endif
 
-#define LANG_VERIFY(cond, msg)                                     \
-    do {                                                            \
-        if (!(cond)) {                                              \
-            std::cerr << msg << '\n';                              \
-			DEBUG_BREAK();                                          \
-		}                                                           \
+#define LANG_VERIFY(cond, msg)                    \
+    do {                                          \
+        if (!(cond)) {                            \
+            utility::console::out << msg << '\n'; \
+			DEBUG_BREAK();                        \
+		}                                         \
     } while (false)
 
 /**
@@ -65,3 +65,57 @@
 #define SUPPRESS_C4100(_statement) (void)_statement
 
 #define LANG_FILE_EXTENSION ".s"
+
+
+template <size_t size>
+struct enum_flag_integer_for_size;
+
+template <>
+struct enum_flag_integer_for_size<1> {
+    typedef utility::i8 type;
+};
+
+template <>
+struct enum_flag_integer_for_size<2> {
+    typedef utility::i16 type;
+};
+
+template <>
+struct enum_flag_integer_for_size<4> {
+    typedef utility::i32 type;
+};
+
+template <>
+struct enum_flag_integer_for_size<8> {
+    typedef utility::i64 type;
+};
+
+// used as an approximation of std::underlying_type<T>
+template <class type>
+struct enum_flag_sized_integer {
+    typedef typename enum_flag_integer_for_size<sizeof(type)>::type type;
+};
+
+// source: <winnt.h>
+
+/**
+ * \brief Declares the given \a __enum to have various binary operands useful
+ * with flag enums.
+ * \param __enum Enum to declare as a flag enum
+ */
+#define FLAG_ENUM(__enum) \
+inline constexpr __enum operator | (__enum a, __enum b) noexcept { return __enum(((enum_flag_sized_integer<__enum>::type)a) | ((enum_flag_sized_integer<__enum>::type)b)); } \
+inline __enum &operator |= (__enum &a, __enum b) noexcept { return (__enum &)(((enum_flag_sized_integer<__enum>::type &)a) |= ((enum_flag_sized_integer<__enum>::type)b)); } \
+inline constexpr __enum operator & (__enum a, __enum b) noexcept { return __enum(((enum_flag_sized_integer<__enum>::type)a) & ((enum_flag_sized_integer<__enum>::type)b)); } \
+inline __enum &operator &= (__enum &a, __enum b) noexcept { return (__enum &)(((enum_flag_sized_integer<__enum>::type &)a) &= ((enum_flag_sized_integer<__enum>::type)b)); } \
+inline constexpr __enum operator ~ (__enum a) noexcept { return __enum(~((enum_flag_sized_integer<__enum>::type)a)); }                                                       \
+inline constexpr __enum operator ^ (__enum a, __enum b) noexcept { return __enum(((enum_flag_sized_integer<__enum>::type)a) ^ ((enum_flag_sized_integer<__enum>::type)b)); } \
+inline __enum &operator ^= (__enum &a, __enum b) noexcept { return (__enum &)(((enum_flag_sized_integer<__enum>::type &)a) ^= ((enum_flag_sized_integer<__enum>::type)b)); } \
+
+#if defined(_MSC_VER)
+#define aligned_malloc _aligned_malloc
+#define aligned_free _aligned_free
+#else
+#define aligned_malloc std::aligned_alloc
+#define aligned_free std::free
+#endif

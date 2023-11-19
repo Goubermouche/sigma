@@ -19,51 +19,51 @@ namespace utility {
 			m_data(static_cast<type*>(alloc.allocate(sizeof(type) * count))),
 			m_size(count) {}
 
-		type* get_data() const {
+		[[nodiscard]] auto get_data() const -> type* {
 			return m_data;
 		}
 
-		u64 get_size() const {
+		[[nodiscard]] auto get_size() const -> u64 {
 			return m_size;
 		}
 
-		type& operator[](u64 index) {
+		[[nodiscard]] auto operator[](u64 index) -> type& {
 			return m_data[index];
 		}
 
-		const type& operator[](u64 index) const {
+		[[nodiscard]] auto operator[](u64 index) const -> const type& {
 			return m_data[index];
 		}
 
-		iterator begin() {
+		[[nodiscard]] auto begin() -> iterator {
 			return m_data;
 		}
 
-		const_iterator begin() const {
+		[[nodiscard]] auto begin() const -> const_iterator {
 			return m_data;
 		}
 
-		reverse_iterator rbegin() {
+		[[nodiscard]] auto rbegin() -> reverse_iterator {
 			return reverse_iterator(end());
 		}
 
-		const_reverse_iterator rbegin() const {
+		[[nodiscard]] auto rbegin() const -> const_reverse_iterator {
 			return const_reverse_iterator(end());
 		}
 
-		const_iterator end() const {
+		[[nodiscard]] auto end() const -> const_iterator {
 			return m_data + m_size;
 		}
 
-		iterator end() {
+		[[nodiscard]] auto end() -> iterator {
 			return m_data + m_size;
 		}
 
-		reverse_iterator rend() {
+		[[nodiscard]] auto rend() -> reverse_iterator{
 			return reverse_iterator(begin());
 		}
 
-		const_reverse_iterator rend() const {
+		[[nodiscard]] auto rend() const -> const_reverse_iterator {
 			return const_reverse_iterator(begin());
 		}
 	private:

@@ -16,19 +16,21 @@ namespace utility::types {
         handle(type* ptr)
             : m_ptr(ptr) {}
 
-        type& operator*() const {
+        ~handle() {}
+
+        auto operator*() const -> type& {
             return *m_ptr;
         }
 
-        type* operator->() const {
+        auto operator->() const -> type* {
             return m_ptr;
         }
 
-        type* get() const {
+        [[nodiscard]] auto get() const -> type* {
             return m_ptr;
         }
 
-        bool operator==(const handle& other) const {
+        auto operator==(const handle& other) const -> bool {
             return m_ptr == other.m_ptr;
         }
 

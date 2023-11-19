@@ -1,13 +1,11 @@
 #pragma once
 #include "utility/diagnostics/error.h"
 
-#include "utility/containers/long_string.h"
-#include "utility/containers/byte_buffer.h"
 
 namespace utility {
 	class file {
 	public:
-		static outcome::result<void> write(const long_string& value, const filepath& path) {
+		/*static outcome::result<void> write(const long_string& value, const filepath& path) {
 			OUTCOME_TRY(std::ofstream& file, get_write_handle(path));
 
 			for (char* chunk : value) {
@@ -15,17 +13,17 @@ namespace utility {
 			}
 
 			return outcome::success();
-		}
+		}*/
 
-		static outcome::result<void> write(const byte_buffer& value, const filepath& path) {
-			OUTCOME_TRY(std::ofstream& file, get_write_handle(path));
+		//static outcome::result<void> write(const byte_buffer& value, const filepath& path) {
+		//	OUTCOME_TRY(std::ofstream& file, get_write_handle(path));
 
-			file.write(reinterpret_cast<const char*>(
-				value.get_data()), value.get_size() * sizeof(utility::byte)
-			);
+		//	file.write(reinterpret_cast<const char*>(
+		//		value.get_data()), value.get_size() * sizeof(utility::byte)
+		//	);
 
-			return outcome::success();
-		}
+		//	return outcome::success();
+		//}
 	private:
 		static outcome::result<std::ofstream> get_write_handle(
 			const filepath& path

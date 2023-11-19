@@ -7,7 +7,7 @@ namespace utility {
 		void start();
 
 		template<typename duration>
-		f64 elapsed() const;
+		[[nodiscard]] f64 elapsed() const;
 	private:
 		std::chrono::high_resolution_clock::time_point m_start;
 	};

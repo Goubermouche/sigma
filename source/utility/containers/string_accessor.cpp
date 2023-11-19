@@ -4,19 +4,8 @@ namespace utility::detail {
 	string_accessor::string_accessor(const std::string& string)
 		: m_string(string) {}
 
-	string_accessor::string_accessor(ptr<text_file> file) {
-		// compute total length of the result string
-		const u64 total_length = std::accumulate(file->get_lines().begin(), file->get_lines().end(), size_t{},
-			[](u64 sum, const std::string& str) {
-				return sum + str.size() + 1;  // +1 for newline character
-			});
-
-		m_string.reserve(total_length);
-
-		for (const auto& str : file->get_lines()) {
-			std::ranges::copy(str.begin(), str.end(), std::back_inserter(m_string));
-			m_string.push_back('\n');
-		}
+	string_accessor::string_accessor(s_ptr<text_file> file) {
+		m_string = file->get_contents();
 	}
 
 	void string_accessor::advance()	{

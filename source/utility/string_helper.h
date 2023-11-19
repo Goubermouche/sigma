@@ -61,4 +61,10 @@ namespace utility::detail {
 	std::pair<u64, std::string> remove_leading_spaces(
 		const std::string& str
 	);
+
+	void string_replace(
+		std::string& str,
+		const std::string& from,
+		const std::string& to
+	);
 }

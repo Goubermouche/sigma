@@ -25,6 +25,8 @@ workspace "sigma"
     externalanglebrackets "On"
     externalwarnings "Off"
 
+    buildoptions { "/wd5054" }
+
     flags {
         "MultiProcessorCompile"
     }
@@ -126,25 +128,6 @@ project "parser"
         "utility"
     }
 
--- intermediate code
-project "intermediate_code"
-    kind "StaticLib"
-    location "source/intermediate_code"
-
-    files {
-        "source/intermediate_code/**.h",
-        "source/intermediate_code/**.cpp"
-    } 
-
-    includedirs {
-        "source",
-        path.join(llvm_root, "include")
-    }
-
-    links {
-        "utility"
-    }
-    
 -- code_generator
 project "code_generator"
     kind "StaticLib"
@@ -163,6 +146,28 @@ project "code_generator"
     links {
         "utility"
     }
+
+
+-- intermediate code
+project "intermediate_representation"
+    kind "StaticLib"
+    location "source/intermediate_representation"
+
+    files {
+        "source/intermediate_representation/**.h",
+        "source/intermediate_representation/**.cpp"
+    } 
+
+    includedirs {
+        "source",
+        path.join(llvm_root, "include")
+    }
+
+    links {
+        "code_generator",
+        "utility"
+    }
+    
 
 -- compiler
 project "compiler"
@@ -242,7 +247,7 @@ project "compiler"
         "Version",
         "lexer",
         "parser",
-        "intermediate_code",
+        "intermediate_representation",
         "code_generator"
     }
 

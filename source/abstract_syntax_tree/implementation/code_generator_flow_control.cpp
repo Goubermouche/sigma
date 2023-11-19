@@ -53,7 +53,7 @@ namespace sigma {
 		// check if the return type matches the expected return type
 		if(parent_function->get_return_type() != type(type::base::empty, 0)) {
 			return utility::outcome::failure(
-				utility::error::emit<utility::error_code::return_statement_type_mismatch>(
+				utility::error::emit_assembly<utility::error_code::return_statement_type_mismatch>(
 					parent_function_identifier,
 					type(type::base::empty, 0),
 					parent_function->get_return_type()
@@ -292,7 +292,7 @@ namespace sigma {
 		if (condition_value_result->get_type().get_base() != type::base::boolean ||
 			condition_value_result->get_type().is_pointer()) {
 			return utility::outcome::failure(
-				utility::error::emit<utility::error_code::for_conditional_operator_not_bool>(
+				utility::error::emit_assembly<utility::error_code::for_conditional_operator_not_bool>(
 					utility::file_range{}, // node.get_declared_position()
 					condition_value_result->get_type()
 				)
@@ -344,7 +344,7 @@ namespace sigma {
 		if (end_block == nullptr) {
 			// emit an error if there's no enclosing loop to break from
 			return utility::outcome::failure(
-				utility::error::emit<utility::error_code::break_statement_out_of_loop_body>(
+				utility::error::emit_assembly<utility::error_code::break_statement_out_of_loop_body>(
 					utility::file_range{} //node.get_declared_position()
 				)
 			);

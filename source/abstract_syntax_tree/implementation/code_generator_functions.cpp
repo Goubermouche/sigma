@@ -52,7 +52,7 @@ namespace sigma {
 		)) {
 			// failed to insert the function into the registry - function has already been defined before
 			return utility::outcome::failure(
-				utility::error::emit<utility::error_code::function_already_defined>(
+				utility::error::emit_assembly<utility::error_code::function_already_defined>(
 					utility::file_range{}, // node.get_declared_position(),
 					node.get_function_identifier()
 				)
@@ -116,7 +116,7 @@ namespace sigma {
 			// emit the relevant warning
 			// check if the return type is non-void
 			if(node.get_function_return_type() != type(type::base::empty, 0)) {
-				utility::console::out << *utility::warning::emit<utility::warning_code::implicit_function_return_generated>(
+				utility::console::out << *utility::warning::emit_assembly<utility::warning_code::implicit_function_return_generated>(
 					node.get_declared_range(),
 					node.get_function_identifier()
 				);
@@ -156,7 +156,7 @@ namespace sigma {
 		// check if it exists
 		if(!func) {
 			return utility::outcome::failure(
-				utility::error::emit<utility::error_code::function_cannot_be_found>(
+				utility::error::emit_assembly<utility::error_code::function_cannot_be_found>(
 					utility::file_range{}, //node.get_declared_position(),
 					node.get_function_identifier()
 				)
@@ -169,7 +169,7 @@ namespace sigma {
 		// check if the argument counts match
 		if(!func->is_variadic() && required_arguments.size() != given_arguments.size()) {
 			return utility::outcome::failure(
-				utility::error::emit<utility::error_code::function_argument_count_mismatch>(
+				utility::error::emit_assembly<utility::error_code::function_argument_count_mismatch>(
 					utility::file_range{}, //node.get_declared_position(),
 					node.get_function_identifier()
 				)

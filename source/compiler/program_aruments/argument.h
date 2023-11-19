@@ -44,7 +44,7 @@ namespace sigma {
 		const std::string& get_description() const;
 
 		template<typename type>
-		static type any_cast_container(const std::vector<std::any>& values);
+		static type any_cast_container(const std::vector<std::any>& virtual_values);
 
 		template<typename type>
 		type get() const;
@@ -73,7 +73,7 @@ namespace sigma {
 
 	template<typename type>
 	inline type argument::any_cast_container(
-		const std::vector<std::any>& values
+		const std::vector<std::any>& virtual_values
 	) {
 		// convert the entire values vector into the specified container
 		// with the given value type
@@ -81,8 +81,8 @@ namespace sigma {
 
 		type result;
 		std::transform(
-			values.begin(),
-			values.end(),
+			virtual_values.begin(),
+			virtual_values.end(),
 			std::back_inserter(result),
 			[](const auto& value) {
 				return std::any_cast<value_type>(value);

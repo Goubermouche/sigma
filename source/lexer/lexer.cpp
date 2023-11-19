@@ -39,7 +39,7 @@ namespace sigma {
 			return utility::outcome::success();
 		}
 
-		return utility::outcome::failure(utility::error::emit<utility::error_code::parser_unexpected_token>(
+		return utility::outcome::failure(utility::error::emit_assembly<utility::error_code::parser_unexpected_token>(
 			utility::file_range{}, // m_current_token.get_position(),
 			token,
 			m_current_token.get_token()
@@ -150,7 +150,7 @@ namespace sigma {
 		// note: we may want to allow this in some cases (ie. when calling member functions)
 		if (m_last_character == '.') {
 			return utility::outcome::failure(
-				utility::error::emit<utility::error_code::lexer_invalid_dot_at_start>()
+				utility::error::emit_assembly<utility::error_code::lexer_invalid_dot_at_start>()
 			);
 		}
 
@@ -211,7 +211,7 @@ namespace sigma {
 
 		// don't allow 3 or more consecutive underscore characters
 		if (m_value_string.find("___") != std::string::npos) {
-			return utility::outcome::failure(utility::error::emit<utility::error_code::lexer_double_underscore>());
+			return utility::outcome::failure(utility::error::emit_assembly<utility::error_code::lexer_double_underscore>());
 		}
 
 		m_current_token_end_char_index = m_current_char_index - 2;
@@ -254,7 +254,7 @@ namespace sigma {
 			if(m_last_character == '.') {
 				if(dot_met) {
 					return utility::outcome::failure(
-						utility::error::emit<utility::error_code::lexer_invalid_number_format_more_than_one_dot>()
+						utility::error::emit_assembly<utility::error_code::lexer_invalid_number_format_more_than_one_dot>()
 					);
 				}
 
@@ -263,7 +263,7 @@ namespace sigma {
 			else if(m_last_character == 'u') {
 				if(dot_met) {
 					return utility::outcome::failure(
-						utility::error::emit<utility::error_code::lexer_invalid_number_format_unsigned_containing_dot>()
+						utility::error::emit_assembly<utility::error_code::lexer_invalid_number_format_unsigned_containing_dot>()
 					);
 				}
 
@@ -274,7 +274,7 @@ namespace sigma {
 			else if(m_last_character == 'f') {
 				if(!dot_met) {
 					return utility::outcome::failure(
-						utility::error::emit<utility::error_code::lexer_invalid_number_format_floating_point_without_dot>()
+						utility::error::emit_assembly<utility::error_code::lexer_invalid_number_format_floating_point_without_dot>()
 					);
 				}
 
@@ -305,30 +305,30 @@ namespace sigma {
 		u64 max_length
 	) {
 		// the last character, at this point is an x
-		std::string buffer;
+		std::string bytecode;
 		u64 parsed_count = 0;
 
 		// consume all valid hex characters within the specified range
 		while (parsed_count < max_length && utility::detail::is_hex(get_next_char()) && !m_accessor.end()) {
-			buffer += m_last_character;
+			bytecode += m_last_character;
 			parsed_count++;
 		}
 
-		return buffer;
+		return bytecode;
 	}
 
 	utility::outcome::result<std::string> lexer::get_binary_string(
 		u64 max_length
 	) {
-		std::string buffer;
+		std::string bytecode;
 		u64 parsed_count = 0;
 
 		while (parsed_count < max_length && utility::detail::is_bin(get_next_char()) && !m_accessor.end()) {
-			buffer += m_last_character;
+			bytecode += m_last_character;
 			parsed_count++;
 		}
 
-		return buffer;
+		return bytecode;
 	}
 
 	utility::outcome::result<std::string> lexer::get_escaped_character() {
@@ -359,7 +359,7 @@ namespace sigma {
 			case '0':  return "\0";
 			default:
 				return utility::outcome::failure(
-					utility::error::emit<utility::error_code::lexer_unknown_escape_sequence>(m_last_character)
+					utility::error::emit_assembly<utility::error_code::lexer_unknown_escape_sequence>(m_last_character)
 				);
 			}
 		}
@@ -374,7 +374,7 @@ namespace sigma {
 
 		if(m_last_character != '\'') {
 			return utility::outcome::failure(
-				utility::error::emit<utility::error_code::lexer_unterminated_character_literal>()
+				utility::error::emit_assembly<utility::error_code::lexer_unterminated_character_literal>()
 			);
 		}
 
@@ -395,7 +395,7 @@ namespace sigma {
 
 		if(m_last_character != '"') {
 			return utility::outcome::failure(
-				utility::error::emit<utility::error_code::lexer_unterminated_string_literal>()
+				utility::error::emit_assembly<utility::error_code::lexer_unterminated_string_literal>()
 			);
 		}
 

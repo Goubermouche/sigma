@@ -1,13 +1,12 @@
 #pragma once
-#include <utility/containers/slice.h>
-#include <utility/containers/property.h>
-#include <utility/containers/long_string.h>
-#include <utility/containers/allocators/block_allocator.h>
-
 #include "intermediate_representation/node_hierarchy/data_type.h"
 #include "intermediate_representation/node_hierarchy/properties/operations.h"
 #include "intermediate_representation/node_hierarchy/properties/memory.h"
 #include "intermediate_representation/node_hierarchy/properties/control_flow.h"
+
+#include <utility/containers/allocators/block_allocator.h>
+#include <utility/containers/property.h>
+#include <utility/containers/slice.h>
 
 namespace ir {
 	struct codegen_context;

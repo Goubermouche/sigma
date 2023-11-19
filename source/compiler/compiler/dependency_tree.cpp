@@ -11,7 +11,7 @@ namespace sigma {
 
 	utility::outcome::result<void> dependency_tree::verify() const {
 		if(m_graph.is_acyclic() == false) {
-			return utility::outcome::failure(utility::error::emit<utility::error_code::circular_dependency>());
+			return utility::outcome::failure(utility::error::emit_assembly<utility::error_code::circular_dependency>());
 		}
 
 		return utility::outcome::success();
@@ -121,7 +121,7 @@ namespace sigma {
 	) {
 		if (file->get_extension() != LANG_FILE_EXTENSION) {
 			return utility::outcome::failure(
-				utility::error::emit<utility::error_code::invalid_file_extension>(file->get_path(), LANG_FILE_EXTENSION)
+				utility::error::emit_assembly<utility::error_code::invalid_file_extension>(file->get_path(), LANG_FILE_EXTENSION)
 			);
 		}
 

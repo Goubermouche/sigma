@@ -83,7 +83,7 @@ namespace sigma {
 		// check if the global variable exists
 		if (!global_variable) {
 			return utility::outcome::failure(
-				utility::error::emit<utility::error_code::variable_cannot_be_found>(
+				utility::error::emit_assembly<utility::error_code::variable_cannot_be_found>(
 					utility::file_range{}, //node.get_declared_position(), 
 					node.get_identifier()
 				)
@@ -146,7 +146,7 @@ namespace sigma {
 		)) {
 			// insertion operation failed - the variable has already been defined before
 			return utility::outcome::failure(
-				utility::error::emit<utility::error_code::local_variable_already_defined_in_global_scope>(
+				utility::error::emit_assembly<utility::error_code::local_variable_already_defined_in_global_scope>(
 					utility::file_range{}, //node.get_declared_position(),
 					node.get_declaration_identifier()
 				)
@@ -240,7 +240,7 @@ namespace sigma {
 		)) {
 			// variable insertion failed - variable has been declared before
 			return utility::outcome::failure(
-				utility::error::emit<utility::error_code::global_variable_already_defined>(
+				utility::error::emit_assembly<utility::error_code::global_variable_already_defined>(
 					utility::file_range{}, //node.get_declared_position(),
 					node.get_declaration_identifier()
 				)
@@ -571,7 +571,7 @@ namespace sigma {
 		}
 
 		return utility::outcome::failure(
-			utility::error::emit<utility::error_code::variable_cannot_be_found>(
+			utility::error::emit_assembly<utility::error_code::variable_cannot_be_found>(
 				utility::file_range{}, //node.get_declared_position(),
 				node.get_identifier()
 			)

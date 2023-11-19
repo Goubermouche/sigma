@@ -56,7 +56,7 @@ namespace sigma {
 		// check if the expression is an integer or a floating-point value
 		if (!expression_result->get_type().is_numerical()) {
 			return utility::outcome::failure(
-				utility::error::emit<utility::error_code::post_decrement_type_mismatch>(
+				utility::error::emit_assembly<utility::error_code::post_decrement_type_mismatch>(
 					utility::file_range{}, // node.get_declared_position(), 
 					expression_result->get_type()
 				)
@@ -106,7 +106,7 @@ namespace sigma {
 		// check if the expression is an integer or a floating-point value
 		if (!expression_result->get_type().is_numerical()) {
 			return utility::outcome::failure(
-				utility::error::emit<utility::error_code::post_increment_type_mismatch>(
+				utility::error::emit_assembly<utility::error_code::post_increment_type_mismatch>(
 					utility::file_range{}, // node.get_declared_position(),
 					expression_result->get_type()
 				)
@@ -155,7 +155,7 @@ namespace sigma {
 		// check if the expression is an integer or a floating-point value
 		if (!expression_result->get_type().is_numerical()) {
 			return utility::outcome::failure(
-				utility::error::emit<utility::error_code::pre_decrement_type_mismatch>(
+				utility::error::emit_assembly<utility::error_code::pre_decrement_type_mismatch>(
 					utility::file_range{}, //node.get_declared_position(), 
 					expression_result->get_type()
 				)
@@ -210,7 +210,7 @@ namespace sigma {
 		// check if the expression is an integer or a floating-point value
 		if (!expression_result->get_type().is_numerical()) {
 			return utility::outcome::failure(
-				utility::error::emit<utility::error_code::pre_increment_type_mismatch>(
+				utility::error::emit_assembly<utility::error_code::pre_increment_type_mismatch>(
 					utility::file_range{}, //node.get_declared_position(), 
 					expression_result->get_type()
 				)
@@ -267,7 +267,7 @@ namespace sigma {
 		// the expression must be integral
 		if (!operand_result->get_type().is_integral()) {
 			return utility::outcome::failure(
-				utility::error::emit<utility::error_code::bitwise_not_type_mismatch>(
+				utility::error::emit_assembly<utility::error_code::bitwise_not_type_mismatch>(
 					utility::file_range{}, //node.get_declared_position(),
 					operand_result->get_type()
 				)
@@ -351,7 +351,7 @@ namespace sigma {
 		if(!operand_result->get_type().is_numerical() && 
 			operand_result->get_type().get_base() != type::base::boolean) {
 			return utility::outcome::failure(
-				utility::error::emit<utility::error_code::negation_type_mismatch>(
+				utility::error::emit_assembly<utility::error_code::negation_type_mismatch>(
 					utility::file_range{}, //node.get_declared_position(),
 					operand_result->get_type()
 				)
@@ -691,7 +691,7 @@ namespace sigma {
 		if (!left_operand_result->get_type().is_integral() ||
 			!right_operand_result->get_type().is_integral()) {
 			return utility::outcome::failure(
-				utility::error::emit<utility::error_code::bitwise_and_type_mismatch>(
+				utility::error::emit_assembly<utility::error_code::bitwise_and_type_mismatch>(
 					utility::file_range{}, //node.get_declared_position(),
 					left_operand_result->get_type(),
 					right_operand_result->get_type()
@@ -752,7 +752,7 @@ namespace sigma {
 		if (!left_operand_result->get_type().is_integral() ||
 			!right_operand_result->get_type().is_integral()) {
 			return utility::outcome::failure(
-				utility::error::emit<utility::error_code::bitwise_or_type_mismatch>(
+				utility::error::emit_assembly<utility::error_code::bitwise_or_type_mismatch>(
 					utility::file_range{}, //node.get_declared_position(),
 					left_operand_result->get_type(),
 					right_operand_result->get_type()
@@ -815,7 +815,7 @@ namespace sigma {
 		if (!left_operand_result->get_type().is_integral() ||
 			!right_operand_result->get_type().is_integral()) {
 			return utility::outcome::failure(
-				utility::error::emit<utility::error_code::bitwise_left_shift_type_mismatch>(
+				utility::error::emit_assembly<utility::error_code::bitwise_left_shift_type_mismatch>(
 					utility::file_range{}, //node.get_declared_position(),
 					left_operand_result->get_type(),
 					right_operand_result->get_type()
@@ -876,7 +876,7 @@ namespace sigma {
 		if (!left_operand_result->get_type().is_integral() ||
 			!right_operand_result->get_type().is_integral()) {
 			return utility::outcome::failure(
-				utility::error::emit<utility::error_code::bitwise_right_shift_type_mismatch>(
+				utility::error::emit_assembly<utility::error_code::bitwise_right_shift_type_mismatch>(
 					utility::file_range{}, //node.get_declared_position(),
 					left_operand_result->get_type(),
 					right_operand_result->get_type()
@@ -938,7 +938,7 @@ namespace sigma {
 		if (!left_operand_result->get_type().is_integral() ||
 			!right_operand_result->get_type().is_integral()) {
 			return utility::outcome::failure(
-				utility::error::emit<utility::error_code::bitwise_xor_type_mismatch>(
+				utility::error::emit_assembly<utility::error_code::bitwise_xor_type_mismatch>(
 					utility::file_range{}, //node.get_declared_position(),
 					left_operand_result->get_type(),
 					right_operand_result->get_type()
@@ -982,7 +982,7 @@ namespace sigma {
 		if (left_operand_result->get_type().get_base() != type::base::boolean || 
 			right_operand_result->get_type().get_base() != type::base::boolean) {
 			return utility::outcome::failure(
-				utility::error::emit<utility::error_code::conjunction_type_mismatch>(
+				utility::error::emit_assembly<utility::error_code::conjunction_type_mismatch>(
 					utility::file_range{}, //node.get_declared_position(),
 					left_operand_result->get_type(),
 					right_operand_result->get_type()
@@ -1026,7 +1026,7 @@ namespace sigma {
 		if (left_operand_result->get_type().get_base() != type::base::boolean ||
 			right_operand_result->get_type().get_base() != type::base::boolean) {
 			return utility::outcome::failure(
-				utility::error::emit<utility::error_code::disjunction_type_mismatch>(
+				utility::error::emit_assembly<utility::error_code::disjunction_type_mismatch>(
 					utility::file_range{}, //node.get_declared_position(),
 					left_operand_result->get_type(), 
 					right_operand_result->get_type()

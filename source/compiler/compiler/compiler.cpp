@@ -142,7 +142,7 @@ namespace sigma {
 			llvm::CGFT_ObjectFile
 		)) {
 			return utility::outcome::failure(
-				utility::error::emit<utility::error_code::target_machine_cannot_emit_file>()
+				utility::error::emit_assembly<utility::error_code::target_machine_cannot_emit_file>()
 			);
 		}
 
@@ -205,7 +205,7 @@ namespace sigma {
 		// check for compilation errors
 		if (compilation) {
 			if (compilation->containsError()) {
-				utility::error::emit<utility::error_code::clang_compilation_contains_errors>();
+				utility::error::emit_assembly<utility::error_code::clang_compilation_contains_errors>();
 			}
 
 			llvm::SmallVector<std::pair<i32, const clang::driver::Command*>, 4> failing_commands;
@@ -239,7 +239,7 @@ namespace sigma {
 
 		if(!error.empty()) {
 			return utility::outcome::failure(
-				utility::error::emit<utility::error_code::cannot_lookup_target>(target_triple, error)
+				utility::error::emit_assembly<utility::error_code::cannot_lookup_target>(target_triple, error)
 			);
 		}
 
@@ -295,7 +295,7 @@ namespace sigma {
 
 		if(!m_settings.outputs.contains(file_extension::o)) {
 			// delete .o file if we don't want to emit it 
-			OUTCOME_TRY(utility::file::remove(object_file));
+			OUTCOME_TRY(utility::old_file::remove(object_file));
 		}
 
 		return utility::outcome::success();
@@ -308,13 +308,13 @@ namespace sigma {
 		if(const auto main_func = context->get_function_registry().get_function("main", context)) {
 			if (main_func->get_return_type() != type(type::base::i32, 0)) {
 				return utility::outcome::failure(
-					utility::error::emit<utility::error_code::cannot_find_main_with_correct_return_type>(main_func->get_return_type())
+					utility::error::emit_assembly<utility::error_code::cannot_find_main_with_correct_return_type>(main_func->get_return_type())
 				); // return on failure
 			}
 		}
 		else {
 			return utility::outcome::failure(
-				utility::error::emit<utility::error_code::cannot_find_main>()
+				utility::error::emit_assembly<utility::error_code::cannot_find_main>()
 			); // return on failure
 		}
 
@@ -364,7 +364,7 @@ namespace sigma {
 			}
 			else {
 				return utility::outcome::failure(
-					utility::error::emit<utility::error_code::unrecognized_output_extension>(path.extension())
+					utility::error::emit_assembly<utility::error_code::unrecognized_output_extension>(path.extension())
 				);
 			}
 		}

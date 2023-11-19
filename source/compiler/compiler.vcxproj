@@ -45,6 +45,7 @@
       <MinimalRebuild>false</MinimalRebuild>
       <StringPooling>true</StringPooling>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <AdditionalOptions>/wd5054 %(AdditionalOptions)</AdditionalOptions>
       <LanguageStandard>stdcpplatest</LanguageStandard>
       <ExternalWarningLevel>TurnOffAllWarnings</ExternalWarningLevel>
       <TreatAngleIncludeAsExternal>true</TreatAngleIncludeAsExternal>
@@ -79,8 +80,8 @@
     <ProjectReference Include="..\parser\parser.vcxproj">
       <Project>{F28D3C14-DE2F-67EA-C7EA-7A3EB32BEE3A}</Project>
     </ProjectReference>
-    <ProjectReference Include="..\intermediate_code\intermediate_code.vcxproj">
-      <Project>{7ADAB0CF-E6F0-AE65-2F68-3A879BBD7FED}</Project>
+    <ProjectReference Include="..\intermediate_representation\intermediate_representation.vcxproj">
+      <Project>{9289A667-FE96-D44D-877D-D038F389A004}</Project>
     </ProjectReference>
     <ProjectReference Include="..\code_generator\code_generator.vcxproj">
       <Project>{C6E670B8-B2B4-64BE-9B48-D5E487B54023}</Project>

@@ -15,7 +15,7 @@ namespace sigma {
 
 		if (literal_type.get_pointer_level() > 0) {
 			return utility::outcome::failure(
-				utility::error::emit<utility::error_code::cannot_declare_numerical_using_pointer>(
+				utility::error::emit_assembly<utility::error_code::cannot_declare_numerical_using_pointer>(
 					utility::file_range{} // node.get_declared_position()
 				)
 			); // return on failure
@@ -128,7 +128,7 @@ namespace sigma {
 			);
 		default:
 			return utility::outcome::failure(
-				utility::error::emit<utility::error_code::cannot_declare_numerical_using_type>(
+				utility::error::emit_assembly<utility::error_code::cannot_declare_numerical_using_type>(
 					utility::file_range{}, //node.get_declared_position(), 
 					literal_type
 				)

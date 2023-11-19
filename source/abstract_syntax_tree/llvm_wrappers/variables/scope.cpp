@@ -21,7 +21,7 @@ namespace sigma {
 		for (const auto& variable : other->m_variables) {
 			if (m_variables.contains(variable.first)) {
 				return utility::outcome::failure(
-					utility::error::emit<utility::error_code::local_variable_already_defined>(
+					utility::error::emit_assembly<utility::error_code::local_variable_already_defined>(
 						variable.first
 					)
 				);

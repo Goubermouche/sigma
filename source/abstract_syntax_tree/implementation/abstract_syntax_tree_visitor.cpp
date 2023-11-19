@@ -45,7 +45,7 @@ namespace sigma {
 			//	return false;
 			//}
 
-			utility::console::out << *utility::warning::emit<utility::warning_code::implicit_function_type_cast>(
+			utility::console::out << *utility::warning::emit_assembly<utility::warning_code::implicit_function_type_cast>(
 				range,
 				function_return_type,
 				target_type
@@ -81,7 +81,7 @@ namespace sigma {
 		//	return false;
 		//}
 
-		utility::console::out << *utility::warning::emit<utility::warning_code::implicit_type_cast>(
+		utility::console::out << *utility::warning::emit_assembly<utility::warning_code::implicit_type_cast>(
 			range,
 			source_value->get_type(),
 			target_type

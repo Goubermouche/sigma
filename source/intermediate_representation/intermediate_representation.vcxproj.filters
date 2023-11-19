@@ -1,81 +1,187 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <Filter Include="constants">
-      <UniqueIdentifier>{6215F996-CE7F-AD0D-17BE-5EB383678B62}</UniqueIdentifier>
+    <Filter Include="codegen">
+      <UniqueIdentifier>{1A72BCD2-8651-3B6E-8F69-C644FBC7A1CF}</UniqueIdentifier>
     </Filter>
-    <Filter Include="instructions">
-      <UniqueIdentifier>{3A3578A6-2698-074B-CF1D-4001BB5FD3CD}</UniqueIdentifier>
+    <Filter Include="codegen\architectures">
+      <UniqueIdentifier>{BF9B2B6A-2B08-E764-F4FB-7EC2602709CD}</UniqueIdentifier>
     </Filter>
-    <Filter Include="instructions\flow_control">
-      <UniqueIdentifier>{01760FDB-6D38-4365-B6E8-D1F122EA1B43}</UniqueIdentifier>
+    <Filter Include="codegen\architectures\x64">
+      <UniqueIdentifier>{B02E1D8A-1CF1-5014-65A1-DFA0D1A229F2}</UniqueIdentifier>
     </Filter>
-    <Filter Include="instructions\flow_control\function">
-      <UniqueIdentifier>{9674285A-82B0-2BC4-EBC2-43BBD71DD4DE}</UniqueIdentifier>
+    <Filter Include="codegen\memory">
+      <UniqueIdentifier>{629C4C5E-4E6A-4064-37FE-B08A236B1CC9}</UniqueIdentifier>
     </Filter>
-    <Filter Include="instructions\memory">
-      <UniqueIdentifier>{829B09FF-EEFC-E60C-776A-2DBFE3CA1DCC}</UniqueIdentifier>
+    <Filter Include="codegen\memory\allocators">
+      <UniqueIdentifier>{0575B483-7137-E80D-BAE7-769A26E9C0EB}</UniqueIdentifier>
     </Filter>
-    <Filter Include="instructions\operations">
-      <UniqueIdentifier>{6DE616C0-D91D-5F57-E227-C37A4EDE8550}</UniqueIdentifier>
+    <Filter Include="codegen\optimization">
+      <UniqueIdentifier>{D0CE2311-BC5D-ADDA-657C-C1D551EABD80}</UniqueIdentifier>
     </Filter>
-    <Filter Include="types">
-      <UniqueIdentifier>{5A5E7610-C672-9EC1-8FF4-4121FBC79AF2}</UniqueIdentifier>
+    <Filter Include="codegen\targets">
+      <UniqueIdentifier>{630FB939-CF9A-26FE-D8AB-A9F244B682FE}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="codegen\targets\win">
+      <UniqueIdentifier>{E0D6C384-4C38-A192-D5A5-E7444106D851}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="codegen\transformation">
+      <UniqueIdentifier>{E05FC348-CC59-EC9A-B5C6-82ABA15F5207}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="node_hierarchy">
+      <UniqueIdentifier>{497B13D2-3549-07D8-1EDD-77FE0A4AE33C}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="node_hierarchy\properties">
+      <UniqueIdentifier>{858E7495-F150-A81F-3A01-37ACA60281FD}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="nodes\node.h" />
-    <ClInclude Include="nodes\properties\types.h" />
-    <ClInclude Include="nodes\properties\operations.h" />
+    <ClInclude Include="codegen\architectures\architecture.h">
+      <Filter>codegen\architectures</Filter>
+    </ClInclude>
+    <ClInclude Include="codegen\architectures\x64\x64.h">
+      <Filter>codegen\architectures\x64</Filter>
+    </ClInclude>
+    <ClInclude Include="codegen\architectures\x64\x64_disassembler.h">
+      <Filter>codegen\architectures\x64</Filter>
+    </ClInclude>
+    <ClInclude Include="codegen\codegen_context.h">
+      <Filter>codegen</Filter>
+    </ClInclude>
+    <ClInclude Include="codegen\control_flow_graph.h">
+      <Filter>codegen</Filter>
+    </ClInclude>
+    <ClInclude Include="codegen\instruction.h">
+      <Filter>codegen</Filter>
+    </ClInclude>
+    <ClInclude Include="codegen\live_interval.h">
+      <Filter>codegen</Filter>
+    </ClInclude>
+    <ClInclude Include="codegen\memory\allocators\allocator_base.h">
+      <Filter>codegen\memory\allocators</Filter>
+    </ClInclude>
+    <ClInclude Include="codegen\memory\allocators\linear_scan_allocator.h">
+      <Filter>codegen\memory\allocators</Filter>
+    </ClInclude>
+    <ClInclude Include="codegen\memory\memory.h">
+      <Filter>codegen\memory</Filter>
+    </ClInclude>
+    <ClInclude Include="codegen\optimization\optimization_pass_list.h">
+      <Filter>codegen\optimization</Filter>
+    </ClInclude>
+    <ClInclude Include="codegen\targets\parameter_descriptor.h">
+      <Filter>codegen\targets</Filter>
+    </ClInclude>
+    <ClInclude Include="codegen\targets\target.h">
+      <Filter>codegen\targets</Filter>
+    </ClInclude>
+    <ClInclude Include="codegen\targets\win\win.h">
+      <Filter>codegen\targets\win</Filter>
+    </ClInclude>
+    <ClInclude Include="codegen\transformation\live_range_analysis.h">
+      <Filter>codegen\transformation</Filter>
+    </ClInclude>
+    <ClInclude Include="codegen\transformation\scheduler.h">
+      <Filter>codegen\transformation</Filter>
+    </ClInclude>
+    <ClInclude Include="codegen\transformation\transformation_context.h">
+      <Filter>codegen\transformation</Filter>
+    </ClInclude>
+    <ClInclude Include="codegen\transformation\use_list.h">
+      <Filter>codegen\transformation</Filter>
+    </ClInclude>
+    <ClInclude Include="codegen\work_list.h">
+      <Filter>codegen</Filter>
+    </ClInclude>
     <ClInclude Include="module.h" />
-    <ClInclude Include="nodes\function.h" />
-    <ClInclude Include="nodes\data_type.h" />
-    <ClInclude Include="nodes\user.h" />
-    <ClInclude Include="nodes\symbol.h" />
-    <ClInclude Include="nodes\properties\memory.h" />
-    <ClInclude Include="nodes\properties\control_flow.h" />
-    <ClInclude Include="code_generation\code_generator_context.h" />
-    <ClInclude Include="code_generation\targets\x64_target.h" />
-    <ClInclude Include="code_generation\targets\target_base.h" />
-    <ClInclude Include="code_generation\memory\allocators\allocator_base.h" />
-    <ClInclude Include="code_generation\memory\allocators\linear_scan_allocator.h" />
-    <ClInclude Include="code_generation\work_list.h" />
-    <ClInclude Include="code_generation\use_list.h" />
-    <ClInclude Include="code_generation\optimization\passes\scheduler.h" />
-    <ClInclude Include="code_generation\live_interval.h" />
-    <ClInclude Include="code_generation\instruction_selection\instruction_selection.h" />
-    <ClInclude Include="code_generation\instruction.h" />
-    <ClInclude Include="code_generation\live_range_analysis.h" />
-    <ClInclude Include="code_generation\machine_block.h" />
-    <ClInclude Include="code_generation\phi_value.h" />
-    <ClInclude Include="code_generation\memory\reg.h" />
-    <ClInclude Include="code_generation\targets\x64\registers.h" />
-    <ClInclude Include="code_generation\optimization\optimization_pass.h" />
-    <ClInclude Include="code_generation\memory\mem.h" />
+    <ClInclude Include="node_hierarchy\data_type.h">
+      <Filter>node_hierarchy</Filter>
+    </ClInclude>
+    <ClInclude Include="node_hierarchy\function.h">
+      <Filter>node_hierarchy</Filter>
+    </ClInclude>
+    <ClInclude Include="node_hierarchy\node.h">
+      <Filter>node_hierarchy</Filter>
+    </ClInclude>
+    <ClInclude Include="node_hierarchy\properties\control_flow.h">
+      <Filter>node_hierarchy\properties</Filter>
+    </ClInclude>
+    <ClInclude Include="node_hierarchy\properties\memory.h">
+      <Filter>node_hierarchy\properties</Filter>
+    </ClInclude>
+    <ClInclude Include="node_hierarchy\properties\operations.h">
+      <Filter>node_hierarchy\properties</Filter>
+    </ClInclude>
+    <ClInclude Include="node_hierarchy\properties\types.h">
+      <Filter>node_hierarchy\properties</Filter>
+    </ClInclude>
+    <ClInclude Include="node_hierarchy\symbol.h">
+      <Filter>node_hierarchy</Filter>
+    </ClInclude>
+    <ClInclude Include="node_hierarchy\user.h">
+      <Filter>node_hierarchy</Filter>
+    </ClInclude>
+    <ClInclude Include="codegen\value.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="nodes\node.cpp" />
+    <ClCompile Include="codegen\architectures\x64\x64.cpp">
+      <Filter>codegen\architectures\x64</Filter>
+    </ClCompile>
+    <ClCompile Include="codegen\architectures\x64\x64_disassembler.cpp">
+      <Filter>codegen\architectures\x64</Filter>
+    </ClCompile>
+    <ClCompile Include="codegen\architectures\x64\x64_instruction_selection.cpp">
+      <Filter>codegen\architectures\x64</Filter>
+    </ClCompile>
+    <ClCompile Include="codegen\codegen_context.cpp">
+      <Filter>codegen</Filter>
+    </ClCompile>
+    <ClCompile Include="codegen\control_flow_graph.cpp">
+      <Filter>codegen</Filter>
+    </ClCompile>
+    <ClCompile Include="codegen\instruction.cpp">
+      <Filter>codegen</Filter>
+    </ClCompile>
+    <ClCompile Include="codegen\live_interval.cpp">
+      <Filter>codegen</Filter>
+    </ClCompile>
+    <ClCompile Include="codegen\memory\allocators\allocator_base.cpp">
+      <Filter>codegen\memory\allocators</Filter>
+    </ClCompile>
+    <ClCompile Include="codegen\memory\allocators\linear_scan_allocator.cpp">
+      <Filter>codegen\memory\allocators</Filter>
+    </ClCompile>
+    <ClCompile Include="codegen\memory\memory.cpp">
+      <Filter>codegen\memory</Filter>
+    </ClCompile>
+    <ClCompile Include="codegen\optimization\optimization_pass_list.cpp">
+      <Filter>codegen\optimization</Filter>
+    </ClCompile>
+    <ClCompile Include="codegen\targets\target.cpp">
+      <Filter>codegen\targets</Filter>
+    </ClCompile>
+    <ClCompile Include="codegen\transformation\live_range_analysis.cpp">
+      <Filter>codegen\transformation</Filter>
+    </ClCompile>
+    <ClCompile Include="codegen\transformation\scheduler.cpp">
+      <Filter>codegen\transformation</Filter>
+    </ClCompile>
+    <ClCompile Include="codegen\transformation\use_list.cpp">
+      <Filter>codegen\transformation</Filter>
+    </ClCompile>
+    <ClCompile Include="codegen\work_list.cpp">
+      <Filter>codegen</Filter>
+    </ClCompile>
     <ClCompile Include="module.cpp" />
-    <ClCompile Include="nodes\function.cpp" />
-    <ClCompile Include="nodes\data_type.cpp" />
-    <ClCompile Include="nodes\user.cpp" />
-    <ClCompile Include="nodes\symbol.cpp" />
-    <ClCompile Include="code_generation\targets\x64_target.cpp" />
-    <ClCompile Include="code_generation\targets\target_base.cpp" />
-    <ClCompile Include="code_generation\memory\allocators\allocator_base.cpp" />
-    <ClCompile Include="code_generation\memory\allocators\linear_scan_allocator.cpp" />
-    <ClCompile Include="code_generation\work_list.cpp" />
-    <ClCompile Include="code_generation\use_list.cpp" />
-    <ClCompile Include="code_generation\optimization\passes\scheduler.cpp" />
-    <ClCompile Include="code_generation\live_interval.cpp" />
-    <ClCompile Include="code_generation\instruction_selection\instruction_selection.cpp" />
-    <ClCompile Include="code_generation\instruction.cpp" />
-    <ClCompile Include="code_generation\code_generator_context.cpp" />
-    <ClCompile Include="code_generation\live_range_analysis.cpp" />
-    <ClCompile Include="code_generation\machine_block.cpp" />
-    <ClCompile Include="code_generation\phi_value.cpp" />
-    <ClCompile Include="code_generation\memory\reg.cpp" />
-    <ClCompile Include="code_generation\optimization\optimization_pass.cpp" />
-    <ClCompile Include="code_generation\memory\mem.cpp" />
+    <ClCompile Include="node_hierarchy\data_type.cpp">
+      <Filter>node_hierarchy</Filter>
+    </ClCompile>
+    <ClCompile Include="node_hierarchy\function.cpp">
+      <Filter>node_hierarchy</Filter>
+    </ClCompile>
+    <ClCompile Include="node_hierarchy\node.cpp">
+      <Filter>node_hierarchy</Filter>
+    </ClCompile>
+    <ClCompile Include="codegen\value.cpp" />
   </ItemGroup>
 </Project>

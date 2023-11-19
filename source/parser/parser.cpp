@@ -145,7 +145,7 @@ namespace sigma {
 					m_token_list.get_token(); // comma (guaranteed)
 				}
 				else if (next_token != token::r_parenthesis) {
-					return utility::outcome::failure(utility::error::emit<utility::error_code::parser_unexpected_token>(
+					return utility::outcome::failure(utility::error::emit_assembly<utility::error_code::parser_unexpected_token>(
 						utility::file_range{}, //m_token_list.get_current_token().get_position(),
 						token::r_parenthesis,
 						m_token_list.get_current_token().get_token()
@@ -188,7 +188,7 @@ namespace sigma {
 			else {
 				m_token_list.get_token(); // read the erroneous token
 
-				return utility::outcome::failure(utility::error::emit<utility::error_code::parser_unhandled_token>(
+				return utility::outcome::failure(utility::error::emit_assembly<utility::error_code::parser_unhandled_token>(
 					utility::file_range{}, //m_token_list.get_current_token().get_position(),
 					token
 				));
@@ -270,7 +270,7 @@ namespace sigma {
 					OUTCOME_TRY(local_statement_node, parse_pre_operator());
 				}
 				else {
-					return utility::outcome::failure(utility::error::emit<utility::error_code::parser_cannot_apply_unary_to_non_identifier>(
+					return utility::outcome::failure(utility::error::emit_assembly<utility::error_code::parser_cannot_apply_unary_to_non_identifier>(
 						utility::file_range{} //m_token_list.get_current_token().get_position()
 					)); // return on failure
 				}
@@ -295,7 +295,7 @@ namespace sigma {
 				// return right away since we don't want to check for a semicolon at the end of the statement
 				return parse_for_loop();
 			default:
-				return utility::outcome::failure(utility::error::emit<utility::error_code::parser_unhandled_token>(
+				return utility::outcome::failure(utility::error::emit_assembly<utility::error_code::parser_unhandled_token>(
 					utility::file_range{}, //m_token_list.get_current_token().get_position(),
 					next_token
 				)); // return on failure
@@ -427,7 +427,7 @@ namespace sigma {
 				OUTCOME_TRY(loop_increment_node, parse_pre_operator());
 			}
 			else {
-				return utility::outcome::failure(utility::error::emit<utility::error_code::parser_cannot_apply_unary_to_non_identifier>(
+				return utility::outcome::failure(utility::error::emit_assembly<utility::error_code::parser_cannot_apply_unary_to_non_identifier>(
 					utility::file_range{} //m_token_list.get_current_token().get_position()
 				)); // return on failure
 			}
@@ -435,7 +435,7 @@ namespace sigma {
 		case token::r_parenthesis:
 			break;
 		default:
-			return utility::outcome::failure(utility::error::emit<utility::error_code::parser_unhandled_token>(
+			return utility::outcome::failure(utility::error::emit_assembly<utility::error_code::parser_unhandled_token>(
 				utility::file_range{}, //m_token_list.get_current_token().get_position(),
 				next_token
 			)); // return on failure
@@ -462,7 +462,7 @@ namespace sigma {
 			OUTCOME_TRY(loop_initialization_node, parse_local_statement_identifier());
 		}
 		else {
-			return utility::outcome::failure(utility::error::emit<utility::error_code::parser_unhandled_token>(
+			return utility::outcome::failure(utility::error::emit_assembly<utility::error_code::parser_unhandled_token>(
 				utility::file_range{}, //m_token_list.get_current_token().get_position(),
 				next_token
 			)); // return on failure
@@ -710,7 +710,7 @@ namespace sigma {
 					break;
 				}
 				else {
-					return utility::outcome::failure(utility::error::emit<utility::error_code::parser_unhandled_token>(
+					return utility::outcome::failure(utility::error::emit_assembly<utility::error_code::parser_unhandled_token>(
 						utility::file_range{}, //m_token_list.get_current_token().get_position(),
 						m_token_list.get_current_token().get_token()
 					));  // return on failure
@@ -928,7 +928,7 @@ namespace sigma {
 				return parse_pre_operator();
 			}
 
-			return utility::outcome::failure(utility::error::emit<utility::error_code::parser_cannot_apply_unary_to_non_identifier>(
+			return utility::outcome::failure(utility::error::emit_assembly<utility::error_code::parser_cannot_apply_unary_to_non_identifier>(
 				utility::file_range{} //m_token_list.get_current_token().get_position()
 			)); // return on failure
 		case token::identifier:
@@ -952,7 +952,7 @@ namespace sigma {
 			return parse_bool();
 		}
 
-		return utility::outcome::failure(utility::error::emit<utility::error_code::parser_unhandled_token>(
+		return utility::outcome::failure(utility::error::emit_assembly<utility::error_code::parser_unhandled_token>(
 			utility::file_range{}, //m_token_list.get_current_token().get_position(),
 			m_token_list.get_current_token().get_token()
 		)); // return on failure
@@ -1206,7 +1206,7 @@ namespace sigma {
 		m_token_list.get_token();
 
 		if (!is_token_type(m_token_list.get_current_token().get_token())) {
-			return utility::outcome::failure(utility::error::emit<utility::error_code::parser_cannot_apply_unary_to_non_identifier>(
+			return utility::outcome::failure(utility::error::emit_assembly<utility::error_code::parser_cannot_apply_unary_to_non_identifier>(
 				utility::file_range{}, //m_token_list.get_current_token().get_position(),
 				m_token_list.get_current_token().get_token()
 			)); // return on failure

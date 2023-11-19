@@ -1,6 +1,7 @@
 //#include "compiler/compiler.h"
 #include <intermediate_representation/module.h>
 #include <utility/filesystem/new/file.h>
+#include <utility/timer.h>
 
 using namespace utility::types;
 
@@ -15,51 +16,58 @@ using namespace utility::types;
  * \param argv Argument values
  * \return Status code.
  */
-i32 main(i32 argc, char* argv[]) {
+auto main(i32 argc, char* argv[]) -> i32 {
+	// TODO:
+	// - MOVE LOGIC OVER TO THE FUNCTION STRUCT
+	// - remove the forward lists
+
 	SUPPRESS_C4100(argc);
 	SUPPRESS_C4100(argv);
 
 	utility::console::set_output_stream(std::cout);
+
+	utility::timer timer;
+	timer.start();
+
 	ir::module m;
 
-	m.create_function("test", { I32_TYPE });
+	// add function
+	const auto add_f = m.create_function("add", { I32_TYPE , I32_TYPE }, { I32_TYPE });
 
-	const auto temporary_a = m.create_local(4, 4);
-	const auto temporary_b = m.create_local(4, 4);
-	const auto integer_a = m.create_signed_integer(100, 32);
-	const auto integer_b = m.create_signed_integer(200, 32);
+	const auto a = add_f->get_parameter(0);
+	const auto b = add_f->get_parameter(1);
+	const auto add = add_f->create_add(a, b);
+	add_f->create_ret({ add });
 
-	m.create_store(temporary_a, integer_a, 4, false);
-	m.create_store(temporary_b, integer_b, 4, false);
-	m.create_ret({ m.create_add(temporary_a, temporary_b) });
+	const auto main_f = m.create_function("main", {}, { I32_TYPE });
 
-	utility::long_string dot_str;
-	m.print_node_graph(dot_str);
+	const auto a_val = main_f->create_signed_integer(100, 32);
+	const auto b_val = main_f->create_signed_integer(200, 32);
 
-	const auto serialization_result_dot = utility::file::write(
-		dot_str, "./test/module.dot"
-	);
+	const auto returns = main_f->create_call(add_f, { a_val , b_val });
+	main_f->create_ret(returns);
 
-	ASSERT(!serialization_result_dot.has_error(), "unhandled error encountered");
+	auto compilation_result = m.compile(ir::arch::x64, ir::system::windows);
 
-	const auto compilation_result = m.compile(
-		ir::arch::x64, ir::system::windows
-	);
+	utility::console::out 
+		<< "compilation finished (" 
+		<< utility::console::precision(3)
+		<< timer.elapsed<std::chrono::duration<f64>>()
+		<< "s)\n";
 
-	ASSERT(!compilation_result.has_error(), "unhandled error encountered");
+	std::cout << compilation_result.assembly << '\n';
 
-	const auto serialization_result_asm = utility::file::write(
-		compilation_result.get_value()->assembly_output, "./test/assembly.txt"
-	);
-
-	ASSERT(!serialization_result_asm.has_error(), "unhandled error encountered");
-
-	// 55 48 89 e5 48 83 ec 20 c7 44 3d ec 64 00 00 00 c7 44 3d e8 c8 00 00 00 48 8d 44 3d ec 48 8d 4c 3d e8 48 01 c8 48 83 c4 20 5d c3
-	for (const utility::byte byte : compilation_result.get_value()->bytecode) {
-		utility::console::out << byte.to_hex() << ' ';
+	std::cout << "bytecode:\n";
+	for(utility::byte byte : compilation_result.bytecode) {
+		std::cout << byte.to_hex() << ' ';
 	}
+	std::cout << '\n';
 
-	utility::console::out << '\n';
+	// const auto serialization_result_asm = utility::file::write(
+	// 	compilation_result.get_value()->assembly_output, "./test/assembly.asm"
+	// );
+	// 
+	// ASSERT(!serialization_result_asm.has_error(), "unhandled error encountered");
 
 	return 0;
 

@@ -132,7 +132,7 @@ The expected output, after running the generated .exe, looks like this:
 - [ ] Replace LLVM by a custom code generator
 - [ ] Full C function toolset
 - [X] Support for external files and linking
-- [ ] Integral formats (base-16 HEX, base-8 HEX)
+- [ ] Integral formats (hexadecimal, decimal, octal)
 - [ ] Enum support
 - [ ] Struct support
 - [ ] GPU support with kernels 

@@ -4,6 +4,9 @@
     <Filter Include="containers">
       <UniqueIdentifier>{FB7E5497-E736-96E4-503E-6F403C1531D5}</UniqueIdentifier>
     </Filter>
+    <Filter Include="containers\allocator_based_containers">
+      <UniqueIdentifier>{1E907037-8A54-6F27-53BA-9FF1BF3D0B5D}</UniqueIdentifier>
+    </Filter>
     <Filter Include="containers\allocators">
       <UniqueIdentifier>{FEE53DC4-6A52-F9BE-3346-911C9F711B27}</UniqueIdentifier>
     </Filter>
@@ -22,8 +25,14 @@
     <Filter Include="filesystem\new">
       <UniqueIdentifier>{E39E2650-CF6C-1A56-B800-8B7CA46DF6BA}</UniqueIdentifier>
     </Filter>
+    <Filter Include="filesystem\new\file_types">
+      <UniqueIdentifier>{8657AA97-F219-DE21-3BCA-6CAEA7CBB6FF}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="containers\allocator_based_containers\linked_list.h">
+      <Filter>containers\allocator_based_containers</Filter>
+    </ClInclude>
     <ClInclude Include="containers\allocators\block_allocator.h">
       <Filter>containers\allocators</Filter>
     </ClInclude>
@@ -90,14 +99,15 @@
     <ClInclude Include="filesystem\new\file.h">
       <Filter>filesystem\new</Filter>
     </ClInclude>
+    <ClInclude Include="filesystem\new\file_types\object_file.h">
+      <Filter>filesystem\new\file_types</Filter>
+    </ClInclude>
     <ClInclude Include="format.h" />
     <ClInclude Include="macros.h" />
     <ClInclude Include="memory.h" />
     <ClInclude Include="string_helper.h" />
     <ClInclude Include="timer.h" />
     <ClInclude Include="types.h" />
-    <ClInclude Include="filesystem\new\file_types\object_file.h" />
-    <ClInclude Include="containers\allocator_based_containers\linked_list.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="containers\allocators\block_allocator.cpp">

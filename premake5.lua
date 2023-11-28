@@ -128,26 +128,6 @@ project "parser"
         "utility"
     }
 
--- code_generator
-project "code_generator"
-    kind "StaticLib"
-    location "source/code_generator"
-
-    files {
-        "source/code_generator/**.h",
-        "source/code_generator/**.cpp"
-    } 
-
-    includedirs {
-        "source",
-        path.join(llvm_root, "include")
-    }
-
-    links {
-        "utility"
-    }
-
-
 -- intermediate code
 project "intermediate_representation"
     kind "StaticLib"
@@ -164,7 +144,6 @@ project "intermediate_representation"
     }
 
     links {
-        "code_generator",
         "utility"
     }
     
@@ -247,8 +226,7 @@ project "compiler"
         "Version",
         "lexer",
         "parser",
-        "intermediate_representation",
-        "code_generator"
+        "intermediate_representation"
     }
 
     filter "configurations:Release"

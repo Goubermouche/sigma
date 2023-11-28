@@ -1,5 +1,4 @@
 #include "x64.h"
-#include "code_generator/executable/windows/section_header.h"
 #include "intermediate_representation/target/system/win/win.h"
 
 namespace ir {

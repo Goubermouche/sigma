@@ -83,9 +83,6 @@
     <ProjectReference Include="..\intermediate_representation\intermediate_representation.vcxproj">
       <Project>{9289A667-FE96-D44D-877D-D038F389A004}</Project>
     </ProjectReference>
-    <ProjectReference Include="..\code_generator\code_generator.vcxproj">
-      <Project>{C6E670B8-B2B4-64BE-9B48-D5E487B54023}</Project>
-    </ProjectReference>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

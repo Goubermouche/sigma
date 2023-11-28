@@ -1,7 +1,5 @@
 #include "builder.h"
 
-#include "code_generator/executable/windows/section_header.h"
-
 namespace ir {
 	builder::builder(module& target) : m_target(target) {}
 

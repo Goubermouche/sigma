@@ -60,8 +60,8 @@
     </Lib>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="containers\allocators\block_allocator.h" />
     <ClInclude Include="containers\allocator_based_containers\linked_list.h" />
+    <ClInclude Include="containers\allocators\block_allocator.h" />
     <ClInclude Include="containers\byte_buffer.h" />
     <ClInclude Include="containers\contiguous_container.h" />
     <ClInclude Include="containers\dense_set.h" />

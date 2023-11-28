@@ -73,10 +73,10 @@ namespace ir {
 				// a branch's projection that refers to a region would rather be
 				// coalesced but won't if it's a critical edge
 				if (
-					top->ty == node::projection &&
-					top->inputs[0]->ty == node::branch &&
+					top->ty == node::PROJECTION &&
+					top->inputs[0]->ty == node::BRANCH &&
 					top->use->next_user == nullptr &&
-					top->use->node->ty == node::region &&
+					top->use->node->ty == node::REGION &&
 					top->inputs[0]->is_critical_edge(top)
 				) {
 					if(!context.work_list->visit(top->use->node)) {
@@ -112,7 +112,7 @@ namespace ir {
 			}
 
 			// add successors
-			if(top->ty == node::branch) {
+			if(top->ty == node::BRANCH) {
 				std::vector<handle<node>> successors(top->get<branch>().successors.size());
 
 				for(handle<user> user = top->use; user; user = user->next_user) {
@@ -120,7 +120,7 @@ namespace ir {
 
 					if(successor->is_control() && context.work_list->visit(successor)) {
 						ASSERT(
-							successor->ty == node::projection,
+							successor->ty == node::PROJECTION,
 							"successor node of a branch must be a projection"
 						);
 

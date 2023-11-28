@@ -10,7 +10,7 @@ namespace ir {
 			handle<node> successor = user->node;
 
 			// we can't treat regions in the chain
-			if (successor->ty == node::region) {
+			if (successor->ty == node::REGION) {
 				break;
 			}
 

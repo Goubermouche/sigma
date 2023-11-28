@@ -12,9 +12,13 @@ namespace ir {
 		}
 	}
 
+	auto codegen_context::create_symbol_patch() const -> handle<symbol_patch> {
+		return static_cast<symbol_patch*>(function->allocator.allocate(sizeof(symbol_patch)));
+	}
+
 	auto codegen_context::lookup_value(handle<node> value) -> virtual_value* {
-		const auto it = values.find(value->global_value_index);
-		if(it == values.end()) {
+		const auto it = virtual_values.find(value->global_value_index);
+		if(it == virtual_values.end()) {
 			return nullptr;
 		}
 
@@ -26,9 +30,9 @@ namespace ir {
 		return -static_cast<i32>(stack_usage);
 	}
 
-	auto codegen_context::get_stack_slot(handle<node> target) -> i32 {
+	auto codegen_context::get_stack_slot(handle<node> n) -> i32 {
 		// check if a stack slot for the node already exists 
-		const auto it = stack_slots.find(target);
+		const auto it = stack_slots.find(n);
 
 		// if it exists, return the stack position
 		if (it != stack_slots.end()) {
@@ -36,9 +40,9 @@ namespace ir {
 		}
 
 		// allocate a new stack slot for the given node
-		const local& local_prop = target->get<local>();
+		const local& local_prop = n->get<local>();
 		const i32 position = allocate_stack(local_prop.size, local_prop.alignment);
-		stack_slots[target] = position;
+		stack_slots[n] = position;
 		return position;
 	}
 }

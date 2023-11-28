@@ -2,17 +2,19 @@
 #include "intermediate_representation/node_hierarchy/function.h"
 #include "intermediate_representation/codegen/live_interval.h"
 #include "intermediate_representation/codegen/instruction.h"
-#include "intermediate_representation/codegen/value.h"
+#include "intermediate_representation/codegen/codegen_temporary.h"
 
 #include "intermediate_representation/codegen/work_list.h"
 #include "intermediate_representation/codegen/control_flow_graph.h"
+#include "intermediate_representation/target/target.h"
 
+#include <utility/containers/allocator_based_containers/linked_list.h>
 
 namespace ir {
 	struct codegen_context {
 		auto lookup_value(handle<node> value) -> virtual_value*;
 		auto allocate_stack(u64 size, u64 alignment) -> i32;
-		auto get_stack_slot(handle<node> target) -> i32;
+		auto get_stack_slot(handle<node> n) -> i32;
 
 		void append_instruction(handle<instruction> inst);
 		void hint_reg(u64 interval_index, reg reg);
@@ -30,17 +32,20 @@ namespace ir {
 		}
 
 		template<typename extra_type = utility::empty_property>
-		auto create_value() const -> handle<value> {
-			void* value_allocation = function->allocator.allocate(sizeof(value));
-			const handle value_ptr = static_cast<value*>(value_allocation);
+		auto create_temporary() const -> handle<codegen_temporary> {
+			void* value_allocation = function->allocator.allocate(sizeof(codegen_temporary));
+			const handle value_ptr = static_cast<codegen_temporary*>(value_allocation);
 
 			value_ptr->set_property(function->allocator.allocate(sizeof(extra_type)));
 			return value_ptr;
 		}
 
+		auto create_symbol_patch() const -> handle<symbol_patch>;
+
 		handle<function> function;
 		handle<work_list> work_list;
 		control_flow_graph graph;
+		target target;
 
 		std::vector<u64> basic_block_order;
 		std::vector<phi_value> phi_values;
@@ -51,7 +56,7 @@ namespace ir {
 
 		// virtual values which represent physical memory / values which are
 		// passed around when the program runs 
-		std::unordered_map<u64, virtual_value> values;
+		std::unordered_map<u64, virtual_value> virtual_values;
 
 		std::unordered_map<handle<node>, i32> stack_slots;
 
@@ -59,15 +64,16 @@ namespace ir {
 		std::unordered_map<handle<node>, handle<basic_block>> schedule;
 		std::unordered_map<handle<node>, machine_block> machine_blocks;
 
+		// TODO: replace with a linked list
 		handle<instruction> first;
 		handle<instruction> head;
 
-		handle<symbol_patch> first_patch;
+		utility::linked_list<handle<symbol_patch>> patches;
 
 		u64 caller_usage = 0;
 		u64 stack_usage = 0;
 		u64 endpoint = 0;
-		u64 prologue_length = 0;
 		u64 fallthrough;
+		u8 prologue_length = 0;
 	};
 }

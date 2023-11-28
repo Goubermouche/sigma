@@ -24,28 +24,28 @@ namespace ir {
 	struct instruction : utility::property<handle<symbol>, handle<node>, immediate, absolute, label>{
 		enum class category : u8 {
 			// nullary
-			byte,
-			byte_ext,
+			BYTE,
+			BYTE_EXT,
 
 			// unary
-			unary,
-			unary_ext,  // 0F
+			UNARY,
+			UNARY_EXT,  // 0F
 
 			// binary
-			binop,
-			binop_plus, // +r
-			binop_ext,  // 0F
-			binop_ext2, // 0F (movzx, movsx)
-			binop_ext3, // 66 (movd, movq)
-			binop_cl,   // implicit CL, for shift operations
+			BINOP,
+			BINOP_PLUS, // +r
+			BINOP_EXT_1,  // 0F
+			BINOP_EXT_2, // 0F (movzx, movsx)
+			BINOP_EXT_3, // 66 (movd, movq)
+			BINOP_CL,   // implicit CL, for shift operations
 
 			// sse
-			binop_sse
+			BINOP_SSE
 		};
 
-		enum type {
+		enum instruction_type {
 			RET, INT3, STOSB, MOVSB, CAST, system_call, RDTSC, UD2,
-			NOT, NEG, MUL, div, integral_div, call, jmp,
+			NOT, NEG, MUL, DIV, IDIV, CALL, JMP,
 
 			// prefetching
 			PREFETCHNTA, PREFETCH0, PREFETCH1, PREFETCH2,
@@ -66,10 +66,10 @@ namespace ir {
 			BSF, BSR,
 
 			// binary ops but they have an implicit CL on the right-hand side
-			SHL, SHR, ROL, ROR, SAR, ADD, OR, AND, SUB, XOR, CMP, mov, TEST,
+			SHL, SHR, ROL, ROR, SAR, ADD, OR, AND, SUB, XOR, CMP, MOV, TEST,
 
 			// misc integer ops
-			movabs, XCHG, lea, XADD, integral_multiplication, IMUL3,
+			MOVABS, XCHG, LEA, XADD, ÏMUL, IMUL3,
 			MOVSXB, MOVSXW, MOVSXD, MOVZXB, MOVZXW,
 
 			// gpr<->xmm
@@ -80,16 +80,16 @@ namespace ir {
 			FP_CMP,  P_CMP,    FP_UCOMI, FP_CVT32, FP_CVT64, FP_CVT, FP_CVTT,
 			FP_SQRT, FP_RSQRT, FP_AND,   FP_OR,    FP_XOR,
 
-			label = 1024,
-			line,
-			inl, // inline
-			terminator,
-			epilogue,
-			entry,
-			zero
+			LABEL = 1024,
+			LINE,
+			INLINE,
+			TERMINATOR,
+			EPILOGUE,
+			ENTRY,
+			ZERO
 		};
 
-		enum flags {
+		enum instruction_flags {
 			none = 0,
 			lock = 1,
 			rep = 2,
@@ -121,9 +121,9 @@ namespace ir {
 		handle<instruction> next_instruction;
 		u64 time = 0;
 
-		flags fl = none; // instruction flags
-		type ty = zero;  // instruction type
-		i32 dt = 0;      // instruction data type
+		instruction_flags flags = none; // instruction flags
+		instruction_type  type  = ZERO; // instruction type
+		i32 data_type = 0;              // instruction data type
 
 		// operands
 		utility::slice<i32> operands;
@@ -138,5 +138,5 @@ namespace ir {
 	};
 
 	// declare as a flag enum
-	FLAG_ENUM(instruction::flags);
+	FLAG_ENUM(instruction::instruction_flags);
 }

@@ -31,105 +31,11 @@ After building the Sigma solution, you can find the generated compiler executabl
 ```cmd
 compiler.exe path\to\your\source\file.s path\to\your\executable\directory
 ```
-## Language example
-Below is a simple example for rendering a slice of a [Mandelbrot set](https://en.wikipedia.org/wiki/Mandelbrot_set) using the Sigma language.
-```cpp
-i32 WIDTH = 100;
-i32 HEIGHT = 30;
-i32 MAX_ITER = 1000;
-
-i32 mandelbrot(f64 real, f64 imag) {
-    f64 z_real = 0;
-    f64 z_imag = 0;
-    f64 z_real_sq;
-    f64 z_imag_sq;
-
-    for (i32 i = 0; i < MAX_ITER; i++) {
-        z_real_sq = z_real * z_real;
-        z_imag_sq = z_imag * z_imag;
-
-        if (z_real_sq + z_imag_sq > 4.0) {
-            return i; 
-        }
-
-        z_imag = 2 * z_real * z_imag + imag;
-        z_real = z_real_sq - z_imag_sq + real;
-    }
-
-    return MAX_ITER;
-}
-
-char get_char(i32 iterations) {
-    if (iterations == MAX_ITER) {
-        return ' ';
-    }
-
-    char* charset = ".,-~:;=!*#$@";
-    i32 charset_size = 12;
-    return charset[iterations % charset_size];
-}
-
-i32 main() {
-    f64 x_min = -2.0;
-    f64 x_max = 1.0;
-    f64 y_min = -1.0;
-    f64 y_max = 1.0;
-    
-    f64 x_step = (x_max - x_min) / WIDTH;
-    f64 y_step = (y_max - y_min) / HEIGHT;
-    
-    for (f64 y = y_min; y < y_max; y = y + y_step) {
-        for (f64 x = x_min; x < x_max; x = x + x_step) {
-            i32 iterations = mandelbrot(x, y);
-            printc(get_char(iterations));
-        }
-    
-        printc('\n');
-    }
-    
-    return 0;
-}
-```
-The expected output, after running the generated .exe, looks like this:  
-```
-,,,,,,,,,--------~~~~~~~~~~~~~~~~~~~~~~~~~~~::::::::::;;;;==!#~$#@!=;:::::::~~~~~~~~----------------
-,,,,,,,,-------~~~~~~~~~~~~~~~~~~~~~~~~~~::::::::::::;;;;=!!*#@*.#*!=;;::::::::~~~~~~~--------------
-,,,,,,,-----~~~~~~~~~~~~~~~~~~~~~~~~~~~::::::::::::;;;;==*$=.-; ..$$*=;;;;::::::~~~~~~~~~-----------
-,,,,,,----~~~~~~~~~~~~~~~~~~~~~~~~~~::::::::::::;;;====!*#.@      #-#!==;;;;;:::::~~~~~~~~~---------
-,,,,,----~~~~~~~~~~~~~~~~~~~~~~~~:::::::::::;;;=====!!!*#$,*      @,#*!!=====;;;:::~~~~~~~~~--------
-,,,,---~~~~~~~~~~~~~~~~~~~~~~~~::::::::;;;;;=!~-= @##$:;,$:;@    @;=-,@;=*!!!!#~=;::~~~~~~~~~~------
-,,,,--~~~~~~~~~~~~~~~~~~~~~~::::::;;;;;;;;===!$,=  ;~,-                 :,@--~-=~!;::~~~~~~~~~~-----
-,,,--~~~~~~~~~~~~~~~~~~~~::::;;;;;;;;;;;====**#@:,                        .   #@*=;;::~~~~~~~~~~----
-,,--~~~~~~~~~~~~~~~~::::;;=;;;;;;;;;=====!!@#@@!                             :@#!==;;::~~~~~~~~~~---
-,,-~~~~~~~~~~~::::::;;==#.*!!!!!!!!!!!!!!**$,**                               $.##$=;:::~~~~~~~~~~--
-,-~~~~~~:::::::::;;;;==!#=@@,$#$$-$##***##@!                                     *.=;::::~~~~~~~~~~-
-,~~~~::::::::::;;;;;;=!!*#@~@,!#$ :*=~,@@@-,                                    ,#!=;::::~~~~~~~~~~~
-,~~::::::::::;;;;;;;=!!*.@-!~          ;~~#                                     !:!;;::::~~~~~~~~~~~
-,::::::::::;;=====!*,$#@@:.              @=                                    ~*!=;;:::::~~~~~~~~~~
-,:;;;;;=!!====!!!!##.$-!.!                                                    ~#!=;;;:::::~~~~~~~~~~
-~*:=#=:: $:-:@*@!*==                                                        :@#!!=;;;:::::~~~~~~~~~~
-,:;;;;;=!!====!!!!##.$-!.!                                                    ~#!=;;;:::::~~~~~~~~~~
-,::::::::::;;=====!*,$#@@:.              @=                                    ~*!=;;:::::~~~~~~~~~~
-,~~::::::::::;;;;;;;=!!*.@-!~          ;~~#                                     !:!;;::::~~~~~~~~~~~
-,~~~~::::::::::;;;;;;=!!*#@~@,!#$ :*=~,@@@-,                                    ,#!=;::::~~~~~~~~~~~
-,-~~~~~~:::::::::;;;;==!#=@@,$#$$-$##***##@!                                     *.=;::::~~~~~~~~~~-
-,,-~~~~~~~~~~~::::::;;==#.*!!!!!!!!!!!!!!**$,**                               $.##$=;:::~~~~~~~~~~--
-,,--~~~~~~~~~~~~~~~~::::;;=;;;;;;;;;=====!!@#@@!                             :@#!==;;::~~~~~~~~~~---
-,,,--~~~~~~~~~~~~~~~~~~~~::::;;;;;;;;;;;====**#@:,                        .   #@*=;;::~~~~~~~~~~----
-,,,,--~~~~~~~~~~~~~~~~~~~~~~::::::;;;;;;;;===!$,=  ;~,-                 :,@--~-=~!;::~~~~~~~~~~-----
-,,,,---~~~~~~~~~~~~~~~~~~~~~~~~::::::::;;;;;=!~-= @##$:;,$:;@    @;=-,@;=*!!!!#~=;::~~~~~~~~~~------
-,,,,,----~~~~~~~~~~~~~~~~~~~~~~~~:::::::::::;;;=====!!!*#$,*      @,#*!!=====;;;:::~~~~~~~~~--------
-,,,,,,----~~~~~~~~~~~~~~~~~~~~~~~~~~::::::::::::;;;====!*#.@      #-#!==;;;;;:::::~~~~~~~~~---------
-,,,,,,,-----~~~~~~~~~~~~~~~~~~~~~~~~~~~::::::::::::;;;;==*$=.-; ..$$*=;;;;::::::~~~~~~~~~-----------
-,,,,,,,,-------~~~~~~~~~~~~~~~~~~~~~~~~~~::::::::::::;;;;=!!*#@*.#*!=;;::::::::~~~~~~~--------------
-,,,,,,,,,--------~~~~~~~~~~~~~~~~~~~~~~~~~~~::::::::::;;;;==!#~$#@!=;:::::::~~~~~~~~----------------
-```
 ## Todo: 
-- [ ] Replace LLVM by a TB-like code generator
-- [ ] Rework the AST structure (Carbon-style)
-     
-- [ ] Clean up the project structure and utilize modules 
-- [ ] Replace LLVM by a custom code generator
+- [X] Replace LLVM by a basic TB-like code generator
+- [ ] Rework the AST structure (Carbon-style flat AST)
+- [ ] Clean up the project structure and utilize modules
+- [ ] Implement a separate AST checker
 - [ ] Full C function toolset
 - [X] Support for external files and linking
 - [ ] Integral formats (hexadecimal, decimal, octal)
@@ -140,5 +46,5 @@ The expected output, after running the generated .exe, looks like this:
 - [Syntax highlighting](https://github.com/Goubermouche/sigma-syntax-highlighter)
 
 ### Dependencies 
-- [LLVM 16.0.0](https://github.com/llvm/llvm-project/tree/release/16.x)
+- [LLVM 16.0.0](https://github.com/llvm/llvm-project/tree/release/16.x) (temporary)
 - [Premake5](https://github.com/premake/premake-core)

@@ -6,7 +6,7 @@ namespace ir {
 		const utility::byte_buffer& bytecode, const codegen_context& context
 	) -> utility::string {
 		utility::string assembly;
-		assembly.append("{}:\n", context.function->sym.name);
+		assembly.append("{}:\n", context.function->symbol.name);
 
 		// disassemble the prologue
 		disassemble_block(
@@ -19,7 +19,7 @@ namespace ir {
 		);
 
 		// disassemble the function body
-		handle<symbol_patch> patch = context.first_patch;
+		handle<symbol_patch> patch = context.patches.empty() ? nullptr : context.patches.get_first();
 
 		for(u64 i = 0; i < context.basic_block_order.size(); ++i) {
 			const u64 block_index = context.basic_block_order[i];
@@ -60,10 +60,7 @@ namespace ir {
 		while(range.start < range.end) {
 			x64::x64_instruction inst;
 
-			if(!disassemble_instruction(
-				// bytecode.get_slice(range.start, bytecode.get_size() - range.start), inst)
-				bytecode.get_slice(range.start, bytecode.get_size()), inst)
-			) {
+			if(!disassemble_instruction(bytecode.get_slice(range.start, bytecode.get_size()), inst)) {
 				range.start++;
 				assembly.append("  ERROR\n");
 				continue;
@@ -71,19 +68,19 @@ namespace ir {
 
 			assembly.append("  ");
 
-			if (inst.flags & x64::x64_flags_rep) {
+			if (inst.flags & x64::REP) {
 				assembly.append("rep ");
 			}
 
-			if (inst.flags & x64::x64_flags_lock) {
+			if (inst.flags & x64::LOCK) {
 				assembly.append("lock ");
 			}
 
 			assembly.append("{}", inst.get_mnemonic());
 
-			if (inst.data_type_1 >= x64::sse_ss && inst.data_type_1 <= x64::sse_pd) {
+			if (inst.data_type_1 >= x64::SSE_SS && inst.data_type_1 <= x64::SSE_PD) {
 				static const char* type_ids[] = { "ss", "sd", "ps", "pd" };
-				assembly.append(type_ids[inst.data_type_1 - x64::sse_ss]);
+				assembly.append(type_ids[inst.data_type_1 - x64::SSE_SS]);
 			}
 
 			assembly.append(" ");
@@ -93,14 +90,14 @@ namespace ir {
 
 			for (u8 i = 0; i < 4; i++) {
 				if (inst.registers[i].is_valid() == false) {
-					if (mem && inst.flags & x64::x64_flags_use_mem_op) {
+					if (mem && inst.flags & x64::USE_MEM_OP) {
 						if (i > 0) {
 							assembly.append(", ");
 						}
 
 						mem = false;
 
-						if (inst.flags & x64::x64_flags_use_rip_mem) {
+						if (inst.flags & x64::USE_RIP_MEM) {
 							const bool is_label = 
 								inst.opcode == 0xE8 || 
 								inst.opcode == 0xE9 || 
@@ -137,12 +134,12 @@ namespace ir {
 							assembly.append("{} [", x64::get_type_name(inst.data_type_1));
 
 							if (inst.base != 255) {
-								assembly.append("{}", get_register_name(inst.base, x64::qword));
+								assembly.append("{}", get_register_name(inst.base, x64::QWORD));
 							}
 
 							if (inst.memory.index != 255) {
 								assembly.append(
-									" + {}*{}", get_register_name(static_cast<reg::id_type>(inst.memory.index), x64::qword), 1 << static_cast<u8>(inst.memory.scale)
+									" + {}*{}", get_register_name(static_cast<reg::id_type>(inst.memory.index), x64::QWORD), 1 << static_cast<u8>(inst.memory.scale)
 								);
 							}
 
@@ -156,14 +153,14 @@ namespace ir {
 							assembly.append("]");
 						}
 					}
-					else if (imm && (inst.flags & (x64::x64_flags_immediate | x64::x64_flags_absolute))) {
+					else if (imm && (inst.flags & (x64::IMMEDIATE | x64::ABSOLUTE))) {
 						if (i > 0) {
 							assembly.append(", ");
 						}
 
 						imm = false;
 
-						if (inst.flags & x64::x64_flags_absolute) {
+						if (inst.flags & x64::ABSOLUTE) {
 							assembly.append("{}", inst.abs);
 						}
 						else {
@@ -179,7 +176,7 @@ namespace ir {
 						assembly.append(", ");
 
 						// special case for certain ops with two data types
-						if (inst.flags & x64::x64_flags_two_data_types) {
+						if (inst.flags & x64::TWO_DATA_TYPES) {
 							assembly.append(
 								"{}", x64::get_register_name(inst.registers[i], inst.data_type_2)
 							);
@@ -201,10 +198,7 @@ namespace ir {
 		return patch;
 	}
 
-	bool x64_disassembler::disassemble_instruction(
-		const utility::byte_buffer& bytecode,
-		x64::x64_instruction& inst
-	) {
+	bool x64_disassembler::disassemble_instruction(const utility::byte_buffer& bytecode, x64::x64_instruction& inst) {
 		inst = { 0 };
 		for(u8 i = 0; i < 4; ++i) {
 			inst.registers[i] = reg::invalid_id;
@@ -243,17 +237,17 @@ namespace ir {
 				case 0x4D:
 				case 0x4E:
 				case 0x4F: rex = op; break;
-				case 0xF0: inst.flags |= x64::x64_flags_lock; break;
+				case 0xF0: inst.flags |= x64::LOCK; break;
 				case 0x66: address_16 = true; break;
 				case 0x67: address_32 = true; break;
-				case 0xF3: inst.flags |= x64::x64_flags_rep; break;
-				case 0xF2: inst.flags |= x64::x64_flags_repne; break;
-				case 0x2E: inst.segment = x64::x64_segment::cs; break;
-				case 0x36: inst.segment = x64::x64_segment::ss; break;
-				case 0x3E: inst.segment = x64::x64_segment::ds; break;
-				case 0x26: inst.segment = x64::x64_segment::es; break;
-				case 0x64: inst.segment = x64::x64_segment::fs; break;
-				case 0x65: inst.segment = x64::x64_segment::gs; break;
+				case 0xF3: inst.flags |= x64::REP; break;
+				case 0xF2: inst.flags |= x64::REPNE; break;
+				case 0x2E: inst.segment = x64::x64_segment::CS; break;
+				case 0x36: inst.segment = x64::x64_segment::SS; break;
+				case 0x3E: inst.segment = x64::x64_segment::DS; break;
+				case 0x26: inst.segment = x64::x64_segment::ES; break;
+				case 0x64: inst.segment = x64::x64_segment::FS; break;
+				case 0x65: inst.segment = x64::x64_segment::GS; break;
 				default: goto done_prefixing;
 			}
 		}
@@ -279,41 +273,41 @@ namespace ir {
 
 		// in the "default" "type" "system", REX.W is 64bit, certain ops
 		// will mark they're 8bit and most will just be 32bit (with 16bit on ADDR16)
-		inst.data_type_1 = x64::dword;
+		inst.data_type_1 = x64::DWORD;
 
 		if (flags & x64::OP_64BIT) {
 			// basically forced 64bit
-			inst.data_type_1 = x64::qword;
+			inst.data_type_1 = x64::QWORD;
 		}
 		else if (flags & x64::OP_SSE) {
 			// ss REP    OPCODE
 			// sd REPNE  OPCODE
 			// ps __     OPCODE
 			// pd DATA16 OPCODE
-			if (inst.flags & x64::x64_flags_repne) {
-				inst.data_type_1 = x64::sse_sd;
+			if (inst.flags & x64::REPNE) {
+				inst.data_type_1 = x64::SSE_SD;
 			}
-			else if (inst.flags & x64::x64_flags_rep) {
-				inst.data_type_1 = x64::sse_ss;
+			else if (inst.flags & x64::REP) {
+				inst.data_type_1 = x64::SSE_SS;
 			}
 			else if (address_16) {
-				inst.data_type_1 = x64::sse_ss;
+				inst.data_type_1 = x64::SSE_SS;
 			}
 			else {
-				inst.data_type_1 = x64::sse_ps;
+				inst.data_type_1 = x64::SSE_PS;
 			}
 
-			inst.flags &= ~(x64::x64_flags_rep | x64::x64_flags_repne);
+			inst.flags &= ~(x64::REP | x64::REPNE);
 		}
 		else {
 			if (rex & 0x8) {
-				inst.data_type_1 = x64::qword;
+				inst.data_type_1 = x64::QWORD;
 			}
 			else if (flags & x64::OP_8BIT) {
-				inst.data_type_1 = x64::byte;
+				inst.data_type_1 = x64::BYTE;
 			}
 			else if (address_16) {
-				inst.data_type_1 = x64::word;
+				inst.data_type_1 = x64::WORD;
 			}
 		}
 
@@ -324,7 +318,7 @@ namespace ir {
 				return false;
 			}
 
-			inst.flags |= x64::x64_flags_immediate;
+			inst.flags |= x64::IMMEDIATE;
 			inst.imm = bytecode.get_dword(current);
 			current += 4;
 
@@ -333,8 +327,8 @@ namespace ir {
 		}
 
 		if (enc == x64::OP_REL32) {
-			inst.flags |= x64::x64_flags_use_rip_mem;
-			inst.flags |= x64::x64_flags_use_mem_op;
+			inst.flags |= x64::USE_RIP_MEM;
+			inst.flags |= x64::USE_MEM_OP;
 			inst.base = std::numeric_limits<u8>::max();
 			inst.memory.index = -1;
 
@@ -364,7 +358,7 @@ namespace ir {
 					return false;
 				}
 
-				inst.flags |= x64::x64_flags_absolute;
+				inst.flags |= x64::ABSOLUTE;
 				inst.abs = bytecode.get_qword(current);
 				current += 8;
 			}
@@ -400,25 +394,25 @@ namespace ir {
 
 		if (flags & x64::OP_2DT) {
 			if (inst.opcode == 0x0FB6 || inst.opcode == 0x0FB7) {
-				inst.flags |= x64::x64_flags_two_data_types;
-				inst.data_type_2 = inst.opcode == 0x0FB6 ? x64::byte : x64::word;
+				inst.flags |= x64::TWO_DATA_TYPES;
+				inst.data_type_2 = inst.opcode == 0x0FB6 ? x64::BYTE : x64::WORD;
 			}
 			else {
-				inst.flags |= x64::x64_flags_two_data_types;
-				inst.data_type_2 = x64::dword;
+				inst.flags |= x64::TWO_DATA_TYPES;
+				inst.data_type_2 = x64::DWORD;
 			}
 		}
 
 		if (enc != x64::OP_M && !uses_imm) {
 			if (enc == x64::OP_MC) {
-				inst.flags |= x64::x64_flags_two_data_types;
-				inst.data_type_2 = x64::byte;
-				inst.registers[rx_slot] = x64::rcx;
+				inst.flags |= x64::TWO_DATA_TYPES;
+				inst.data_type_2 = x64::BYTE;
+				inst.registers[rx_slot] = x64::RCX;
 			}
 			else {
 				i8 real_rx = static_cast<i8>((rex & 4 ? 8 : 0) | rx);
 
-				if (rex == 0 && inst.data_type_1 == x64::byte && real_rx >= 4) {
+				if (rex == 0 && inst.data_type_1 == x64::BYTE && real_rx >= 4) {
 					// use high registers
 					real_rx += 16;
 				}
@@ -447,12 +441,12 @@ namespace ir {
 		// immediates might use RX for an extended opcode
 		// imul's ternary is a special case
 		if (uses_imm || op == 0x68 || op == 0x69) {
-			if ((enc == x64::OP_MI && inst.data_type_1 == x64::byte) || enc == x64::OP_MI8 || op == 0x68) {
+			if ((enc == x64::OP_MI && inst.data_type_1 == x64::BYTE) || enc == x64::OP_MI8 || op == 0x68) {
 				if (current + 1 > bytecode.get_size()) {
 					return false;
 				}
 
-				inst.flags |= x64::x64_flags_immediate;
+				inst.flags |= x64::IMMEDIATE;
 				inst.imm = bytecode[current++];
 			}
 			else if (enc == x64::OP_MI || op == 0x69) {
@@ -460,7 +454,7 @@ namespace ir {
 					return false;
 				}
 
-				inst.flags |= x64::x64_flags_immediate;
+				inst.flags |= x64::IMMEDIATE;
 				inst.imm = static_cast<i32>(bytecode.get_dword(current));
 				current += 4;
 			}
@@ -482,7 +476,7 @@ namespace ir {
 		u8 rex,
 		x64::x64_instruction& inst
 	) {
-		if (mod == x64::direct) {
+		if (mod == x64::DIRECT) {
 			inst.registers[reg_slot] = (rex & 1 ? 8 : 0) | rm;
 			return 0;
 		}
@@ -490,10 +484,10 @@ namespace ir {
 		u64 current = 0;
 
 		inst.memory.displacement = 0;
-		inst.flags |= x64::x64_flags_use_mem_op;
+		inst.flags |= x64::USE_MEM_OP;
 
 		// indirect
-		if (rm == x64::rsp) {
+		if (rm == x64::RSP) {
 			if (current + 1 > length) {
 				return 0;
 			}
@@ -504,8 +498,8 @@ namespace ir {
 			const u8 index = (sib >> 3) & 7;
 			const u8 base = (sib & 7);
 
-			const u8 base_gpr = mod != x64::indirect || base != x64::rsp ? ((rex & 1 ? 8 : 0) | base) : -1;
-			const u8 index_gpr = mod != x64::indirect || index != x64::rsp ? ((rex & 2 ? 8 : 0) | index) : -1;
+			const u8 base_gpr = mod != x64::INDIRECT || base != x64::RSP ? ((rex & 1 ? 8 : 0) | base) : -1;
+			const u8 index_gpr = mod != x64::INDIRECT || index != x64::RSP ? ((rex & 2 ? 8 : 0) | index) : -1;
 
 			// odd rule but when mod=00,base=101,index=100
 			// and using SIB, enable displacement_32. this would technically
@@ -513,8 +507,8 @@ namespace ir {
 			//   lea rax, [r13 + rcx*2] or lea rax, [rbp + rcx*2]
 			// only
 			//   lea rax, [r13 + rcx*2 + 0] or lea rax, [rbp + rcx*2 + 0]
-			if (mod == 0 && base == x64::rbp) {
-				mod = x64::indirect_displacement_32;
+			if (mod == 0 && base == x64::RBP) {
+				mod = x64::INDIRECT_DISPLACEMENT_32;
 			}
 
 			inst.base = base_gpr;
@@ -522,13 +516,13 @@ namespace ir {
 			inst.memory.scale = s;
 		}
 		else {
-			if (mod == x64::indirect && rm == x64::rbp) {
+			if (mod == x64::INDIRECT && rm == x64::RBP) {
 				// RIP-relative addressing
 				if (current + 4 > length) {
 					return 0;
 				}
 
-				inst.flags |= x64::x64_flags_use_rip_mem;
+				inst.flags |= x64::USE_RIP_MEM;
 				inst.base = std::numeric_limits<u8>::max();
 				inst.memory.index = -1;
 				inst.memory.displacement = static_cast<i32>(bytecode.get_dword(current));
@@ -541,14 +535,14 @@ namespace ir {
 			}
 		}
 
-		if (mod == x64::indirect_displacement_8) {
+		if (mod == x64::INDIRECT_DISPLACEMENT_8) {
 			if (current + 1 > length) {
 				return 0;
 			}
 
 			inst.memory.displacement = static_cast<i32>(bytecode[current++]);
 		}
-		else if (mod == x64::indirect_displacement_32) {
+		else if (mod == x64::INDIRECT_DISPLACEMENT_32) {
 			if (current + 4 > length) {
 				return 0;
 			}
@@ -683,13 +677,13 @@ namespace ir {
 	std::string x64::x64_instruction::get_mnemonic() const {
 		// cwd/cdq/cqo
 		if (opcode == 0x99) {
-			if (data_type_1 == word) {
+			if (data_type_1 == WORD) {
 				return "cwd";
 			}
-			if (data_type_1 == dword) {
+			if (data_type_1 == DWORD) {
 				return "cdq";
 			}
-			if (data_type_1 == qword) {
+			if (data_type_1 == QWORD) {
 				return "cqo";
 			}
 

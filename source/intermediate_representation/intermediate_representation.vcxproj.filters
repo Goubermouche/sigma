@@ -36,13 +36,13 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="codegen\architectures\architecture.h">
+    <ClInclude Include="target\arch\architecture.h">
       <Filter>codegen\architectures</Filter>
     </ClInclude>
-    <ClInclude Include="codegen\architectures\x64\x64.h">
+    <ClInclude Include="target\arch\x64\x64.h">
       <Filter>codegen\architectures\x64</Filter>
     </ClInclude>
-    <ClInclude Include="codegen\architectures\x64\x64_disassembler.h">
+    <ClInclude Include="target\arch\x64\x64_disassembler.h">
       <Filter>codegen\architectures\x64</Filter>
     </ClInclude>
     <ClInclude Include="codegen\codegen_context.h">
@@ -69,13 +69,13 @@
     <ClInclude Include="codegen\optimization\optimization_pass_list.h">
       <Filter>codegen\optimization</Filter>
     </ClInclude>
-    <ClInclude Include="codegen\targets\parameter_descriptor.h">
+    <ClInclude Include="target\parameter_descriptor.h">
       <Filter>codegen\targets</Filter>
     </ClInclude>
-    <ClInclude Include="codegen\targets\target.h">
+    <ClInclude Include="codegen\codegen_target.h">
       <Filter>codegen\targets</Filter>
     </ClInclude>
-    <ClInclude Include="codegen\targets\win\win.h">
+    <ClInclude Include="target\system\win\win.h">
       <Filter>codegen\targets\win</Filter>
     </ClInclude>
     <ClInclude Include="codegen\transformation\live_range_analysis.h">
@@ -94,7 +94,7 @@
       <Filter>codegen</Filter>
     </ClInclude>
     <ClInclude Include="module.h" />
-    <ClInclude Include="node_hierarchy\data_type.h">
+    <ClInclude Include="node_hierarchy\types.h">
       <Filter>node_hierarchy</Filter>
     </ClInclude>
     <ClInclude Include="node_hierarchy\function.h">
@@ -121,16 +121,22 @@
     <ClInclude Include="node_hierarchy\user.h">
       <Filter>node_hierarchy</Filter>
     </ClInclude>
-    <ClInclude Include="codegen\value.h" />
+    <ClInclude Include="codegen\codegen_temporary.h" />
+    <ClInclude Include="node_hierarchy\global.h" />
+    <ClInclude Include="codegen\outputs\coff.h" />
+    <ClInclude Include="codegen\object_file_emitter.h" />
+    <ClInclude Include="builder.h" />
+    <ClInclude Include="target\target.h" />
+    <ClInclude Include="target\system\systemv\systemv.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="codegen\architectures\x64\x64.cpp">
+    <ClCompile Include="target\arch\x64\x64.cpp">
       <Filter>codegen\architectures\x64</Filter>
     </ClCompile>
-    <ClCompile Include="codegen\architectures\x64\x64_disassembler.cpp">
+    <ClCompile Include="target\arch\x64\x64_disassembler.cpp">
       <Filter>codegen\architectures\x64</Filter>
     </ClCompile>
-    <ClCompile Include="codegen\architectures\x64\x64_instruction_selection.cpp">
+    <ClCompile Include="target\arch\x64\x64_instruction_selection.cpp">
       <Filter>codegen\architectures\x64</Filter>
     </ClCompile>
     <ClCompile Include="codegen\codegen_context.cpp">
@@ -157,7 +163,7 @@
     <ClCompile Include="codegen\optimization\optimization_pass_list.cpp">
       <Filter>codegen\optimization</Filter>
     </ClCompile>
-    <ClCompile Include="codegen\targets\target.cpp">
+    <ClCompile Include="codegen\codegen_target.cpp">
       <Filter>codegen\targets</Filter>
     </ClCompile>
     <ClCompile Include="codegen\transformation\live_range_analysis.cpp">
@@ -173,7 +179,7 @@
       <Filter>codegen</Filter>
     </ClCompile>
     <ClCompile Include="module.cpp" />
-    <ClCompile Include="node_hierarchy\data_type.cpp">
+    <ClCompile Include="node_hierarchy\types.cpp">
       <Filter>node_hierarchy</Filter>
     </ClCompile>
     <ClCompile Include="node_hierarchy\function.cpp">
@@ -182,6 +188,10 @@
     <ClCompile Include="node_hierarchy\node.cpp">
       <Filter>node_hierarchy</Filter>
     </ClCompile>
-    <ClCompile Include="codegen\value.cpp" />
+    <ClCompile Include="codegen\codegen_temporary.cpp" />
+    <ClCompile Include="node_hierarchy\global.cpp" />
+    <ClCompile Include="codegen\outputs\coff.cpp" />
+    <ClCompile Include="builder.cpp" />
+    <ClCompile Include="target\target.cpp" />
   </ItemGroup>
 </Project>

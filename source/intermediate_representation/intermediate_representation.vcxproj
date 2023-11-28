@@ -56,9 +56,10 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="codegen\architectures\architecture.h" />
-    <ClInclude Include="codegen\architectures\x64\x64.h" />
-    <ClInclude Include="codegen\architectures\x64\x64_disassembler.h" />
+    <ClInclude Include="builder.h" />
+    <ClInclude Include="target\arch\architecture.h" />
+    <ClInclude Include="target\arch\x64\x64.h" />
+    <ClInclude Include="target\arch\x64\x64_disassembler.h" />
     <ClInclude Include="codegen\codegen_context.h" />
     <ClInclude Include="codegen\control_flow_graph.h" />
     <ClInclude Include="codegen\instruction.h" />
@@ -67,17 +68,21 @@
     <ClInclude Include="codegen\memory\allocators\linear_scan_allocator.h" />
     <ClInclude Include="codegen\memory\memory.h" />
     <ClInclude Include="codegen\optimization\optimization_pass_list.h" />
-    <ClInclude Include="codegen\targets\parameter_descriptor.h" />
-    <ClInclude Include="codegen\targets\target.h" />
-    <ClInclude Include="codegen\targets\win\win.h" />
+    <ClInclude Include="target\system\systemv\systemv.h" />
+    <ClInclude Include="codegen\object_file_emitter.h" />
+    <ClInclude Include="target\parameter_descriptor.h" />
+    <ClInclude Include="codegen\codegen_target.h" />
+    <ClInclude Include="codegen\outputs\coff.h" />
+    <ClInclude Include="target\system\win\win.h" />
     <ClInclude Include="codegen\transformation\live_range_analysis.h" />
     <ClInclude Include="codegen\transformation\scheduler.h" />
     <ClInclude Include="codegen\transformation\transformation_context.h" />
     <ClInclude Include="codegen\transformation\use_list.h" />
     <ClInclude Include="codegen\work_list.h" />
     <ClInclude Include="module.h" />
-    <ClInclude Include="node_hierarchy\data_type.h" />
+    <ClInclude Include="node_hierarchy\types.h" />
     <ClInclude Include="node_hierarchy\function.h" />
+    <ClInclude Include="node_hierarchy\global.h" />
     <ClInclude Include="node_hierarchy\node.h" />
     <ClInclude Include="node_hierarchy\properties\control_flow.h" />
     <ClInclude Include="node_hierarchy\properties\memory.h" />
@@ -85,12 +90,14 @@
     <ClInclude Include="node_hierarchy\properties\types.h" />
     <ClInclude Include="node_hierarchy\symbol.h" />
     <ClInclude Include="node_hierarchy\user.h" />
-    <ClInclude Include="codegen\value.h" />
+    <ClInclude Include="codegen\codegen_temporary.h" />
+    <ClInclude Include="target\target.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="codegen\architectures\x64\x64.cpp" />
-    <ClCompile Include="codegen\architectures\x64\x64_disassembler.cpp" />
-    <ClCompile Include="codegen\architectures\x64\x64_instruction_selection.cpp" />
+    <ClCompile Include="builder.cpp" />
+    <ClCompile Include="target\arch\x64\x64.cpp" />
+    <ClCompile Include="target\arch\x64\x64_disassembler.cpp" />
+    <ClCompile Include="target\arch\x64\x64_instruction_selection.cpp" />
     <ClCompile Include="codegen\codegen_context.cpp" />
     <ClCompile Include="codegen\control_flow_graph.cpp" />
     <ClCompile Include="codegen\instruction.cpp" />
@@ -99,16 +106,19 @@
     <ClCompile Include="codegen\memory\allocators\linear_scan_allocator.cpp" />
     <ClCompile Include="codegen\memory\memory.cpp" />
     <ClCompile Include="codegen\optimization\optimization_pass_list.cpp" />
-    <ClCompile Include="codegen\targets\target.cpp" />
+    <ClCompile Include="codegen\codegen_target.cpp" />
+    <ClCompile Include="codegen\outputs\coff.cpp" />
     <ClCompile Include="codegen\transformation\live_range_analysis.cpp" />
     <ClCompile Include="codegen\transformation\scheduler.cpp" />
     <ClCompile Include="codegen\transformation\use_list.cpp" />
     <ClCompile Include="codegen\work_list.cpp" />
     <ClCompile Include="module.cpp" />
-    <ClCompile Include="node_hierarchy\data_type.cpp" />
+    <ClCompile Include="node_hierarchy\types.cpp" />
     <ClCompile Include="node_hierarchy\function.cpp" />
+    <ClCompile Include="node_hierarchy\global.cpp" />
     <ClCompile Include="node_hierarchy\node.cpp" />
-    <ClCompile Include="codegen\value.cpp" />
+    <ClCompile Include="codegen\codegen_temporary.cpp" />
+    <ClCompile Include="target\target.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\code_generator\code_generator.vcxproj">

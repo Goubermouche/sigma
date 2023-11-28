@@ -34,7 +34,7 @@ compiler.exe path\to\your\source\file.s path\to\your\executable\directory
 ## Todo: 
 - [X] Replace LLVM by a basic TB-like code generator
 - [ ] Rework the AST structure (Carbon-style flat AST)
-- [ ] Clean up the project structure and utilize modules
+- [ ] Clean up the project structure
 - [ ] Implement a separate AST checker
 - [ ] Full C function toolset
 - [X] Support for external files and linking

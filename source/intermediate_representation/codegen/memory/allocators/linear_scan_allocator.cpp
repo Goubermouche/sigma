@@ -1,7 +1,6 @@
 #include "linear_scan_allocator.h"
 
 #include "compiler/compiler/compiler.h"
-#include "intermediate_representation/codegen/targets/win/win.h"
 
 namespace ir {
 	void linear_scan_allocator::allocate(
@@ -53,7 +52,7 @@ namespace ir {
 			context.intervals[i].add_range({ 0, 1 });
 		}
 
-		mark_callee_saved_constraints();
+		mark_callee_saved_constraints(context);
 
 		// generate unhandled interval list (sorted by starting point)
 		for(u64 i = 0; i < interval_count; ++i) {
@@ -170,7 +169,7 @@ namespace ir {
 
 		// resolve all split interval references
 		for(handle<instruction> inst = context.first; inst; inst = inst->next_instruction) {
-			if(inst->fl & instruction::spill) {
+			if(inst->flags & instruction::spill) {
 				continue;
 			}
 
@@ -203,7 +202,7 @@ namespace ir {
 	) {
 		const handle<instruction> next = inst->next_instruction;
 
-		if(next && next->ty != instruction::label) {
+		if(next && next->type != instruction::LABEL) {
 			reverse_block_walk(context, bb, next);
 		}
 
@@ -212,13 +211,13 @@ namespace ir {
 		auto ops = inst->operands.begin();
 
 		const bool is_call = 
-			inst->ty == instruction::call || 
-			inst->ty == instruction::system_call;
+			inst->type == instruction::CALL || 
+			inst->type == instruction::system_call;
 
 		const bool dst_use_reg = 
-			inst->ty == instruction::integral_multiplication ||
-			inst->ty == instruction::zero || 
-			inst->fl & (instruction::mem_f | instruction::global);
+			inst->type == instruction::ÏMUL ||
+			inst->type == instruction::ZERO || 
+			inst->flags & (instruction::mem_f | instruction::global);
 
 		for(u8 i = 0; i <inst->out_count; ++i) {
 			live_interval* interval = &context.intervals[*ops++];
@@ -260,14 +259,13 @@ namespace ir {
 		}
 	}
 
-	void linear_scan_allocator::mark_callee_saved_constraints() {
-		const parameter_descriptor& descriptor = win::win_parameter_descriptor;
+	void linear_scan_allocator::mark_callee_saved_constraints(const codegen_context& context) {
+		const parameter_descriptor descriptor = context.target.get_parameter_descriptor();
 
-		// TODO: system specific
 		// don't include RBP and RSP registers
 		u32 callee_saved_gp_registers = ~descriptor.caller_saved_gpr_count;
-		callee_saved_gp_registers &= ~(1u << x64::rbp);
-		callee_saved_gp_registers &= ~(1u << x64::rsp);
+		callee_saved_gp_registers &= ~(1u << x64::RBP);
+		callee_saved_gp_registers &= ~(1u << x64::RSP);
 		m_callee_saved[0] = callee_saved_gp_registers;
 
 		m_callee_saved[1] = 0;
@@ -417,8 +415,8 @@ namespace ir {
 
 		// folded spill
 		if (
-			inst && inst->ty == instruction::mov &&
-			inst->fl == instruction::none &&
+			inst && inst->type == instruction::MOV &&
+			inst->flags == instruction::none &&
 			inst->operands[0] == old_reg
 		) {
 			inst->operands[0] = static_cast<i32>(new_reg);
@@ -427,9 +425,9 @@ namespace ir {
 
 		const handle<instruction> new_inst = context.create_instruction(2);
 
-		new_inst->ty = instruction::mov;
-		new_inst->fl = instruction::spill;
-		new_inst->dt = data_type;
+		new_inst->type = instruction::MOV;
+		new_inst->flags = instruction::spill;
+		new_inst->data_type = data_type;
 
 		new_inst->out_count = 1;
 		new_inst->in_count = 1;
@@ -611,10 +609,10 @@ namespace ir {
 			}
 		}
 
-		if(register_class == x64::register_class::gpr) {
+		if(register_class == x64::register_class::GPR) {
 			// reserved registers
-			m_free_positions[x64::rbp] = 0;
-			m_free_positions[x64::rsp] = 0;
+			m_free_positions[x64::RBP] = 0;
+			m_free_positions[x64::RSP] = 0;
 		}
 
 		// try hint
@@ -650,7 +648,7 @@ namespace ir {
 			m_callee_saved[register_class] &= (1ull << highest.id);
 
 			const u8 size = register_class ? 16 : 8;
-			const u8 virtual_reg = (register_class ? x64::register_class::first_xmm : x64::register_class::first_gpr) + highest.id;
+			const u8 virtual_reg = (register_class ? x64::register_class::FIRST_XMM : x64::register_class::FIRST_GPR) + highest.id;
 			context.stack_usage = utility::align(context.stack_usage + size, size);
 
 			const live_interval it{

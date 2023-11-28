@@ -6,7 +6,7 @@ namespace ir {
 
 		for (const handle<node>& item : context.work_list->items) {
 			// append locals
-			if (item->ty == node::local) {
+			if (item->ty == node::LOCAL) {
 				context.locals.emplace_back(item);
 			}
 

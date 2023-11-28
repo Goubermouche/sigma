@@ -70,11 +70,11 @@ namespace ir {
 
 			handle<basic_block> use_block = it->second;
 
-			if (user_node->ty == node::phi) {
+			if (user_node->ty == node::PHI) {
 				const handle<node> use_node = user_node->inputs[0];
 
 				ASSERT(
-					use_node->ty == node::region,
+					use_node->ty == node::REGION,
 					"user block expects a region node"
 				);
 
@@ -145,7 +145,7 @@ namespace ir {
 
 					if (
 						use->slot == 0 &&
-						(projection->ty == node::projection || projection->ty == node::phi)
+						(projection->ty == node::PROJECTION || projection->ty == node::PHI)
 					) {
 						if (!context.schedule.contains(projection)) {
 							basic_block->items.insert(projection);

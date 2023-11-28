@@ -27,7 +27,7 @@ namespace ir {
 			handle<instruction> inst = context.first;
 
 			ASSERT(
-				inst->ty == instruction::label,
+				inst->type == instruction::LABEL,
 				"entry instruction is not a label"
 			);
 
@@ -42,12 +42,12 @@ namespace ir {
 			inst = inst->next_instruction;
 
 			for (; inst; inst = inst->next_instruction) {
-				if (inst->ty == instruction::label) {
+				if (inst->type == instruction::LABEL) {
 					context.machine_blocks.at(basic_block).end = timeline;
 					timeline += 4;
 
 					ASSERT(
-						inst->fl & instruction::node_f,
+						inst->flags & instruction::node_f,
 						"instruction does not contain a node"
 					);
 
@@ -59,7 +59,7 @@ namespace ir {
 				else if (inst->is_terminator() && machine_block->terminator == 0) {
 					machine_block->terminator = timeline;
 				}
-				else if (inst->ty == instruction::epilogue) {
+				else if (inst->type == instruction::EPILOGUE) {
 					epilogue = timeline;
 				}
 
@@ -109,9 +109,9 @@ namespace ir {
 			live_out.clear();
 
 			// walk all successors
-			if (block_end->ty == node::branch) {
+			if (block_end->ty == node::BRANCH) {
 				for (handle<user> user = block_end->use; user; user = user->next_user) {
-					if (user->node->ty == node::projection) {
+					if (user->node->ty == node::PROJECTION) {
 						// union with successor's lives
 						handle<node> successor = user->node->get_next_block();
 						live_out.set_union(context.machine_blocks.at(successor).live_in);
@@ -119,8 +119,8 @@ namespace ir {
 				}
 			}
 			else if (
-				block_end->ty != node::exit && 
-				block_end->ty != node::unreachable
+				block_end->ty != node::EXIT && 
+				block_end->ty != node::UNREACHABLE
 			) {
 				// union with successor's lives
 				handle<node> successor = block_end->get_next_control();
@@ -142,7 +142,7 @@ namespace ir {
 			// if we have changes, mark the predecessors
 			if (
 				changes &&
-				!(basic_block->ty == node::projection && basic_block->inputs[0]->ty == node::entry)
+				!(basic_block->ty == node::PROJECTION && basic_block->inputs[0]->ty == node::ENTRY)
 			) {
 				for (u64 i = 0; i < basic_block->inputs.get_size(); ++i) {
 					context.work_list->items.push_back(context.graph.get_predecessor(basic_block, i));

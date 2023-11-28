@@ -1,7 +1,7 @@
 #pragma once
 #include "intermediate_representation/codegen/memory/allocators/allocator_base.h"
 #include "intermediate_representation/codegen/live_interval.h"
-#include "intermediate_representation/codegen/architectures/x64/x64.h"
+#include "intermediate_representation/target/arch/x64/x64.h"
 
 #include <utility/containers/dense_set.h>
 
@@ -24,7 +24,7 @@ namespace ir {
 			codegen_context& context, handle<machine_block> block, handle<instruction> inst
 		);
 
-		void mark_callee_saved_constraints();
+		void mark_callee_saved_constraints(const codegen_context& context);
 
 		static auto partition(const std::vector<live_interval>& intervals, ptr_diff lo, ptr_diff hi, std::vector<u64>& arr) -> u64;
 		static void quick_sort_definitions(std::vector<live_interval>& intervals, ptr_diff lo, ptr_diff hi, std::vector<u64>& arr);
@@ -49,6 +49,3 @@ namespace ir {
 		handle<instruction> m_cache;
 	};
 }
-
-// TODO: remove this
-#undef WIN64_ABI_CALLER_SAVED

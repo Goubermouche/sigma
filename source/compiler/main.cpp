@@ -1,7 +1,8 @@
 //#include "compiler/compiler.h"
 #include <intermediate_representation/module.h>
 #include <utility/filesystem/new/file.h>
-#include <utility/timer.h>
+
+#include <intermediate_representation/builder.h>
 
 using namespace utility::types;
 
@@ -17,59 +18,84 @@ using namespace utility::types;
  * \return Status code.
  */
 auto main(i32 argc, char* argv[]) -> i32 {
-	// TODO:
-	// - MOVE LOGIC OVER TO THE FUNCTION STRUCT
-	// - remove the forward lists
-
 	SUPPRESS_C4100(argc);
 	SUPPRESS_C4100(argv);
 
 	utility::console::set_output_stream(std::cout);
 
-	utility::timer timer;
-	timer.start();
+	ir::target target(ir::arch::X64, ir::system::WINDOWS);
+	ir::module module(target);
+	ir::builder builder(module);
 
-	ir::module m;
+	const ir::function_type main_func_ty {
+		.identifier = "main",
+		.returns = { I32_TYPE }
+	};
 
-	// add function
-	const auto add_f = m.create_function("add", { I32_TYPE , I32_TYPE }, { I32_TYPE });
+	// add
+	const ir::function_type add_func_ty{
+		.identifier = "add",
+		.parameters = { PTR_TYPE, PTR_TYPE },
+		.returns    = { PTR_TYPE }
+	};
 
-	const auto a = add_f->get_parameter(0);
-	const auto b = add_f->get_parameter(1);
-	const auto add = add_f->create_add(a, b);
-	add_f->create_ret({ add });
+	auto add_func = builder.create_function(add_func_ty, ir::linkage::PRIVATE);
 
-	const auto main_f = m.create_function("main", {}, { I32_TYPE });
+	auto param1 = builder.get_parameter(0);
+	auto param2 = builder.get_parameter(1);
 
-	const auto a_val = main_f->create_signed_integer(100, 32);
-	const auto b_val = main_f->create_signed_integer(200, 32);
+	builder.create_return({ builder.create_add(param1, param2) });
 
-	const auto returns = main_f->create_call(add_f, { a_val , b_val });
-	main_f->create_ret(returns);
+	// main
+	builder.create_function(main_func_ty, ir::linkage::PUBLIC);
 
-	auto compilation_result = m.compile(ir::arch::x64, ir::system::windows);
+	const ir::function_type printf_func_ty {
+		.identifier   = "printf",
+		.parameters   = { PTR_TYPE },
+		.returns      = { I32_TYPE },
+		.has_var_args = true
+	};
 
-	utility::console::out 
-		<< "compilation finished (" 
-		<< utility::console::precision(3)
-		<< timer.elapsed<std::chrono::duration<f64>>()
-		<< "s)\n";
+	const auto printf_external = builder.create_external(printf_func_ty, ir::linkage::SO_LOCAL);
+	const auto message1 = builder.create_string("Hello, world! %d\n");
 
-	std::cout << compilation_result.assembly << '\n';
+	auto value1 = builder.create_signed_integer(200, 32);
+	auto value2 = builder.create_signed_integer(100, 32);
+	auto add_result = builder.create_call(add_func, { value1, value2 });
 
-	std::cout << "bytecode:\n";
-	for(utility::byte byte : compilation_result.bytecode) {
-		std::cout << byte.to_hex() << ' ';
+	builder.create_call(printf_external, printf_func_ty, { message1, add_result.front() });
+	builder.create_return({ builder.create_signed_integer(0, 32) });
+
+	module.compile();
+
+	auto object_file = module.generate_object_file();
+
+	auto write_res = utility::file::write(object_file, "./test/a.obj");
+	if (write_res.has_error()) {
+		utility::console::out << *write_res.get_error() << '\n';
 	}
-	std::cout << '\n';
+
+	return 0;
+
+	//utility::console::out 
+	//	<< "compilation finished (" 
+	//	<< utility::console::precision(3)
+	//	<< timer.elapsed<std::chrono::duration<f64>>()
+	//	<< "s)\n";
+
+	//std::cout << compilation_result.assembly << '\n';
+
+	//std::cout << "bytecode:\n";
+	//for(utility::byte byte : compilation_result.bytecode) {
+	//	std::cout << byte.to_hex() << ' ';
+	//}
+	//std::cout << '\n';
 
 	// const auto serialization_result_asm = utility::file::write(
 	// 	compilation_result.get_value()->assembly_output, "./test/assembly.asm"
 	// );
 	// 
 	// ASSERT(!serialization_result_asm.has_error(), "unhandled error encountered");
-
-	return 0;
 
 	//const std::vector<utility::byte> bytes = assembly.get_code();
 

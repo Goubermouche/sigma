@@ -2,20 +2,21 @@
 #include "intermediate_representation/codegen/work_list.h"
 
 namespace ir {
-	function::function(const std::string& name, symbol::tag tag) :
+	function::function(const std::string& name) :
 		allocator(NODE_ALLOCATION_BLOCK_SIZE)
 	{
-		void* symbol_allocation = allocator.allocate(sizeof(symbol));
-		sym = new (symbol_allocation) symbol{ .name = name, .t = tag };
+		symbol.name = name;
+		symbol.tag = symbol::symbol_tag::FUNCTION;
+
 		parameters.resize(3);
 	}
 
-	auto function::get_symbol_address(handle<function> target) -> handle<node> {
-		ASSERT(target != nullptr, "invalid function");
+	auto function::get_symbol_address(handle<ir::symbol> sym) -> handle<node> {
+		ASSERT(sym != nullptr, "invalid symbol");
 
-		const handle<node> n = create_node<handle<symbol>>(node::symbol, 1);
-		n->get<handle<symbol>>() = target->sym;
-		n->dt = PTR_TYPE;
+		const handle<node> n = create_node<handle<ir::symbol>>(node::SYMBOL, 1);
+		n->get<handle<ir::symbol>>() = sym;
+		n->data_type = PTR_TYPE;
 		return n;
 	}
 
@@ -28,52 +29,19 @@ namespace ir {
 		active_control_node = nullptr;
 
 		// just add the edge directly.
-		ASSERT(n->dt.ty == data_type::control, "invalid edge");
+		ASSERT(n->data_type.ty == data_type::CONTROL, "invalid edge");
 		add_input_late(target, n);
 		add_memory_edge(n, mem_state, target);
+	}
+
+	auto function::create_call(handle<external> target, const function_type& target_type, const std::vector<handle<node>>& arguments) -> std::vector<handle<node>> {
+		return create_call(target_type, get_symbol_address(&target->symbol), arguments);
 	}
 
 	auto function::create_call(
 		handle<function> target_func, const std::vector<handle<node>>& arguments
 	) -> std::vector<handle<node>> {
-		const handle<node> target = get_symbol_address(target_func);
-		const u64 proj_count = 2 + (target_func->return_count > 1 ? target_func->return_count : 1);
-
-		const handle<node> n = create_node<function_call>(node::call, 3 + arguments.size());
-		n->inputs[0] = active_control_node;
-		n->inputs[2] = target;
-		n->dt = TUPLE_TYPE;
-
-		for (int i = 0; i < arguments.size(); ++i) {
-			n->inputs[3 + i] = arguments[i];
-		}
-
-		auto& call_prop = n->get<function_call>();
-		call_prop.target = target_func;
-
-		const handle<node> control_proj = create_projection(CONTROL_TYPE, n, 0);
-		const handle<node> memory_proj = create_projection(MEMORY_TYPE, n, 1);
-		n->inputs[1] = append_memory(memory_proj);
-
-		// create data projections
-		call_prop.projections.resize(proj_count);
-		const auto returns = target_func->parameter_data.begin() + target_func->parameter_count;
-
-		for (u64 i = 0; i < target_func->return_count; ++i) {
-			call_prop.projections[i + 2] = create_projection(returns[i], n, i + 2);
-		}
-
-		// we'll slot a NULL so it's easy to tell when it's empty
-		if (target_func->return_count == 0) {
-			call_prop.projections[1] = nullptr;
-		}
-
-		call_prop.projections[0] = control_proj;
-		call_prop.projections[1] = memory_proj;
-		active_control_node = control_proj;
-
-		// todo returns
-		return { call_prop.projections.begin() + 2, call_prop.projections.end() };
+		return create_call(target_func->type, get_symbol_address(&target_func->symbol), arguments);
 	}
 
 	auto function::get_parameter(u64 index) -> handle<node> {
@@ -86,27 +54,27 @@ namespace ir {
 
 		// allocate a new return node
 		if (exit_node == nullptr) {
-			const handle<node> exit_region_node = create_node<region>(node::region, 0);
-			exit_region_node->dt = CONTROL_TYPE;
+			const handle<node> exit_region_node = create_node<region>(node::REGION, 0);
+			exit_region_node->data_type = CONTROL_TYPE;
 
-			exit_node = create_node<region>(node::exit, virtual_values.size() + 3);
-			const handle<node> phi_node = create_node<utility::empty_property>(node::phi, 2);
+			exit_node = create_node<region>(node::EXIT, virtual_values.size() + 3);
+			const handle<node> phi_node = create_node<utility::empty_property>(node::PHI, 2);
 
-			exit_node->dt = CONTROL_TYPE;
+			exit_node->data_type = CONTROL_TYPE;
 			exit_node->inputs[0] = exit_region_node;
 			exit_node->inputs[1] = phi_node;
 			exit_node->inputs[2] = parameters[2];
 
-			phi_node->dt = MEMORY_TYPE;
+			phi_node->data_type = MEMORY_TYPE;
 			phi_node->inputs[0] = exit_region_node;
 			phi_node->inputs[1] = memory_state;
 
 			for (u64 i = 0; i < virtual_values.size(); ++i) {
 				const handle<node> value_phi_node = create_node<utility::empty_property>(
-					node::phi, 2
+					node::PHI, 2
 				);
 
-				value_phi_node->dt = virtual_values[i]->dt;
+				value_phi_node->data_type = virtual_values[i]->data_type;
 				value_phi_node->inputs[0] = exit_region_node;
 				value_phi_node->inputs[1] = virtual_values[i];
 
@@ -130,8 +98,8 @@ namespace ir {
 	}
 
 	auto function::create_signed_integer(i64 value, u8 bit_width) -> handle<node> {
-		const handle<node> integer_node = create_node<integer>(node::integer_constant, 1);
-		integer_node->dt = { .ty = data_type::type::integer, .bit_width = bit_width };
+		const handle<node> integer_node = create_node<integer>(node::INTEGER_CONSTANT, 1);
+		integer_node->data_type = { .ty = data_type::INTEGER, .bit_width = bit_width };
 
 		auto& integer_prop = integer_node->get<integer>();
 		integer_prop.bit_width = bit_width;
@@ -144,7 +112,7 @@ namespace ir {
 		handle<node> left, handle<node> right, arithmetic_behaviour behaviour
 	) -> handle<node> {
 		return create_binary_arithmetic_operation(
-			node::addition, left, right, behaviour
+			node::ADD, left, right, behaviour
 		);
 	}
 
@@ -152,7 +120,7 @@ namespace ir {
 		handle<node> left, handle<node> right, arithmetic_behaviour behaviour
 	) -> handle<node> {
 		return create_binary_arithmetic_operation(
-			node::subtraction, left, right, behaviour
+			node::SUB, left, right, behaviour
 		);
 	}
 
@@ -160,10 +128,10 @@ namespace ir {
 		handle<node> destination, handle<node> value, u32 alignment, bool is_volatile
 	) {
 		const handle<node> store_node = create_node<memory_access>(
-			is_volatile ? node::write : node::store, 4
+			is_volatile ? node::WRITE : node::STORE, 4
 		);
 
-		store_node->dt = MEMORY_TYPE;
+		store_node->data_type = MEMORY_TYPE;
 		store_node->inputs[0] = active_control_node;
 		store_node->inputs[1] = append_memory(store_node);
 		store_node->inputs[2] = destination;
@@ -172,10 +140,10 @@ namespace ir {
 	}
 
 	auto function::create_local(u32 size, u32 alignment) -> handle<node> {
-		const handle<node> local_node = create_node<local>(node::local, 1);
+		const handle<node> local_node = create_node<local>(node::LOCAL, 1);
 
 		local_node->inputs[0] = entry_node;
-		local_node->dt = PTR_TYPE;
+		local_node->data_type = PTR_TYPE;
 
 		auto& local_prop = local_node->get<local>();
 		local_prop.alignment = alignment;
@@ -184,29 +152,71 @@ namespace ir {
 		return local_node;
 	}
 
-	auto function::create_binary_arithmetic_operation(node::type type, handle<node> left, handle<node> right, arithmetic_behaviour behaviour) -> handle<node> {
+	auto function::create_call(
+		const function_type& callee_type, handle<node> callee_symbol_address, const std::vector<handle<node>>& arguments
+	) ->  std::vector<handle<node>> {
+		// const handle<node> target = get_symbol_address(target_func->sym);
+		const u64 proj_count = 2 + (callee_type.returns.size() > 1 ? callee_type.returns.size() : 1);
+
+		const handle<node> n = create_node<function_call>(node::CALL, 3 + arguments.size());
+		n->inputs[0] = active_control_node;
+		n->inputs[2] = callee_symbol_address;
+		n->data_type = TUPLE_TYPE;
+
+		for (int i = 0; i < arguments.size(); ++i) {
+			n->inputs[3 + i] = arguments[i];
+		}
+
+		auto& call_prop = n->get<function_call>();
+		call_prop.type = callee_type;
+
+		const handle<node> control_proj = create_projection(CONTROL_TYPE, n, 0);
+		const handle<node> memory_proj = create_projection(MEMORY_TYPE, n, 1);
+		n->inputs[1] = append_memory(memory_proj);
+
+		// create data projections
+		call_prop.projections.resize(proj_count);
+
+		for (u64 i = 0; i < callee_type.returns.size(); ++i) {
+			call_prop.projections[i + 2] = create_projection(callee_type.returns[i], n, i + 2);
+		}
+
+		// we'll slot a NULL so it's easy to tell when it's empty
+		if (callee_type.returns.empty()) {
+			call_prop.projections[1] = nullptr;
+		}
+
+		call_prop.projections[0] = control_proj;
+		call_prop.projections[1] = memory_proj;
+		active_control_node = control_proj;
+
+		// todo returns
+		return { call_prop.projections.begin() + 2, call_prop.projections.end() };
+	}
+
+	auto function::create_binary_arithmetic_operation(node::type op_type, handle<node> left, handle<node> right, arithmetic_behaviour behaviour) -> handle<node> {
 		ASSERT(
-			left->dt == right->dt,
+			left->data_type == right->data_type,
 			"data types of the two operands do not match"
 		);
 
-		const handle<node> op_node = create_node<binary_integer_op>(type, 3);
+		const handle<node> op_node = create_node<binary_integer_op>(op_type, 3);
 
 		op_node->get<binary_integer_op>().behaviour = behaviour;
 		op_node->inputs[1] = left;
 		op_node->inputs[2] = right;
-		op_node->dt = left->dt;
+		op_node->data_type = left->data_type;
 
 		return op_node;
 	}
 
 	auto function::create_projection(data_type dt, handle<node> source, u64 index) -> handle<node> {
-		ASSERT(source->dt.ty == data_type::type::tuple, "projections must be of type tuple");
-		const handle<node> projection_node = create_node<projection>(node::projection, 1);
+		ASSERT(source->data_type.ty == data_type::TUPLE, "projections must be of type tuple");
+		const handle<node> projection_node = create_node<projection>(node::PROJECTION, 1);
 
 		projection_node->get<projection>().index = index;
 		projection_node->inputs[0] = source;
-		projection_node->dt = dt;
+		projection_node->data_type = dt;
 
 		return projection_node;
 	}
@@ -224,8 +234,8 @@ namespace ir {
 
 	void function::add_input_late(handle<node> n, handle<node> input) {
 		ASSERT(
-			n->ty == node::type::region || 
-			n->ty == node::type::phi,
+			n->ty == node::type::REGION || 
+			n->ty == node::type::PHI,
 			"invalid node, cannot append input to a region/phi node"
 		);
 
@@ -244,9 +254,9 @@ namespace ir {
 	}
 
 	void function::add_memory_edge(handle<node> n, handle<node> mem_state, handle<node> target) {
-		ASSERT(target->ty == node::region, "invalid target type");
+		ASSERT(target->ty == node::REGION, "invalid target type");
 		const auto& region_prop = target->get<region>();
-		ASSERT(region_prop.memory_in && region_prop.memory_in->ty == node::phi, "invalid region type");
+		ASSERT(region_prop.memory_in && region_prop.memory_in->ty == node::PHI, "invalid region type");
 		add_input_late(region_prop.memory_in, mem_state);
 	}
 }

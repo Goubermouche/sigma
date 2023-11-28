@@ -8,7 +8,7 @@ namespace ir {
 	auto node::get_parent_region() -> handle<node> {
 		handle node = this;
 
-		while (node->ty != region && node->ty != entry) {
+		while (node->ty != REGION && node->ty != ENTRY) {
 			ASSERT(node->inputs[0] != nullptr, "node has no control edge");
 			node = node->inputs[0];
 		}
@@ -28,19 +28,19 @@ namespace ir {
 
 	auto node::get_fallthrough() -> handle<node> {
 		if(
-			ty == projection &&
-			dt.ty == data_type::type::control &&
-			inputs[0]->ty != entry
+			ty == PROJECTION &&
+			data_type.ty == data_type::CONTROL &&
+			inputs[0]->ty != ENTRY
 		) {
 			// if it's single user and that user is the terminator we can skip it in the fallthrough logic
-			return use->next_user == nullptr && use->node->ty == region ? use->node : this;
+			return use->next_user == nullptr && use->node->ty == REGION ? use->node : this;
 		}
 
 		return this;
 	}
 
 	auto node::get_next_block() -> handle<node> {
-		ASSERT(ty == projection && inputs[0]->ty == branch, "panic");
+		ASSERT(ty == PROJECTION && inputs[0]->ty == BRANCH, "panic");
 
 		if (!inputs[0]->is_critical_edge(this)) {
 			return use->node;
@@ -51,90 +51,90 @@ namespace ir {
 
 	auto node::get_node_name() const -> std::string {
 		switch (ty) {
-			case none: return "INVALID NODE";
-			case dead: return "dead";
-			case unreachable: return "unreachable";
+			case NONE: return "INVALID NODE";
+			case DEAD: return "dead";
+			case UNREACHABLE: return "unreachable";
 
-			case entry:  return "entry";
-			case exit:   return "exit";
-			case projection:   return "proj";
-			case region: return "region";
+			case ENTRY:  return "entry";
+			case EXIT:   return "exit";
+			case PROJECTION:   return "proj";
+			case REGION: return "region";
 
-			case local: return "local";
+			case LOCAL: return "local";
 
-			case variadic_start: return "variadic_start";
-			case debug_break: return "debug_break";
+			case VARIADIC_START: return "variadic_start";
+			case DEBUG_BREAK: return "debug_break";
 
-			case poison: return "poison";
-			case integer_constant: return "int";
-			case f32_constant: return "float32";
-			case f64_constant: return "float64";
+			case POISON: return "poison";
+			case INTEGER_CONSTANT: return "int";
+			case F32_CONSTANT: return "float32";
+			case F64_CONSTANT: return "float64";
 
-			case phi: return "phi";
-			case select: return "select";
-			case lookup: return "lookup";
+			case PHI: return "phi";
+			case SELECT: return "select";
+			case LOOKUP: return "lookup";
 
-			case array_access: return "array";
-			case member_access: return "member";
+			case ARRAY_ACCESS: return "array";
+			case MEMBER_ACCESS: return "member";
 
-			case pointer_to_integer: return "ptr2int";
-			case integer_to_pointer: return "int2ptr";
+			case POINTER_TO_INTEGER: return "ptr2int";
+			case INTEGER_TO_POINTER: return "int2ptr";
 
-			case memset: return "memset";
-			case memcpy: return "memcpy";
+			case MEMSET: return "memset";
+			case MEMCPY: return "memcpy";
 
-			case zero_extend: return "zxt";
-			case sign_extend: return "sxt";
-			case float_extend: return "fpxt";
-			case truncate: return "trunc";
-			case bit_cast: return "bitcast";
-			case uint_to_float: return "uint2float";
-			case int_to_float: return "int2float";
-			case float_to_uint: return "float2uint";
-			case float_to_int: return "float2int";
-			case symbol: return "symbol";
+			case ZERO_EXTEND: return "zxt";
+			case SIGN_EXTEND: return "sxt";
+			case FLOAT_EXTEND: return "fpxt";
+			case TRUNCATE: return "trunc";
+			case BIT_CAST: return "bitcast";
+			case UNSIGNED_INTEGER_TO_FLOAT: return "uint2float";
+			case INTEGER_TO_FLOAT: return "int2float";
+			case FLOAT_TO_UNSIGNED_INTEGER: return "float2uint";
+			case FLOAT_TO_INTEGER: return "float2int";
+			case SYMBOL: return "symbol";
 
-			case compare_not_equal: return "cmp.ne";
-			case compare_equal: return "cmp.eq";
-			case compare_unsigned_less_than: return "cmp.ult";
-			case compare_unsigned_less_than_or_equal: return "cmp.ule";
-			case compare_signed_less_than: return "cmp.slt";
-			case compare_signed_less_than_or_equal: return "cmp.sle";
-			case compare_float_less_than: return "cmp.lt";
-			case compare_float_less_than_or_equal: return "cmp.le";
+			case CMP_NE: return "cmp.ne";
+			case CMP_EQ: return "cmp.eq";
+			case CMP_ULT: return "cmp.ult";
+			case CMP_ULTE: return "cmp.ule";
+			case CMP_SLT: return "cmp.slt";
+			case CMP_SLTE: return "cmp.sle";
+			case CMP_FLT: return "cmp.lt";
+			case CMP_FLTE: return "cmp.le";
 
-			case clz: return "clz";
-			case ctz: return "ctz";
-			case negation: return "not";
-			case conjunction: return "and";
-			case disjunction: return "or";
-			case exclusive_disjunction: return "xor";
-			case addition: return "add";
-			case subtraction: return "sub";
-			case multiplication: return "mul";
-			case unsigned_division: return "udiv";
-			case signed_division: return "sdiv";
-			case unsigned_modulus: return "umod";
-			case signed_modulus: return "smod";
-			case left_shift: return "shl";
-			case right_shift: return "shr";
-			case left_rotate: return "rol";
-			case right_rotate: return "ror";
-			case right_arithmetic_shift: return "sar";
+			case CLZ: return "clz";
+			case CTZ: return "ctz";
+			case NOT: return "not";
+			case AND: return "and";
+			case OR: return "or";
+			case XOR: return "xor";
+			case ADD: return "add";
+			case SUB: return "sub";
+			case MUL: return "mul";
+			case UDIV: return "udiv";
+			case DIV: return "sdiv";
+			case UMOD: return "umod";
+			case MOD: return "smod";
+			case LSH: return "shl";
+			case RSH: return "shr";
+			case LR: return "rol";
+			case RR: return "ror";
+			case RAS: return "sar";
 
-			case float_addition: return "fadd";
-			case float_subtraction: return "fsub";
-			case float_multiplication: return "fmul";
-			case float_division: return "fdiv";
+			case FADD: return "fadd";
+			case FSUB: return "fsub";
+			case FMUL: return "fmul";
+			case FDIV: return "fdiv";
 
-			case multiply_pair: return "mulpair";
-			case load: return "load";
-			case store: return "store";
+			case MUL_PAIR: return "mulpair";
+			case LOAD: return "load";
+			case STORE: return "store";
 
-			case call: return "call";
-			case system_call: return "syscall";
-			case branch: 
-			case tail_call: return "branch";
+			case CALL: return "call";
+			case SYSTEM_CALL: return "syscall";
+			case BRANCH: 
+			case TAIL_CALL: return "branch";
 
 			default: {
 				ASSERT(false, "unknown type");
@@ -146,24 +146,24 @@ namespace ir {
 	auto node::has_effects() const -> bool {
 		switch (ty) {
 			// memory effects
-			case read:
-			case write:
-			case store:
-			case memcpy:
-			case memset:
+			case READ:
+			case WRITE:
+			case STORE:
+			case MEMCPY:
+			case MEMSET:
 				return true;
-			case projection:
-				return dt.ty == data_type::type::control;
+			case PROJECTION:
+				return data_type.ty == data_type::CONTROL;
 			// control flow
-			case entry:
-			case region:
-			case branch:
-			case exit:
-			case unreachable:
-			case debug_break:
-			case trap:
-			case system_call:
-			case call:
+			case ENTRY:
+			case REGION:
+			case BRANCH:
+			case EXIT:
+			case UNREACHABLE:
+			case DEBUG_BREAK:
+			case TRAP:
+			case SYSTEM_CALL:
+			case CALL:
 				return true;
 			default:
 				return false;
@@ -172,11 +172,11 @@ namespace ir {
 
 	auto node::is_control() const -> bool {
 		// easy case
-		if (dt.ty == data_type::type::control) {
+		if (data_type.ty == data_type::CONTROL) {
 			return true;
 		}
 
-		if (dt.ty != data_type::type::tuple) {
+		if (data_type.ty != data_type::TUPLE) {
 			return false;
 		}
 
@@ -184,11 +184,11 @@ namespace ir {
 		// checking which is annoying and slow)
 		//
 		// branch, debug break, trap, unreachable, dead  OR  call, syscall, safe point
-		return (ty >= branch && ty <= dead) || (ty >= call && ty <= safe_point_poll);
+		return (ty >= BRANCH && ty <= DEAD) || (ty >= CALL && ty <= SAFE_POINT_POLL);
 	}
 
 	auto node::is_pinned() const -> bool {
-		return ty >= entry && ty <= safe_point_poll || ty == projection;
+		return ty >= ENTRY && ty <= SAFE_POINT_POLL || ty == PROJECTION;
 	}
 
 	auto node::is_on_last_use(codegen_context& context) -> bool {
@@ -210,12 +210,12 @@ namespace ir {
 	auto node::get_predecessor(u64 index) -> handle<node> {
 		handle<node> predecessor = inputs[index];
 
-		if (ty == region && predecessor->ty == projection) {
+		if (ty == REGION && predecessor->ty == PROJECTION) {
 			const handle<node> parent = predecessor->inputs[0];
 
 			// start or projections with multiple users
 			if (
-				parent->ty == entry || 
+				parent->ty == ENTRY || 
 				(!parent->is_control_projection_node() && predecessor->use->next_user != nullptr)
 			) {
 				return predecessor;
@@ -246,28 +246,28 @@ namespace ir {
 	}
 
 	auto node::is_block_end() const -> bool {
-		return ty == branch;
+		return ty == BRANCH;
 	}
 
 	auto node::is_block_begin() const -> bool {
 		return
-			ty == region ||
-			ty == projection && (inputs[0]->ty == entry || inputs[0]->ty == branch);
+			ty == REGION ||
+			ty == PROJECTION && (inputs[0]->ty == ENTRY || inputs[0]->ty == BRANCH);
 	}
 
 	auto node::is_mem_out_op() const  -> bool {
 		return
-			dt.ty == data_type::type::memory ||
-			(ty >= store && ty < atomic_cas) ||
-			(ty >= call && ty <= safe_point_poll);
+			data_type.ty == data_type::MEMORY ||
+			(ty >= STORE && ty < ATOMIC_CAS) ||
+			(ty >= CALL && ty <= SAFE_POINT_POLL);
 	}
 
 	auto node::is_terminator() const -> bool {
-		return ty == branch || ty == unreachable || ty == trap || ty == exit;
+		return ty == BRANCH || ty == UNREACHABLE || ty == TRAP || ty == EXIT;
 	}
 
 	auto node::is_control_projection_node() const -> bool {
-		return ty == call || ty == system_call || ty == read || ty == write;
+		return ty == CALL || ty == SYSTEM_CALL || ty == READ || ty == WRITE;
 	}
 
 	auto node::is_critical_edge(handle<node> projection) const -> bool {
@@ -276,17 +276,17 @@ namespace ir {
 		// multi-user proj, this means it's basically a basic block
 		if (
 			projection->use->next_user != nullptr ||
-			projection->use->node->ty != region
+			projection->use->node->ty != REGION
 		) {
 			return true;
 		}
 
-		ASSERT(ty == branch, "current node is not a branch");
+		ASSERT(ty == BRANCH, "current node is not a branch");
 		const handle<node> region = projection->use->node;
 
 		if (region->ty == region && region->inputs.get_size() > 1) {
 			for (handle<user> u = region->use; u; u = u->next_user ) {
-				if (u->node->ty == phi) {
+				if (u->node->ty == PHI) {
 					return true;
 				}
 			}
@@ -297,20 +297,20 @@ namespace ir {
 
 	auto node::should_rematerialize() const -> bool {
 		if (
-			(ty == int_to_float || ty == integer_to_pointer) &&
-			inputs[1]->ty == integer_constant
+			(ty == INTEGER_TO_FLOAT || ty == INTEGER_TO_POINTER) &&
+			inputs[1]->ty == INTEGER_CONSTANT
 		) {
 			return true;
 		}
 
 		return
-			(ty == projection && inputs[0]->ty == entry) ||
-			ty == f32_constant ||
-			ty == f64_constant ||
-			ty == integer_constant ||
-			ty == member_access ||
-			ty == local || 
-			ty == symbol;
+			(ty == PROJECTION && inputs[0]->ty == ENTRY) ||
+			ty == F32_CONSTANT ||
+			ty == F64_CONSTANT ||
+			ty == INTEGER_CONSTANT ||
+			ty == MEMBER_ACCESS ||
+			ty == LOCAL || 
+			ty == SYMBOL;
 	}
 
 	auto node::remove_user(u64 slot) -> handle<user> {

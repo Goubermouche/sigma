@@ -5,8 +5,8 @@ namespace ir {
 	using namespace utility::types;
 
 	enum class float_format {
-		f32,
-		f64
+		F32,
+		F64
 	};
 
 	struct integer {

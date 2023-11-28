@@ -1,21 +1,21 @@
-#include "data_type.h"
+#include "types.h"
 #include <utility/macros.h>
 
 
 namespace ir {
     auto data_type::to_string() const -> std::string {
         switch (ty) {
-        case integer:
+        case INTEGER:
             return "i" + std::to_string(bit_width);
-        case pointer:
+        case POINTER:
             return "ptr" + std::to_string(bit_width);
-        case floating_point:
+        case FLOAT:
             return "f" + std::to_string(bit_width);
-        case tuple:
+        case TUPLE:
             return "tuple";
-        case control:
+        case CONTROL:
             return "control";
-        case memory:
+        case MEMORY:
             return "memory";
         default:
             ASSERT(false, "not implemented");

@@ -1,22 +1,29 @@
 #pragma once
 #include <utility/types.h>
+#include <utility/containers/handle.h>
 
 namespace ir {
+	using namespace utility::types;
+
+	class module;
 	struct symbol {
-		enum class tag {
-			none,
+		enum symbol_tag {
+			NONE,
 
 			// symbol is dead
-			tombstone,
+			TOMBSTONE,
 
-			external,
-			global,
-			function,
+			EXTERNAL,
+			GLOBAL,
+			FUNCTION,
 
-			max
+			MAX
 		};
 
+		handle<module> module;
 		std::string name;
-		tag t;
+		symbol_tag tag;
+		u64 symbol_id;
+		u64 ordinal;
 	};
 }

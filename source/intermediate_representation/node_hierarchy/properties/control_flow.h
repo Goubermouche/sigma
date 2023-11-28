@@ -21,7 +21,7 @@ namespace ir {
 	};
 
 	struct function_call {
-		handle<function> target;
+		function_type type; // function prototype
 		std::vector<handle<node>> projections;
 	};
 }

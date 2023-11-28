@@ -1,15 +1,36 @@
 #pragma once
 #include "intermediate_representation/node_hierarchy/user.h"
 #include "intermediate_representation/node_hierarchy/symbol.h"
+#include "intermediate_representation/node_hierarchy/global.h"
+
+#include <utility/containers/byte_buffer.h>
+#include <utility/containers/allocator_based_containers/linked_list.h>
 
 // NOTE: it might be a good idea to determine block size from the node count
 //       of the preceding AST and scale relative to that
 #define NODE_ALLOCATION_BLOCK_SIZE 1024
 
 namespace ir {
+	struct function;
+	struct symbol_patch;
+
+	struct compiled_function {
+		handle<function> parent;
+
+		u64 ordinal;
+		u8 prologue_length;
+
+		uint64_t stack_usage;
+
+		u64 code_position; // relative to the export-specific text section
+		utility::byte_buffer bytecode;
+
+		utility::linked_list<handle<symbol_patch>> patches;
+	};
+
 	struct function {
 		function() = default;
-		function(const std::string& name, symbol::tag tag);
+		function(const std::string& name);
 
 		template<typename extra_type>
 		auto create_node(node::type type, u64 input_count) -> handle<node>;
@@ -17,11 +38,13 @@ namespace ir {
 		void add_input_late(handle<node> n, handle<node> input);
 		void add_memory_edge(handle<node> n, handle<node> mem_state, handle<node> target);
 
-		auto get_symbol_address(handle<function> target) -> handle<node>;
+		auto get_symbol_address(handle<symbol> sym) -> handle<node>;
 
 		// node hierarchy
 		void create_goto(handle<node> target);
 		void create_ret(const std::vector<handle<node>>& virtual_values);
+
+		auto create_call(handle<external> target, const function_type& target_type, const std::vector<handle<node>>& arguments) -> std::vector<handle<node>>;
 		auto create_call(handle<function> target_func, const std::vector<handle<node>>& arguments) -> std::vector<handle<node>>;
 
 		auto create_signed_integer(i64 value, u8 bit_width) -> handle<node>;
@@ -34,11 +57,22 @@ namespace ir {
 		auto get_parameter(u64 index) -> handle<node>;
 		auto create_local(u32 size, u32 alignment) -> handle<node>;
 	private:
-		auto create_binary_arithmetic_operation(node::type type, handle<node> left, handle<node> right, arithmetic_behaviour behaviour) -> handle<node>;
+		auto create_call(const function_type& callee_type, handle<node> callee_symbol_address, const std::vector<handle<node>>& arguments) -> std::vector<handle<node>>;
+		auto create_binary_arithmetic_operation(node::type op_type, handle<node> left, handle<node> right, arithmetic_behaviour behaviour) -> handle<node>;
 		auto create_projection(data_type dt, handle<node> source, u64 index) -> handle<node>;
 		auto append_memory(handle<node> memory) const -> handle<node>;
 	public:
 		friend class module;
+		symbol symbol; // symbol of the given function
+
+		compiled_function output;
+		function_type type;
+		linkage linkage;
+
+		u8 parent_section; // index of the parent module section
+
+		// allocator which is used for allocating child nodes
+		utility::block_allocator allocator;
 
 		handle<node> active_control_node;
 		handle<node> entry_node;
@@ -53,12 +87,7 @@ namespace ir {
 		// 0 - m_parameter_count             : actual parameters
 		// m_parameter_count - m_return_count: function returns
 		std::vector<handle<node>> parameters;
-		std::vector<data_type> parameter_data;
 		std::vector<handle<node>> terminators;
-
-		// allocator which is used for allocating child nodes
-		utility::block_allocator allocator;
-		handle<symbol> sym; // symbol of the given function
 	};
 
 	template<typename extra_type>

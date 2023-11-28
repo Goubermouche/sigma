@@ -59,11 +59,10 @@ namespace std {
 
         auto format(const utility::types::handle<type>& obj, format_context& ctx) {
             if (obj) {
-                return format_to(ctx.out(), "{}", (utility::u64)obj.get());
+                return format_to(ctx.out(), "{}", static_cast<utility::u64>(obj.get()));
             }
-            else {
-                return format_to(ctx.out(), "0");
-            }
+
+            return format_to(ctx.out(), "0");
         }
     };
 }

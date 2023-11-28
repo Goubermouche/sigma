@@ -6,22 +6,59 @@ namespace utility {
 	template<typename type>
 	class contiguous_container {
 	public:
-		contiguous_container()
+		constexpr contiguous_container() noexcept
 			: m_owning(true), m_data(nullptr), m_size(0), m_capacity(0) {}
 
-		contiguous_container(u64 capacity)
-			: m_owning(true), m_data(new type[capacity]), m_size(0), m_capacity(capacity) {}
+		constexpr contiguous_container(u64 size) noexcept
+			: m_owning(true), m_data(new type[size]), m_size(size), m_capacity(size) {}
 
-		contiguous_container(u64 size, type* data)
+		constexpr contiguous_container(u64 size, type* data) noexcept
 			: m_owning(false), m_data(data), m_size(size), m_capacity(size) {}
 
-		~contiguous_container() {
+		contiguous_container(const contiguous_container& other)
+			: m_owning(true), m_size(other.m_size), m_capacity(other.m_capacity) {
+			m_data = static_cast<type*>(std::malloc(m_capacity * sizeof(type)));
+			std::memcpy(m_data, other.m_data, m_capacity * sizeof(type));
+		}
+
+		[[nodiscard]] contiguous_container& operator=(const contiguous_container& other) {
+			if(&other == this) {
+				return *this;
+			}
+
+			m_owning = true;
+			m_size = other.m_size;
+			m_capacity = other.m_capacity;
+			m_data = static_cast<type*>(std::malloc(m_capacity * sizeof(type)));
+			std::memcpy(m_data, other.m_data, m_capacity * sizeof(type));
+
+			return *this;
+		}
+
+		constexpr ~contiguous_container() noexcept {
 			if (m_owning) {
 				delete[] m_data;
 			}
 		}
 
-		void push_back(const type& value) {
+		[[nodiscard]] static contiguous_container zero_initialize(u64 size) {
+			const contiguous_container container(size);
+			container.zero_fill();
+			return container;
+		}
+
+		constexpr void clear() {
+			m_size = 0;
+			zero_fill();
+		}
+
+		constexpr void zero_fill() const {
+			if(m_data) {
+				std::memset(m_data, 0, m_size * sizeof(type));
+			}
+		}
+
+		constexpr void push_back(const type& value) {
 			ASSERT(m_owning, "non-owning container cannot change the memory layout");
 			if (m_size == m_capacity) {
 				grow();
@@ -38,7 +75,7 @@ namespace utility {
 		}
 
 		template<typename... arg_types>
-		void emplace_back(arg_types&&... args) {
+		constexpr void emplace_back(arg_types&&... args) {
 			ASSERT(m_owning, "non-owning container cannot change the memory layout");
 
 			static_assert(
@@ -54,7 +91,7 @@ namespace utility {
 			m_size++;
 		}
 
-		void insert(type* where, const type* start, const type* end) {
+		constexpr void insert(type* where, const type* start, const type* end) {
 			ASSERT(m_owning, "non-owning container cannot change the memory layout");
 			const u64 elements_to_insert = end - start;
 
@@ -97,39 +134,47 @@ namespace utility {
 			m_size += elements_to_insert;
 		}
 
-		void append(const contiguous_container& other) {
+		constexpr void append(const contiguous_container& other) {
 			insert(end(), other.cbegin(), other.cend());
 		}
 
-		void prepend(const contiguous_container& other) {
+		constexpr void prepend(const contiguous_container& other) {
 			insert(begin(), other.cbegin(), other.cend());
 		}
 
-		[[nodiscard]] auto get_slice(u64 start, u64 size) const -> slice<type> {
+		type& operator[](u64 index) {
+			return m_data[index];
+		}
+
+		const type& operator[](u64 index) const {
+			return m_data[index];
+		}
+
+		[[nodiscard]] constexpr auto get_slice(u64 start, u64 size) const -> slice<type> {
 			return { m_data + start, size };
 		}
 
-		[[nodiscard]] auto get_size() const -> u64 {
+		[[nodiscard]] constexpr auto get_size() const -> u64 {
 			return m_size;
 		}
 
-		[[nodiscard]] auto begin() -> type* {
+		[[nodiscard]] constexpr auto begin() -> type* {
 			return m_data;
 		}
 
-		[[nodiscard]] auto cbegin() const -> const type* {
+		[[nodiscard]] constexpr auto cbegin() const -> const type* {
 			return m_data;
 		}
 
-		[[nodiscard]] auto end() -> type* {
+		[[nodiscard]] constexpr auto end() -> type* {
 			return m_data + m_size;
 		}
 
-		[[nodiscard]] auto cend() const -> const type* {
+		[[nodiscard]] constexpr auto cend() const -> const type* {
 			return m_data + m_size;
 		}
 
-		void reserve(u64 capacity) {
+		constexpr void reserve(u64 capacity) {
 			ASSERT(m_owning, "non-owning container cannot change the memory layout");
 			ASSERT(
 				capacity > m_capacity,
@@ -154,7 +199,7 @@ namespace utility {
 			m_capacity = capacity;
 		}
 
-		void resize(u64 size) {
+		constexpr void resize(u64 size) {
 			ASSERT(m_owning, "non-owning container cannot change the memory layout");
 			ASSERT(size != m_size, "size is already equal to the passed value");
 
@@ -173,20 +218,47 @@ namespace utility {
 
 			m_size = size;
 		}
-	private:
+
+		constexpr void resize(u64 size, const type& value) {
+			ASSERT(m_owning, "non-owning container cannot change the memory layout");
+			ASSERT(size != m_size, "size is already equal to the passed value");
+
+			if (size > m_capacity) {
+				reserve(size);
+			}
+
+			if constexpr (!std::is_trivial_v<type>) {
+				if (size > m_size) {
+					for (auto p = m_data + m_size; p != m_data + size; ++p) {
+						new (p) type(value); // Construct each new element with the given value
+					}
+				}
+				else {
+					destruct_range(m_data + size, m_data + m_size);
+				}
+			}
+			else {
+				if (size > m_size) {
+					std::fill(m_data + m_size, m_data + size, value);
+				}
+			}
+
+			m_size = size;
+		}
+	protected:
 		void grow() {
 			ASSERT(m_owning, "non-owning container cannot change the memory layout");
 			reserve(m_capacity * 2 + 1);
 		}
 
-		static void destruct_range(type* begin, type* end) {
+		static constexpr void destruct_range(type* begin, type* end) {
 			while (begin != end) {
 				begin->~type();
 				++begin;
 			}
 		}
 
-		static void copy_range(type* begin, type* end, type* destination) {
+		static constexpr void copy_range(type* begin, type* end, type* destination) {
 			while (begin != end) {
 				new (destination) type(*begin);
 				++begin;
@@ -194,7 +266,7 @@ namespace utility {
 			}
 		}
 
-		static void construct_range(type* begin, type* end) {
+		static constexpr void construct_range(type* begin, type* end) {
 			while (begin != end) {
 				new (begin) type;
 				++begin;

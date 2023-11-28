@@ -96,6 +96,8 @@
     <ClInclude Include="string_helper.h" />
     <ClInclude Include="timer.h" />
     <ClInclude Include="types.h" />
+    <ClInclude Include="filesystem\new\file_types\object_file.h" />
+    <ClInclude Include="containers\allocator_based_containers\linked_list.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="containers\allocators\block_allocator.cpp">

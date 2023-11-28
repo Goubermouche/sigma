@@ -1,11 +1,8 @@
 #pragma once
-#include "contiguous_container.h"
+#include "utility/containers/contiguous_container.h"
 #include "utility/memory.h"
-#include "utility/macros.h"
 
 namespace utility {
-	class code_generator_context;
-
 	/**
 	 * \brief Simple abstraction for a list of bytes. Provides basic quality of life
 	 * features such as resolving relocations and iterators.
@@ -13,8 +10,15 @@ namespace utility {
 	class byte_buffer : public contiguous_container<byte> {
 	public:
 		byte_buffer() = default;
+
+		byte_buffer(const contiguous_container& container)
+			: contiguous_container(container) {}
+
 		byte_buffer(const slice<byte>& slice)
 			: contiguous_container(slice.get_size(), slice.get_data()) {}
+
+		byte_buffer(u64 size)
+			: contiguous_container(size) {}
 
 		auto operator[](u64 index) const -> const byte& {
 			return m_data[index];
@@ -59,6 +63,13 @@ namespace utility {
 			}
 		}
 
+		template<typename type>
+		void append_type(const type& value) {
+			// get a pointer to the memory representation of value
+			const auto bytes = reinterpret_cast<const byte*>(&value);
+			insert(end(), bytes, bytes + sizeof(type));
+		}
+
 		auto get_byte(u64 index) const -> u8 {
 			return m_data[index];
 		}
@@ -81,8 +92,20 @@ namespace utility {
 			return result;
 		}
 
+		void patch_byte(u64 pos, u8 data) const {
+			*reinterpret_cast<u8*>(&m_data[pos]) = data;
+		}
+
+		void patch_word(u64 pos, u16 data) const {
+			*reinterpret_cast<u16*>(&m_data[pos]) = data;
+		}
+
 		void patch_dword(u64 pos, u32 data) const {
 			*reinterpret_cast<u32*>(&m_data[pos]) = data;
+		}
+
+		void patch_qword(u64 pos, u64 data) const {
+			*reinterpret_cast<u64*>(&m_data[pos]) = data;
 		}
 
 		/**
@@ -121,5 +144,22 @@ namespace utility {
 				*head = pos;
 			}
 		}
+	};
+
+	class byte_writer : public byte_buffer {
+	public:
+		byte_writer(u64 size) : byte_buffer(size), m_position(0) {}
+
+		template<typename append_type>
+		void write(const append_type& value) {
+			std::memcpy(&m_data[m_position], &value, sizeof(append_type));
+			m_position += sizeof(append_type);
+		}
+
+		[[nodiscard]] u64 get_position() const {
+			return m_position;
+		}
+	protected:
+		u64 m_position;
 	};
 }

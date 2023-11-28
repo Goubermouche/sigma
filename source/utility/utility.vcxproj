@@ -61,6 +61,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="containers\allocators\block_allocator.h" />
+    <ClInclude Include="containers\allocator_based_containers\linked_list.h" />
     <ClInclude Include="containers\byte_buffer.h" />
     <ClInclude Include="containers\contiguous_container.h" />
     <ClInclude Include="containers\dense_set.h" />
@@ -82,6 +83,7 @@
     <ClInclude Include="filesystem\file_types\text_file.h" />
     <ClInclude Include="filesystem\filesystem.h" />
     <ClInclude Include="filesystem\new\file.h" />
+    <ClInclude Include="filesystem\new\file_types\object_file.h" />
     <ClInclude Include="format.h" />
     <ClInclude Include="macros.h" />
     <ClInclude Include="memory.h" />

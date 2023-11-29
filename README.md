@@ -49,3 +49,4 @@ Sigma strives to be a fully functional enviroment, for this purpose we're develo
 ### Dependencies 
 -   [LLVM 16.0.0](https://github.com/llvm/llvm-project/tree/release/16.x) (temporary)
 -   [Premake5](https://github.com/premake/premake-core)
+

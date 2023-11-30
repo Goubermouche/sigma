@@ -6,7 +6,7 @@ Heya! welcome to the Sigma project, feel free to look around or help out here an
 ## Ways to contribute
 
 ### Contributing to the compiler implementation
-Before contributing to the compiler implementation please read our [**style guide**](TODO) first. Pretty much anything can be a contribution, from a tiny typo fix, to an entire feature implementation - anything is possible. 
+Before contributing to the compiler implementation please read our [**style guide**](STYLE.md) first. Pretty much anything can be a contribution, from a tiny typo fix, to an entire feature implementation - anything is possible. 
 
 ### Contributing to the language design
 TODO

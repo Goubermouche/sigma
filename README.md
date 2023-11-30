@@ -39,8 +39,8 @@ As Sigma us currently under heavy development, it isn't ready for stable use, an
 
 ## Contributing
 Contributions, either to the compiler implementation, or related to language design are greatly appreciated. 
--   [Contribute to the compiler implementation](CONTRIBUTING.md#ontributing_to_the_compiler_implementation): Bug reports, optimizations, new features.
--   [Contribute to the language design](CONTRIBUTING.md#contributing_to_the_language_design): Feedback on the language design, new feature request, interesting ideas.
+-   [Contribute to the compiler implementation](/documents/CONTRIBUTING.md#ontributing_to_the_compiler_implementation): Bug reports, optimizations, new features.
+-   [Contribute to the language design](/documents/CONTRIBUTING.md#contributing_to_the_language_design): Feedback on the language design, new feature request, interesting ideas.
 
 ## Tooling
 Sigma strives to be a fully functional enviroment, for this purpose we're developing several tools which aim to ease entry cost and improve the developer experience. As more tools become available they will be added to the list bellow: 

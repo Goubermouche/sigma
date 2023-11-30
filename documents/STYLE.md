@@ -5,7 +5,7 @@ C++ code in the Sigma project should use a consistent and well documented style
 guide. Where possible, this should be enacted and enforced with tooling to avoid
 toil both for authors of C++ code in the Sigma project and for code reviewers.
 
-> :warning: While we do suggest that you use the mentioned techniques the Sigma source code does not entirely abide by them yet.
+> :warning: **While we do suggest that you use the mentioned techniques the Sigma source code does not entirely abide by them yet.**
 
 ## General naming rules
 -   Compile time constants and macros should use `UPPER_CASE` formatting.

@@ -9,7 +9,8 @@ Each Sigma (`.s`) will contain a list of includes at the top of the file (this c
 ## Including external files
 Including external files in a given `.s` file can be achieved using the `#include` keyword, like so:
 ```cpp
-#include<utilities.s> // includes and essentially copies the utilities.s file to the target file at the position of the include directive
+ // includes and essentially copies the utilities.s file to the target file at the position of the include directive
+#include<utilities.s>
 ```
 
 ## Builtin types

@@ -38,15 +38,15 @@ As Sigma us currently under heavy development, it isn't ready for stable use, an
     -   Official GPU support via kernels
 
 ## Contributing
-Contributions, either to the compiler implementation, or related to language design are greatly appreciated. 
--   [Contribute to the compiler implementation](/documents/CONTRIBUTING.md#ontributing_to_the_compiler_implementation): Bug reports, optimizations, new features.
--   [Contribute to the language design](/documents/CONTRIBUTING.md#contributing_to_the_language_design): Feedback on the language design, new feature request, interesting ideas.
+Contributions, either to the compiler implementation, or related to language design are greatly appreciated and welcome.
+-   [**Contribute to the compiler implementation**](/documents/CONTRIBUTING.md#ontributing_to_the_compiler_implementation): Bug reports, optimizations, new features.
+-   [**Contribute to the language design**](/documents/CONTRIBUTING.md#contributing_to_the_language_design): Feedback on the language design, new feature request, interesting ideas.
 
 ## Tooling
 Sigma strives to be a fully functional enviroment, for this purpose we're developing several tools which aim to ease entry cost and improve the developer experience. As more tools become available they will be added to the list bellow: 
--   [Syntax highlighting](https://github.com/Goubermouche/sigma-syntax-highlighter)
+-   [**Syntax highlighting**](https://github.com/Goubermouche/sigma-syntax-highlighter)
 
 ### Dependencies 
--   [LLVM 16.0.0](https://github.com/llvm/llvm-project/tree/release/16.x) (temporary)
--   [Premake5](https://github.com/premake/premake-core)
+-   [**LLVM 16.0.0**](https://github.com/llvm/llvm-project/tree/release/16.x) (temporary)
+-   [**Premake5**](https://github.com/premake/premake-core)
 

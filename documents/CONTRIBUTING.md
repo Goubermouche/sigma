@@ -9,4 +9,4 @@ Heya! welcome to the Sigma project, feel free to look around or help out here an
 Before contributing to the compiler implementation please read our [**style guide**](STYLE.md) first. Pretty much anything can be a contribution, from a tiny typo fix, to an entire feature implementation - anything is possible. 
 
 ### Contributing to the language design
-Before contributing to the language design implementation please read our [**language design**](DESIGN.md) writeup.
+Before contributing to the language design implementation please read our [**language design**](LANGUAGE_DESIGN.md) writeup.

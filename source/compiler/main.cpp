@@ -1,71 +1,116 @@
 //#include "compiler/compiler.h"
+#include <intermediate_representation/builder.h>
 #include <intermediate_representation/module.h>
 #include <utility/filesystem/new/file.h>
+#include <utility/string_helper.h>
 
-#include <intermediate_representation/builder.h>
+#include <tokenizer/tokenizer.h>
+#include <parser/parser.h>
+#include <type_checker/type_checker.h>
+#include <ir_translator/ir_translator.h>
 
 using namespace utility::types;
 
-// todo: 
-// - rework the console so that it supports multiple stream types
-// - make the pe executable format derive from the file class
-// - replace print methods with overloaded friend methods
+//ast.traverse([&](const handle<ast::node>& node, u16 depth) {
+//	 std::cout << std::string(depth * 2, ' ');
+//	switch (node->type.type) {
+//		case ast::node_type::FUNCTION:
+//			std::cout << "FUNCTION " << utility::detail::escape_string(syntax.symbols.get(node->get<ast::function>().identifier_key)) << '\n';
+//			return;
+//		case ast::node_type::FUNCTION_CALL:
+//			std::cout << "FUNCTION_CALL " << utility::detail::escape_string(syntax.symbols.get(node->get<ast::function_call>().callee_identifier_key)) << '\n';
+//			return;
+//		case ast::node_type::VARIABLE_DECLARATION:
+//			std::cout << utility::detail::escape_string(syntax.symbols.get(node->get<ast::variable>().identifier_key)) << '\n';
+//			return;
+//		case ast::node_type::STRING_LITERAL:
+//		case ast::node_type::NUMERICAL_LITERAL:
+//			std::cout << '"' << utility::detail::escape_string(syntax.symbols.get(node->get<ast::literal>().value_key)) << "\"\n";
+//		return;
+//	}
+//	std::cout << node->type.to_string() << '\n';
+//});
 
-/**
- * \brief Runs the compiler. 
- * \param argc Argument count
- * \param argv Argument values
- * \return Status code.
- */
+namespace sigma {
+	auto compile() -> void {
+		const auto file          = utility::file::read_text_file("./test/main.s").get_value();
+		auto [tokens, symbols]   = tokenizer::tokenize(file);
+		abstract_syntax_tree ast = parser::parse(tokens, symbols);
+
+		// verify the integrity of our AST
+		type_checker::type_check(ast, symbols);
+
+		// translate our AST into IR SoN
+		auto module = ast::ir_translator::translate(
+			ast, { ir::arch::X64, ir::system::WINDOWS }, symbols
+		);
+
+		// compile our IR
+		module.compile();
+
+		auto object_file = module.generate_object_file();
+
+		auto write_res = utility::file::write(object_file, "./test/a.obj");
+		if (write_res.has_error()) {
+			utility::console::out << *write_res.get_error() << '\n';
+		}
+	}
+}
+
 auto main(i32 argc, char* argv[]) -> i32 {
 	SUPPRESS_C4100(argc);
 	SUPPRESS_C4100(argv);
 
 	utility::console::set_output_stream(std::cout);
 
+	sigma::compile();
+	return 0;
+
 	ir::target target(ir::arch::X64, ir::system::WINDOWS);
 	ir::module module(target);
 	ir::builder builder(module);
 
-	const ir::function_type main_func_ty {
+	const ir::function_type main_func_ty{
 		.identifier = "main",
 		.returns = { I32_TYPE }
 	};
 
-	// add
-	const ir::function_type add_func_ty{
-		.identifier = "add",
-		.parameters = { PTR_TYPE, PTR_TYPE },
-		.returns    = { PTR_TYPE }
-	};
-
-	auto add_func = builder.create_function(add_func_ty, ir::linkage::PRIVATE);
-
-	auto param1 = builder.get_parameter(0);
-	auto param2 = builder.get_parameter(1);
-
-	builder.create_return({ builder.create_add(param1, param2) });
-
 	// main
 	builder.create_function(main_func_ty, ir::linkage::PUBLIC);
 
-	const ir::function_type printf_func_ty {
-		.identifier   = "printf",
-		.parameters   = { PTR_TYPE },
-		.returns      = { I32_TYPE },
+	const ir::function_type printf_func_ty{
+		.identifier = "printf",
+		.parameters = { PTR_TYPE },
+		.returns = { I32_TYPE },
 		.has_var_args = true
 	};
 
 	const auto printf_external = builder.create_external(printf_func_ty, ir::linkage::SO_LOCAL);
-	const auto message1 = builder.create_string("Hello, world! %d\n");
 
-	auto value1 = builder.create_signed_integer(200, 32);
-	auto value2 = builder.create_signed_integer(100, 32);
-	auto add_result = builder.create_call(add_func, { value1, value2 });
+	const auto message_true = builder.create_string("true\n");
+	const auto message_false = builder.create_string("false\n");
 
-	builder.create_call(printf_external, printf_func_ty, { message1, add_result.front() });
-	builder.create_return({ builder.create_signed_integer(0, 32) });
+	const auto true_ctrl = builder.create_region();
+	const auto false_ctrl = builder.create_region();
+	const auto after_ctrl = builder.create_region();
 
+	builder.create_conditional_branch(builder.create_bool(true), true_ctrl, false_ctrl);
+
+	// false
+	builder.set_control(false_ctrl);
+	builder.create_call(printf_external, printf_func_ty, { message_false });
+	builder.create_branch(after_ctrl);
+
+	// true
+	builder.set_control(true_ctrl);
+	builder.create_call(printf_external, printf_func_ty, { message_true });
+	builder.create_branch(after_ctrl);
+
+	
+
+	// end
+	builder.set_control(after_ctrl);
+	builder.create_return({  builder.create_signed_integer(0, 32) });
 	module.compile();
 
 	auto object_file = module.generate_object_file();

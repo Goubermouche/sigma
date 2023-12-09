@@ -37,7 +37,7 @@
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <WarningLevel>Level4</WarningLevel>
       <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..;..\..\..\..\thirdparty\llvm\llvm-16.0.0\llvm-install\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <Optimization>Full</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
@@ -56,17 +56,19 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="data_type.h" />
     <ClInclude Include="parser.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="data_type.cpp" />
     <ClCompile Include="parser.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\tokenizer\tokenizer.vcxproj">
+      <Project>{80A83D4B-EC12-F2C1-3551-A367A1FACF16}</Project>
+    </ProjectReference>
     <ProjectReference Include="..\abstract_syntax_tree\abstract_syntax_tree.vcxproj">
       <Project>{6E6184C2-5AF0-0D8C-030F-2287EF7C1E32}</Project>
-    </ProjectReference>
-    <ProjectReference Include="..\utility\utility.vcxproj">
-      <Project>{79DE5C48-E5BD-DBE3-EED5-66BA5A344245}</Project>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

@@ -7,9 +7,13 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "abstract_syntax_tree", "sou
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "intermediate_representation", "source\intermediate_representation\intermediate_representation.vcxproj", "{9289A667-FE96-D44D-877D-D038F389A004}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "lexer", "source\lexer\lexer.vcxproj", "{C5C4DA0F-31D9-02C1-FA5A-A620662EFFF1}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ir_translator", "source\ir_translator\ir_translator.vcxproj", "{A9B083A5-1571-FFDB-DEAB-48594A2B44B8}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "parser", "source\parser\parser.vcxproj", "{F28D3C14-DE2F-67EA-C7EA-7A3EB32BEE3A}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "tokenizer", "source\tokenizer\tokenizer.vcxproj", "{80A83D4B-EC12-F2C1-3551-A367A1FACF16}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "type_checker", "source\type_checker\type_checker.vcxproj", "{9B9C9AB4-87FF-2959-3085-620F1CC7F5DB}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "utility", "source\utility\utility.vcxproj", "{79DE5C48-E5BD-DBE3-EED5-66BA5A344245}"
 EndProject
@@ -24,10 +28,14 @@ Global
 		{6E6184C2-5AF0-0D8C-030F-2287EF7C1E32}.Release|x64.Build.0 = Release|x64
 		{9289A667-FE96-D44D-877D-D038F389A004}.Release|x64.ActiveCfg = Release|x64
 		{9289A667-FE96-D44D-877D-D038F389A004}.Release|x64.Build.0 = Release|x64
-		{C5C4DA0F-31D9-02C1-FA5A-A620662EFFF1}.Release|x64.ActiveCfg = Release|x64
-		{C5C4DA0F-31D9-02C1-FA5A-A620662EFFF1}.Release|x64.Build.0 = Release|x64
+		{A9B083A5-1571-FFDB-DEAB-48594A2B44B8}.Release|x64.ActiveCfg = Release|x64
+		{A9B083A5-1571-FFDB-DEAB-48594A2B44B8}.Release|x64.Build.0 = Release|x64
 		{F28D3C14-DE2F-67EA-C7EA-7A3EB32BEE3A}.Release|x64.ActiveCfg = Release|x64
 		{F28D3C14-DE2F-67EA-C7EA-7A3EB32BEE3A}.Release|x64.Build.0 = Release|x64
+		{80A83D4B-EC12-F2C1-3551-A367A1FACF16}.Release|x64.ActiveCfg = Release|x64
+		{80A83D4B-EC12-F2C1-3551-A367A1FACF16}.Release|x64.Build.0 = Release|x64
+		{9B9C9AB4-87FF-2959-3085-620F1CC7F5DB}.Release|x64.ActiveCfg = Release|x64
+		{9B9C9AB4-87FF-2959-3085-620F1CC7F5DB}.Release|x64.Build.0 = Release|x64
 		{79DE5C48-E5BD-DBE3-EED5-66BA5A344245}.Release|x64.ActiveCfg = Release|x64
 		{79DE5C48-E5BD-DBE3-EED5-66BA5A344245}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection

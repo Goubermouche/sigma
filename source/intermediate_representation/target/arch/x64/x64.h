@@ -78,6 +78,11 @@ namespace ir {
 			INDIRECT_DISPLACEMENT_32 = 2, // [rax + disp32]
 			DIRECT = 3,                   // rax
 		};
+
+		enum conditional {
+			O, NO, B, NB, E, NE, BE, A,
+			S, NS, P, NP, L, GE, LE, G
+		};
 	}
 	
 	static auto rex(bool is_64_bit, u8 rx, u8 base, u8 index) -> u8;
@@ -94,6 +99,7 @@ namespace ir {
 		void select_instruction(codegen_context& context, handle<node> n, reg destination);
 		auto select_memory_access_instruction(codegen_context& context, handle<node> n, reg destination, i32 store_op, i32 source) -> handle<instruction>;
 		auto select_array_access_instruction(codegen_context& context, handle<node> n, reg destination, i32 store_op, i32 source) -> handle<instruction>;
+		auto select_instruction_cmp(codegen_context& context, handle<node> n) -> x64::conditional;
 
 		void dfs_schedule(codegen_context& context, handle<basic_block> bb, handle<node> n, bool is_end);
 		void dfs_schedule_phi(codegen_context& context, handle<basic_block> bb, handle<node> phi, ptr_diff phi_index);
@@ -118,16 +124,19 @@ namespace ir {
 
 		auto create_label(codegen_context& context, handle<node> target) -> handle<instruction>;
 		auto create_jump(codegen_context& context, u64 target) -> handle<instruction>;
+		auto create_jcc(codegen_context& context, int target, x64::conditional cc) -> handle<instruction>;
 		auto create_move(codegen_context& context, const data_type& data_type, reg destination, reg source) -> handle<instruction>;
-		auto create_mr(codegen_context& context, instruction::instruction_type type, const data_type& data_type, reg base, mem memory, i32 source) -> handle<instruction>;
-		auto create_rm(codegen_context& context, instruction::instruction_type type, const data_type& data_type, reg destination, reg base, mem memory) -> handle<instruction>;
+		auto create_mr(codegen_context& context, instruction::instruction_type type, const data_type& data_type, reg base, i32 index, scale scale, i32 disp, i32 source) -> handle<instruction>;
+		auto create_rm(codegen_context& context, instruction::instruction_type type, const data_type& data_type, reg destination, reg base, i32 index, scale scale, i32 disp) -> handle<instruction>;
 		auto create_rr(codegen_context& context, instruction::instruction_type type, const data_type& data_type, reg destination, reg source) -> handle<instruction>;
+		auto create_rr_no_destination(codegen_context& context, instruction::instruction_type type, const data_type& data_type, reg left, reg right) -> handle<instruction>;
 		auto create_immediate(codegen_context& context, instruction::instruction_type type, const data_type& data_type, reg destination, i32 value) -> handle<instruction>;
 		auto create_zero(codegen_context& context, const data_type& data_type, reg destination) -> handle<instruction>;
 		auto create_abs(codegen_context& context, instruction::instruction_type type, const data_type& data_type, reg destination, u64 immediate) -> handle<instruction>;
+		auto create_ri(codegen_context& context, instruction::instruction_type type, const data_type& data_type, reg src, i32 imm) -> handle<instruction>;;
 		auto create_rri(codegen_context& context, instruction::instruction_type type, const data_type& data_type, reg destination, reg source, i32 immediate_value) -> handle<instruction>;
 		auto create_rrr(codegen_context& context, instruction::instruction_type type, const data_type& data_type, reg destination, reg left, reg right) -> handle<instruction>;
-		auto create_rrm(codegen_context& context, instruction::instruction_type type, const data_type& data_type, reg destination, reg source, reg base, mem memory) -> handle<instruction>;
+		auto create_rrm(codegen_context& context, instruction::instruction_type type, const data_type& data_type, reg destination, reg source, reg base, i32 index, scale scale, i32 disp) -> handle<instruction>;
 		auto create_op_global(codegen_context& context, instruction::instruction_type type, const data_type& data_type, reg dst, handle<symbol> s) -> handle<instruction>;
 
 		static auto try_for_imm32(handle<node> n, i32 bits, i32& out) -> bool;

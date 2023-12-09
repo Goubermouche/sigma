@@ -166,16 +166,18 @@ namespace ir {
 			FSUB,
 			FMUL,
 			FDIV,
+			FMAX,
+			FMIN,
 
 			// comparisons
 			CMP_EQ,
 			CMP_NE,
 			CMP_ULT,
-			CMP_ULTE,
+			CMP_ULE,
 			CMP_SLT,
-			CMP_SLTE,
+			CMP_SLE,
 			CMP_FLT,
-			CMP_FLTE,
+			CMP_FLE,
 
 			// special operations
 			// does full multiplication (64x64=128 and so on) returning the low
@@ -213,6 +215,7 @@ namespace ir {
 		auto is_on_last_use(codegen_context& context) -> bool;
 		auto is_control_projection_node() const -> bool;
 		auto should_rematerialize() const -> bool;
+		auto is_unreachable() const -> bool;
 		auto is_block_begin() const -> bool;
 		auto is_mem_out_op() const -> bool;
 		auto is_terminator() const -> bool;

@@ -97,11 +97,11 @@ namespace ir {
 			case CMP_NE: return "cmp.ne";
 			case CMP_EQ: return "cmp.eq";
 			case CMP_ULT: return "cmp.ult";
-			case CMP_ULTE: return "cmp.ule";
+			case CMP_ULE: return "cmp.ule";
 			case CMP_SLT: return "cmp.slt";
-			case CMP_SLTE: return "cmp.sle";
+			case CMP_SLE: return "cmp.sle";
 			case CMP_FLT: return "cmp.lt";
-			case CMP_FLTE: return "cmp.le";
+			case CMP_FLE: return "cmp.le";
 
 			case CLZ: return "clz";
 			case CTZ: return "ctz";
@@ -271,7 +271,7 @@ namespace ir {
 	}
 
 	auto node::is_critical_edge(handle<node> projection) const -> bool {
-		ASSERT(projection->ty == projection, "invalid projection node");
+		ASSERT(projection->ty == node::PROJECTION, "invalid projection node");
 
 		// multi-user proj, this means it's basically a basic block
 		if (
@@ -311,6 +311,16 @@ namespace ir {
 			ty == MEMBER_ACCESS ||
 			ty == LOCAL || 
 			ty == SYMBOL;
+	}
+
+	auto node::is_unreachable() const -> bool {
+		for (handle<user> u = use; u; u = u->next_user) {
+			if (u->node->ty == UNREACHABLE) {
+				return true;
+			}
+		}
+
+		return false;
 	}
 
 	auto node::remove_user(u64 slot) -> handle<user> {

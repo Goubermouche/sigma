@@ -21,6 +21,7 @@ namespace ir {
 
 	class target {
 	public:
+		target() = default;
 		target(arch arch, system system);
 
 		[[nodiscard]] auto get_abi() const->abi;

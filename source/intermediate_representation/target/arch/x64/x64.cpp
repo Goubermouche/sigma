@@ -184,8 +184,18 @@ namespace ir {
 					i += resolve_interval(context, inst, i, left);
 					ternary = (i < in_base + inst->in_count) || (inst->flags & (instruction::immediate | instruction::absolute));
 
-					if (ternary && inst->type == instruction::ÏMUL && (inst->flags & instruction::immediate)) {
-						ASSERT(false, "special case is not implemented");
+					if (ternary && inst->type == instruction::IMUL && (inst->flags & instruction::immediate)) {
+						// there's a special case for ternary IMUL r64, r/m64, imm32
+						emit_instruction_2(context, instruction::IMUL3, out, left, dt, bytecode);
+
+						if(inst->data_type == x64::WORD) {
+							bytecode.append_word(static_cast<u16>(inst->get<immediate>().value));
+						}
+						else {
+							bytecode.append_dword(inst->get<immediate>().value);
+						}
+
+						continue;
 					}
 
 					if (inst->out_count == 0) {
@@ -202,7 +212,14 @@ namespace ir {
 
 						if (ternary || inst->type == instruction::MOV || inst->type == instruction::FP_MOV) {
 							if (out->matches(left) == false) {
-								emit_instruction_2(context, static_cast<instruction::instruction_type>(mov_op), out, left, dt, bytecode);
+								emit_instruction_2(
+									context, 
+									static_cast<instruction::instruction_type>(mov_op), 
+									out, 
+									left,
+									dt, 
+									bytecode
+								);
 							}
 						}
 						else {
@@ -282,7 +299,7 @@ namespace ir {
 		table[instruction::STOSB      ] = { .mnemonic = "rep stosb", .cat = instruction::category::BYTE,     .op = 0xAA };
 		table[instruction::MOVSB      ] = { .mnemonic = "rep movsb", .cat = instruction::category::BYTE,     .op = 0xA4 };
 		table[instruction::CAST       ] = { .mnemonic = "cvt",       .cat = instruction::category::BYTE,     .op = 0x99 };
-		table[instruction::system_call] = { .mnemonic = "syscall",   .cat = instruction::category::BYTE_EXT, .op = 0x05 };
+		table[instruction::SYS_CALL] = { .mnemonic = "syscall",   .cat = instruction::category::BYTE_EXT, .op = 0x05 };
 		table[instruction::RDTSC      ] = { .mnemonic = "rdtsc",     .cat = instruction::category::BYTE_EXT, .op = 0x31 };
 		table[instruction::UD2        ] = { .mnemonic = "ud2",       .cat = instruction::category::BYTE_EXT, .op = 0x0B };
 
@@ -379,7 +396,7 @@ namespace ir {
 		table[instruction::XCHG                   ] =  { .mnemonic = "xchg",   .cat = instruction::category::BINOP,      .op = 0x86 };
 		table[instruction::LEA                    ] =  { .mnemonic = "lea",    .cat = instruction::category::BINOP,      .op = 0x8D };
 		table[instruction::XADD                   ] =  { .mnemonic = "xadd",   .cat = instruction::category::BINOP_EXT_1,  .op = 0xC0 };
-		table[instruction::ÏMUL] =  { .mnemonic = "imul",   .cat = instruction::category::BINOP_EXT_1,  .op = 0xAF };
+		table[instruction::IMUL                   ] =  { .mnemonic = "imul",   .cat = instruction::category::BINOP_EXT_1,  .op = 0xAF };
 		table[instruction::IMUL3                  ] =  { .mnemonic = "imul",   .cat = instruction::category::BINOP,      .op = 0x69 };
 		table[instruction::MOVSXB                 ] =  { .mnemonic = "movsxb", .cat = instruction::category::BINOP_EXT_2, .op = 0xBE };
 		table[instruction::MOVSXW                 ] =  { .mnemonic = "movsxw", .cat = instruction::category::BINOP_EXT_2, .op = 0xBF };
@@ -834,17 +851,15 @@ namespace ir {
 		patch->next = nullptr;
 		patch->pos = pos;
 
-		context.patches.append(patch, context.function->allocator);
+		context.patch_count++;
 
-		//context.patch_count++;
-
-		//if(context.first_patch == nullptr) {
-		//	context.first_patch = context.last_patch = patch;
-		//}
-		//else {
-		//	context.last_patch->next = patch;
-		//	context.last_patch = patch;
-		//}
+		if(context.first_patch == nullptr) {
+			context.first_patch = context.last_patch = patch;
+		}
+		else {
+			context.last_patch->next = patch;
+			context.last_patch = patch;
+		}
 	}
 
 	auto rex(bool is_64_bit, u8 rx, u8 base, u8 index) -> u8 {

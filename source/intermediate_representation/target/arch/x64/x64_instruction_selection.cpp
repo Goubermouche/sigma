@@ -1,4 +1,5 @@
 #include "x64.h"
+#include "intermediate_representation/codegen/instruction.h"
 #include "intermediate_representation/target/system/win/win.h"
 
 namespace ir {
@@ -39,6 +40,7 @@ namespace ir {
 		context.basic_block_order.push_back(stop_block);
 
 		for (u64 i = 0; i < context.basic_block_order.size(); ++i) {
+			printf("---------------- label %d\n", i);
 			handle<node> basic_block = context.work_list->items[context.basic_block_order[i]];
 			const handle<instruction> label = create_label(context, basic_block);
 
@@ -105,22 +107,28 @@ namespace ir {
 		// phi nodes within this block should view themselves as the previous value,
 		// and not the one we're producing
 		u64 old_phi_count = context.phi_values.size();
+		printf("......................PHI: %d\n", old_phi_count);
 
 		for (u64 i = 0; i < old_phi_count; ++i) {
 			auto& phi = context.phi_values[i];
 
 			// mark the proper output, especially before we make the BB-local ones
+
 			phi.destination = input_reg(context, phi.phi);
 		}
 
 		if (block_entry->ty == node::REGION) {
+			printf("  reg %d\n", block_entry->global_value_index);
 			for (handle<user> user = block_entry->use; user; user = user->next_user) {
 				handle<node> user_node = user->node;
+
+				printf("  %d %d %d\n", user_node->ty == node::PHI, user_node->data_type.ty != data_type::MEMORY, user_node->global_value_index);
 
 				if (
 					user_node->ty == node::PHI &&
 					user_node->data_type.ty != data_type::MEMORY
 				) {
+					printf("...............ADD PHI 1\n");
 					// copy the phi into a temporary
 					auto& phi = context.phi_values.emplace_back(phi_value{
 						.phi = user_node,
@@ -137,6 +145,7 @@ namespace ir {
 		}
 
 		if (rpo_index == 0) {
+			printf(".. isel 1\n");
 			select_instruction(context, context.function->entry_node, reg::invalid_id);
 		}
 
@@ -179,6 +188,7 @@ namespace ir {
 					ASSERT(old_phi_count == 0, "branches don't get phi edges, they should've been split");
 				}
 
+				printf(".. isel 2\n");
 				select_instruction(context, target, value->virtual_register);
 
 				if (
@@ -200,6 +210,7 @@ namespace ir {
 					value->virtual_register = allocate_virtual_register(context, target, target->data_type);
 				}
 
+				printf(".. isel 3\n");
 				select_instruction(context, target, value->virtual_register);
 			}
 
@@ -269,7 +280,8 @@ namespace ir {
 				context, instruction::TERMINATOR, VOID_TYPE, 0, 0, 0
 			));
 
-			// reset phi's 
+			// reset phi's
+			printf("reset phi %d\n", old_phi_count);
 			for (u64 i = 0; i < old_phi_count; ++i) {
 				auto& phi = context.phi_values[i];
 
@@ -295,6 +307,8 @@ namespace ir {
 	void x64_architecture::select_instruction(
 		codegen_context& context, handle<node> n, reg destination
 	) {
+		printf("-- %d %d\n", n->global_value_index, n->ty);
+		// ASSERT(n->global_value_index != 5, "");
 		switch (const node::type node_type = n->ty) {
 			case node::PHI:
 			case node::REGION: break;
@@ -502,7 +516,9 @@ namespace ir {
 							use_xmm ? instruction::FP_MOV : instruction::MOV,
 							parameter_node->data_type,
 							x64::RSP,
-							mem{ .index = reg::invalid_id, .scale = scale::x1, .displacement = reg * 8 },
+							reg::invalid_id,
+							scale::x1, 
+							reg * 8,
 							src.id
 						));
 					}
@@ -572,7 +588,7 @@ namespace ir {
 				// all these registers need to be spilled and reloaded if they're used across
 				// the function call boundary... you might see why inlining could be nice to implement
 				u8 clobber_count = utility::pop_count(caller_saved_gp_registers) + utility::pop_count(caller_saved_xmm_registers);
-				auto op = instruction::system_call;
+				auto op = instruction::SYS_CALL;
 
 				if (n->ty == node::CALL) {
 					op = instruction::CALL;
@@ -660,16 +676,19 @@ namespace ir {
 				}
 
 				if (value == 0) {
+
 					context.append_instruction(create_zero(
 						context, n->data_type, destination
 					));
 				}
 				else if ((value >> 32ull) == std::numeric_limits<u32>::max()) {
+
 					context.append_instruction(create_immediate(
 						context, instruction::MOV, I32_TYPE, destination, static_cast<i32>(value)
 					));
 				}
 				else if (bits_in_type <= 32 || (value >> 31ull) == 0) {
+
 					context.append_instruction(create_immediate(
 						context, instruction::MOV, n->data_type, destination, static_cast<i32>(value)
 					));
@@ -723,7 +742,7 @@ namespace ir {
 
 					if (node_type == node::ADD) {
 						context.append_instruction(create_rm(
-							context, instruction::LEA, I64_TYPE, destination, left, mem{ .index = -1, .scale = scale::x1, .displacement = immediate }
+							context, instruction::LEA, I64_TYPE, destination, left, -1, scale::x1, immediate
 						));
 					}
 					else {
@@ -751,8 +770,39 @@ namespace ir {
 				break;
 			}
 
+			case node::MUL: {
+				reg left = input_reg(context, n->inputs[1]);
+				context.hint_reg(destination.id, left);
+
+				data_type dt = n->data_type;
+				ASSERT(dt.ty == data_type::INTEGER, "invalid type for a MUL op");
+
+				if(dt.bit_width < 16) {
+					dt.bit_width = 16;
+				}
+
+				i32 x;
+				if(try_for_imm32(n->inputs[2], dt.bit_width, x)) {
+					virtual_value* v = context.lookup_value(n->inputs[2]);
+					if(v) {
+						v->use_count -= 1;
+					}
+
+					context.append_instruction(create_move(context, dt, destination, left));
+					context.append_instruction(create_rri(context, instruction::IMUL, dt, destination, destination, x));
+				}
+				else {
+					reg right = input_reg(context, n->inputs[2]);
+
+					context.append_instruction(create_move(context, dt, destination, left));
+					context.append_instruction(create_rrr(context, instruction::IMUL, dt, destination, destination, right));
+				}
+
+				break;
+			}
+
 			case node::EXIT: {
-				ASSERT(n->inputs.get_size() <= 5, "At most 2 return values :(");
+				ASSERT(n->inputs.get_size() <= 5, "at most 2 return values :(");
 				static reg default_return_registers[2] = { x64::RAX, x64::RDX };
 				const u64 return_count = n->inputs.get_size() - 3;
 
@@ -855,6 +905,67 @@ namespace ir {
 				break;
 			}
 
+			case node::BRANCH: {
+				handle<node> bb = n->get_parent_region();
+				auto& br = n->get<branch>();
+
+				std::vector<int> succ(br.successors.size());
+
+				// fill successors
+				bool has_default = false;
+				for (handle<user> u = n->use; u; u = u->next_user) {
+					if (u->node->ty == node::PROJECTION) {
+						int index = u->node->get<projection>().index;
+						handle<node> succ_n = u->node->get_next_block();
+
+						if (index == 0) {
+							has_default = !succ_n->is_unreachable();
+						}
+
+						succ[index] = context.graph.blocks.at(succ_n).id;
+					}
+				}
+
+				data_type dt = n->inputs[1]->data_type;
+
+				context.append_instruction(create_instruction(context, instruction::TERMINATOR, VOID_TYPE, 0, 0, 0));
+
+				if(br.successors.size() == 1) {
+					ASSERT(false, "degenerate branch");
+				}
+				else if(br.successors.size() == 2) {
+					int f = succ[1], t = succ[0];
+
+					x64::conditional cc;
+					if(br.keys[0] == 0) {
+						cc = select_instruction_cmp(context, n->inputs[1]);
+					}
+					else {
+						reg key = input_reg(context, n->inputs[1]);
+						context.append_instruction(create_ri(context, instruction::CMP, dt, key, br.keys[0]));
+						cc = x64::NE;
+					}
+
+					// if flipping avoids a jmp, do that
+					if(context.fallthrough == t) {
+						context.append_instruction(create_jcc(context, f, x64::conditional(cc ^ 1)));
+					}
+					else {
+						context.append_instruction(create_jcc(context, t, cc));
+
+						if(context.fallthrough != f) {
+							context.append_instruction(create_jump(context, f));
+						}
+					}
+				}
+				else {
+					ASSERT(false, "more than 2 branches - not implemented");
+				}
+
+
+				break;
+			}
+
 			case node::SYMBOL: {
 				auto s = n->get<handle<symbol>>();
 
@@ -862,6 +973,25 @@ namespace ir {
 					context, instruction::LEA, n->data_type, destination, s
 				));
 
+				break;
+			}
+			case node::LOAD:
+			case node::ATOMIC_LOAD: {
+				instruction::instruction_type mov_op = n->data_type.ty == data_type::FLOAT ? instruction::FP_MOV : instruction::MOV;
+				handle<node> address = n->inputs[2];
+
+				handle<instruction> load_inst = select_array_access_instruction(
+					context, address, destination, -1, -1
+				);
+
+				load_inst->type = mov_op;
+				load_inst->data_type = legalize_data_type(n->data_type);
+
+				if(n->ty == node::ATOMIC_LOAD) {
+					load_inst->flags |= instruction::lock;
+				}
+
+				context.append_instruction(load_inst);
 				break;
 			}
 
@@ -875,10 +1005,11 @@ namespace ir {
 						instruction::instruction_type i = n->data_type.ty == data_type::FLOAT ? instruction::FP_MOV : instruction::MOV;
 
 						context.append_instruction(create_rm(
-							context, i, n->data_type, destination, x64::RBP, mem{ .index = reg::invalid_id, .scale = scale::x1, .displacement = 16 + index * 8 }
+							context, i, n->data_type, destination, x64::RBP, reg::invalid_id, scale::x1, 16 + index * 8
 						));
 					}
 				}
+
 				break;
 			}
 			default: {
@@ -920,18 +1051,18 @@ namespace ir {
 			base = input_reg(context, n);
 		}
 
-		const mem memory{ .index = index, .scale = scale, .displacement = static_cast<i32>(offset) };
+		// const mem memory{ .index = static_cast<u8>(index), .scale = scale, .displacement = static_cast<i32>(offset) };
 
 		// compute the base
 		if (store_op < 0) {
 			if (has_second_in) {
-				return  create_rrm(context, instruction::LEA, n->data_type, destination, static_cast<u8>(source), base, memory);
+				return  create_rrm(context, instruction::LEA, n->data_type, destination, static_cast<u8>(source), base, index, scale, offset);
 			}
 
-			return create_rm(context, instruction::LEA, n->data_type, destination, base, memory);
+			return create_rm(context, instruction::LEA, n->data_type, destination, base, index, scale, offset);
 		}
 
-		return create_mr(context, static_cast<instruction::instruction_type>(store_op), n->data_type, base, memory, source);
+		return create_mr(context, static_cast<instruction::instruction_type>(store_op), n->data_type, base, index, scale, offset, source);
 	}
 
 	auto x64_architecture::select_array_access_instruction(
@@ -943,20 +1074,48 @@ namespace ir {
 			(context.virtual_values.at(n->global_value_index).use_count > 2 || context.virtual_values.at(n->global_value_index).virtual_register.is_valid())
 		) {
 			const reg base = input_reg(context, n);
-			constexpr mem memory{ .index = -1, .scale = scale::x1, .displacement = 0 };
 
 			if (store_op < 0) {
 				if (source >= 0) {
-					return create_rrm(context, instruction::LEA, PTR_TYPE, destination, static_cast<u8>(source), base, memory);
+					return create_rrm(context, instruction::LEA, PTR_TYPE, destination, static_cast<u8>(source), base, -1, scale::x1, 0);
 				}
 
-				return create_rm(context, instruction::instruction_type::LEA, PTR_TYPE, destination, base, memory);
+				return create_rm(context, instruction::instruction_type::LEA, PTR_TYPE, destination, base, -1, scale::x1, 0);
 			}
 
-			return create_mr(context, static_cast<instruction::instruction_type>(store_op), PTR_TYPE, base, memory, source);
+			return create_mr(context, static_cast<instruction::instruction_type>(store_op), PTR_TYPE, base, -1, scale::x1, 0, source);
 		}
 
 		return select_memory_access_instruction(context, n, destination, store_op, source);
+	}
+
+	auto x64_architecture::select_instruction_cmp(codegen_context& context, handle<node> n) -> x64::conditional {
+		bool invert = false;
+		if (n->ty == node::CMP_EQ && n->data_type.ty == data_type::INTEGER && n->data_type.bit_width == 1 && n->inputs[2]->ty == node::INTEGER_CONSTANT) {
+			auto& b = n->inputs[2]->get<integer>();
+			if (b.value == 0) {
+				invert = true;
+				n = n->inputs[1];
+			}
+		}
+
+		if (n->ty >= node::CMP_EQ && n->ty <= node::CMP_FLE) {
+			ASSERT(false, "not implemented");
+			// data_type cmp_dt = n->get<compare>()
+		}
+		else {
+			reg src = input_reg(context, n);
+
+			data_type dt = n->data_type;
+			if(dt.ty == data_type::FLOAT) {
+				
+			}
+			else {
+				context.append_instruction(create_rr_no_destination(context, instruction::TEST, dt, src, src));
+			}
+
+			return x64::conditional(x64::NE ^ invert);
+		}
 	}
 
 	void x64_architecture::dfs_schedule(
@@ -1061,6 +1220,9 @@ namespace ir {
 
 		// reserve phi space
 		if (phi->data_type.ty != data_type::MEMORY) {
+
+			printf("...............ADD PHI 2\n");
+
 			context.phi_values.emplace_back(phi_value{ 
 				.phi = phi, 
 				.node = value
@@ -1138,7 +1300,7 @@ namespace ir {
 		}
 
 		const integer& i = n->get<integer>();
-		if(utility::fits_into_32_bits(i.value)) {
+		if(!utility::fits_into_32_bits(i.value)) {
 			return false;
 		}
 
@@ -1154,14 +1316,18 @@ namespace ir {
 		// attempt to lookup an existing value
 		auto* value = context.lookup_value(n);
 
+		// ASSERT(n->global_value_index != 5, "x");
 		// no value was found, allocate a new virtual register
 		if (value == nullptr) {
 			const reg tmp = allocate_virtual_register(context, n, n->data_type);
+			printf(".. isel 4\n");
 			select_instruction(context, n, tmp);
 			return tmp;
 		}
 
 		value->use_count--;
+
+		printf("ireg: %d %d\n", value->virtual_register.id, n->global_value_index);
 
 		// if we have a virtual register, return its ID
 		if (value->virtual_register.is_valid()) {
@@ -1171,6 +1337,7 @@ namespace ir {
 		// if the node should rematerialize we allocate a new virtual register
 		if (n->should_rematerialize()) {
 			const reg tmp = allocate_virtual_register(context, n, n->data_type);
+			printf(".. isel 5\n");
 			select_instruction(context, n, tmp);
 			return tmp;
 		}
@@ -1188,6 +1355,8 @@ namespace ir {
 		inst->get<handle<node>>() = target;
 		inst->type = instruction::LABEL;
 		inst->flags = instruction::node_f;
+
+		printf("label\n");
 		return inst;
 	}
 
@@ -1200,6 +1369,19 @@ namespace ir {
 
 		inst->flags = instruction::node_f;
 		inst->get<label>().value = target;
+		printf("jump\n");
+		return inst;
+	}
+
+	auto x64_architecture::create_jcc(codegen_context& context, int target, x64::conditional cc) -> handle<instruction>{
+		const handle<instruction> inst = create_instruction<label>(
+			context, (instruction::instruction_type)(instruction::JO + cc), VOID_TYPE, 0, 0, 0
+		);
+
+		inst->flags = instruction::node_f;
+		inst->get<label>().value = target;
+		printf("jcc\n");
+
 		return inst;
 	}
 
@@ -1216,53 +1398,59 @@ namespace ir {
 		inst->in_count = 1;
 		inst->operands[0] = destination.id;
 		inst->operands[1] = source.id;
-
+		printf("move\n");
 		return inst;
 	}
 
 	auto x64_architecture::create_mr(
-		codegen_context& context, instruction::instruction_type type, const data_type& data_type, reg base, mem memory, i32 source
+		codegen_context& context, instruction::instruction_type type, const data_type& data_type, reg base, i32 index, scale scale, i32 disp, i32 source
 	) -> handle<instruction> {
 		const handle<instruction> inst = create_instruction(
-			context, type, data_type, 0, memory.index >= 0 ? 3 : 2, 0
+			context, type, data_type, 0, index >= 0 ? 3 : 2, 0
 		);
 
-		inst->flags = instruction::mem_f | (memory.index >= 0 ? instruction::indexed : instruction::none);
+		inst->flags = instruction::mem_f | (index >= 0 ? instruction::indexed : instruction::none);
 		inst->memory_slot = 0;
 
 		inst->operands[0] = base.id;
 
-		if (memory.index >= 0) {
-			inst->operands[1] = memory.index;
+		if (index >= 0) {
+			inst->operands[1] = index;
 			inst->operands[2] = source;
 		}
 		else {
 			inst->operands[1] = source;
 		}
 
-		inst->displacement = memory.displacement;
-		inst->sc = memory.scale;
+		inst->displacement = disp;
+		inst->sc = scale;
+
+		printf("mr\n");
+
 		return inst;
 	}
 
 	auto x64_architecture::create_rm(
-		codegen_context& context, instruction::instruction_type type, const data_type& data_type, reg destination, reg base, mem memory
+		codegen_context& context, instruction::instruction_type type, const data_type& data_type, reg destination, reg base, i32 index, scale scale, i32 disp
 	) -> handle<instruction> {
 		const handle<instruction> inst = create_instruction(
-			context, type, data_type, 1, memory.index >= 0 ? 2 : 1, 0
+			context, type, data_type, 1, index >= 0 ? 2 : 1, 0
 		);
 
-		inst->flags = instruction::mem_f | (memory.index >= 0 ? instruction::indexed : instruction::none);
+		inst->flags = instruction::mem_f | (index >= 0 ? instruction::indexed : instruction::none);
 		inst->memory_slot = 1;
 		inst->operands[0] = destination.id;
 		inst->operands[1] = base.id;
 
-		if (memory.index >= 0) {
-			inst->operands[2] = memory.index;
+		if (index >= 0) {
+			inst->operands[2] = index;
 		}
 
-		inst->displacement = memory.displacement;
-		inst->sc = memory.scale;
+		inst->displacement = disp;
+		inst->sc = scale;
+
+		printf("rm\n");
+
 		return inst;
 	}
 
@@ -1275,6 +1463,20 @@ namespace ir {
 
 		inst->operands[0] = destination.id;
 		inst->operands[1] = source.id;
+
+		printf("rr\n");
+
+		return inst;
+	}
+
+	auto x64_architecture::create_rr_no_destination(codegen_context& context, instruction::instruction_type type, const data_type& data_type, reg left, reg right) -> handle<instruction> {
+		const handle<instruction> inst = create_instruction(
+			context, type, data_type, 0, 2, 0
+		);
+
+		inst->operands[0] = left.id;
+		inst->operands[1] = right.id;
+		printf("rr no dest\n");
 
 		return inst;
 	}
@@ -1289,6 +1491,9 @@ namespace ir {
 		inst->get<immediate>().value = value;
 		inst->flags = instruction::immediate;
 		inst->operands[0]= destination.id;
+
+		printf("imm\n");
+
 		return inst;
 	}
 
@@ -1300,6 +1505,8 @@ namespace ir {
 		);
 
 		inst->operands[0] = destination.id;
+		printf("zero\n");
+
 		return inst;
 	}
 
@@ -1313,6 +1520,21 @@ namespace ir {
 		inst->get<absolute>().value = immediate;
 		inst->flags = instruction::absolute;
 		inst->operands[0] = destination.id;
+		printf("abs\n");
+
+		return inst;
+	}
+
+	auto x64_architecture::create_ri(codegen_context& context, instruction::instruction_type type, const data_type& data_type, reg src, i32 imm) -> handle<instruction> {
+		const handle<instruction> inst = create_instruction<absolute>(
+			context, type, data_type, 0, 1, 0
+		);
+
+		inst->flags = instruction::immediate;
+		inst->operands[0] = src.id;
+		inst->get<immediate>().value = imm;
+		printf("ri\n");
+
 		return inst;
 	}
 
@@ -1327,6 +1549,8 @@ namespace ir {
 		inst->flags = instruction::immediate;
 		inst->operands[0] = destination.id;
 		inst->operands[1] = source.id;
+		printf("rri\n");
+
 		return inst;
 	}
 
@@ -1340,29 +1564,32 @@ namespace ir {
 		inst->operands[0] = destination.id;
 		inst->operands[1] = left.id;
 		inst->operands[2] = right.id;
+		printf("rrr\n");
 
 		return inst;
 	}
 
 	auto x64_architecture::create_rrm(
-		codegen_context& context, instruction::instruction_type type, const data_type& data_type, reg destination, reg source, reg base, mem memory
+		codegen_context& context, instruction::instruction_type type, const data_type& data_type, reg destination, reg source, reg base, i32 index, scale scale, i32 disp
 	) -> handle<instruction> {
 		const handle<instruction> inst = create_instruction(
-			context, type, data_type, 1, memory.index >= 0 ? 3 : 2, 0
+			context, type, data_type, 1, index >= 0 ? 3 : 2, 0
 		);
 
-		inst->flags = instruction::mem_f | (memory.index >= 0 ? instruction::indexed : instruction::none);
-		inst->sc = memory.scale;
-		inst->displacement = memory.displacement;
+		inst->flags = instruction::mem_f | (index >= 0 ? instruction::indexed : instruction::none);
+		inst->sc = scale;
+		inst->displacement = disp;
 		inst->memory_slot = 2;
 
 		inst->operands[0] = destination.id;
 		inst->operands[1] = source.id;
 		inst->operands[2] = base.id;
 
-		if (memory.index >= 0) {
-			inst->operands[4] = memory.index;
+		if (index >= 0) {
+			inst->operands[4] = index;
 		}
+
+		printf("rrm\n");
 
 		return inst;
 	}
@@ -1378,6 +1605,9 @@ namespace ir {
 		inst->operands[1] = x64::RSP;
 		inst->get<handle<symbol>>() = s;
 		inst->displacement = 0;
+
+		printf("global\n");
+
 		return inst;
 	}
 

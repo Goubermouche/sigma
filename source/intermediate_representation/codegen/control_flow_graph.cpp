@@ -77,13 +77,14 @@ namespace ir {
 					top->inputs[0]->ty == node::BRANCH &&
 					top->use->next_user == nullptr &&
 					top->use->node->ty == node::REGION &&
-					top->inputs[0]->is_critical_edge(top)
+					!top->inputs[0]->is_critical_edge(top)
 				) {
 					if(!context.work_list->visit(top->use->node)) {
 						// we've already seen this block, skip it
 						continue;
 					}
 
+					printf("here\n");
 					top = top->use->node;
 				}
 
@@ -113,7 +114,9 @@ namespace ir {
 
 			// add successors
 			if(top->ty == node::BRANCH) {
-				std::vector<handle<node>> successors(top->get<branch>().successors.size());
+				u64 successor_count = top->get<branch>().successors.size();
+				stack.resize(stack.size() + successor_count);
+				handle<node>* top_nodes = &stack.back();
 
 				for(handle<user> user = top->use; user; user = user->next_user) {
 					const handle<node> successor = user->node;
@@ -125,11 +128,13 @@ namespace ir {
 						);
 
 						const i64 index = successor->get<projection>().index;
-						successors[-index] = successor;
+						printf("index: %d\n", index);
+
+						top_nodes[-index] = successor;
 					}
 				}
 
-				stack.append_range(successors);
+				// stack.append_range(successors);
 			}
 			else {
 				for(handle<user> user = top->use; user; user = user->next_user) {

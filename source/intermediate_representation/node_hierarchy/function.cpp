@@ -20,7 +20,7 @@ namespace ir {
 		return n;
 	}
 
-	void function::create_goto(handle<node> target) {
+	void function::create_branch(handle<node> target) {
 		const handle<node> n = active_control_node;
 		const handle<node> mem_state = n->peek_memory();
 
@@ -44,7 +44,44 @@ namespace ir {
 		return create_call(target_func->type, get_symbol_address(&target_func->symbol), arguments);
 	}
 
-	auto function::get_parameter(u64 index) -> handle<node> {
+	void function::create_conditional_branch(handle<node> condition, handle<node> if_true, handle<node> if_false) {
+		const handle<node> memory_state = active_control_node->get_parent_region()->get<region>().memory_out;
+
+		// generate control projections
+		handle<node> n = create_node<branch>(node::BRANCH, 2);
+		n->data_type = TUPLE_TYPE;
+		n->inputs[0] = active_control_node; // control edge
+		n->inputs[1] = condition;
+
+		for(u8 i = 0; i < 2; ++i) {
+			const handle<node> target = i ? if_false : if_true;
+			const handle<node> c_proj = create_projection(CONTROL_TYPE, n, i);
+
+			add_input_late(target, c_proj);
+			add_memory_edge(n, memory_state, target);
+		}
+
+		auto& br = n->get<branch>();
+		br.successors.resize(2);
+		br.keys.push_back(0);
+
+		terminators.push_back(n);
+		active_control_node = nullptr;
+	}
+
+	auto function::create_region() -> handle<node> {
+		handle<node> region_node = create_node<region>(node::REGION, 0);
+		region_node->data_type = CONTROL_TYPE;
+		auto& r = region_node->get<region>();
+
+		const handle<node> phi = create_node<utility::empty_property>(node::PHI, 1);
+		phi->data_type = MEMORY_TYPE;
+		phi->inputs[0] = region_node;
+		r.memory_in = r.memory_out = phi;
+		return region_node;
+	}
+
+	auto function::get_function_parameter(u64 index) -> handle<node> {
 		ASSERT(index < parameter_count, "parameter out of range");
 		return parameters[3 + index];
 	}
@@ -108,20 +145,24 @@ namespace ir {
 		return integer_node;
 	}
 
-	auto function::create_add(
-		handle<node> left, handle<node> right, arithmetic_behaviour behaviour
-	) -> handle<node> {
-		return create_binary_arithmetic_operation(
-			node::ADD, left, right, behaviour
-		);
+	auto function::create_bool(bool value) -> handle<node> {
+		handle<node> node = create_node<integer>(node::INTEGER_CONSTANT, 1);
+		node->data_type = BOOL_TYPE;
+
+		node->get<integer>().value = static_cast<u64>(value);
+		return node;
 	}
 
-	auto function::create_sub(
-		handle<node> left, handle<node> right, arithmetic_behaviour behaviour
-	) -> handle<node> {
-		return create_binary_arithmetic_operation(
-			node::SUB, left, right, behaviour
-		);
+	auto function::create_add(handle<node> left, handle<node> right, arithmetic_behaviour behaviour) -> handle<node> {
+		return create_binary_arithmetic_operation(node::ADD, left, right, behaviour);
+	}
+
+	auto function::create_sub(handle<node> left, handle<node> right, arithmetic_behaviour behaviour) -> handle<node> {
+		return create_binary_arithmetic_operation(node::SUB, left, right, behaviour);
+	}
+
+	auto function::create_mul(handle<node> left, handle<node> right, arithmetic_behaviour behaviour) -> handle<node> {
+		return create_binary_arithmetic_operation(node::MUL, left, right, behaviour);
 	}
 
 	void function::create_store(
@@ -137,6 +178,26 @@ namespace ir {
 		store_node->inputs[2] = destination;
 		store_node->inputs[3] = value;
 		store_node->get<memory_access>().alignment = alignment;
+	}
+
+	auto function::create_load(handle<node> value_to_load, data_type data_type, u32 alignment, bool is_volatile) -> handle<node> {
+		ASSERT(value_to_load, "invalid value");
+
+		handle<node> n = create_node<memory_access>(is_volatile ? node::READ : node::LOAD, 3);
+		n->data_type = is_volatile ? TUPLE_TYPE : data_type;
+
+		n->inputs[0] = active_control_node;
+		n->inputs[1] = active_control_node->get_parent_region()->get<region>().memory_out;
+		n->inputs[2] = value_to_load;
+
+		n->get<memory_access>().alignment = alignment;
+
+		if(is_volatile) {
+			append_memory(create_projection(MEMORY_TYPE, n, 0));
+			return create_projection(data_type, n, 1);
+		}
+
+		return n;
 	}
 
 	auto function::create_local(u32 size, u32 alignment) -> handle<node> {

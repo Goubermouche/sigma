@@ -61,6 +61,7 @@ namespace ir {
 	 */
 	class module {
 	public:
+		module();
 		module(target target);
 
 		void compile() const;
@@ -100,7 +101,7 @@ namespace ir {
 		utility::block_allocator m_allocator;
 		codegen_target m_codegen;
 
-		std::unordered_set<handle<symbol>> m_symbols;
+		std::vector<handle<symbol>> m_symbols;
 
 		std::vector<handle<function>> m_functions;
 		std::vector<handle<global>> m_globals;

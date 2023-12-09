@@ -3,6 +3,13 @@
 #include "compiler/compiler/compiler.h"
 
 namespace ir {
+	// debug
+	static const char* reg_name(int rg, int num) {
+		static const char* GPR_NAMES[] = { "RAX", "RCX", "RDX", "RBX", "RSP", "RBP", "RSI", "RDI", "R8",  "R9", "R10", "R11", "R12", "R13", "R14", "R15" };
+		static const char* XMM_NAMES[] = { "XMM0", "XMM1", "XMM2", "XMM3", "XMM4", "XMM5", "XMM6", "XMM7", "XMM8",  "XMM9", "XMM10", "XMM11", "XMM12", "XMM13", "XMM14", "XMM15" };
+		return (rg == x64::register_class::XMM ? XMM_NAMES : GPR_NAMES)[num];
+	}
+
 	void linear_scan_allocator::allocate(
 		codegen_context& context
 	) {
@@ -67,6 +74,7 @@ namespace ir {
 		// linear scan main loop
 		while(!m_unhandled.empty()) {
 			const u64 register_index = m_unhandled.back();
+
 			handle interval = &context.intervals[register_index];
 			u64 time = interval->ranges[interval->active_range].start;
 			m_unhandled.pop_back();
@@ -115,6 +123,21 @@ namespace ir {
 				interval->assigned = reg;
 				move_to_active(context, interval);
 			}
+
+			printf("  \x1b[32m{ ");
+			for (u8 rc = 0; rc < REGISTER_CLASS_COUNT; ++rc) {
+				utility::foreach_set(m_active_set[rc], [&](u64 r) {
+					int id = m_active[rc][r];
+
+					if (context.intervals[id].reg.is_valid()) {
+						printf("%s ", reg_name(rc, context.intervals[id].reg.id));
+					}
+					else {
+						printf("v%d:%s ", m_active[rc][r], reg_name(rc, r));
+					}
+				});
+			}
+			printf("}\x1b[0m\n");
 		}
 
 		// move the resolver
@@ -169,13 +192,14 @@ namespace ir {
 
 		// resolve all split interval references
 		for(handle<instruction> inst = context.first; inst; inst = inst->next_instruction) {
+
 			if(inst->flags & instruction::spill) {
 				continue;
 			}
 
 			const u64 position = inst->time;
 
-			for (u64 i = 0; i < inst->operands.get_size(); ++i) {
+			for (u64 i = 0; i < inst->out_count + inst->in_count + inst->tmp_count + inst->save_count; ++i) {
 				inst->operands[i] = static_cast<i32>(context.intervals[inst->operands[i]].split_at(
 					context, position
 				).get() - context.intervals.data());
@@ -212,10 +236,10 @@ namespace ir {
 
 		const bool is_call = 
 			inst->type == instruction::CALL || 
-			inst->type == instruction::system_call;
+			inst->type == instruction::SYS_CALL;
 
 		const bool dst_use_reg = 
-			inst->type == instruction::ÏMUL ||
+			inst->type == instruction::IMUL ||
 			inst->type == instruction::ZERO || 
 			inst->flags & (instruction::mem_f | instruction::global);
 
@@ -339,7 +363,7 @@ namespace ir {
 		// get to the right range first
 		while (interval->ranges[interval->active_range].end <= time) {
 			ASSERT(interval->active_range > 0, "");
-			interval->active_range--;
+			interval->active_range -= 1;
 		}
 
 		const ptr_diff register_index = interval.get() - context.intervals.data();
@@ -366,6 +390,7 @@ namespace ir {
 			}
 
 			m_active_set[register_class].remove(reg.id);
+
 			m_inactive.push_back(register_index);
 		}
 
@@ -602,7 +627,6 @@ namespace ir {
 
 			if(free_position > 0) {
 				const ptr_diff intersect = interval_intersect(interval, it);
-
 				if(intersect >= 0 && intersect < free_position) {
 					m_free_positions[it->assigned.id] = intersect;
 				}
@@ -653,7 +677,8 @@ namespace ir {
 
 			const live_interval it{
 				.reg = classified_reg(),
-				.data_type = context.intervals[virtual_reg].data_type
+				.data_type = context.intervals[virtual_reg].data_type,
+				.spill = static_cast<i32>(context.stack_usage)
 			};
 
 			const ptr_diff old_reg = interval.get() - context.intervals.data();

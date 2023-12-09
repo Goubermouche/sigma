@@ -11,6 +11,8 @@
 #include "intermediate_representation/codegen/transformation/use_list.h"
 
 namespace ir {
+	module::module() : m_allocator(1024) {}
+
 	module::module(target target) : m_allocator(1024), m_codegen(target) {
 		create_section(".text",  module_section::EXEC,                         comdat::NONE);
 		create_section(".data",  module_section::WRITE,                        comdat::NONE);
@@ -64,6 +66,10 @@ namespace ir {
 			register_allocator->allocate(codegen);
 			utility::byte_buffer bytecode = m_codegen.emit_bytecode(codegen);
 
+			for(const auto byte : bytecode) {
+				std::cout << byte.to_hex() << ' ';
+			}
+
 			// debug - emit an asm-like version of the function
 			assembly.append(m_codegen.disassemble(bytecode, codegen));
 
@@ -73,7 +79,9 @@ namespace ir {
 				.prologue_length = codegen.prologue_length,
 				.stack_usage     = codegen.stack_usage,
 				.bytecode        = bytecode,
-				.patches         = codegen.patches
+				.patch_count     = codegen.patch_count,
+				.first_patch     = codegen.first_patch,
+				.last_patch      = codegen.last_patch
 			};
 		}
 
@@ -92,7 +100,7 @@ namespace ir {
 		ex->symbol.module = this;
 		ex->linkage = linkage;
 
-		m_symbols.insert(&ex->symbol);
+		m_symbols.push_back(&ex->symbol);
 		return ex;
 	}
 
@@ -105,7 +113,7 @@ namespace ir {
 		g->symbol.module = this;
 		g->linkage = linkage;
 
-		m_symbols.insert(&g->symbol);
+		m_symbols.push_back(&g->symbol);
 		return g;
 	}
 
@@ -117,7 +125,7 @@ namespace ir {
 		func->linkage = linkage;
 		func->parent_section = get_text_section();
 
-		m_symbols.insert(&func->symbol);
+		m_symbols.push_back(&func->symbol);
 
 		// allocate the entry node
 		const handle<node> entry_node = func->create_node<region>(node::ENTRY, 0);
@@ -156,10 +164,10 @@ namespace ir {
 
 	auto module::create_string(handle<function> f, const std::string& value) -> handle<node> {
 		const auto dummy = create_global("", PRIVATE);
-		dummy->set_storage(get_rdata_section(), static_cast<u32>(value.size()), 1, 1);
+		dummy->set_storage(get_rdata_section(), static_cast<u32>(value.size() + 1), 1, 1);
 
-		const auto destination = static_cast<char*>(dummy->add_region(0, static_cast<u32>(value.size())));
-		std::memcpy(destination, value.c_str(), value.size());
+		const auto destination = static_cast<char*>(dummy->add_region(0, static_cast<u32>(value.size() + 1)));
+		std::strcpy(destination, value.c_str());
 		return f->get_symbol_address(&dummy->symbol);
 	}
 
@@ -200,6 +208,7 @@ namespace ir {
 				}
 				case symbol::symbol_tag::GLOBAL: {
 					handle g = reinterpret_cast<global*>(symbol.get());
+
 					m_sections[g->parent_section].globals.push_back(g);
 					break;
 				}
@@ -215,15 +224,15 @@ namespace ir {
 
 		// TODO: actually assign ordinals
 		for(module_section& section : m_sections) {
-			// sort functions
-			std::ranges::sort(section.functions, [](const handle<compiled_function>& a, const handle<compiled_function>& b) {
-				return a->ordinal < b->ordinal;
-			});
-
-			// sort globals
-			std::ranges::sort(section.globals, [](const handle<global>& a, const handle<global>& b) {
-				return reinterpret_cast<symbol*>(a.get())->ordinal < reinterpret_cast<symbol*>(b.get())->ordinal;
-			});
+			// // sort functions
+			// std::ranges::sort(section.functions, [](const handle<compiled_function>& a, const handle<compiled_function>& b) {
+			// 	return a->ordinal < b->ordinal;
+			// });
+			// 
+			// // sort globals
+			// std::ranges::sort(section.globals, [](const handle<global>& a, const handle<global>& b) {
+			// 	return reinterpret_cast<symbol*>(a.get())->ordinal < reinterpret_cast<symbol*>(b.get())->ordinal;
+			// });
 
 			// place functions first
 			u32 offset = 0;
@@ -234,7 +243,8 @@ namespace ir {
 
 			// then globals
 			for(const auto& global : section.globals) {
-				offset += static_cast<u32>(utility::align(offset, global->alignment));
+				offset = static_cast<u32>(utility::align(offset, global->alignment));
+
 				global->position = offset;
 				offset += global->size;
 			}

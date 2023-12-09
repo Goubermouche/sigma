@@ -68,7 +68,9 @@ namespace ir {
 		handle<instruction> first;
 		handle<instruction> head;
 
-		utility::linked_list<handle<symbol_patch>> patches;
+		u64 patch_count;
+		handle<symbol_patch> first_patch;
+		handle<symbol_patch> last_patch;
 
 		u64 caller_usage = 0;
 		u64 stack_usage = 0;

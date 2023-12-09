@@ -115,7 +115,7 @@ namespace ir {
 	inline ptr_diff interval_intersect(handle<live_interval> a, handle<live_interval> b) {
 		for (u64 i = a->active_range + 1; i-- > 1;) {
 			for (u64 j = b->active_range + 1; j-- > 1;) {
-				const ptr_diff intersect = range_intersect(a->ranges[i], b->ranges[i]);
+				const ptr_diff intersect = range_intersect(a->ranges[i], b->ranges[j]);
 
 				if (intersect >= 0) {
 					return intersect;

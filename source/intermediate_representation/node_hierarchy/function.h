@@ -17,7 +17,7 @@ namespace ir {
 	struct compiled_function {
 		handle<function> parent;
 
-		u64 ordinal;
+		u64 ordinal = 0;
 		u8 prologue_length;
 
 		uint64_t stack_usage;
@@ -25,7 +25,9 @@ namespace ir {
 		u64 code_position; // relative to the export-specific text section
 		utility::byte_buffer bytecode;
 
-		utility::linked_list<handle<symbol_patch>> patches;
+		u64 patch_count;
+		handle<symbol_patch> first_patch;
+		handle<symbol_patch> last_patch;
 	};
 
 	struct function {
@@ -41,20 +43,27 @@ namespace ir {
 		auto get_symbol_address(handle<symbol> sym) -> handle<node>;
 
 		// node hierarchy
-		void create_goto(handle<node> target);
+		void create_branch(handle<node> target);
+		void create_conditional_branch(handle<node> condition, handle<node> if_true, handle<node> if_false);
+
+		auto create_region() -> handle<node>;
+
 		void create_ret(const std::vector<handle<node>>& virtual_values);
 
 		auto create_call(handle<external> target, const function_type& target_type, const std::vector<handle<node>>& arguments) -> std::vector<handle<node>>;
 		auto create_call(handle<function> target_func, const std::vector<handle<node>>& arguments) -> std::vector<handle<node>>;
 
 		auto create_signed_integer(i64 value, u8 bit_width) -> handle<node>;
+		auto create_bool(bool value) -> handle<node>;
 
 		auto create_add(handle<node> left, handle<node> right, arithmetic_behaviour behaviour = arithmetic_behaviour::none) -> handle<node>;
 		auto create_sub(handle<node> left, handle<node> right, arithmetic_behaviour behaviour = arithmetic_behaviour::none) -> handle<node>;
+		auto create_mul(handle<node> left, handle<node> right, arithmetic_behaviour behaviour = arithmetic_behaviour::none) -> handle<node>;
 
 		void create_store(handle<node> destination, handle<node> value, u32 alignment, bool is_volatile);
+		auto create_load(handle<node> value_to_load, data_type data_type, u32 alignment, bool is_volatile) -> handle<node>;
 
-		auto get_parameter(u64 index) -> handle<node>;
+		auto get_function_parameter(u64 index) -> handle<node>;
 		auto create_local(u32 size, u32 alignment) -> handle<node>;
 	private:
 		auto create_call(const function_type& callee_type, handle<node> callee_symbol_address, const std::vector<handle<node>>& arguments) -> std::vector<handle<node>>;

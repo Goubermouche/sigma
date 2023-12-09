@@ -61,7 +61,7 @@ namespace ir {
 		// COFF file header & section headers
 		coff_file_header header = {
 			.section_count = static_cast<u16>(section_count),
-			.timestamp = 0,
+			.timestamp = 1056582000u,
 			.symbol_table = 0,
 			.symbol_count = static_cast<u32>(unique_id_counter),
 			.flags = IMAGE_FILE_LINE_NUMS_STRIPPED
@@ -104,7 +104,7 @@ namespace ir {
 		// compute string table size
 		for (const auto& section : sections) {
 			for (const auto& function : section.functions) {
-				u64 name_length = function->parent->symbol.name.size();
+				u64 name_length = function->parent->symbol.name.size() + 1;
 
 				if (name_length >= 8) {
 					string_table.size += static_cast<u32>(name_length) + 1;
@@ -112,7 +112,7 @@ namespace ir {
 			}
 
 			for (const auto& global : section.globals) {
-				u64 name_length = global->symbol.name.size();
+				u64 name_length = global->symbol.name.size() + 1;
 
 				if (name_length >= 8) {
 					string_table.size += static_cast<u32>(name_length) + 1;
@@ -121,7 +121,7 @@ namespace ir {
 		}
 
 		for (const auto& ex : externals) {
-			u64 name_length = ex->symbol.name.size();
+			u64 name_length = ex->symbol.name.size() + 1;
 
 			if (name_length >= 8) {
 				string_table.size += static_cast<u32>(name_length) + 1;
@@ -135,11 +135,11 @@ namespace ir {
 		utility::byte_buffer headers = utility::byte_buffer::zero_initialize(sizeof(coff_file_header) + sizeof(coff_section_header) * section_count);
 
 		// write the file header 
-		auto header_data = reinterpret_cast<coff_file_header*>(headers.get_data());
-		*header_data = header;
+		coff_file_header* file = reinterpret_cast<coff_file_header*>(headers.get_data());
+		*file = header;
 
 		// write sections headers
-		auto sec_headers = reinterpret_cast<coff_section_header*>(header_data + 1);
+		auto sec_headers = reinterpret_cast<coff_section_header*>(file + 1);
 
 		for (auto& section : sections) {
 			coff_section_header section_header = {
@@ -149,7 +149,7 @@ namespace ir {
 				.characteristics = section.export_flags
 			};
 
-			u64 section_name_length = section.name.size();
+			u64 section_name_length = section.name.size() + 1;
 			memcpy(section_header.name, section.name.c_str(), section_name_length > 8 ? 8 : section_name_length);
 
 			if (section.relocation_count >= 0xFFFF) {
@@ -165,9 +165,7 @@ namespace ir {
 
 		for (u64 i = 0; i < sections.size(); ++i) {
 			if (unwinds[i]) {
-				// .pdata
 				memcpy(sec_headers + 0, &unwinds[i]->pdata_header, sizeof(coff_section_header));
-				// .xdata
 				memcpy(sec_headers + 1, &unwinds[i]->xdata_header, sizeof(coff_section_header));
 				sec_headers += 2;
 			}
@@ -198,7 +196,7 @@ namespace ir {
 			for (const auto& function : section.functions) {
 				u64 source_offset = function->code_position;
 
-				for (handle<symbol_patch> patch : function->patches) {
+				for (handle<symbol_patch> patch = function->first_patch; patch; patch = patch->next) {
 					if (patch->internal) {
 						continue;
 					}
@@ -269,7 +267,7 @@ namespace ir {
 				.aux_symbols_count = 1
 			};
 
-			std::memcpy(s.short_name, section.name.data(), 8 * sizeof(char));
+			std::memcpy(s.short_name, section.name.c_str(), 8 * sizeof(char));
 			symbol_table_writer.write(s);
 
 			coff_auxiliary_section_symbol aux = {
@@ -341,7 +339,7 @@ namespace ir {
 				};
 
 				std::string name = function->parent->symbol.name;
-				u64 name_length = name.size();
+				u64 name_length = name.size() + 1;
 
 				ASSERT(name_length < std::numeric_limits<u16>::max(), "invalid name");
 
@@ -370,7 +368,7 @@ namespace ir {
 				};
 
 				if (global->symbol.name[0] != 0) {
-					u64 name_len = global->symbol.name.size();
+					u64 name_len = global->symbol.name.size() + 1;
 					ASSERT(name_len < std::numeric_limits<u16>::max(), "invalid name length");
 
 					if (name_len >= 8) {
@@ -392,25 +390,25 @@ namespace ir {
 			}
 		}
 
-		for (const auto& ex : externals) {
+		for (const auto& ext : externals) {
 			coff_symbol sym = {
 				.value = 0,
 				.section_number = 0,
 				.storage_class = IMAGE_SYM_CLASS_EXTERNAL
 			};
 
-			u64 name_length = ex->symbol.name.size();
+			u64 name_length = ext->symbol.name.size() + 1;
 			ASSERT(name_length < std::numeric_limits<u16>::max(), "invalid name length");
 
 			if (name_length >= 8) {
 				sym.long_name[0] = 0; // this value is 0 for long names
 				sym.long_name[1] = string_table_mark;
 
-				string_table_data[string_table_length++] = ex->symbol.name;
-				string_table_mark += static_cast<u32>(name_length) + 1;
+				string_table_data[string_table_length++] = ext->symbol.name;
+				string_table_mark += static_cast<u32>(name_length);
 			}
 			else {
-				std::memcpy(sym.short_name, ex->symbol.name.c_str(), name_length + 1);
+				std::memcpy(sym.short_name, ext->symbol.name.c_str(), name_length);
 			}
 
 			symbol_table_writer.write(sym);
@@ -575,7 +573,7 @@ namespace ir {
 		const u64 source_section = compiled_func->parent->parent_section;
 		u64 ordinal = 0;
 
-		for (const handle<symbol_patch> patch : compiled_func->patches) {
+		for (handle<symbol_patch> patch = compiled_func->first_patch; patch; patch = patch->next) {
 		 	if (patch->target->tag == symbol::symbol_tag::FUNCTION) {
 				const u64 destination_section = reinterpret_cast<function*>(patch->target.get())->output.parent->parent_section;
 	 
@@ -593,7 +591,7 @@ namespace ir {
 		 	}
 		}
 	 
-		return static_cast<u32>(compiled_func->patches.get_size() - ordinal);
+		return static_cast<u32>(compiled_func->patch_count) - ordinal;
 	}
 
 	auto coff_file_emitter::helper_write_section(u64 write_pos, const module_section* section, u32 pos, utility::byte_buffer& buffer) -> u64 {
@@ -621,6 +619,7 @@ namespace ir {
 
 		return write_pos + section->total_size;
 	}
+
 	auto coff_file_emitter::machine_to_coff_machine(target target) -> coff_machine::value {
 		switch (target.get_arch()) {
 			case arch::X64: return coff_machine::AMD64;

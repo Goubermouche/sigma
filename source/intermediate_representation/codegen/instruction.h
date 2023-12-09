@@ -44,7 +44,7 @@ namespace ir {
 		};
 
 		enum instruction_type {
-			RET, INT3, STOSB, MOVSB, CAST, system_call, RDTSC, UD2,
+			RET, INT3, STOSB, MOVSB, CAST, SYS_CALL, RDTSC, UD2,
 			NOT, NEG, MUL, DIV, IDIV, CALL, JMP,
 
 			// prefetching
@@ -69,7 +69,7 @@ namespace ir {
 			SHL, SHR, ROL, ROR, SAR, ADD, OR, AND, SUB, XOR, CMP, MOV, TEST,
 
 			// misc integer ops
-			MOVABS, XCHG, LEA, XADD, ÏMUL, IMUL3,
+			MOVABS, XCHG, LEA, XADD, IMUL, IMUL3,
 			MOVSXB, MOVSXW, MOVSXD, MOVZXB, MOVZXW,
 
 			// gpr<->xmm

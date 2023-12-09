@@ -7,6 +7,7 @@ namespace ir {
 	class module;
 	class codegen_target {
 	public:
+		codegen_target() = default;
 		codegen_target(target target);
 
 		[[nodiscard]] auto get_target() const -> target;

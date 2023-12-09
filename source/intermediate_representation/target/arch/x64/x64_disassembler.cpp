@@ -19,7 +19,7 @@ namespace ir {
 		);
 
 		// disassemble the function body
-		handle<symbol_patch> patch = context.patches.empty() ? nullptr : context.patches.get_first();
+		handle<symbol_patch> patch = context.first_patch;
 
 		for(u64 i = 0; i < context.basic_block_order.size(); ++i) {
 			const u64 block_index = context.basic_block_order[i];
@@ -60,7 +60,7 @@ namespace ir {
 		while(range.start < range.end) {
 			x64::x64_instruction inst;
 
-			if(!disassemble_instruction(bytecode.get_slice(range.start, bytecode.get_size()), inst)) {
+			if(!disassemble_instruction(bytecode.get_slice(range.start, range.end - range.start), inst)) {
 				range.start++;
 				assembly.append("  ERROR\n");
 				continue;
@@ -139,7 +139,7 @@ namespace ir {
 
 							if (inst.memory.index != 255) {
 								assembly.append(
-									" + {}*{}", get_register_name(static_cast<reg::id_type>(inst.memory.index), x64::QWORD), 1 << static_cast<u8>(inst.memory.scale)
+									" + {}*{}", get_register_name(inst.memory.index, x64::QWORD), 1 << static_cast<u8>(inst.memory.scale)
 								);
 							}
 
@@ -329,7 +329,7 @@ namespace ir {
 		if (enc == x64::OP_REL32) {
 			inst.flags |= x64::USE_RIP_MEM;
 			inst.flags |= x64::USE_MEM_OP;
-			inst.base = std::numeric_limits<u8>::max();
+			inst.base = -1;
 			inst.memory.index = -1;
 
 			if (current + 4 > bytecode.get_size()) {
@@ -423,7 +423,7 @@ namespace ir {
 
 		// writes out the RM reg (or base and index)
 		const ptr_diff delta = disassemble_memory_operand(
-			bytecode,
+			bytecode.get_slice(current, bytecode.get_size()),
 			bytecode.get_size() - current,
 			rm_slot, 
 			mod, 
@@ -530,7 +530,7 @@ namespace ir {
 			}
 			else {
 				inst.base = (rex & 1 ? 8 : 0) | rm;
-				inst.memory.index = -1;
+				inst.memory.index = 255;
 				inst.memory.scale = scale::x1;
 			}
 		}
@@ -540,7 +540,8 @@ namespace ir {
 				return 0;
 			}
 
-			inst.memory.displacement = static_cast<i32>(bytecode[current++]);
+			// NOTE: this has to be cast to i8 before we can use it
+			inst.memory.displacement = (i8)bytecode[current++];
 		}
 		else if (mod == x64::INDIRECT_DISPLACEMENT_32) {
 			if (current + 4 > length) {

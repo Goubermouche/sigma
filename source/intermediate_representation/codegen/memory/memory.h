@@ -31,7 +31,7 @@ namespace ir {
 	};
 
 	struct mem {
-		i32 index;
+		u8 index;
 		scale scale;
 		i32 displacement;
 	};

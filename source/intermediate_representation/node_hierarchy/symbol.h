@@ -24,6 +24,6 @@ namespace ir {
 		std::string name;
 		symbol_tag tag;
 		u64 symbol_id;
-		u64 ordinal;
+		u64 ordinal = 0;
 	};
 }

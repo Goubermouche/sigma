@@ -21,25 +21,54 @@ namespace ir {
 
 		auto create_function(const function_type& type, linkage linkage) -> handle<function>;
 
+		void create_branch(handle<node> target) const;
+
+		/**
+		 * \brief Creates a conditional branch, depending on the specified \b condition the branch will either go to \b if_true or \b if_false. Generally, we want to create a region for
+		 * every destination (\b if_true, \b if_false), and for the region that both cases will eventually grant control to. Both \b if_true and \b if_false should eventually branch into
+		 * the final region.
+		 * \param condition Boolean condition which works as a control argument
+		 * \param if_true Destination region that a branch is created to when the condition evaluates to \b true
+		 * \param if_false Destination region that a branch is created to when the condition evaluates to \b false
+		 */
+		void create_conditional_branch(handle<node> condition, handle<node> if_true, handle<node> if_false) const;
+
+		auto create_region() const->handle<node>;
+
 		auto create_call(handle<external> target, const function_type& type, const std::vector<handle<node>>& parameters) const -> std::vector<handle<node>>;
 		auto create_call(handle<function> target, const std::vector<handle<node>>& parameters) const-> std::vector<handle<node>>;
-		void create_return(const std::vector<handle<node>>& return_values) const;
+		auto get_function_parameter(u64 index) const->handle<node>;
 
-		auto get_parameter(u64 index) const-> handle<node>;
+		void create_return(const std::vector<handle<node>>& return_values) const;
 
 		auto create_external(const std::string& identifier, linkage linkage) const -> handle <external>;
 		auto create_external(const function_type& type, linkage linkage) const -> handle<external>;
 
 		auto create_global(const std::string& identifier, linkage linkage) const -> handle<global>;
+
+		/**
+		 * \brief Creates a local variable.
+		 * \param size Size of the variable [bytes]
+		 * \param alignment Alignment of the variable [bytes]
+		 * \return Created local variable.
+		 */
 		auto create_local(u16 size, u16 alignment) const -> handle<node>;
 
 		auto create_string(const std::string& value) const -> handle<node>;
 		auto create_signed_integer(i64 value, u8 bit_width) const -> handle<node>;
+		auto create_bool(bool value) const -> handle<node>;;
 
 		auto create_add(handle<node> left, handle<node> right, arithmetic_behaviour behaviour = arithmetic_behaviour::none) const -> handle<node>;
+		auto create_sub(handle<node> left, handle<node> right, arithmetic_behaviour behaviour = arithmetic_behaviour::none) const -> handle<node>;
+		auto create_mul(handle<node> left, handle<node> right, arithmetic_behaviour behaviour = arithmetic_behaviour::none) const -> handle<node>;
+
+		void create_store(handle<node> destination, handle<node> value, u32 alignment, bool is_volatile) const;
+		auto create_load(handle<node> value_to_load, data_type data_type, u32 alignment, bool is_volatile) const -> handle<node>;
 
 		[[nodiscard]] auto get_insert_point() const -> handle<function>;
 		void set_insert_point(handle<function> function);
+
+		void set_control(handle<node> control) const;
 	private:
 		[[nodiscard]] auto get_insert_point_checked() const -> handle<function>;
 	private:

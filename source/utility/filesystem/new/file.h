@@ -13,12 +13,22 @@ namespace utility {
 				return outcome::failure(error::emit_assembly<error_code::unable_to_open_file>(path));
 			}
 
-			for (const type* ptr = data.cbegin(); ptr != data.cend(); ++ptr) {
+			for (const type* ptr = data.begin(); ptr != data.end(); ++ptr) {
 				file.write(reinterpret_cast<const char*>(ptr), sizeof(type));
 			}
 
 			file.close();
 			return outcome::success();
+		}
+
+		static auto read_text_file(const filepath& path) -> outcome::result<std::string> {
+			std::ifstream file(path);
+
+			if(!file) {
+				ASSERT(false, "failure");
+			}
+
+			return std::string(std::istreambuf_iterator<char>(file), std::istreambuf_iterator<char>());
 		}
 	};
 }

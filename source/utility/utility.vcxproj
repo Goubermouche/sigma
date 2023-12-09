@@ -37,7 +37,7 @@
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <WarningLevel>Level4</WarningLevel>
       <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..;..\..\..\..\thirdparty\llvm\llvm-16.0.0\llvm-install\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <Optimization>Full</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
@@ -54,10 +54,6 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
     </Link>
-    <Lib>
-      <AdditionalDependencies>C:\dev\thirdparty\llvm-16.0.0\llvm-build\Release\lib\LLVMCore.lib;C:\dev\thirdparty\llvm-16.0.0\llvm-build\Release\lib\LLVMRemarks.lib;C:\dev\thirdparty\llvm-16.0.0\llvm-build\Release\lib\LLVMBitstreamReader.lib;C:\dev\thirdparty\llvm-16.0.0\llvm-build\Release\lib\LLVMBinaryFormat.lib;C:\dev\thirdparty\llvm-16.0.0\llvm-build\Release\lib\LLVMTargetParser.lib;C:\dev\thirdparty\llvm-16.0.0\llvm-build\Release\lib\LLVMSupport.lib;C:\dev\thirdparty\llvm-16.0.0\llvm-build\Release\lib\LLVMDemangle.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>..\..\..\..\thirdparty\llvm\llvm-16.0.0\llvm-install\lib;..\..\..\..\thirdparty\llvm\llvm-16.0.0\llvm-install\bin;..\..\..\..\thirdparty\llvm\llvm-16.0.0\llvm-build\lib;..\..\..\..\thirdparty\llvm\llvm-16.0.0\llvm-install\Release\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-    </Lib>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="containers\allocator_based_containers\linked_list.h" />
@@ -72,14 +68,15 @@
     <ClInclude Include="containers\property.h" />
     <ClInclude Include="containers\range.h" />
     <ClInclude Include="containers\slice.h" />
+    <ClInclude Include="containers\stack.h" />
     <ClInclude Include="containers\string.h" />
     <ClInclude Include="containers\string_accessor.h" />
+    <ClInclude Include="containers\symbol_table.h" />
     <ClInclude Include="diagnostics\console.h" />
     <ClInclude Include="diagnostics\diagnostics.h" />
     <ClInclude Include="diagnostics\error.h" />
     <ClInclude Include="diagnostics\warning.h" />
     <ClInclude Include="filesystem\file_types\old_file.h" />
-    <ClInclude Include="filesystem\file_types\raw_file.h" />
     <ClInclude Include="filesystem\file_types\text_file.h" />
     <ClInclude Include="filesystem\filesystem.h" />
     <ClInclude Include="filesystem\new\file.h" />
@@ -96,11 +93,11 @@
     <ClCompile Include="containers\dense_set.cpp" />
     <ClCompile Include="containers\directed_graph.cpp" />
     <ClCompile Include="containers\string_accessor.cpp" />
+    <ClCompile Include="containers\symbol_table.cpp" />
     <ClCompile Include="diagnostics\console.cpp" />
     <ClCompile Include="diagnostics\error.cpp" />
     <ClCompile Include="diagnostics\warning.cpp" />
     <ClCompile Include="filesystem\file_types\old_file.cpp" />
-    <ClCompile Include="filesystem\file_types\raw_file.cpp" />
     <ClCompile Include="filesystem\file_types\text_file.cpp" />
     <ClCompile Include="filesystem\filesystem.cpp" />
     <ClCompile Include="memory.cpp" />

@@ -1,45 +1,57 @@
 #include "abstract_syntax_tree.h"
+#include <utility/containers/stack.h>
 
 namespace sigma {
-	void abstract_syntax_tree::add_node(node_ptr node) {
+	abstract_syntax_tree::abstract_syntax_tree() : m_allocator(1024) {}
+
+	void abstract_syntax_tree::add_node(handle<node> node) {
 		m_nodes.push_back(node);
 	}
 
-	u64 abstract_syntax_tree::size() const {
-		return m_nodes.size();
-	}
+	void abstract_syntax_tree::traverse(std::function<void(handle<node>, u16)>&& function) const {
+		utility::stack<std::pair<handle<node>, u16>> node_stack;
 
-	std::vector<node_ptr>::iterator abstract_syntax_tree::begin() {
-		return m_nodes.begin();
-	}
+		for(const handle<node> root_node : m_nodes) {
+			node_stack.push_back({ root_node, 0 });
 
-	std::vector<node_ptr>::iterator abstract_syntax_tree::end() {
-		return m_nodes.end();
-	}
+			while (!node_stack.empty()) {
+				auto [current, depth] = node_stack.pop_back();
 
-	void abstract_syntax_tree::move_insert(
-		std::vector<node_ptr>::iterator where,
-		s_ptr<abstract_syntax_tree> other
-	) {
-		std::move(
-			std::make_move_iterator(other->m_nodes.begin()),
-			std::make_move_iterator(other->m_nodes.end()),
-			std::inserter(m_nodes, where)
-		);
+				if(!current) {
+					continue;
+				}
 
-		other->m_nodes.clear();
-	}
+				function(current, depth);
 
-	utility::console& operator<<(
-		utility::console& console,
-		const abstract_syntax_tree& t
-	) {
-		utility::console::out << "abstract syntax tree\n";
-
-		for (u64 i = 0; i < t.m_nodes.size(); i++) {
-			t.m_nodes[i]->print(1, L"", i == t.m_nodes.size() - 1);
+				for (auto it = current->children.rbegin(); it != current->children.rend(); ++it) {
+					node_stack.push_back({ *it, depth + 1 });
+				}
+			}
 		}
-
-		return console;
 	}
-}
+
+	auto abstract_syntax_tree::allocate_node_list(u64 count) -> utility::slice<handle<node>> {
+		return { m_allocator, count };
+	}
+
+	auto abstract_syntax_tree::get_nodes() -> utility::contiguous_container<handle<node>>& {
+		return m_nodes;
+	}
+
+	auto abstract_syntax_tree::get_nodes() const -> const utility::contiguous_container<handle<node>>& {
+		return m_nodes;
+	}
+
+	auto abstract_syntax_tree::get_allocator() -> utility::block_allocator& {
+		return m_allocator;
+	}
+
+	handle<node> abstract_syntax_tree::create_binary_expression(
+		node_type type, handle<node> left, handle<node> right
+	) {
+		const handle<node> node = create_node<utility::empty_property>(type, 2);
+		node->children[0] = left;
+		node->children[1] = right;
+		return node;
+	}
+} // namespace sigma

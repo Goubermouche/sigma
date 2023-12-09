@@ -1,32 +1,40 @@
-﻿#include "node.h"
-#include "abstract_syntax_tree/abstract_syntax_tree_visitor_template.h"
+#include "node.h"
+#include <utility/macros.h>
 
 namespace sigma {
-	node::node(const utility::file_range& range)
-		: m_range(range) {}
+	node_type::node_type(underlying type) : type(type) {}
 
-	const utility::file_range& node::get_declared_range() const {
-		return m_range;
+	auto node_type::to_string() const->std::string {
+		switch(type) {
+			case UNKNOWN:              return "UNKNOWN";
+			case FUNCTION:             return "FUNCTION";
+			case FUNCTION_CALL:        return "FUNCTION_CALL";
+
+			case RETURN:               return "RETURN";
+
+			case BRANCH:               return "BRANCH";
+			case CONDITIONAL_BRANCH:   return "CONDITIONAL_BRANCH";
+
+			case VARIABLE_DECLARATION: return "VARIABLE_DECLARATION";
+			case VARIABLE_ACCESS:      return "VARIABLE_ACCESS";
+			case VARIABLE_ASSIGNMENT:  return "VARIABLE_ASSIGNMENT";
+
+			case OPERATOR_ADD:         return "OPERATOR_ADD";
+			case OPERATOR_SUBTRACT:    return "OPERATOR_SUBTRACT";
+			case OPERATOR_MULTIPLY:    return "OPERATOR_MULTIPLY";
+			case OPERATOR_DIVIDE:      return "OPERATOR_DIVIDE";
+			case OPERATOR_MODULO:      return "OPERATOR_MODULO";
+
+			case NUMERICAL_LITERAL:    return "NUMERICAL_LITERAL";
+			case STRING_LITERAL:       return "STRING_LITERAL";
+			case BOOL_LITERAL:         return "BOOL_LITERAL";
+
+			default: ASSERT(false, "not implemented");
+		}
 	}
 
-	void node::print_node_name(
-		u64 depth, 
-		const std::wstring& prefix,
-		const std::string& node_name, 
-		bool is_last
-	) {
-		utility::console::out
-			<< prefix
-			<< (depth == 0 ? L"" : is_last ? L"╰─" : L"├─")
-			<< node_name
-			<< ' ';
+	node_type::operator underlying() const {
+		return type;
 	}
 
-	std::wstring node::get_new_prefix(
-		u64 depth, 
-		const std::wstring& prefix,
-		bool is_last
-	) {
-		return depth == 0 ? L"" : prefix + (is_last ? L"  " : L"│ ");
-	}
-}
+} // sigma

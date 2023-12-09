@@ -148,7 +148,7 @@ namespace utility {
 
 	class byte_writer : public byte_buffer {
 	public:
-		byte_writer(u64 size) : byte_buffer(size), m_position(0) {}
+		byte_writer(u64 size) : byte_buffer(zero_initialize(size)), m_position(0) {}
 
 		template<typename append_type>
 		void write(const append_type& value) {

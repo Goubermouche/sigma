@@ -1,27 +1,32 @@
 #pragma once
-#include "utility/containers/contiguous_container.h"
+#include "utility/macros.h"
 
 namespace utility {
-	class dense_set : public contiguous_container<u64> {
+	// TODO: add documentation
+	// TODO: explore alternate datastructures which may result
+	//       in better performance/cleaner code
+
+	class dense_set {
 	public:
 		dense_set() = default;
 		dense_set(u64 capacity);
 
 		void clear();
 
-		auto set_union(const dense_set& src) -> bool;
-		void copy(dense_set& src);
+		bool set_union(const dense_set& src);
+		void copy(const dense_set& src);
 
 		void put(u64 index);
-		void remove(u64 index) const;
-		auto get(u64 index) const -> bool;
+		void remove(u64 index);
+		bool get(u64 index) const;
 
-		auto data(u64 index) const -> u64;
-		auto data(u64 index) -> u64&;
+		u64 data(u64 index) const;
+		u64& data(u64 index);
 
-		auto capacity() const ->u64;
+		u64 capacity() const;
 	private:
-		u64 m_used_capacity;
+		std::vector<u64> m_data;
+		u64 m_capacity;
 	};
 
 	template <typename function>

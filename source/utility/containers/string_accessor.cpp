@@ -16,23 +16,31 @@ namespace utility::detail {
 		m_position--;
 	}
 
-	char string_accessor::get() const {
+	auto string_accessor::get() const -> char {
 		// check if we are inside of our strings' bounds
 		ASSERT(m_position <= m_string.size(), "accessor out of range! (get)");
 		return m_string[m_position];
 	}
 
-	char string_accessor::get_advance() {
+	auto string_accessor::get_advance() -> char {
 		const char temp = get();
 		advance();
 		return temp;
 	}
 
-	bool string_accessor::end() const {
+	auto string_accessor::end() const -> bool {
 		return m_position > m_string.size();
 	}
 
-	u64 string_accessor::get_position() const {
+	auto string_accessor::get_data() const -> const std::string& {
+		return m_string;
+	}
+
+	auto string_accessor::get_data() -> std::string& {
+		return m_string;
+	}
+
+	auto string_accessor::get_position() const -> u64 {
 		return m_position;
 	}
 

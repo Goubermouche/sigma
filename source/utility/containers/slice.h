@@ -14,6 +14,9 @@ namespace utility {
 		slice(void* data, u64 size) :
 			m_data(static_cast<type*>(data)), m_size(size) {}
 
+		slice(type* data, u64 size) :
+			m_data(data), m_size(size) {}
+
 		template<typename allocator>
 		slice(allocator& alloc, u64 count) :
 			m_data(static_cast<type*>(alloc.allocate(sizeof(type) * count))),
@@ -66,7 +69,7 @@ namespace utility {
 		[[nodiscard]] auto rend() const -> const_reverse_iterator {
 			return const_reverse_iterator(begin());
 		}
-	private:
+	protected:
 		type* m_data;
 		u64 m_size;
 	};

@@ -19,32 +19,35 @@ namespace utility::detail {
 		/**
 		 * \brief Increments the caret location.
 		 */
-		inline void advance();
+		void advance();
 
 		/**
 		 * \brief Decrements the caret location.
 		 */
-		inline void retreat();
+		void retreat();
 
 		/**
 		 * \brief Retrieves the character at the current caret location, if we are out of bounds an assertion is triggered.
 		 * \returns Character at the current caret location
 		 */
-		inline char get() const;
+		[[nodiscard]] auto get() const -> char;
 
 		/**
 		 * \brief Retrieves the character at the current caret location and increments the caret location, if we are out of bounds an assertion is triggered
 		 * \returns Character at the current caret location 
 		 */
-		char get_advance();
+		[[nodiscard]] auto get_advance() -> char;
 
 		/**
 		 * \brief Checks whether the current caret location is in/out of bounds of the contained string.
 		 * \return True if the caret is out of bounds, otherwise False
 		 */
-		bool end() const;
+		[[nodiscard]] auto end() const -> bool;
 
-		u64 get_position() const;
+		[[nodiscard]] auto get_data() const -> const std::string&;
+		[[nodiscard]] auto get_data() -> std::string&;
+		[[nodiscard]] auto get_position() const -> u64;
+
 		void set_position(u64 position);
 	private:
 		std::string m_string; // contained string

@@ -1,6 +1,6 @@
 #include "use_list.h"
 
-namespace ir {
+namespace sigma::ir {
 	void generate_use_lists(transformation_context& context) {
 		context.work_list->push_all(context.function);
 

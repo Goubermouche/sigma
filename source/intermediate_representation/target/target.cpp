@@ -2,7 +2,7 @@
 #include "intermediate_representation/target/system/systemv/systemv.h"
 #include "intermediate_representation/target/system/win/win.h"
 
-namespace ir {
+namespace sigma::ir {
 	target::target(arch arch, system system)
 		: m_arch(arch), m_system(system) {
 		m_abi = system == system::WINDOWS ? abi::WIN_64 : abi::SYSTEMV;

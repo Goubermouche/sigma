@@ -15,7 +15,7 @@
 // tree and for various final operations on it (compilation, emission of object
 // files, etc.).
 
-namespace ir {
+namespace sigma::ir {
 	struct comdat {
 		enum comdat_type {
 			NONE,
@@ -61,31 +61,38 @@ namespace ir {
 	 */
 	class module {
 	public:
-		module();
 		module(target target);
 
 		void compile() const;
 		auto generate_object_file() -> utility::object_file;
 
 		auto create_external(const std::string& name, linkage linkage) -> handle<external>;
-		auto create_function(const function_type& type, linkage linkage) -> handle<function>;
+
+		auto create_function(
+			const function_signature& function_sig, linkage linkage
+		) -> handle<function>;
 
 		auto create_global(const std::string& name, linkage linkage) -> handle<global>;
-		auto create_string(handle<function> f, const std::string& value) -> handle<node>;
+		auto create_string(handle<function> parent_function, const std::string& value) -> handle<node>;
 
 		[[nodiscard]] auto get_target() const -> target;
 	protected:
 		auto get_sections() -> std::vector<module_section>&;
 		auto get_sections() const -> const std::vector<module_section>&;
 
-		void create_section(const std::string& name, module_section::module_section_flags flags, comdat::comdat_type comdat);
+		void create_section(
+			const std::string& name, 
+			module_section::module_section_flags flags, 
+			comdat::comdat_type comdat
+		);
+
 		auto generate_externals() -> std::vector<handle<external>>;
 
 		static constexpr u8 get_text_section()  { return 0; }
 		static constexpr u8 get_data_section()  { return 1; }
 		static constexpr u8 get_rdata_section() { return 2; }
 		static constexpr u8 get_tls_section()   { return 3; }
-	protected:
+
 		// rough memory layout:
 		//
 		//   module:
@@ -111,4 +118,4 @@ namespace ir {
 
 		friend class coff_file_emitter;
 	};
-}
+} // namespace sigma::ir

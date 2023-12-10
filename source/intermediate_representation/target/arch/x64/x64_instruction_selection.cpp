@@ -2,7 +2,7 @@
 #include "intermediate_representation/codegen/instruction.h"
 #include "intermediate_representation/target/system/win/win.h"
 
-namespace ir {
+namespace sigma::ir {
 	void x64_architecture::select_instructions(codegen_context& context) {
 		ASSERT(
 			context.work_list->items.size() == context.graph.blocks.size(),
@@ -40,7 +40,6 @@ namespace ir {
 		context.basic_block_order.push_back(stop_block);
 
 		for (u64 i = 0; i < context.basic_block_order.size(); ++i) {
-			printf("---------------- label %d\n", i);
 			handle<node> basic_block = context.work_list->items[context.basic_block_order[i]];
 			const handle<instruction> label = create_label(context, basic_block);
 
@@ -107,7 +106,6 @@ namespace ir {
 		// phi nodes within this block should view themselves as the previous value,
 		// and not the one we're producing
 		u64 old_phi_count = context.phi_values.size();
-		printf("......................PHI: %d\n", old_phi_count);
 
 		for (u64 i = 0; i < old_phi_count; ++i) {
 			auto& phi = context.phi_values[i];
@@ -118,17 +116,13 @@ namespace ir {
 		}
 
 		if (block_entry->ty == node::REGION) {
-			printf("  reg %d\n", block_entry->global_value_index);
 			for (handle<user> user = block_entry->use; user; user = user->next_user) {
 				handle<node> user_node = user->node;
-
-				printf("  %d %d %d\n", user_node->ty == node::PHI, user_node->data_type.ty != data_type::MEMORY, user_node->global_value_index);
 
 				if (
 					user_node->ty == node::PHI &&
 					user_node->data_type.ty != data_type::MEMORY
 				) {
-					printf("...............ADD PHI 1\n");
 					// copy the phi into a temporary
 					auto& phi = context.phi_values.emplace_back(phi_value{
 						.phi = user_node,
@@ -145,7 +139,6 @@ namespace ir {
 		}
 
 		if (rpo_index == 0) {
-			printf(".. isel 1\n");
 			select_instruction(context, context.function->entry_node, reg::invalid_id);
 		}
 
@@ -188,7 +181,6 @@ namespace ir {
 					ASSERT(old_phi_count == 0, "branches don't get phi edges, they should've been split");
 				}
 
-				printf(".. isel 2\n");
 				select_instruction(context, target, value->virtual_register);
 
 				if (
@@ -210,7 +202,6 @@ namespace ir {
 					value->virtual_register = allocate_virtual_register(context, target, target->data_type);
 				}
 
-				printf(".. isel 3\n");
 				select_instruction(context, target, value->virtual_register);
 			}
 
@@ -281,7 +272,6 @@ namespace ir {
 			));
 
 			// reset phi's
-			printf("reset phi %d\n", old_phi_count);
 			for (u64 i = 0; i < old_phi_count; ++i) {
 				auto& phi = context.phi_values[i];
 
@@ -307,7 +297,6 @@ namespace ir {
 	void x64_architecture::select_instruction(
 		codegen_context& context, handle<node> n, reg destination
 	) {
-		printf("-- %d %d\n", n->global_value_index, n->ty);
 		// ASSERT(n->global_value_index != 5, "");
 		switch (const node::type node_type = n->ty) {
 			case node::PHI:
@@ -440,15 +429,15 @@ namespace ir {
 
 				u32 caller_saved_gp_registers = descriptor.caller_saved_gpr_count;
 				u32 caller_saved_xmm_registers = ~0ull >> (64 - descriptor.caller_saved_xmm_count);
-				const function_type& callee_proto = n->get<function_call>().type;
+				const function_signature& callee_signature = n->get<function_call>().signature;
 
 				reg return_registers[2] = { reg::invalid_id, reg::invalid_id };
 				handle<node> return_nodes[2] = { nullptr };
 				u8 return_count = 0;
 
-				ASSERT(callee_proto.returns.size() <= 2, "invalid function return count");
+				ASSERT(callee_signature.returns.size() <= 2, "invalid function return count");
 
-				for (u64 i = 0; i < callee_proto.returns.size(); ++i) {
+				for (u64 i = 0; i < callee_signature.returns.size(); ++i) {
 					handle<node> return_node = n->get<function_call>().projections[2 + i];
 
 					if(return_node && !return_node->has_users(context)) {
@@ -479,7 +468,7 @@ namespace ir {
 				i32 ins[64];
 				reg parameter_registers[64];
 
-				u64 vararg_cutoff = callee_proto.has_var_args ? callee_proto.parameters.size() : n->inputs.get_size() - 2;
+				u64 vararg_cutoff = callee_signature.has_var_args ? callee_signature.parameters.size() : n->inputs.get_size() - 2;
 
 				u8 used_gpr_count = 0;
 				u8 used_xmm_count = 0;
@@ -508,7 +497,7 @@ namespace ir {
 
 					// first few parameters are passed as inputs to the CALL instruction.
 					// the rest are written into the stack at specific places.
-					ir::reg src = input_reg(context, parameter_node);
+					sigma::ir::reg src = input_reg(context, parameter_node);
 
 					if (reg >= descriptor.gpr_count) {
 						context.append_instruction(create_mr(
@@ -575,7 +564,7 @@ namespace ir {
 				}
 				else {
 					// the number of float parameters is written into AL
-					if (callee_proto.has_var_args && is_systemv) {
+					if (callee_signature.has_var_args && is_systemv) {
 						context.append_instruction(create_immediate(
 							context, instruction::MOV, I8_TYPE, x64::RAX, used_xmm_count
 						));
@@ -910,19 +899,19 @@ namespace ir {
 				auto& br = n->get<branch>();
 
 				std::vector<int> succ(br.successors.size());
+				bool has_default = false;
 
 				// fill successors
-				bool has_default = false;
 				for (handle<user> u = n->use; u; u = u->next_user) {
 					if (u->node->ty == node::PROJECTION) {
-						int index = u->node->get<projection>().index;
-						handle<node> succ_n = u->node->get_next_block();
+						i32 index = static_cast<i32>(u->node->get<projection>().index);
+						handle<node> successor_node = u->node->get_next_block();
 
 						if (index == 0) {
-							has_default = !succ_n->is_unreachable();
+							has_default = !successor_node->is_unreachable();
 						}
 
-						succ[index] = context.graph.blocks.at(succ_n).id;
+						succ[index] = static_cast<i32>(context.graph.blocks.at(successor_node).id);
 					}
 				}
 
@@ -936,13 +925,13 @@ namespace ir {
 				else if(br.successors.size() == 2) {
 					int f = succ[1], t = succ[0];
 
-					x64::conditional cc;
+					x64::conditional cc = x64::conditional::E;
 					if(br.keys[0] == 0) {
 						cc = select_instruction_cmp(context, n->inputs[1]);
 					}
 					else {
 						reg key = input_reg(context, n->inputs[1]);
-						context.append_instruction(create_ri(context, instruction::CMP, dt, key, br.keys[0]));
+						context.append_instruction(create_ri(context, instruction::CMP, dt, key, static_cast<i32>(br.keys[0])));
 						cc = x64::NE;
 					}
 
@@ -1022,7 +1011,7 @@ namespace ir {
 		codegen_context& context, handle<node> n, reg destination, i32 store_op, i32 source
 	) -> handle<instruction> {
 		const bool has_second_in = store_op < 0 && source >= 0;
-		i64 offset = 0;
+		i32 offset = 0;
 		constexpr auto scale = scale::x1;
 		constexpr i32 index = -1;
 		reg base;
@@ -1102,6 +1091,8 @@ namespace ir {
 		if (n->ty >= node::CMP_EQ && n->ty <= node::CMP_FLE) {
 			ASSERT(false, "not implemented");
 			// data_type cmp_dt = n->get<compare>()
+
+			return x64::NE; // temp
 		}
 		else {
 			reg src = input_reg(context, n);
@@ -1114,7 +1105,7 @@ namespace ir {
 				context.append_instruction(create_rr_no_destination(context, instruction::TEST, dt, src, src));
 			}
 
-			return x64::conditional(x64::NE ^ invert);
+			return static_cast<x64::conditional>(x64::NE ^ invert);
 		}
 	}
 
@@ -1220,9 +1211,6 @@ namespace ir {
 
 		// reserve phi space
 		if (phi->data_type.ty != data_type::MEMORY) {
-
-			printf("...............ADD PHI 2\n");
-
 			context.phi_values.emplace_back(phi_value{ 
 				.phi = phi, 
 				.node = value
@@ -1320,14 +1308,11 @@ namespace ir {
 		// no value was found, allocate a new virtual register
 		if (value == nullptr) {
 			const reg tmp = allocate_virtual_register(context, n, n->data_type);
-			printf(".. isel 4\n");
 			select_instruction(context, n, tmp);
 			return tmp;
 		}
 
 		value->use_count--;
-
-		printf("ireg: %d %d\n", value->virtual_register.id, n->global_value_index);
 
 		// if we have a virtual register, return its ID
 		if (value->virtual_register.is_valid()) {
@@ -1337,7 +1322,6 @@ namespace ir {
 		// if the node should rematerialize we allocate a new virtual register
 		if (n->should_rematerialize()) {
 			const reg tmp = allocate_virtual_register(context, n, n->data_type);
-			printf(".. isel 5\n");
 			select_instruction(context, n, tmp);
 			return tmp;
 		}
@@ -1355,8 +1339,6 @@ namespace ir {
 		inst->get<handle<node>>() = target;
 		inst->type = instruction::LABEL;
 		inst->flags = instruction::node_f;
-
-		printf("label\n");
 		return inst;
 	}
 
@@ -1369,7 +1351,6 @@ namespace ir {
 
 		inst->flags = instruction::node_f;
 		inst->get<label>().value = target;
-		printf("jump\n");
 		return inst;
 	}
 
@@ -1380,8 +1361,6 @@ namespace ir {
 
 		inst->flags = instruction::node_f;
 		inst->get<label>().value = target;
-		printf("jcc\n");
-
 		return inst;
 	}
 
@@ -1398,7 +1377,6 @@ namespace ir {
 		inst->in_count = 1;
 		inst->operands[0] = destination.id;
 		inst->operands[1] = source.id;
-		printf("move\n");
 		return inst;
 	}
 
@@ -1424,9 +1402,6 @@ namespace ir {
 
 		inst->displacement = disp;
 		inst->sc = scale;
-
-		printf("mr\n");
-
 		return inst;
 	}
 
@@ -1448,9 +1423,6 @@ namespace ir {
 
 		inst->displacement = disp;
 		inst->sc = scale;
-
-		printf("rm\n");
-
 		return inst;
 	}
 
@@ -1463,9 +1435,6 @@ namespace ir {
 
 		inst->operands[0] = destination.id;
 		inst->operands[1] = source.id;
-
-		printf("rr\n");
-
 		return inst;
 	}
 
@@ -1476,8 +1445,6 @@ namespace ir {
 
 		inst->operands[0] = left.id;
 		inst->operands[1] = right.id;
-		printf("rr no dest\n");
-
 		return inst;
 	}
 
@@ -1491,9 +1458,6 @@ namespace ir {
 		inst->get<immediate>().value = value;
 		inst->flags = instruction::immediate;
 		inst->operands[0]= destination.id;
-
-		printf("imm\n");
-
 		return inst;
 	}
 
@@ -1505,8 +1469,6 @@ namespace ir {
 		);
 
 		inst->operands[0] = destination.id;
-		printf("zero\n");
-
 		return inst;
 	}
 
@@ -1520,8 +1482,6 @@ namespace ir {
 		inst->get<absolute>().value = immediate;
 		inst->flags = instruction::absolute;
 		inst->operands[0] = destination.id;
-		printf("abs\n");
-
 		return inst;
 	}
 
@@ -1533,8 +1493,6 @@ namespace ir {
 		inst->flags = instruction::immediate;
 		inst->operands[0] = src.id;
 		inst->get<immediate>().value = imm;
-		printf("ri\n");
-
 		return inst;
 	}
 
@@ -1549,8 +1507,6 @@ namespace ir {
 		inst->flags = instruction::immediate;
 		inst->operands[0] = destination.id;
 		inst->operands[1] = source.id;
-		printf("rri\n");
-
 		return inst;
 	}
 
@@ -1564,8 +1520,6 @@ namespace ir {
 		inst->operands[0] = destination.id;
 		inst->operands[1] = left.id;
 		inst->operands[2] = right.id;
-		printf("rrr\n");
-
 		return inst;
 	}
 
@@ -1589,8 +1543,6 @@ namespace ir {
 			inst->operands[4] = index;
 		}
 
-		printf("rrm\n");
-
 		return inst;
 	}
 
@@ -1605,8 +1557,6 @@ namespace ir {
 		inst->operands[1] = x64::RSP;
 		inst->get<handle<symbol>>() = s;
 		inst->displacement = 0;
-
-		printf("global\n");
 
 		return inst;
 	}

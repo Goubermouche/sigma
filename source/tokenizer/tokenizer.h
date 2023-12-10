@@ -7,7 +7,9 @@ namespace sigma {
 	public:
 		tokenizer(const std::string& source);
 
-		[[nodiscard]] static auto tokenize(const std::string& source) -> std::pair<token_buffer, utility::symbol_table>;
+		[[nodiscard]] static auto tokenize(
+			const std::string& source
+		) -> std::pair<token_buffer, utility::symbol_table>;
 
 		[[nodiscard]] auto tokenize() -> std::pair<token_buffer, utility::symbol_table>;
 	private:

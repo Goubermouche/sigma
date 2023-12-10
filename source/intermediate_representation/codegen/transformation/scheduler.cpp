@@ -1,6 +1,6 @@
 #include "scheduler.h"
 
-namespace ir {
+namespace sigma::ir {
 	void schedule_early(
 		codegen_context& context, const handle<node>& target
 	) {

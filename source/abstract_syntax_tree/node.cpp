@@ -31,6 +31,8 @@ namespace sigma {
 
 			default: ASSERT(false, "not implemented");
 		}
+
+		return std::string();
 	}
 
 	node_type::operator underlying() const {

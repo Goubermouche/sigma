@@ -1,7 +1,7 @@
 #pragma once
 #include <utility/filesystem/new/file_types/object_file.h>
 
-namespace ir {
+namespace sigma::ir {
 	using namespace utility::types;
 
 	class module;

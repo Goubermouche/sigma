@@ -1,7 +1,7 @@
 #pragma once
 #include "intermediate_representation/codegen/live_interval.h"
 
-namespace ir {
+namespace sigma::ir {
 	struct codegen_context;
 
 	struct control_flow_graph {

@@ -1,7 +1,7 @@
 #include "x64_disassembler.h"
 #include "intermediate_representation/target/arch/x64/x64.h"
 
-namespace ir {
+namespace sigma::ir {
 	auto x64_disassembler::disassemble(
 		const utility::byte_buffer& bytecode, const codegen_context& context
 	) -> utility::string {
@@ -329,8 +329,8 @@ namespace ir {
 		if (enc == x64::OP_REL32) {
 			inst.flags |= x64::USE_RIP_MEM;
 			inst.flags |= x64::USE_MEM_OP;
-			inst.base = -1;
-			inst.memory.index = -1;
+			inst.base = 255;
+			inst.memory.index = 255;
 
 			if (current + 4 > bytecode.get_size()) {
 				return false;
@@ -524,7 +524,7 @@ namespace ir {
 
 				inst.flags |= x64::USE_RIP_MEM;
 				inst.base = std::numeric_limits<u8>::max();
-				inst.memory.index = -1;
+				inst.memory.index = 255;
 				inst.memory.displacement = static_cast<i32>(bytecode.get_dword(current));
 				current += 4;
 			}

@@ -2,7 +2,7 @@
 #include "intermediate_representation/node_hierarchy/symbol.h"
 #include "types.h"
 
-namespace ir {
+namespace sigma::ir {
 	struct init_object {
 		enum init_object_type {
 			REGION,

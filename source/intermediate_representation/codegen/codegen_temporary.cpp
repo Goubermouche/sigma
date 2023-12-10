@@ -1,7 +1,7 @@
 #include "codegen_temporary.h"
 #include "intermediate_representation/codegen/codegen_context.h"
 
-namespace ir {
+namespace sigma::ir {
 	auto codegen_temporary::matches(handle<codegen_temporary> b) const -> bool {
 		if (type != b->type) {
 			return false;
@@ -18,9 +18,9 @@ namespace ir {
 	}
 
 	auto codegen_temporary::create_label(codegen_context& context, u64 target) -> handle<codegen_temporary> {
-		const handle<codegen_temporary> val = context.create_temporary<ir::label>();
+		const handle<codegen_temporary> val = context.create_temporary<sigma::ir::label>();
 		val->type = label;
-		val->get<ir::label>().value = target;
+		val->get<sigma::ir::label>().value = target;
 		return val;
 	}
 

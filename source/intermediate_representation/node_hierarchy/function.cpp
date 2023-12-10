@@ -1,7 +1,7 @@
 #include "function.h"
 #include "intermediate_representation/codegen/work_list.h"
 
-namespace ir {
+namespace sigma::ir {
 	function::function(const std::string& name) :
 		allocator(NODE_ALLOCATION_BLOCK_SIZE)
 	{
@@ -34,17 +34,27 @@ namespace ir {
 		add_memory_edge(n, mem_state, target);
 	}
 
-	auto function::create_call(handle<external> target, const function_type& target_type, const std::vector<handle<node>>& arguments) -> std::vector<handle<node>> {
-		return create_call(target_type, get_symbol_address(&target->symbol), arguments);
+	auto function::create_call(
+		handle<external> target,
+		const function_signature& function_sig, 
+		const std::vector<handle<node>>& arguments
+	) -> std::vector<handle<node>> {
+		return create_call(function_sig, get_symbol_address(&target->symbol), arguments);
 	}
 
 	auto function::create_call(
 		handle<function> target_func, const std::vector<handle<node>>& arguments
 	) -> std::vector<handle<node>> {
-		return create_call(target_func->type, get_symbol_address(&target_func->symbol), arguments);
+		return create_call(
+			target_func->signature, get_symbol_address(&target_func->symbol), arguments
+		);
 	}
 
-	void function::create_conditional_branch(handle<node> condition, handle<node> if_true, handle<node> if_false) {
+	void function::create_conditional_branch(
+		handle<node> condition,
+		handle<node> if_true, 
+		handle<node> if_false
+	) {
 		const handle<node> memory_state = active_control_node->get_parent_region()->get<region>().memory_out;
 
 		// generate control projections
@@ -153,15 +163,27 @@ namespace ir {
 		return node;
 	}
 
-	auto function::create_add(handle<node> left, handle<node> right, arithmetic_behaviour behaviour) -> handle<node> {
+	auto function::create_add(
+		handle<node> left, 
+		handle<node> right,
+		arithmetic_behaviour behaviour
+	) -> handle<node> {
 		return create_binary_arithmetic_operation(node::ADD, left, right, behaviour);
 	}
 
-	auto function::create_sub(handle<node> left, handle<node> right, arithmetic_behaviour behaviour) -> handle<node> {
+	auto function::create_sub(
+		handle<node> left,
+		handle<node> right,
+		arithmetic_behaviour behaviour
+	) -> handle<node> {
 		return create_binary_arithmetic_operation(node::SUB, left, right, behaviour);
 	}
 
-	auto function::create_mul(handle<node> left, handle<node> right, arithmetic_behaviour behaviour) -> handle<node> {
+	auto function::create_mul(
+		handle<node> left,
+		handle<node> right,
+		arithmetic_behaviour behaviour
+	) -> handle<node> {
 		return create_binary_arithmetic_operation(node::MUL, left, right, behaviour);
 	}
 
@@ -180,7 +202,9 @@ namespace ir {
 		store_node->get<memory_access>().alignment = alignment;
 	}
 
-	auto function::create_load(handle<node> value_to_load, data_type data_type, u32 alignment, bool is_volatile) -> handle<node> {
+	auto function::create_load(
+		handle<node> value_to_load, data_type data_type, u32 alignment, bool is_volatile
+	) -> handle<node> {
 		ASSERT(value_to_load, "invalid value");
 
 		handle<node> n = create_node<memory_access>(is_volatile ? node::READ : node::LOAD, 3);
@@ -214,10 +238,12 @@ namespace ir {
 	}
 
 	auto function::create_call(
-		const function_type& callee_type, handle<node> callee_symbol_address, const std::vector<handle<node>>& arguments
+		const function_signature& function_sig, 
+		handle<node> callee_symbol_address, 
+		const std::vector<handle<node>>& arguments
 	) ->  std::vector<handle<node>> {
 		// const handle<node> target = get_symbol_address(target_func->sym);
-		const u64 proj_count = 2 + (callee_type.returns.size() > 1 ? callee_type.returns.size() : 1);
+		const u64 proj_count = 2 + (function_sig.returns.size() > 1 ? function_sig.returns.size() : 1);
 
 		const handle<node> n = create_node<function_call>(node::CALL, 3 + arguments.size());
 		n->inputs[0] = active_control_node;
@@ -229,7 +255,7 @@ namespace ir {
 		}
 
 		auto& call_prop = n->get<function_call>();
-		call_prop.type = callee_type;
+		call_prop.signature = function_sig;
 
 		const handle<node> control_proj = create_projection(CONTROL_TYPE, n, 0);
 		const handle<node> memory_proj = create_projection(MEMORY_TYPE, n, 1);
@@ -238,12 +264,12 @@ namespace ir {
 		// create data projections
 		call_prop.projections.resize(proj_count);
 
-		for (u64 i = 0; i < callee_type.returns.size(); ++i) {
-			call_prop.projections[i + 2] = create_projection(callee_type.returns[i], n, i + 2);
+		for (u64 i = 0; i < function_sig.returns.size(); ++i) {
+			call_prop.projections[i + 2] = create_projection(function_sig.returns[i], n, i + 2);
 		}
 
 		// we'll slot a NULL so it's easy to tell when it's empty
-		if (callee_type.returns.empty()) {
+		if (function_sig.returns.empty()) {
 			call_prop.projections[1] = nullptr;
 		}
 
@@ -255,7 +281,12 @@ namespace ir {
 		return { call_prop.projections.begin() + 2, call_prop.projections.end() };
 	}
 
-	auto function::create_binary_arithmetic_operation(node::type op_type, handle<node> left, handle<node> right, arithmetic_behaviour behaviour) -> handle<node> {
+	auto function::create_binary_arithmetic_operation(
+		node::type op_type, 
+		handle<node> left, 
+		handle<node> right, 
+		arithmetic_behaviour behaviour
+	) -> handle<node> {
 		ASSERT(
 			left->data_type == right->data_type,
 			"data types of the two operands do not match"
@@ -320,4 +351,4 @@ namespace ir {
 		ASSERT(region_prop.memory_in && region_prop.memory_in->ty == node::PHI, "invalid region type");
 		add_input_late(region_prop.memory_in, mem_state);
 	}
-}
+} // namespace sigma::ir

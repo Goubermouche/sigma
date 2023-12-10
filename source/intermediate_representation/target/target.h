@@ -1,7 +1,7 @@
 #pragma once
 #include "intermediate_representation/target/parameter_descriptor.h"
 
-namespace ir {
+namespace sigma::ir {
 	enum class arch {
 		X64
 	};

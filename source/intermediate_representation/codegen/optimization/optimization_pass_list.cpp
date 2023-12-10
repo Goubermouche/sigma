@@ -1,6 +1,6 @@
 #include "optimization_pass_list.h"
 
-namespace ir {
+namespace sigma::ir {
 	optimization_pass_list::optimization_pass_list(
 		const std::vector<s_ptr<optimization_pass>>& passes
 	) : m_passes(passes) {}

@@ -3,7 +3,9 @@
 namespace sigma {
 	tokenizer::tokenizer(const std::string& source) : m_source(source) {}
 
-	auto tokenizer::tokenize(const std::string& source) -> std::pair<token_buffer, utility::symbol_table> {
+	auto tokenizer::tokenize(
+		const std::string& source
+	) -> std::pair<token_buffer, utility::symbol_table> {
 		return tokenizer(source).tokenize();
 	}
 

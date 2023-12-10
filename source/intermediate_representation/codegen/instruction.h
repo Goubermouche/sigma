@@ -6,7 +6,7 @@
 // more information). Each instruction holds several inputs and has several flags,
 // a category, and a general instruction type.
 
-namespace ir {
+namespace sigma::ir {
 	struct code_generator_context;
 
 	struct immediate {

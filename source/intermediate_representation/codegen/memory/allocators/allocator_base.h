@@ -1,6 +1,6 @@
 #pragma once
 
-namespace ir {
+namespace sigma::ir {
 	struct codegen_context;
 
 	class allocator_base {

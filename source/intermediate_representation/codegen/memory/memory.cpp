@@ -1,6 +1,6 @@
 #include "memory.h"
 
-namespace ir {
+namespace sigma::ir {
 	reg::reg(id_type id) : id(id) {}
 
 	auto reg::operator==(reg other) const -> bool {

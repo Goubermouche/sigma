@@ -27,13 +27,6 @@
  */
 #define ASSERT(cond, mesg) LANG_VERIFY(cond, mesg)
 
-// #define ENABLE_NODE_NAME_LOGS
-#ifdef ENABLE_NODE_NAME_LOGS
-#define LOG_NODE_NAME(node) std::cout << #node << '\n'
-#else
-#define LOG_NODE_NAME(node)
-#endif
-
 #define CONCATENATE(x, y) _CONCATENATE(x, y)
 #define _CONCATENATE(x, y) x ## y
 

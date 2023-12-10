@@ -34,7 +34,7 @@ namespace sigma {
 		u8 pointer_level = 0;
 	};
 
-	struct named_type {
+	struct named_data_type {
 		data_type type;
 		utility::symbol_table_key identifier_key;
 	};

@@ -1,7 +1,7 @@
 #include "live_interval.h"
 #include "intermediate_representation/codegen/codegen_context.h"
 
-namespace ir {
+namespace sigma::ir {
 	auto live_interval::get_start() const -> u64 {
 		return ranges.back().start;
 	}

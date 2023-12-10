@@ -57,12 +57,10 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="abstract_syntax_tree.h" />
-    <ClInclude Include="function_registry.h" />
     <ClInclude Include="node.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="abstract_syntax_tree.cpp" />
-    <ClCompile Include="function_registry.cpp" />
     <ClCompile Include="node.cpp" />
   </ItemGroup>
   <ItemGroup>

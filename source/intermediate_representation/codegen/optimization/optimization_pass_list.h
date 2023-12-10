@@ -1,7 +1,7 @@
 #pragma once
 #include "intermediate_representation/codegen/transformation/transformation_context.h"
 
-namespace ir {
+namespace sigma::ir {
 	class optimization_pass {
 	public:
 		virtual void apply(transformation_context& context) = 0;

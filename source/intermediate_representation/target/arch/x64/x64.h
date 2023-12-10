@@ -2,7 +2,7 @@
 #include "intermediate_representation/target/arch/architecture.h"
 #include "intermediate_representation/codegen/memory/memory.h"
 
-namespace ir {
+namespace sigma::ir {
 	namespace x64 {
 		enum data_type {
 			NONE = 0,

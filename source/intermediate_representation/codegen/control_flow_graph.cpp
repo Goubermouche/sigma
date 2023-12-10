@@ -1,7 +1,7 @@
 #include "control_flow_graph.h"
 #include "intermediate_representation/codegen/codegen_context.h"
 
-namespace ir {
+namespace sigma::ir {
 	auto control_flow_graph::get_immediate_dominator(handle<node> target) -> handle<node> {
 		const auto it = blocks.find(target);
 		if (it == blocks.end()) {
@@ -84,7 +84,6 @@ namespace ir {
 						continue;
 					}
 
-					printf("here\n");
 					top = top->use->node;
 				}
 
@@ -128,8 +127,6 @@ namespace ir {
 						);
 
 						const i64 index = successor->get<projection>().index;
-						printf("index: %d\n", index);
-
 						top_nodes[-index] = successor;
 					}
 				}

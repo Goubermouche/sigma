@@ -1,6 +1,6 @@
 #include "live_range_analysis.h"
 
-namespace ir {
+namespace sigma::ir {
 	void determine_live_ranges(codegen_context& context) {
 		const u64 interval_count = context.intervals.size();
 		u64 epilogue = std::numeric_limits<u64>::max();

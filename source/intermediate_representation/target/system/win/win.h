@@ -56,7 +56,7 @@
 #define IMAGE_SUBSYSTEM_WINDOWS_CUI 3
 #define IMAGE_SUBSYSTEM_EFI_APPLICATION 10
 
-namespace ir::win {
+namespace sigma::ir::win {
 	constexpr auto get_caller_saved() -> u16 {
 		return
 			1u << x64::RAX |

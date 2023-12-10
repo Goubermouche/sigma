@@ -4,13 +4,12 @@
 #include "intermediate_representation/node_hierarchy/global.h"
 
 #include <utility/containers/byte_buffer.h>
-#include <utility/containers/allocator_based_containers/linked_list.h>
 
 // NOTE: it might be a good idea to determine block size from the node count
 //       of the preceding AST and scale relative to that
 #define NODE_ALLOCATION_BLOCK_SIZE 1024
 
-namespace ir {
+namespace sigma::ir {
 	struct function;
 	struct symbol_patch;
 
@@ -44,30 +43,70 @@ namespace ir {
 
 		// node hierarchy
 		void create_branch(handle<node> target);
-		void create_conditional_branch(handle<node> condition, handle<node> if_true, handle<node> if_false);
+		void create_conditional_branch(
+			handle<node> condition, handle<node> if_true, handle<node> if_false
+		);
 
 		auto create_region() -> handle<node>;
 
 		void create_ret(const std::vector<handle<node>>& virtual_values);
 
-		auto create_call(handle<external> target, const function_type& target_type, const std::vector<handle<node>>& arguments) -> std::vector<handle<node>>;
-		auto create_call(handle<function> target_func, const std::vector<handle<node>>& arguments) -> std::vector<handle<node>>;
+		auto create_call(
+			handle<external> target, 
+			const function_signature& function_sig,
+			const std::vector<handle<node>>& arguments
+		) -> std::vector<handle<node>>;
+
+		auto create_call(
+			handle<function> target_func, 
+			const std::vector<handle<node>>& arguments
+		) -> std::vector<handle<node>>;
 
 		auto create_signed_integer(i64 value, u8 bit_width) -> handle<node>;
 		auto create_bool(bool value) -> handle<node>;
 
-		auto create_add(handle<node> left, handle<node> right, arithmetic_behaviour behaviour = arithmetic_behaviour::none) -> handle<node>;
-		auto create_sub(handle<node> left, handle<node> right, arithmetic_behaviour behaviour = arithmetic_behaviour::none) -> handle<node>;
-		auto create_mul(handle<node> left, handle<node> right, arithmetic_behaviour behaviour = arithmetic_behaviour::none) -> handle<node>;
+		auto create_add(
+			handle<node> left,
+			handle<node> right, 
+			arithmetic_behaviour behaviour = arithmetic_behaviour::none
+		) -> handle<node>;
 
-		void create_store(handle<node> destination, handle<node> value, u32 alignment, bool is_volatile);
-		auto create_load(handle<node> value_to_load, data_type data_type, u32 alignment, bool is_volatile) -> handle<node>;
+		auto create_sub(
+			handle<node> left,
+			handle<node> right,
+			arithmetic_behaviour behaviour = arithmetic_behaviour::none
+		) -> handle<node>;
+
+		auto create_mul(
+			handle<node> left, 
+			handle<node> right,
+			arithmetic_behaviour behaviour = arithmetic_behaviour::none
+		) -> handle<node>;
+
+		void create_store(
+			handle<node> destination, handle<node> value, u32 alignment, bool is_volatile
+		);
+
+		auto create_load(
+			handle<node> value_to_load, data_type data_type, u32 alignment, bool is_volatile
+		) -> handle<node>;
 
 		auto get_function_parameter(u64 index) -> handle<node>;
 		auto create_local(u32 size, u32 alignment) -> handle<node>;
 	private:
-		auto create_call(const function_type& callee_type, handle<node> callee_symbol_address, const std::vector<handle<node>>& arguments) -> std::vector<handle<node>>;
-		auto create_binary_arithmetic_operation(node::type op_type, handle<node> left, handle<node> right, arithmetic_behaviour behaviour) -> handle<node>;
+		auto create_call(
+			const function_signature& function_sig,
+			handle<node> callee_symbol_address,
+			const std::vector<handle<node>>& arguments
+		) -> std::vector<handle<node>>;
+
+		auto create_binary_arithmetic_operation(
+			node::type op_type,
+			handle<node> left,
+			handle<node> right, 
+			arithmetic_behaviour behaviour
+		) -> handle<node>;
+
 		auto create_projection(data_type dt, handle<node> source, u64 index) -> handle<node>;
 		auto append_memory(handle<node> memory) const -> handle<node>;
 	public:
@@ -75,7 +114,7 @@ namespace ir {
 		symbol symbol; // symbol of the given function
 
 		compiled_function output;
-		function_type type;
+		function_signature signature;
 		linkage linkage;
 
 		u8 parent_section; // index of the parent module section
@@ -111,4 +150,4 @@ namespace ir {
 
 		return node_ptr;
 	}
-}
+} // namespace sigma::ir

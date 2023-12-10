@@ -8,18 +8,35 @@ namespace sigma {
 	type_checker::type_checker(abstract_syntax_tree& ast, utility::symbol_table& symbols)
 		: m_ast(ast)
 	{
-		const utility::symbol_table_key printf_key = symbols.insert("printf");
-		const utility::symbol_table_key format_key = symbols.insert("format");
+		{
+			const utility::symbol_table_key printf_key = symbols.insert("printf");
+			const utility::symbol_table_key format_key = symbols.insert("format");
 
-		auto printf_params = utility::slice<named_type>(m_ast.get_allocator(), 1);
-		printf_params[0] = named_type{ data_type(data_type::CHAR, 1), format_key };
+			auto printf_params = utility::slice<named_data_type>(m_ast.get_allocator(), 1);
+			printf_params[0] = named_data_type{ data_type(data_type::CHAR, 1), format_key };
 
-		m_external_functions[printf_key] = function{
-			.return_type = data_type(data_type::I32, 0),
-			.identifier_key = printf_key,
-			.parameters = printf_params,
-			.has_var_args = true
-		};
+			m_external_functions[printf_key] = function{
+				.return_type = data_type(data_type::I32, 0),
+				.parameter_types = printf_params,
+				.has_var_args = true,
+				.identifier_key = printf_key
+			};
+		}
+
+		{
+			const utility::symbol_table_key printf_key = symbols.insert("puts");
+			const utility::symbol_table_key format_key = symbols.insert("str");
+
+			auto printf_params = utility::slice<named_data_type>(m_ast.get_allocator(), 1);
+			printf_params[0] = named_data_type{ data_type(data_type::CHAR, 1), format_key };
+
+			m_external_functions[printf_key] = function{
+				.return_type = data_type(data_type::I32, 0),
+				.parameter_types = printf_params,
+				.has_var_args = false,
+				.identifier_key = printf_key
+			};
+		}
 	}
 
 	void type_checker::type_check() {
@@ -83,6 +100,8 @@ namespace sigma {
 	}
 
 	void type_checker::type_check_function_call(handle<node> call_node, data_type expected) {
+		SUPPRESS_C4100(expected);
+
 		// TODO: move the function check in here?
 		auto& property = call_node->get<function_call>();
 
@@ -102,15 +121,21 @@ namespace sigma {
 		}
 
 		if (callee->has_var_args) {
-			ASSERT(call_node->children.get_size() >= callee->parameters.get_size(), "invalid parameter count");
+			ASSERT(
+				call_node->children.get_size() >= callee->parameter_types.get_size(),
+				"invalid parameter count"
+			);
 		}
 		else {
-			ASSERT(callee->parameters.get_size() == call_node->children.get_size(), "invalid parameter count");
+			ASSERT(
+				callee->parameter_types.get_size() == call_node->children.get_size(),
+				"invalid parameter count"
+			);
 		}
 
 		u64 i = 0;
-		for (; i < callee->parameters.get_size(); ++i) {
-			type_check_node(call_node->children[i], callee->parameters[i].type);
+		for (; i < callee->parameter_types.get_size(); ++i) {
+			type_check_node(call_node->children[i], callee->parameter_types[i].type);
 		}
 
 		// variable arguments should be promoted

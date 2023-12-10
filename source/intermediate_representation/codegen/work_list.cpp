@@ -1,7 +1,7 @@
 #include "work_list.h"
 #include "intermediate_representation/codegen/codegen_context.h"
 
-namespace ir {
+namespace sigma::ir {
 	auto work_list::mark_next_control(handle<node> target) -> handle<node> {
 		// unless it's a branch (aka a terminator), it'll have one successor
 		handle<node> next = nullptr;

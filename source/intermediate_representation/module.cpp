@@ -10,9 +10,7 @@
 #include "intermediate_representation/codegen/transformation/scheduler.h"
 #include "intermediate_representation/codegen/transformation/use_list.h"
 
-namespace ir {
-	module::module() : m_allocator(1024) {}
-
+namespace sigma::ir {
 	module::module(target target) : m_allocator(1024), m_codegen(target) {
 		create_section(".text",  module_section::EXEC,                         comdat::NONE);
 		create_section(".data",  module_section::WRITE,                        comdat::NONE);
@@ -66,9 +64,9 @@ namespace ir {
 			register_allocator->allocate(codegen);
 			utility::byte_buffer bytecode = m_codegen.emit_bytecode(codegen);
 
-			for(const auto byte : bytecode) {
-				std::cout << byte.to_hex() << ' ';
-			}
+			// for(const auto byte : bytecode) {
+			// 	utility::console::out << byte.to_hex() << ' ';
+			// }
 
 			// debug - emit an asm-like version of the function
 			assembly.append(m_codegen.disassemble(bytecode, codegen));
@@ -117,15 +115,17 @@ namespace ir {
 		return g;
 	}
 
-	auto module::create_function(const function_type& type, linkage linkage) -> handle<function> {
+	auto module::create_function(
+		const function_signature& function_sig, linkage linkage
+	) -> handle<function> {
 		auto func_allocation = m_allocator.allocate(sizeof(function));
-		const handle func = new (func_allocation) function(type.identifier);
+		const handle func = new (func_allocation) function(function_sig.identifier);
 		m_functions.push_back(func);
 
 		func->linkage = linkage;
 		func->parent_section = get_text_section();
 
-		m_symbols.push_back(&func->symbol);
+		m_symbols.emplace_back(&func->symbol);
 
 		// allocate the entry node
 		const handle<node> entry_node = func->create_node<region>(node::ENTRY, 0);
@@ -144,8 +144,8 @@ namespace ir {
 		func->parameters[1] = func->create_projection(MEMORY_TYPE, entry_node, 1);
 		func->parameters[2] = func->create_projection(CONTINUATION_TYPE, entry_node, 2);
 
-		func->parameter_count = type.parameters.size();
-		func->return_count = type.returns.size();
+		func->parameter_count = function_sig.parameters.size();
+		func->return_count = function_sig.returns.size();
 		func->active_control_node = projection_node;
 
 		// mark the input memory as both mem_in and mem_out
@@ -153,22 +153,24 @@ namespace ir {
 		entry_region.memory_out = func->parameters[1];
 
 		// create parameter projections
-		for(u64 i = 0; i < type.parameters.size(); ++i) {
-			const data_type dt = type.parameters[i];
+		for(u64 i = 0; i < function_sig.parameters.size(); ++i) {
+			const data_type dt = function_sig.parameters[i];
 			func->parameters.push_back(func->create_projection(dt, func->entry_node, 3 + i));
 		}
 
-		func->type = type;
+		func->signature = function_sig;
 		return func;
 	}
 
-	auto module::create_string(handle<function> f, const std::string& value) -> handle<node> {
+	auto module::create_string(
+		handle<function> parent_function, const std::string& value
+	) -> handle<node> {
 		const auto dummy = create_global("", PRIVATE);
 		dummy->set_storage(get_rdata_section(), static_cast<u32>(value.size() + 1), 1, 1);
 
 		const auto destination = static_cast<char*>(dummy->add_region(0, static_cast<u32>(value.size() + 1)));
-		std::strcpy(destination, value.c_str());
-		return f->get_symbol_address(&dummy->symbol);
+		std::memcpy(destination, value.c_str(), value.size() + 1);
+		return parent_function->get_symbol_address(&dummy->symbol);
 	}
 
 	auto module::get_target() const -> target {
@@ -183,7 +185,9 @@ namespace ir {
 		return m_sections;
 	}
 
-	void module::create_section(const std::string& name, module_section::module_section_flags flags, comdat::comdat_type comdat) {
+	void module::create_section(
+		const std::string& name, module_section::module_section_flags flags, comdat::comdat_type comdat
+	) {
 		const module_section section {
 			.name = std::string(name),
 			.flags = flags,
@@ -254,4 +258,4 @@ namespace ir {
 
 		return externals;
 	}
-}
+} // namespace sigma::ir

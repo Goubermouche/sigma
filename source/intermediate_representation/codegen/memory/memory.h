@@ -1,7 +1,7 @@
 #pragma once
 #include <utility/types.h>
 
-namespace ir {
+namespace sigma::ir {
 	using namespace utility::types;
 
 	struct reg {

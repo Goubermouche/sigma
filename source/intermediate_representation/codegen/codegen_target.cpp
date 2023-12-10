@@ -8,7 +8,7 @@
 // win
 #include "intermediate_representation/codegen/outputs/coff.h"
 
-namespace ir {
+namespace sigma::ir {
 	codegen_target::codegen_target(target target) : m_target(target) {
 		m_object_file_emitter = pick_object_file_emitter(m_target.get_system());
 		m_architecture        = pick_architecture(m_target.get_arch());

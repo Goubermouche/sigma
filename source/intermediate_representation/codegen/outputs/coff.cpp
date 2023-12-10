@@ -2,7 +2,7 @@
 #include "intermediate_representation/target/system/win/win.h"
 #include "intermediate_representation/module.h"
 
-namespace ir {
+namespace sigma::ir {
 	utility::object_file coff_file_emitter::emit(module& module) {
 		std::vector<handle<external>> externals = module.generate_externals();
 
@@ -591,7 +591,7 @@ namespace ir {
 		 	}
 		}
 	 
-		return static_cast<u32>(compiled_func->patch_count) - ordinal;
+		return static_cast<u32>(compiled_func->patch_count - ordinal);
 	}
 
 	auto coff_file_emitter::helper_write_section(u64 write_pos, const module_section* section, u32 pos, utility::byte_buffer& buffer) -> u64 {

@@ -7,7 +7,7 @@
 
 #define REGISTER_CLASS_COUNT 2
 
-namespace ir {
+namespace sigma::ir {
 	class linear_scan_allocator : public allocator_base {
 	public:
 		/**

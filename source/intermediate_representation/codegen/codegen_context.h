@@ -10,7 +10,7 @@
 
 #include <utility/containers/allocator_based_containers/linked_list.h>
 
-namespace ir {
+namespace sigma::ir {
 	struct codegen_context {
 		auto lookup_value(handle<node> value) -> virtual_value*;
 		auto allocate_stack(u64 size, u64 alignment) -> i32;

@@ -1,7 +1,7 @@
 #pragma once
 #include <utility/macros.h>
 
-namespace ir {
+namespace sigma::ir {
 	using namespace utility::types;
 
 	struct local {

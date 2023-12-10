@@ -48,9 +48,10 @@ namespace sigma {
 
 	struct function {
 		data_type return_type;
-		utility::symbol_table_key identifier_key;
-		utility::slice<named_type> parameters;
+		utility::slice<named_data_type> parameter_types;
 		bool has_var_args = false;
+
+		utility::symbol_table_key identifier_key;
 	};
 
 	struct function_call {

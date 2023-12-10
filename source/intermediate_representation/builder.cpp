@@ -1,17 +1,27 @@
 #include "builder.h"
 
-namespace ir {
+namespace sigma::ir {
 	builder::builder(module& target) : m_target(target) {}
 
-	auto builder::create_function(const function_type& type, linkage linkage) -> handle<function> {
-		return m_insert_point = m_target.create_function(type, linkage);
+	auto builder::create_function(
+		const function_signature& function_sig, 
+		linkage linkage
+	) -> handle<function> {
+		return m_insert_point = m_target.create_function(function_sig, linkage);
 	}
 
-	auto builder::create_call(handle<external> target, const function_type& type, const std::vector<handle<node>>& parameters) const -> std::vector<handle<node>> {
-		return get_insert_point_checked()->create_call(target, type, parameters);
+	auto builder::create_call(
+		handle<external> target,
+		const function_signature& function_sig, 
+		const std::vector<handle<node>>& parameters
+	) const -> std::vector<handle<node>> {
+		return get_insert_point_checked()->create_call(target, function_sig, parameters);
 	}
 
-	auto builder::create_call(handle<function> target, const std::vector<handle<node>>& parameters) const -> std::vector<handle<node>> {
+	auto builder::create_call(
+		handle<function> target, 
+		const std::vector<handle<node>>& parameters
+	) const -> std::vector<handle<node>> {
 		return get_insert_point_checked()->create_call(target, parameters);
 	}
 
@@ -19,7 +29,11 @@ namespace ir {
 		get_insert_point_checked()->create_branch(target);
 	}
 
-	void builder::create_conditional_branch(handle<node> condition, handle<node> if_true, handle<node> if_false) const {
+	void builder::create_conditional_branch(
+		handle<node> condition,
+		handle<node> if_true,
+		handle<node> if_false
+	) const {
 		return get_insert_point_checked()->create_conditional_branch(condition, if_true, if_false);
 	}
 
@@ -35,15 +49,24 @@ namespace ir {
 		return get_insert_point_checked()->get_function_parameter(index);
 	}
 
-	auto builder::create_external(const std::string& identifier, linkage linkage) const -> handle<external> {
+	auto builder::create_external(
+		const std::string& identifier,
+		linkage linkage
+	) const -> handle<external> {
 		return m_target.create_external(identifier, linkage);
 	}
 
-	auto builder::create_external(const function_type& type, linkage linkage) const -> handle<external> {
-		return m_target.create_external(type.identifier, linkage);
+	auto builder::create_external(
+		const function_signature& function_sig, 
+		linkage linkage
+	) const -> handle<external> {
+		return m_target.create_external(function_sig.identifier, linkage);
 	}
 
-	auto builder::create_global(const std::string& identifier, linkage linkage) const -> handle<global> {
+	auto builder::create_global(
+		const std::string& identifier, 
+		linkage linkage
+	) const -> handle<global> {
 		return m_target.create_global(identifier, linkage);
 	}
 
@@ -63,24 +86,42 @@ namespace ir {
 		return get_insert_point_checked()->create_bool(value);
 	}
 
-	auto builder::create_add(handle<node> left, handle<node> right, arithmetic_behaviour behaviour) const -> handle<node> {
+	auto builder::create_add(
+		handle<node> left,
+		handle<node> right, 
+		arithmetic_behaviour behaviour
+	) const -> handle<node> {
 		return get_insert_point_checked()->create_add(left, right, behaviour);
 	}
 
-	auto builder::create_sub(handle<node> left, handle<node> right, arithmetic_behaviour behaviour) const -> handle<node> {
+	auto builder::create_sub(
+		handle<node> left,
+		handle<node> right,
+		arithmetic_behaviour behaviour
+	) const -> handle<node> {
 		return get_insert_point_checked()->create_sub(left, right, behaviour);
 	}
 
-	auto builder::create_mul(handle<node> left, handle<node> right, arithmetic_behaviour behaviour) const -> handle<node> {
+	auto builder::create_mul(
+		handle<node> left,
+		handle<node> right,
+		arithmetic_behaviour behaviour
+	) const -> handle<node> {
 		return get_insert_point_checked()->create_mul(left, right, behaviour);
 	}
 
-	void builder::create_store(handle<node> destination, handle<node> value, u32 alignment, bool is_volatile) const {
+	void builder::create_store(
+		handle<node> destination, handle<node> value, u32 alignment, bool is_volatile
+	) const {
 		get_insert_point_checked()->create_store(destination, value, alignment, is_volatile);
 	}
 
-	auto builder::create_load(handle<node> value_to_load, data_type data_type, u32 alignment, bool is_volatile) const -> handle<node> {
-		return get_insert_point_checked()->create_load(value_to_load, data_type, alignment, is_volatile);
+	auto builder::create_load(
+		handle<node> value_to_load, data_type data_type, u32 alignment, bool is_volatile
+	) const -> handle<node> {
+		return get_insert_point_checked()->create_load(
+			value_to_load, data_type, alignment, is_volatile
+		);
 	}
 
 	auto builder::get_insert_point() const -> handle<function> {
@@ -100,4 +141,4 @@ namespace ir {
 		ASSERT(m_insert_point, "unspecified insert point");
 		return m_insert_point;
 	}
-}
+} // namespace sigma::ir

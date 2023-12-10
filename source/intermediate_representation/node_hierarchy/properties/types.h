@@ -1,7 +1,7 @@
 #pragma once
 #include <utility/containers/handle.h>
 
-namespace ir {
+namespace sigma::ir {
 	using namespace utility::types;
 
 	enum class float_format {

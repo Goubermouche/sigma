@@ -1,7 +1,7 @@
 #pragma once
 #include "intermediate_representation/target/arch/architecture.h"
 
-namespace ir {
+namespace sigma::ir {
 	namespace x64 {
 		enum class x64_segment {
 			DEFAULT_SEGMENT = 0,

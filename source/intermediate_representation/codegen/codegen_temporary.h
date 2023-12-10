@@ -1,7 +1,7 @@
 #pragma once
 #include "intermediate_representation/codegen/instruction.h"
 
-namespace ir {
+namespace sigma::ir {
 	struct codegen_context;
 
 	struct codegen_temporary : utility::property<absolute, label, handle<symbol>> {

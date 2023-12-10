@@ -47,6 +47,7 @@ namespace sigma {
 		}
 
 		ASSERT(false, "not implemented");
+		return 0;
 	}
 
 	auto data_type::token_to_type(token token) -> base {

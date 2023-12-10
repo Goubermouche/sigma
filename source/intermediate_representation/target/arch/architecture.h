@@ -4,7 +4,7 @@
 #include <utility/containers/byte_buffer.h>
 #include <utility/containers/string.h>
 
-namespace ir {
+namespace sigma::ir {
 	class disassembler {
 	public:
 		virtual auto disassemble(

@@ -4,7 +4,7 @@
 #include "intermediate_representation/node_hierarchy/user.h"
 #include "intermediate_representation/codegen/codegen_context.h"
 
-namespace ir {
+namespace sigma::ir {
 	auto node::get_parent_region() -> handle<node> {
 		handle node = this;
 
@@ -242,7 +242,7 @@ namespace ir {
 	}
 
 	auto node::peek_memory() -> handle<node> {
-		return get_parent_region()->get<ir::region>().memory_out;
+		return get_parent_region()->get<sigma::ir::region>().memory_out;
 	}
 
 	auto node::is_block_end() const -> bool {

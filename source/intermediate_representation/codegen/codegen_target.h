@@ -3,7 +3,7 @@
 #include "intermediate_representation/target/arch/architecture.h"
 #include "intermediate_representation/target/target.h"
 
-namespace ir {
+namespace sigma::ir {
 	class module;
 	class codegen_target {
 	public:

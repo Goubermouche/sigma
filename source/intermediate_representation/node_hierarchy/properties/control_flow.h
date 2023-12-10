@@ -1,6 +1,6 @@
 #pragma once
 
-namespace ir {
+namespace sigma::ir {
 	using namespace utility::types;
 
 	struct node;
@@ -21,7 +21,7 @@ namespace ir {
 	};
 
 	struct function_call {
-		function_type type; // function prototype
+		function_signature signature; // function prototype
 		std::vector<handle<node>> projections;
 	};
 }

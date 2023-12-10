@@ -1,4 +1,4 @@
 #include "allocator_base.h"
 
-namespace ir::cg {
+namespace sigma::ir::cg {
 }

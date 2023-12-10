@@ -2,7 +2,7 @@
 #include <utility/macros.h>
 
 
-namespace ir {
+namespace sigma::ir {
     auto data_type::to_string() const -> std::string {
         switch (ty) {
         case INTEGER:

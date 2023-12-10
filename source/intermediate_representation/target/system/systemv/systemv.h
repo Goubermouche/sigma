@@ -2,7 +2,7 @@
 #include "intermediate_representation/target/parameter_descriptor.h"
 #include "intermediate_representation/target/arch/x64/x64.h"
 
-namespace ir::systemv {
+namespace sigma::ir::systemv {
 	constexpr auto get_caller_saved() -> u16 {
 		return
 			1u << x64::RAX |

@@ -11,7 +11,6 @@ namespace sigma {
 	}
 
 	auto parser::parse() -> abstract_syntax_tree {
-		std::cout << "-----------------\n";
 		// TODO: handle peeks looking past EOF
 		// TODO: manage local context (ie. function body, loop body, if body etc), probably use
 		//       a stack
@@ -21,7 +20,7 @@ namespace sigma {
 				m_ast.add_node(parse_function_declaration());
 			}
 			else {
-				std::cout << "parse global\n";
+				utility::console::out << "parse global\n";
 			}
 
 			m_tokens.next();
@@ -32,7 +31,7 @@ namespace sigma {
 
 	auto parser::parse_function_declaration() -> handle<node> {
 		const data_type return_type = parse_type();
-		std::vector<named_type> parameters;
+		std::vector<named_data_type> parameters;
 
 		// IDENTIFIER (guaranteed)
 		m_tokens.next();
@@ -71,7 +70,7 @@ namespace sigma {
 		auto& prop = function_node->get<function>();
 		prop.return_type = return_type;
 		prop.identifier_key = identifier_key;
-		prop.parameters = utility::slice<named_type>(m_ast.get_allocator(), parameters.size());
+		prop.parameter_types = utility::slice<named_data_type>(m_ast.get_allocator(), parameters.size());
 
 		// copy all statement pointers over to the memory arena
 		std::memcpy(
@@ -81,9 +80,9 @@ namespace sigma {
 		);
 
 		std::memcpy(
-			prop.parameters.get_data(),
+			prop.parameter_types.get_data(),
 			parameters.data(),
-			parameters.size() * sizeof(named_type)
+			parameters.size() * sizeof(named_data_type)
 		);
 
 		return function_node;
@@ -240,9 +239,6 @@ namespace sigma {
 				return variable;
 			}
 		}
-
-		ASSERT(false, "unhandled token");
-		return nullptr;
 	}
 
 	auto parser::parse_negative_expression() -> handle<node> {

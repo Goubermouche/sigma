@@ -8,7 +8,7 @@
 #include <utility/containers/property.h>
 #include <utility/containers/slice.h>
 
-namespace ir {
+namespace sigma::ir {
 	struct codegen_context;
 	struct user;
 	struct symbol;

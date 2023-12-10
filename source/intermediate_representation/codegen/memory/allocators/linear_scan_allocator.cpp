@@ -2,17 +2,8 @@
 
 #include "compiler/compiler/compiler.h"
 
-namespace ir {
-	// debug
-	static const char* reg_name(int rg, int num) {
-		static const char* GPR_NAMES[] = { "RAX", "RCX", "RDX", "RBX", "RSP", "RBP", "RSI", "RDI", "R8",  "R9", "R10", "R11", "R12", "R13", "R14", "R15" };
-		static const char* XMM_NAMES[] = { "XMM0", "XMM1", "XMM2", "XMM3", "XMM4", "XMM5", "XMM6", "XMM7", "XMM8",  "XMM9", "XMM10", "XMM11", "XMM12", "XMM13", "XMM14", "XMM15" };
-		return (rg == x64::register_class::XMM ? XMM_NAMES : GPR_NAMES)[num];
-	}
-
-	void linear_scan_allocator::allocate(
-		codegen_context& context
-	) {
+namespace sigma::ir {
+	void linear_scan_allocator::allocate(codegen_context& context) {
 		clear();
 		m_cache = context.first;
 		m_free_positions.reserve(16);
@@ -124,20 +115,20 @@ namespace ir {
 				move_to_active(context, interval);
 			}
 
-			printf("  \x1b[32m{ ");
-			for (u8 rc = 0; rc < REGISTER_CLASS_COUNT; ++rc) {
-				utility::foreach_set(m_active_set[rc], [&](u64 r) {
-					int id = m_active[rc][r];
+			//printf("  \x1b[32m{ ");
+			//for (u8 rc = 0; rc < REGISTER_CLASS_COUNT; ++rc) {
+			//	utility::foreach_set(m_active_set[rc], [&](u64 r) {
+			//		int id = m_active[rc][r];
 
-					if (context.intervals[id].reg.is_valid()) {
-						printf("%s ", reg_name(rc, context.intervals[id].reg.id));
-					}
-					else {
-						printf("v%d:%s ", m_active[rc][r], reg_name(rc, r));
-					}
-				});
-			}
-			printf("}\x1b[0m\n");
+			//		if (context.intervals[id].reg.is_valid()) {
+			//			printf("%s ", reg_name(rc, context.intervals[id].reg.id));
+			//		}
+			//		else {
+			//			printf("v%d:%s ", m_active[rc][r], reg_name(rc, r));
+			//		}
+			//	});
+			//}
+			//printf("}\x1b[0m\n");
 		}
 
 		// move the resolver

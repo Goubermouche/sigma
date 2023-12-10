@@ -5,7 +5,7 @@
 #include <utility/containers/dense_set.h>
 #include <utility/containers/range.h>
 
-namespace ir {
+namespace sigma::ir {
 	struct virtual_value {
 		u64 use_count = std::numeric_limits<u64>::max();
 		reg virtual_register = reg::invalid_id;

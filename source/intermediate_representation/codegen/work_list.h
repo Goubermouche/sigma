@@ -1,7 +1,7 @@
 #pragma once
 #include "intermediate_representation/codegen/control_flow_graph.h"
 
-namespace ir {
+namespace sigma::ir {
 	struct work_list {
 		auto mark_next_control(handle<node> target) -> handle<node>;
 		auto visit(handle<node> node) -> bool;

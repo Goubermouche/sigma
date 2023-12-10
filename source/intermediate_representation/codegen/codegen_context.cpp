@@ -1,6 +1,6 @@
 #include "codegen_context.h"
 
-namespace ir {
+namespace sigma::ir {
 	void codegen_context::append_instruction(handle<instruction> inst) {
 		head->next_instruction = inst;
 		head = inst;

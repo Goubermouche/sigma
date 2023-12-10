@@ -2,7 +2,7 @@
 
 #include "intermediate_representation/codegen/instruction.h"
 
-namespace ir {
+namespace sigma::ir {
 	utility::byte_buffer x64_architecture::emit_bytecode(codegen_context& context) {
 		resolve_stack_usage(context);
 
@@ -549,7 +549,7 @@ namespace ir {
 			bytecode.append_byte(descriptor.op);
 			bytecode.append_dword(0);
 
-			const u64 label = r->get<ir::label>().value;
+			const u64 label = r->get<sigma::ir::label>().value;
 			bytecode.emit_relocation_dword(&context.labels[label], bytecode.get_size() - 4);
 		}
 		else {

@@ -66,61 +66,61 @@ auto main(i32 argc, char* argv[]) -> i32 {
 	sigma::compile();
 	return 0;
 
-	ir::target target(ir::arch::X64, ir::system::WINDOWS);
-	ir::module module(target);
-	ir::builder builder(module);
+	//ir::target target(ir::arch::X64, ir::system::WINDOWS);
+	//ir::module module(target);
+	//ir::builder builder(module);
 
-	const ir::function_type main_func_ty{
-		.identifier = "main",
-		.returns = { I32_TYPE }
-	};
+	//const ir::function_signature main_func_ty{
+	//	.identifier = "main",
+	//	.returns = { I32_TYPE }
+	//};
 
-	// main
-	builder.create_function(main_func_ty, ir::linkage::PUBLIC);
+	//// main
+	//builder.create_function(main_func_ty, ir::linkage::PUBLIC);
 
-	const ir::function_type printf_func_ty{
-		.identifier = "printf",
-		.parameters = { PTR_TYPE },
-		.returns = { I32_TYPE },
-		.has_var_args = true
-	};
+	//const ir::function_signature printf_func_ty{
+	//	.identifier = "printf",
+	//	.parameters = { PTR_TYPE },
+	//	.returns = { I32_TYPE },
+	//	.has_var_args = true
+	//};
 
-	const auto printf_external = builder.create_external(printf_func_ty, ir::linkage::SO_LOCAL);
+	//const auto printf_external = builder.create_external(printf_func_ty, ir::linkage::SO_LOCAL);
 
-	const auto message_true = builder.create_string("true\n");
-	const auto message_false = builder.create_string("false\n");
+	//const auto message_true = builder.create_string("true\n");
+	//const auto message_false = builder.create_string("false\n");
 
-	const auto true_ctrl = builder.create_region();
-	const auto false_ctrl = builder.create_region();
-	const auto after_ctrl = builder.create_region();
+	//const auto true_ctrl = builder.create_region();
+	//const auto false_ctrl = builder.create_region();
+	//const auto after_ctrl = builder.create_region();
 
-	builder.create_conditional_branch(builder.create_bool(true), true_ctrl, false_ctrl);
+	//builder.create_conditional_branch(builder.create_bool(true), true_ctrl, false_ctrl);
 
-	// false
-	builder.set_control(false_ctrl);
-	builder.create_call(printf_external, printf_func_ty, { message_false });
-	builder.create_branch(after_ctrl);
+	//// false
+	//builder.set_control(false_ctrl);
+	//builder.create_call(printf_external, printf_func_ty, { message_false });
+	//builder.create_branch(after_ctrl);
 
-	// true
-	builder.set_control(true_ctrl);
-	builder.create_call(printf_external, printf_func_ty, { message_true });
-	builder.create_branch(after_ctrl);
+	//// true
+	//builder.set_control(true_ctrl);
+	//builder.create_call(printf_external, printf_func_ty, { message_true });
+	//builder.create_branch(after_ctrl);
 
-	
+	//
 
-	// end
-	builder.set_control(after_ctrl);
-	builder.create_return({  builder.create_signed_integer(0, 32) });
-	module.compile();
+	//// end
+	//builder.set_control(after_ctrl);
+	//builder.create_return({  builder.create_signed_integer(0, 32) });
+	//module.compile();
 
-	auto object_file = module.generate_object_file();
+	//auto object_file = module.generate_object_file();
 
-	auto write_res = utility::file::write(object_file, "./test/a.obj");
-	if (write_res.has_error()) {
-		utility::console::out << *write_res.get_error() << '\n';
-	}
+	//auto write_res = utility::file::write(object_file, "./test/a.obj");
+	//if (write_res.has_error()) {
+	//	utility::console::out << *write_res.get_error() << '\n';
+	//}
 
-	return 0;
+	//return 0;
 
 	//utility::console::out 
 	//	<< "compilation finished (" 

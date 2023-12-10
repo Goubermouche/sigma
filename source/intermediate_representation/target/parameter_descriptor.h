@@ -1,7 +1,7 @@
 #pragma once
 #include "intermediate_representation/codegen/memory/memory.h"
 
-namespace ir {
+namespace sigma::ir {
 	using namespace utility::types;
 
 	struct parameter_descriptor {

@@ -14,7 +14,7 @@
 
 #define MD5_HASHBYTES 16
 
-namespace ir {
+namespace sigma::ir {
 	enum {
 		UNWIND_FLAG_EHANDLER = 0x01,
 		UNWIND_FLAG_UHANDLER = 0x02,
@@ -64,7 +64,7 @@ namespace ir {
 	};
 
 	struct coff_machine {
-		enum value {
+		enum value : u16 {
 			NONE = 0,
 			AMD64 = 0x8664, // AMD64 (K8)
 			ARM64 = 0xAA64, // ARM64 Little-Endian

@@ -24,15 +24,13 @@ sigma main.s
 
 ## Project status
 As Sigma us currently under heavy development, it isn't ready for stable use, and many breaking changes may (and most likely will) be made. Please note that why the end goal is to target GPU's and other massivelly parallel targets, the current goal is to get a basic CPU-oriented language going, and there isn't a hard timeframe set - for more details see the current status bellow: 
--   Moving away from LLVM:
-    -   Implemented a basic, non-optimizing TB-based/inspired backend
 -   Parser/Lexer rework: 
-    -   Implemented a faster, simpler tokenizer & `token_buffer` combo.
+    -   Implemented a faster, simpler tokenizer & `token_buffer` combo. *(working draft)*
     -   Began work on a new recursive descent parser.
 -   AST rework:
-    -   WIP
+    -   WIP *(working draft)*
 -   Typechecker:
-    -   WIP
+    -   WIP *(working draft)*
 -   Future:
     -   Unified package manager
     -   Official GPU support via kernels
@@ -47,6 +45,6 @@ Sigma strives to be a fully functional enviroment, for this purpose we're develo
 -   [**Syntax highlighting**](https://github.com/Goubermouche/sigma-syntax-highlighter)
 
 ### Dependencies 
--   [**LLVM 16.0.0**](https://github.com/llvm/llvm-project/tree/release/16.x) (temporary)
 -   [**Premake5**](https://github.com/premake/premake-core)
+-   [**TB**](https://github.com/RealNeGate/Cuik/tree/master/tb) (indirect, Sigma contains a 'C++ reimplementation' of some TB systems)
 

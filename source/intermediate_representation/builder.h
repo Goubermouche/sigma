@@ -34,14 +34,14 @@ namespace sigma::ir {
 
 		auto create_call(
 			handle<external> target,
-			const function_signature& function_sig, 
+			const function_signature& function_sig,
 			const std::vector<handle<node>>& parameters
-		) const -> std::vector<handle<node>>;
+		) const -> handle<node>;
 
 		auto create_call(
-			handle<function> target, 
+			handle<function> target,
 			const std::vector<handle<node>>& parameters
-		) const-> std::vector<handle<node>>;
+		) const -> handle<node>;
 
 		void create_return(const std::vector<handle<node>>& return_values) const;
 

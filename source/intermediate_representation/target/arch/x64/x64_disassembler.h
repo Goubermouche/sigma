@@ -104,4 +104,4 @@ namespace sigma::ir {
 		static std::array<u16, 256> get_first_table();
 		static std::array<u16, 256> get_ext_table();
 	};
-}
+} // namespace sigma::ir

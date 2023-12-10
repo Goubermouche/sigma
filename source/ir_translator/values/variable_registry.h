@@ -18,7 +18,7 @@ namespace sigma::detail {
 		 */
 		auto register_variable(
 			utility::symbol_table_key identifier_key, u16 size, u16 alignment
-		) -> handle<sigma::ir::node>;
+		) -> handle<ir::node>;
 		
 		/**
 		 * \brief Loads the variable located under the specified \b identifier \b key.
@@ -28,8 +28,8 @@ namespace sigma::detail {
 		 * \return Handle<ir::node> representing the loaded variable.
 		 */
 		auto create_load(
-			utility::symbol_table_key identifier_key, sigma::ir::data_type type, u16 alignment
-		) -> handle<sigma::ir::node>;
+			utility::symbol_table_key identifier_key, ir::data_type type, u16 alignment
+		) -> handle<ir::node>;
 
 		/**
 		 * \brief Stores the specified \b value in the given variable.
@@ -38,12 +38,12 @@ namespace sigma::detail {
 		 * \param alignment Alignment of the store operation [bytes]
 		 */
 		void create_store(
-			utility::symbol_table_key identifier_key, handle<sigma::ir::node> value, u16 alignment
+			utility::symbol_table_key identifier_key, handle<ir::node> value, u16 alignment
 		);
 	private:
-		sigma::ir::builder& m_builder;
+		ir::builder& m_builder;
 
-		std::unordered_map<utility::symbol_table_key, handle<sigma::ir::node>> m_variables;
+		std::unordered_map<utility::symbol_table_key, handle<ir::node>> m_variables;
 	};
 } // namespace sigma::detail
 

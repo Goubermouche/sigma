@@ -188,6 +188,14 @@ namespace utility {
 			return m_size;
 		}
 
+		/**
+		 * \brief Updates the size of the container, \b does \b not \b actually \b change \b the \b memory.
+		 * \param new_size New size of the container
+		 */
+		constexpr void set_size(u64 new_size) {
+			m_size = new_size;
+		}
+
 		[[nodiscard]] constexpr auto get_capacity() const -> u64 {
 			return m_capacity;
 		}
@@ -323,4 +331,4 @@ namespace utility {
 		u64 m_size;
 		u64 m_capacity;
 	};
-}
+} // namespace utility

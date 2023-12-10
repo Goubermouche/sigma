@@ -52,15 +52,15 @@ namespace sigma::ir {
 		void create_ret(const std::vector<handle<node>>& virtual_values);
 
 		auto create_call(
-			handle<external> target, 
+			handle<external> target,
 			const function_signature& function_sig,
 			const std::vector<handle<node>>& arguments
-		) -> std::vector<handle<node>>;
+		) -> handle<node>;
 
 		auto create_call(
-			handle<function> target_func, 
+			handle<function> target_func,
 			const std::vector<handle<node>>& arguments
-		) -> std::vector<handle<node>>;
+		) -> handle<node>;
 
 		auto create_signed_integer(i64 value, u8 bit_width) -> handle<node>;
 		auto create_bool(bool value) -> handle<node>;
@@ -98,7 +98,7 @@ namespace sigma::ir {
 			const function_signature& function_sig,
 			handle<node> callee_symbol_address,
 			const std::vector<handle<node>>& arguments
-		) -> std::vector<handle<node>>;
+		) -> handle<node>;
 
 		auto create_binary_arithmetic_operation(
 			node::type op_type,

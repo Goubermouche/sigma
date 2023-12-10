@@ -47,7 +47,9 @@ namespace sigma::ir {
 		context.stack_usage = utility::align(usage, 16);
 	}
 
-	void x64_architecture::emit_function_prologue(codegen_context& context, utility::byte_buffer& bytecode) {
+	void x64_architecture::emit_function_prologue(
+		codegen_context& context, utility::byte_buffer& bytecode
+	) {
 		if(context.stack_usage <= 16) {
 			context.prologue_length = 0;
 			return;
@@ -85,10 +87,19 @@ namespace sigma::ir {
 		context.prologue_length = static_cast<u8>(bytecode.get_size());
 	}
 
-	void x64_architecture::emit_function_body(codegen_context& context, utility::byte_buffer& bytecode) {
+	void x64_architecture::emit_function_body(
+		codegen_context& context, utility::byte_buffer& bytecode
+	) {
 		for (handle<instruction> inst = context.first; inst; inst = inst->next_instruction) {
 			const u8 in_base = inst->out_count;
-			const auto cat = inst->type >= s_instruction_table.size() ? instruction::category::BINOP : s_instruction_table[inst->type].cat;
+			instruction::category cat;
+
+			if(inst->type >= s_instruction_table.size()) {
+				cat = instruction::category::BINOP;
+			}
+			else {
+				cat = s_instruction_table[inst->type].cat;;
+			}
 
 			if (
 				inst->type == instruction::ENTRY ||
@@ -123,7 +134,15 @@ namespace sigma::ir {
 				const bool is_xmm = inst->data_type >= x64::PBYTE && inst->data_type <= x64::XMMWORD;
 
 				resolve_interval(context, inst, 0, destination);
-				emit_instruction_2(context, is_xmm ? instruction::FP_XOR : instruction::XOR, destination, destination, inst->data_type, bytecode);
+
+				emit_instruction_2(
+					context, 
+					is_xmm ? instruction::FP_XOR : instruction::XOR, 
+					destination, 
+					destination,
+					inst->data_type,
+					bytecode
+				);
 			}
 			else if (
 				inst->type >= instruction::JMP &&
@@ -150,7 +169,13 @@ namespace sigma::ir {
 				emit_instruction_1(context, instruction::CALL, target, x64::QWORD, bytecode);
 			}
 			else {
-				i32 mov_op = inst->data_type >= x64::PBYTE && inst->data_type <= x64::XMMWORD ? instruction::FP_MOV : instruction::MOV;
+				i32 mov_op;
+				if(inst->data_type >= x64::PBYTE && inst->data_type <= x64::XMMWORD) {
+					mov_op = instruction::FP_MOV;
+				}
+				else {
+					mov_op = instruction::MOV;
+				}
 
 				// prefix
 				if (inst->flags & instruction::lock) {
@@ -182,9 +207,15 @@ namespace sigma::ir {
 				if (inst->in_count > 0) {
 					const handle<codegen_temporary> left = context.create_temporary();
 					i += resolve_interval(context, inst, i, left);
-					ternary = (i < in_base + inst->in_count) || (inst->flags & (instruction::immediate | instruction::absolute));
+					ternary = 
+						(i < in_base + inst->in_count) ||
+						(inst->flags & (instruction::immediate | instruction::absolute));
 
-					if (ternary && inst->type == instruction::IMUL && (inst->flags & instruction::immediate)) {
+					if (
+						ternary &&
+						inst->type == instruction::IMUL &&
+						(inst->flags & instruction::immediate)
+					) {
 						// there's a special case for ternary IMUL r64, r/m64, imm32
 						emit_instruction_2(context, instruction::IMUL3, out, left, dt, bytecode);
 
@@ -235,18 +266,27 @@ namespace sigma::ir {
 				}
 
 				if (inst->flags & instruction::immediate) {
-					const handle<codegen_temporary> right = codegen_temporary::create_imm(context, inst->get<immediate>().value);
+					const handle<codegen_temporary> right = codegen_temporary::create_imm(
+						context, inst->get<immediate>().value
+					);
+
 					emit_instruction_2(context, inst->type, out, right, dt, bytecode);
 				}
 				else if (inst->flags & instruction::absolute) {
-					const handle<codegen_temporary> right = codegen_temporary::create_abs(context, inst->get<immediate>().value);
+					const handle<codegen_temporary> right = codegen_temporary::create_abs(
+						context, inst->get<immediate>().value
+					);
+
 					emit_instruction_2(context, inst->type, out, right, dt, bytecode);
 				}
 				else if (ternary) {
 					const handle<codegen_temporary> right = context.create_temporary();
 					resolve_interval(context, inst, i, right);
 
-					if (inst->type != instruction::MOV || (inst->type == instruction::MOV && out->matches(right) == false)) {
+					if (
+						inst->type != instruction::MOV || 
+						(inst->type == instruction::MOV && out->matches(right) == false)
+					) {
 						emit_instruction_2(context, inst->type, out, right, dt, bytecode);
 					}
 				}
@@ -254,7 +294,9 @@ namespace sigma::ir {
 		}
 	}
 
-	void x64_architecture::emit_function_epilogue(const codegen_context& context, utility::byte_buffer& bytecode) {
+	void x64_architecture::emit_function_epilogue(
+		const codegen_context& context, utility::byte_buffer& bytecode
+	) {
 		ASSERT(context.function->exit_node != nullptr, "no exit node found");
 
 		if(context.stack_usage <= 16) {
@@ -299,7 +341,7 @@ namespace sigma::ir {
 		table[instruction::STOSB      ] = { .mnemonic = "rep stosb", .cat = instruction::category::BYTE,     .op = 0xAA };
 		table[instruction::MOVSB      ] = { .mnemonic = "rep movsb", .cat = instruction::category::BYTE,     .op = 0xA4 };
 		table[instruction::CAST       ] = { .mnemonic = "cvt",       .cat = instruction::category::BYTE,     .op = 0x99 };
-		table[instruction::SYS_CALL] = { .mnemonic = "syscall",   .cat = instruction::category::BYTE_EXT, .op = 0x05 };
+		table[instruction::SYS_CALL   ] = { .mnemonic = "syscall",   .cat = instruction::category::BYTE_EXT, .op = 0x05 };
 		table[instruction::RDTSC      ] = { .mnemonic = "rdtsc",     .cat = instruction::category::BYTE_EXT, .op = 0x31 };
 		table[instruction::UD2        ] = { .mnemonic = "ud2",       .cat = instruction::category::BYTE_EXT, .op = 0x0B };
 
@@ -307,7 +349,7 @@ namespace sigma::ir {
 		table[instruction::NEG         ] = { .mnemonic = "neg",  .cat = instruction::category::UNARY, .op = 0xF7, .rx_i = 0x03 };
 		table[instruction::MUL         ] = { .mnemonic = "mul",  .cat = instruction::category::UNARY, .op = 0xF7, .rx_i = 0x04 };
 		table[instruction::DIV         ] = { .mnemonic = "div",  .cat = instruction::category::UNARY, .op = 0xF7, .rx_i = 0x06 };
-		table[instruction::IDIV] = { .mnemonic = "idiv", .cat = instruction::category::UNARY, .op = 0xF7, .rx_i = 0x07 };
+		table[instruction::IDIV        ] = { .mnemonic = "idiv", .cat = instruction::category::UNARY, .op = 0xF7, .rx_i = 0x07 };
 		table[instruction::CALL        ] = { .mnemonic = "call", .cat = instruction::category::UNARY, .op = 0xE8, .rx_i = 0x02 };
 		table[instruction::JMP         ] = { .mnemonic = "jmp",  .cat = instruction::category::UNARY, .op = 0xE9, .rx_i = 0x04 };
 
@@ -469,7 +511,7 @@ namespace sigma::ir {
 		const u8 op = descriptor.op_i;
 		const u8 rx = descriptor.rx_i;
 
-		if (r->type == codegen_temporary::gpr) {
+		if (r->type == codegen_temporary::GPR) {
 			if (is_rex || r->reg >= 8) {
 				bytecode.append_byte(rex(is_rexw, 0x00, r->reg, 0x00));
 			}
@@ -481,8 +523,8 @@ namespace sigma::ir {
 			bytecode.append_byte(op ? op : descriptor.op);
 			bytecode.append_byte(mod_rx_rm(x64::DIRECT, rx, r->reg));
 		}
-		else if (r->type == codegen_temporary::mem) {
-			const i32 displacement = r->imm;
+		else if (r->type == codegen_temporary::MEM) {
+			const i32 displacement = r->IMM;
 			const u8 index = r->index;
 			const u8 base = r->reg;
 			scale s = r->sc;
@@ -507,7 +549,9 @@ namespace sigma::ir {
 			bytecode.append_byte(mod_rx_rm(m, rx, needs_index ? x64::RSP : base));
 
 			if (needs_index) {
-				bytecode.append_byte(mod_rx_rm(static_cast<x64::mod>(s), (base & 7) == x64::RSP ? x64::RSP : index, base));
+				bytecode.append_byte(
+					mod_rx_rm(static_cast<x64::mod>(s), (base & 7) == x64::RSP ? x64::RSP : index, base)
+				);
 			}
 
 			if (m == x64::INDIRECT_DISPLACEMENT_8) {
@@ -517,7 +561,7 @@ namespace sigma::ir {
 				bytecode.append_dword(static_cast<i32>(displacement));
 			}
 		}
-		else if (r->type == codegen_temporary::global) {
+		else if (r->type == codegen_temporary::GLOBAL) {
 			if(descriptor.op) {
 				if(descriptor.cat == instruction::category::UNARY_EXT) {
 					bytecode.append_byte(0x0F);
@@ -541,7 +585,7 @@ namespace sigma::ir {
 			bytecode.append_dword(r->immediate);
 			emit_symbol_patch(context, r->get<handle<symbol>>(), bytecode.get_size() - 4);
 		}
-		else if (r->type == codegen_temporary::label) {
+		else if (r->type == codegen_temporary::LABEL) {
 			if (descriptor.cat == instruction::category::UNARY_EXT) {
 				bytecode.append_byte(0x0F);
 			}
@@ -573,11 +617,11 @@ namespace sigma::ir {
 		ASSERT(type < s_instruction_table.size(), "invalid type");
 
 		const instruction::description& descriptor = s_instruction_table[type];
-		const bool dir = b->type == codegen_temporary::mem || b->type == codegen_temporary::global;
+		const bool dir = b->type == codegen_temporary::MEM || b->type == codegen_temporary::GLOBAL;
 
 		if (type == instruction::MOVABS) {
 			ASSERT(
-				a->type == codegen_temporary::gpr && b->type == codegen_temporary::abs,
+				a->type == codegen_temporary::GPR && b->type == codegen_temporary::ABS,
 				"invalid data types for a movabs operation"
 			);
 
@@ -603,7 +647,7 @@ namespace sigma::ir {
 
 		// uses an imm value that works as a sign extended 8 bit number
 		const bool short_imm =
-			sz && b->type == codegen_temporary::imm &&
+			sz && b->type == codegen_temporary::IMM &&
 			b->immediate == static_cast<i8>(b->immediate) &&
 			descriptor.op_i == 0x80;
 
@@ -618,7 +662,7 @@ namespace sigma::ir {
 			}
 
 			ASSERT(
-				b->type == codegen_temporary::gpr || b->type == codegen_temporary::imm,
+				b->type == codegen_temporary::GPR || b->type == codegen_temporary::IMM,
 				"secondary operand is invalid!"
 			);
 		}
@@ -637,22 +681,29 @@ namespace sigma::ir {
 		u8 rex_prefix = 0x40 | (data_type == x64::QWORD ? 8 : 0);
 		u8 base;
 
-		if (a->type == codegen_temporary::mem || a->type == codegen_temporary::gpr) {
+		if (a->type == codegen_temporary::MEM || a->type == codegen_temporary::GPR) {
 			base = a->reg;
 		}
 		else {
 			base = x64::RBP;
 		}
 
-		if (a->type == codegen_temporary::mem && a->index != reg::invalid_id) {
+		if (a->type == codegen_temporary::MEM && a->index != reg::invalid_id) {
 			rex_prefix |= ((a->index >> 3) << 1);
 		}
 
-		u8 rx = (b->type == codegen_temporary::gpr || b->type == codegen_temporary::xmm) ? b->reg : descriptor.rx_i;
+		u8 rx;
+		if(b->type == codegen_temporary::GPR || b->type == codegen_temporary::XMM) {
+			rx = b->reg;
+		}
+		else {
+			rx = descriptor.rx_i;
+		}
 
 		if (descriptor.cat == instruction::category::BINOP_CL) {
 			ASSERT(
-				b->type == codegen_temporary::imm || (b->type == codegen_temporary::gpr && b->reg == x64::RCX),
+				b->type == codegen_temporary::IMM || 
+				(b->type == codegen_temporary::GPR && b->reg == x64::RCX),
 				"invalid binary operation"
 			);
 
@@ -688,11 +739,11 @@ namespace sigma::ir {
 
 			// immediates have a custom opcode
 			ASSERT(
-				b->type != codegen_temporary::imm || descriptor.op_i != 0 || descriptor.rx_i != 0, 
+				b->type != codegen_temporary::IMM || descriptor.op_i != 0 || descriptor.rx_i != 0, 
 				"no immediate variant of instruction"
 			);
 
-			u8 opcode = b->type == codegen_temporary::imm ? descriptor.op_i : descriptor.op;
+			u8 opcode = b->type == codegen_temporary::IMM ? descriptor.op_i : descriptor.op;
 
 			// the bottom bit usually means size, 0 for 8bit, 1 for everything else
 			opcode |= sz;
@@ -710,7 +761,7 @@ namespace sigma::ir {
 		// memory displacements go before immediates
 		const u64 disp_patch = bytecode.get_size() - 4;
 
-		if (b->type == codegen_temporary::imm) {
+		if (b->type == codegen_temporary::IMM) {
 			if (data_type == x64::BYTE || short_imm) {
 				if (short_imm) {
 					ASSERT(
@@ -735,7 +786,7 @@ namespace sigma::ir {
 			}
 		}
 
-		if (a->type == codegen_temporary::global && 
+		if (a->type == codegen_temporary::GLOBAL && 
 			disp_patch + 4 != bytecode.get_size()
 		) {
 			bytecode.patch_dword(
@@ -748,17 +799,18 @@ namespace sigma::ir {
 		codegen_context& context, u8 rx, handle<codegen_temporary> a, utility::byte_buffer& bytecode
 	) {
 		// operand encoding
-		if (a->type == codegen_temporary::gpr || a->type == codegen_temporary::xmm) {
+		if (a->type == codegen_temporary::GPR || a->type == codegen_temporary::XMM) {
 			bytecode.append_byte(mod_rx_rm(x64::DIRECT, rx, a->reg));
 		}
-		else if (a->type == codegen_temporary::mem) {
+		else if (a->type == codegen_temporary::MEM) {
 			const u8 base = a->reg;
 			const u8 index = a->index;
 			scale scale = a->sc;
 			const i32 displacement = a->immediate;
 			const bool needs_index = (index != reg::invalid_id) || (base & 7) == x64::RSP;
 			
-			// if it needs an index, it'll put RSP into the base slot and write the real base into the SIB
+			// if it needs an index, it'll put RSP into the base slot and write the real base
+			// into the SIB
 			x64::mod m = x64::INDIRECT_DISPLACEMENT_32;
 			
 			if (displacement == 0 && (base & 7) != x64::RBP) {
@@ -771,7 +823,9 @@ namespace sigma::ir {
 			bytecode.append_byte(mod_rx_rm(m, rx, needs_index ? x64::RSP : base));
 			
 			if (needs_index) {
-				bytecode.append_byte(mod_rx_rm(static_cast<x64::mod>(scale), (base & 7) == x64::RSP ? x64::RSP : index, base));
+				bytecode.append_byte(
+					mod_rx_rm(static_cast<x64::mod>(scale), (base & 7) == x64::RSP ? x64::RSP : index, base)
+				);
 			}
 			
 			if (m == x64::INDIRECT_DISPLACEMENT_8) {
@@ -781,7 +835,7 @@ namespace sigma::ir {
 				bytecode.append_dword(displacement);
 			}
 		}
-		else if (a->type == codegen_temporary::global) {
+		else if (a->type == codegen_temporary::GLOBAL) {
 			bytecode.append_byte(((rx & 7) << 3) | x64::RBP);
 			bytecode.append_dword(a->immediate);
 			emit_symbol_patch(context, a->get<handle<symbol>>(), bytecode.get_size() - 4);
@@ -806,7 +860,7 @@ namespace sigma::ir {
 			ASSERT(interval->spill <= 0, "cannot use spilled value for a memory operand");
 
 			if (inst->flags & instruction::mem_f) {
-				val->type = codegen_temporary::mem;
+				val->type = codegen_temporary::MEM;
 				val->reg = interval->assigned.id;
 				val->index = reg::invalid_id;
 				val->sc = inst->sc;
@@ -823,7 +877,7 @@ namespace sigma::ir {
 				return 1;
 			}
 
-			val->type = codegen_temporary::global;
+			val->type = codegen_temporary::GLOBAL;
 			val->immediate = inst->displacement;
 			val->get<handle<symbol>>() = inst->get<handle<symbol>>();
 
@@ -831,20 +885,28 @@ namespace sigma::ir {
 		}
 
 		if (interval->spill > 0) {
-			val->type = codegen_temporary::mem;
+			val->type = codegen_temporary::MEM;
 			val->reg = x64::RBP;
 			val->index = reg::invalid_id;
 			val->immediate = -interval->spill;
 		}
 		else {
-			val->type = interval->reg.cl == x64::register_class::XMM ? codegen_temporary::xmm : codegen_temporary::gpr;
+			if(interval->reg.cl == x64::register_class::XMM) {
+				val->type = codegen_temporary::XMM;
+			}
+			else {
+				val->type = codegen_temporary::GPR;
+			}
+
 			val->reg = interval->assigned.id;
 		}
 
 		return 1;
 	}
 
-	void x64_architecture::emit_symbol_patch(codegen_context& context, handle<symbol> target, u64 pos) {
+	void x64_architecture::emit_symbol_patch(
+		codegen_context& context, handle<symbol> target, u64 pos
+	) {
 		const handle<symbol_patch> patch = context.create_symbol_patch();
 
 		patch->target = target;
@@ -869,4 +931,4 @@ namespace sigma::ir {
 	auto mod_rx_rm(x64::mod mod, u8 rx, u8 rm) -> u8 {
 		return ((mod & 3) << 6) | ((rx & 7) << 3) | (rm & 7);
 	}
-}
+} // namespace sigma::ir

@@ -6,7 +6,7 @@ namespace sigma::ir {
 	void linear_scan_allocator::allocate(codegen_context& context) {
 		clear();
 		m_cache = context.first;
-		m_free_positions.reserve(16);
+		m_free_positions.resize(16);
 
 		for (u8 i = 0; i < REGISTER_CLASS_COUNT; ++i) {
 			m_active_set[i] = utility::dense_set(16);
@@ -183,14 +183,14 @@ namespace sigma::ir {
 
 		// resolve all split interval references
 		for(handle<instruction> inst = context.first; inst; inst = inst->next_instruction) {
-
 			if(inst->flags & instruction::spill) {
 				continue;
 			}
 
 			const u64 position = inst->time;
+			const u64 rel_count = inst->out_count + inst->in_count + inst->tmp_count + inst->save_count;
 
-			for (u64 i = 0; i < inst->out_count + inst->in_count + inst->tmp_count + inst->save_count; ++i) {
+			for (u64 i = 0; i < rel_count; ++i) {
 				inst->operands[i] = static_cast<i32>(context.intervals[inst->operands[i]].split_at(
 					context, position
 				).get() - context.intervals.data());
@@ -213,12 +213,12 @@ namespace sigma::ir {
 	}
 
 	void linear_scan_allocator::reverse_block_walk(
-		codegen_context& context, handle<machine_block> bb, handle<instruction> inst
+		codegen_context& context, handle<machine_block> block, handle<instruction> inst
 	) {
 		const handle<instruction> next = inst->next_instruction;
 
 		if(next && next->type != instruction::LABEL) {
-			reverse_block_walk(context, bb, next);
+			reverse_block_walk(context, block, next);
 		}
 
 		// mark outputs, inputs and temps
@@ -254,7 +254,7 @@ namespace sigma::ir {
 		for (u8 i = 0; i < inst->in_count; ++i) {
 			live_interval* interval = &context.intervals[*ops++];
 			interval->uses.push_back({ .position = time, .kind = use_position::reg });
-			interval->add_range({  bb->start, time });
+			interval->add_range({ block->start, time });
 		}
 
 		for (int i = 0; i < inst->tmp_count; ++i) {
@@ -270,7 +270,7 @@ namespace sigma::ir {
 		for(u8 i =0; i < inst->save_count; ++i) {
 			live_interval* interval = &context.intervals[*ops++];
 			interval->uses.push_back({ .position = time, .kind = use_position::mem_or_reg });
-			interval->add_range({ bb->start, time });
+			interval->add_range({ block->start, time });
 		}
 	}
 
@@ -645,7 +645,7 @@ namespace sigma::ir {
 
 		// pick highest free pos
 		if(highest.is_valid() == false) {
-			highest.id = 0;
+			 highest.id = 0;
 
 			for(u8 i = 1; i < 16; ++i) {
 				if(m_free_positions[i] > m_free_positions[highest.id]) {
@@ -663,7 +663,15 @@ namespace sigma::ir {
 			m_callee_saved[register_class] &= (1ull << highest.id);
 
 			const u8 size = register_class ? 16 : 8;
-			const u8 virtual_reg = (register_class ? x64::register_class::FIRST_XMM : x64::register_class::FIRST_GPR) + highest.id;
+			u8 virtual_reg = highest.id;
+
+			if(register_class) {
+				virtual_reg += x64::register_class::FIRST_XMM;
+			}
+			else {
+				virtual_reg += x64::register_class::FIRST_GPR;
+			}
+
 			context.stack_usage = utility::align(context.stack_usage + size, size);
 
 			const live_interval it{
@@ -703,4 +711,4 @@ namespace sigma::ir {
 		ASSERT(false, "not implemented");
 		return reg();
 	}
-}
+} // namespace sigma::ir

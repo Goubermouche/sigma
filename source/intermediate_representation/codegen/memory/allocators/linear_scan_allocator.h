@@ -26,13 +26,38 @@ namespace sigma::ir {
 
 		void mark_callee_saved_constraints(const codegen_context& context);
 
-		static auto partition(const std::vector<live_interval>& intervals, ptr_diff lo, ptr_diff hi, std::vector<u64>& arr) -> u64;
-		static void quick_sort_definitions(std::vector<live_interval>& intervals, ptr_diff lo, ptr_diff hi, std::vector<u64>& arr);
+		static auto partition(
+			const std::vector<live_interval>& intervals, 
+			ptr_diff lo,
+			ptr_diff hi,
+			std::vector<u64>& arr
+		) -> u64;
 
-		auto update_interval(const codegen_context& context, handle<live_interval> interval, bool is_active, u64 time, ptr_diff inactive_index) -> bool;
+		static void quick_sort_definitions(
+			std::vector<live_interval>& intervals, 
+			ptr_diff lo,
+			ptr_diff hi,
+			std::vector<u64>& arr
+		);
+
+		auto update_interval(
+			const codegen_context& context, 
+			handle<live_interval> interval,
+			bool is_active,
+			u64 time,
+			ptr_diff inactive_index
+		) -> bool;
+
 		void move_to_active(const codegen_context& context, handle<live_interval> interval);
 		void insert_split_move(codegen_context& context, u64 t, ptr_diff old_reg, ptr_diff new_reg);
-		auto split_intersecting(codegen_context& context, u64 current_time, u64 pos, handle<live_interval> interval, bool is_spill) -> u64;
+
+		auto split_intersecting(
+			codegen_context& context,
+			u64 current_time,
+			u64 pos,
+			handle<live_interval> interval, 
+			bool is_spill
+		) -> u64;
 
 		auto allocate_free_reg(codegen_context& context, handle<live_interval> interval) -> reg;
 		auto allocate_blocked_reg(codegen_context& context, handle<live_interval> interval) -> reg;
@@ -48,4 +73,4 @@ namespace sigma::ir {
 
 		handle<instruction> m_cache;
 	};
-}
+} // namespace sigma::ir

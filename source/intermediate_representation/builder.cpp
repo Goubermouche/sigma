@@ -14,14 +14,14 @@ namespace sigma::ir {
 		handle<external> target,
 		const function_signature& function_sig, 
 		const std::vector<handle<node>>& parameters
-	) const -> std::vector<handle<node>> {
+	) const -> handle<node> {
 		return get_insert_point_checked()->create_call(target, function_sig, parameters);
 	}
 
 	auto builder::create_call(
 		handle<function> target, 
 		const std::vector<handle<node>>& parameters
-	) const -> std::vector<handle<node>> {
+	) const -> handle<node> {
 		return get_insert_point_checked()->create_call(target, parameters);
 	}
 

@@ -6,15 +6,15 @@ namespace sigma::ir {
 
 	struct codegen_temporary : utility::property<absolute, label, handle<symbol>> {
 		enum value_type {
-			none,
-			flags,
-			gpr,
-			xmm,
-			imm,
-			mem,
-			global,
-			abs,
-			label
+			NONE,
+			FLAGS,
+			GPR,
+			XMM,
+			IMM,
+			MEM,
+			GLOBAL,
+			ABS,
+			LABEL
 		};
 
 		static auto create_label(codegen_context& context, u64 target) -> handle<codegen_temporary>;
@@ -29,4 +29,4 @@ namespace sigma::ir {
 		scale sc;
 		i32 immediate;
 	};
-}
+} // namespace sigma::ir

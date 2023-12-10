@@ -60,7 +60,9 @@ namespace sigma::ir {
 		while(range.start < range.end) {
 			x64::x64_instruction inst;
 
-			if(!disassemble_instruction(bytecode.get_slice(range.start, range.end - range.start), inst)) {
+			if(!disassemble_instruction(
+				bytecode.get_slice(range.start, range.end - range.start), inst)
+			) {
 				range.start++;
 				assembly.append("  ERROR\n");
 				continue;
@@ -198,7 +200,9 @@ namespace sigma::ir {
 		return patch;
 	}
 
-	bool x64_disassembler::disassemble_instruction(const utility::byte_buffer& bytecode, x64::x64_instruction& inst) {
+	bool x64_disassembler::disassemble_instruction(
+		const utility::byte_buffer& bytecode, x64::x64_instruction& inst
+	) {
 		inst = { 0 };
 		for(u8 i = 0; i < 4; ++i) {
 			inst.registers[i] = reg::invalid_id;
@@ -441,7 +445,10 @@ namespace sigma::ir {
 		// immediates might use RX for an extended opcode
 		// imul's ternary is a special case
 		if (uses_imm || op == 0x68 || op == 0x69) {
-			if ((enc == x64::OP_MI && inst.data_type_1 == x64::BYTE) || enc == x64::OP_MI8 || op == 0x68) {
+			if (
+				(enc == x64::OP_MI && inst.data_type_1 == x64::BYTE) || 
+				enc == x64::OP_MI8 || op == 0x68
+			) {
 				if (current + 1 > bytecode.get_size()) {
 					return false;
 				}
@@ -827,4 +834,4 @@ namespace sigma::ir {
 			default: return "??";
 		}
 	}
-}
+} // namespace sigma::ir

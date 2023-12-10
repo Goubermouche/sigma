@@ -6,13 +6,13 @@ namespace sigma::detail {
 	using namespace utility::types;
 
 	struct external_function {
-		handle<sigma::ir::external> external;
-		sigma::ir::function_signature signature;
+		handle<ir::external> external;
+		ir::function_signature signature;
 	};
 
 	class function_registry {
 	public:
-		function_registry(sigma::ir::builder& builder);
+		function_registry(ir::builder& builder);
 
 		/**
 		 * \brief Declares a new function.
@@ -20,7 +20,7 @@ namespace sigma::detail {
 		 * \param function_sig Function to declare
 		 */
 		void register_function(
-			utility::symbol_table_key identifier_key, const sigma::ir::function_signature& function_sig
+			utility::symbol_table_key identifier_key, const ir::function_signature& function_sig
 		);
 
 		/**
@@ -29,7 +29,7 @@ namespace sigma::detail {
 		 * \param function_sig Function signature of the external function
 		 */
 		void register_external_function(
-			utility::symbol_table_key identifier_key, const sigma::ir::function_signature& function_sig
+			utility::symbol_table_key identifier_key, const ir::function_signature& function_sig
 		);
 		
 		/**
@@ -39,13 +39,13 @@ namespace sigma::detail {
 		 * \return Callee return value.
 		 */
 		[[nodiscard]] auto create_call(
-			utility::symbol_table_key identifier_key, const std::vector<handle<sigma::ir::node>>& parameters
-		) -> handle<sigma::ir::node>;
+			utility::symbol_table_key identifier_key, const std::vector<handle<ir::node>>& parameters
+		) -> handle<ir::node>;
 	private:
-		sigma::ir::builder& m_builder;
+		ir::builder& m_builder;
 
 		// TODO: the key should take parameter data types into account
-		std::unordered_map<utility::symbol_table_key, handle<sigma::ir::function>> m_functions;
+		std::unordered_map<utility::symbol_table_key, handle<ir::function>> m_functions;
 		std::unordered_map<utility::symbol_table_key, external_function> m_external_functions;
 	};
 } // sigma::detail

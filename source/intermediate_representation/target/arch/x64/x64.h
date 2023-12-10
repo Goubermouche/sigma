@@ -95,17 +95,43 @@ namespace sigma::ir {
 		auto emit_bytecode(codegen_context& context) -> utility::byte_buffer override;
 	private:
 		#pragma region instruction selection
-		void select_instructions_region(codegen_context& context, handle<node> block_entry, handle<node> block_end, u64 rpo_index);
-		void select_instruction(codegen_context& context, handle<node> n, reg destination);
-		auto select_memory_access_instruction(codegen_context& context, handle<node> n, reg destination, i32 store_op, i32 source) -> handle<instruction>;
-		auto select_array_access_instruction(codegen_context& context, handle<node> n, reg destination, i32 store_op, i32 source) -> handle<instruction>;
-		auto select_instruction_cmp(codegen_context& context, handle<node> n) -> x64::conditional;
+		void select_instructions_region(
+			codegen_context& context, handle<node> block_entry, handle<node> block_end, u64 rpo_index
+		);
 
-		void dfs_schedule(codegen_context& context, handle<basic_block> bb, handle<node> n, bool is_end);
-		void dfs_schedule_phi(codegen_context& context, handle<basic_block> bb, handle<node> phi, ptr_diff phi_index);
+		void select_instruction(
+			codegen_context& context, handle<node> n, reg destination
+		);
+
+		auto select_memory_access_instruction(
+			codegen_context& context, handle<node> n, reg destination, i32 store_op, i32 source
+		) -> handle<instruction>;
+
+		auto select_array_access_instruction(
+			codegen_context& context, handle<node> n, reg destination, i32 store_op, i32 source
+		) -> handle<instruction>;
+
+		auto select_instruction_cmp(
+			codegen_context& context, handle<node> n
+		) -> x64::conditional;
+
+		void dfs_schedule(
+			codegen_context& context, handle<basic_block> bb, handle<node> n, bool is_end
+		);
+
+		void dfs_schedule_phi(
+			codegen_context& context, handle<basic_block> bb, handle<node> phi, ptr_diff phi_index
+		);
 
 		template<typename extra_type = utility::empty_property>
-		static auto create_instruction(codegen_context& context, instruction::instruction_type type, data_type data_type, u8 out_count, u8 in_count, u8 tmp_count) -> handle<instruction> {
+		static auto create_instruction(
+			codegen_context& context,
+			instruction::instruction_type type,
+			data_type data_type, 
+			u8 out_count,
+			u8 in_count, 
+			u8 tmp_count
+		) -> handle<instruction> {
 			const handle<instruction> inst = context.create_instruction<extra_type>(
 				out_count + in_count + tmp_count
 			);
@@ -119,49 +145,207 @@ namespace sigma::ir {
 			return inst;
 		}
 
-		auto allocate_virtual_register(codegen_context& context, handle<node> n, const data_type& data_type) -> reg;
+		auto allocate_virtual_register(
+			codegen_context& context, handle<node> n, const data_type& data_type
+		) -> reg;
+
 		auto input_reg(codegen_context& context, handle<node> n) -> reg;
 
-		auto create_label(codegen_context& context, handle<node> target) -> handle<instruction>;
-		auto create_jump(codegen_context& context, u64 target) -> handle<instruction>;
-		auto create_jcc(codegen_context& context, int target, x64::conditional cc) -> handle<instruction>;
-		auto create_move(codegen_context& context, const data_type& data_type, reg destination, reg source) -> handle<instruction>;
-		auto create_mr(codegen_context& context, instruction::instruction_type type, const data_type& data_type, reg base, i32 index, scale scale, i32 disp, i32 source) -> handle<instruction>;
-		auto create_rm(codegen_context& context, instruction::instruction_type type, const data_type& data_type, reg destination, reg base, i32 index, scale scale, i32 disp) -> handle<instruction>;
-		auto create_rr(codegen_context& context, instruction::instruction_type type, const data_type& data_type, reg destination, reg source) -> handle<instruction>;
-		auto create_rr_no_destination(codegen_context& context, instruction::instruction_type type, const data_type& data_type, reg left, reg right) -> handle<instruction>;
-		auto create_immediate(codegen_context& context, instruction::instruction_type type, const data_type& data_type, reg destination, i32 value) -> handle<instruction>;
-		auto create_zero(codegen_context& context, const data_type& data_type, reg destination) -> handle<instruction>;
-		auto create_abs(codegen_context& context, instruction::instruction_type type, const data_type& data_type, reg destination, u64 immediate) -> handle<instruction>;
-		auto create_ri(codegen_context& context, instruction::instruction_type type, const data_type& data_type, reg src, i32 imm) -> handle<instruction>;;
-		auto create_rri(codegen_context& context, instruction::instruction_type type, const data_type& data_type, reg destination, reg source, i32 immediate_value) -> handle<instruction>;
-		auto create_rrr(codegen_context& context, instruction::instruction_type type, const data_type& data_type, reg destination, reg left, reg right) -> handle<instruction>;
-		auto create_rrm(codegen_context& context, instruction::instruction_type type, const data_type& data_type, reg destination, reg source, reg base, i32 index, scale scale, i32 disp) -> handle<instruction>;
-		auto create_op_global(codegen_context& context, instruction::instruction_type type, const data_type& data_type, reg dst, handle<symbol> s) -> handle<instruction>;
+		auto create_label(
+			codegen_context& context,
+			handle<node> target
+		) -> handle<instruction>;
+
+		auto create_jump(
+			codegen_context& context,
+			u64 target
+		) -> handle<instruction>;
+
+		auto create_jcc(
+			codegen_context& context, 
+			int target, x64::conditional cc
+		) -> handle<instruction>;
+
+		auto create_move(
+			codegen_context& context, 
+			const data_type& data_type, 
+			reg destination,
+			reg source
+		) -> handle<instruction>;
+
+		auto create_mr(
+			codegen_context& context,
+			instruction::instruction_type type, 
+			const data_type& data_type, 
+			reg base,
+			i32 index, 
+			scale scale,
+			i32 disp, 
+			i32 source
+		) -> handle<instruction>;
+
+		auto create_rm(
+			codegen_context& context,
+			instruction::instruction_type type, 
+			const data_type& data_type,
+			reg destination,
+			reg base, 
+			i32 index, 
+			scale scale, 
+			i32 disp
+		) -> handle<instruction>;
+
+		auto create_rr(
+			codegen_context& context,
+			instruction::instruction_type type,
+			const data_type& data_type, 
+			reg destination, 
+			reg source
+		) -> handle<instruction>;
+
+		auto create_rr_no_destination(
+			codegen_context& context, 
+			instruction::instruction_type type,
+			const data_type& data_type, 
+			reg left, 
+			reg right
+		) -> handle<instruction>;
+
+		auto create_immediate(
+			codegen_context& context,
+			instruction::instruction_type type,
+			const data_type& data_type,
+			reg destination, 
+			i32 value
+		) -> handle<instruction>;
+
+		auto create_zero(
+			codegen_context& context, 
+			const data_type& data_type, 
+			reg destination
+		) -> handle<instruction>;
+
+		auto create_abs(
+			codegen_context& context,
+			instruction::instruction_type type,
+			const data_type& data_type, 
+			reg destination, 
+			u64 immediate
+		) -> handle<instruction>;
+
+		auto create_ri(
+			codegen_context& context,
+			instruction::instruction_type type,
+			const data_type& data_type, 
+			reg src,
+			i32 imm
+		) -> handle<instruction>;
+
+		auto create_rri(
+			codegen_context& context,
+			instruction::instruction_type type,
+			const data_type& data_type, 
+			reg destination, 
+			reg source,
+			i32 immediate_value
+		) -> handle<instruction>;
+
+		auto create_rrr(
+			codegen_context& context,
+			instruction::instruction_type type,
+			const data_type& data_type,
+			reg destination, 
+			reg left, 
+			reg right
+		) -> handle<instruction>;
+
+		auto create_rrm(
+			codegen_context& context,
+			instruction::instruction_type type,
+			const data_type& data_type,
+			reg destination, 
+			reg source,
+			reg base, 
+			i32 index, 
+			scale scale,
+			i32 disp
+		) -> handle<instruction>;
+
+		auto create_op_global(
+			codegen_context& context,
+			instruction::instruction_type type, 
+			const data_type& data_type,
+			reg dst,
+			handle<symbol> s
+		) -> handle<instruction>;
 
 		static auto try_for_imm32(handle<node> n, i32 bits, i32& out) -> bool;
-		static auto can_folded_store(codegen_context& context, handle<node> memory, handle<node> address, handle<node> source) -> i32;
-		static auto classify_register_class(const data_type& data_type) -> u8;
-		static auto legalize_integer_data_type(u64* out_mask, const data_type& data_type) -> x64::data_type;
-		static auto legalize_data_type(const data_type& data_type) -> i32;
+		static auto can_folded_store(
+			codegen_context& context, handle<node> memory, handle<node> address, handle<node> source
+		) -> i32;
+
+		static auto classify_register_class(
+			const data_type& data_type
+		) -> u8;
+
+		static auto legalize_integer_data_type(
+			u64* out_mask, const data_type& data_type
+		) -> x64::data_type;
+
+		static auto legalize_data_type(
+			const data_type& data_type
+		) -> i32;
 
 		static void resolve_stack_usage(codegen_context& context);
 		#pragma endregion
 		#pragma region code generation
-		static void emit_function_prologue(codegen_context& context, utility::byte_buffer& bytecode);
-		static void emit_function_body(codegen_context& context, utility::byte_buffer& bytecode);
-		static void emit_function_epilogue(const codegen_context& context, utility::byte_buffer& bytecode);
+		static void emit_function_prologue(
+			codegen_context& context, utility::byte_buffer& bytecode
+		);
+
+		static void emit_function_body(
+			codegen_context& context, utility::byte_buffer& bytecode
+		);
+
+		static void emit_function_epilogue(
+			const codegen_context& context, utility::byte_buffer& bytecode
+		);
+
 		static auto get_instruction_table() -> std::array<instruction::description, 120>;
 
-		static void emit_instruction_0(instruction::instruction_type type, i32 data_type, utility::byte_buffer& bytecode);
-		static void emit_instruction_1(codegen_context& context, instruction::instruction_type type, handle<codegen_temporary> r, i32 dt, utility::byte_buffer& bytecode);
-		static void emit_instruction_2(codegen_context& context, instruction::instruction_type type, handle<codegen_temporary> a, handle<codegen_temporary> b, i32 data_type, utility::byte_buffer& bytecode);
+		static void emit_instruction_0(
+			instruction::instruction_type type, i32 data_type, utility::byte_buffer& bytecode
+		);
 
-		static void emit_memory_operand(codegen_context& context, u8 rx, handle<codegen_temporary> a, utility::byte_buffer& bytecode);
-		static auto resolve_interval(const codegen_context& context, handle<instruction> inst, u8 i,handle<codegen_temporary> val) -> u8;
-		static void emit_symbol_patch(codegen_context& context, handle<symbol> target, u64 pos);
+		static void emit_instruction_1(
+			codegen_context& context,
+			instruction::instruction_type type, 
+			handle<codegen_temporary> r, 
+			i32 dt, 
+			utility::byte_buffer& bytecode
+		);
+
+		static void emit_instruction_2(
+			codegen_context& context, 
+			instruction::instruction_type type,
+			handle<codegen_temporary> a, 
+			handle<codegen_temporary> b,
+			i32 data_type, 
+			utility::byte_buffer& bytecode
+		);
+
+		static void emit_memory_operand(
+			codegen_context& context, u8 rx, handle<codegen_temporary> a, utility::byte_buffer& bytecode
+		);
+		static auto resolve_interval(
+			const codegen_context& context, handle<instruction> inst, u8 i,handle<codegen_temporary> val
+		) -> u8;
+
+		static void emit_symbol_patch(
+			codegen_context& context, handle<symbol> target, u64 pos
+		);
 
 		static inline std::array<instruction::description, 120> s_instruction_table = get_instruction_table();
 		#pragma endregion
 	};
-}
+} // namespace sigma::ir

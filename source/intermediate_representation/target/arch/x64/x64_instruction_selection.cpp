@@ -64,7 +64,9 @@ namespace sigma::ir {
 		}
 	}
 
-	void x64_architecture::select_instructions_region(codegen_context& context, handle<node> block_entry, handle<node> block_end, u64 rpo_index) {
+	void x64_architecture::select_instructions_region(
+		codegen_context& context, handle<node> block_entry, handle<node> block_end, u64 rpo_index
+	) {
 		ASSERT(
 			context.work_list->items.size() == context.graph.blocks.size(),
 			"invalid work list"
@@ -105,7 +107,7 @@ namespace sigma::ir {
 
 		// phi nodes within this block should view themselves as the previous value,
 		// and not the one we're producing
-		u64 old_phi_count = context.phi_values.size();
+		u64 old_phi_count = context.phi_values.get_size();
 
 		for (u64 i = 0; i < old_phi_count; ++i) {
 			auto& phi = context.phi_values[i];
@@ -124,10 +126,12 @@ namespace sigma::ir {
 					user_node->data_type.ty != data_type::MEMORY
 				) {
 					// copy the phi into a temporary
-					auto& phi = context.phi_values.emplace_back(phi_value{
+					const phi_value phi{
 						.phi = user_node,
-						.destination = input_reg(context, user_node)
-					});
+						.destination = input_reg(context, user_node),
+					};
+
+					context.phi_values.push_back(phi);
 
 					auto dt = phi.phi->data_type;
 					reg tmp = allocate_virtual_register(context, nullptr, dt);
@@ -175,7 +179,11 @@ namespace sigma::ir {
 
 			if (
 				target->ty != node::MUL_PAIR &&
-				(target->data_type.ty == data_type::TUPLE || target->data_type.ty == data_type::CONTROL || target->data_type.ty == data_type::MEMORY)
+				(
+					target->data_type.ty == data_type::TUPLE || 
+					target->data_type.ty == data_type::CONTROL ||
+					target->data_type.ty == data_type::MEMORY
+				)
 			) {
 				if (target->ty == node::BRANCH) {
 					ASSERT(old_phi_count == 0, "branches don't get phi edges, they should've been split");
@@ -250,12 +258,12 @@ namespace sigma::ir {
 		}
 
 		// restore the PHI value to normal
-		for (u64 i = old_phi_count; i < context.phi_values.size(); ++i) {
+		for (u64 i = old_phi_count; i < context.phi_values.get_size(); ++i) {
 			auto& value = context.phi_values[i];
 			context.lookup_value(value.phi)->virtual_register = value.destination;
 		}
 
-		context.phi_values.clear();
+		context.phi_values.set_size(0);
 		context.head = last ? last : head;
 
 		if (
@@ -297,7 +305,6 @@ namespace sigma::ir {
 	void x64_architecture::select_instruction(
 		codegen_context& context, handle<node> n, reg destination
 	) {
-		// ASSERT(n->global_value_index != 5, "");
 		switch (const node::type node_type = n->ty) {
 			case node::PHI:
 			case node::REGION: break;
@@ -343,7 +350,9 @@ namespace sigma::ir {
 
 						if (value != nullptr) {
 							ASSERT(value->virtual_register.is_valid() == false, "unexpected valid register");
-							value->virtual_register = allocate_virtual_register(context, projection, projection->data_type);
+							value->virtual_register = allocate_virtual_register(
+								context, projection, projection->data_type
+							);
 
 							i32 reg_num = is_float ? id : gpr_params[id];
 							i32 virtual_reg = (is_float ? x64::register_class::FIRST_XMM : 0) + reg_num;
@@ -351,7 +360,10 @@ namespace sigma::ir {
 							context.hint_reg(value->virtual_register.id, static_cast<u8>(virtual_reg));
 
 							context.append_instruction(create_move(
-								context, projection->data_type, value->virtual_register, static_cast<u8>(virtual_reg)
+								context, 
+								projection->data_type, 
+								value->virtual_register,
+								static_cast<u8>(virtual_reg)
 							));
 
 							outs[out_count++] = virtual_reg;
@@ -468,7 +480,13 @@ namespace sigma::ir {
 				i32 ins[64];
 				reg parameter_registers[64];
 
-				u64 vararg_cutoff = callee_signature.has_var_args ? callee_signature.parameters.size() : n->inputs.get_size() - 2;
+				u64 vararg_cutoff;
+				if(callee_signature.has_var_args) {
+					vararg_cutoff = callee_signature.parameters.size();
+				}
+				else {
+					vararg_cutoff = n->inputs.get_size() - 2;
+				}
 
 				u8 used_gpr_count = 0;
 				u8 used_xmm_count = 0;
@@ -513,7 +531,14 @@ namespace sigma::ir {
 					}
 					else {
 						u8 phys_reg = use_xmm ? reg : descriptor.gpr_registers[reg].id;
-						u8 dst = (use_xmm ? x64::register_class::FIRST_XMM : x64::register_class::FIRST_GPR) + phys_reg;
+						u8 dst = phys_reg;
+
+						if(use_xmm) {
+							dst += x64::register_class::FIRST_XMM;
+						}
+						else {
+							dst += x64::register_class::FIRST_GPR;
+						}
 
 						context.hint_reg(src.id, dst);
 
@@ -538,7 +563,8 @@ namespace sigma::ir {
 						context, dt, static_cast<u8>(ins[i]), parameter_registers[i]
 					));
 
-					// in win64, float params past the vararg cutoff are duplicated in their respective GPR slot
+					// in win64, float params past the vararg cutoff are duplicated in their
+					// respective GPR slot
 					if (use_xmm && i >= vararg_cutoff && i < descriptor.gpr_count) {
 						u8 phys_reg = descriptor.gpr_registers[i].id;
 
@@ -550,7 +576,8 @@ namespace sigma::ir {
 					}
 				}
 
-				// compute the target (unless it's a symbol) before the registers all need to be forcibly shuffled
+				// compute the target (unless it's a symbol) before the registers all need to be
+				// forcibly shuffled
 				handle<node> target = n->inputs[2];
 				bool static_call = n->ty != node::SYSTEM_CALL && target->ty == node::SYMBOL;
 
@@ -576,7 +603,9 @@ namespace sigma::ir {
 
 				// all these registers need to be spilled and reloaded if they're used across
 				// the function call boundary... you might see why inlining could be nice to implement
-				u8 clobber_count = utility::pop_count(caller_saved_gp_registers) + utility::pop_count(caller_saved_xmm_registers);
+				const u8 caller_saved_gpr_pop_count = utility::pop_count(caller_saved_gp_registers);
+				const u8 caller_saved_xmm_pop_count = utility::pop_count(caller_saved_xmm_registers);
+				u8 clobber_count = caller_saved_gpr_pop_count + caller_saved_xmm_pop_count;
 				auto op = instruction::SYS_CALL;
 
 				if (n->ty == node::CALL) {
@@ -659,7 +688,14 @@ namespace sigma::ir {
 				u64 value = n->get<integer>().value;
 
 				// mask off bits
-				const u64 bits_in_type = n->data_type.ty == data_type::POINTER ? 64 : n->data_type.bit_width;
+				u64 bits_in_type;
+				if(n->data_type.ty == data_type::POINTER) {
+					bits_in_type = 64;
+				}
+				else {
+					bits_in_type = n->data_type.bit_width;
+				}
+
 				if (bits_in_type < 64) {
 					value &= (1ull << bits_in_type) - 1;
 				}
@@ -778,13 +814,17 @@ namespace sigma::ir {
 					}
 
 					context.append_instruction(create_move(context, dt, destination, left));
-					context.append_instruction(create_rri(context, instruction::IMUL, dt, destination, destination, x));
+					context.append_instruction(create_rri(
+						context, instruction::IMUL, dt, destination, destination, x)
+					);
 				}
 				else {
 					reg right = input_reg(context, n->inputs[2]);
 
 					context.append_instruction(create_move(context, dt, destination, left));
-					context.append_instruction(create_rrr(context, instruction::IMUL, dt, destination, destination, right));
+					context.append_instruction(create_rrr(
+						context, instruction::IMUL, dt, destination, destination, right)
+					);
 				}
 
 				break;
@@ -805,13 +845,18 @@ namespace sigma::ir {
 					}
 					else {
 						context.hint_reg(source.id, default_return_registers[i]);
-						context.append_instruction(create_move(context, dt, default_return_registers[i], source));
+						context.append_instruction(create_move(
+							context, dt, default_return_registers[i], source)
+						);
 					}
 				}
 
-				// we don't really need a fence if we're about to exit but we do need to mark that it's the epilogue
-				// to tell the register allocator where callee registers need to get restored
-				context.append_instruction(create_instruction(context, instruction::EPILOGUE, VOID_TYPE, 0, 0, 0));
+				// we don't really need a fence if we're about to exit but we do need to mark that
+				// it's the epilogue to tell the register allocator where callee registers need
+				// to get restored
+				context.append_instruction(create_instruction(
+					context, instruction::EPILOGUE, VOID_TYPE, 0, 0, 0)
+				);
 				break;
 			}
 
@@ -819,7 +864,9 @@ namespace sigma::ir {
 			case node::VARIADIC_START:
 			case node::MEMBER_ACCESS:
 			case node::ARRAY_ACCESS: {
-				context.append_instruction(select_memory_access_instruction(context, n, destination, -1, -1));
+				context.append_instruction(select_memory_access_instruction(
+					context, n, destination, -1, -1)
+				);
 				break;
 			}
 
@@ -917,7 +964,9 @@ namespace sigma::ir {
 
 				data_type dt = n->inputs[1]->data_type;
 
-				context.append_instruction(create_instruction(context, instruction::TERMINATOR, VOID_TYPE, 0, 0, 0));
+				context.append_instruction(create_instruction(
+					context, instruction::TERMINATOR, VOID_TYPE, 0, 0, 0)
+				);
 
 				if(br.successors.size() == 1) {
 					ASSERT(false, "degenerate branch");
@@ -931,7 +980,10 @@ namespace sigma::ir {
 					}
 					else {
 						reg key = input_reg(context, n->inputs[1]);
-						context.append_instruction(create_ri(context, instruction::CMP, dt, key, static_cast<i32>(br.keys[0])));
+						context.append_instruction(create_ri(
+							context, instruction::CMP, dt, key, static_cast<i32>(br.keys[0]))
+						);
+
 						cc = x64::NE;
 					}
 
@@ -966,7 +1018,14 @@ namespace sigma::ir {
 			}
 			case node::LOAD:
 			case node::ATOMIC_LOAD: {
-				instruction::instruction_type mov_op = n->data_type.ty == data_type::FLOAT ? instruction::FP_MOV : instruction::MOV;
+				instruction::instruction_type mov_op;
+				if(n->data_type.ty == data_type::FLOAT) {
+					mov_op = instruction::FP_MOV;
+				}
+				else {
+					mov_op = instruction::MOV;
+				}
+
 				handle<node> address = n->inputs[2];
 
 				handle<instruction> load_inst = select_array_access_instruction(
@@ -991,10 +1050,23 @@ namespace sigma::ir {
 
 					// use stack space past the n registers we're given
 					if (index >= param_gpr_count) {
-						instruction::instruction_type i = n->data_type.ty == data_type::FLOAT ? instruction::FP_MOV : instruction::MOV;
+						instruction::instruction_type i;
+						if(n->data_type.ty == data_type::FLOAT) {
+							i = instruction::FP_MOV;
+						}
+						else {
+							i = instruction::MOV;
+						}
 
 						context.append_instruction(create_rm(
-							context, i, n->data_type, destination, x64::RBP, reg::invalid_id, scale::x1, 16 + index * 8
+							context, 
+							i,
+							n->data_type,
+							destination,
+							x64::RBP, 
+							reg::invalid_id, 
+							scale::x1, 
+							16 + index * 8
 						));
 					}
 				}
@@ -1040,48 +1112,113 @@ namespace sigma::ir {
 			base = input_reg(context, n);
 		}
 
-		// const mem memory{ .index = static_cast<u8>(index), .scale = scale, .displacement = static_cast<i32>(offset) };
-
 		// compute the base
 		if (store_op < 0) {
 			if (has_second_in) {
-				return  create_rrm(context, instruction::LEA, n->data_type, destination, static_cast<u8>(source), base, index, scale, offset);
+				return create_rrm(
+					context,
+					instruction::LEA, 
+					n->data_type, 
+					destination, 
+					static_cast<u8>(source),
+					base, 
+					index, 
+					scale, 
+					offset
+				);
 			}
 
-			return create_rm(context, instruction::LEA, n->data_type, destination, base, index, scale, offset);
+			return create_rm(
+				context,
+				instruction::LEA, 
+				n->data_type, 
+				destination, 
+				base, 
+				index,
+				scale, 
+				offset
+			);
 		}
 
-		return create_mr(context, static_cast<instruction::instruction_type>(store_op), n->data_type, base, index, scale, offset, source);
+		return create_mr(
+			context, 
+			static_cast<instruction::instruction_type>(store_op),
+			n->data_type,
+			base,
+			index,
+			scale,
+			offset,
+			source
+		);
 	}
 
 	auto x64_architecture::select_array_access_instruction(
 		codegen_context& context, handle<node> n, reg destination, i32 store_op, i32 source
 	) -> handle<instruction> {
+		const bool base_dir = 
+			context.virtual_values.at(n->global_value_index).use_count > 2 || 
+			context.virtual_values.at(n->global_value_index).virtual_register.is_valid();
+
 		// compute base
 		if (
 			n->ty == node::ARRAY_ACCESS &&
-			(context.virtual_values.at(n->global_value_index).use_count > 2 || context.virtual_values.at(n->global_value_index).virtual_register.is_valid())
+			base_dir
 		) {
 			const reg base = input_reg(context, n);
 
 			if (store_op < 0) {
 				if (source >= 0) {
-					return create_rrm(context, instruction::LEA, PTR_TYPE, destination, static_cast<u8>(source), base, -1, scale::x1, 0);
+					return create_rrm(
+						context, 
+						instruction::LEA,
+						PTR_TYPE,
+						destination, 
+						static_cast<u8>(source),
+						base, 
+						-1, 
+						scale::x1,
+						0
+					);
 				}
 
-				return create_rm(context, instruction::instruction_type::LEA, PTR_TYPE, destination, base, -1, scale::x1, 0);
+				return create_rm(
+					context, 
+					instruction::instruction_type::LEA,
+					PTR_TYPE,
+					destination,
+					base, 
+					-1, 
+					scale::x1,
+					0
+				);
 			}
 
-			return create_mr(context, static_cast<instruction::instruction_type>(store_op), PTR_TYPE, base, -1, scale::x1, 0, source);
+			return create_mr(
+				context, 
+				static_cast<instruction::instruction_type>(store_op),
+				PTR_TYPE,
+				base, 
+				-1,
+				scale::x1,
+				0, 
+				source
+			);
 		}
 
 		return select_memory_access_instruction(context, n, destination, store_op, source);
 	}
 
-	auto x64_architecture::select_instruction_cmp(codegen_context& context, handle<node> n) -> x64::conditional {
+	auto x64_architecture::select_instruction_cmp(
+		codegen_context& context, handle<node> n
+	) -> x64::conditional {
 		bool invert = false;
-		if (n->ty == node::CMP_EQ && n->data_type.ty == data_type::INTEGER && n->data_type.bit_width == 1 && n->inputs[2]->ty == node::INTEGER_CONSTANT) {
-			auto& b = n->inputs[2]->get<integer>();
+		if (
+			n->ty == node::CMP_EQ && 
+			n->data_type.ty == data_type::INTEGER && 
+			n->data_type.bit_width == 1 && 
+			n->inputs[2]->ty == node::INTEGER_CONSTANT
+		) {
+			const auto& b = n->inputs[2]->get<integer>();
 			if (b.value == 0) {
 				invert = true;
 				n = n->inputs[1];
@@ -1102,7 +1239,9 @@ namespace sigma::ir {
 				
 			}
 			else {
-				context.append_instruction(create_rr_no_destination(context, instruction::TEST, dt, src, src));
+				context.append_instruction(create_rr_no_destination(
+					context, instruction::TEST, dt, src, src)
+				);
 			}
 
 			return static_cast<x64::conditional>(x64::NE ^ invert);
@@ -1126,7 +1265,13 @@ namespace sigma::ir {
 					continue;
 				}
 
-				const handle<node> destination = is_fallthrough ? user->node : user->node->get_next_block();
+				handle<node> destination;
+				if(is_fallthrough) {
+					destination = user->node;
+				}
+				else {
+					destination = user->node->get_next_block();
+				}
 
 				// find predecessor index and do that edge
 				ptr_diff phi_index = -1;
@@ -1354,7 +1499,9 @@ namespace sigma::ir {
 		return inst;
 	}
 
-	auto x64_architecture::create_jcc(codegen_context& context, int target, x64::conditional cc) -> handle<instruction>{
+	auto x64_architecture::create_jcc(
+		codegen_context& context, int target, x64::conditional cc
+	) -> handle<instruction>{
 		const handle<instruction> inst = create_instruction<label>(
 			context, (instruction::instruction_type)(instruction::JO + cc), VOID_TYPE, 0, 0, 0
 		);
@@ -1381,7 +1528,14 @@ namespace sigma::ir {
 	}
 
 	auto x64_architecture::create_mr(
-		codegen_context& context, instruction::instruction_type type, const data_type& data_type, reg base, i32 index, scale scale, i32 disp, i32 source
+		codegen_context& context, 
+		instruction::instruction_type type,
+		const data_type& data_type,
+		reg base, 
+		i32 index,
+		scale scale, 
+		i32 disp,
+		i32 source
 	) -> handle<instruction> {
 		const handle<instruction> inst = create_instruction(
 			context, type, data_type, 0, index >= 0 ? 3 : 2, 0
@@ -1406,7 +1560,14 @@ namespace sigma::ir {
 	}
 
 	auto x64_architecture::create_rm(
-		codegen_context& context, instruction::instruction_type type, const data_type& data_type, reg destination, reg base, i32 index, scale scale, i32 disp
+		codegen_context& context,
+		instruction::instruction_type type, 
+		const data_type& data_type, 
+		reg destination, 
+		reg base, 
+		i32 index,
+		scale scale, 
+		i32 disp
 	) -> handle<instruction> {
 		const handle<instruction> inst = create_instruction(
 			context, type, data_type, 1, index >= 0 ? 2 : 1, 0
@@ -1427,7 +1588,11 @@ namespace sigma::ir {
 	}
 
 	auto x64_architecture::create_rr(
-		codegen_context& context, instruction::instruction_type type, const data_type& data_type, reg destination, reg source
+		codegen_context& context,
+		instruction::instruction_type type, 
+		const data_type& data_type,
+		reg destination, 
+		reg source
 	) -> handle<instruction> {
 		const handle<instruction> inst = create_instruction(
 			context, type, data_type, 1, 1, 0
@@ -1438,7 +1603,13 @@ namespace sigma::ir {
 		return inst;
 	}
 
-	auto x64_architecture::create_rr_no_destination(codegen_context& context, instruction::instruction_type type, const data_type& data_type, reg left, reg right) -> handle<instruction> {
+	auto x64_architecture::create_rr_no_destination(
+		codegen_context& context,
+		instruction::instruction_type type,
+		const data_type& data_type, 
+		reg left,
+		reg right
+	) -> handle<instruction> {
 		const handle<instruction> inst = create_instruction(
 			context, type, data_type, 0, 2, 0
 		);
@@ -1449,7 +1620,11 @@ namespace sigma::ir {
 	}
 
 	auto x64_architecture::create_immediate(
-		codegen_context& context, instruction::instruction_type type, const data_type& data_type, reg destination, i32 value
+		codegen_context& context,
+		instruction::instruction_type type,
+		const data_type& data_type, 
+		reg destination, 
+		i32 value
 	) -> handle<instruction> {
 		const handle<instruction> inst = create_instruction<immediate>(
 			context, type, data_type, 1, 0, 0
@@ -1462,7 +1637,9 @@ namespace sigma::ir {
 	}
 
 	auto x64_architecture::create_zero(
-		codegen_context& context, const data_type& data_type, reg destination
+		codegen_context& context, 
+		const data_type& data_type, 
+		reg destination
 	) -> handle<instruction> {
 		const handle<instruction> inst = create_instruction(
 			context, instruction::ZERO, data_type, 1, 0, 0
@@ -1473,7 +1650,11 @@ namespace sigma::ir {
 	}
 
 	auto x64_architecture::create_abs(
-		codegen_context& context, instruction::instruction_type type, const data_type& data_type, reg destination, u64 immediate
+		codegen_context& context, 
+		instruction::instruction_type type,
+		const data_type& data_type,
+		reg destination,
+		u64 immediate
 	) -> handle<instruction> {
 		const handle<instruction> inst = create_instruction<absolute>(
 			context, type, data_type, 1, 0, 0
@@ -1485,7 +1666,13 @@ namespace sigma::ir {
 		return inst;
 	}
 
-	auto x64_architecture::create_ri(codegen_context& context, instruction::instruction_type type, const data_type& data_type, reg src, i32 imm) -> handle<instruction> {
+	auto x64_architecture::create_ri(
+		codegen_context& context,
+		instruction::instruction_type type,
+		const data_type& data_type,
+		reg src, 
+		i32 imm
+	) -> handle<instruction> {
 		const handle<instruction> inst = create_instruction<absolute>(
 			context, type, data_type, 0, 1, 0
 		);
@@ -1497,7 +1684,12 @@ namespace sigma::ir {
 	}
 
 	auto x64_architecture::create_rri(
-		codegen_context& context, instruction::instruction_type type, const data_type& data_type, reg destination, reg source, i32 immediate_value
+		codegen_context& context,
+		instruction::instruction_type type,
+		const data_type& data_type,
+		reg destination,
+		reg source, 
+		i32 immediate_value
 	) -> handle<instruction> {
 		const handle<instruction> inst = create_instruction<immediate>(
 			context, type, data_type, 1, 1, 0
@@ -1511,7 +1703,12 @@ namespace sigma::ir {
 	}
 
 	auto x64_architecture::create_rrr(
-		codegen_context& context, instruction::instruction_type type, const data_type& data_type, reg destination, reg left, reg right
+		codegen_context& context,
+		instruction::instruction_type type,
+		const data_type& data_type,
+		reg destination,
+		reg left,
+		reg right
 	) -> handle<instruction> {
 		const handle<instruction> inst = create_instruction<immediate>(
 			context, type, data_type, 1, 2, 0
@@ -1524,7 +1721,15 @@ namespace sigma::ir {
 	}
 
 	auto x64_architecture::create_rrm(
-		codegen_context& context, instruction::instruction_type type, const data_type& data_type, reg destination, reg source, reg base, i32 index, scale scale, i32 disp
+		codegen_context& context,
+		instruction::instruction_type type,
+		const data_type& data_type,
+		reg destination, 
+		reg source, 
+		reg base,
+		i32 index, 
+		scale scale,
+		i32 disp
 	) -> handle<instruction> {
 		const handle<instruction> inst = create_instruction(
 			context, type, data_type, 1, index >= 0 ? 3 : 2, 0
@@ -1546,7 +1751,13 @@ namespace sigma::ir {
 		return inst;
 	}
 
-	auto x64_architecture::create_op_global(codegen_context& context, instruction::instruction_type type, const data_type& data_type, reg dst, handle<symbol> s) -> handle<instruction> {
+	auto x64_architecture::create_op_global(
+		codegen_context& context,
+		instruction::instruction_type type,
+		const data_type& data_type,
+		reg dst, 
+		handle<symbol> s
+	) -> handle<instruction> {
 		const handle<instruction> inst = create_instruction<handle<symbol>>(
 			context, type, data_type, 1, 1, 0
 		);
@@ -1561,7 +1772,6 @@ namespace sigma::ir {
 		return inst;
 	}
 
-
 	auto x64_architecture::legalize_data_type(const data_type& data_type) -> i32 {
 		if (data_type.ty == data_type::type::FLOAT) {
 			ASSERT(false, "not implemented");
@@ -1571,7 +1781,9 @@ namespace sigma::ir {
 		return legalize_integer_data_type(&mask, data_type);
 	}
 
-	auto x64_architecture::legalize_integer_data_type(u64* out_mask, const data_type& data_type) -> x64::data_type {
+	auto x64_architecture::legalize_integer_data_type(
+		u64* out_mask, const data_type& data_type
+	) -> x64::data_type {
 		const data_type::type type = data_type.ty;
 
 		ASSERT(
@@ -1610,4 +1822,4 @@ namespace sigma::ir {
 		*out_mask = (bit_width == bits) ? 0 : mask;
 		return t;
 	}
-}
+} // namespace sigma::ir

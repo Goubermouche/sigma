@@ -22,4 +22,4 @@ namespace sigma::ir {
 
 		virtual ~architecture() = default;
 	};
-}
+} // namespace sigma::ir

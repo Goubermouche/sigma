@@ -38,13 +38,13 @@ namespace sigma::ir {
 		handle<external> target,
 		const function_signature& function_sig, 
 		const std::vector<handle<node>>& arguments
-	) -> std::vector<handle<node>> {
+	) -> handle<node> {
 		return create_call(function_sig, get_symbol_address(&target->symbol), arguments);
 	}
 
 	auto function::create_call(
 		handle<function> target_func, const std::vector<handle<node>>& arguments
-	) -> std::vector<handle<node>> {
+	) -> handle<node> {
 		return create_call(
 			target_func->signature, get_symbol_address(&target_func->symbol), arguments
 		);
@@ -241,7 +241,7 @@ namespace sigma::ir {
 		const function_signature& function_sig, 
 		handle<node> callee_symbol_address, 
 		const std::vector<handle<node>>& arguments
-	) ->  std::vector<handle<node>> {
+	) -> handle<node> {
 		// const handle<node> target = get_symbol_address(target_func->sym);
 		const u64 proj_count = 2 + (function_sig.returns.size() > 1 ? function_sig.returns.size() : 1);
 
@@ -277,8 +277,8 @@ namespace sigma::ir {
 		call_prop.projections[1] = memory_proj;
 		active_control_node = control_proj;
 
-		// todo returns
-		return { call_prop.projections.begin() + 2, call_prop.projections.end() };
+		ASSERT(signature.returns.size() == 1, "invalid return count");
+		return call_prop.projections[2];
 	}
 
 	auto function::create_binary_arithmetic_operation(

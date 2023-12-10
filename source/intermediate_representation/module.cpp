@@ -110,6 +110,7 @@ namespace sigma::ir {
 		g->symbol.name = std::string(name);
 		g->symbol.module = this;
 		g->linkage = linkage;
+		g->objects = std::vector<init_object>();
 
 		m_symbols.push_back(&g->symbol);
 		return g;

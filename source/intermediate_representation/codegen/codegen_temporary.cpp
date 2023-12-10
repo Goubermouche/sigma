@@ -7,34 +7,39 @@ namespace sigma::ir {
 			return false;
 		}
 
-		if (type == mem) {
+		if (type == MEM) {
 			return
 				reg == b->reg &&
 				index == b->index &&
 				sc == b->sc;
 		}
 
-		return (type == gpr || type == xmm) ? reg == b->reg : false;
+		return (type == GPR || type == XMM) ? reg == b->reg : false;
 	}
 
-	auto codegen_temporary::create_label(codegen_context& context, u64 target) -> handle<codegen_temporary> {
+	auto codegen_temporary::create_label(
+		codegen_context& context, u64 target
+	) -> handle<codegen_temporary> {
 		const handle<codegen_temporary> val = context.create_temporary<sigma::ir::label>();
-		val->type = label;
-		val->get<sigma::ir::label>().value = target;
+		val->type = LABEL;
+		val->get<label>().value = target;
 		return val;
 	}
 
-	auto codegen_temporary::create_imm(codegen_context& context, i32 imm) -> handle<codegen_temporary> {
+	auto codegen_temporary::create_imm(
+		codegen_context& context, i32 imm) -> handle<codegen_temporary> {
 		const handle<codegen_temporary> val = context.create_temporary();
-		val->type = codegen_temporary::imm;
+		val->type = IMM;
 		val->immediate = imm;
 		return val;
 	}
 
-	auto codegen_temporary::create_abs(codegen_context& context, u64 abs) -> handle<codegen_temporary> {
+	auto codegen_temporary::create_abs(
+		codegen_context& context, u64 abs
+	) -> handle<codegen_temporary> {
 		const handle<codegen_temporary> val = context.create_temporary<absolute>();
-		val->type = codegen_temporary::abs;
+		val->type = ABS;
 		val->get<absolute>().value = abs;
 		return val;
 	}
-}
+} // namespace sigma::ir

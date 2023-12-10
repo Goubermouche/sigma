@@ -1,5 +1,5 @@
 workspace "sigma"
-    configurations { "Release" }
+    configurations { "Release", "Debug" }
     startproject "compiler"
 
     architecture "x64"
@@ -19,6 +19,13 @@ workspace "sigma"
         defines { "NDEBUG" }
         optimize "On"
         warnings "High"
+
+    filter "configurations:Debug"
+        symbols "On"
+        optimize "Off"
+        runtime "Debug"
+        defines { "DEBUG", "_DEBUG" }
+        warnings "Extra"
 
     -- output directories 
     targetdir "output/bin/%{cfg.buildcfg}"
@@ -169,11 +176,6 @@ project "compiler"
         "ir_translator"
     }
 
-    filter "configurations:Release"
-        defines { "NDEBUG" }
-        optimize "On"
-        warnings "High"
-        
     filter { "system:linux", "action:gmake" }
         links {
             "dl",     

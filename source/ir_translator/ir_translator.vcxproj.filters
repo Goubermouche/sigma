@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="values">
+      <UniqueIdentifier>{F53F3822-E1E1-62F8-CA9C-764CB6DDE948}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="ir_translator.h" />
+    <ClInclude Include="values\function_registry.h">
+      <Filter>values</Filter>
+    </ClInclude>
+    <ClInclude Include="values\variable_registry.h">
+      <Filter>values</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="ir_translator.cpp" />
+    <ClCompile Include="values\function_registry.cpp">
+      <Filter>values</Filter>
+    </ClCompile>
+    <ClCompile Include="values\variable_registry.cpp">
+      <Filter>values</Filter>
+    </ClCompile>
+  </ItemGroup>
+</Project>

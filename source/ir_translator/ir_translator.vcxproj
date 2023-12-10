@@ -56,10 +56,14 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="values\function_registry.h" />
     <ClInclude Include="ir_translator.h" />
+    <ClInclude Include="values\variable_registry.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="values\function_registry.cpp" />
     <ClCompile Include="ir_translator.cpp" />
+    <ClCompile Include="values\variable_registry.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\tokenizer\tokenizer.vcxproj">

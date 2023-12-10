@@ -9,6 +9,7 @@
 //     -   check for memory oversteps
 // -   IR translator 
 //     -   dynamic programming impl? 
+// -   Fix all errors that DEBUG catches, run with fsanitize=address,undefined
 
 i32 main() {
 	bool a = true;

@@ -45,6 +45,7 @@ project "utility"
         "source"
     }
 
+-- tokenizer
 project "tokenizer"
     kind "StaticLib"
     location "source/tokenizer"
@@ -62,6 +63,7 @@ project "tokenizer"
         "utility"
     }
 
+-- abstract_syntax_tree
 project "abstract_syntax_tree"
     kind "StaticLib"
     location "source/abstract_syntax_tree"
@@ -79,6 +81,7 @@ project "abstract_syntax_tree"
         "utility"
     }
 
+-- parser
 project "parser"
     kind "StaticLib"
     location "source/parser"
@@ -97,6 +100,7 @@ project "parser"
         "abstract_syntax_tree"
     }
 
+-- type_checker
 project "type_checker"
     kind "StaticLib"
     location "source/type_checker"
@@ -115,7 +119,7 @@ project "type_checker"
         "abstract_syntax_tree"
     }
 
--- IR
+-- intermediate_representation
 project "intermediate_representation"
     kind "StaticLib"
     location "source/intermediate_representation"
@@ -133,6 +137,7 @@ project "intermediate_representation"
         "utility"
     }
 
+-- ir_translator
 project "ir_translator"
     kind "StaticLib"
     location "source/ir_translator"
@@ -191,5 +196,3 @@ project "compiler"
         linkoptions {
             "-lstdc++"
         }
-
-    filter {}

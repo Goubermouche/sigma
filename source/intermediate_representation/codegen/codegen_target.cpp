@@ -53,7 +53,7 @@ namespace sigma::ir {
 			//case system::web: 
 		}
 
-		ASSERT(false, "specified architecture is not implemented");
+		NOT_IMPLEMENTED();
 		return nullptr;
 	}
 
@@ -62,7 +62,7 @@ namespace sigma::ir {
 			case arch::X64: return std::make_shared<x64_architecture>();
 		}
 
-		ASSERT(false, "specified architecture is not implemented");
+		NOT_IMPLEMENTED();
 		return nullptr;
 	}
 
@@ -71,7 +71,7 @@ namespace sigma::ir {
 			case arch::X64: return std::make_shared<x64_disassembler>();
 		}
 
-		ASSERT(false, "specified disassembler is not implemented");
+		NOT_IMPLEMENTED();
 		return nullptr;
 	}
 }

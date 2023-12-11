@@ -1,6 +1,5 @@
 #pragma once
 #include <utility/macros.h>
-#include <utility/diagnostics/error.h>
 
 using namespace utility::types;
 
@@ -104,7 +103,6 @@ namespace sigma {
 				return any_cast_container<type>(m_values);
 			}
 
-			utility::console::out << "HER�\n";
 			return std::any_cast<type>(m_values.front());
 		}
 
@@ -159,7 +157,7 @@ namespace sigma {
 			return argument_it->second->get<type>();
 		}
 
-		ASSERT(false, "cannot find argument with name '" + name + "'");
+		PANIC("cannot find argument with name '{}'", name);
 		return type();
 	}
 }

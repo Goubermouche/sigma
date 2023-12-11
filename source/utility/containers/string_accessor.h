@@ -1,5 +1,5 @@
 #pragma once
-#include "utility/filesystem/filesystem.h"
+#include "utility/types.h"
 
 namespace utility::detail {
 	/**
@@ -14,7 +14,6 @@ namespace utility::detail {
 		 * \param string String to use as the base of the string accessor
 		 */
 		string_accessor(const std::string& string);
-		string_accessor(s_ptr<text_file> file);
 
 		/**
 		 * \brief Increments the caret location.

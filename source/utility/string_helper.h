@@ -1,5 +1,5 @@
 #pragma once
-#include "diagnostics/error.h"
+#include "utility/types.h"
 
 namespace utility::detail {
 	/**
@@ -26,15 +26,6 @@ namespace utility::detail {
 		const std::string& str,
 		u64 start,
 		u64 end
-	);
-
-	/**
-	 * \brief Converts the given hexadecimal string to a hexadecimal value
-	 * \param str String to convert
-	 * \return Result (U64 containing the hexadecimal value).
-	 */
-	outcome::result<u64> string_to_hex(
-		const std::string& str
 	);
 
 	/**

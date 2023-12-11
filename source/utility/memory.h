@@ -1,5 +1,5 @@
 #pragma once
-#include "utility/diagnostics/console.h"
+#include "utility/diagnostics.h"
 
 namespace utility {
 	struct byte {

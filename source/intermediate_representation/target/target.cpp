@@ -26,7 +26,7 @@ namespace sigma::ir {
 			case abi::WIN_64:  return win::parameter_descriptor;
 		}
 
-		ASSERT(false, "specified ABI does not have a parameter descriptor associated with it");
+		NOT_IMPLEMENTED();
 		return {};
 	}
 }

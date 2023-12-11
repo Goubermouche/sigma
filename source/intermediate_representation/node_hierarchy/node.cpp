@@ -1,6 +1,4 @@
 #include "node.h"
-#include <utility/filesystem/file_types/text_file.h>
-
 #include "intermediate_representation/node_hierarchy/user.h"
 #include "intermediate_representation/codegen/codegen_context.h"
 
@@ -351,7 +349,7 @@ namespace sigma::ir {
 			}
 		}
 
-		ASSERT(false, "user system is desynchronized");
+		PANIC("user system is desynchronized");
 		return nullptr;
 	}
 

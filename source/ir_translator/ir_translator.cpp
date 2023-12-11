@@ -1,6 +1,6 @@
 #include "ir_translator.h"
 
-namespace sigma::ast {
+namespace sigma {
 	auto ir_translator::translate(
 		const abstract_syntax_tree& ast, ir::target target, utility::symbol_table& symbols
 	) -> ir::module { 
@@ -32,7 +32,7 @@ namespace sigma::ast {
 			case node_type::FUNCTION:             translate_function_declaration(ast_node); break;
 			case node_type::FUNCTION_CALL:        return translate_function_call(ast_node);
 
-				// flow control
+			// flow control
 			case node_type::RETURN:               translate_return(ast_node); break;
 			case node_type::CONDITIONAL_BRANCH:   translate_conditional_branch(ast_node, nullptr); break;
 
@@ -40,13 +40,14 @@ namespace sigma::ast {
 			case node_type::VARIABLE_ACCESS:      return translate_variable_access(ast_node);
 			case node_type::VARIABLE_ASSIGNMENT:  return translate_variable_assignment(ast_node);
 
-				// operators:
+			// operators:
 			case node_type::OPERATOR_ADD:
 			case node_type::OPERATOR_SUBTRACT:
 			case node_type::OPERATOR_MULTIPLY:
 			case node_type::OPERATOR_DIVIDE:
 			case node_type::OPERATOR_MODULO:      return translate_binary_math_operator(ast_node);
 
+			// literals
 			case node_type::NUMERICAL_LITERAL:    return translate_numerical_literal(ast_node);
 			case node_type::STRING_LITERAL:       return translate_string_literal(ast_node);
 			case node_type::BOOL_LITERAL:         return translate_bool_literal(ast_node);
@@ -135,7 +136,7 @@ namespace sigma::ast {
 				translate_branch(successor, end_control);
 			}
 			else {
-				ASSERT(false, "panic"); // unreachable
+				PANIC("unreachable");
 			}
 		}
 		else {
@@ -197,7 +198,7 @@ namespace sigma::ast {
 			//case node_type::OPERATOR_MODULO:   
 		}
 
-		ASSERT(false, "unreachable");
+		NOT_IMPLEMENTED();
 		return nullptr;
 	}
 
@@ -243,24 +244,24 @@ namespace sigma::ast {
 
 		// handle pointers separately
 		if (literal.data_type.pointer_level > 0) {
-			ASSERT(false, "not implemented");
+			NOT_IMPLEMENTED();
 		}
 
 		switch (literal.data_type.type) {
 			case data_type::I32: return m_builder.create_signed_integer(std::stoi(value), 32);
-			default: ASSERT(false, "unhandled data type");
+			default: NOT_IMPLEMENTED();
 		}
 
 		return nullptr;
 	}
 
-	auto ir_translator::data_type_to_ir(data_type dt) const -> ir::data_type {
+	auto ir_translator::data_type_to_ir(data_type dt) -> ir::data_type {
 		ASSERT(dt.pointer_level == 0, "invalid pointer level");
 
 		switch (dt.type) {
 			case data_type::I32:  return I32_TYPE;
 			case data_type::BOOL: return BOOL_TYPE;
-			default: ASSERT(false, "unhandled data type");
+			default: NOT_IMPLEMENTED();
 		}
 
 		return {};
@@ -273,4 +274,4 @@ namespace sigma::ast {
 
 		return std::move(m_module);
 	}
-}
+} // namespace sigma

@@ -37,7 +37,7 @@ namespace sigma {
 		const auto command_it = m_commands.find(command);
 
 		if (command_it == m_commands.end()) {
-			utility::console::out << "cannot find command '" << command << "'\n";
+			utility::console::print("cannot find command '{}'\n", command);
 			return 1;
 		}
 
@@ -70,20 +70,20 @@ namespace sigma {
 
 		// print missing arguments
 		if (!missing_arguments.empty()) {
-			utility::console::out
-				<< missing_arguments.size()
-				<< " missing "
-				<< (missing_arguments.size() == 1 ? "argument" : "arguments")
-				<< " detected:\n";
+			utility::console::print(
+				"{} missing {} detected\n",
+				missing_arguments.size(),
+				missing_arguments.size() == 1 ? "argument" : "arguments"
+			);
 
 			for (const auto& missing_argument : missing_arguments) {
-				utility::console::out << "   " << missing_argument->get_long_tag();
+				utility::console::print("   {}", missing_argument->get_long_tag());
 
 				if (!missing_argument->get_short_tag().empty()) {
-					utility::console::out << " (" << missing_argument->get_short_tag() << ')';
+					utility::console::print(" ({})", missing_argument->get_short_tag());
 				}
 
-				utility::console::out << '\n';
+				utility::console::print("\n");
 			}
 
 			return 1;
@@ -94,15 +94,16 @@ namespace sigma {
 
 	void program_options::display_help() const {
 		// usage section
-		utility::console::out << "usage: " << m_application_name << " {";
+		utility::console::print("usage: {} {{", m_application_name);
 
 		std::string separator = "";
 		for (const auto& [command_tag, command] : m_commands) {
-			utility::console::out << separator << command_tag;
+
+			utility::console::print("{}{}", separator, command_tag);
 			separator = ", ";
 		}
 
-		utility::console::out << "}\n\n";
+		utility::console::print("}}\n\n");
 
 		// print individual commands
 	   // find the largest command tag
@@ -112,11 +113,9 @@ namespace sigma {
 		}
 
 		// individual commands
-		utility::console::out << "commands: \n";
+		utility::console::print("commands: \n");
 		for (const auto& [command_tag, command] : m_commands) {
-			utility::console::out
-				<< "  " << utility::console::left << utility::console::width(max_length + 3)
-				<< command_tag << command.get_description() << '\n';
+			utility::console::print("  {:>{}}{}\n", command_tag, max_length + 3, command.get_description());
 		}
 	}
 }

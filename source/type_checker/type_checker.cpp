@@ -71,7 +71,7 @@ namespace sigma {
 			case node_type::STRING_LITERAL:       type_check_string_literal(ast_node, expected); break;
 			case node_type::BOOL_LITERAL:         type_check_bool_literal(ast_node, expected); break;
 
-			default: ASSERT(false, "unchecked node detected");
+			default: NOT_IMPLEMENTED();
 		}
 	}
 
@@ -169,7 +169,7 @@ namespace sigma {
 				type_check_branch(branch_node->children[1]);
 			}
 			else {
-				ASSERT(false, "unexpected node type");
+				PANIC("unexpected node type");
 			}
 		}
 
@@ -224,10 +224,10 @@ namespace sigma {
 				}
 
 				switch (target.type) {
-					case data_type::UNKNOWN: ASSERT(false, "promotion on unknown data type"); break;
+					case data_type::UNKNOWN: PANIC("promotion on unknown data type"); break;
 					case data_type::I32:     return;
 					case data_type::BOOL:    target.type = data_type::I32; break;
-					default:                        ASSERT(false, "unimplemented promotion");
+					default: NOT_IMPLEMENTED();
 				}
 			}
 			else {

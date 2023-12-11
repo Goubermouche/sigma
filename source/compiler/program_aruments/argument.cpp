@@ -52,7 +52,7 @@ namespace sigma {
 	) {
 		// check if the argument is used
 		if (m_is_used) {
-			utility::console::out << "argument '" << specified_tag << "' has already been defined before\n";
+			utility::console::print("argument '{}' has already been defined before\n", specified_tag);
 			return 1;
 		}
 
@@ -80,7 +80,7 @@ namespace sigma {
 
 				// check if we haven't exceeded our max argument range
 				if (parsed_argument_value_count == m_value_range.max) {
-					utility::console::out << "too many argument values passed for argument '" << specified_tag << "'\n";
+					utility::console::print("too many argument values passed for argument '{}'\n", specified_tag);
 					return 1;
 				}
 
@@ -92,7 +92,7 @@ namespace sigma {
 		// we've finished parsing
 		// first we should check if we've parsed enough values
 		if (m_values.size() < m_value_range.min) {
-			utility::console::out << "too few argument values passed for argument '" << specified_tag << "'\n";
+			utility::console::print("too few argument values passed for argument '{}'\n", specified_tag);
 			return 1;
 		}
 

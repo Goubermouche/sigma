@@ -78,26 +78,8 @@
     <ClInclude Include="containers\symbol_table.h">
       <Filter>containers</Filter>
     </ClInclude>
-    <ClInclude Include="diagnostics\console.h">
+    <ClInclude Include="diagnostics.h">
       <Filter>diagnostics</Filter>
-    </ClInclude>
-    <ClInclude Include="diagnostics\diagnostics.h">
-      <Filter>diagnostics</Filter>
-    </ClInclude>
-    <ClInclude Include="diagnostics\error.h">
-      <Filter>diagnostics</Filter>
-    </ClInclude>
-    <ClInclude Include="diagnostics\warning.h">
-      <Filter>diagnostics</Filter>
-    </ClInclude>
-    <ClInclude Include="filesystem\file_types\old_file.h">
-      <Filter>filesystem\file_types</Filter>
-    </ClInclude>
-    <ClInclude Include="filesystem\file_types\text_file.h">
-      <Filter>filesystem\file_types</Filter>
-    </ClInclude>
-    <ClInclude Include="filesystem\filesystem.h">
-      <Filter>filesystem</Filter>
     </ClInclude>
     <ClInclude Include="filesystem\new\file.h">
       <Filter>filesystem\new</Filter>
@@ -127,24 +109,6 @@
     </ClCompile>
     <ClCompile Include="containers\symbol_table.cpp">
       <Filter>containers</Filter>
-    </ClCompile>
-    <ClCompile Include="diagnostics\console.cpp">
-      <Filter>diagnostics</Filter>
-    </ClCompile>
-    <ClCompile Include="diagnostics\error.cpp">
-      <Filter>diagnostics</Filter>
-    </ClCompile>
-    <ClCompile Include="diagnostics\warning.cpp">
-      <Filter>diagnostics</Filter>
-    </ClCompile>
-    <ClCompile Include="filesystem\file_types\old_file.cpp">
-      <Filter>filesystem\file_types</Filter>
-    </ClCompile>
-    <ClCompile Include="filesystem\file_types\text_file.cpp">
-      <Filter>filesystem\file_types</Filter>
-    </ClCompile>
-    <ClCompile Include="filesystem\filesystem.cpp">
-      <Filter>filesystem</Filter>
     </ClCompile>
     <ClCompile Include="memory.cpp" />
     <ClCompile Include="string_helper.cpp" />

@@ -49,7 +49,7 @@ namespace sigma {
 
 		// single quote characters are interpreted as character literals
 		if (m_last_character == '\'') {
-			ASSERT(false, "not implemented - char literals");
+			NOT_IMPLEMENTED();
 		}
 
 		// double quote characters are interpreted as string literals
@@ -75,7 +75,7 @@ namespace sigma {
 			// hexadecimal char sequence
 			// note: don's use std::to_lower as the C standard doesn't allow \X escape sequences for hexadecimals
 			if (m_last_character == 'x') {
-				ASSERT(false, "not implemented");
+				NOT_IMPLEMENTED();
 			}
 
 			switch (m_last_character) {
@@ -91,7 +91,7 @@ namespace sigma {
 				case 't':  return '\t';
 				case 'v':  return '\v';
 				case '0':  return '\0';
-				default: ASSERT(false, "not implemented - unknown escape sequence");
+				default: NOT_IMPLEMENTED();
 			}
 		}
 
@@ -149,14 +149,14 @@ namespace sigma {
 		if (first_character == '0') {
 			// hexadecimal
 			if (std::tolower(m_last_character) == 'x') {
-				ASSERT(false, "not implemented - hex");
+				NOT_IMPLEMENTED();
 				//OUTCOME_TRY(m_value_string, get_hexadecimal_string());
 				//return token::number_hexadecimal;
 			}
 
 			// binary
 			if (std::tolower(m_last_character) == 'b') {
-				ASSERT(false, "not implemented - binary");
+				NOT_IMPLEMENTED();
 				//OUTCOME_TRY(m_value_string, get_binary_string());
 				//return token::number_binary;
 			}
@@ -266,7 +266,7 @@ namespace sigma {
 			return { .token = { it->second }, .location = m_token_start_location };
 		}
 
-		ASSERT(false, "unreachable");
+		NOT_IMPLEMENTED();
 		return {};
 	}
 } // namespace sigma::lex

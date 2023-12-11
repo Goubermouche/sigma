@@ -29,7 +29,7 @@ namespace sigma {
 			case STRING_LITERAL:       return "STRING_LITERAL";
 			case BOOL_LITERAL:         return "BOOL_LITERAL";
 
-			default: ASSERT(false, "not implemented");
+			default: NOT_IMPLEMENTED();
 		}
 
 		return std::string();

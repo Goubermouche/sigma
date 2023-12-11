@@ -30,7 +30,7 @@ namespace sigma::ir {
 
 		bool has_var_args = false;
 	};
-}
+} // namespace sigma::ir
 
 // integral types
 #define VOID_TYPE sigma::ir::data_type(sigma::ir::data_type::INTEGER, 0)

@@ -45,7 +45,7 @@ namespace sigma {
 
 				// if adding this argument would make the line too long, print the current line and start a new one.
 				if (current_line.length() + 1 + argument_str.length() > max_line_length) {
-					utility::console::out << current_line << '\n';
+					utility::console::print("{}\n", current_line);
 					current_line = std::string(first_arg_padding, ' ') + argument_str;
 				}
 				else {
@@ -57,13 +57,13 @@ namespace sigma {
 
 		// print any remaining content on the current line.
 		if (!current_line.empty()) {
-			utility::console::out << current_line << '\n';
+			utility::console::print("{}\n", current_line);
 		}
 
-		utility::console::out << '\n';
+		utility::console::print("\n");
 
 		if (!m_description.empty()) {
-			utility::console::out << m_description << "\n\n";
+			utility::console::print("{}\n\n", m_description);
 		}
 
 		// print individual arguments
@@ -74,7 +74,7 @@ namespace sigma {
 		}
 
 		// required arguments
-		utility::console::out << "required arguments:\n";
+		utility::console::print("required arguments:\n");
 		m_arguments.traverse_ordered(
 			[max_length](const std::string& key, const s_ptr<argument>& argument) {
 				SUPPRESS_C4100(key);
@@ -87,18 +87,14 @@ namespace sigma {
 						tag_section << ", " << argument->get_short_tag();
 					}
 
-					utility::console::out
-						<< utility::console::left << utility::console::width(max_length + 8)
-						<< tag_section.str() << argument->get_description() << '\n';
+					utility::console::print("{:<{}}{}\n", tag_section.str(), max_length + 8, argument->get_description());
 				}
 			}
 		);
 
 		// optional arguments
-		utility::console::out << "\noptional arguments:\n";
-		utility::console::out
-			<< utility::console::left << utility::console::width(max_length + 8)
-			<< "   --help, -h" << "show help message\n";
+		utility::console::print("\noptional arguments:\n");
+		utility::console::print("{:<{}} show help message\n", "   --help, -h", max_length + 8);
 
 		m_arguments.traverse_ordered(
 			[max_length](const std::string& key, const s_ptr<argument>& argument) {
@@ -112,9 +108,7 @@ namespace sigma {
 						tag_section << ", " << argument->get_short_tag();
 					}
 
-					utility::console::out
-						<< utility::console::left << utility::console::width(max_length + 8)
-						<< tag_section.str() << argument->get_description() << '\n';
+					utility::console::print("{:<{}}{}\n", tag_section.str(), max_length + 8, argument->get_description());
 				}
 			}
 		);
@@ -132,7 +126,12 @@ namespace sigma {
 			const auto argument_it = m_arguments.find(current_argument_tag);
 
 			if (argument_it == m_arguments.end()) {
-				utility::console::out << "cannot find argument '" << current_argument_tag << "' within the '" << m_name << "' command\n";
+				utility::console::print(
+					"cannot find argument '{}' within the '{}' command",
+					current_argument_tag, 
+					m_name
+				);
+
 				return 1;
 			}
 

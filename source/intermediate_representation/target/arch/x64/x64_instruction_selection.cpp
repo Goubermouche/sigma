@@ -436,7 +436,7 @@ namespace sigma::ir {
 				const parameter_descriptor descriptor = context.target.get_parameter_descriptor();
 
 				if (node_type == node::SYSTEM_CALL) {
-					ASSERT(false, "not implemented");
+					NOT_IMPLEMENTED();
 				}
 
 				u32 caller_saved_gp_registers = descriptor.caller_saved_gpr_count;
@@ -587,7 +587,7 @@ namespace sigma::ir {
 				}
 
 				if (node_type == node::SYSTEM_CALL) {
-					ASSERT(false, "not implemented");
+					NOT_IMPLEMENTED();
 				}
 				else {
 					// the number of float parameters is written into AL
@@ -841,7 +841,7 @@ namespace sigma::ir {
 
 					// copy to the return register
 					if (dt.ty == data_type::FLOAT) {
-						ASSERT(false, "not implemented");
+						NOT_IMPLEMENTED();
 					}
 					else {
 						context.hint_reg(source.id, default_return_registers[i]);
@@ -969,7 +969,7 @@ namespace sigma::ir {
 				);
 
 				if(br.successors.size() == 1) {
-					ASSERT(false, "degenerate branch");
+					PANIC("degenerate branch");
 				}
 				else if(br.successors.size() == 2) {
 					int f = succ[1], t = succ[0];
@@ -1000,9 +1000,8 @@ namespace sigma::ir {
 					}
 				}
 				else {
-					ASSERT(false, "more than 2 branches - not implemented");
+					NOT_IMPLEMENTED();
 				}
-
 
 				break;
 			}
@@ -1074,7 +1073,7 @@ namespace sigma::ir {
 				break;
 			}
 			default: {
-				ASSERT(false, "not implemented");
+				NOT_IMPLEMENTED();
 			}
 		}
 	}
@@ -1089,17 +1088,17 @@ namespace sigma::ir {
 		reg base;
 
 		if (n->ty == node::SYMBOL) {
-			ASSERT(false, "not implemented");
+			NOT_IMPLEMENTED();
 		}
 		else if (n->ty == node::VARIADIC_START) {
-			ASSERT(false, "not implemented");
+			NOT_IMPLEMENTED();
 		}
 		else if (n->ty == node::MEMBER_ACCESS) {
-			ASSERT(false, "not implemented");
+			NOT_IMPLEMENTED();
 		}
 
 		if (n->ty == node::ARRAY_ACCESS) {
-			ASSERT(false, "not implemented");
+			NOT_IMPLEMENTED();
 		}
 
 		if (n->ty == node::LOCAL) {
@@ -1226,7 +1225,7 @@ namespace sigma::ir {
 		}
 
 		if (n->ty >= node::CMP_EQ && n->ty <= node::CMP_FLE) {
-			ASSERT(false, "not implemented");
+			NOT_IMPLEMENTED();
 			// data_type cmp_dt = n->get<compare>()
 
 			return x64::NE; // temp
@@ -1774,7 +1773,7 @@ namespace sigma::ir {
 
 	auto x64_architecture::legalize_data_type(const data_type& data_type) -> i32 {
 		if (data_type.ty == data_type::type::FLOAT) {
-			ASSERT(false, "not implemented");
+			NOT_IMPLEMENTED();
 		}
 
 		u64 mask;

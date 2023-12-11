@@ -136,7 +136,7 @@ namespace sigma::ir {
 			terminators.push_back(exit_node);
 		}
 		else {
-			ASSERT(false, "not implemented");
+			NOT_IMPLEMENTED();
 		}
 
 		const handle<node> n = active_control_node;

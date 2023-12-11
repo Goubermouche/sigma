@@ -4,7 +4,7 @@
 
 #include <abstract_syntax_tree/abstract_syntax_tree.h>
 
-namespace sigma::ast {
+namespace sigma {
 	class ir_translator {
 	public:
 		static auto translate(
@@ -51,7 +51,7 @@ namespace sigma::ast {
 		auto translate_variable_assignment(handle<node> assignment_node) -> handle<ir::node>;
 
 		auto literal_to_ir(literal& literal) const-> handle<ir::node>;
-		auto data_type_to_ir(data_type dt) const-> ir::data_type;
+		static auto data_type_to_ir(data_type dt) -> ir::data_type;
 	private:
 		const abstract_syntax_tree& m_ast;
 		utility::symbol_table& m_symbols;
@@ -62,4 +62,4 @@ namespace sigma::ast {
 		detail::function_registry m_functions;
 		detail::variable_registry m_variables;
 	};
-}
+} // namespace sigma

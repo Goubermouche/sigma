@@ -46,7 +46,7 @@ namespace sigma {
 			case CHAR:    return sizeof(char);
 		}
 
-		ASSERT(false, "not implemented");
+		NOT_IMPLEMENTED();
 		return 0;
 	}
 
@@ -58,7 +58,7 @@ namespace sigma {
 			case token_type::I64:  return I64;
 			case token_type::BOOL: return BOOL;
 			default: {
-				ASSERT(false, "unhandked token to type conversion");
+				NOT_IMPLEMENTED();
 				return UNKNOWN;
 			}
 		}

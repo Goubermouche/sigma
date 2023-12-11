@@ -30,7 +30,7 @@ namespace sigma::ir {
 
 		// go through all declared functions and run codegen
 		for (const handle<function> function : m_functions) {
-			utility::console::out << "compiling function: " << function->symbol.name << '\n';
+			// utility::console::out << "compiling function: " << function->symbol.name << '\n';
 
 			// every function has its own unique work list (thread safe), this list
 			// is reused in all passes of the given function so that we don't have to
@@ -83,7 +83,7 @@ namespace sigma::ir {
 			};
 		}
 
-		utility::console::out << assembly.get_underlying() << '\n';
+		// utility::console::out << assembly.get_underlying() << '\n';
 	}
 
 	auto module::generate_object_file() -> utility::object_file {

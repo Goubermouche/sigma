@@ -3,6 +3,7 @@
 #include <intermediate_representation/module.h>
 #include <utility/filesystem/new/file.h>
 #include <utility/string_helper.h>
+#include <utility/timer.h>
 
 #include <tokenizer/tokenizer.h>
 #include <parser/parser.h>
@@ -33,27 +34,54 @@ using namespace utility::types;
 
 namespace sigma {
 	auto compile() -> void {
-		const auto file          = utility::file::read_text_file("./test/main.s").get_value();
+		const auto file = utility::file::read_text_file("./test/main.s");
+
+		utility::timer total_timer;
+		utility::timer tokenizer_timer;
+		utility::timer parser_timer;
+		utility::timer type_checker_timer;
+		utility::timer ir_translator_timer;
+		utility::timer codegen_timer;
+
+		total_timer.start();
+
+		// tokenizer
+		tokenizer_timer.start();
 		auto [tokens, symbols]   = tokenizer::tokenize(file);
+
+		utility::console::println("{:<30}{:.3f}s", "tokenizer finished", tokenizer_timer.elapsed_seconds());
+
+		// parser
+		parser_timer.start();
 		abstract_syntax_tree ast = parser::parse(tokens, symbols);
 
-		// verify the integrity of our AST
+		utility::console::println("{:<30}{:.3f}s", "parser finished", parser_timer.elapsed_seconds());
+
+		// type checker
+		type_checker_timer.start();
 		type_checker::type_check(ast, symbols);
 
-		// translate our AST into IR SoN
-		auto module = ast::ir_translator::translate(
+		utility::console::println("{:<30}{:.3f}s", "type checker finished", type_checker_timer.elapsed_seconds());
+
+		// ir translator
+		ir_translator_timer.start();
+		auto module = ir_translator::translate(
 			ast, { ir::arch::X64, ir::system::WINDOWS }, symbols
 		);
 
-		// compile our IR
+		utility::console::println("{:<30}{:.3f}s", "IR translator finished", ir_translator_timer.elapsed_seconds());
+
+		// codegen
+		codegen_timer.start();
 		module.compile();
 
-		auto object_file = module.generate_object_file();
+		utility::console::println("{:<30}{:.3f}s", "codegen finished", codegen_timer.elapsed_seconds());
 
-		auto write_res = utility::file::write(object_file, "./test/a.obj");
-		if (write_res.has_error()) {
-			utility::console::out << *write_res.get_error() << '\n';
-		}
+		utility::console::println("{}", std::string(36, '-'));
+		utility::console::println("{:<30}{:.3f}s", "compilation finished", total_timer.elapsed_seconds());
+
+		auto object_file = module.generate_object_file();
+		utility::file::write(object_file, "./test/a.obj");
 	}
 }
 
@@ -61,64 +89,62 @@ auto main(i32 argc, char* argv[]) -> i32 {
 	SUPPRESS_C4100(argc);
 	SUPPRESS_C4100(argv);
 
-	utility::console::set_output_stream(std::cout);
-
 	sigma::compile();
 	return 0;
 
-	sigma::ir::target target(sigma::ir::arch::X64, sigma::ir::system::WINDOWS);
-	sigma::ir::module module(target);
-	sigma::ir::builder builder(module);
+	//sigma::ir::target target(sigma::ir::arch::X64, sigma::ir::system::WINDOWS);
+	//sigma::ir::module module(target);
+	//sigma::ir::builder builder(module);
 
-	const sigma::ir::function_signature main_func_ty{
-		.identifier = "main",
-		.returns = { I32_TYPE }
-	};
+	//const sigma::ir::function_signature main_func_ty{
+	//	.identifier = "main",
+	//	.returns = { I32_TYPE }
+	//};
 
-	// main
-	builder.create_function(main_func_ty, sigma::ir::linkage::PUBLIC);
+	//// main
+	//builder.create_function(main_func_ty, sigma::ir::linkage::PUBLIC);
 
-	const sigma::ir::function_signature printf_func_ty{
-		.identifier = "printf",
-		.parameters = { PTR_TYPE },
-		.returns = { I32_TYPE },
-		.has_var_args = true
-	};
+	//const sigma::ir::function_signature printf_func_ty{
+	//	.identifier = "printf",
+	//	.parameters = { PTR_TYPE },
+	//	.returns = { I32_TYPE },
+	//	.has_var_args = true
+	//};
 
-	const auto printf_external = builder.create_external(printf_func_ty, sigma::ir::linkage::SO_LOCAL);
+	//const auto printf_external = builder.create_external(printf_func_ty, sigma::ir::linkage::SO_LOCAL);
 
-	const auto message_true = builder.create_string("true\n");
-	const auto message_false = builder.create_string("false\n");
+	//const auto message_true = builder.create_string("true\n");
+	//const auto message_false = builder.create_string("false\n");
 
-	const auto true_ctrl = builder.create_region();
-	const auto false_ctrl = builder.create_region();
-	const auto after_ctrl = builder.create_region();
+	//const auto true_ctrl = builder.create_region();
+	//const auto false_ctrl = builder.create_region();
+	//const auto after_ctrl = builder.create_region();
 
-	builder.create_conditional_branch(builder.create_bool(true), true_ctrl, false_ctrl);
+	//builder.create_conditional_branch(builder.create_bool(true), true_ctrl, false_ctrl);
 
-	builder.set_control(false_ctrl);
-	builder.create_call(printf_external, printf_func_ty, { message_false });
-	builder.create_branch(after_ctrl);
+	//builder.set_control(false_ctrl);
+	//builder.create_call(printf_external, printf_func_ty, { message_false });
+	//builder.create_branch(after_ctrl);
 
-	builder.set_control(true_ctrl);
-	builder.create_call(printf_external, printf_func_ty, { message_true });
-	builder.create_branch(after_ctrl);
+	//builder.set_control(true_ctrl);
+	//builder.create_call(printf_external, printf_func_ty, { message_true });
+	//builder.create_branch(after_ctrl);
 
-	
+	//
 
-	// end
-	builder.set_control(after_ctrl);
-	builder.create_return({  builder.create_signed_integer(0, 32) });
-	module.compile();
+	//// end
+	//builder.set_control(after_ctrl);
+	//builder.create_return({  builder.create_signed_integer(0, 32) });
+	//module.compile();
 
-	auto object_file = module.generate_object_file();
+	//auto object_file = module.generate_object_file();
 
-	auto write_res = utility::file::write(object_file, "./test/a.obj");
-	if (write_res.has_error()) {
-		utility::console::out << *write_res.get_error() << '\n';
-	}
+	//auto write_res = utility::file::write(object_file, "./test/a.obj");
+	//if (write_res.has_error()) {
+	//	utility::console::out << *write_res.get_error() << '\n';
+	//}
 
-	return 0;
+	//return 0;
 
 	//utility::console::out 
 	//	<< "compilation finished (" 

@@ -42,18 +42,6 @@ namespace utility::detail {
             m_nodes[key] = new node_type(value, children);
         }
 
-        void print() const {
-            for (const auto& [key, node] : m_nodes) {
-                console::out << key << '\n';
-
-                for (const auto& dependency : node->get_children()) {
-                    console::out << "    " << dependency << '\n';
-                }
-            }
-
-            console::out << '\n';
-        }
-
         bool is_acyclic() const {
             std::unordered_map<key_type, bool> visited;
             std::unordered_map<key_type, bool> rec_stack;

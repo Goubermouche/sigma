@@ -396,7 +396,7 @@ namespace sigma::ir {
 		const reg register_id = interval->assigned;
 
 		if(m_active_set[register_class].get(register_id.id)) {
-			ASSERT(false, "intervals should never be forced out");
+			PANIC("intervals should never be forced out");
 		}
 
 		ASSERT(register_id.id < 16, "");
@@ -708,7 +708,7 @@ namespace sigma::ir {
 		SUPPRESS_C4100(context);
 		SUPPRESS_C4100(interval);
 
-		ASSERT(false, "not implemented");
+		NOT_IMPLEMENTED();
 		return reg();
 	}
 } // namespace sigma::ir

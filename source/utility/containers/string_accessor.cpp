@@ -1,12 +1,9 @@
 #include "string_accessor.h"
+#include "utility/macros.h"
 
 namespace utility::detail {
 	string_accessor::string_accessor(const std::string& string)
 		: m_string(string) {}
-
-	string_accessor::string_accessor(s_ptr<text_file> file) {
-		m_string = file->get_contents();
-	}
 
 	void string_accessor::advance()	{
 		m_position++;

@@ -223,7 +223,7 @@ namespace sigma::ir {
 						};
 					}
 					else {
-						ASSERT(false, "not implemented");
+						NOT_IMPLEMENTED();
 					}
 				}
 			}
@@ -579,7 +579,7 @@ namespace sigma::ir {
 	 
 		 		// you can't do relocations across sections
 		 		if (source_section == destination_section) {
-		 			ASSERT(patch->pos < compiled_func->bytecode.get_size(), "invalid patch position");
+					ASSERT(patch->pos < compiled_func->bytecode.get_size(), "invalid patch position");
 	 
 		 			const u64 actual_position = compiled_func->code_position + patch->pos + 4;
 		 			u32 position = static_cast<u32>(reinterpret_cast<function*>(patch->target.get())->output.code_position - actual_position);
@@ -625,7 +625,7 @@ namespace sigma::ir {
 			case arch::X64: return coff_machine::AMD64;
 		}
 
-		ASSERT(false, "coversion not implemented");
+		NOT_IMPLEMENTED();
 		return coff_machine::NONE;
 	}
 }

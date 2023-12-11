@@ -35,22 +35,6 @@ namespace utility::detail {
         return underline;
     }
 
-    outcome::result<u64> string_to_hex(
-        const std::string& str
-    ) {
-        std::stringstream ss;
-        ss << std::hex << str;
-
-        u64 hex_value;
-        if (!(ss >> (hex_value))) {
-            return outcome::failure(
-                error::emit_assembly<error_code::string_to_hexadecimal_failed>(str)
-            );
-        }
-
-        return hex_value;
-    }
-
     bool is_hex(char c) {
         return std::isdigit(c) || (std::tolower(c) >= 'a' && std::tolower(c) <= 'f');
     }

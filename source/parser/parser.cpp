@@ -20,7 +20,7 @@ namespace sigma {
 				m_ast.add_node(parse_function_declaration());
 			}
 			else {
-				utility::console::out << "parse global\n";
+				NOT_IMPLEMENTED();
 			}
 
 			m_tokens.next();
@@ -124,7 +124,7 @@ namespace sigma {
 					break;
 				}
 
-				default: ASSERT(false, "not implemented");
+				default: NOT_IMPLEMENTED();
 			}
 		}
 
@@ -137,7 +137,7 @@ namespace sigma {
 		// first token is the RET keyword
 		// allow return statements without any expressions
 		if (m_tokens.peek_next_token() == token_type::SEMICOLON) {
-			ASSERT(false, "unhandled empty return TODO\n");
+			NOT_IMPLEMENTED();
 			return nullptr;
 		}
 
@@ -394,7 +394,7 @@ namespace sigma {
 			switch (operation) {
 				case token_type::PLUS_SIGN:  operator_type = node_type::OPERATOR_ADD; break;
 				case token_type::MINUS_SIGN: operator_type = node_type::OPERATOR_SUBTRACT; break;
-				default: ASSERT(false, "not implemented");
+				default: NOT_IMPLEMENTED();
 			}
 
 			left = m_ast.create_binary_expression(operator_type, left, right);
@@ -425,7 +425,7 @@ namespace sigma {
 				case token_type::ASTERISK: operator_type = node_type::OPERATOR_MULTIPLY; break;
 				case token_type::SLASH:    operator_type = node_type::OPERATOR_DIVIDE; break;
 				case token_type::MODULO:   operator_type = node_type::OPERATOR_MODULO; break;
-				default: ASSERT(false, "not implemented");
+				default: NOT_IMPLEMENTED();
 			}
 
 			left = m_ast.create_binary_expression(operator_type, left, right);
@@ -446,7 +446,7 @@ namespace sigma {
 			case token_type::MINUS_SIGN:         return parse_negative_expression();
 			case token_type::BOOL_LITERAL_TRUE:
 			case token_type::BOOL_LITERAL_FALSE: return parse_bool_literal();
-			default: ASSERT(false, "unknown token detected");
+			default: NOT_IMPLEMENTED();
 		}
 
 		return nullptr;
@@ -473,7 +473,7 @@ namespace sigma {
 			//case lex::token_type::F64_LITERAL:         base = data_type::F64; break;
 			case token_type::HEXADECIMAL_LITERAL: base = data_type::I32; break;
 			case token_type::BINARY_LITERAL:      base = data_type::I32; break;
-			default: ASSERT(false, "not implemented");
+			default: NOT_IMPLEMENTED();
 		}
 
 		const handle<node> literal_node = m_ast.create_node<literal>(

@@ -65,7 +65,7 @@ namespace sigma::ir {
 
 		if(context.stack_usage >= 4096) {
 			// emit a chkstk function
-			ASSERT(false, "not implemented - chkstk");
+			NOT_IMPLEMENTED();
 		}
 		else {
 			bytecode.append_byte(rex(true, 0x00, x64::RSP, 0));
@@ -113,11 +113,11 @@ namespace sigma::ir {
 				bytecode.resolve_relocation_dword(&context.labels[id], position);
 			}
 			else if(inst->type == instruction::INLINE) {
-				ASSERT(false, "not implemented  - inline instruction");
+				NOT_IMPLEMENTED();
 			}
 			else if (inst->type == instruction::EPILOGUE) { /*does nothing*/ }
 			else if (inst->type == instruction::LINE) {
-				ASSERT(false, "not implemented - line instruction");
+				NOT_IMPLEMENTED();
 			}
 			else if (
 				cat == instruction::category::BYTE ||
@@ -154,7 +154,7 @@ namespace sigma::ir {
 					target = codegen_temporary::create_label(context, inst->get<label>().value);
 				}
 				else if (inst->flags & instruction::global) {
-					ASSERT(false, "not implemented");
+					NOT_IMPLEMENTED();
 				}
 				else {
 					ASSERT(inst->in_count == 1, "");
@@ -597,7 +597,7 @@ namespace sigma::ir {
 			bytecode.emit_relocation_dword(&context.labels[label], bytecode.get_size() - 4);
 		}
 		else {
-			ASSERT(false, "not implemented");
+			NOT_IMPLEMENTED();
 		}
 	}
 
@@ -610,7 +610,7 @@ namespace sigma::ir {
 		utility::byte_buffer& bytecode
 	) {
 		if (data_type >= x64::SSE_SS && data_type <= x64::SSE_PD) {
-			ASSERT(false, "");
+			NOT_IMPLEMENTED();
 		}
 
 		ASSERT(data_type >= x64::BYTE && data_type <= x64::QWORD, "invalid data type");
@@ -841,7 +841,7 @@ namespace sigma::ir {
 			emit_symbol_patch(context, a->get<handle<symbol>>(), bytecode.get_size() - 4);
 		}
 		else {
-			ASSERT(false, "not implemented 2");
+			NOT_IMPLEMENTED();
 		}
 	}
 

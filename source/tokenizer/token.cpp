@@ -77,7 +77,7 @@ namespace sigma {
 			case token_type::END_OF_FILE:         return "EOF";
 		}
 
-		ASSERT(false, "unspecified token type to string conversion");
+		NOT_IMPLEMENTED();
 		return "ERROR";
 	}
 

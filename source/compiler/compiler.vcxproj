@@ -100,15 +100,14 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="compiler\compilation_context.h" />
     <ClInclude Include="compiler\compiler.h" />
-    <ClInclude Include="compiler\dependency_tree.h" />
     <ClInclude Include="program_aruments\argument.h" />
     <ClInclude Include="program_aruments\command.h" />
     <ClInclude Include="program_aruments\program_options.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="compiler\compiler.cpp" />
-    <ClCompile Include="compiler\dependency_tree.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="program_aruments\argument.cpp" />
     <ClCompile Include="program_aruments\command.cpp" />

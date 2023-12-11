@@ -2,7 +2,9 @@
 #include "intermediate_representation/module.h"
 
 namespace sigma::ir {
-	void global::set_storage(u8 section_handle, u32 storage_size, u32 storage_alignment, u32 max_objects) {
+	void global::set_storage(
+		u8 section_handle, u32 storage_size, u32 storage_alignment, u32 max_objects
+	) {
 		// parent = section
 		position = 0;
 		size = storage_size;
@@ -26,4 +28,4 @@ namespace sigma::ir {
 		objects.push_back(o);
 		return ptr;
 	}
-}
+} // namespace sigma::ir

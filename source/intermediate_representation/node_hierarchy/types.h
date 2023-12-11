@@ -42,8 +42,14 @@ namespace sigma::ir {
 #define I64_TYPE  sigma::ir::data_type(sigma::ir::data_type::INTEGER, 64)
 
 // floating point types
-#define F32_TYPE sigma::ir::data_type(sigma::ir::data_type::FLOAT, static_cast<u8>(sigma::ir::float_format::f32))
-#define F64_TYPE sigma::ir::data_type(sigma::ir::data_type::FLOAT, static_cast<u8>(sigma::ir::float_format::f64))
+#define F32_TYPE sigma::ir::data_type(          \
+	sigma::ir::data_type::FLOAT,                  \
+	static_cast<u8>(sigma::ir::float_format::f32) \
+)
+#define F64_TYPE sigma::ir::data_type(          \
+	sigma::ir::data_type::FLOAT,                  \
+	static_cast<u8>(sigma::ir::float_format::f64) \
+)
 
 // misc types
 #define CONTROL_TYPE      sigma::ir::data_type(sigma::ir::data_type::CONTROL)

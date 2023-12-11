@@ -101,7 +101,6 @@
     <ClInclude Include="containers\byte_buffer.h" />
     <ClInclude Include="containers\contiguous_container.h" />
     <ClInclude Include="containers\dense_set.h" />
-    <ClInclude Include="containers\directed_graph.h" />
     <ClInclude Include="containers\handle.h" />
     <ClInclude Include="containers\iterators\const_iterator.h" />
     <ClInclude Include="containers\iterators\iterator.h" />
@@ -125,7 +124,6 @@
   <ItemGroup>
     <ClCompile Include="containers\allocators\block_allocator.cpp" />
     <ClCompile Include="containers\dense_set.cpp" />
-    <ClCompile Include="containers\directed_graph.cpp" />
     <ClCompile Include="containers\string_accessor.cpp" />
     <ClCompile Include="containers\symbol_table.cpp" />
     <ClCompile Include="memory.cpp" />

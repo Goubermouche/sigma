@@ -12,9 +12,6 @@
     <ClInclude Include="compiler\compiler.h">
       <Filter>compiler</Filter>
     </ClInclude>
-    <ClInclude Include="compiler\dependency_tree.h">
-      <Filter>compiler</Filter>
-    </ClInclude>
     <ClInclude Include="program_aruments\argument.h">
       <Filter>program_aruments</Filter>
     </ClInclude>
@@ -24,12 +21,10 @@
     <ClInclude Include="program_aruments\program_options.h">
       <Filter>program_aruments</Filter>
     </ClInclude>
+    <ClInclude Include="compiler\compilation_context.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="compiler\compiler.cpp">
-      <Filter>compiler</Filter>
-    </ClCompile>
-    <ClCompile Include="compiler\dependency_tree.cpp">
       <Filter>compiler</Filter>
     </ClCompile>
     <ClCompile Include="main.cpp" />

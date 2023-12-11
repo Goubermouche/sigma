@@ -2,15 +2,17 @@
 #include <abstract_syntax_tree/abstract_syntax_tree.h>
 
 namespace sigma {
+	struct compilation_context;
+
 	/**
 	 * \brief A simple type checker implementation, traverses the provided AST and
 	 * resolves type relationships, including generics.
 	 */
 	class type_checker {
 	public:
-		static void type_check(abstract_syntax_tree& ast, utility::symbol_table& symbols);
+		static void type_check(compilation_context& context);
 	private:
-		type_checker(abstract_syntax_tree& ast, utility::symbol_table& symbols);
+		type_checker(compilation_context& context);
 		void type_check();
 
 		void type_check_node(handle<node> ast_node, data_type expected = {});
@@ -31,7 +33,7 @@ namespace sigma {
 
 		static void apply_expected_data_type(data_type& target, data_type source);
 	private:
-		abstract_syntax_tree& m_ast;
+		compilation_context& m_context;
 
 		// TODO: create a function registry
 		std::unordered_map<utility::symbol_table_key, handle<function>> m_functions;

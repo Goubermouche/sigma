@@ -45,9 +45,6 @@
     <ClInclude Include="containers\dense_set.h">
       <Filter>containers</Filter>
     </ClInclude>
-    <ClInclude Include="containers\directed_graph.h">
-      <Filter>containers</Filter>
-    </ClInclude>
     <ClInclude Include="containers\handle.h">
       <Filter>containers</Filter>
     </ClInclude>
@@ -99,9 +96,6 @@
       <Filter>containers\allocators</Filter>
     </ClCompile>
     <ClCompile Include="containers\dense_set.cpp">
-      <Filter>containers</Filter>
-    </ClCompile>
-    <ClCompile Include="containers\directed_graph.cpp">
       <Filter>containers</Filter>
     </ClCompile>
     <ClCompile Include="containers\string_accessor.cpp">

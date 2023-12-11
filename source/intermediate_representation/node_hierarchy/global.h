@@ -50,4 +50,4 @@ namespace sigma::ir {
 		symbol symbol;
 		linkage linkage;
 	};
-}
+} // namespace sigma::ir

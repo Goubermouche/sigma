@@ -197,7 +197,13 @@ namespace sigma::ir {
 		auto get_node_name() const -> std::string;
 
 		// user stuff
-		void add_user(handle<node> in, u64 slot, handle<user> recycled, handle<utility::block_allocator> allocator);
+		void add_user(
+			handle<node> in,
+			u64 slot,
+			handle<user> recycled,
+			handle<utility::block_allocator> allocator
+		);
+
 		auto has_users(codegen_context& context) -> bool;
 		auto remove_user(u64 slot) -> handle<user>;
 		void use_node(codegen_context& context);

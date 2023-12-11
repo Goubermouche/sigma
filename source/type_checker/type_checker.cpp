@@ -1,18 +1,17 @@
 #include "type_checker.h"
+#include <compiler/compiler/compilation_context.h>
 
 namespace sigma {
-	void type_checker::type_check(abstract_syntax_tree& ast, utility::symbol_table& symbols) {
-		type_checker(ast, symbols).type_check();
+	void type_checker::type_check(compilation_context& context) {
+		type_checker(context).type_check();
 	}
 
-	type_checker::type_checker(abstract_syntax_tree& ast, utility::symbol_table& symbols)
-		: m_ast(ast)
-	{
+	type_checker::type_checker(compilation_context& context) : m_context(context) {
 		{
-			const utility::symbol_table_key printf_key = symbols.insert("printf");
-			const utility::symbol_table_key format_key = symbols.insert("format");
+			const utility::symbol_table_key printf_key = context.symbols.insert("printf");
+			const utility::symbol_table_key format_key = context.symbols.insert("format");
 
-			auto printf_params = utility::slice<named_data_type>(m_ast.get_allocator(), 1);
+			auto printf_params = utility::slice<named_data_type>(m_context.ast.get_allocator(), 1);
 			printf_params[0] = named_data_type{ data_type(data_type::CHAR, 1), format_key };
 
 			m_external_functions[printf_key] = function{
@@ -24,10 +23,10 @@ namespace sigma {
 		}
 
 		{
-			const utility::symbol_table_key printf_key = symbols.insert("puts");
-			const utility::symbol_table_key format_key = symbols.insert("str");
+			const utility::symbol_table_key printf_key = context.symbols.insert("puts");
+			const utility::symbol_table_key format_key = context.symbols.insert("str");
 
-			auto printf_params = utility::slice<named_data_type>(m_ast.get_allocator(), 1);
+			auto printf_params = utility::slice<named_data_type>(m_context.ast.get_allocator(), 1);
 			printf_params[0] = named_data_type{ data_type(data_type::CHAR, 1), format_key };
 
 			m_external_functions[printf_key] = function{
@@ -40,7 +39,7 @@ namespace sigma {
 	}
 
 	void type_checker::type_check() {
-		for (const handle<node> top_level : m_ast.get_nodes()) {
+		for (const handle<node> top_level : m_context.ast.get_nodes()) {
 			type_check_node(top_level);
 		}
 	}

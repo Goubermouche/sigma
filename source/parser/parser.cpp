@@ -1,13 +1,12 @@
 #include "parser.h"
+#include <compiler/compiler/compilation_context.h>
 
 namespace sigma {
-	parser::parser(const token_buffer& tokens, utility::symbol_table& symbols)
-		: m_symbols(symbols), m_tokens(tokens) {}
+	parser::parser(compilation_context& context)
+		: m_context(context), m_tokens(context.tokens) {}
 
-	auto parser::parse(
-		const token_buffer& tokens, utility::symbol_table& symbols
-	) -> abstract_syntax_tree {
-		return parser(tokens, symbols).parse();
+	auto parser::parse(compilation_context& context) -> abstract_syntax_tree {
+		return parser(context).parse();
 	}
 
 	auto parser::parse() -> abstract_syntax_tree {
@@ -251,7 +250,7 @@ namespace sigma {
 		);
 
 		auto& prop = negation->get<literal>();
-		prop.value_key = m_symbols.insert("-1");
+		prop.value_key = m_context.symbols.insert("-1");
 		prop.data_type = { data_type::I32, 0 };
 
 		// negate the expression

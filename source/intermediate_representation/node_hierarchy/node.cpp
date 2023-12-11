@@ -49,95 +49,77 @@ namespace sigma::ir {
 
 	auto node::get_node_name() const -> std::string {
 		switch (ty) {
-			case NONE: return "INVALID NODE";
-			case DEAD: return "dead";
-			case UNREACHABLE: return "unreachable";
-
-			case ENTRY:  return "entry";
-			case EXIT:   return "exit";
-			case PROJECTION:   return "proj";
-			case REGION: return "region";
-
-			case LOCAL: return "local";
-
-			case VARIADIC_START: return "variadic_start";
-			case DEBUG_BREAK: return "debug_break";
-
-			case POISON: return "poison";
-			case INTEGER_CONSTANT: return "int";
-			case F32_CONSTANT: return "float32";
-			case F64_CONSTANT: return "float64";
-
-			case PHI: return "phi";
-			case SELECT: return "select";
-			case LOOKUP: return "lookup";
-
-			case ARRAY_ACCESS: return "array";
-			case MEMBER_ACCESS: return "member";
-
-			case POINTER_TO_INTEGER: return "ptr2int";
-			case INTEGER_TO_POINTER: return "int2ptr";
-
-			case MEMSET: return "memset";
-			case MEMCPY: return "memcpy";
-
-			case ZERO_EXTEND: return "zxt";
-			case SIGN_EXTEND: return "sxt";
-			case FLOAT_EXTEND: return "fpxt";
-			case TRUNCATE: return "trunc";
-			case BIT_CAST: return "bitcast";
+			case NONE:                      return "INVALID NODE";
+			case DEAD:                      return "dead";
+			case UNREACHABLE:               return "unreachable";
+			case ENTRY:                     return "entry";
+			case EXIT:                      return "exit";
+			case PROJECTION:                return "proj";
+			case REGION:                    return "region";
+			case LOCAL:                     return "local";
+			case VARIADIC_START:            return "variadic_start";
+			case DEBUG_BREAK:               return "debug_break";
+			case POISON:                    return "poison";
+			case INTEGER_CONSTANT:          return "int";
+			case F32_CONSTANT:              return "float32";
+			case F64_CONSTANT:              return "float64";
+			case PHI:                       return "phi";
+			case SELECT:                    return "select";
+			case LOOKUP:                    return "lookup";
+			case ARRAY_ACCESS:              return "array";
+			case MEMBER_ACCESS:             return "member";
+			case POINTER_TO_INTEGER:        return "ptr2int";
+			case INTEGER_TO_POINTER:        return "int2ptr";
+			case MEMSET:                    return "memset";
+			case MEMCPY:                    return "memcpy";
+			case ZERO_EXTEND:               return "zxt";
+			case SIGN_EXTEND:               return "sxt";
+			case FLOAT_EXTEND:              return "fpxt";
+			case TRUNCATE:                  return "trunc";
+			case BIT_CAST:                  return "bitcast";
 			case UNSIGNED_INTEGER_TO_FLOAT: return "uint2float";
-			case INTEGER_TO_FLOAT: return "int2float";
+			case INTEGER_TO_FLOAT:          return "int2float";
 			case FLOAT_TO_UNSIGNED_INTEGER: return "float2uint";
-			case FLOAT_TO_INTEGER: return "float2int";
-			case SYMBOL: return "symbol";
-
-			case CMP_NE: return "cmp.ne";
-			case CMP_EQ: return "cmp.eq";
-			case CMP_ULT: return "cmp.ult";
-			case CMP_ULE: return "cmp.ule";
-			case CMP_SLT: return "cmp.slt";
-			case CMP_SLE: return "cmp.sle";
-			case CMP_FLT: return "cmp.lt";
-			case CMP_FLE: return "cmp.le";
-
-			case CLZ: return "clz";
-			case CTZ: return "ctz";
-			case NOT: return "not";
-			case AND: return "and";
-			case OR: return "or";
-			case XOR: return "xor";
-			case ADD: return "add";
-			case SUB: return "sub";
-			case MUL: return "mul";
-			case UDIV: return "udiv";
-			case DIV: return "sdiv";
-			case UMOD: return "umod";
-			case MOD: return "smod";
-			case LSH: return "shl";
-			case RSH: return "shr";
-			case LR: return "rol";
-			case RR: return "ror";
-			case RAS: return "sar";
-
-			case FADD: return "fadd";
-			case FSUB: return "fsub";
-			case FMUL: return "fmul";
-			case FDIV: return "fdiv";
-
-			case MUL_PAIR: return "mulpair";
-			case LOAD: return "load";
-			case STORE: return "store";
-
-			case CALL: return "call";
-			case SYSTEM_CALL: return "syscall";
+			case FLOAT_TO_INTEGER:          return "float2int";
+			case SYMBOL:                    return "symbol";
+			case CMP_NE:                    return "cmp.ne";
+			case CMP_EQ:                    return "cmp.eq";
+			case CMP_ULT:                   return "cmp.ult";
+			case CMP_ULE:                   return "cmp.ule";
+			case CMP_SLT:                   return "cmp.slt";
+			case CMP_SLE:                   return "cmp.sle";
+			case CMP_FLT:                   return "cmp.lt";
+			case CMP_FLE:                   return "cmp.le";
+			case CLZ:                       return "clz";
+			case CTZ:                       return "ctz";
+			case NOT:                       return "not";
+			case AND:                       return "and";
+			case OR:                        return "or";
+			case XOR:                       return "xor";
+			case ADD:                       return "add";
+			case SUB:                       return "sub";
+			case MUL:                       return "mul";
+			case UDIV:                      return "udiv";
+			case DIV:                       return "sdiv";
+			case UMOD:                      return "umod";
+			case MOD:                       return "smod";
+			case LSH:                       return "shl";
+			case RSH:                       return "shr";
+			case LR:                        return "rol";
+			case RR:                        return "ror";
+			case RAS:                       return "sar";
+			case FADD:                      return "fadd";
+			case FSUB:                      return "fsub";
+			case FMUL:                      return "fmul";
+			case FDIV:                      return "fdiv";
+			case MUL_PAIR:                  return "mulpair";
+			case LOAD:                      return "load";
+			case STORE:                     return "store";
+			case CALL:                      return "call";
+			case SYSTEM_CALL:               return "syscall";
 			case BRANCH: 
-			case TAIL_CALL: return "branch";
-
-			default: {
-				ASSERT(false, "unknown type");
-				return "";
-			}
+			case TAIL_CALL:                 return "branch";
+			default: NOT_IMPLEMENTED();     return "";
 		}
 	}
 
@@ -353,7 +335,12 @@ namespace sigma::ir {
 		return nullptr;
 	}
 
-	void node::add_user(handle<node> in, u64 slot, handle<user> recycled, handle<utility::block_allocator> allocator) {
+	void node::add_user(
+		handle<node> in,
+		u64 slot, 
+		handle<user> recycled,
+		handle<utility::block_allocator> allocator
+	) {
 		const auto new_use = recycled ? recycled : static_cast<user*>(
 			allocator->allocate(sizeof(user))
 		);
@@ -363,4 +350,4 @@ namespace sigma::ir {
 		new_use->slot = slot;
 		in->use = new_use;
 	}
-}
+} // namespace sigma::ir

@@ -1,25 +1,26 @@
 #include "ir_translator.h"
+#include <compiler/compiler/compilation_context.h>
 
 namespace sigma {
 	auto ir_translator::translate(
-		const abstract_syntax_tree& ast, ir::target target, utility::symbol_table& symbols
+		compilation_context& context, ir::target target
 	) -> ir::module { 
-		return ir_translator(ast, target, symbols).translate();
+		return ir_translator(context, target).translate();
 	}
 
 	ir_translator::ir_translator(
-		const abstract_syntax_tree& ast, ir::target target, utility::symbol_table& symbols
-	) : m_ast(ast), m_symbols(symbols), m_module(target), m_builder(m_module),
+		compilation_context& context, ir::target target
+	) : m_context(context), m_module(target), m_builder(m_module),
 	m_functions(m_builder), m_variables(m_builder) {
 
-		m_functions.register_external_function(symbols.insert("printf"), {
+		m_functions.register_external_function(m_context.symbols.insert("printf"), {
 			.identifier   = "printf",
 			.parameters   = { PTR_TYPE },
 			.returns      = { I32_TYPE },
 			.has_var_args = true
 		});
 
-		m_functions.register_external_function(symbols.insert("puts"), {
+		m_functions.register_external_function(m_context.symbols.insert("puts"), {
 			.identifier   = "puts",
 			.parameters   = { PTR_TYPE },
 			.returns      = { I32_TYPE },
@@ -51,6 +52,7 @@ namespace sigma {
 			case node_type::NUMERICAL_LITERAL:    return translate_numerical_literal(ast_node);
 			case node_type::STRING_LITERAL:       return translate_string_literal(ast_node);
 			case node_type::BOOL_LITERAL:         return translate_bool_literal(ast_node);
+			default: NOT_IMPLEMENTED();
 		}
 
 		return nullptr;
@@ -67,7 +69,7 @@ namespace sigma {
 
 		// TODO: the IR system should inherit our symbol table system
 		const ir::function_signature signature {
-			.identifier = m_symbols.get(prop.identifier_key), // TEMP
+			.identifier = m_context.symbols.get(prop.identifier_key), // TEMP
 			.parameters = parameter_types,
 			.returns = { data_type_to_ir(prop.return_type) },
 			.has_var_args = false
@@ -173,7 +175,7 @@ namespace sigma {
 	auto ir_translator::translate_string_literal(
 		handle<node> string_literal_node
 	) const -> handle<ir::node> {
-		const std::string& value = m_symbols.get(string_literal_node->get<literal>().value_key);
+		const std::string& value = m_context.symbols.get(string_literal_node->get<literal>().value_key);
 		return m_builder.create_string(value);
 	}
 
@@ -240,7 +242,7 @@ namespace sigma {
 	}
 
 	auto ir_translator::literal_to_ir(literal& literal) const -> handle<ir::node> {
-		const std::string& value = m_symbols.get(literal.value_key);
+		const std::string& value = m_context.symbols.get(literal.value_key);
 
 		// handle pointers separately
 		if (literal.data_type.pointer_level > 0) {
@@ -268,7 +270,7 @@ namespace sigma {
 	}
 
 	auto ir_translator::translate() -> ir::module {
-		for (const handle<node> top_level : m_ast.get_nodes()) {
+		for (const handle<node> top_level : m_context.ast.get_nodes()) {
 			translate_node(top_level);
 		}
 

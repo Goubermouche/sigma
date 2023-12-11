@@ -7,13 +7,13 @@
 namespace sigma {
 	using namespace utility::types;
 
+	struct compilation_context;
+
 	class parser {
 	public:
-		[[nodiscard]] static auto parse(
-			const token_buffer& tokens, utility::symbol_table& symbols
-		) -> abstract_syntax_tree;
+		[[nodiscard]] static auto parse(compilation_context& context) -> abstract_syntax_tree;
 	private:
-		parser(const token_buffer& tokens, utility::symbol_table& symbols);
+		parser(compilation_context& context);
 		[[nodiscard]] auto parse() -> abstract_syntax_tree;
 
 		auto parse_function_declaration() -> handle<node>;
@@ -53,7 +53,8 @@ namespace sigma {
 		auto peek_is_function_call() const -> bool;
 		auto peek_is_variable_declaration() const -> bool;
 	private:
-		utility::symbol_table& m_symbols;
+		compilation_context& m_context;
+
 		token_buffer_iterator m_tokens;
 		abstract_syntax_tree m_ast;
 	};

@@ -5,14 +5,16 @@
 #include <abstract_syntax_tree/abstract_syntax_tree.h>
 
 namespace sigma {
+	struct compilation_context;
+
 	class ir_translator {
 	public:
 		static auto translate(
-			const abstract_syntax_tree& ast, ir::target target, utility::symbol_table& symbols
+			compilation_context& context, ir::target target
 		) -> ir::module;
 	private:
 		ir_translator(
-			const abstract_syntax_tree& ast, ir::target target, utility::symbol_table& symbols
+			compilation_context& context, ir::target target
 		);
 
 		auto translate() -> ir::module;
@@ -53,8 +55,7 @@ namespace sigma {
 		auto literal_to_ir(literal& literal) const-> handle<ir::node>;
 		static auto data_type_to_ir(data_type dt) -> ir::data_type;
 	private:
-		const abstract_syntax_tree& m_ast;
-		utility::symbol_table& m_symbols;
+		compilation_context& m_context;
 
 		ir::module m_module;
 		ir::builder m_builder;

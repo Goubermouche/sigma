@@ -371,3 +371,6 @@ Makefile
 
 /source/compiler/test/*.exe
 /source/compiler/test/*.obj
+
+*.vcxproj
+*.vcxproj.filters

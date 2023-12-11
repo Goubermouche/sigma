@@ -40,8 +40,8 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <OutDir>bin\Release\</OutDir>
-    <IntDir>obj\</IntDir>
+    <OutDir>..\..\output\bin\Release\</OutDir>
+    <IntDir>..\..\output\obj\Release\Release\intermediate_representation\</IntDir>
     <TargetName>intermediate_representation</TargetName>
     <TargetExt>.lib</TargetExt>
   </PropertyGroup>

@@ -41,8 +41,8 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
-    <OutDir>bin\Release\</OutDir>
-    <IntDir>obj\</IntDir>
+    <OutDir>..\..\output\bin\Release\</OutDir>
+    <IntDir>..\..\output\obj\Release\Release\compiler\</IntDir>
     <TargetName>compiler</TargetName>
     <TargetExt>.exe</TargetExt>
   </PropertyGroup>

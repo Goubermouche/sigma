@@ -13,14 +13,8 @@
     <Filter Include="containers\iterators">
       <UniqueIdentifier>{27050236-1394-8BFF-BCB2-9FFAA8209CA5}</UniqueIdentifier>
     </Filter>
-    <Filter Include="diagnostics">
-      <UniqueIdentifier>{3DB66EFC-A96B-E7F1-3260-E1C89E14DEF5}</UniqueIdentifier>
-    </Filter>
     <Filter Include="filesystem">
       <UniqueIdentifier>{AAB27DB8-966A-BF05-FF71-9861EB485AF6}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="filesystem\file_types">
-      <UniqueIdentifier>{ED20BDD8-598D-78D3-2281-10318EAC9A3B}</UniqueIdentifier>
     </Filter>
     <Filter Include="filesystem\new">
       <UniqueIdentifier>{E39E2650-CF6C-1A56-B800-8B7CA46DF6BA}</UniqueIdentifier>
@@ -75,9 +69,7 @@
     <ClInclude Include="containers\symbol_table.h">
       <Filter>containers</Filter>
     </ClInclude>
-    <ClInclude Include="diagnostics.h">
-      <Filter>diagnostics</Filter>
-    </ClInclude>
+    <ClInclude Include="diagnostics.h" />
     <ClInclude Include="filesystem\new\file.h">
       <Filter>filesystem\new</Filter>
     </ClInclude>

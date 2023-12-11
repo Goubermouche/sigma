@@ -40,8 +40,8 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <OutDir>bin\Release\</OutDir>
-    <IntDir>obj\</IntDir>
+    <OutDir>..\..\output\bin\Release\</OutDir>
+    <IntDir>..\..\output\obj\Release\Release\ir_translator\</IntDir>
     <TargetName>ir_translator</TargetName>
     <TargetExt>.lib</TargetExt>
   </PropertyGroup>

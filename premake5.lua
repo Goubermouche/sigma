@@ -45,6 +45,10 @@ project "utility"
         "source"
     }
 
+    -- output directories 
+    targetdir "output/bin/%{cfg.buildcfg}"
+    objdir "output/obj/%{cfg.buildcfg}"
+
 -- tokenizer
 project "tokenizer"
     kind "StaticLib"
@@ -63,6 +67,10 @@ project "tokenizer"
         "utility"
     }
 
+    -- output directories 
+    targetdir "output/bin/%{cfg.buildcfg}"
+    objdir "output/obj/%{cfg.buildcfg}"
+
 -- abstract_syntax_tree
 project "abstract_syntax_tree"
     kind "StaticLib"
@@ -80,6 +88,10 @@ project "abstract_syntax_tree"
     links {
         "utility"
     }
+
+    -- output directories 
+    targetdir "output/bin/%{cfg.buildcfg}"
+    objdir "output/obj/%{cfg.buildcfg}"
 
 -- parser
 project "parser"
@@ -100,6 +112,10 @@ project "parser"
         "abstract_syntax_tree"
     }
 
+    -- output directories 
+    targetdir "output/bin/%{cfg.buildcfg}"
+    objdir "output/obj/%{cfg.buildcfg}"
+
 -- type_checker
 project "type_checker"
     kind "StaticLib"
@@ -119,6 +135,10 @@ project "type_checker"
         "abstract_syntax_tree"
     }
 
+    -- output directories 
+    targetdir "output/bin/%{cfg.buildcfg}"
+    objdir "output/obj/%{cfg.buildcfg}"
+
 -- intermediate_representation
 project "intermediate_representation"
     kind "StaticLib"
@@ -136,6 +156,10 @@ project "intermediate_representation"
     links {
         "utility"
     }
+
+    -- output directories 
+    targetdir "output/bin/%{cfg.buildcfg}"
+    objdir "output/obj/%{cfg.buildcfg}"
 
 -- ir_translator
 project "ir_translator"
@@ -156,6 +180,10 @@ project "ir_translator"
         "abstract_syntax_tree",
         "intermediate_representation"
     }
+
+    -- output directories 
+    targetdir "output/bin/%{cfg.buildcfg}"
+    objdir "output/obj/%{cfg.buildcfg}"
 
 -- compiler
 project "compiler"
@@ -181,6 +209,10 @@ project "compiler"
         "ir_translator"
     }
 
+    -- output directories 
+    targetdir "output/bin/%{cfg.buildcfg}"
+    objdir "output/obj/%{cfg.buildcfg}"
+
     filter { "system:linux", "action:gmake" }
         links {
             "dl",     
@@ -196,3 +228,5 @@ project "compiler"
         linkoptions {
             "-lstdc++"
         }
+
+      

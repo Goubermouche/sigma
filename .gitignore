@@ -369,6 +369,5 @@ FodyWeavers.xsd
 
 Makefile
 
-
 /source/compiler/test/*.exe
 /source/compiler/test/*.obj

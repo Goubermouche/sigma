@@ -1,6 +1,6 @@
 <p align="center">
  <a href="https://github.com/Goubermouche/sigma">
-    <img src="/images/banner_2.png" alt="sigma logo" width="650cm">
+    <img src="/images/banner_3.png" alt="sigma logo" width="650cm">
    </a>
 </p>
 

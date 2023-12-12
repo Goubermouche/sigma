@@ -374,3 +374,4 @@ Makefile
 
 *.vcxproj
 *.vcxproj.filters
+*.sln

@@ -34,6 +34,9 @@ As Sigma us currently under heavy development, it isn't ready for stable use, an
 -   Future:
     -   Unified package manager
     -   Official GPU support via kernels
+-   Linux compilation:
+    -   Fix segfaults
+    -   Clean up the code and includes
 
 ## Contributing
 Contributions, either to the compiler implementation, or related to language design are greatly appreciated and welcome.

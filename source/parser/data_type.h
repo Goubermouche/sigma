@@ -1,5 +1,5 @@
 #pragma once
-#include <tokenizer/token.h>
+#include "tokenizer/token.h"
 
 namespace sigma {
 	using namespace utility::types;

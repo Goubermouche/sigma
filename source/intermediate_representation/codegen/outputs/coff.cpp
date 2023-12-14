@@ -18,7 +18,7 @@ namespace sigma::ir {
 			flags |= section.flags & module_section::WRITE ? coff::SECTION_WRITE : 0;
 			flags |= section.flags & module_section::EXEC  ? coff::SECTION_EXECUTE | coff::SECTION_CODE : coff::SECTION_INIT;
 
-			if (section.comdat.ty != comdat::NONE) {
+			if (section.com.ty != comdat::NONE) {
 				flags |= coff::SECTION_COMDAT;
 			}
 
@@ -36,16 +36,16 @@ namespace sigma::ir {
 
 		for (auto& section : sections) {
 			for (const auto& func : section.functions) {
-				func->parent->symbol.symbol_id = unique_id_counter++;
+				func->parent->sym.symbol_id = unique_id_counter++;
 			}
 
 			for (const auto& global : section.globals) {
-				global->symbol.symbol_id = unique_id_counter++;
+				global->sym.symbol_id = unique_id_counter++;
 			}
 		}
 
 		for (auto& ex : externals) {
-			ex->symbol.symbol_id = unique_id_counter++;
+			ex->sym.symbol_id = unique_id_counter++;
 		}
 
 		for (u64 i = 0; i < sections.size(); ++i) {
@@ -104,7 +104,7 @@ namespace sigma::ir {
 		// compute string table size
 		for (const auto& section : sections) {
 			for (const auto& function : section.functions) {
-				u64 name_length = function->parent->symbol.name.size() + 1;
+				u64 name_length = function->parent->sym.name.size() + 1;
 
 				if (name_length >= 8) {
 					string_table.size += static_cast<u32>(name_length) + 1;
@@ -112,7 +112,7 @@ namespace sigma::ir {
 			}
 
 			for (const auto& global : section.globals) {
-				u64 name_length = global->symbol.name.size() + 1;
+				u64 name_length = global->sym.name.size() + 1;
 
 				if (name_length >= 8) {
 					string_table.size += static_cast<u32>(name_length) + 1;
@@ -121,7 +121,7 @@ namespace sigma::ir {
 		}
 
 		for (const auto& ex : externals) {
-			u64 name_length = ex->symbol.name.size() + 1;
+			u64 name_length = ex->sym.name.size() + 1;
 
 			if (name_length >= 8) {
 				string_table.size += static_cast<u32>(name_length) + 1;
@@ -274,7 +274,7 @@ namespace sigma::ir {
 				.length = section.total_size,
 				.reloc_count = static_cast<u16>(section.relocation_count),
 				.number = static_cast<i16>(symbol_count),
-				.selection = static_cast<u8>(section.comdat.ty != comdat::NONE ? 2 : 0),
+				.selection = static_cast<u8>(section.com.ty != comdat::NONE ? 2 : 0),
 			};
 
 			symbol_table_writer.write(aux);
@@ -331,14 +331,14 @@ namespace sigma::ir {
 			i16 section_index = section.section_index;
 
 			for (const auto& function : section.functions) {
-				bool is_extern = function->parent->linkage == PUBLIC;
+				bool is_extern = function->parent->link == PUBLIC;
 				coff_symbol sym = {
 					.value = static_cast<u32>(function->code_position),
 					.section_number = section_index,
 					.storage_class = static_cast<u8>(is_extern ? IMAGE_SYM_CLASS_EXTERNAL : IMAGE_SYM_CLASS_STATIC)
 				};
 
-				std::string name = function->parent->symbol.name;
+				std::string name = function->parent->sym.name;
 				u64 name_length = name.size() + 1;
 
 				ASSERT(name_length < std::numeric_limits<u16>::max(), "invalid name");
@@ -358,7 +358,7 @@ namespace sigma::ir {
 			}
 
 			for (const auto& global : section.globals) {
-				bool is_extern = global->linkage == PUBLIC;
+				bool is_extern = global->link == PUBLIC;
 
 				ASSERT(section_index == global->parent_section + 1, "invalid parent section");
 				coff_symbol sym = {
@@ -367,23 +367,23 @@ namespace sigma::ir {
 					.storage_class = static_cast<u8>(is_extern ? IMAGE_SYM_CLASS_EXTERNAL : IMAGE_SYM_CLASS_STATIC)
 				};
 
-				if (global->symbol.name[0] != 0) {
-					u64 name_len = global->symbol.name.size() + 1;
+				if (global->sym.name[0] != 0) {
+					u64 name_len = global->sym.name.size() + 1;
 					ASSERT(name_len < std::numeric_limits<u16>::max(), "invalid name length");
 
 					if (name_len >= 8) {
 						sym.long_name[0] = 0; // this value is 0 for long names
 						sym.long_name[1] = string_table_mark;
 
-						string_table_data[string_table_length++] = global->symbol.name;
+						string_table_data[string_table_length++] = global->sym.name;
 						string_table_mark += static_cast<u32>(name_len) + 1;
 					}
 					else {
-						std::memcpy(sym.short_name, global->symbol.name.c_str(), name_len + 1);
+						std::memcpy(sym.short_name, global->sym.name.c_str(), name_len + 1);
 					}
 				}
 				else {
-					std::snprintf(reinterpret_cast<char*>(sym.short_name), 8, "$%06zx", global->symbol.symbol_id);
+					std::snprintf(reinterpret_cast<char*>(sym.short_name), 8, "$%06zx", global->sym.symbol_id);
 				}
 
 				symbol_table_writer.write(sym);
@@ -397,18 +397,18 @@ namespace sigma::ir {
 				.storage_class = IMAGE_SYM_CLASS_EXTERNAL
 			};
 
-			u64 name_length = ext->symbol.name.size() + 1;
+			u64 name_length = ext->sym.name.size() + 1;
 			ASSERT(name_length < std::numeric_limits<u16>::max(), "invalid name length");
 
 			if (name_length >= 8) {
 				sym.long_name[0] = 0; // this value is 0 for long names
 				sym.long_name[1] = string_table_mark;
 
-				string_table_data[string_table_length++] = ext->symbol.name;
+				string_table_data[string_table_length++] = ext->sym.name;
 				string_table_mark += static_cast<u32>(name_length);
 			}
 			else {
-				std::memcpy(sym.short_name, ext->symbol.name.c_str(), name_length);
+				std::memcpy(sym.short_name, ext->sym.name.c_str(), name_length);
 			}
 
 			symbol_table_writer.write(sym);
@@ -470,7 +470,7 @@ namespace sigma::ir {
 	 		pdata[j + 2] = unwind_info;
 	 
 	 		// .pdata has relocations
-	 		const u32 sym = static_cast<u32>(function->parent->symbol.symbol_id);
+	 		const u32 sym = static_cast<u32>(function->parent->sym.symbol_id);
 
 	 		relocations[j + 0] = coff_image_relocation{
 	 			.virtual_address = static_cast<u32>(j * 4),
@@ -531,11 +531,11 @@ namespace sigma::ir {
  		else {
  			const unwind_code codes[] = {
  				// sub rsp, stack_usage
-				{ .offset = {.code_offset = 8, .unwind_op = unwind_op::ALLOC_SMALL, .op_info = static_cast<u8>(stack_usage / 8 - 1) }},
+				{ .o = {.code_offset = 8, .unwind_op = unwind_op::ALLOC_SMALL, .op_info = static_cast<u8>(stack_usage / 8 - 1) }},
  				// mov rbp, rsp
-				{.offset = {.code_offset = 4, .unwind_op = unwind_op::SET_FPREG, .op_info = 0 }},
+				{.o = {.code_offset = 4, .unwind_op = unwind_op::SET_FPREG, .op_info = 0 }},
  				// push rbp
-				{.offset = {.code_offset = 1, .unwind_op = unwind_op::PUSH_NONVOL, .op_info = x64::RBP }},
+				{.o = {.code_offset = 1, .unwind_op = unwind_op::PUSH_NONVOL, .op_info = x64::RBP }},
  			};
 	 
  			buffer.append_type(codes);

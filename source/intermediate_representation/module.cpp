@@ -30,7 +30,7 @@ namespace sigma::ir {
 
 		// go through all declared functions and run codegen
 		for (const handle<function> function : m_functions) {
-			// utility::console::out << "compiling function: " << function->symbol.name << '\n';
+			// utility::console::out << "compiling function: " << function->sym.name << '\n';
 
 			// every function has its own unique work list (thread safe), this list
 			// is reused in all passes of the given function so that we don't have to
@@ -39,8 +39,8 @@ namespace sigma::ir {
 
 			// initialize the transformation pass
 			transformation_context transformation {
-				.function  = function,
-				.work_list = &function_work_list
+				.func  = function,
+				.work = &function_work_list
 			};
 
 			// run our transformations
@@ -49,9 +49,9 @@ namespace sigma::ir {
 
 			// initialize the code generation pass
 			codegen_context codegen {
-				.function  = function,
-				.work_list = &function_work_list,
-				.target    = m_codegen.get_target(),
+				.func  = function,
+				.work = &function_work_list,
+				.t    = m_codegen.get_target(),
 				.intervals = m_codegen.get_register_intervals()
 			};
 
@@ -93,12 +93,12 @@ namespace sigma::ir {
 	auto module::create_external(const std::string& name, linkage linkage) -> handle<external> {
 		const auto ex = static_cast<external*>(m_allocator.allocate(sizeof(external)));
 		 
-		ex->symbol.tag = symbol::EXTERNAL;
-		ex->symbol.name = std::string(name);
-		ex->symbol.module = this;
-		ex->linkage = linkage;
+		ex->sym.tag = symbol::EXTERNAL;
+		ex->sym.name = std::string(name);
+		ex->sym.parent_module = this;
+		ex->link = linkage;
 
-		m_symbols.push_back(&ex->symbol);
+		m_symbols.push_back(&ex->sym);
 		return ex;
 	}
 
@@ -106,13 +106,13 @@ namespace sigma::ir {
 		const auto g = static_cast<global*>(m_allocator.allocate(sizeof(global)));
 		m_globals.emplace_back(g);
 
-		g->symbol.tag = symbol::GLOBAL;
-		g->symbol.name = std::string(name);
-		g->symbol.module = this;
-		g->linkage = linkage;
+		g->sym.tag = symbol::GLOBAL;
+		g->sym.name = std::string(name);
+		g->sym.parent_module = this;
+		g->link = linkage;
 		g->objects = std::vector<init_object>();
 
-		m_symbols.push_back(&g->symbol);
+		m_symbols.push_back(&g->sym);
 		return g;
 	}
 
@@ -123,17 +123,17 @@ namespace sigma::ir {
 		const handle func = new (func_allocation) function(function_sig.identifier);
 		m_functions.push_back(func);
 
-		func->linkage = linkage;
+		func->link = linkage;
 		func->parent_section = get_text_section();
 
-		m_symbols.emplace_back(&func->symbol);
+		m_symbols.emplace_back(&func->sym);
 
 		// allocate the entry node
 		const handle<node> entry_node = func->create_node<region>(node::ENTRY, 0);
 
 		auto& entry_region = entry_node->get<region>();
 
-		entry_node->data_type = TUPLE_TYPE;
+		entry_node->dt = TUPLE_TYPE;
 		func->entry_node = entry_node;
 
 		const handle<node> projection_node = func->create_projection(
@@ -171,7 +171,7 @@ namespace sigma::ir {
 
 		const auto destination = static_cast<char*>(dummy->add_region(0, static_cast<u32>(value.size() + 1)));
 		std::memcpy(destination, value.c_str(), value.size() + 1);
-		return parent_function->get_symbol_address(&dummy->symbol);
+		return parent_function->get_symbol_address(&dummy->sym);
 	}
 
 	auto module::get_target() const -> target {
@@ -192,7 +192,7 @@ namespace sigma::ir {
 		const module_section section {
 			.name = std::string(name),
 			.flags = flags,
-			.comdat = {.ty = comdat }
+			.com = {.ty = comdat }
 		};
 
 		m_sections.push_back(section);
@@ -207,7 +207,7 @@ namespace sigma::ir {
 					const handle func = reinterpret_cast<function*>(symbol.get());
 					const handle section = &m_sections[func->parent_section];
 
-					func->output.ordinal = func->symbol.ordinal;
+					func->output.ordinal = func->sym.ordinal;
 					section->functions.emplace_back(&func->output);
 					break;
 				}

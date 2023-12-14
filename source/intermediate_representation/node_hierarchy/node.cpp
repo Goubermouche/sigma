@@ -27,11 +27,11 @@ namespace sigma::ir {
 	auto node::get_fallthrough() -> handle<node> {
 		if(
 			ty == PROJECTION &&
-			data_type.ty == data_type::CONTROL &&
+			dt.ty == data_type::CONTROL &&
 			inputs[0]->ty != ENTRY
 		) {
 			// if it's single user and that user is the terminator we can skip it in the fallthrough logic
-			return use->next_user == nullptr && use->node->ty == REGION ? use->node : this;
+			return use->next_user == nullptr && use->n->ty == REGION ? use->n : this;
 		}
 
 		return this;
@@ -41,7 +41,7 @@ namespace sigma::ir {
 		ASSERT(ty == PROJECTION && inputs[0]->ty == BRANCH, "panic");
 
 		if (!inputs[0]->is_critical_edge(this)) {
-			return use->node;
+			return use->n;
 		}
 
 		return this;
@@ -133,7 +133,7 @@ namespace sigma::ir {
 			case MEMSET:
 				return true;
 			case PROJECTION:
-				return data_type.ty == data_type::CONTROL;
+				return dt.ty == data_type::CONTROL;
 			// control flow
 			case ENTRY:
 			case REGION:
@@ -152,11 +152,11 @@ namespace sigma::ir {
 
 	auto node::is_control() const -> bool {
 		// easy case
-		if (data_type.ty == data_type::CONTROL) {
+		if (dt.ty == data_type::CONTROL) {
 			return true;
 		}
 
-		if (data_type.ty != data_type::TUPLE) {
+		if (dt.ty != data_type::TUPLE) {
 			return false;
 		}
 
@@ -213,8 +213,8 @@ namespace sigma::ir {
 
 	auto node::get_next_control() const -> handle<node> {
 		for (auto u = use; u; u = u->next_user) {
-			if (use->node->is_control()) {
-				return use->node;
+			if (use->n->is_control()) {
+				return use->n;
 			}
 		}
 
@@ -237,7 +237,7 @@ namespace sigma::ir {
 
 	auto node::is_mem_out_op() const  -> bool {
 		return
-			data_type.ty == data_type::MEMORY ||
+			dt.ty == data_type::MEMORY ||
 			(ty >= STORE && ty < ATOMIC_CAS) ||
 			(ty >= CALL && ty <= SAFE_POINT_POLL);
 	}
@@ -256,17 +256,17 @@ namespace sigma::ir {
 		// multi-user proj, this means it's basically a basic block
 		if (
 			projection->use->next_user != nullptr ||
-			projection->use->node->ty != REGION
+			projection->use->n->ty != REGION
 		) {
 			return true;
 		}
 
 		ASSERT(ty == BRANCH, "current node is not a branch");
-		const handle<node> region = projection->use->node;
+		const handle<node> region = projection->use->n;
 
 		if (region->ty == region && region->inputs.get_size() > 1) {
 			for (handle<user> u = region->use; u; u = u->next_user ) {
-				if (u->node->ty == PHI) {
+				if (u->n->ty == PHI) {
 					return true;
 				}
 			}
@@ -295,7 +295,7 @@ namespace sigma::ir {
 
 	auto node::is_unreachable() const -> bool {
 		for (handle<user> u = use; u; u = u->next_user) {
-			if (u->node->ty == UNREACHABLE) {
+			if (u->n->ty == UNREACHABLE) {
 				return true;
 			}
 		}
@@ -318,7 +318,7 @@ namespace sigma::ir {
 
 		// remove the old user
 		for (handle<user> prev = nullptr; old_use; prev = old_use, old_use = old_use->next_user) {
-			if (old_use->slot == slot && old_use->node == this) {
+			if (old_use->slot == slot && old_use->n == this) {
 				// remove the given node
 				if (prev != nullptr) {
 					prev->next_user = old_use->next_user;
@@ -346,7 +346,7 @@ namespace sigma::ir {
 		);
 		 
 		new_use->next_user = in->use;
-		new_use->node = this;
+		new_use->n = this;
 		new_use->slot = slot;
 		in->use = new_use;
 	}

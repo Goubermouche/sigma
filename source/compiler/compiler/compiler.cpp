@@ -1,18 +1,18 @@
 #include "compiler.h"
 #include "compiler/compiler/compilation_context.h"
 
-#include <tokenizer/tokenizer.h>
-#include <parser/parser.h>
-#include <type_checker/type_checker.h>
-#include <ir_translator/ir_translator.h>
+#include "tokenizer/tokenizer.h"
+#include "parser/parser.h"
+#include "type_checker/type_checker.h"
+#include "ir_translator/ir_translator.h"
 
-#include <utility/filesystem/new/file.h>
-#include <utility/string_helper.h>
-#include <utility/timer.h>
+#include "utility/filesystem/new/file.h"
+#include "utility/string_helper.h"
+#include "utility/timer.h"
 
 namespace sigma {
 	void compiler::compile() {
-		const auto file = utility::file::read_text_file("./test/main.s");
+		const auto file = utility::file::read_text_file("/home/goubermouche/dev/projects/sigma/source/compiler/test/main.s");
 
 		utility::timer total_timer;
 		utility::timer tokenizer_timer;
@@ -51,14 +51,14 @@ namespace sigma {
 
 		// codegen
 		codegen_timer.start();
-		module.compile();
+		// module.compile();
 		utility::console::println("{:<30}{:.3f}s", "codegen finished", codegen_timer.elapsed_seconds());
 
 		utility::console::println("{}", std::string(36, '-'));
 		utility::console::println("{:<30}{:.3f}s", "compilation finished", total_timer.elapsed_seconds());
 
-		auto object_file = module.generate_object_file();
-		utility::file::write(object_file, "./test/a.obj");
+		// auto object_file = module.generate_object_file();
+		// utility::file::write(object_file, "./test/a.obj");
 	}
 } // namespace sigma
 

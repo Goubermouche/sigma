@@ -24,6 +24,7 @@ namespace utility {
 			std::ifstream file(path);
 
 			if(!file) {
+				std::cout << "err file\n";
 				ASSERT(false, "failure");
 			}
 

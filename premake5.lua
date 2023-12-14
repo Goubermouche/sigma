@@ -9,7 +9,7 @@ workspace "sigma"
     externalanglebrackets "On"
     externalwarnings "Off"
 
-    buildoptions { "/wd5054" }
+    -- buildoptions { "-w" } -- temp
 
     flags {
         "MultiProcessorCompile"
@@ -39,7 +39,7 @@ project "utility"
     files {
         "source/utility/**.h",
         "source/utility/**.cpp"
-    } 
+    }
 
     includedirs {
         "source"
@@ -49,7 +49,7 @@ project "utility"
     targetdir "output/bin/%{cfg.buildcfg}"
     objdir "output/obj/%{cfg.buildcfg}"
 
--- tokenizer
+-- -- tokenizer
 project "tokenizer"
     kind "StaticLib"
     location "source/tokenizer"
@@ -108,8 +108,8 @@ project "parser"
     }
 
     links {
-        "tokenizer",
-        "abstract_syntax_tree"
+        "abstract_syntax_tree",
+        "utility"
     }
 
     -- output directories 
@@ -131,8 +131,8 @@ project "type_checker"
     }
 
     links {
-        "tokenizer",
-        "abstract_syntax_tree"
+        "abstract_syntax_tree",
+        "utility"
     }
 
     -- output directories 
@@ -176,9 +176,9 @@ project "ir_translator"
     }
 
     links {
-        "tokenizer",
         "abstract_syntax_tree",
-        "intermediate_representation"
+        "intermediate_representation",
+        "utility"
     }
 
     -- output directories 
@@ -202,11 +202,13 @@ project "compiler"
     }
 
     links {
-        "Version",
+        "ir_translator",
         "intermediate_representation",
-        "parser",
         "type_checker",
-        "ir_translator"
+        "parser",
+        "abstract_syntax_tree",
+        "tokenizer",
+        "utility"
     }
 
     -- output directories 
@@ -218,7 +220,7 @@ project "compiler"
             "dl",     
             "pthread",
             "m",      
-            "rt"      
+            "rt"
         }
 
         buildoptions { 

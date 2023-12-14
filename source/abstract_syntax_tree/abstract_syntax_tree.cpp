@@ -1,5 +1,5 @@
 #include "abstract_syntax_tree.h"
-#include <utility/containers/stack.h>
+#include "utility/containers/stack.h"
 
 namespace sigma {
 	abstract_syntax_tree::abstract_syntax_tree() : m_allocator(1024) {}

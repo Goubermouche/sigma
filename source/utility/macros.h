@@ -17,7 +17,7 @@
 	do {                                                                            \
 		if(!(__condition)) {                                                          \
 			utility::console::print("ASSERTION FAILED: ({}:{}): ", __FILE__, __LINE__); \
-			utility::console::println((__fmt), __VA_ARGS__);                            \
+			utility::console::println((__fmt), ##__VA_ARGS__);                            \
 			DEBUG_BREAK();                                                              \
 		}                                                                             \
 	} while(false)
@@ -31,7 +31,7 @@
 #define PANIC( __fmt, ...)                                                      \
 	do {                                                                          \
 		utility::console::print("ASSERTION FAILED: ({}:{}): ", __FILE__, __LINE__); \
-		utility::console::println((__fmt), __VA_ARGS__);                            \
+		utility::console::println((__fmt), ##__VA_ARGS__);                            \
 		DEBUG_BREAK();                                                              \
 	} while(false)
 #else
@@ -42,19 +42,6 @@
 
 #define CONCATENATE(x, y) _CONCATENATE(x, y)
 #define _CONCATENATE(x, y) x ## y
-
-//#define OUTCOME_TRY_1(__function)                                                    \
-//  do {                                                                               \
-//		auto CONCATENATE(result, __LINE__) = __function;                                 \
-//		if (CONCATENATE(result, __LINE__).has_error())                                   \
-//			return utility::outcome::failure((CONCATENATE(result, __LINE__)).get_error()); \
-//  } while(false)
-
-//#define OUTCOME_TRY_2(__success, __function)                                       \
-//  auto CONCATENATE(result, __LINE__) = __function;                                 \
-//  if(CONCATENATE(result, __LINE__).has_error())                                    \
-//    return utility::outcome::failure((CONCATENATE(result, __LINE__)).get_error()); \
-//  __success = CONCATENATE(result, __LINE__).get_value()
 
 #define EXPAND(x) x
 #define GET_MACRO(_1, _2, NAME, ...) NAME
@@ -98,7 +85,7 @@ struct enum_flag_integer_for_size<8> {
 // used as an approximation of std::underlying_type<T>
 template <class type>
 struct enum_flag_sized_integer {
-  typedef typename enum_flag_integer_for_size<sizeof(type)>::type type;
+  typedef typename enum_flag_integer_for_size<sizeof(type)>::type size_type;
 };
 
 // source: <winnt.h>
@@ -109,13 +96,13 @@ struct enum_flag_sized_integer {
  * \param __enum Enum to declare as a flag enum
  */
 #define FLAG_ENUM(__enum) \
-inline constexpr __enum operator | (__enum a, __enum b) noexcept { return __enum(((enum_flag_sized_integer<__enum>::type)a) | ((enum_flag_sized_integer<__enum>::type)b)); } \
-inline __enum &operator |= (__enum &a, __enum b) noexcept { return (__enum &)(((enum_flag_sized_integer<__enum>::type &)a) |= ((enum_flag_sized_integer<__enum>::type)b)); } \
-inline constexpr __enum operator & (__enum a, __enum b) noexcept { return __enum(((enum_flag_sized_integer<__enum>::type)a) & ((enum_flag_sized_integer<__enum>::type)b)); } \
-inline __enum &operator &= (__enum &a, __enum b) noexcept { return (__enum &)(((enum_flag_sized_integer<__enum>::type &)a) &= ((enum_flag_sized_integer<__enum>::type)b)); } \
-inline constexpr __enum operator ~ (__enum a) noexcept { return __enum(~((enum_flag_sized_integer<__enum>::type)a)); }                                                       \
-inline constexpr __enum operator ^ (__enum a, __enum b) noexcept { return __enum(((enum_flag_sized_integer<__enum>::type)a) ^ ((enum_flag_sized_integer<__enum>::type)b)); } \
-inline __enum &operator ^= (__enum &a, __enum b) noexcept { return (__enum &)(((enum_flag_sized_integer<__enum>::type &)a) ^= ((enum_flag_sized_integer<__enum>::type)b)); } \
+inline constexpr __enum operator | (__enum a, __enum b) noexcept { return __enum(((enum_flag_sized_integer<__enum>::size_type)a) | ((enum_flag_sized_integer<__enum>::size_type)b)); } \
+inline __enum &operator |= (__enum &a, __enum b) noexcept { return (__enum &)(((enum_flag_sized_integer<__enum>::size_type &)a) |= ((enum_flag_sized_integer<__enum>::size_type)b)); } \
+inline constexpr __enum operator & (__enum a, __enum b) noexcept { return __enum(((enum_flag_sized_integer<__enum>::size_type)a) & ((enum_flag_sized_integer<__enum>::size_type)b)); } \
+inline __enum &operator &= (__enum &a, __enum b) noexcept { return (__enum &)(((enum_flag_sized_integer<__enum>::size_type &)a) &= ((enum_flag_sized_integer<__enum>::size_type)b)); } \
+inline constexpr __enum operator ~ (__enum a) noexcept { return __enum(~((enum_flag_sized_integer<__enum>::size_type)a)); }                                                       \
+inline constexpr __enum operator ^ (__enum a, __enum b) noexcept { return __enum(((enum_flag_sized_integer<__enum>::size_type)a) ^ ((enum_flag_sized_integer<__enum>::size_type)b)); } \
+inline __enum &operator ^= (__enum &a, __enum b) noexcept { return (__enum &)(((enum_flag_sized_integer<__enum>::size_type &)a) ^= ((enum_flag_sized_integer<__enum>::size_type)b)); } \
 
 #if defined(_MSC_VER)
 #define aligned_malloc _aligned_malloc

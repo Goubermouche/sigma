@@ -137,7 +137,7 @@ namespace sigma::ir {
 			);
 
 			inst->type = type;
-			inst->data_type = legalize_data_type(data_type);
+			inst->dt = legalize_data_type(data_type);
 			inst->in_count = in_count;
 			inst->out_count = out_count;
 			inst->tmp_count = tmp_count;

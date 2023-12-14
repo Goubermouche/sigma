@@ -1,5 +1,5 @@
 #pragma once
-#include <utility/types.h>
+#include "utility/types.h"
 
 namespace sigma::ir {
 	using namespace utility::types;
@@ -32,7 +32,7 @@ namespace sigma::ir {
 
 	struct mem {
 		u8 index;
-		scale scale;
+		scale sc;
 		i32 displacement;
 	};
 }

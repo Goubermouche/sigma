@@ -14,7 +14,7 @@ namespace sigma {
 
 		while (current != token_type::END_OF_FILE) {
 			const token_info info = get_next_token();
-			current = info.token.type;
+			current = info.tok.type;
 
 			m_tokens.add_token(info);
 		}
@@ -33,7 +33,7 @@ namespace sigma {
 
 		// check for EOF so we don't have to do it in the individual brace checks
 		if (m_source.end()) {
-			return { .token = { token_type::END_OF_FILE }, .location = m_current_location };
+			return { .tok = { token_type::END_OF_FILE }, .location = m_current_location };
 		}
 
 		// at this point we have a non-space character
@@ -125,17 +125,15 @@ namespace sigma {
 		const auto it = m_keyword_tokens.find(m_current_section);
 		if (it != m_keyword_tokens.end()) {
 			// the string is a keyword
-			return { .token = { it->second }, .location = m_token_start_location };
+			return { .tok = { it->second }, .location = m_token_start_location };
 		}
 
 		// the string isn't a keyword, treat it as an identifier
 		return {
-			.token = { token_type::IDENTIFIER },
+			.tok = { token_type::IDENTIFIER },
 			.location   = m_token_start_location,
 			.symbol_key = m_symbols.insert(m_current_section)
 		};
-
-
 	}
 
 	auto tokenizer::get_numerical_token() -> token_info {
@@ -178,7 +176,7 @@ namespace sigma {
 
 				get_next_char();
 				return {
-					.token = { token_type::UNSIGNED_LITERAL },
+					.tok = { token_type::UNSIGNED_LITERAL },
 					.location   = m_token_start_location,
 					.symbol_key = m_symbols.insert(m_current_section)
 				};
@@ -190,7 +188,7 @@ namespace sigma {
 
 				get_next_char();
 				return {
-					.token = { token_type::F32_LITERAL },
+					.tok = { token_type::F32_LITERAL },
 					.location   = m_token_start_location,
 					.symbol_key = m_symbols.insert(m_current_section)
 				};
@@ -206,7 +204,7 @@ namespace sigma {
 		// 0.0 format
 		if (dot_met) {
 			return {
-				.token = { token_type::F64_LITERAL },
+				.tok = { token_type::F64_LITERAL },
 				.location = m_token_start_location,
 				.symbol_key = m_symbols.insert(m_current_section)
 			};
@@ -214,7 +212,7 @@ namespace sigma {
 
 		// 0 format
 		return {
-			.token = { token_type::SIGNED_LITERAL },
+			.tok = { token_type::SIGNED_LITERAL },
 			.location   = m_token_start_location,
 			.symbol_key = m_symbols.insert(m_current_section)
 		};
@@ -233,7 +231,7 @@ namespace sigma {
 		get_next_char();
 
 		return {
-			.token      = { token_type::STRING_LITERAL },
+			.tok      = { token_type::STRING_LITERAL },
 			.location   = m_token_start_location,
 			.symbol_key = m_symbols.insert(m_current_section)
 		};
@@ -263,7 +261,7 @@ namespace sigma {
 				}
 			}
 
-			return { .token = { it->second }, .location = m_token_start_location };
+			return { .tok = { it->second }, .location = m_token_start_location };
 		}
 
 		NOT_IMPLEMENTED();

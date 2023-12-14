@@ -1,8 +1,8 @@
 #pragma once
 #include "intermediate_representation/codegen/codegen_context.h"
 
-#include <utility/containers/byte_buffer.h>
-#include <utility/containers/string.h>
+#include "utility/containers/byte_buffer.h"
+#include "utility/containers/string.h"
 
 namespace sigma::ir {
 	class disassembler {

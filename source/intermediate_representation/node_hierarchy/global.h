@@ -33,8 +33,8 @@ namespace sigma::ir {
 		void set_storage(u8 section_handle, u32 storage_size, u32 storage_alignment, u32 max_objects);
 		auto add_region(u32 region_offset, u32 region_size) -> void*;
 
-		symbol symbol;
-		linkage linkage;
+		symbol sym;
+		linkage link;
 
 		u8 parent_section;
 
@@ -47,7 +47,7 @@ namespace sigma::ir {
 	};
 
 	struct external {
-		symbol symbol;
-		linkage linkage;
+		symbol sym;
+		linkage link;
 	};
 } // namespace sigma::ir

@@ -1,5 +1,5 @@
 #include "ir_translator.h"
-#include <compiler/compiler/compilation_context.h>
+#include "compiler/compiler/compilation_context.h"
 
 namespace sigma {
 	auto ir_translator::translate(
@@ -87,7 +87,7 @@ namespace sigma {
 
 	void ir_translator::translate_variable_declaration(handle<node> variable_node) {
 		const auto& prop = variable_node->get<variable>();
-		const u16 byte_width = prop.data_type.get_byte_width();
+		const u16 byte_width = prop.dt.get_byte_width();
 
 		const handle<ir::node> local = m_variables.register_variable(
 			prop.identifier_key, byte_width, byte_width
@@ -97,7 +97,7 @@ namespace sigma {
 			const handle<ir::node> expression = translate_node(variable_node->children[0]);
 			m_builder.create_store(local, expression, byte_width, false);
 		}
-		else if (prop.data_type.type == data_type::BOOL) {
+		else if (prop.dt.type == data_type::BOOL) {
 			// boolean values should default to false
 			m_builder.create_store(local, m_builder.create_bool(false), byte_width, false);
 		}
@@ -223,7 +223,7 @@ namespace sigma {
 		const auto& prop = access_node->get<variable_access>();
 
 		handle<ir::node> load = m_variables.create_load(
-			prop.identifier_key, data_type_to_ir(prop.data_type), prop.data_type.get_byte_width()
+			prop.identifier_key, data_type_to_ir(prop.dt), prop.dt.get_byte_width()
 		);
 
 		ASSERT(load, "unknown variable referenced");
@@ -237,7 +237,7 @@ namespace sigma {
 		const handle<ir::node> value = translate_node(assignment_node->children[1]);
 
 		// assign the variable
-		m_variables.create_store(var.identifier_key, value, var.data_type.get_byte_width());
+		m_variables.create_store(var.identifier_key, value, var.dt.get_byte_width());
 		return nullptr;
 	}
 
@@ -245,11 +245,11 @@ namespace sigma {
 		const std::string& value = m_context.symbols.get(literal.value_key);
 
 		// handle pointers separately
-		if (literal.data_type.pointer_level > 0) {
+		if (literal.dt.pointer_level > 0) {
 			NOT_IMPLEMENTED();
 		}
 
-		switch (literal.data_type.type) {
+		switch (literal.dt.type) {
 			case data_type::I32: return m_builder.create_signed_integer(std::stoi(value), 32);
 			default: NOT_IMPLEMENTED();
 		}

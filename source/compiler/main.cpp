@@ -1,4 +1,3 @@
-//#include "compiler/compiler.h"
 #include "compiler/compiler.h"
 
 using namespace utility::types;
@@ -22,6 +21,9 @@ using namespace utility::types;
 //	}
 //	std::cout << node->type.to_string() << '\n';
 //});
+
+// ./source/compiler/bin/Release/compiler
+// ./output/bin/Release/compiler
 
 auto main(i32 argc, char* argv[]) -> i32 {
 	SUPPRESS_C4100(argc);

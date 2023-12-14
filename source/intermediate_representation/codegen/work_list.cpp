@@ -7,7 +7,7 @@ namespace sigma::ir {
 		handle<node> next = nullptr;
 
 		for (handle<user> user = target->use; user; user = user->next_user) {
-			handle<node> successor = user->node;
+			handle<node> successor = user->n;
 
 			// we can't treat regions in the chain
 			if (successor->ty == node::REGION) {

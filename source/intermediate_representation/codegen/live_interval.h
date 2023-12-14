@@ -2,8 +2,8 @@
 #include "intermediate_representation/node_hierarchy/node.h"
 #include "intermediate_representation/codegen/memory/memory.h"
 
-#include <utility/containers/dense_set.h>
-#include <utility/containers/range.h>
+#include "utility/containers/dense_set.h"
+#include "utility/containers/range.h"
 
 namespace sigma::ir {
 	struct virtual_value {
@@ -23,7 +23,7 @@ namespace sigma::ir {
 
 	struct phi_value {
 		handle<node> phi;
-		handle<node> node;
+		handle<node> n;
 
 		reg destination;
 		reg source;
@@ -99,8 +99,8 @@ namespace sigma::ir {
 		reg assigned;
 		reg hint;
 
-		classified_reg reg;
-		handle<node> node;
+		classified_reg r;
+		handle<node> n;
 
 		u64 active_range = 0;
 

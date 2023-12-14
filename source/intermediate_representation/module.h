@@ -40,7 +40,7 @@ namespace sigma::ir {
 		module_section_flags flags;
 
 		u8 section_index;
-		comdat comdat;
+		comdat com;
 
 		u32 raw_data_pos;
 		u32 total_size;

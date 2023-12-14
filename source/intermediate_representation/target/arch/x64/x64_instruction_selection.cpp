@@ -5,7 +5,7 @@
 namespace sigma::ir {
 	void x64_architecture::select_instructions(codegen_context& context) {
 		ASSERT(
-			context.work_list->items.size() == context.graph.blocks.size(),
+			context.work->items.size() == context.graph.blocks.size(),
 			"misaligned control flow graph detected"
 		);
 
@@ -13,17 +13,17 @@ namespace sigma::ir {
 		u64 stop_block;
 
 		for (u64 i = 0; i < context.graph.blocks.size(); ++i) {
-			handle<node> basic_block = context.work_list->items[i];
+			handle<node> basic_block = context.work->items[i];
 
 			for (handle<user> use = basic_block->use; use; use = use->next_user) {
-				const handle<node> use_node = use->node;
+				const handle<node> use_node = use->n;
 
 				if (
 					use_node->ty == node::PHI &&
-					use_node->data_type.ty != data_type::MEMORY
+					use_node->dt.ty != data_type::MEMORY
 				) {
 					context.virtual_values[use_node->global_value_index] = virtual_value();
-					context.work_list->visit(use_node);
+					context.work->visit(use_node);
 				}
 			}
 
@@ -40,7 +40,7 @@ namespace sigma::ir {
 		context.basic_block_order.push_back(stop_block);
 
 		for (u64 i = 0; i < context.basic_block_order.size(); ++i) {
-			handle<node> basic_block = context.work_list->items[context.basic_block_order[i]];
+			handle<node> basic_block = context.work->items[context.basic_block_order[i]];
 			const handle<instruction> label = create_label(context, basic_block);
 
 			context.labels[context.basic_block_order[i]] = 0;
@@ -68,7 +68,7 @@ namespace sigma::ir {
 		codegen_context& context, handle<node> block_entry, handle<node> block_end, u64 rpo_index
 	) {
 		ASSERT(
-			context.work_list->items.size() == context.graph.blocks.size(),
+			context.work->items.size() == context.graph.blocks.size(),
 			"invalid work list"
 		);
 
@@ -79,25 +79,25 @@ namespace sigma::ir {
 
 		// schedule params
 		if (rpo_index == 0) {
-			for (auto use = context.function->entry_node->use; use; use = use->next_user) {
-				handle<node> user_node = use->node;
+			for (auto use = context.func->entry_node->use; use; use = use->next_user) {
+				handle<node> user_node = use->n;
 
 				if (
-					user_node->ty == node::PROJECTION && context.work_list->visit(user_node)
+					user_node->ty == node::PROJECTION && context.work->visit(user_node)
 				) {
-					context.work_list->items.push_back(user_node);
+					context.work->items.push_back(user_node);
 				}
 			}
 		}
 
 		// define all the nodes in this block
-		for (u64 i = context.graph.blocks.size(); i < context.work_list->items.size(); ++i) {
-			handle<node> block_node = context.work_list->items[i];
+		for (u64 i = context.graph.blocks.size(); i < context.work->items.size(); ++i) {
+			handle<node> block_node = context.work->items[i];
 			u64 use_count = 0;
 
 			// track non-dead users
 			for (auto use = block_node->use; use; use = use->next_user) {
-				if (context.schedule.contains(use->node)) {
+				if (context.schedule.contains(use->n)) {
 					use_count++;
 				}
 			}
@@ -119,11 +119,11 @@ namespace sigma::ir {
 
 		if (block_entry->ty == node::REGION) {
 			for (handle<user> user = block_entry->use; user; user = user->next_user) {
-				handle<node> user_node = user->node;
+				handle<node> user_node = user->n;
 
 				if (
 					user_node->ty == node::PHI &&
-					user_node->data_type.ty != data_type::MEMORY
+					user_node->dt.ty != data_type::MEMORY
 				) {
 					// copy the phi into a temporary
 					const phi_value phi{
@@ -133,7 +133,7 @@ namespace sigma::ir {
 
 					context.phi_values.push_back(phi);
 
-					auto dt = phi.phi->data_type;
+					auto dt = phi.phi->dt;
 					reg tmp = allocate_virtual_register(context, nullptr, dt);
 
 					context.append_instruction(create_move(context, dt, tmp, phi.destination));
@@ -143,7 +143,7 @@ namespace sigma::ir {
 		}
 
 		if (rpo_index == 0) {
-			select_instruction(context, context.function->entry_node, reg::invalid_id);
+			select_instruction(context, context.func->entry_node, reg::invalid_id);
 		}
 
 		// walk all nodes (we're allowed to fold nodes into those which appear later)
@@ -154,8 +154,8 @@ namespace sigma::ir {
 		handle<instruction> last = nullptr;
 		handle<node> prev_effect = nullptr;
 
-		for (u64 i = context.work_list->items.size(); i-- > context.graph.blocks.size();) {
-			handle<node> target = context.work_list->items[i];
+		for (u64 i = context.work->items.size(); i-- > context.graph.blocks.size();) {
+			handle<node> target = context.work->items[i];
 
 			if (target->ty == node::ENTRY) {
 				continue;
@@ -180,9 +180,9 @@ namespace sigma::ir {
 			if (
 				target->ty != node::MUL_PAIR &&
 				(
-					target->data_type.ty == data_type::TUPLE || 
-					target->data_type.ty == data_type::CONTROL ||
-					target->data_type.ty == data_type::MEMORY
+					target->dt.ty == data_type::TUPLE || 
+					target->dt.ty == data_type::CONTROL ||
+					target->dt.ty == data_type::MEMORY
 				)
 			) {
 				if (target->ty == node::BRANCH) {
@@ -207,7 +207,7 @@ namespace sigma::ir {
 				value->virtual_register.is_valid()
 			) {
 				if (value->virtual_register.is_valid() == false) {
-					value->virtual_register = allocate_virtual_register(context, target, target->data_type);
+					value->virtual_register = allocate_virtual_register(context, target, target->dt);
 				}
 
 				select_instruction(context, target, value->virtual_register);
@@ -283,8 +283,8 @@ namespace sigma::ir {
 			for (u64 i = 0; i < old_phi_count; ++i) {
 				auto& phi = context.phi_values[i];
 
-				auto dt = phi.phi->data_type;
-				reg src = input_reg(context, phi.node);
+				auto dt = phi.phi->dt;
+				reg src = input_reg(context, phi.n);
 
 				context.hint_reg(phi.destination.id, src);
 				context.append_instruction(
@@ -299,7 +299,7 @@ namespace sigma::ir {
 			}
 		}
 
-		context.work_list->items.resize(context.graph.blocks.size());
+		context.work->items.resize(context.graph.blocks.size());
 	}
 
 	void x64_architecture::select_instruction(
@@ -309,7 +309,7 @@ namespace sigma::ir {
 			case node::PHI:
 			case node::REGION: break;
 			case node::ENTRY: {
-				bool is_systemv = context.target.get_abi() == abi::SYSTEMV;
+				bool is_systemv = context.t.get_abi() == abi::SYSTEMV;
 				constexpr x64::gpr gpr_params[] = { x64::RCX, x64::RDX, x64::R8, x64::R9 };
 
 				u8 gpr_param_count = 4;
@@ -323,11 +323,11 @@ namespace sigma::ir {
 				// handle known parameters
 				i32 used_gpr = 0;
 				i32 used_xmm = 0;
-				auto& params = context.function->parameters;
+				auto& params = context.func->parameters;
 
-				for (u64 i = 0; i < context.function->parameter_count; ++i) {
+				for (u64 i = 0; i < context.func->parameter_count; ++i) {
 					handle<node> projection = params[3 + i];
-					bool is_float = projection->data_type.ty == data_type::FLOAT;
+					bool is_float = projection->dt.ty == data_type::FLOAT;
 					i32 reg_limit = is_float ? xmm_param_count : gpr_param_count;
 					i32 id = is_float ? used_xmm : used_gpr;
 
@@ -351,7 +351,7 @@ namespace sigma::ir {
 						if (value != nullptr) {
 							ASSERT(value->virtual_register.is_valid() == false, "unexpected valid register");
 							value->virtual_register = allocate_virtual_register(
-								context, projection, projection->data_type
+								context, projection, projection->dt
 							);
 
 							i32 reg_num = is_float ? id : gpr_params[id];
@@ -361,7 +361,7 @@ namespace sigma::ir {
 
 							context.append_instruction(create_move(
 								context, 
-								projection->data_type, 
+								projection->dt, 
 								value->virtual_register,
 								static_cast<u8>(virtual_reg)
 							));
@@ -388,7 +388,7 @@ namespace sigma::ir {
 				bool has_param_slots = false;
 
 				// walk the entry to find any parameter stack slots
-				for (u64 i = 0; i < context.function->parameter_count; ++i) {
+				for (u64 i = 0; i < context.func->parameter_count; ++i) {
 					handle<node> projection = params[3 + i];
 
 					handle<user> user = projection->use;
@@ -396,7 +396,7 @@ namespace sigma::ir {
 						continue;
 					}
 
-					handle<node> store = user->node;
+					handle<node> store = user->n;
 					if (store->ty != node::STORE || store->inputs[0]->get_parent_region() != n) {
 						continue;
 					}
@@ -409,7 +409,7 @@ namespace sigma::ir {
 					u64 pos = 16 + i * 8;
 					context.stack_slots[address] = static_cast<i32>(pos);
 
-					if (i >= 4 && context.target.get_abi() == abi::WIN_64) {
+					if (i >= 4 && context.t.get_abi() == abi::WIN_64) {
 						if (auto* value = context.lookup_value(store)) {
 							value->virtual_register = 0;
 						}
@@ -419,7 +419,7 @@ namespace sigma::ir {
 				}
 
 				if (has_param_slots) {
-					context.stack_usage += 16 + context.function->parameter_count * 8;
+					context.stack_usage += 16 + context.func->parameter_count * 8;
 				}
 				else {
 					context.stack_usage += 16;
@@ -431,9 +431,9 @@ namespace sigma::ir {
 
 			case node::SYSTEM_CALL:
 			case node::CALL: {
-				bool is_systemv = context.target.get_abi() == abi::SYSTEMV;
+				bool is_systemv = context.t.get_abi() == abi::SYSTEMV;
 				static reg default_return_registers[2] = { x64::RAX, x64::RDX };
-				const parameter_descriptor descriptor = context.target.get_parameter_descriptor();
+				const parameter_descriptor descriptor = context.t.get_parameter_descriptor();
 
 				if (node_type == node::SYSTEM_CALL) {
 					NOT_IMPLEMENTED();
@@ -461,7 +461,7 @@ namespace sigma::ir {
 						return_registers[i] = input_reg(context, return_node);
 						return_count++;
 
-						if (return_node->data_type.ty == data_type::FLOAT) {
+						if (return_node->dt.ty == data_type::FLOAT) {
 							caller_saved_xmm_registers &= ~(1ull << (x64::XMM0 + i));
 						}
 						else {
@@ -493,7 +493,7 @@ namespace sigma::ir {
 
 				for (u64 i = 3; i < n->inputs.get_size(); ++i) {
 					handle<node> parameter_node = n->inputs[i];
-					data_type param_dt = parameter_node->data_type;
+					data_type param_dt = parameter_node->dt;
 
 					bool use_xmm = param_dt.ty == data_type::FLOAT;
 					u8 reg = use_xmm ? used_xmm_count : used_gpr_count;
@@ -521,7 +521,7 @@ namespace sigma::ir {
 						context.append_instruction(create_mr(
 							context,
 							use_xmm ? instruction::FP_MOV : instruction::MOV,
-							parameter_node->data_type,
+							parameter_node->dt,
 							x64::RSP,
 							reg::invalid_id,
 							scale::x1, 
@@ -556,7 +556,7 @@ namespace sigma::ir {
 
 				// perform last minute copies (this avoids keeping parameter registers alive for too long)
 				for (u64 i = 0; i < in_count; ++i) {
-					data_type dt = n->inputs[3 + i]->data_type;
+					data_type dt = n->inputs[3 + i]->dt;
 					bool use_xmm = dt.ty == data_type::FLOAT;
 
 					context.append_instruction(create_move(
@@ -638,7 +638,7 @@ namespace sigma::ir {
 
 				for (u8 i = 0; i < 2; ++i) {
 					if (return_nodes[i] != nullptr) {
-						if (return_nodes[i]->data_type.ty == data_type::FLOAT) {
+						if (return_nodes[i]->dt.ty == data_type::FLOAT) {
 							*dst_ins++ = x64::register_class::FIRST_XMM + i;
 						}
 						else {
@@ -662,7 +662,7 @@ namespace sigma::ir {
 				for (u8 i = 0; i < 2; ++i) {
 					if (return_nodes[i] != nullptr) {
 						ASSERT(return_registers[i].is_valid(), "invalid return register detected");
-						data_type dt = return_nodes[i]->data_type;
+						data_type dt = return_nodes[i]->dt;
 
 						if (dt.ty == data_type::FLOAT) {
 							context.hint_reg(return_registers[i].id, x64::register_class::FIRST_GPR + i);
@@ -689,11 +689,11 @@ namespace sigma::ir {
 
 				// mask off bits
 				u64 bits_in_type;
-				if(n->data_type.ty == data_type::POINTER) {
+				if(n->dt.ty == data_type::POINTER) {
 					bits_in_type = 64;
 				}
 				else {
-					bits_in_type = n->data_type.bit_width;
+					bits_in_type = n->dt.bit_width;
 				}
 
 				if (bits_in_type < 64) {
@@ -703,7 +703,7 @@ namespace sigma::ir {
 				if (value == 0) {
 
 					context.append_instruction(create_zero(
-						context, n->data_type, destination
+						context, n->dt, destination
 					));
 				}
 				else if ((value >> 32ull) == std::numeric_limits<u32>::max()) {
@@ -715,12 +715,12 @@ namespace sigma::ir {
 				else if (bits_in_type <= 32 || (value >> 31ull) == 0) {
 
 					context.append_instruction(create_immediate(
-						context, instruction::MOV, n->data_type, destination, static_cast<i32>(value)
+						context, instruction::MOV, n->dt, destination, static_cast<i32>(value)
 					));
 				}
 				else {
 					context.append_instruction(create_abs(
-						context, instruction::MOVABS, n->data_type, destination, value
+						context, instruction::MOVABS, n->dt, destination, value
 					));
 				}
 
@@ -750,7 +750,7 @@ namespace sigma::ir {
 					n->inputs[2]->use_node(context);
 
 					context.append_instruction(create_move(
-						context, n->data_type, destination, left
+						context, n->dt, destination, left
 					));
 
 					handle<instruction> inst = select_array_access_instruction(
@@ -758,11 +758,11 @@ namespace sigma::ir {
 					);
 
 					inst->type = operation;
-					inst->data_type = legalize_data_type(n->data_type);
+					inst->dt = legalize_data_type(n->dt);
 
 					context.append_instruction(inst);
 				}
-				else if (try_for_imm32(n->inputs[2], n->data_type.bit_width, immediate)) {
+				else if (try_for_imm32(n->inputs[2], n->dt.bit_width, immediate)) {
 					n->inputs[2]->use_node(context);
 
 					if (node_type == node::ADD) {
@@ -772,11 +772,11 @@ namespace sigma::ir {
 					}
 					else {
 						context.append_instruction(create_move(
-							context, n->data_type, destination, left
+							context, n->dt, destination, left
 						));
 
 						context.append_instruction(create_rri(
-							context, operation, n->data_type, destination, destination, immediate
+							context, operation, n->dt, destination, destination, immediate
 						));
 					}
 				}
@@ -784,11 +784,11 @@ namespace sigma::ir {
 					reg right = input_reg(context, n->inputs[2]);
 
 					context.append_instruction(create_move(
-						context, n->data_type, destination, left
+						context, n->dt, destination, left
 					));
 
 					context.append_instruction(create_rrr(
-						context, operation, n->data_type, destination, destination, right
+						context, operation, n->dt, destination, destination, right
 					));
 				}
 
@@ -799,7 +799,7 @@ namespace sigma::ir {
 				reg left = input_reg(context, n->inputs[1]);
 				context.hint_reg(destination.id, left);
 
-				data_type dt = n->data_type;
+				data_type dt = n->dt;
 				ASSERT(dt.ty == data_type::INTEGER, "invalid type for a MUL op");
 
 				if(dt.bit_width < 16) {
@@ -837,7 +837,7 @@ namespace sigma::ir {
 
 				for (u64 i = 0; i < return_count; ++i) {
 					reg source = input_reg(context, n->inputs[3 + i]);
-					auto dt = n->inputs[3 + i]->data_type;
+					auto dt = n->inputs[3 + i]->dt;
 
 					// copy to the return register
 					if (dt.ty == data_type::FLOAT) {
@@ -877,7 +877,7 @@ namespace sigma::ir {
 					break;
 				}
 
-				const data_type store_data_type = n->inputs[3]->data_type;
+				const data_type store_data_type = n->inputs[3]->dt;
 				const handle<node> address = n->inputs[2];
 				handle<node> source_node = n->inputs[3];
 				i32 immediate_value;
@@ -902,7 +902,7 @@ namespace sigma::ir {
 					}
 				}
 
-				if (try_for_imm32(source_node, source_node->data_type.bit_width, immediate_value)) {
+				if (try_for_imm32(source_node, source_node->dt.bit_width, immediate_value)) {
 					source_node->use_node(context);
 
 					const handle<instruction> store_inst = select_array_access_instruction(
@@ -910,9 +910,9 @@ namespace sigma::ir {
 					);
 
 					store_inst->in_count = store_inst->in_count - 1;
-					store_inst->data_type = legalize_data_type(store_data_type);
+					store_inst->dt = legalize_data_type(store_data_type);
 					store_inst->flags |= instruction::immediate;
-					store_inst->set_property(context.function->allocator.allocate(sizeof(immediate)));
+					store_inst->set_property(context.func->allocator.allocate(sizeof(immediate)));
 					store_inst->get<immediate>().value = immediate_value;
 
 					ASSERT(
@@ -928,7 +928,7 @@ namespace sigma::ir {
 						context, address, destination, store_op, source.id
 					);
 
-					store_inst->data_type = legalize_data_type(store_data_type);
+					store_inst->dt = legalize_data_type(store_data_type);
 
 					ASSERT(
 						store_inst->flags & (instruction::mem_f | instruction::global),
@@ -950,9 +950,9 @@ namespace sigma::ir {
 
 				// fill successors
 				for (handle<user> u = n->use; u; u = u->next_user) {
-					if (u->node->ty == node::PROJECTION) {
-						i32 index = static_cast<i32>(u->node->get<projection>().index);
-						handle<node> successor_node = u->node->get_next_block();
+					if (u->n->ty == node::PROJECTION) {
+						i32 index = static_cast<i32>(u->n->get<projection>().index);
+						handle<node> successor_node = u->n->get_next_block();
 
 						if (index == 0) {
 							has_default = !successor_node->is_unreachable();
@@ -962,7 +962,7 @@ namespace sigma::ir {
 					}
 				}
 
-				data_type dt = n->inputs[1]->data_type;
+				data_type dt = n->inputs[1]->dt;
 
 				context.append_instruction(create_instruction(
 					context, instruction::TERMINATOR, VOID_TYPE, 0, 0, 0)
@@ -1010,7 +1010,7 @@ namespace sigma::ir {
 				auto s = n->get<handle<symbol>>();
 
 				context.append_instruction(create_op_global(
-					context, instruction::LEA, n->data_type, destination, s
+					context, instruction::LEA, n->dt, destination, s
 				));
 
 				break;
@@ -1018,7 +1018,7 @@ namespace sigma::ir {
 			case node::LOAD:
 			case node::ATOMIC_LOAD: {
 				instruction::instruction_type mov_op;
-				if(n->data_type.ty == data_type::FLOAT) {
+				if(n->dt.ty == data_type::FLOAT) {
 					mov_op = instruction::FP_MOV;
 				}
 				else {
@@ -1032,7 +1032,7 @@ namespace sigma::ir {
 				);
 
 				load_inst->type = mov_op;
-				load_inst->data_type = legalize_data_type(n->data_type);
+				load_inst->dt = legalize_data_type(n->dt);
 
 				if(n->ty == node::ATOMIC_LOAD) {
 					load_inst->flags |= instruction::lock;
@@ -1045,12 +1045,12 @@ namespace sigma::ir {
 			case node::PROJECTION: {
 				if (n->inputs[0]->ty == node::ENTRY) {
 					const i32 index = static_cast<i32>(n->get<projection>().index - 3);
-					i32 param_gpr_count = context.target.get_abi() == abi::WIN_64 ? 4 : 6;
+					i32 param_gpr_count = context.t.get_abi() == abi::WIN_64 ? 4 : 6;
 
 					// use stack space past the n registers we're given
 					if (index >= param_gpr_count) {
 						instruction::instruction_type i;
-						if(n->data_type.ty == data_type::FLOAT) {
+						if(n->dt.ty == data_type::FLOAT) {
 							i = instruction::FP_MOV;
 						}
 						else {
@@ -1060,7 +1060,7 @@ namespace sigma::ir {
 						context.append_instruction(create_rm(
 							context, 
 							i,
-							n->data_type,
+							n->dt,
 							destination,
 							x64::RBP, 
 							reg::invalid_id, 
@@ -1117,7 +1117,7 @@ namespace sigma::ir {
 				return create_rrm(
 					context,
 					instruction::LEA, 
-					n->data_type, 
+					n->dt, 
 					destination, 
 					static_cast<u8>(source),
 					base, 
@@ -1130,7 +1130,7 @@ namespace sigma::ir {
 			return create_rm(
 				context,
 				instruction::LEA, 
-				n->data_type, 
+				n->dt, 
 				destination, 
 				base, 
 				index,
@@ -1142,7 +1142,7 @@ namespace sigma::ir {
 		return create_mr(
 			context, 
 			static_cast<instruction::instruction_type>(store_op),
-			n->data_type,
+			n->dt,
 			base,
 			index,
 			scale,
@@ -1213,8 +1213,8 @@ namespace sigma::ir {
 		bool invert = false;
 		if (
 			n->ty == node::CMP_EQ && 
-			n->data_type.ty == data_type::INTEGER && 
-			n->data_type.bit_width == 1 && 
+			n->dt.ty == data_type::INTEGER && 
+			n->dt.bit_width == 1 && 
 			n->inputs[2]->ty == node::INTEGER_CONSTANT
 		) {
 			const auto& b = n->inputs[2]->get<integer>();
@@ -1233,7 +1233,7 @@ namespace sigma::ir {
 		else {
 			reg src = input_reg(context, n);
 
-			data_type dt = n->data_type;
+			data_type dt = n->dt;
 			if(dt.ty == data_type::FLOAT) {
 				
 			}
@@ -1251,7 +1251,7 @@ namespace sigma::ir {
 		codegen_context& context, handle<basic_block> bb, handle<node> n, bool is_end
 	) {
 		const auto it = context.schedule.find(n);
-		if (it == context.schedule.end() || it->second != bb || !context.work_list->visit(n)) {
+		if (it == context.schedule.end() || it->second != bb || !context.work->visit(n)) {
 			return;
 		}
 
@@ -1260,16 +1260,16 @@ namespace sigma::ir {
 			const bool is_fallthrough = n->ty != node::BRANCH;
 
 			for (handle<user> user = n->use; user; user = user->next_user) {
-				if (!user->node->is_control()) {
+				if (!user->n->is_control()) {
 					continue;
 				}
 
 				handle<node> destination;
 				if(is_fallthrough) {
-					destination = user->node;
+					destination = user->n;
 				}
 				else {
-					destination = user->node->get_next_block();
+					destination = user->n->get_next_block();
 				}
 
 				// find predecessor index and do that edge
@@ -1289,18 +1289,18 @@ namespace sigma::ir {
 
 				// schedule memory phis
 				for (auto use = destination->use; use; use = use->next_user) {
-					const handle<node> phi = use->node;
+					const handle<node> phi = use->n;
 
-					if (phi->ty == node::PHI && phi->data_type.ty == data_type::MEMORY) {
+					if (phi->ty == node::PHI && phi->dt.ty == data_type::MEMORY) {
 						dfs_schedule_phi(context, bb, phi, phi_index);
 					}
 				}
 
 				// schedule data phis, we schedule these afterwards because it's "generally" better
 				for (auto use = destination->use; use; use = use->next_user) {
-					const handle<node> phi = use->node;
+					const handle<node> phi = use->n;
 
-					if (phi->ty == node::PHI && phi->data_type.ty != data_type::MEMORY) {
+					if (phi->ty == node::PHI && phi->dt.ty != data_type::MEMORY) {
 						dfs_schedule_phi(context, bb, phi, phi_index);
 					}
 				}
@@ -1321,7 +1321,7 @@ namespace sigma::ir {
 			}
 		}
 
-		context.work_list->items.push_back(n);
+		context.work->items.push_back(n);
 
 		if (
 			n->is_mem_out_op() && n->ty != node::PHI &&
@@ -1330,16 +1330,16 @@ namespace sigma::ir {
 			// memory effects have anti-dependencies, the previous loads
 			// must finish before the next memory effect is applied.
 			for (handle<user> use = n->inputs[1]->use; use; use = use->next_user) {
-				if (use->slot == 1 && use->node != n) {
-					dfs_schedule(context, bb, use->node, false);
+				if (use->slot == 1 && use->n != n) {
+					dfs_schedule(context, bb, use->n, false);
 				}
 			}
 		}
 
 		// push outputs (projections, if they apply)
-		if (n->data_type.ty == data_type::TUPLE && n->ty != node::BRANCH) {
+		if (n->dt.ty == data_type::TUPLE && n->ty != node::BRANCH) {
 			for (auto use = n->use; use; use = use->next_user) {
-				const handle<node> projection = use->node;
+				const handle<node> projection = use->n;
 
 				if (projection->ty == node::PROJECTION) {
 					dfs_schedule(context, bb, projection, false);
@@ -1354,10 +1354,10 @@ namespace sigma::ir {
 		const handle<node> value = phi->inputs[1 + phi_index];
 
 		// reserve phi space
-		if (phi->data_type.ty != data_type::MEMORY) {
+		if (phi->dt.ty != data_type::MEMORY) {
 			context.phi_values.emplace_back(phi_value{ 
 				.phi = phi, 
-				.node = value
+				.n = value
 			});
 		}
 
@@ -1379,8 +1379,8 @@ namespace sigma::ir {
 		// create a new live interval with an uninitialized register
 		live_interval it{
 			.assigned = reg::invalid_id,
-			.reg = reg,
-			.node = n,
+			.r = reg,
+			.n = n,
 			.data_type = legalize_data_type(data_type),
 			.ranges = { utility::range<u64>::max() }
 		};
@@ -1451,7 +1451,7 @@ namespace sigma::ir {
 		// ASSERT(n->global_value_index != 5, "x");
 		// no value was found, allocate a new virtual register
 		if (value == nullptr) {
-			const reg tmp = allocate_virtual_register(context, n, n->data_type);
+			const reg tmp = allocate_virtual_register(context, n, n->dt);
 			select_instruction(context, n, tmp);
 			return tmp;
 		}
@@ -1465,13 +1465,13 @@ namespace sigma::ir {
 
 		// if the node should rematerialize we allocate a new virtual register
 		if (n->should_rematerialize()) {
-			const reg tmp = allocate_virtual_register(context, n, n->data_type);
+			const reg tmp = allocate_virtual_register(context, n, n->dt);
 			select_instruction(context, n, tmp);
 			return tmp;
 		}
 
 		// fallback to just allocating a new virtual register
-		const reg tmp = allocate_virtual_register(context, n, n->data_type);
+		const reg tmp = allocate_virtual_register(context, n, n->dt);
 		value->virtual_register = tmp;
 		return tmp;
 	}
@@ -1517,7 +1517,7 @@ namespace sigma::ir {
 		const handle<instruction> inst = context.create_instruction(2);
 
 		inst->type = machine_data_type >= x64::SSE_SS ? instruction::FP_MOV : instruction::MOV;
-		inst->data_type = machine_data_type;
+		inst->dt = machine_data_type;
 
 		inst->out_count = 1;
 		inst->in_count = 1;

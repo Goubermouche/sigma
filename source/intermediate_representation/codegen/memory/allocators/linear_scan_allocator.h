@@ -3,7 +3,7 @@
 #include "intermediate_representation/codegen/live_interval.h"
 #include "intermediate_representation/target/arch/x64/x64.h"
 
-#include <utility/containers/dense_set.h>
+#include "utility/containers/dense_set.h"
 
 #define REGISTER_CLASS_COUNT 2
 

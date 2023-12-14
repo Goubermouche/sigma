@@ -2,7 +2,7 @@
 #include "ir_translator/values/function_registry.h"
 #include "ir_translator/values/variable_registry.h"
 
-#include <abstract_syntax_tree/abstract_syntax_tree.h>
+#include "abstract_syntax_tree/abstract_syntax_tree.h"
 
 namespace sigma {
 	struct compilation_context;

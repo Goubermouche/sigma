@@ -1,6 +1,6 @@
 #pragma once
-#include <utility/types.h>
-#include <utility/containers/handle.h>
+#include "utility/types.h"
+#include "utility/containers/handle.h"
 
 namespace sigma::ir {
 	using namespace utility::types;
@@ -20,7 +20,7 @@ namespace sigma::ir {
 			MAX
 		};
 
-		handle<module> module;
+		handle<module> parent_module;
 		std::string name;
 		symbol_tag tag;
 		u64 symbol_id;

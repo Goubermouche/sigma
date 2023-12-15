@@ -35,8 +35,10 @@ namespace sigma::ir {
 		};
 
 		std::string name;
+		u32 section_number;
 
 		u32 export_flags;
+		u32 name_position;
 		module_section_flags flags;
 
 		u8 section_index;
@@ -117,5 +119,6 @@ namespace sigma::ir {
 		handle<symbol> m_chkstk_extern;
 
 		friend class coff_file_emitter;
+		friend class elf_file_emitter;
 	};
 } // namespace sigma::ir

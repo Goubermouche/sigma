@@ -1,10 +1,7 @@
 #pragma once
 #include "intermediate_representation/codegen/object_file_emitter.h"
 #include "intermediate_representation/target/target.h"
-
-#include <utility/containers/byte_buffer.h>
 #include <utility/containers/handle.h>
-
 
 #define COFF_CHARACTERISTICS_TEXT   0x60500020u
 #define COFF_CHARACTERISTICS_DATA   0xC0000040u
@@ -129,7 +126,7 @@ namespace sigma::ir {
 	};
 
 	struct coff_unwind_info {
-		size_t section_num, patch_count;
+		u64 section_num, patch_count;
 
 		utility::byte_buffer xdata_chunk;
 		utility::byte_buffer pdata_chunk;
@@ -173,21 +170,18 @@ namespace sigma::ir {
 	};
 #pragma pack(pop)
 
-	struct module_section;
-	struct compiled_function;
-
 	class coff_file_emitter : public object_file_emitter {
 	public:
 		utility::object_file emit(module& module) override;
 	private:
-		static auto generate_unwind_info(module& module, u64 xdata_section, const module_section& section) -> handle<coff_unwind_info>;
-		static void emit_win_unwind_info(utility::byte_buffer& buffer, handle<compiled_function> function, u64 stack_usage);
+		static auto generate_unwind_info(
+			module& module, u64 xdata_section, const module_section& section
+		) -> handle<coff_unwind_info>;
 
-		static auto layout_relocations(std::vector<module_section>& sections, u32 output_size, u32 relocation_size) -> u32;
-		static auto emit_call_patches(handle<compiled_function> compiled_func) -> u32;
-
-		static auto helper_write_section(u64 write_pos, const module_section* section, u32 pos, utility::byte_buffer& buffer) -> u64;
+		static void emit_win_unwind_info(
+			utility::byte_buffer& buffer, handle<compiled_function> function, u64 stack_usage
+		);
 
 		static auto machine_to_coff_machine(target target) -> coff_machine::value;
 	};
-}
+} // namespace sigma::ir

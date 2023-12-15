@@ -5,8 +5,9 @@
 #include "intermediate_representation/target/arch/x64/x64_disassembler.h"
 #include "intermediate_representation/target/arch/x64/x64.h"
 
-// win
+// object files
 #include "intermediate_representation/codegen/outputs/coff.h"
+#include "intermediate_representation/codegen/outputs/elf.h"
 
 namespace sigma::ir {
 	codegen_target::codegen_target(target target) : m_target(target) {
@@ -47,8 +48,8 @@ namespace sigma::ir {
 	auto codegen_target::pick_object_file_emitter(system system) -> s_ptr<object_file_emitter> {
 		switch (system) {
 			case system::WINDOWS: return std::make_shared<coff_file_emitter>();
+			case system::LINUX:   return std::make_shared<elf_file_emitter>();
 			//case system::android:
-			//case system::linux:
 			//case system::mac_os:
 			//case system::web: 
 		}

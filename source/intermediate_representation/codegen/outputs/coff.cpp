@@ -256,8 +256,7 @@ namespace sigma::ir {
 
 		std::vector<std::string> string_table_data;
 		string_table_data.resize(unique_id_counter);
-		utility::byte_writer symbol_table_writer(header.symbol_count * sizeof(coff_symbol));
-
+		utility::byte_buffer symbol_table_writer = utility::byte_buffer::reserve_initialize(header.symbol_count * sizeof(coff_symbol));
 		u64 symbol_count = 1;
 
 		for (auto& section : sections) {
@@ -268,7 +267,7 @@ namespace sigma::ir {
 			};
 
 			std::memcpy(s.short_name, section.name.c_str(), 8 * sizeof(char));
-			symbol_table_writer.write(s);
+			symbol_table_writer.append_type(s);
 
 			coff_auxiliary_section_symbol aux = {
 				.length = section.total_size,
@@ -277,7 +276,7 @@ namespace sigma::ir {
 				.selection = static_cast<u8>(section.com.ty != comdat::NONE ? 2 : 0),
 			};
 
-			symbol_table_writer.write(aux);
+			symbol_table_writer.append_type(aux);
 			symbol_count++;
 		}
 
@@ -319,10 +318,10 @@ namespace sigma::ir {
 					aux[0].number = section_num;
 				}
 
-				symbol_table_writer.write(s[0]);
-				symbol_table_writer.write(aux[0]);
-				symbol_table_writer.write(s[1]);
-				symbol_table_writer.write(aux[1]);
+				symbol_table_writer.append_type(s[0]);
+				symbol_table_writer.append_type(aux[0]);
+				symbol_table_writer.append_type(s[1]);
+				symbol_table_writer.append_type(aux[1]);
 				symbol_count += 2;
 			}
 		}
@@ -354,7 +353,7 @@ namespace sigma::ir {
 					std::memcpy(sym.short_name, name.c_str(), name_length + 1);
 				}
 
-				symbol_table_writer.write(sym);
+				symbol_table_writer.append_type(sym);
 			}
 
 			for (const auto& global : section.globals) {
@@ -386,7 +385,7 @@ namespace sigma::ir {
 					std::snprintf(reinterpret_cast<char*>(sym.short_name), 8, "$%06zx", global->sym.symbol_id);
 				}
 
-				symbol_table_writer.write(sym);
+				symbol_table_writer.append_type(sym);
 			}
 		}
 
@@ -411,10 +410,9 @@ namespace sigma::ir {
 				std::memcpy(sym.short_name, ext->sym.name.c_str(), name_length);
 			}
 
-			symbol_table_writer.write(sym);
+			symbol_table_writer.append_type(sym);
 		}
 
-		ASSERT(symbol_table_writer.get_position() == symbol_table_writer.get_size(), "invalid write position");
 		out_file.append(symbol_table_writer);
 
 		utility::byte_buffer chunk = utility::byte_buffer::zero_initialize(string_table.size);
@@ -545,81 +543,6 @@ namespace sigma::ir {
  		buffer.patch_byte(patch_position + offsetof(unwind_info, code_count), code_count);
 	}
 
-	auto coff_file_emitter::layout_relocations(std::vector<module_section>& sections, u32 output_size, u32 relocation_size) -> u32 {
-		// calculate the relocation layout
- 		for(auto& section : sections) {
- 			u32 relocation_count = 0;
-	 
- 			for(const auto& function : section.functions) {
- 				relocation_count += emit_call_patches(function);
- 			}
-	 
- 			for(const auto& global : section.globals) {
- 				for(const auto& object : global->objects) {
- 					relocation_count += object.type == init_object::RELOCATION;
- 				}
- 			}
-
- 			section.relocation_count = relocation_count;
- 			section.relocation_position = output_size;
-
-			output_size += relocation_count * relocation_size;
- 		}
-
- 		return output_size;
-	}
-
-	auto coff_file_emitter::emit_call_patches(handle<compiled_function> compiled_func) -> u32 {
-		const u64 source_section = compiled_func->parent->parent_section;
-		u64 ordinal = 0;
-
-		for (handle<symbol_patch> patch = compiled_func->first_patch; patch; patch = patch->next) {
-		 	if (patch->target->tag == symbol::symbol_tag::FUNCTION) {
-				const u64 destination_section = reinterpret_cast<function*>(patch->target.get())->output.parent->parent_section;
-	 
-		 		// you can't do relocations across sections
-		 		if (source_section == destination_section) {
-					ASSERT(patch->pos < compiled_func->bytecode.get_size(), "invalid patch position");
-	 
-		 			const u64 actual_position = compiled_func->code_position + patch->pos + 4;
-		 			u32 position = static_cast<u32>(reinterpret_cast<function*>(patch->target.get())->output.code_position - actual_position);
-		 			memcpy(&compiled_func->bytecode[patch->pos], &position, sizeof(uint32_t));
-	 
-		 			ordinal += 1;
-		 			patch->internal = true;
-		 		}
-		 	}
-		}
-	 
-		return static_cast<u32>(compiled_func->patch_count - ordinal);
-	}
-
-	auto coff_file_emitter::helper_write_section(u64 write_pos, const module_section* section, u32 pos, utility::byte_buffer& buffer) -> u64 {
-		ASSERT(write_pos == pos, "invalid write position");
-		utility::byte* data = &buffer[pos];
-
-		// place functions
-		for (const auto& function : section->functions) {
-			if (function != nullptr) {
-				memcpy(data + function->code_position, function->bytecode.get_data(), function->bytecode.get_size());
-			}
-		}
-
-		// place globals
-		for (const auto& global : section->globals) {
-			memset(&data[global->position], 0, global->size);
-
-			for (const auto& object : global->objects) {
-				if (object.type == init_object::REGION) {
-					ASSERT(object.offset + object.r.size <= global->size, "invalid object layout");
-					memcpy(&data[global->position + object.offset], object.r.ptr, object.r.size);
-				}
-			}
-		}
-
-		return write_pos + section->total_size;
-	}
-
 	auto coff_file_emitter::machine_to_coff_machine(target target) -> coff_machine::value {
 		switch (target.get_arch()) {
 			case arch::X64: return coff_machine::AMD64;
@@ -628,4 +551,4 @@ namespace sigma::ir {
 		NOT_IMPLEMENTED();
 		return coff_machine::NONE;
 	}
-}
+} // namespace sigma::ir

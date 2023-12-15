@@ -53,6 +53,12 @@ namespace utility {
 			return container;
 		}
 
+		[[nodiscard]] static contiguous_container reserve_initialize(u64 reserved_size) {
+			contiguous_container container;
+			container.reserve(reserved_size);
+			return container;
+		}
+
 		constexpr void clear() {
 			m_size = 0;
 			zero_fill();

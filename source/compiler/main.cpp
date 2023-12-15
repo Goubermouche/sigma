@@ -1,5 +1,6 @@
 #include "compiler/compiler.h"
 
+#include <utility/macros.h>
 using namespace utility::types;
 
 //ast.traverse([&](const handle<ast::node>& node, u16 depth) {
@@ -29,7 +30,11 @@ auto main(i32 argc, char* argv[]) -> i32 {
 	SUPPRESS_C4100(argc);
 	SUPPRESS_C4100(argv);
 
-	sigma::compiler::compile();
+	sigma::compiler::compile(
+		"./test/main.s", 
+		{ sigma::ir::arch::X64, sigma::ir::system::WINDOWS }
+	);
+
 	return 0;
 
 	//sigma::ir::target target(sigma::ir::arch::X64, sigma::ir::system::WINDOWS);

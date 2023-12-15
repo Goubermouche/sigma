@@ -1,8 +1,8 @@
 #pragma once
 #include "tokenizer/token.h"
 
-#include "utility/containers/contiguous_container.h"
-#include "utility/containers/symbol_table.h"
+#include <utility/containers/contiguous_container.h>
+#include <utility/containers/symbol_table.h>
 
 namespace sigma {
 	class token_buffer {

@@ -2,8 +2,8 @@
 #include "intermediate_representation/codegen/object_file_emitter.h"
 #include "intermediate_representation/target/target.h"
 
-#include "utility/containers/byte_buffer.h"
-#include "utility/containers/handle.h"
+#include <utility/containers/byte_buffer.h>
+#include <utility/containers/handle.h>
 
 
 #define COFF_CHARACTERISTICS_TEXT   0x60500020u

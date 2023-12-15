@@ -4,7 +4,7 @@
 #include "intermediate_representation/codegen/memory/allocators/linear_scan_allocator.h"
 
 // transformation passes
-#include "codegen/codegen_context.h"
+#include "intermediate_representation/codegen/codegen_context.h"
 #include "intermediate_representation/codegen/optimization/optimization_pass_list.h"
 #include "intermediate_representation/codegen/transformation/live_range_analysis.h"
 #include "intermediate_representation/codegen/transformation/scheduler.h"

@@ -1,12 +1,12 @@
 #pragma once
-#include "types.h"
+#include "intermediate_representation/node_hierarchy/types.h"
 #include "intermediate_representation/node_hierarchy/properties/operations.h"
 #include "intermediate_representation/node_hierarchy/properties/memory.h"
 #include "intermediate_representation/node_hierarchy/properties/control_flow.h"
 
-#include "utility/containers/allocators/block_allocator.h"
-#include "utility/containers/property.h"
-#include "utility/containers/slice.h"
+#include <utility/containers/allocators/block_allocator.h>
+#include <utility/containers/property.h>
+#include <utility/containers/slice.h>
 
 namespace sigma::ir {
 	struct codegen_context;

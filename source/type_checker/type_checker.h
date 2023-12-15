@@ -1,5 +1,5 @@
 #pragma once
-#include "abstract_syntax_tree/abstract_syntax_tree.h"
+#include <abstract_syntax_tree/abstract_syntax_tree.h>
 
 namespace sigma {
 	struct compilation_context;

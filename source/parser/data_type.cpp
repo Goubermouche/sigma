@@ -1,5 +1,5 @@
 #include "data_type.h"
-#include "utility/macros.h"
+#include <utility/macros.h>
 
 namespace sigma {
 	data_type::data_type(token token, u8 pointer_level)

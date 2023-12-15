@@ -1,6 +1,6 @@
 #pragma once
 #include "intermediate_representation/node_hierarchy/symbol.h"
-#include "types.h"
+#include "intermediate_representation/node_hierarchy/types.h"
 
 namespace sigma::ir {
 	struct init_object {

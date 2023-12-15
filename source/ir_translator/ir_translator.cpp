@@ -1,5 +1,5 @@
 #include "ir_translator.h"
-#include "compiler/compiler/compilation_context.h"
+#include <compiler/compiler/compilation_context.h>
 
 namespace sigma {
 	auto ir_translator::translate(

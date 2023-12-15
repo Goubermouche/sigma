@@ -1,18 +1,19 @@
 #include "compiler.h"
 #include "compiler/compiler/compilation_context.h"
 
-#include "tokenizer/tokenizer.h"
-#include "parser/parser.h"
-#include "type_checker/type_checker.h"
-#include "ir_translator/ir_translator.h"
+#include <tokenizer/tokenizer.h>
+#include <parser/parser.h>
+#include <type_checker/type_checker.h>
+#include <ir_translator/ir_translator.h>
 
-#include "utility/filesystem/new/file.h"
-#include "utility/string_helper.h"
-#include "utility/timer.h"
+#include <utility/filesystem/file.h>
+#include <utility/string_helper.h>
+#include <utility/timer.h>
 
 namespace sigma {
-	void compiler::compile() {
-		const auto file = utility::file::read_text_file("/home/goubermouche/dev/projects/sigma/source/compiler/test/main.s");
+	void compiler::compile(const filepath& path, ir::target target) {
+		verify_file(path);
+		const auto file = utility::file::read_text_file(path);
 
 		utility::timer total_timer;
 		utility::timer tokenizer_timer;
@@ -46,7 +47,7 @@ namespace sigma {
 
 		// ir translator
 		ir_translator_timer.start();
-		auto module = ir_translator::translate(context, { ir::arch::X64, ir::system::WINDOWS });
+		auto module = ir_translator::translate(context, target);
 		utility::console::println("{:<30}{:.3f}s", "IR translator finished", ir_translator_timer.elapsed_seconds());
 
 		// codegen
@@ -57,8 +58,23 @@ namespace sigma {
 		utility::console::println("{}", std::string(36, '-'));
 		utility::console::println("{:<30}{:.3f}s", "compilation finished", total_timer.elapsed_seconds());
 
+		// emit the object file
 		auto object_file = module.generate_object_file();
-		utility::file::write(object_file, "/home/goubermouche/dev/projects/sigma/source/compiler/test/a.obj");
+
+		static const char* object_formats[] = {
+			".obj", // WINDOWS
+			".o"    // LINUX
+		};
+
+		const char* active_format = object_formats[static_cast<u8>(target.get_system())];
+		auto object_path = path.parent_path() / (std::string("a") + active_format);
+
+		utility::file::write(object_file, object_path);
+	}
+
+	void compiler::verify_file(const filepath& path) {
+		ASSERT(path.extension() == ".s", "invalid file extension detected");
+		ASSERT(std::filesystem::is_regular_file(path), "invalid file detected");
 	}
 } // namespace sigma
 

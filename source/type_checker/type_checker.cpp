@@ -1,5 +1,5 @@
 #include "type_checker.h"
-#include "compiler/compiler/compilation_context.h"
+#include <compiler/compiler/compilation_context.h>
 
 namespace sigma {
 	void type_checker::type_check(compilation_context& context) {

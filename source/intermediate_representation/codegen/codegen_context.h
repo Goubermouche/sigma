@@ -3,12 +3,11 @@
 #include "intermediate_representation/codegen/live_interval.h"
 #include "intermediate_representation/codegen/instruction.h"
 #include "intermediate_representation/codegen/codegen_temporary.h"
-
 #include "intermediate_representation/codegen/work_list.h"
 #include "intermediate_representation/codegen/control_flow_graph.h"
 #include "intermediate_representation/target/target.h"
 
-#include "utility/containers/allocator_based_containers/linked_list.h"
+#include <utility/containers/allocator_based_containers/linked_list.h>
 
 namespace sigma::ir {
 	struct codegen_context {

@@ -1,6 +1,5 @@
 #include "types.h"
-#include "utility/macros.h"
-
+#include <utility/macros.h>
 
 namespace sigma::ir {
   auto data_type::to_string() const -> std::string {

@@ -1,6 +1,6 @@
 #pragma once
-#include "intermediate_representation/builder.h"
-#include "utility/containers/symbol_table.h"
+#include <intermediate_representation/builder.h>
+#include <utility/containers/symbol_table.h>
 
 namespace sigma::detail {
 	using namespace utility::types;

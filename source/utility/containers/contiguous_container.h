@@ -1,6 +1,7 @@
 #pragma once
 #include "utility/macros.h"
 #include "utility/containers/slice.h"
+#include <cstring>
 
 namespace utility {
 	template<typename type>

@@ -8,7 +8,7 @@ namespace sigma::ir {
 	 */
 	struct user {
 		handle<user> next_user;
-		handle<node> node;
+		handle<node> n;
 		u64 slot;
 	};
 }

@@ -1,5 +1,5 @@
 #pragma once
-#include "types.h"
+#include "intermediate_representation/node_hierarchy/types.h"
 #include "intermediate_representation/node_hierarchy/properties/operations.h"
 #include "intermediate_representation/node_hierarchy/properties/memory.h"
 #include "intermediate_representation/node_hierarchy/properties/control_flow.h"
@@ -234,6 +234,6 @@ namespace sigma::ir {
 		utility::slice<handle<node>> inputs; // inputs for the given node
 		u64 global_value_index;              // value number used for optimizations
 		type ty = NONE;                      // underlying node type
-		data_type data_type;                 // additional data 
+		data_type dt;                 // additional data 
 	};
 }

@@ -1,9 +1,9 @@
 #pragma once
-#include <parser/data_type.h>
+#include "parser/data_type.h"
 
-#include <utility/containers/property.h>
-#include <utility/containers/handle.h>
-#include <utility/containers/slice.h>
+#include "utility/containers/property.h"
+#include "utility/containers/handle.h"
+#include "utility/containers/slice.h"
 
 namespace sigma {
 	using namespace utility::types;
@@ -63,7 +63,7 @@ namespace sigma {
 
 	struct literal {
 		utility::symbol_table_key value_key;
-		data_type data_type;
+		data_type dt;
 	};
 
 	struct bool_literal {
@@ -72,12 +72,12 @@ namespace sigma {
 
 	struct variable {
 		utility::symbol_table_key identifier_key;
-		data_type data_type;
+		data_type dt;
 	};
 
 	struct variable_access {
 		utility::symbol_table_key identifier_key;
-		data_type data_type;
+		data_type dt;
 	};
 
 	// implementation details of specific node types:

@@ -20,7 +20,7 @@ namespace sigma::ir {
 			MAX
 		};
 
-		handle<module> module;
+		handle<module> parent_module;
 		std::string name;
 		symbol_tag tag;
 		u64 symbol_id;

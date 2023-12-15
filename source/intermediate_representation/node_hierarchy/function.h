@@ -111,11 +111,11 @@ namespace sigma::ir {
 		auto append_memory(handle<node> memory) const -> handle<node>;
 	public:
 		friend class module;
-		symbol symbol; // symbol of the given function
+		symbol sym; // symbol of the given function
 
 		compiled_function output;
 		function_signature signature;
-		linkage linkage;
+		linkage link;
 
 		u8 parent_section; // index of the parent module section
 

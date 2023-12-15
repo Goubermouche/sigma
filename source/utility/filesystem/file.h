@@ -24,10 +24,13 @@ namespace utility {
 			std::ifstream file(path);
 
 			if(!file) {
+				std::cout << "err file\n";
 				ASSERT(false, "failure");
 			}
 
 			return std::string(std::istreambuf_iterator<char>(file), std::istreambuf_iterator<char>());
 		}
 	};
+
+
 }

@@ -4,12 +4,12 @@ namespace sigma::ir {
 	void schedule_early(
 		codegen_context& context, const handle<node>& target
 	) {
-		if (!context.work_list->visit(target)) {
+		if (!context.work->visit(target)) {
 			return;
 		}
 
 		// push node, late scheduling will process this list
-		context.work_list->items.push_back(target);
+		context.work->items.push_back(target);
 
 		// schedule inputs first
 		for(const handle<node>& input : target->inputs) {
@@ -24,7 +24,7 @@ namespace sigma::ir {
 		}
 
 		// start at the entry point
-		handle best = context.schedule.at(context.work_list->items[0]);
+		handle best = context.schedule.at(context.work->items[0]);
 		i32 best_depth = 0;
 
 		// choose deepest block
@@ -61,7 +61,7 @@ namespace sigma::ir {
 
 		// find the least common ancestor
 		for (auto use = target->use; use; use = use->next_user) {
-			handle<node> user_node = use->node;
+			handle<node> user_node = use->n;
 
 			auto it = context.schedule.find(user_node);
 			if (it == context.schedule.end()) {
@@ -116,21 +116,21 @@ namespace sigma::ir {
 
 	void schedule_node_hierarchy(codegen_context& context) {
 		// generate graph dominators 
-		context.work_list->compute_dominators(context.graph);
-		context.work_list->visited_items.clear();
+		context.work->compute_dominators(context.graph);
+		context.work->visited_items.clear();
 
 		for (u64 i = 0; i < context.graph.blocks.size(); ++i) {
-			context.graph.blocks.at(context.work_list->items[i]).items.reserve(32);
+			context.graph.blocks.at(context.work->items[i]).items.reserve(32);
 		}
 
 		for (u64 i = context.graph.blocks.size(); i-- > 0;) {
-			handle<node> basic_block_node = context.work_list->items[i];
+			handle<node> basic_block_node = context.work->items[i];
 			const handle basic_block = &context.graph.blocks[basic_block_node];
 			handle<node> basic_block_end = basic_block->end;
 
 			if (i == 0) {
 				// schedule the entry node
-				handle<node> start = context.function->entry_node;
+				handle<node> start = context.func->entry_node;
 				basic_block->items.insert(start);
 				context.schedule[start] = basic_block;
 			}
@@ -141,7 +141,7 @@ namespace sigma::ir {
 
 				// add projections to the same block
 				for (handle<user> use = basic_block_end->use; use; use = use->next_user) {
-					handle<node> projection = use->node;
+					handle<node> projection = use->n;
 
 					if (
 						use->slot == 0 &&
@@ -163,15 +163,15 @@ namespace sigma::ir {
 		}
 
 		for (u64 i = context.graph.blocks.size(); i-- > 0;) {
-			schedule_early(context, context.graph.blocks.at(context.work_list->items[i]).end);
+			schedule_early(context, context.graph.blocks.at(context.work->items[i]).end);
 		}
 
-		for (u64 i = context.graph.blocks.size(); i < context.work_list->items.size(); ++i) {
-			schedule_late(context, context.work_list->items[i]);
+		for (u64 i = context.graph.blocks.size(); i < context.work->items.size(); ++i) {
+			schedule_late(context, context.work->items[i]);
 		}
 
-		context.work_list->items.resize(context.graph.blocks.size());
-		context.work_list->visited_items.clear();
+		context.work->items.resize(context.graph.blocks.size());
+		context.work->visited_items.clear();
 		context.labels.resize(context.graph.blocks.size());
 	}
 }

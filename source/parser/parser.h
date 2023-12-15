@@ -1,7 +1,7 @@
 #pragma once
 #include "parser/data_type.h"
-#include "tokenizer/token_buffer.h"
 
+#include <tokenizer/token_buffer.h>
 #include <abstract_syntax_tree/abstract_syntax_tree.h>
 
 namespace sigma {

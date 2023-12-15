@@ -2,9 +2,9 @@
 
 namespace sigma::ir {
 	void generate_use_lists(transformation_context& context) {
-		context.work_list->push_all(context.function);
+		context.work->push_all(context.func);
 
-		for (const handle<node>& item : context.work_list->items) {
+		for (const handle<node>& item : context.work->items) {
 			// append locals
 			if (item->ty == node::LOCAL) {
 				context.locals.emplace_back(item);
@@ -13,11 +13,11 @@ namespace sigma::ir {
 			// mark every node as a user of all of its input nodes
 			for (u64 i = 0; i < item->inputs.get_size(); ++i) {
 				if (const handle<node> input = item->inputs[i]) {
-					item->add_user(input, i, nullptr, &context.function->allocator);
+					item->add_user(input, i, nullptr, &context.func->allocator);
 				}
 			}
 		}
 
-		context.work_list->clear();
+		context.work->clear();
 	}
 }

@@ -1,5 +1,5 @@
 #include "parser.h"
-#include <compiler/compiler/compilation_context.h>
+#include "compiler/compiler/compilation_context.h"
 
 namespace sigma {
 	parser::parser(compilation_context& context)
@@ -251,7 +251,7 @@ namespace sigma {
 
 		auto& prop = negation->get<literal>();
 		prop.value_key = m_context.symbols.insert("-1");
-		prop.data_type = { data_type::I32, 0 };
+		prop.dt = { data_type::I32, 0 };
 
 		// negate the expression
 		return m_ast.create_binary_expression(
@@ -321,7 +321,7 @@ namespace sigma {
 		);
 
 		auto& prop = declaration_node->get<variable>();
-		prop.data_type = dt;
+		prop.dt = dt;
 		prop.identifier_key = identifier_key;
 
 		if (assigned_value) {
@@ -481,7 +481,7 @@ namespace sigma {
 
 		auto& prop = literal_node->get<literal>();
 		prop.value_key = m_tokens.get_current().symbol_key;
-		prop.data_type = { base, 0 };
+		prop.dt = { base, 0 };
 
 		return literal_node;
 	}
@@ -491,7 +491,7 @@ namespace sigma {
 		const handle<node> string = m_ast.create_node<literal>(node_type::STRING_LITERAL, 0);
 		auto& prop = string->get<literal>();
 		prop.value_key = m_tokens.get_current().symbol_key;
-		prop.data_type = { data_type::CHAR, 1 }; // char*
+		prop.dt = { data_type::CHAR, 1 }; // char*
 		return string;
 	}
 

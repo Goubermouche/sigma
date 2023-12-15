@@ -12,7 +12,6 @@ namespace sigma {
 		compilation_context& context, ir::target target
 	) : m_context(context), m_module(target), m_builder(m_module),
 	m_functions(m_builder), m_variables(m_builder) {
-
 		m_functions.register_external_function(m_context.symbols.insert("printf"), {
 			.identifier   = "printf",
 			.parameters   = { PTR_TYPE },
@@ -33,26 +32,27 @@ namespace sigma {
 			case node_type::FUNCTION:             translate_function_declaration(ast_node); break;
 			case node_type::FUNCTION_CALL:        return translate_function_call(ast_node);
 
-			// flow control
+			// // flow control
 			case node_type::RETURN:               translate_return(ast_node); break;
 			case node_type::CONDITIONAL_BRANCH:   translate_conditional_branch(ast_node, nullptr); break;
 
 			case node_type::VARIABLE_DECLARATION: translate_variable_declaration(ast_node); break;
 			case node_type::VARIABLE_ACCESS:      return translate_variable_access(ast_node);
-			case node_type::VARIABLE_ASSIGNMENT:  return translate_variable_assignment(ast_node);
+			// case node_type::VARIABLE_ASSIGNMENT:  return translate_variable_assignment(ast_node);
 
-			// operators:
-			case node_type::OPERATOR_ADD:
-			case node_type::OPERATOR_SUBTRACT:
-			case node_type::OPERATOR_MULTIPLY:
-			case node_type::OPERATOR_DIVIDE:
-			case node_type::OPERATOR_MODULO:      return translate_binary_math_operator(ast_node);
+			// // operators:
+			// case node_type::OPERATOR_ADD:
+			// case node_type::OPERATOR_SUBTRACT:
+			// case node_type::OPERATOR_MULTIPLY:
+			// case node_type::OPERATOR_DIVIDE:
+			// case node_type::OPERATOR_MODULO:      return translate_binary_math_operator(ast_node);
 
-			// literals
+			// // literals
 			case node_type::NUMERICAL_LITERAL:    return translate_numerical_literal(ast_node);
 			case node_type::STRING_LITERAL:       return translate_string_literal(ast_node);
 			case node_type::BOOL_LITERAL:         return translate_bool_literal(ast_node);
-			default: NOT_IMPLEMENTED();
+			// default: NOT_IMPLEMENTED();
+			default: std::cout << ast_node->type.to_string() << '\n';
 		}
 
 		return nullptr;
@@ -87,7 +87,7 @@ namespace sigma {
 
 	void ir_translator::translate_variable_declaration(handle<node> variable_node) {
 		const auto& prop = variable_node->get<variable>();
-		const u16 byte_width = prop.data_type.get_byte_width();
+		const u16 byte_width = prop.dt.get_byte_width();
 
 		const handle<ir::node> local = m_variables.register_variable(
 			prop.identifier_key, byte_width, byte_width
@@ -97,7 +97,7 @@ namespace sigma {
 			const handle<ir::node> expression = translate_node(variable_node->children[0]);
 			m_builder.create_store(local, expression, byte_width, false);
 		}
-		else if (prop.data_type.type == data_type::BOOL) {
+		else if (prop.dt.type == data_type::BOOL) {
 			// boolean values should default to false
 			m_builder.create_store(local, m_builder.create_bool(false), byte_width, false);
 		}
@@ -223,7 +223,7 @@ namespace sigma {
 		const auto& prop = access_node->get<variable_access>();
 
 		handle<ir::node> load = m_variables.create_load(
-			prop.identifier_key, data_type_to_ir(prop.data_type), prop.data_type.get_byte_width()
+			prop.identifier_key, data_type_to_ir(prop.dt), prop.dt.get_byte_width()
 		);
 
 		ASSERT(load, "unknown variable referenced");
@@ -237,7 +237,7 @@ namespace sigma {
 		const handle<ir::node> value = translate_node(assignment_node->children[1]);
 
 		// assign the variable
-		m_variables.create_store(var.identifier_key, value, var.data_type.get_byte_width());
+		m_variables.create_store(var.identifier_key, value, var.dt.get_byte_width());
 		return nullptr;
 	}
 
@@ -245,11 +245,11 @@ namespace sigma {
 		const std::string& value = m_context.symbols.get(literal.value_key);
 
 		// handle pointers separately
-		if (literal.data_type.pointer_level > 0) {
+		if (literal.dt.pointer_level > 0) {
 			NOT_IMPLEMENTED();
 		}
 
-		switch (literal.data_type.type) {
+		switch (literal.dt.type) {
 			case data_type::I32: return m_builder.create_signed_integer(std::stoi(value), 32);
 			default: NOT_IMPLEMENTED();
 		}

@@ -1,5 +1,6 @@
 #pragma once
 #include "tokenizer/token_buffer.h"
+
 #include <utility/containers/string_accessor.h>
 
 namespace sigma {

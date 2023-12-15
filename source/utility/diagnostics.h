@@ -1,5 +1,9 @@
 #pragma once
 #include "utility/types.h"
+#include "utility/macros.h"
+
+#include <format>
+#include <list>
 
 namespace utility {
 	class console {
@@ -18,7 +22,7 @@ namespace utility {
 		static auto format_str(
 			std::format_string<arguments...> fmt, arguments&&... args
 		) -> std::string {
-			return std::move(std::format(fmt, std::forward<arguments>(args)...));
+			return std::format(fmt, std::forward<arguments>(args)...);
 		}
 	};
 } // namespace utility

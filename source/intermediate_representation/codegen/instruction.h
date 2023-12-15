@@ -123,7 +123,7 @@ namespace sigma::ir {
 
 		instruction_flags flags = none; // instruction flags
 		instruction_type  type  = ZERO; // instruction type
-		i32 data_type = 0;              // instruction data type
+		i32 dt = 0;              // instruction data type
 
 		// operands
 		utility::slice<i32> operands;

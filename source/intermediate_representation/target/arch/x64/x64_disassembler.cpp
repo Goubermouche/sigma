@@ -6,7 +6,7 @@ namespace sigma::ir {
 		const utility::byte_buffer& bytecode, const codegen_context& context
 	) -> utility::string {
 		utility::string assembly;
-		assembly.append("{}:\n", context.function->symbol.name);
+		assembly.append("{}:\n", context.func->sym.name);
 
 		// disassemble the prologue
 		disassemble_block(
@@ -23,7 +23,7 @@ namespace sigma::ir {
 
 		for(u64 i = 0; i < context.basic_block_order.size(); ++i) {
 			const u64 block_index = context.basic_block_order[i];
-			handle<node> basic_block = context.work_list->items[block_index];
+			handle<node> basic_block = context.work->items[block_index];
 
 			const u64 start = context.labels[block_index] & ~0x80000000;
 			u64 end   = bytecode.get_size();
@@ -141,7 +141,7 @@ namespace sigma::ir {
 
 							if (inst.memory.index != 255) {
 								assembly.append(
-									" + {}*{}", get_register_name(inst.memory.index, x64::QWORD), 1 << static_cast<u8>(inst.memory.scale)
+									" + {}*{}", get_register_name(inst.memory.index, x64::QWORD), 1 << static_cast<u8>(inst.memory.sc)
 								);
 							}
 
@@ -520,7 +520,7 @@ namespace sigma::ir {
 
 			inst.base = base_gpr;
 			inst.memory.index = index_gpr;
-			inst.memory.scale = s;
+			inst.memory.sc = s;
 		}
 		else {
 			if (mod == x64::INDIRECT && rm == x64::RBP) {
@@ -538,7 +538,7 @@ namespace sigma::ir {
 			else {
 				inst.base = (rex & 1 ? 8 : 0) | rm;
 				inst.memory.index = 255;
-				inst.memory.scale = scale::x1;
+				inst.memory.sc = scale::x1;
 			}
 		}
 

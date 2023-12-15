@@ -9,11 +9,15 @@
 // +-------+  +--------+  +--------------+  +---------------+  +----------------+  +------------+
 
 #pragma once
-#include <utility/macros.h>
+#include <intermediate_representation/target/target.h>
 
 namespace sigma {
+	using namespace utility::types;
+
 	class compiler {
 	public:
-		static void compile();
+		static void compile(const filepath& path, ir::target target);
+	private:
+		static void verify_file(const filepath& path);
 	};
 } // namespace sigma

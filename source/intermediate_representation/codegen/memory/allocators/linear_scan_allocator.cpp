@@ -16,7 +16,7 @@ namespace sigma::ir {
 
 		// create intervals 
 		for (u64 i = context.basic_block_order.size(); i-- > 0;) {
-			handle<node> basic_block = context.work_list->items[context.basic_block_order[i]];
+			handle<node> basic_block = context.work->items[context.basic_block_order[i]];
 			const handle machine_block = &context.machine_blocks.at(basic_block);
 			const u64 block_start = machine_block->start;
 			const u64 black_end = machine_block->end + 2;
@@ -72,7 +72,7 @@ namespace sigma::ir {
 
 			ASSERT(time != std::numeric_limits<u64>::max(), "panic");
 
-			if(interval->reg.is_valid() == false && interval->spill > 0) {
+			if(interval->r.is_valid() == false && interval->spill > 0) {
 				continue;
 			}
 
@@ -96,7 +96,7 @@ namespace sigma::ir {
 				i++;
 			}
 
-			reg reg = interval->reg;
+			reg reg = interval->r;
 
 			if(reg.is_valid() == false) {
 				// find register for virtual interval
@@ -133,16 +133,16 @@ namespace sigma::ir {
 
 		// move the resolver
 		for(const u64 block_order : context.basic_block_order) {
-			handle<node> basic_block = context.work_list->items[block_order];
+			handle<node> basic_block = context.work->items[block_order];
 			auto machine_block = &context.machine_blocks.at(basic_block);
 			const auto end_node = machine_block->end_node;
 
 			for(handle<user> use = end_node->use; use; use = use->next_user) {
-				if(!use->node->is_control()) {
+				if(!use->n->is_control()) {
 					continue;
 				}
 
-				const handle<node> successor = use->node->get_fallthrough();
+				const handle<node> successor = use->n->get_fallthrough();
 				auto target = &context.machine_blocks.at(successor);
 
 				// for all live-ins, we should check if we need to insert a move
@@ -275,7 +275,7 @@ namespace sigma::ir {
 	}
 
 	void linear_scan_allocator::mark_callee_saved_constraints(const codegen_context& context) {
-		const parameter_descriptor descriptor = context.target.get_parameter_descriptor();
+		const parameter_descriptor descriptor = context.t.get_parameter_descriptor();
 
 		// don't include RBP and RSP registers
 		u32 callee_saved_gp_registers = ~descriptor.caller_saved_gpr_count;
@@ -358,7 +358,7 @@ namespace sigma::ir {
 		}
 
 		const ptr_diff register_index = interval.get() - context.intervals.data();
-		const classified_reg::class_type register_class = interval->reg.cl;
+		const classified_reg::class_type register_class = interval->r.cl;
 
 		const u64 hole_end = interval->ranges[interval->active_range].start;
 		const bool is_now_active = time >= hole_end;
@@ -391,7 +391,7 @@ namespace sigma::ir {
 	void linear_scan_allocator::move_to_active(
 		const codegen_context& context, handle<live_interval> interval
 	) {
-		const classified_reg::class_type register_class = interval->reg.cl;
+		const classified_reg::class_type register_class = interval->r.cl;
 		const ptr_diff register_index = interval.get() - context.intervals.data();
 		const reg register_id = interval->assigned;
 
@@ -443,7 +443,7 @@ namespace sigma::ir {
 
 		new_inst->type = instruction::MOV;
 		new_inst->flags = instruction::spill;
-		new_inst->data_type = data_type;
+		new_inst->dt = data_type;
 
 		new_inst->out_count = 1;
 		new_inst->in_count = 1;
@@ -469,7 +469,7 @@ namespace sigma::ir {
 			context.stack_usage = utility::align(context.stack_usage + size, size);
 
 			// remove from active set
-			m_active_set[interval->reg.cl].remove(interval->assigned.id);
+			m_active_set[interval->r.cl].remove(interval->assigned.id);
 		}
 
 		// split lifetime
@@ -482,11 +482,11 @@ namespace sigma::ir {
 			it.spill = -1;
 		}
 
-		it.reg = classified_reg();
+		it.r = classified_reg();
 		it.assigned = reg();
 		it.ranges.reserve(4);
 		it.uses.clear();
-		it.node = nullptr;
+		it.n = nullptr;
 		it.split_kid = -1;
 
 		ASSERT(interval->split_kid < 0, "cannot spill while spilled");
@@ -598,7 +598,7 @@ namespace sigma::ir {
 	reg linear_scan_allocator::allocate_free_reg(
 		codegen_context& context, handle<live_interval> interval
 	) {
-		const auto register_class = interval->reg.cl;
+		const auto register_class = interval->r.cl;
 		constexpr i32 half_free = 1 << 16;
 
 		for(int i = 0; i < 16; ++i) {
@@ -635,7 +635,7 @@ namespace sigma::ir {
 
 		if(interval->hint.is_valid()) {
 			const auto hint = &context.intervals[interval->hint.id];
-			ASSERT(hint->reg.cl == register_class, "invalid hint register class");
+			ASSERT(hint->r.cl == register_class, "invalid hint register class");
 			const reg hint_reg = hint->assigned;
 
 			if(static_cast<ptr_diff>(interval->get_end()) <= m_free_positions[hint_reg.id]) {
@@ -675,7 +675,7 @@ namespace sigma::ir {
 			context.stack_usage = utility::align(context.stack_usage + size, size);
 
 			const live_interval it{
-				.reg = classified_reg(),
+				.r = classified_reg(),
 				.data_type = context.intervals[virtual_reg].data_type,
 				.spill = static_cast<i32>(context.stack_usage)
 			};

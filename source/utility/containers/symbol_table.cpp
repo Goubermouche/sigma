@@ -1,4 +1,5 @@
 #include "symbol_table.h"
+#include "utility/macros.h"
 
 namespace utility {
 	auto symbol_table_key::create_key() -> symbol_table_key {
@@ -37,6 +38,7 @@ namespace utility {
 	}
 
 	auto symbol_table::get(symbol_table_key key) const -> const std::string& {
+		ASSERT(key.get_value() != 0, "invalid symbol key");
 		return m_key_to_string.at(key);
 	}
 } // namespace utility

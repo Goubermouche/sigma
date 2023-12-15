@@ -146,7 +146,7 @@ namespace sigma::ir {
 	};
 
 	typedef union {
-		offset offset;
+		offset o; // offset
 		u16 frame_offset;
 	} unwind_code;
 

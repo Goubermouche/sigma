@@ -32,7 +32,7 @@ namespace sigma::ir {
 
 	struct mem {
 		u8 index;
-		scale scale;
+		scale sc;
 		i32 displacement;
 	};
 }

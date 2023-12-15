@@ -27,7 +27,7 @@ namespace sigma::ir {
 			reg.cl = is_gpr ? x64::register_class::GPR : x64::register_class::XMM;
 
 			intervals[i] = live_interval{
-				.reg = reg,
+				.r = reg,
 				.data_type = is_gpr ? x64::QWORD : x64::XMMWORD,
 				.ranges = { utility::range<u64>::max() }
 			};
@@ -39,7 +39,7 @@ namespace sigma::ir {
 	void x64_architecture::resolve_stack_usage(codegen_context& context) {
 		u64 caller_usage = context.caller_usage;
 
-		if(context.target.get_abi() == abi::WIN_64 && caller_usage > 0 && caller_usage < 4) {
+		if(context.t.get_abi() == abi::WIN_64 && caller_usage > 0 && caller_usage < 4) {
 			caller_usage = 4;
 		}
 
@@ -127,11 +127,11 @@ namespace sigma::ir {
 					bytecode.append_byte(0xF3);
 				}
 
-				emit_instruction_0(inst->type, inst->data_type, bytecode);
+				emit_instruction_0(inst->type, inst->dt, bytecode);
 			}
 			else if (inst->type == instruction::ZERO) {
 				const handle<codegen_temporary> destination = context.create_temporary();
-				const bool is_xmm = inst->data_type >= x64::PBYTE && inst->data_type <= x64::XMMWORD;
+				const bool is_xmm = inst->dt >= x64::PBYTE && inst->dt <= x64::XMMWORD;
 
 				resolve_interval(context, inst, 0, destination);
 
@@ -140,7 +140,7 @@ namespace sigma::ir {
 					is_xmm ? instruction::FP_XOR : instruction::XOR, 
 					destination, 
 					destination,
-					inst->data_type,
+					inst->dt,
 					bytecode
 				);
 			}
@@ -161,7 +161,7 @@ namespace sigma::ir {
 					resolve_interval(context, inst, in_base, target);
 				}
 
-				emit_instruction_1(context, inst->type, target, inst->data_type, bytecode);
+				emit_instruction_1(context, inst->type, target, inst->dt, bytecode);
 			}
 			else if (inst->type == instruction::CALL) {
 				const handle<codegen_temporary> target = context.create_temporary<handle<symbol>>();
@@ -170,7 +170,7 @@ namespace sigma::ir {
 			}
 			else {
 				i32 mov_op;
-				if(inst->data_type >= x64::PBYTE && inst->data_type <= x64::XMMWORD) {
+				if(inst->dt >= x64::PBYTE && inst->dt <= x64::XMMWORD) {
 					mov_op = instruction::FP_MOV;
 				}
 				else {
@@ -186,7 +186,7 @@ namespace sigma::ir {
 					bytecode.append_byte(0xF3);
 				}
 
-				i32 dt = inst->data_type;
+				i32 dt = inst->dt;
 				if (dt == x64::XMMWORD) {
 					dt = x64::SSE_PD;
 				}
@@ -219,7 +219,7 @@ namespace sigma::ir {
 						// there's a special case for ternary IMUL r64, r/m64, imm32
 						emit_instruction_2(context, instruction::IMUL3, out, left, dt, bytecode);
 
-						if(inst->data_type == x64::WORD) {
+						if(inst->dt == x64::WORD) {
 							bytecode.append_word(static_cast<u16>(inst->get<immediate>().value));
 						}
 						else {
@@ -297,7 +297,7 @@ namespace sigma::ir {
 	void x64_architecture::emit_function_epilogue(
 		const codegen_context& context, utility::byte_buffer& bytecode
 	) {
-		ASSERT(context.function->exit_node != nullptr, "no exit node found");
+		ASSERT(context.func->exit_node != nullptr, "no exit node found");
 
 		if(context.stack_usage <= 16) {
 			bytecode.append_byte(0xC3);
@@ -322,7 +322,7 @@ namespace sigma::ir {
 		bytecode.append_byte(0x58 + x64::RBP);
 
 		// ret
-		const handle<node> remote_procedure_call = context.function->exit_node->inputs[2];
+		const handle<node> remote_procedure_call = context.func->exit_node->inputs[2];
 
 		if(
 			remote_procedure_call->ty == node::PROJECTION &&
@@ -891,7 +891,7 @@ namespace sigma::ir {
 			val->immediate = -interval->spill;
 		}
 		else {
-			if(interval->reg.cl == x64::register_class::XMM) {
+			if(interval->r.cl == x64::register_class::XMM) {
 				val->type = codegen_temporary::XMM;
 			}
 			else {

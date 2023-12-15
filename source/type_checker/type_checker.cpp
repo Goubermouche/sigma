@@ -90,11 +90,11 @@ namespace sigma {
 		const auto& property = variable_node->get<variable>();
 
 		// register the variable
-		m_local_variables[property.identifier_key] = property.data_type;
+		m_local_variables[property.identifier_key] = property.dt;
 
 		// type check the assigned value
 		if (variable_node->children.get_size() == 1) {
-			type_check_node(variable_node->children[0], property.data_type);
+			type_check_node(variable_node->children[0], property.dt);
 		}
 	}
 
@@ -190,12 +190,12 @@ namespace sigma {
 
 	void type_checker::type_check_numerical_literal(handle<node> literal_node, data_type expected) {
 		auto& prop = literal_node->get<literal>();
-		apply_expected_data_type(prop.data_type, expected);
+		apply_expected_data_type(prop.dt, expected);
 	}
 
 	void type_checker::type_check_string_literal(handle<node> literal_node, data_type expected) {
 		auto& prop = literal_node->get<literal>();
-		apply_expected_data_type(prop.data_type, expected);
+		apply_expected_data_type(prop.dt, expected);
 	}
 
 	void type_checker::type_check_bool_literal(handle<node> literal_node, data_type expected) {
@@ -208,9 +208,9 @@ namespace sigma {
 		const auto it = m_local_variables.find(prop.identifier_key);
 		ASSERT(it != m_local_variables.end(), "unknown local variable");
 
-		prop.data_type = it->second; // default to the declared type 
+		prop.dt = it->second; // default to the declared type 
 
-		apply_expected_data_type(prop.data_type, expected);
+		apply_expected_data_type(prop.dt, expected);
 	}
 
 	void type_checker::apply_expected_data_type(data_type& target, data_type source) {

@@ -23,7 +23,7 @@ namespace sigma::ir {
 
 	struct phi_value {
 		handle<node> phi;
-		handle<node> node;
+		handle<node> n;
 
 		reg destination;
 		reg source;
@@ -99,8 +99,8 @@ namespace sigma::ir {
 		reg assigned;
 		reg hint;
 
-		classified_reg reg;
-		handle<node> node;
+		classified_reg r;
+		handle<node> n;
 
 		u64 active_range = 0;
 

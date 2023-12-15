@@ -23,6 +23,8 @@ namespace sigma {
 		[[nodiscard]] auto last() const -> token_info;
 
 		[[nodiscard]] auto empty() const -> bool;
+
+		void print() const;
 	private:
 		utility::contiguous_container<token_info> m_token_infos;
 	};

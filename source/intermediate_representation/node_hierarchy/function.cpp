@@ -5,8 +5,8 @@ namespace sigma::ir {
 	function::function(const std::string& name) :
 		allocator(NODE_ALLOCATION_BLOCK_SIZE)
 	{
-		symbol.name = name;
-		symbol.tag = symbol::symbol_tag::FUNCTION;
+		sym.name = name;
+		sym.tag = symbol::symbol_tag::FUNCTION;
 
 		parameters.resize(3);
 	}
@@ -16,7 +16,7 @@ namespace sigma::ir {
 
 		const handle<node> n = create_node<handle<ir::symbol>>(node::SYMBOL, 1);
 		n->get<handle<ir::symbol>>() = sym;
-		n->data_type = PTR_TYPE;
+		n->dt = PTR_TYPE;
 		return n;
 	}
 
@@ -29,7 +29,7 @@ namespace sigma::ir {
 		active_control_node = nullptr;
 
 		// just add the edge directly.
-		ASSERT(n->data_type.ty == data_type::CONTROL, "invalid edge");
+		ASSERT(n->dt.ty == data_type::CONTROL, "invalid edge");
 		add_input_late(target, n);
 		add_memory_edge(n, mem_state, target);
 	}
@@ -39,14 +39,14 @@ namespace sigma::ir {
 		const function_signature& function_sig, 
 		const std::vector<handle<node>>& arguments
 	) -> handle<node> {
-		return create_call(function_sig, get_symbol_address(&target->symbol), arguments);
+		return create_call(function_sig, get_symbol_address(&target->sym), arguments);
 	}
 
 	auto function::create_call(
 		handle<function> target_func, const std::vector<handle<node>>& arguments
 	) -> handle<node> {
 		return create_call(
-			target_func->signature, get_symbol_address(&target_func->symbol), arguments
+			target_func->signature, get_symbol_address(&target_func->sym), arguments
 		);
 	}
 
@@ -59,7 +59,7 @@ namespace sigma::ir {
 
 		// generate control projections
 		handle<node> n = create_node<branch>(node::BRANCH, 2);
-		n->data_type = TUPLE_TYPE;
+		n->dt = TUPLE_TYPE;
 		n->inputs[0] = active_control_node; // control edge
 		n->inputs[1] = condition;
 
@@ -81,11 +81,11 @@ namespace sigma::ir {
 
 	auto function::create_region() -> handle<node> {
 		handle<node> region_node = create_node<region>(node::REGION, 0);
-		region_node->data_type = CONTROL_TYPE;
+		region_node->dt = CONTROL_TYPE;
 		auto& r = region_node->get<region>();
 
 		const handle<node> phi = create_node<utility::empty_property>(node::PHI, 1);
-		phi->data_type = MEMORY_TYPE;
+		phi->dt = MEMORY_TYPE;
 		phi->inputs[0] = region_node;
 		r.memory_in = r.memory_out = phi;
 		return region_node;
@@ -102,17 +102,17 @@ namespace sigma::ir {
 		// allocate a new return node
 		if (exit_node == nullptr) {
 			const handle<node> exit_region_node = create_node<region>(node::REGION, 0);
-			exit_region_node->data_type = CONTROL_TYPE;
+			exit_region_node->dt = CONTROL_TYPE;
 
 			exit_node = create_node<region>(node::EXIT, virtual_values.size() + 3);
 			const handle<node> phi_node = create_node<utility::empty_property>(node::PHI, 2);
 
-			exit_node->data_type = CONTROL_TYPE;
+			exit_node->dt = CONTROL_TYPE;
 			exit_node->inputs[0] = exit_region_node;
 			exit_node->inputs[1] = phi_node;
 			exit_node->inputs[2] = parameters[2];
 
-			phi_node->data_type = MEMORY_TYPE;
+			phi_node->dt = MEMORY_TYPE;
 			phi_node->inputs[0] = exit_region_node;
 			phi_node->inputs[1] = memory_state;
 
@@ -121,7 +121,7 @@ namespace sigma::ir {
 					node::PHI, 2
 				);
 
-				value_phi_node->data_type = virtual_values[i]->data_type;
+				value_phi_node->dt = virtual_values[i]->dt;
 				value_phi_node->inputs[0] = exit_region_node;
 				value_phi_node->inputs[1] = virtual_values[i];
 
@@ -146,7 +146,7 @@ namespace sigma::ir {
 
 	auto function::create_signed_integer(i64 value, u8 bit_width) -> handle<node> {
 		const handle<node> integer_node = create_node<integer>(node::INTEGER_CONSTANT, 1);
-		integer_node->data_type = { .ty = data_type::INTEGER, .bit_width = bit_width };
+		integer_node->dt = { .ty = data_type::INTEGER, .bit_width = bit_width };
 
 		auto& integer_prop = integer_node->get<integer>();
 		integer_prop.bit_width = bit_width;
@@ -157,7 +157,7 @@ namespace sigma::ir {
 
 	auto function::create_bool(bool value) -> handle<node> {
 		handle<node> node = create_node<integer>(node::INTEGER_CONSTANT, 1);
-		node->data_type = BOOL_TYPE;
+		node->dt = BOOL_TYPE;
 
 		node->get<integer>().value = static_cast<u64>(value);
 		return node;
@@ -194,7 +194,7 @@ namespace sigma::ir {
 			is_volatile ? node::WRITE : node::STORE, 4
 		);
 
-		store_node->data_type = MEMORY_TYPE;
+		store_node->dt = MEMORY_TYPE;
 		store_node->inputs[0] = active_control_node;
 		store_node->inputs[1] = append_memory(store_node);
 		store_node->inputs[2] = destination;
@@ -208,7 +208,7 @@ namespace sigma::ir {
 		ASSERT(value_to_load, "invalid value");
 
 		handle<node> n = create_node<memory_access>(is_volatile ? node::READ : node::LOAD, 3);
-		n->data_type = is_volatile ? TUPLE_TYPE : data_type;
+		n->dt = is_volatile ? TUPLE_TYPE : data_type;
 
 		n->inputs[0] = active_control_node;
 		n->inputs[1] = active_control_node->get_parent_region()->get<region>().memory_out;
@@ -228,7 +228,7 @@ namespace sigma::ir {
 		const handle<node> local_node = create_node<local>(node::LOCAL, 1);
 
 		local_node->inputs[0] = entry_node;
-		local_node->data_type = PTR_TYPE;
+		local_node->dt = PTR_TYPE;
 
 		auto& local_prop = local_node->get<local>();
 		local_prop.alignment = alignment;
@@ -248,7 +248,7 @@ namespace sigma::ir {
 		const handle<node> n = create_node<function_call>(node::CALL, 3 + arguments.size());
 		n->inputs[0] = active_control_node;
 		n->inputs[2] = callee_symbol_address;
-		n->data_type = TUPLE_TYPE;
+		n->dt = TUPLE_TYPE;
 
 		for (int i = 0; i < arguments.size(); ++i) {
 			n->inputs[3 + i] = arguments[i];
@@ -288,7 +288,7 @@ namespace sigma::ir {
 		arithmetic_behaviour behaviour
 	) -> handle<node> {
 		ASSERT(
-			left->data_type == right->data_type,
+			left->dt == right->dt,
 			"data types of the two operands do not match"
 		);
 
@@ -297,18 +297,18 @@ namespace sigma::ir {
 		op_node->get<binary_integer_op>().behaviour = behaviour;
 		op_node->inputs[1] = left;
 		op_node->inputs[2] = right;
-		op_node->data_type = left->data_type;
+		op_node->dt = left->dt;
 
 		return op_node;
 	}
 
 	auto function::create_projection(data_type dt, handle<node> source, u64 index) -> handle<node> {
-		ASSERT(source->data_type.ty == data_type::TUPLE, "projections must be of type tuple");
+		ASSERT(source->dt.ty == data_type::TUPLE, "projections must be of type tuple");
 		const handle<node> projection_node = create_node<projection>(node::PROJECTION, 1);
 
 		projection_node->get<projection>().index = index;
 		projection_node->inputs[0] = source;
-		projection_node->data_type = dt;
+		projection_node->dt = dt;
 
 		return projection_node;
 	}

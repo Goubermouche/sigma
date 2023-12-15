@@ -1,5 +1,6 @@
 #pragma once
 #include "utility/types.h"
+#include <format>
 
 namespace utility::types {
     // note: due to the lightweight nature of ptr, atomic operations are NOT used

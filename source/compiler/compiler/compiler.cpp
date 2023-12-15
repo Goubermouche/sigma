@@ -51,14 +51,14 @@ namespace sigma {
 
 		// codegen
 		codegen_timer.start();
-		// module.compile();
+		module.compile();
 		utility::console::println("{:<30}{:.3f}s", "codegen finished", codegen_timer.elapsed_seconds());
 
 		utility::console::println("{}", std::string(36, '-'));
 		utility::console::println("{:<30}{:.3f}s", "compilation finished", total_timer.elapsed_seconds());
 
-		// auto object_file = module.generate_object_file();
-		// utility::file::write(object_file, "./test/a.obj");
+		auto object_file = module.generate_object_file();
+		utility::file::write(object_file, "/home/goubermouche/dev/projects/sigma/source/compiler/test/a.obj");
 	}
 } // namespace sigma
 

@@ -12,7 +12,6 @@ namespace sigma {
 		compilation_context& context, ir::target target
 	) : m_context(context), m_module(target), m_builder(m_module),
 	m_functions(m_builder), m_variables(m_builder) {
-
 		m_functions.register_external_function(m_context.symbols.insert("printf"), {
 			.identifier   = "printf",
 			.parameters   = { PTR_TYPE },
@@ -33,26 +32,27 @@ namespace sigma {
 			case node_type::FUNCTION:             translate_function_declaration(ast_node); break;
 			case node_type::FUNCTION_CALL:        return translate_function_call(ast_node);
 
-			// flow control
+			// // flow control
 			case node_type::RETURN:               translate_return(ast_node); break;
 			case node_type::CONDITIONAL_BRANCH:   translate_conditional_branch(ast_node, nullptr); break;
 
 			case node_type::VARIABLE_DECLARATION: translate_variable_declaration(ast_node); break;
 			case node_type::VARIABLE_ACCESS:      return translate_variable_access(ast_node);
-			case node_type::VARIABLE_ASSIGNMENT:  return translate_variable_assignment(ast_node);
+			// case node_type::VARIABLE_ASSIGNMENT:  return translate_variable_assignment(ast_node);
 
-			// operators:
-			case node_type::OPERATOR_ADD:
-			case node_type::OPERATOR_SUBTRACT:
-			case node_type::OPERATOR_MULTIPLY:
-			case node_type::OPERATOR_DIVIDE:
-			case node_type::OPERATOR_MODULO:      return translate_binary_math_operator(ast_node);
+			// // operators:
+			// case node_type::OPERATOR_ADD:
+			// case node_type::OPERATOR_SUBTRACT:
+			// case node_type::OPERATOR_MULTIPLY:
+			// case node_type::OPERATOR_DIVIDE:
+			// case node_type::OPERATOR_MODULO:      return translate_binary_math_operator(ast_node);
 
-			// literals
+			// // literals
 			case node_type::NUMERICAL_LITERAL:    return translate_numerical_literal(ast_node);
 			case node_type::STRING_LITERAL:       return translate_string_literal(ast_node);
 			case node_type::BOOL_LITERAL:         return translate_bool_literal(ast_node);
-			default: NOT_IMPLEMENTED();
+			// default: NOT_IMPLEMENTED();
+			default: std::cout << ast_node->type.to_string() << '\n';
 		}
 
 		return nullptr;

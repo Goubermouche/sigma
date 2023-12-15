@@ -91,8 +91,9 @@ namespace sigma::ir {
 	}
 
 	auto module::create_external(const std::string& name, linkage linkage) -> handle<external> {
-		const auto ex = static_cast<external*>(m_allocator.allocate(sizeof(external)));
-		 
+		const auto memory = m_allocator.allocate(sizeof(external));
+		const auto ex = new (memory) external();
+		
 		ex->sym.tag = symbol::EXTERNAL;
 		ex->sym.name = std::string(name);
 		ex->sym.parent_module = this;
@@ -103,7 +104,8 @@ namespace sigma::ir {
 	}
 
 	auto module::create_global(const std::string& name, linkage linkage) -> handle<global> {
-		const auto g = static_cast<global*>(m_allocator.allocate(sizeof(global)));
+		const auto memory = m_allocator.allocate(sizeof(global));
+		const auto g = new (memory) global();
 		m_globals.emplace_back(g);
 
 		g->sym.tag = symbol::GLOBAL;
@@ -171,6 +173,7 @@ namespace sigma::ir {
 
 		const auto destination = static_cast<char*>(dummy->add_region(0, static_cast<u32>(value.size() + 1)));
 		std::memcpy(destination, value.c_str(), value.size() + 1);
+
 		return parent_function->get_symbol_address(&dummy->sym);
 	}
 

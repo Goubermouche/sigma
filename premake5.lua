@@ -9,7 +9,7 @@ workspace "sigma"
     externalanglebrackets "On"
     externalwarnings "Off"
 
-    -- buildoptions { "-w" } -- temp
+    buildoptions { "-w" } -- temp
 
     flags {
         "MultiProcessorCompile"

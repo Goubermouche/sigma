@@ -31,6 +31,4 @@ namespace utility {
 			return std::string(std::istreambuf_iterator<char>(file), std::istreambuf_iterator<char>());
 		}
 	};
-
-
 }

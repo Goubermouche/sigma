@@ -63,7 +63,6 @@ namespace sigma::ir {
 		};
 
 		u64 pad = 16 - (bytecode.get_size() & 15);
-		std::cout << pad << '\n';
 
 		if(pad < 16) {
 			bytecode.reserve(bytecode.get_size() + pad);

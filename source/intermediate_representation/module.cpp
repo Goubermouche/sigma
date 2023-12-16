@@ -66,9 +66,9 @@ namespace sigma::ir {
 			register_allocator->allocate(codegen);
 			utility::byte_buffer bytecode = m_codegen.emit_bytecode(codegen);
 
-			for(const auto byte : bytecode) {
-				utility::console::print("{} ", byte.to_hex());
-			}
+			// for(const auto byte : bytecode) {
+			// 	utility::console::print("{} ", byte.to_hex());
+			// }
 
 			// debug - emit an asm-like version of the function
 			assembly.append(m_codegen.disassemble(bytecode, codegen));

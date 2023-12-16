@@ -23,7 +23,7 @@ sigma main.s
 ```
 
 ## Project status
-As Sigma us currently under heavy development, it isn't ready for stable use, and many breaking changes may (and most likely will) be made. Please note that why the end goal is to target GPU's and other massivelly parallel targets, the current goal is to get a basic CPU-oriented language going, and there isn't a hard timeframe set - for more details see the current status bellow: 
+As Sigma is currently under heavy development, it isn't ready for stable use, and many breaking changes may (and most likely will) be made. Please note that why the end goal is to target GPU's and other massivelly parallel targets, the current goal is to get a basic CPU-oriented language going, and there isn't a hard timeframe set - for more details see the current status bellow: 
 -   Parser/Lexer rework: 
     -   Implemented a faster, simpler tokenizer & `token_buffer` combo. *(working draft)*
     -   Began work on a new recursive descent parser.
@@ -34,9 +34,6 @@ As Sigma us currently under heavy development, it isn't ready for stable use, an
 -   Future:
     -   Unified package manager
     -   Official GPU support via kernels
--   Linux compilation:
-    -   Fix segfaults
-    -   Clean up the code and includes
 
 ## Contributing
 Contributions, either to the compiler implementation, or related to language design are greatly appreciated and welcome.

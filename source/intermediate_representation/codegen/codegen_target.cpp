@@ -49,9 +49,6 @@ namespace sigma::ir {
 		switch (system) {
 			case system::WINDOWS: return std::make_shared<coff_file_emitter>();
 			case system::LINUX:   return std::make_shared<elf_file_emitter>();
-			//case system::android:
-			//case system::mac_os:
-			//case system::web: 
 		}
 
 		NOT_IMPLEMENTED();
@@ -75,4 +72,4 @@ namespace sigma::ir {
 		NOT_IMPLEMENTED();
 		return nullptr;
 	}
-}
+} // namespace sigma::ir

@@ -20,6 +20,8 @@ namespace sigma::ir {
 			MAX
 		};
 
+		auto is_non_local() const -> bool;
+
 		handle<module> parent_module;
 		std::string name;
 		symbol_tag tag;

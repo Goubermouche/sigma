@@ -35,13 +35,12 @@ namespace sigma::ir {
 		};
 
 		std::string name;
-		u32 section_number;
 
 		u32 export_flags;
 		u32 name_position;
 		module_section_flags flags;
 
-		u8 section_index;
+		u16 section_index;
 		comdat com;
 
 		u32 raw_data_pos;

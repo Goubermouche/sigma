@@ -13,6 +13,8 @@ namespace sigma::ir {
 		emit_function_body(context, bytecode);
 		emit_function_epilogue(context, bytecode);
 
+		pad(bytecode);
+
 		return bytecode;
 	}
 
@@ -45,6 +47,38 @@ namespace sigma::ir {
 
 		const u64 usage = context.stack_usage + caller_usage * 8;
 		context.stack_usage = utility::align(usage, 16);
+	}
+
+	void x64_architecture::pad(utility::byte_buffer& bytecode) {
+		// pad to 16bytes
+		static const u8 nops[8][8] = {
+				{ 0x90 },
+				{ 0x66, 0x90 },
+				{ 0x0F, 0x1F, 0x00 },
+				{ 0x0F, 0x1F, 0x40, 0x00 },
+				{ 0x0F, 0x1F, 0x44, 0x00, 0x00 },
+				{ 0x66, 0x0F, 0x1F, 0x44, 0x00, 0x00 },
+				{ 0x0F, 0x1F, 0x80, 0x00, 0x00, 0x00, 0x00 },
+				{ 0x0F, 0x1F, 0x84, 0x00, 0x00, 0x00, 0x00, 0x00 },
+		};
+
+		u64 pad = 16 - (bytecode.get_size() & 15);
+		std::cout << pad << '\n';
+
+		if(pad < 16) {
+			bytecode.reserve(bytecode.get_size() + pad);
+			utility::byte* dst = bytecode.get_data() + bytecode.get_size();
+			bytecode.set_size(bytecode.get_size() + pad);
+
+			if(pad > 8) {
+				const u64 rem = pad - 8;
+				memset(dst, 0x66, rem);
+				pad -= rem;
+				dst += rem;
+			}
+
+			std::memcpy(dst, nops[pad - 1], pad);
+		}
 	}
 
 	void x64_architecture::emit_function_prologue(
@@ -746,7 +780,7 @@ namespace sigma::ir {
 			u8 opcode = b->type == codegen_temporary::IMM ? descriptor.op_i : descriptor.op;
 
 			// the bottom bit usually means size, 0 for 8bit, 1 for everything else
-			opcode |= sz;
+			opcode |= static_cast<u8>(sz);
 
 			// you can't actually be flipped in the immediates because it would mean
 			// you're storing into an immediate so they reuse that direction bit for size

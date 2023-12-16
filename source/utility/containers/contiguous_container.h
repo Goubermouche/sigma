@@ -47,33 +47,57 @@ namespace utility {
 			}
 		}
 
+		/**
+		 * \brief Creates a 0-filled contiguous container with the specified \b size.
+		 * \param size Target container size
+		 * \return 0-filled contiguous container of the specified \b size.
+		 */
 		[[nodiscard]] static contiguous_container zero_initialize(u64 size) {
 			const contiguous_container container(size);
 			container.zero_fill();
 			return container;
 		}
 
-		[[nodiscard]] static contiguous_container reserve_initialize(u64 reserved_size) {
+		/**
+		 * \brief Creates a contiguous container with the specified \b capacity
+		 * \param capacity Target container capacity
+		 * \return Pre-reserved contiguous container.
+		 */
+		[[nodiscard]] static contiguous_container reserve_initialize(u64 capacity) {
 			contiguous_container container;
-			container.reserve(reserved_size);
+			container.reserve(capacity);
 			return container;
 		}
 
+		/**
+		 * \brief Resizes the container to 0 and fills all used space with 0's.
+		 */
 		constexpr void clear() {
 			m_size = 0;
 			zero_fill();
 		}
 
+		/**
+		 * \brief Checks if the container is empty.
+		 * \return True if the container is empty, false otherwise.
+		 */
 		[[nodiscard]] constexpr  auto empty() const -> bool {
 			return m_size == 0;
 		}
 
+		/**
+		 * \brief 0-fills the entire container.
+		 */
 		constexpr void zero_fill() const {
 			if(m_data) {
 				std::memset(m_data, 0, m_size * sizeof(type));
 			}
 		}
 
+		/**
+		 * \brief Appends \b value to the end of the container.
+		 * \param value Value to append
+		 */
 		void push_back(const type& value)
 		{
 			if (m_size == m_capacity) {
@@ -90,6 +114,10 @@ namespace utility {
 			m_size++;
 		}
 
+		/**
+		 * \brief Appends \b value to the end of the container.
+		 * \param value Value to append
+		 */
 		constexpr void push_back(type&& value) {
 			ASSERT(m_owning, "non-owning container cannot change the memory layout");
 
@@ -107,6 +135,12 @@ namespace utility {
 			m_size++;
 		}
 
+		/**
+		 * \brief Emplaces and in-place-constructs an element of the underlying type to the end of the
+		 * container.
+		 * \tparam arg_types Value constructor types.
+		 * \param args Value constructor parameters.
+		 */
 		template<typename... arg_types>
 		constexpr void emplace_back(arg_types&&... args) {
 			ASSERT(m_owning, "non-owning container cannot change the memory layout");
@@ -124,6 +158,12 @@ namespace utility {
 			m_size++;
 		}
 
+		/**
+		 * \brief Inserts a range (\b start - \b end) at \b where.
+		 * \param where Where to insert
+		 * \param start Start of the inserted range
+		 * \param end End of the inserted range
+		 */
 		constexpr void insert(type* where, const type* start, const type* end) {
 			ASSERT(m_owning, "non-owning container cannot change the memory layout");
 			const u64 elements_to_insert = end - start;
@@ -167,14 +207,27 @@ namespace utility {
 			m_size += elements_to_insert;
 		}
 
+		/**
+		 * \brief Appends a range to the end of the container.
+		 * \param source_begin Beginning of the source range
+		 * \param source_end End of the source range
+		 */
 		constexpr void append(const type* source_begin, const type* source_end) {
 			insert(end(), source_begin, source_end);
 		}
 
+		/**
+		 * \brief Appends a contiguous container to the end of this container.
+		 * \param other Container to append
+		 */
 		constexpr void append(const contiguous_container& other) {
 			insert(end(), other.begin(), other.end());
 		}
 
+		/**
+		 * \brief Prepends a contiguous container to the beginning of this container.
+		 * \param other Container to prepend
+		 */
 		constexpr void prepend(const contiguous_container& other) {
 			insert(begin(), other.begin(), other.end());
 		}
@@ -187,10 +240,20 @@ namespace utility {
 			return m_data[index];
 		}
 
+		/**
+		 * \brief Creates a non-owning slice/view of this container.
+		 * \param start Start of the slice
+		 * \param size Size of the slice
+		 * \return Slice beginning at \b start with the specified \b size.
+		 */
 		[[nodiscard]] constexpr auto get_slice(u64 start, u64 size) const -> slice<type> {
 			return { m_data + start, size };
 		}
 
+		/**
+		 * \brief Retrieves the current size of the container.
+		 * \return Size of the container
+		 */
 		[[nodiscard]] constexpr auto get_size() const -> u64 {
 			return m_size;
 		}
@@ -203,6 +266,10 @@ namespace utility {
 			m_size = new_size;
 		}
 
+		/**
+		 * \brief Retrieves the current capacity of the container.
+		 * \return Capacity of the container
+		 */
 		[[nodiscard]] constexpr auto get_capacity() const -> u64 {
 			return m_capacity;
 		}
@@ -223,20 +290,34 @@ namespace utility {
 			return m_data + m_size;
 		}
 
+		/**
+		 * \brief Retrieves the first element in the container.
+		 * \return First element in the container
+		 */
 		[[nodiscard]] constexpr auto first() const -> const type& {
+			ASSERT(m_data != nullptr && m_size > 0, "first() used on an uninitialized container");
 			return m_data[0];
 		}
 
+		/**
+		 * \brief Retrieves the last element in the container.
+		 * \return Last element in the container
+		 */
 		[[nodiscard]] constexpr auto last() const -> const type& {
+			ASSERT(m_data != nullptr && m_size > 0, "last() used on an uninitialized container");
 			return m_data[m_size - 1];
 		}
 
+		/**
+		 * \brief Reserve enough space for the specified \b capacity.
+		 * \param capacity Number of elements to reserve space for
+		 */
 		constexpr void reserve(u64 capacity) {
 			ASSERT(m_owning, "non-owning container cannot change the memory layout");
-			ASSERT(
-				capacity > m_capacity,
-				"capacity is already equal to or greater than the passed value"
-			);
+
+			if(m_capacity > capacity) {
+				return;
+			}
 
 			if constexpr (std::is_trivial_v<type>) {
 				m_data = static_cast<type*>(std::realloc(m_data, sizeof(type) * capacity));
@@ -256,6 +337,11 @@ namespace utility {
 			m_capacity = capacity;
 		}
 
+		/**
+		 * \brief Resizes the container to the specified \b size (additional
+		 * elements are \b not 0-filled).
+		 * \param size Size to resize to
+		 */
 		constexpr void resize(u64 size) {
 			ASSERT(m_owning, "non-owning container cannot change the memory layout");
 			ASSERT(size != m_size, "size is already equal to the passed value");
@@ -276,6 +362,12 @@ namespace utility {
 			m_size = size;
 		}
 
+		/**
+		 * \brief Resizes the container to the specified \b size and fills the new
+		 * elements with \b value.
+		 * \param size Size to resize to
+		 * \param value Value to fill the new elements with
+		 */
 		constexpr void resize(u64 size, const type& value) {
 			ASSERT(m_owning, "non-owning container cannot change the memory layout");
 			ASSERT(size != m_size, "size is already equal to the passed value");

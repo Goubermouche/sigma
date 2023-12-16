@@ -11,11 +11,11 @@ namespace sigma::ir {
 		parameters.resize(3);
 	}
 
-	auto function::get_symbol_address(handle<ir::symbol> sym) -> handle<node> {
-		ASSERT(sym != nullptr, "invalid symbol");
+	auto function::get_symbol_address(handle<symbol> s) -> handle<node> {
+		ASSERT(s != nullptr, "invalid symbol");
 
 		const handle<node> n = create_node<handle<ir::symbol>>(node::SYMBOL, 1);
-		n->get<handle<ir::symbol>>() = sym;
+		n->get<handle<ir::symbol>>() = s;
 		n->dt = PTR_TYPE;
 		return n;
 	}

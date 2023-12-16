@@ -12,26 +12,12 @@
 // -   Fix all errors that DEBUG catches, run with fsanitize=address,undefined
 
 i32 main() {
-	bool a = true;
-	bool b = false;
-
-	if(a) {
-		if(b) {
-			printf("A && B\n");
-		}
-		else {
-			printf("A\n");
-		}
-	}
-	else if(b) {
-		printf("B\n");
+	if(true) {
+		printf("true\n");
 	}
 	else {
-		printf("fallback\n");
+		printf("false\n");
 	}
-
-	printf(":D\n");
-	puts("THIS IS A PUTS TEST");
 
 	ret 0;
 }

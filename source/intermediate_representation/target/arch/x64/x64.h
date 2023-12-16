@@ -299,6 +299,8 @@ namespace sigma::ir {
 		static void resolve_stack_usage(codegen_context& context);
 		#pragma endregion
 		#pragma region code generation
+		static void pad(utility::byte_buffer& bytecode);
+
 		static void emit_function_prologue(
 			codegen_context& context, utility::byte_buffer& bytecode
 		);

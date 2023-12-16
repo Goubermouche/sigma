@@ -30,4 +30,4 @@ namespace sigma::ir {
 
 		target m_target;
 	};
-}
+} // namespace sigma::ir

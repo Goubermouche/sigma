@@ -12,12 +12,14 @@
 
 namespace sigma::ir {
 	module::module(target target) : m_allocator(1024), m_codegen(target) {
-		create_section(".text",  module_section::EXEC,                         comdat::NONE);
-		create_section(".data",  module_section::WRITE,                        comdat::NONE);
-		create_section(".rdata", module_section::NONE,                         comdat::NONE);
-		create_section(".tls$",  module_section::WRITE | module_section::TLS,  comdat::NONE);
+		const bool is_win = target.get_system() == system::WINDOWS;
 
-		if(target.get_system() == system::WINDOWS) {
+		create_section(".text",                       module_section::EXEC,                         comdat::NONE);
+		create_section(".data",                       module_section::WRITE,                        comdat::NONE);
+		create_section(is_win ? ".rdata" : ".rodata", module_section::NONE,                         comdat::NONE);
+		create_section(is_win ? ".tls$" :  ".tls",    module_section::WRITE | module_section::TLS,  comdat::NONE);
+
+		if(is_win) {
 			m_chkstk_extern = reinterpret_cast<symbol*>(create_external("__chkstk", SO_LOCAL).get());
 		}
 	}
@@ -49,9 +51,9 @@ namespace sigma::ir {
 
 			// initialize the code generation pass
 			codegen_context codegen {
-				.func  = function,
+				.func = function,
 				.work = &function_work_list,
-				.t    = m_codegen.get_target(),
+				.t = m_codegen.get_target(),
 				.intervals = m_codegen.get_register_intervals()
 			};
 
@@ -64,9 +66,9 @@ namespace sigma::ir {
 			register_allocator->allocate(codegen);
 			utility::byte_buffer bytecode = m_codegen.emit_bytecode(codegen);
 
-			// for(const auto byte : bytecode) {
-			// 	utility::console::out << byte.to_hex() << ' ';
-			// }
+			for(const auto byte : bytecode) {
+				utility::console::print("{} ", byte.to_hex());
+			}
 
 			// debug - emit an asm-like version of the function
 			assembly.append(m_codegen.disassemble(bytecode, codegen));
@@ -252,7 +254,6 @@ namespace sigma::ir {
 			// then globals
 			for(const auto& global : section.globals) {
 				offset = static_cast<u32>(utility::align(offset, global->alignment));
-
 				global->position = offset;
 				offset += global->size;
 			}

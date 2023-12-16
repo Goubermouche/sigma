@@ -1502,7 +1502,7 @@ namespace sigma::ir {
 		codegen_context& context, int target, x64::conditional cc
 	) -> handle<instruction>{
 		const handle<instruction> inst = create_instruction<label>(
-			context, (instruction::instruction_type)(instruction::JO + cc), VOID_TYPE, 0, 0, 0
+			context, static_cast<instruction::instruction_type>(instruction::JO + cc), VOID_TYPE, 0, 0, 0
 		);
 
 		inst->flags = instruction::node_f;

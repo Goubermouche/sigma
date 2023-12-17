@@ -15,13 +15,6 @@ jobs:
       with:
         fetch-depth: 0
 
-    - name: Install Premake
-      run: |
-        # Update this URL if a newer version is available
-        Invoke-WebRequest -Uri "URL_TO_NEWER_VERSION_OF_PREMAKE" -OutFile "premake.zip"
-        Expand-Archive "premake.zip" -DestinationPath "C:\tools"
-        echo "C:\tools" | Out-File -Append -FilePath $env:GITHUB_PATH
-
     - name: Install Visual Studio Build Tools
       run: |
         choco install visualstudio2022buildtools --package-parameters "--add Microsoft.VisualStudio.Component.VC.Tools.x86.x64 --add Microsoft.VisualStudio.Component.Windows10SDK --add Microsoft.VisualStudio.Component.TestTools.BuildTools --includeOptional" -y
@@ -37,8 +30,7 @@ jobs:
 
     - name: Run Premake for Visual Studio
       run: |
-        # Use an appropriate action here based on the Premake version
-        C:\tools\premake5.exe vs2019  # or vs2022 if the updated version supports it
+        setup.bat
 
     - name: Compile Project with MSBuild
       run: |

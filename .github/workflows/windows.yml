@@ -1,4 +1,4 @@
-name: Windows
+name: Windows Build
 
 on:
   push:
@@ -15,12 +15,11 @@ jobs:
       with:
         fetch-depth: 0
 
-    - name: Add MSBuild to PATH
-      run: echo "C:\Program Files (x86)\Microsoft Visual Studio\2022\BuildTools\MSBuild\Current\Bin" >> $env:GITHUB_PATH
+    - name: Setup MSBuild
+      uses: microsoft/setup-msbuild@v1.1
 
     - name: Run Premake for Visual Studio
       run: .\setup.bat
 
     - name: Compile Project with MSBuild
-      run: |
-        msbuild sigma.sln /p:Configuration=Debug /p:Platform="x64" /p:stdcpp=latest
+      run: msbuild sigma.sln /p:Configuration=Debug /p:Platform="x64" /p:stdcpp=latest

@@ -215,10 +215,6 @@ project "compiler"
             "rt"
         }
 
-        buildoptions { 
-            "-std=c++23"
-        }
-
         linkoptions {
             "-lstdc++"
         }
@@ -250,10 +246,6 @@ project "tests"
             "pthread",
             "m",      
             "rt"
-        }
-
-        buildoptions { 
-            "-std=c++23"
         }
 
         linkoptions {

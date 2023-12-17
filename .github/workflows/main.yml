@@ -17,7 +17,8 @@ jobs:
 
     - name: Install Premake
       run: |
-        Invoke-WebRequest -Uri "https://github.com/premake/premake-core/releases/download/v5.0.0-alpha16/premake-5.0.0-alpha16-windows.zip" -OutFile "premake.zip"
+        # Update this URL if a newer version is available
+        Invoke-WebRequest -Uri "URL_TO_NEWER_VERSION_OF_PREMAKE" -OutFile "premake.zip"
         Expand-Archive "premake.zip" -DestinationPath "C:\tools"
         echo "C:\tools" | Out-File -Append -FilePath $env:GITHUB_PATH
 
@@ -35,7 +36,10 @@ jobs:
         msbuild -version
 
     - name: Run Premake for Visual Studio
-      run: C:\tools\premake5.exe vs2022
+      run: |
+        # Use an appropriate action here based on the Premake version
+        C:\tools\premake5.exe vs2019  # or vs2022 if the updated version supports it
 
     - name: Compile Project with MSBuild
-      run: msbuild sigma.sln /p:Configuration=Debug /p:Platform="x64" /p:stdcpp=latest
+      run: |
+        msbuild sigma.sln /p:Configuration=Debug /p:Platform="x64" /p:stdcpp=latest

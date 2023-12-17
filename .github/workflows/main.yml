@@ -26,6 +26,11 @@ jobs:
         sudo apt update
         sudo apt install -y clang
 
+    - name: Set CC and CXX environment variables
+      run: |
+        echo "CC=clang" >> $GITHUB_ENV
+        echo "CXX=clang++" >> $GITHUB_ENV
+
     - name: Run Premake
       run: premake5 gmake
       

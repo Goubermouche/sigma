@@ -146,7 +146,7 @@ namespace sigma::ir {
 
 	auto function::create_signed_integer(i64 value, u8 bit_width) -> handle<node> {
 		const handle<node> integer_node = create_node<integer>(node::INTEGER_CONSTANT, 1);
-		integer_node->dt = { .ty = data_type::INTEGER, .bit_width = bit_width };
+		integer_node->dt = data_type(data_type::INTEGER, bit_width);
 
 		auto& integer_prop = integer_node->get<integer>();
 		integer_prop.bit_width = bit_width;

@@ -266,7 +266,7 @@ namespace sigma {
 			default: NOT_IMPLEMENTED();
 		}
 
-		return {};
+		return ir::data_type();
 	}
 
 	auto ir_translator::translate() -> ir::module {

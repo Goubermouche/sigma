@@ -6,14 +6,18 @@ namespace sigma::ir {
 
 	struct data_type {
 		enum type : u8 {
-			INTEGER,     // void is an i0 and bool is an i1
-			FLOAT,       // f{32, 64}
-			POINTER,     // pointer{0-2047}
-			TUPLE,       // tuples, can only be accessed by projections
-			CONTROL,     // represents control flow for regions and branches
-			MEMORY,      // represents memory and I/O
-			CONTINUATION // continuation (usually just the return addresses)
+			INTEGER,      // void is an i0 and bool is an i1
+			FLOAT,        // f{32, 64}
+			POINTER,      // pointer{0-2047}
+			TUPLE,        // tuples, can only be accessed by projections
+			CONTROL,      // represents control flow for regions and branches
+			MEMORY,       // represents memory and I/O
+			CONTINUATION, // continuation (usually just the return addresses)
+			UNKNOWN
 		};
+
+		data_type();
+		data_type(type t, u8 bw = 0);
 
 		auto to_string() const -> std::string;
 		auto operator==(const data_type& other) const -> bool;

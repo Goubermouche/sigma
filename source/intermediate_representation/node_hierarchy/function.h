@@ -141,7 +141,8 @@ namespace sigma::ir {
 	template<typename extra_type>
 	auto function::create_node(node::type type, u64 input_count) -> handle<node> {
 		void* node_allocation = allocator.allocate(sizeof(node));
-		const handle node_ptr = new (node_allocation) node{ .ty = type };
+		const handle node_ptr = static_cast<node*>(node_allocation);
+		node_ptr->ty = type;
 
 		// initialize the base sea of nodes layout 
 		node_ptr->inputs = utility::slice<handle<node>>(allocator, input_count);

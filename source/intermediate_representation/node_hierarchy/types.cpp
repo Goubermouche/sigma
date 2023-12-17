@@ -2,6 +2,9 @@
 #include <utility/macros.h>
 
 namespace sigma::ir {
+	data_type::data_type() : ty(UNKNOWN), bit_width(0) {}
+  data_type::data_type(type t, u8 bw) : ty(t), bit_width(bw) {}
+
   auto data_type::to_string() const -> std::string {
     switch (ty) {
 			case INTEGER:
@@ -16,6 +19,8 @@ namespace sigma::ir {
         return "control";
 			case MEMORY:
         return "memory";
+    case UNKNOWN:
+			return "unknown";
 			default:
         NOT_IMPLEMENTED();
         return "";

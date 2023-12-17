@@ -22,11 +22,6 @@ jobs:
         tar -xzvf premake-5.0.0-alpha16-linux.tar.gz
         sudo mv premake5 /usr/local/bin/        
 
-    - name: Install Clang
-      run: |
-        sudo apt update
-        sudo apt install -y clang
-
     - name: Set CC and CXX environment variables
       run: |
         echo "CC=clang" >> $GITHUB_ENV

@@ -11,8 +11,9 @@
 
 
 
-
+<p align="center">
 Sigma is a compiled, statically typed, C-like, data oriented language with a focus on performance and low-level optimization using GPU acceleration via kernels.  
+</p>
 
 ## Getting up and running      
 Get started by running:

@@ -21,11 +21,13 @@ jobs:
         tar -xzvf premake-5.0.0-alpha16-linux.tar.gz
         sudo mv premake5 /usr/local/bin/
 
-    - name: Print current dir
-      run: ls
+    - name: Install Clang
+      run: |
+        sudo apt update
+        sudo apt install -y clang
 
     - name: Run Premake
       run: premake5 gmake
       
     - name: Compile Project
-      run: make config=debug
+      run: make config=debug CC=clang

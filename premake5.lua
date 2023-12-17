@@ -6,9 +6,6 @@ workspace "sigma"
     language "C++"
     cppdialect "C++latest"
 
-    externalanglebrackets "On"
-    externalwarnings "Off"
-
     flags {
         "MultiProcessorCompile"
     }

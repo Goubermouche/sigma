@@ -21,16 +21,21 @@ jobs:
         Expand-Archive "premake.zip" -DestinationPath "C:\tools"
         echo "C:\tools" | Out-File -Append -FilePath $env:GITHUB_PATH
 
-    - name: Setup MSBuild
-      uses: microsoft/setup-msbuild@v1.1
+    - name: Install Visual Studio Build Tools
+      run: |
+        choco install visualstudio2022buildtools --package-parameters "--add Microsoft.VisualStudio.Component.VC.Tools.x86.x64 --add Microsoft.VisualStudio.Component.Windows10SDK --add Microsoft.VisualStudio.Component.TestTools.BuildTools --includeOptional" -y
+        choco install visualstudio2022-workload-vctools -y
+
+    - name: Add MSBuild to PATH
+      run: |
+        echo "C:\Program Files (x86)\Microsoft Visual Studio\2022\BuildTools\MSBuild\Current\Bin" | Out-File -Append -FilePath $env:GITHUB_PATH
 
     - name: Print MSBuild Version
       run: |
         msbuild -version
 
     - name: Run Premake for Visual Studio
-      run: C:\tools\premake5.exe vs2019
+      run: C:\tools\premake5.exe vs2022
 
     - name: Compile Project with MSBuild
       run: msbuild sigma.sln /p:Configuration=Debug /p:Platform="x64" /p:stdcpp=latest
-

@@ -15,6 +15,11 @@ jobs:
       with:
         fetch-depth: 0
 
+    - name: Install Specific MSBuild Version
+      run: |
+        # Add commands here to install the specific version of MSBuild
+        # or Visual Studio Build Tools that matches your local environment
+
     - name: Install Premake
       run: |
         Invoke-WebRequest -Uri "https://github.com/premake/premake-core/releases/download/v5.0.0-alpha16/premake-5.0.0-alpha16-windows.zip" -OutFile "premake.zip"
@@ -23,6 +28,10 @@ jobs:
 
     - name: Setup MSBuild
       uses: microsoft/setup-msbuild@v1.1
+
+    - name: Print MSBuild Version
+      run: |
+        msbuild -version
 
     - name: Run Premake for Visual Studio
       run: C:\tools\premake5.exe vs2019

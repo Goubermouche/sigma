@@ -22,10 +22,6 @@ jobs:
         Expand-Archive "premake.zip" -DestinationPath "C:\tools"
         echo "C:\tools" | Out-File -Append -FilePath $env:GITHUB_PATH
 
-    - name: Install Clang
-      run: |
-        choco install llvm --version=11.0.0
-
     - name: Set CC and CXX environment variables
       run: |
         echo "CC=clang" | Out-File -Append -FilePath $env:GITHUB_ENV

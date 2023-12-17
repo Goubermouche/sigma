@@ -38,7 +38,8 @@ jobs:
           ${{ runner.os }}-compilation-
 
     - name: Run Premake
-      run: .\premake5.exe gmake
+      run: |
+        C:\tools\premake5.exe gmake
 
     - name: Compile Project
       run: mingw32-make config=debug CC=clang

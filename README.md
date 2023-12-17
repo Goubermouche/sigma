@@ -6,7 +6,7 @@
 
 <div align="center">
  
-[![Linux](https://github.com/Goubermouche/sigma/actions/workflows/linux.yml/badge.svg)](https://github.com/Goubermouche/sigma/actions/workflows/linux.yml)
+[![Linux](https://github.com/Goubermouche/sigma/actions/workflows/linux.yml/badge.svg)](https://github.com/Goubermouche/sigma/actions/workflows/linux.yml)   [![Windows](https://github.com/Goubermouche/sigma/actions/workflows/windows.yml/badge.svg)](https://github.com/Goubermouche/sigma/actions/workflows/windows.yml)
 </div>
 
 

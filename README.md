@@ -4,6 +4,14 @@
    </a>
 </p>
 
+<div align="center">
+ 
+[![Linux](https://github.com/Goubermouche/sigma/actions/workflows/linux.yml/badge.svg)](https://github.com/Goubermouche/sigma/actions/workflows/linux.yml)
+</div>
+
+
+
+
 Sigma is a compiled, statically typed, C-like, data oriented language with a focus on performance and low-level optimization using GPU acceleration via kernels.  
 
 ## Getting up and running      

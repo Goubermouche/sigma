@@ -14,21 +14,13 @@ jobs:
     - uses: actions/checkout@v2
       with:
         fetch-depth: 0
-        
-    - name: Cache Premake
-      id: cache-premake
-      uses: actions/cache@v2
-      with:
-        path: |
-          premake5
-        key: ${{ runner.os }}-premake-${{ hashFiles('**/premake5.lua') }}
 
     - name: Install Premake
       if: steps.cache-premake.outputs.cache-hit != 'true'
       run: |
         wget https://github.com/premake/premake-core/releases/download/v5.0.0-alpha16/premake-5.0.0-alpha16-linux.tar.gz
         tar -xzvf premake-5.0.0-alpha16-linux.tar.gz
-        sudo mv premake5 /usr/local/bin/
+        sudo mv premake5 /usr/local/bin/        
 
     - name: Install Clang
       run: |
@@ -39,6 +31,16 @@ jobs:
       run: |
         echo "CC=clang" >> $GITHUB_ENV
         echo "CXX=clang++" >> $GITHUB_ENV
+
+    - name: Cache Compilation Outputs
+      uses: actions/cache@v2
+      with:
+        path: |
+          output/**/bin/
+          output/**/obj/
+        key: ${{ runner.os }}-compilation-${{ hashFiles('**/*.cpp', '**/*.h') }}
+        restore-keys: |
+          ${{ runner.os }}-compilation-
 
     - name: Run Premake
       run: premake5 gmake

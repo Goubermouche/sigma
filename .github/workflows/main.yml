@@ -35,10 +35,12 @@ jobs:
         key: ${{ runner.os }}-compilation-${{ hashFiles('**/*.cpp', '**/*.h') }}
         restore-keys: |
           ${{ runner.os }}-compilation-
-          
+
+    - name: Setup MSBuild
+      uses: microsoft/setup-msbuild@v1.1
+
     - name: Run Premake for Visual Studio
       run: C:\tools\premake5.exe vs2019 
+
     - name: Compile Project with MSBuild
-      run: |
-        $msbuildPath = "C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\MSBuild\Current\Bin\MSBuild.exe"
-        & $msbuildPath sigma.sln /p:Configuration=Debug /p:Platform="x64"
+      run: msbuild sigma.sln /p:Configuration=Debug /p:Platform="x64"

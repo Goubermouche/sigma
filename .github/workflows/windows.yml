@@ -29,8 +29,7 @@ jobs:
         msbuild -version
 
     - name: Run Premake for Visual Studio
-      run: |
-        setup.bat
+      run: .\setup.bat
 
     - name: Compile Project with MSBuild
       run: |

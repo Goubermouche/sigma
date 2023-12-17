@@ -35,6 +35,8 @@ namespace sigma {
 	};
 
 	struct named_data_type {
+		named_data_type(data_type ty, utility::symbol_table_key key);
+
 		data_type type;
 		utility::symbol_table_key identifier_key;
 	};

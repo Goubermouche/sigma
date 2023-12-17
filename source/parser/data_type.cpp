@@ -63,4 +63,7 @@ namespace sigma {
 			}
 		}
 	}
+
+  named_data_type::named_data_type(data_type ty, utility::symbol_table_key key)
+	  : type(ty), identifier_key(key) {}
 } // sigma::parse

@@ -4,7 +4,7 @@ workspace "sigma"
 
     architecture "x64"
     language "C++"
-    cppdialect "C++latest"
+    cppdialect "C++20"
 
     flags {
         "MultiProcessorCompile"

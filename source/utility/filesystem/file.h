@@ -2,6 +2,30 @@
 #include "utility/containers/contiguous_container.h"
 
 namespace utility {
+	class fs {
+	public:
+		static auto exists(const filepath& path) -> bool {
+			return std::filesystem::exists(path);
+		}
+
+		static auto is_directory(const filepath& path) -> bool {
+			return std::filesystem::is_directory(path);
+		}
+
+		static auto get_canonical_path(const filepath& path) -> filepath {
+			try {
+				return canonical(path);
+			}	catch(const std::filesystem::filesystem_error& err) {
+				PANIC("{}", err.what());
+				return {};
+			}
+		}
+
+		static void remove(const filepath& path) {
+			std::filesystem::remove(path);
+		}
+	};
+
 	class file {
 	public:
 		template<typename type>
@@ -29,6 +53,20 @@ namespace utility {
 			}
 
 			return std::string(std::istreambuf_iterator<char>(file), std::istreambuf_iterator<char>());
+		}
+
+
+	};
+
+	class directory {
+	public:
+		static void for_all_directory_items(const filepath& path, std::function<void(const filepath&)> function) {
+			ASSERT(fs::exists(path), "directory '{}' doesn't exist", path.string());
+			ASSERT(fs::is_directory(path), "filepath '{}' doesn't point to a directory", path.string());
+
+			for (const auto& entry : std::filesystem::directory_iterator(path)) {
+				function(entry.path());
+			}
 		}
 	};
 }

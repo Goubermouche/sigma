@@ -16,6 +16,11 @@ namespace utility {
 		constexpr contiguous_container(u64 size, type* data)
 			: m_owning(false), m_data(data), m_size(size), m_capacity(size) {}
 
+		constexpr contiguous_container(std::initializer_list<type> initializer_list)
+			: m_owning(true), m_data(allocate(initializer_list.size())), m_size(initializer_list.size()), m_capacity(m_size) {
+			std::uninitialized_copy(initializer_list.begin(), initializer_list.end(), m_data);
+		}
+
 		contiguous_container(const contiguous_container& other)
 			: m_owning(true), m_size(other.m_size), m_capacity(other.m_capacity) {
 			m_data = static_cast<type*>(std::malloc(m_capacity * sizeof(type)));
@@ -410,7 +415,7 @@ namespace utility {
 			}
 		}
 
-		static constexpr void copy_range(type* begin, type* end, type* destination) {
+		static constexpr void copy_range(const type* begin, const type* end, type* destination) {
 			while (begin != end) {
 				new (destination) type(*begin);
 				++begin;

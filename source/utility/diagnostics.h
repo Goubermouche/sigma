@@ -17,6 +17,10 @@ namespace utility {
 		static void println(std::format_string<arguments...> fmt, arguments&&... args) {
 			std::cout << format_str(std::move(fmt), std::forward<arguments>(args)...) << '\n';
 		}
+
+		static void flush() {
+			std::cout << std::flush;
+		}
 	private:
 		template<typename... arguments>
 		static auto format_str(

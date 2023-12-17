@@ -50,8 +50,8 @@ namespace sigma::ir {
 	}
 
 	void x64_architecture::pad(utility::byte_buffer& bytecode) {
-		// pad to 16bytes
-		static const u8 nops[8][8] = {
+		// pad to 16 bytes
+		static constexpr u8 nops[8][8] = {
 				{ 0x90 },
 				{ 0x66, 0x90 },
 				{ 0x0F, 0x1F, 0x00 },

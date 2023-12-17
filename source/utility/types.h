@@ -4,6 +4,7 @@
 #include <any>
 #include <cstddef>
 #include <codecvt>
+#include <queue>
 #include <deque>
 #include <expected>
 #include <filesystem>

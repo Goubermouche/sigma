@@ -7,6 +7,10 @@ namespace utility {
 	public:
 		stack()
 			: contiguous_container<type>() {}
+
+		stack(const std::initializer_list<type>& initializer_list)
+			: contiguous_container<type>(initializer_list) {}
+
 		stack(const contiguous_container<type>& container)
 			: contiguous_container<type>(container) {}
 

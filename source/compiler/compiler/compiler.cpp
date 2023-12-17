@@ -12,6 +12,8 @@
 
 namespace sigma {
 	void compiler::compile(const filepath& path, ir::target target) {
+		utility::console::println("compiling file: {}", path.string());
+
 		verify_file(path);
 		const auto file = utility::file::read_text_file(path);
 
@@ -33,30 +35,21 @@ namespace sigma {
 			.tokens = tokens
 		};
 
-		utility::console::println("{:<30}{:.3f}s", "tokenizer finished", tokenizer_timer.elapsed_seconds());
-
 		// parser
 		parser_timer.start();
 		context.ast = parser::parse(context);
-		utility::console::println("{:<30}{:.3f}s", "parser finished", parser_timer.elapsed_seconds());
 
 		// type checker
 		type_checker_timer.start();
 		type_checker::type_check(context);
-		utility::console::println("{:<30}{:.3f}s", "type checker finished", type_checker_timer.elapsed_seconds());
 
 		// ir translator
 		ir_translator_timer.start();
 		auto module = ir_translator::translate(context, target);
-		utility::console::println("{:<30}{:.3f}s", "IR translator finished", ir_translator_timer.elapsed_seconds());
 
 		// codegen
 		codegen_timer.start();
 		module.compile();
-		utility::console::println("{:<30}{:.3f}s", "codegen finished", codegen_timer.elapsed_seconds());
-
-		utility::console::println("{}", std::string(36, '-'));
-		utility::console::println("{:<30}{:.3f}s", "compilation finished", total_timer.elapsed_seconds());
 
 		// emit the object file
 		auto object_file = module.generate_object_file();
@@ -69,7 +62,7 @@ namespace sigma {
 		const char* active_format = object_formats[static_cast<u8>(target.get_system())];
 		auto object_path = path.parent_path() / (std::string("a") + active_format);
 
-		utility::file::write(object_file, object_path);
+		//utility::file::write(object_file, object_path);
 	}
 
 	void compiler::verify_file(const filepath& path) {

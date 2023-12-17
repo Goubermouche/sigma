@@ -25,10 +25,6 @@ workspace "sigma"
         defines { "DEBUG", "_DEBUG" }
         warnings "Extra"
 
-    -- output directories 
-    targetdir "output/bin/%{cfg.buildcfg}"
-    objdir "output/obj/%{cfg.buildcfg}"
-
 -- utility 
 project "utility"
     kind "StaticLib"
@@ -44,8 +40,8 @@ project "utility"
     }
 
     -- output directories 
-    targetdir "output/bin/%{cfg.buildcfg}"
-    objdir "output/obj/%{cfg.buildcfg}"
+    targetdir "output/compiler/bin/%{cfg.buildcfg}"
+    objdir "output/compiler/obj/%{cfg.buildcfg}"
 
 -- -- tokenizer
 project "tokenizer"
@@ -66,8 +62,8 @@ project "tokenizer"
     }
 
     -- output directories 
-    targetdir "output/bin/%{cfg.buildcfg}"
-    objdir "output/obj/%{cfg.buildcfg}"
+    targetdir "output/compiler/bin/%{cfg.buildcfg}"
+    objdir "output/compiler/obj/%{cfg.buildcfg}"
 
 -- abstract_syntax_tree
 project "abstract_syntax_tree"
@@ -88,8 +84,8 @@ project "abstract_syntax_tree"
     }
 
     -- output directories 
-    targetdir "output/bin/%{cfg.buildcfg}"
-    objdir "output/obj/%{cfg.buildcfg}"
+    targetdir "output/compiler/bin/%{cfg.buildcfg}"
+    objdir "output/compiler/obj/%{cfg.buildcfg}"
 
 -- parser
 project "parser"
@@ -111,8 +107,8 @@ project "parser"
     }
 
     -- output directories 
-    targetdir "output/bin/%{cfg.buildcfg}"
-    objdir "output/obj/%{cfg.buildcfg}"
+    targetdir "output/compiler/bin/%{cfg.buildcfg}"
+    objdir "output/compiler/obj/%{cfg.buildcfg}"
 
 -- type_checker
 project "type_checker"
@@ -134,8 +130,8 @@ project "type_checker"
     }
 
     -- output directories 
-    targetdir "output/bin/%{cfg.buildcfg}"
-    objdir "output/obj/%{cfg.buildcfg}"
+    targetdir "output/compiler/bin/%{cfg.buildcfg}"
+    objdir "output/compiler/obj/%{cfg.buildcfg}"
 
 -- intermediate_representation
 project "intermediate_representation"
@@ -156,8 +152,8 @@ project "intermediate_representation"
     }
 
     -- output directories 
-    targetdir "output/bin/%{cfg.buildcfg}"
-    objdir "output/obj/%{cfg.buildcfg}"
+    targetdir "output/compiler/bin/%{cfg.buildcfg}"
+    objdir "output/compiler/obj/%{cfg.buildcfg}"
 
 -- ir_translator
 project "ir_translator"
@@ -180,15 +176,16 @@ project "ir_translator"
     }
 
     -- output directories 
-    targetdir "output/bin/%{cfg.buildcfg}"
-    objdir "output/obj/%{cfg.buildcfg}"
+    targetdir "output/compiler/bin/%{cfg.buildcfg}"
+    objdir "output/compiler/obj/%{cfg.buildcfg}"
 
 -- compiler
 project "compiler"
     kind "ConsoleApp"
     location "source/compiler"
 
-    debugargs { "compile", "-s", "test/main.s", "-o", "test/app.exe" }
+    -- debugargs { "compile", "-s", "test/main.s", "-o", "test/app.exe" }
+    debugargs { "./test/main.s" }
 
     files {
         "source/compiler/**.h",
@@ -210,8 +207,8 @@ project "compiler"
     }
 
     -- output directories 
-    targetdir "output/bin/%{cfg.buildcfg}"
-    objdir "output/obj/%{cfg.buildcfg}"
+    targetdir "output/compiler/bin/%{cfg.buildcfg}"
+    objdir "output/compiler/obj/%{cfg.buildcfg}"
 
     filter { "system:linux", "action:gmake" }
         links {
@@ -229,4 +226,39 @@ project "compiler"
             "-lstdc++"
         }
 
-      
+project "tests"
+    kind "ConsoleApp"
+    location "source/tests"
+
+    files {
+        "source/tests/**.h",
+        "source/tests/**.cpp"
+    }
+
+    includedirs {
+        "source"
+    }
+
+    links {
+        "utility"
+    }
+
+    -- output directories 
+    targetdir "output/tests/bin/%{cfg.buildcfg}"
+    objdir "output/tests/obj/%{cfg.buildcfg}"
+
+    filter { "system:linux", "action:gmake" }
+        links {
+            "dl",     
+            "pthread",
+            "m",      
+            "rt"
+        }
+
+        buildoptions { 
+            "-std=c++23"
+        }
+
+        linkoptions {
+            "-lstdc++"
+        }

@@ -15,6 +15,10 @@ jobs:
       with:
         fetch-depth: 0
 
+    - name: Add MSBuild to PATH
+      run: |
+        echo "C:\Program Files (x86)\Microsoft Visual Studio\2022\BuildTools\MSBuild\Current\Bin" | Out-File -Append -FilePath $env:GITHUB_PATH
+
     - name: Run Premake for Visual Studio
       run: .\setup.bat
 

@@ -16,7 +16,6 @@ jobs:
         fetch-depth: 0
 
     - name: Install Premake
-      if: steps.cache-premake.outputs.cache-hit != 'true'
       run: |
         Invoke-WebRequest -Uri "https://github.com/premake/premake-core/releases/download/v5.0.0-alpha16/premake-5.0.0-alpha16-windows.zip" -OutFile "premake.zip"
         Expand-Archive "premake.zip" -DestinationPath "C:\tools"
@@ -36,10 +35,8 @@ jobs:
         key: ${{ runner.os }}-compilation-${{ hashFiles('**/*.cpp', '**/*.h') }}
         restore-keys: |
           ${{ runner.os }}-compilation-
-
-    - name: Run Premake
-      run: |
-        C:\tools\premake5.exe gmake
-
-    - name: Compile Project
-      run: mingw32-make config=debug CC=clang
+          
+    - name: Run Premake for Visual Studio
+      run: C:\tools\premake5.exe vs2019 
+    - name: Compile Project with MSBuild
+      run: msbuild sigma.sln /p:Configuration=Debug /p:Platform="x64"

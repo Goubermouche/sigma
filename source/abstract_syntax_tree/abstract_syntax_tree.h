@@ -9,8 +9,9 @@ namespace sigma {
 	public:
 		abstract_syntax_tree();
 
-		void add_node(handle<node> node);
 		void traverse(std::function<void(handle<node>, u16)>&& function) const;
+
+		void add_node(handle<node> node);
 
 		auto allocate_node_list(u64 count) -> utility::slice<handle<node>>;
 

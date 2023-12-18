@@ -2,7 +2,7 @@
 #include "tokenizer/token.h"
 
 #include <utility/containers/contiguous_container.h>
-#include <utility/containers/symbol_table.h>
+#include <utility/containers/string_table.h>
 
 namespace sigma {
 	class token_buffer {
@@ -12,7 +12,7 @@ namespace sigma {
 		[[nodiscard]] auto get_size() const -> u64;
 
 		[[nodiscard]] auto get_token(u64 index) const->token;
-		[[nodiscard]] auto get_token_symbol_key(u64 index) const -> utility::symbol_table_key;
+		[[nodiscard]] auto get_token_symbol_key(u64 index) const -> utility::string_table_key;
 
 		[[nodiscard]] auto operator[](u64 index) const -> token_info;
 

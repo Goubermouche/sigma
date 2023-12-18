@@ -9,10 +9,16 @@
 //     -   check for memory oversteps
 // -   IR translator 
 //     -   dynamic programming impl? 
-// -   Fix all errors that DEBUG catches, run with fsanitize=address,undefined
+
+i32 test(i32 a) {
+	ret 0;
+}
 
 i32 main() {
-	if(true) {
+	bool value = true;
+	value = false;
+
+	if(value) {
 		printf("true\n");
 	}
 	else {

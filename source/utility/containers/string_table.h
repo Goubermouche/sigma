@@ -3,10 +3,10 @@
 #include "utility/types.h"
 
 namespace utility {
-	struct symbol_table_key {
-		static auto create_key() -> symbol_table_key;
+	struct string_table_key {
+		static auto create_key() -> string_table_key;
 
-		auto operator==(symbol_table_key other) const -> bool;
+		auto operator==(string_table_key other) const -> bool;
 
 		auto get_value() const->u32;
 		auto is_valid() const -> bool;
@@ -16,8 +16,8 @@ namespace utility {
 } // namespace utility
 
 template <>
-struct std::hash<utility::symbol_table_key> {
-	auto operator()(const utility::symbol_table_key& k) const -> utility::u64 {
+struct std::hash<utility::string_table_key> {
+	auto operator()(const utility::string_table_key& k) const -> utility::u64 {
 		return std::hash<utility::types::u32>()(k.get_value());
 	}
 };
@@ -35,14 +35,15 @@ namespace utility {
 	// potential ideas:
 	// -   some sort of in place allocator where the index offsets of strings would be the addresses
 
-	class symbol_table {
+	class string_table {
 	public:
-		symbol_table() = default;
+		string_table() = default;
 
-		auto insert(const std::string& symbol) -> symbol_table_key;
-		auto get(symbol_table_key key) const -> const std::string&;
+		bool contains(string_table_key key) const;
+		auto insert(const std::string& symbol) -> string_table_key;
+		auto get(string_table_key key) const -> const std::string&;
 	private:
-		std::unordered_map<std::string, symbol_table_key> m_string_to_key;
-		std::unordered_map<symbol_table_key, std::string> m_key_to_string;
+		std::unordered_map<std::string, string_table_key> m_string_to_key;
+		std::unordered_map<string_table_key, std::string> m_key_to_string;
 	};
 } // namespace utility

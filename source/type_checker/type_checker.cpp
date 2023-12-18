@@ -8,8 +8,8 @@ namespace sigma {
 
 	type_checker::type_checker(compilation_context& context) : m_context(context) {
 		{
-			const utility::symbol_table_key printf_key = context.symbols.insert("printf");
-			const utility::symbol_table_key format_key = context.symbols.insert("format");
+			const utility::string_table_key printf_key = context.strings.insert("printf");
+			const utility::string_table_key format_key = context.strings.insert("format");
 
 			auto printf_params = utility::slice<named_data_type>(m_context.ast.get_allocator(), 1);
 			printf_params[0] = named_data_type{ data_type(data_type::CHAR, 1), format_key };
@@ -23,8 +23,8 @@ namespace sigma {
 		}
 
 		{
-			const utility::symbol_table_key printf_key = context.symbols.insert("puts");
-			const utility::symbol_table_key format_key = context.symbols.insert("str");
+			const utility::string_table_key printf_key = context.strings.insert("puts");
+			const utility::string_table_key format_key = context.strings.insert("str");
 
 			auto printf_params = utility::slice<named_data_type>(m_context.ast.get_allocator(), 1);
 			printf_params[0] = named_data_type{ data_type(data_type::CHAR, 1), format_key };
@@ -46,7 +46,7 @@ namespace sigma {
 
 	void type_checker::type_check_node(handle<node> ast_node, data_type expected) {
 		switch (ast_node->type) {
-			case node_type::FUNCTION:             type_check_function(ast_node); break;
+			case node_type::FUNCTION_DECLARATION:             type_check_function(ast_node); break;
 			case node_type::FUNCTION_CALL:        type_check_function_call(ast_node, expected); break;
 
 			// flow control
@@ -57,6 +57,7 @@ namespace sigma {
 			// variables
 			case node_type::VARIABLE_DECLARATION: type_check_variable_declaration(ast_node); break;
 			case node_type::VARIABLE_ACCESS:      type_check_variable_access(ast_node, expected); break;
+			case node_type::VARIABLE_ASSIGNMENT:  type_check_variable_assignment(ast_node); break;
 
 			// operators:
 			case node_type::OPERATOR_ADD:
@@ -70,7 +71,7 @@ namespace sigma {
 			case node_type::STRING_LITERAL:       type_check_string_literal(ast_node, expected); break;
 			case node_type::BOOL_LITERAL:         type_check_bool_literal(ast_node, expected); break;
 
-			default: NOT_IMPLEMENTED();
+			default: PANIC("type checking for node '{}' is not implemented", ast_node->type.to_string());
 		}
 	}
 
@@ -203,7 +204,7 @@ namespace sigma {
 	}
 
 	void type_checker::type_check_variable_access(handle<node> access_node, data_type expected) {
-		auto& prop = access_node->get<variable_access>();
+		auto& prop = access_node->get<variable>();
 
 		const auto it = m_local_variables.find(prop.identifier_key);
 		ASSERT(it != m_local_variables.end(), "unknown local variable");
@@ -211,6 +212,16 @@ namespace sigma {
 		prop.dt = it->second; // default to the declared type 
 
 		apply_expected_data_type(prop.dt, expected);
+	}
+
+	void type_checker::type_check_variable_assignment(handle<node> assignment_node) {
+		const handle<node> variable_node = assignment_node->children[0];
+		const auto& variable_prop = variable_node->get<variable>();
+
+		const auto it = m_local_variables.find(variable_prop.identifier_key);
+		ASSERT(it != m_local_variables.end(), "unknown local variable referenced");
+
+		type_check_node(assignment_node->children[1], it->second);
 	}
 
 	void type_checker::apply_expected_data_type(data_type& target, data_type source) {

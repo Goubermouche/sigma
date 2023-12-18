@@ -12,7 +12,7 @@ namespace sigma {
 		enum underlying {
 			UNKNOWN,
 
-			FUNCTION,
+			FUNCTION_DECLARATION,
 			FUNCTION_CALL,
 
 			RETURN,
@@ -22,6 +22,7 @@ namespace sigma {
 
 			VARIABLE_DECLARATION,
 			VARIABLE_ACCESS,
+			// first child is the variable, second child is the assigned value
 			VARIABLE_ASSIGNMENT,
 
 			OPERATOR_ADD,
@@ -51,18 +52,18 @@ namespace sigma {
 		utility::slice<named_data_type> parameter_types;
 		bool has_var_args = false;
 
-		utility::symbol_table_key identifier_key;
+		utility::string_table_key identifier_key;
 	};
 
 	struct function_call {
-		utility::symbol_table_key callee_identifier_key;
+		utility::string_table_key callee_identifier_key;
 		bool is_external;
 	};
 
 	struct return_statement {};
 
 	struct literal {
-		utility::symbol_table_key value_key;
+		utility::string_table_key value_key;
 		data_type dt;
 	};
 
@@ -71,12 +72,7 @@ namespace sigma {
 	};
 
 	struct variable {
-		utility::symbol_table_key identifier_key;
-		data_type dt;
-	};
-
-	struct variable_access {
-		utility::symbol_table_key identifier_key;
+		utility::string_table_key identifier_key;
 		data_type dt;
 	};
 
@@ -88,7 +84,7 @@ namespace sigma {
 	// -   children[0 - n] = statements
 
 	using node_properties = utility::property<
-		function, return_statement, literal, function_call, variable, variable_access, bool_literal
+		function, return_statement, literal, function_call, variable, bool_literal
 	>;
 
 	struct node : node_properties {

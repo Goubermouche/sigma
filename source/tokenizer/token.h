@@ -1,5 +1,5 @@
 #pragma once
-#include <utility/containers/symbol_table.h>
+#include <utility/containers/string_table.h>
 #include <utility/containers/handle.h>
 
 namespace sigma {
@@ -81,6 +81,6 @@ namespace sigma {
 	struct token_info {
 		token tok;
 		token_location location;
-		utility::symbol_table_key symbol_key;
+		utility::string_table_key symbol_key;
 	};
 }

@@ -1,6 +1,6 @@
 #pragma once
 #include <intermediate_representation/builder.h>
-#include <utility/containers/symbol_table.h>
+#include <utility/containers/string_table.h>
 
 namespace sigma::detail {
 	using namespace utility::types;
@@ -17,7 +17,7 @@ namespace sigma::detail {
 		 * \return Handle<ir::node> representing the local variable.
 		 */
 		auto register_variable(
-			utility::symbol_table_key identifier_key, u16 size, u16 alignment
+			utility::string_table_key identifier_key, u16 size, u16 alignment
 		) -> handle<ir::node>;
 		
 		/**
@@ -28,7 +28,7 @@ namespace sigma::detail {
 		 * \return Handle<ir::node> representing the loaded variable.
 		 */
 		auto create_load(
-			utility::symbol_table_key identifier_key, ir::data_type type, u16 alignment
+			utility::string_table_key identifier_key, ir::data_type type, u16 alignment
 		) -> handle<ir::node>;
 
 		/**
@@ -38,12 +38,12 @@ namespace sigma::detail {
 		 * \param alignment Alignment of the store operation [bytes]
 		 */
 		void create_store(
-			utility::symbol_table_key identifier_key, handle<ir::node> value, u16 alignment
+			utility::string_table_key identifier_key, handle<ir::node> value, u16 alignment
 		);
 	private:
 		ir::builder& m_builder;
 
-		std::unordered_map<utility::symbol_table_key, handle<ir::node>> m_variables;
+		std::unordered_map<utility::string_table_key, handle<ir::node>> m_variables;
 	};
 } // namespace sigma::detail
 

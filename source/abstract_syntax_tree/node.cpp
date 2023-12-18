@@ -7,7 +7,7 @@ namespace sigma {
 	auto node_type::to_string() const->std::string {
 		switch(type) {
 			case UNKNOWN:              return "UNKNOWN";
-			case FUNCTION:             return "FUNCTION";
+			case FUNCTION_DECLARATION: return "FUNCTION_DECLARATION";
 			case FUNCTION_CALL:        return "FUNCTION_CALL";
 
 			case RETURN:               return "RETURN";

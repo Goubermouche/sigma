@@ -5,11 +5,11 @@ namespace sigma {
 
 	auto tokenizer::tokenize(
 		const std::string& source
-	) -> std::pair<token_buffer, utility::symbol_table> {
+	) -> std::pair<token_buffer, utility::string_table> {
 		return tokenizer(source).tokenize();
 	}
 
-	auto tokenizer::tokenize() -> std::pair<token_buffer, utility::symbol_table> {
+	auto tokenizer::tokenize() -> std::pair<token_buffer, utility::string_table> {
 		token_type current = token_type::UNKNOWN;
 
 		while (current != token_type::END_OF_FILE) {

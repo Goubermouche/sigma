@@ -12,14 +12,14 @@ namespace sigma {
 		compilation_context& context, ir::target target
 	) : m_context(context), m_module(target), m_builder(m_module),
 	m_functions(m_builder), m_variables(m_builder) {
-		m_functions.register_external_function(m_context.symbols.insert("printf"), {
+		m_functions.register_external_function(m_context.strings.insert("printf"), {
 			.identifier   = "printf",
 			.parameters   = { PTR_TYPE },
 			.returns      = { I32_TYPE },
 			.has_var_args = true
 		});
 
-		m_functions.register_external_function(m_context.symbols.insert("puts"), {
+		m_functions.register_external_function(m_context.strings.insert("puts"), {
 			.identifier   = "puts",
 			.parameters   = { PTR_TYPE },
 			.returns      = { I32_TYPE },
@@ -29,7 +29,7 @@ namespace sigma {
 
 	handle<ir::node> ir_translator::translate_node(handle<node> ast_node) {
 		switch (ast_node->type) {
-			case node_type::FUNCTION:             translate_function_declaration(ast_node); break;
+			case node_type::FUNCTION_DECLARATION:             translate_function_declaration(ast_node); break;
 			case node_type::FUNCTION_CALL:        return translate_function_call(ast_node);
 
 			// // flow control
@@ -38,21 +38,21 @@ namespace sigma {
 
 			case node_type::VARIABLE_DECLARATION: translate_variable_declaration(ast_node); break;
 			case node_type::VARIABLE_ACCESS:      return translate_variable_access(ast_node);
-			// case node_type::VARIABLE_ASSIGNMENT:  return translate_variable_assignment(ast_node);
+			case node_type::VARIABLE_ASSIGNMENT:  return translate_variable_assignment(ast_node);
 
 			// // operators:
-			// case node_type::OPERATOR_ADD:
-			// case node_type::OPERATOR_SUBTRACT:
-			// case node_type::OPERATOR_MULTIPLY:
-			// case node_type::OPERATOR_DIVIDE:
-			// case node_type::OPERATOR_MODULO:      return translate_binary_math_operator(ast_node);
+			 case node_type::OPERATOR_ADD:
+			 case node_type::OPERATOR_SUBTRACT:
+			 case node_type::OPERATOR_MULTIPLY:
+			 case node_type::OPERATOR_DIVIDE:
+			 case node_type::OPERATOR_MODULO:     return translate_binary_math_operator(ast_node);
 
 			// // literals
 			case node_type::NUMERICAL_LITERAL:    return translate_numerical_literal(ast_node);
 			case node_type::STRING_LITERAL:       return translate_string_literal(ast_node);
 			case node_type::BOOL_LITERAL:         return translate_bool_literal(ast_node);
 			// default: NOT_IMPLEMENTED();
-			default: std::cout << ast_node->type.to_string() << '\n';
+			default: PANIC("irgen for node '{}' is not implemented", ast_node->type.to_string());
 		}
 
 		return nullptr;
@@ -69,7 +69,7 @@ namespace sigma {
 
 		// TODO: the IR system should inherit our symbol table system
 		const ir::function_signature signature {
-			.identifier = m_context.symbols.get(prop.identifier_key), // TEMP
+			.identifier = m_context.strings.get(prop.identifier_key), // TEMP
 			.parameters = parameter_types,
 			.returns = { data_type_to_ir(prop.return_type) },
 			.has_var_args = false
@@ -175,7 +175,7 @@ namespace sigma {
 	auto ir_translator::translate_string_literal(
 		handle<node> string_literal_node
 	) const -> handle<ir::node> {
-		const std::string& value = m_context.symbols.get(string_literal_node->get<literal>().value_key);
+		const std::string& value = m_context.strings.get(string_literal_node->get<literal>().value_key);
 		return m_builder.create_string(value);
 	}
 
@@ -220,7 +220,7 @@ namespace sigma {
 	}
 
 	auto ir_translator::translate_variable_access(handle<node> access_node) -> handle<ir::node> {
-		const auto& prop = access_node->get<variable_access>();
+		const auto& prop = access_node->get<variable>();
 
 		handle<ir::node> load = m_variables.create_load(
 			prop.identifier_key, data_type_to_ir(prop.dt), prop.dt.get_byte_width()
@@ -233,7 +233,7 @@ namespace sigma {
 	auto ir_translator::translate_variable_assignment(
 		handle<node> assignment_node
 	) -> handle<ir::node> {
-		const auto& var = assignment_node->children[0]->get<variable_access>();
+		const auto& var = assignment_node->children[0]->get<variable>();
 		const handle<ir::node> value = translate_node(assignment_node->children[1]);
 
 		// assign the variable
@@ -242,7 +242,7 @@ namespace sigma {
 	}
 
 	auto ir_translator::literal_to_ir(literal& literal) const -> handle<ir::node> {
-		const std::string& value = m_context.symbols.get(literal.value_key);
+		const std::string& value = m_context.strings.get(literal.value_key);
 
 		// handle pointers separately
 		if (literal.dt.pointer_level > 0) {

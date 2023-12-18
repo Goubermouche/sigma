@@ -26,6 +26,7 @@ namespace sigma {
 		void type_check_branch(handle<node> branch_node);
 		void type_check_binary_math_operator(handle<node> operator_node, data_type expected);
 		void type_check_variable_access(handle<node> access_node, data_type expected);
+		void type_check_variable_assignment(handle<node> assignment_node);
 
 		static void type_check_numerical_literal(handle<node> literal_node, data_type expected);
 		static void type_check_string_literal(handle<node> literal_node, data_type expected);
@@ -36,9 +37,9 @@ namespace sigma {
 		compilation_context& m_context;
 
 		// TODO: create a function registry
-		std::unordered_map<utility::symbol_table_key, handle<function>> m_functions;
-		std::unordered_map<utility::symbol_table_key, function> m_external_functions;
+		std::unordered_map<utility::string_table_key, handle<function>> m_functions;
+		std::unordered_map<utility::string_table_key, function> m_external_functions;
 
-		std::unordered_map<utility::symbol_table_key, data_type> m_local_variables;
+		std::unordered_map<utility::string_table_key, data_type> m_local_variables;
 	};
 } // namespace sigma

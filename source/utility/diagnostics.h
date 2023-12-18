@@ -18,6 +18,10 @@ namespace utility {
 			std::cout << format_str(std::move(fmt), std::forward<arguments>(args)...) << '\n';
 		}
 
+		static void println() {
+			std::cout << '\n';
+		}
+
 		static void flush() {
 			std::cout << std::flush;
 		}

@@ -10,9 +10,9 @@ namespace sigma {
 
 		[[nodiscard]] static auto tokenize(
 			const std::string& source
-		) -> std::pair<token_buffer, utility::symbol_table>;
+		) -> std::pair<token_buffer, utility::string_table>;
 
-		[[nodiscard]] auto tokenize() -> std::pair<token_buffer, utility::symbol_table>;
+		[[nodiscard]] auto tokenize() -> std::pair<token_buffer, utility::string_table>;
 	private:
 		[[nodiscard]] auto get_next_token() -> token_info;
 		[[nodiscard]] auto get_alphabetical_token() -> token_info;
@@ -33,7 +33,7 @@ namespace sigma {
 
 		utility::detail::string_accessor m_source;
 
-		utility::symbol_table m_symbols;
+		utility::string_table m_symbols;
 		token_buffer m_tokens;
 
 		// keywords

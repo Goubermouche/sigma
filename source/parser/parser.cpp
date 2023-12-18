@@ -63,7 +63,7 @@ namespace sigma {
 		const std::vector<handle<node>> statements = parse_statement_block();
 
 		handle<node> function_node = m_ast.create_node<function>(
-			node_type::FUNCTION, statements.size()
+			node_type::FUNCTION_DECLARATION, statements.size()
 		);
 
 		auto& prop = function_node->get<function>();
@@ -250,7 +250,7 @@ namespace sigma {
 		);
 
 		auto& prop = negation->get<literal>();
-		prop.value_key = m_context.symbols.insert("-1");
+		prop.value_key = m_context.strings.insert("-1");
 		prop.dt = { data_type::I32, 0 };
 
 		// negate the expression
@@ -334,11 +334,11 @@ namespace sigma {
 	auto parser::parse_variable_access() -> handle<node> {
 		// first token is the identifier
 
-		handle<node> access_node = m_ast.create_node<variable_access>(
+		handle<node> access_node = m_ast.create_node<variable>(
 			node_type::VARIABLE_ACCESS, 0
 		);
 
-		access_node->get<variable_access>().identifier_key = m_tokens.get_current().symbol_key;
+		access_node->get<variable>().identifier_key = m_tokens.get_current().symbol_key;
 		return access_node;
 	}
 

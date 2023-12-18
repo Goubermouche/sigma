@@ -34,7 +34,7 @@ namespace sigma {
 		return m_token_infos[index].tok;
 	}
 
-	auto token_buffer::get_token_symbol_key(u64 index) const -> utility::symbol_table_key {
+	auto token_buffer::get_token_symbol_key(u64 index) const -> utility::string_table_key {
 		return m_token_infos[index].symbol_key;
 	}
 

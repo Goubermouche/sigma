@@ -31,13 +31,16 @@ namespace sigma {
 		auto [tokens, symbols] = tokenizer::tokenize(file);
 
 		compilation_context context {
-			.symbols = symbols,
+			.strings = symbols,
 			.tokens = tokens
 		};
+
+		// context.print_tokens();
 
 		// parser
 		parser_timer.start();
 		context.ast = parser::parse(context);
+		context.print_ast();
 
 		// type checker
 		type_checker_timer.start();
@@ -62,7 +65,7 @@ namespace sigma {
 		const char* active_format = object_formats[static_cast<u8>(target.get_system())];
 		auto object_path = path.parent_path() / (std::string("a") + active_format);
 
-		//utility::file::write(object_file, object_path);
+		utility::file::write(object_file, object_path);
 	}
 
 	void compiler::verify_file(const filepath& path) {

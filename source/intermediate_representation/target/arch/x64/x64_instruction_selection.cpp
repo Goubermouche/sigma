@@ -953,20 +953,20 @@ namespace sigma::ir {
 				handle<node> bb = n->get_parent_region();
 				auto& br = n->get<branch>();
 
-				std::vector<int> succ(br.successors.size());
-				bool has_default = false;
+				std::vector<u64> successors(br.successors.size());
+			  // bool has_default = false;
 
 				// fill successors
 				for (handle<user> u = n->use; u; u = u->next_user) {
 					if (u->n->ty == node::PROJECTION) {
-						i32 index = static_cast<i32>(u->n->get<projection>().index);
+						u64 index = u->n->get<projection>().index;
 						handle<node> successor_node = u->n->get_next_block();
 
-						if (index == 0) {
-							has_default = !successor_node->is_unreachable();
-						}
+						// if (index == 0) {
+						// 	has_default = !successor_node->is_unreachable();
+						// }
 
-						succ[index] = static_cast<i32>(context.graph.blocks.at(successor_node).id);
+						successors[index] = context.graph.blocks.at(successor_node).id;
 					}
 				}
 
@@ -980,7 +980,8 @@ namespace sigma::ir {
 					PANIC("degenerate branch");
 				}
 				else if (br.successors.size() == 2) {
-					int f = succ[1], t = succ[0];
+					u64 t = successors[0];
+					u64 f = successors[1];
 
 					x64::conditional cc = x64::conditional::E;
 					if (br.keys[0] == 0) {
@@ -997,10 +998,12 @@ namespace sigma::ir {
 
 					// if flipping avoids a jmp, do that
 					if (context.fallthrough == t) {
-						context.append_instruction(create_jcc(context, f, static_cast<x64::conditional>(cc ^ 1)));
+						context.append_instruction(
+							create_jcc(context, static_cast<i32>(f), static_cast<x64::conditional>(cc ^ 1))
+						);
 					}
 					else {
-						context.append_instruction(create_jcc(context, t, cc));
+						context.append_instruction(create_jcc(context, static_cast<i32>(t), cc));
 
 						if (context.fallthrough != f) {
 							context.append_instruction(create_jump(context, f));

@@ -214,7 +214,7 @@ namespace sigma::ir {
 		// parse prefixes
 		u8 op;
 		u8 rex          = 0;     // 0x4X
-		bool address_32;
+		/*bool address_32;*/
 		bool address_16 = false; // 0x66
 		bool ext        = false; // 0x0F
 
@@ -241,10 +241,10 @@ namespace sigma::ir {
 				case 0x4C:
 				case 0x4D:
 				case 0x4E:
-				case 0x4F: /*rex = op;*/ break;
+				case 0x4F: rex = op; break;
 				case 0xF0: inst.flags |= x64::LOCK; break;
 				case 0x66: address_16 = true; break;
-				case 0x67: address_32 = true; break;
+				case 0x67: /*address_32 = true;*/ break;
 				case 0xF3: inst.flags |= x64::REP; break;
 				case 0xF2: inst.flags |= x64::REPNE; break;
 				case 0x2E: inst.segment = x64::x64_segment::CS; break;

@@ -346,6 +346,7 @@ namespace sigma::ir {
 	}
 
 	void function::add_memory_edge(handle<node> n, handle<node> mem_state, handle<node> target) {
+		SUPPRESS_C4100(n);
 		ASSERT(target->ty == node::REGION, "invalid target type");
 		const auto& region_prop = target->get<region>();
 		ASSERT(region_prop.memory_in && region_prop.memory_in->ty == node::PHI, "invalid region type");

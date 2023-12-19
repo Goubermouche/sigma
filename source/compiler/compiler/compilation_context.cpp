@@ -76,6 +76,8 @@ namespace sigma {
 
 					break;
 				}
+
+				default: break; // suppress unhandled enumeration warnings
 			}
 
 			utility::console::println();

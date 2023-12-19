@@ -156,7 +156,7 @@ namespace sigma::ir {
 				cat == instruction::category::BYTE ||
 				cat == instruction::category::BYTE_EXT
 			) {
-				if(inst->type & instruction::rep) {
+				if(inst->type & static_cast<u32>(instruction::rep)) {
 					bytecode.append_byte(0xF3);
 				}
 

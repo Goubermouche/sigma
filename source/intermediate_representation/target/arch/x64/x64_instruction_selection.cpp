@@ -976,14 +976,14 @@ namespace sigma::ir {
 					context, instruction::TERMINATOR, VOID_TYPE, 0, 0, 0)
 				);
 
-				if(br.successors.size() == 1) {
+				if (br.successors.size() == 1) {
 					PANIC("degenerate branch");
 				}
-				else if(br.successors.size() == 2) {
+				else if (br.successors.size() == 2) {
 					int f = succ[1], t = succ[0];
 
 					x64::conditional cc = x64::conditional::E;
-					if(br.keys[0] == 0) {
+					if (br.keys[0] == 0) {
 						cc = select_instruction_cmp(context, n->inputs[1]);
 					}
 					else {
@@ -996,13 +996,13 @@ namespace sigma::ir {
 					}
 
 					// if flipping avoids a jmp, do that
-					if(context.fallthrough == t) {
+					if (context.fallthrough == t) {
 						context.append_instruction(create_jcc(context, f, static_cast<x64::conditional>(cc ^ 1)));
 					}
 					else {
 						context.append_instruction(create_jcc(context, t, cc));
 
-						if(context.fallthrough != f) {
+						if (context.fallthrough != f) {
 							context.append_instruction(create_jump(context, f));
 						}
 					}
@@ -1220,9 +1220,9 @@ namespace sigma::ir {
 	) -> x64::conditional {
 		bool invert = false;
 		if (
-			n->ty == node::CMP_EQ && 
-			n->dt.ty == data_type::INTEGER && 
-			n->dt.bit_width == 1 && 
+			n->ty == node::CMP_EQ &&
+			n->dt.ty == data_type::INTEGER &&
+			n->dt.bit_width == 1 &&
 			n->inputs[2]->ty == node::INTEGER_CONSTANT
 		) {
 			const auto& b = n->inputs[2]->get<integer>();
@@ -1239,11 +1239,11 @@ namespace sigma::ir {
 			return x64::conditional::NE; // temp
 		}
 		else {
-			reg src = input_reg(context, n);
+			const reg src = input_reg(context, n);
+			const data_type dt = n->dt;
 
-			data_type dt = n->dt;
-			if(dt.ty == data_type::FLOAT) {
-				
+			if (dt.ty == data_type::FLOAT) {
+				NOT_IMPLEMENTED();
 			}
 			else {
 				context.append_instruction(create_rr_no_destination(
@@ -1283,10 +1283,8 @@ namespace sigma::ir {
 				// find predecessor index and do that edge
 				ptr_diff phi_index = -1;
 				for (u64 j = 0; j < destination->inputs.get_size(); ++j) {
-					const handle<basic_block> predecessor = context.schedule.at(destination->inputs[j]);
-
-					if (predecessor == bb) {
-						phi_index = j;
+					if (context.schedule.at(destination->inputs[j]) == bb) {
+						phi_index = static_cast<ptr_diff>(j);
 						break;
 					}
 				}
@@ -1510,7 +1508,12 @@ namespace sigma::ir {
 		codegen_context& context, int target, x64::conditional cc
 	) -> handle<instruction>{
 		const handle<instruction> inst = create_instruction<label>(
-			context, static_cast<instruction::instruction_type>(instruction::JO + cc), VOID_TYPE, 0, 0, 0
+			context, 
+			static_cast<instruction::instruction_type>(instruction::JO + cc), 
+			VOID_TYPE, 
+			0,
+			0,
+			0
 		);
 
 		inst->flags = instruction::node_f;

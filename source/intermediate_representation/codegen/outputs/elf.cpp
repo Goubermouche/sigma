@@ -174,7 +174,7 @@ namespace sigma::ir {
 				ASSERT(section.relocation_position == write_position, "invalid relocations");
 				auto relocations = reinterpret_cast<elf64_relocation*>(&output[write_position]);
 
-				for(const handle<compiled_function> function : section.functions) {
+				for(const handle<compiled_function>& function : section.functions) {
 					u64 source_offset = function->code_position;
 
 					for(handle<symbol_patch> patch = function->first_patch; patch; patch = patch->next) {

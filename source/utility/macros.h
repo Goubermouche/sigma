@@ -61,51 +61,33 @@
 
 #define LANG_FILE_EXTENSION ".s"
 
-
-template <size_t size>
-struct enum_flag_integer_for_size;
-
-template <>
-struct enum_flag_integer_for_size<1> {
-  typedef utility::i8 type;
-};
-
-template <>
-struct enum_flag_integer_for_size<2> {
-  typedef utility::i16 type;
-};
-
-template <>
-struct enum_flag_integer_for_size<4> {
-  typedef utility::i32 type;
-};
-
-template <>
-struct enum_flag_integer_for_size<8> {
-  typedef utility::i64 type;
-};
-
-// used as an approximation of std::underlying_type<T>
-template <class type>
-struct enum_flag_sized_integer {
-  typedef typename enum_flag_integer_for_size<sizeof(type)>::type size_type;
-};
-
-// source: <winnt.h>
-
 /**
  * \brief Declares the given \a __enum to have various binary operands useful
  * with flag enums.
  * \param __enum Enum to declare as a flag enum
  */
 #define FLAG_ENUM(__enum) \
-inline constexpr __enum operator | (__enum a, __enum b) noexcept { return __enum(((enum_flag_sized_integer<__enum>::size_type)a) | ((enum_flag_sized_integer<__enum>::size_type)b)); } \
-inline __enum &operator |= (__enum &a, __enum b) noexcept { return (__enum &)(((enum_flag_sized_integer<__enum>::size_type &)a) |= ((enum_flag_sized_integer<__enum>::size_type)b)); } \
-inline constexpr __enum operator & (__enum a, __enum b) noexcept { return __enum(((enum_flag_sized_integer<__enum>::size_type)a) & ((enum_flag_sized_integer<__enum>::size_type)b)); } \
-inline __enum &operator &= (__enum &a, __enum b) noexcept { return (__enum &)(((enum_flag_sized_integer<__enum>::size_type &)a) &= ((enum_flag_sized_integer<__enum>::size_type)b)); } \
-inline constexpr __enum operator ~ (__enum a) noexcept { return __enum(~((enum_flag_sized_integer<__enum>::size_type)a)); }                                                       \
-inline constexpr __enum operator ^ (__enum a, __enum b) noexcept { return __enum(((enum_flag_sized_integer<__enum>::size_type)a) ^ ((enum_flag_sized_integer<__enum>::size_type)b)); } \
-inline __enum &operator ^= (__enum &a, __enum b) noexcept { return (__enum &)(((enum_flag_sized_integer<__enum>::size_type &)a) ^= ((enum_flag_sized_integer<__enum>::size_type)b)); } \
+inline constexpr __enum operator | (__enum a, __enum b) noexcept { return __enum(((std::underlying_type_t<__enum>)a) | ((std::underlying_type_t<__enum>)b)); } \
+inline __enum &operator |= (__enum &a, __enum b) noexcept { return (__enum &)(((std::underlying_type_t<__enum> &)a) |= ((std::underlying_type_t<__enum>)b)); } \
+inline constexpr __enum operator & (__enum a, __enum b) noexcept { return __enum(((std::underlying_type_t<__enum>)a) & ((std::underlying_type_t<__enum>)b)); } \
+inline __enum &operator &= (__enum &a, __enum b) noexcept { return (__enum &)(((std::underlying_type_t<__enum> &)a) &= ((std::underlying_type_t<__enum>)b)); } \
+inline constexpr __enum operator ~ (__enum a) noexcept { return __enum(~((std::underlying_type_t<__enum>)a)); }                                                \
+inline constexpr __enum operator ^ (__enum a, __enum b) noexcept { return __enum(((std::underlying_type_t<__enum>)a) ^ ((std::underlying_type_t<__enum>)b)); } \
+inline __enum &operator ^= (__enum &a, __enum b) noexcept { return (__enum &)(((std::underlying_type_t<__enum> &)a) ^= ((std::underlying_type_t<__enum>)b)); } \
+
+#define INTEGRAL_ENUM(__enum) \
+template<typename other_enum_type> \
+inline constexpr std::underlying_type_t<__enum> operator | (__enum enum_a, other_enum_type enum_b) { return (std::underlying_type_t<__enum>)enum_a | (std::underlying_type_t<other_enum_type>)enum_b; } \
+inline constexpr std::underlying_type_t<__enum> operator | (__enum e, std::underlying_type_t<__enum> value) { return (std::underlying_type_t<__enum>)e | value; } \
+inline constexpr std::underlying_type_t<__enum> operator | (std::underlying_type_t<__enum> value, __enum e) { return value | (std::underlying_type_t<__enum>)e; } \
+inline constexpr std::underlying_type_t<__enum> operator & (__enum e, std::underlying_type_t<__enum> value) { return (std::underlying_type_t<__enum>)e & value; } \
+inline constexpr std::underlying_type_t<__enum> operator & (std::underlying_type_t<__enum> value, __enum e) { return value & (std::underlying_type_t<__enum>)e; } \
+inline constexpr std::underlying_type_t<__enum> operator << (std::underlying_type_t<__enum> value, __enum e) { return value << (std::underlying_type_t<__enum>)e; } \
+inline constexpr std::underlying_type_t<__enum> operator + (__enum e, std::underlying_type_t<__enum> value) { return (std::underlying_type_t<__enum>)e + value; } \
+inline constexpr std::underlying_type_t<__enum> operator + (std::underlying_type_t<__enum> value, __enum e) { return value + (std::underlying_type_t<__enum>)e; } \
+inline constexpr std::underlying_type_t<__enum> operator ^ (__enum e, std::underlying_type_t<__enum> value) { return (std::underlying_type_t<__enum>)e ^ value; } \
+inline constexpr std::underlying_type_t<__enum> operator ^ (std::underlying_type_t<__enum> value, __enum e) { return value ^ (std::underlying_type_t<__enum>)e; } \
+inline constexpr bool operator == (std::underlying_type_t<__enum> value, __enum e) { return value == (std::underlying_type_t<__enum>)e; } \
 
 #if defined(_MSC_VER)
 #define aligned_malloc _aligned_malloc

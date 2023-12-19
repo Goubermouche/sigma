@@ -89,30 +89,30 @@ namespace sigma::ir {
 		}
 
 		// push RBP
-		bytecode.append_byte(0x50 + x64::RBP);
+		bytecode.append_byte(0x50 + x64::gpr::RBP);
 
 		// mov RBP, RSP
-		bytecode.append_byte(rex(true, x64::RSP, x64::RBP, 0));
+		bytecode.append_byte(rex(true, static_cast<u8>(x64::gpr::RSP), static_cast<u8>(x64::gpr::RBP), 0));
 		bytecode.append_byte(0x89);
-		bytecode.append_byte(mod_rx_rm(x64::DIRECT, x64::RSP, x64::RBP));
+		bytecode.append_byte(mod_rx_rm(x64::DIRECT, static_cast<u8>(x64::gpr::RSP), static_cast<u8>(x64::gpr::RBP)));
 
 		if(context.stack_usage >= 4096) {
 			// emit a chkstk function
 			NOT_IMPLEMENTED();
 		}
 		else {
-			bytecode.append_byte(rex(true, 0x00, x64::RSP, 0));
+			bytecode.append_byte(rex(true, 0x00, static_cast<u8>(x64::gpr::RSP), 0));
 
 			if (utility::fits_into_8_bits(context.stack_usage)) {
 				// sub RSP, stack_usage
 				bytecode.append_byte(0x83);
-				bytecode.append_byte(mod_rx_rm(x64::DIRECT, 0x05, x64::RSP));
+				bytecode.append_byte(mod_rx_rm(x64::DIRECT, 0x05, static_cast<u8>(x64::gpr::RSP)));
 				bytecode.append_byte(static_cast<u8>(context.stack_usage));
 			}
 			else {
 				// sub RSP, stack_usage
 				bytecode.append_byte(0x81);
-				bytecode.append_byte(mod_rx_rm(x64::DIRECT, 0x05, x64::RSP));
+				bytecode.append_byte(mod_rx_rm(x64::DIRECT, 0x05, static_cast<u8>(x64::gpr::RSP)));
 				bytecode.append_dword(static_cast<u32>(context.stack_usage));
 			}
 		}
@@ -140,7 +140,7 @@ namespace sigma::ir {
 			) { /*does nothing*/ }
 			else if(inst->type == instruction::instruction_type::LABEL) {
 				const handle<node> basic_block = inst->get<handle<node>>();
-				const u64 position = bytecode.get_size();
+				const u32 position = static_cast<u32>(bytecode.get_size());
 				const u64 id = context.graph.blocks.at(basic_block).id;
 
 				bytecode.resolve_relocation_dword(&context.labels[id], position);
@@ -338,21 +338,21 @@ namespace sigma::ir {
 		}
 
 		// add RSP, stack_usage
-		bytecode.append_byte(rex(true, 0x00, x64::RSP, 0));
+		bytecode.append_byte(rex(true, 0x00, static_cast<u8>(x64::gpr::RSP), 0));
 
 		if (utility::fits_into_8_bits(context.stack_usage)) {
 			bytecode.append_byte(0x83);
-			bytecode.append_byte(mod_rx_rm(x64::DIRECT, 0x00, x64::RSP));
+			bytecode.append_byte(mod_rx_rm(x64::DIRECT, 0x00, static_cast<u8>(x64::gpr::RSP)));
 			bytecode.append_byte(static_cast<i8>(context.stack_usage));
 		}
 		else {
 			bytecode.append_byte(0x81);
-			bytecode.append_byte(mod_rx_rm(x64::DIRECT, 0x00, x64::RSP));
+			bytecode.append_byte(mod_rx_rm(x64::DIRECT, 0x00, static_cast<u8>(x64::gpr::RSP)));
 			bytecode.append_dword(static_cast<u32>(context.stack_usage));
 		}
 
 		// pop RBP
-		bytecode.append_byte(0x58 + x64::RBP);
+		bytecode.append_byte(0x58 + x64::gpr::RBP);
 
 		// ret
 		const handle<node> remote_procedure_call = context.func->exit_node->inputs[2];
@@ -562,7 +562,7 @@ namespace sigma::ir {
 			const u8 base = r->reg;
 			scale s = r->sc;
 
-			const bool needs_index = (index != reg::invalid_id) || (base & 7) == x64::RSP;
+			const bool needs_index = (index != reg::invalid_id) || (base & 7) == x64::gpr::RSP;
 			bytecode.append_byte(rex(is_rexw, 0x00, base, index != reg::invalid_id ? index : 0));
 
 			if (descriptor.cat == instruction::category::UNARY_EXT) {
@@ -579,11 +579,11 @@ namespace sigma::ir {
 				m = x64::INDIRECT_DISPLACEMENT_8;
 			}
 
-			bytecode.append_byte(mod_rx_rm(m, rx, needs_index ? x64::RSP : base));
+			bytecode.append_byte(mod_rx_rm(m, rx, needs_index ? static_cast<u8>(x64::gpr::RSP) : base));
 
 			if (needs_index) {
 				bytecode.append_byte(
-					mod_rx_rm(static_cast<x64::mod>(s), (base & 7) == x64::RSP ? x64::RSP : index, base)
+					mod_rx_rm(static_cast<x64::mod>(s), (base & 7) == x64::gpr::RSP ? static_cast<u8>(x64::gpr::RSP) : index, base)
 				);
 			}
 
@@ -612,7 +612,7 @@ namespace sigma::ir {
 				}
 
 				bytecode.append_byte(op);
-				bytecode.append_byte(((rx & 7) << 3) | x64::RBP);
+				bytecode.append_byte(((rx & 7) << 3) | x64::gpr::RBP);
 			}
 
 			bytecode.append_dword(r->immediate);
@@ -626,8 +626,11 @@ namespace sigma::ir {
 			bytecode.append_byte(descriptor.op);
 			bytecode.append_dword(0);
 
-			const u64 label = r->get<sigma::ir::label>().value;
-			bytecode.emit_relocation_dword(&context.labels[label], bytecode.get_size() - 4);
+			const u64 label = r->get<ir::label>().value;
+			bytecode.emit_relocation_dword(
+				&context.labels[label], 
+				static_cast<u32>(bytecode.get_size()) - 4
+			);
 		}
 		else {
 			NOT_IMPLEMENTED();
@@ -718,7 +721,7 @@ namespace sigma::ir {
 			base = a->reg;
 		}
 		else {
-			base = x64::RBP;
+			base = static_cast<u8>(x64::gpr::RBP);
 		}
 
 		if (a->type == codegen_temporary::MEM && a->index != reg::invalid_id) {
@@ -736,7 +739,7 @@ namespace sigma::ir {
 		if (descriptor.cat == instruction::category::BINOP_CL) {
 			ASSERT(
 				b->type == codegen_temporary::IMM || 
-				(b->type == codegen_temporary::GPR && b->reg == x64::RCX),
+				(b->type == codegen_temporary::GPR && b->reg == x64::gpr::RCX),
 				"invalid binary operation"
 			);
 
@@ -840,24 +843,24 @@ namespace sigma::ir {
 			const u8 index = a->index;
 			scale scale = a->sc;
 			const i32 displacement = a->immediate;
-			const bool needs_index = (index != reg::invalid_id) || (base & 7) == x64::RSP;
+			const bool needs_index = (index != reg::invalid_id) || (base & 7) == x64::gpr::RSP;
 			
 			// if it needs an index, it'll put RSP into the base slot and write the real base
 			// into the SIB
 			x64::mod m = x64::INDIRECT_DISPLACEMENT_32;
 			
-			if (displacement == 0 && (base & 7) != x64::RBP) {
+			if (displacement == 0 && (base & 7) != x64::gpr::RBP) {
 				m = x64::INDIRECT;
 			}
 			else if (displacement == static_cast<i8>(displacement)) {
 				m = x64::INDIRECT_DISPLACEMENT_8;
 			}
 
-			bytecode.append_byte(mod_rx_rm(m, rx, needs_index ? x64::RSP : base));
+			bytecode.append_byte(mod_rx_rm(m, rx, needs_index ? static_cast<u8>(x64::gpr::RSP) : base));
 			
 			if (needs_index) {
 				bytecode.append_byte(
-					mod_rx_rm(static_cast<x64::mod>(scale), (base & 7) == x64::RSP ? x64::RSP : index, base)
+					mod_rx_rm(static_cast<x64::mod>(scale), (base & 7) == x64::gpr::RSP ? static_cast<u8>(x64::gpr::RSP) : index, base)
 				);
 			}
 			
@@ -869,7 +872,7 @@ namespace sigma::ir {
 			}
 		}
 		else if (a->type == codegen_temporary::GLOBAL) {
-			bytecode.append_byte(((rx & 7) << 3) | x64::RBP);
+			bytecode.append_byte(((rx & 7) << 3) | x64::gpr::RBP);
 			bytecode.append_dword(a->immediate);
 			emit_symbol_patch(context, a->get<handle<symbol>>(), bytecode.get_size() - 4);
 		}
@@ -919,7 +922,7 @@ namespace sigma::ir {
 
 		if (interval->spill > 0) {
 			val->type = codegen_temporary::MEM;
-			val->reg = x64::RBP;
+			val->reg = static_cast<u8>(x64::gpr::RBP);
 			val->index = reg::invalid_id;
 			val->immediate = -interval->spill;
 		}

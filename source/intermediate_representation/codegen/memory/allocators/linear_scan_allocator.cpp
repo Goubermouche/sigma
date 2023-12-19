@@ -279,8 +279,8 @@ namespace sigma::ir {
 
 		// don't include RBP and RSP registers
 		u32 callee_saved_gp_registers = ~descriptor.caller_saved_gpr_count;
-		callee_saved_gp_registers &= ~(1u << x64::RBP);
-		callee_saved_gp_registers &= ~(1u << x64::RSP);
+		callee_saved_gp_registers &= ~(1u << x64::gpr::RBP);
+		callee_saved_gp_registers &= ~(1u << x64::gpr::RSP);
 		m_callee_saved[0] = callee_saved_gp_registers;
 
 		m_callee_saved[1] = 0;
@@ -626,8 +626,8 @@ namespace sigma::ir {
 
 		if(register_class == x64::register_class::GPR) {
 			// reserved registers
-			m_free_positions[x64::RBP] = 0;
-			m_free_positions[x64::RSP] = 0;
+			m_free_positions[static_cast<u8>(x64::gpr::RBP)] = 0;
+			m_free_positions[static_cast<u8>(x64::gpr::RSP)] = 0;
 		}
 
 		// try hint

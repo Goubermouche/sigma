@@ -517,7 +517,7 @@ namespace sigma::ir {
  			.flags = UNWIND_FLAG_EHANDLER,
  			.prolog_length = function->prologue_length,
  			.code_count = 0,
- 			.frame_register = x64::RBP,
+ 			.frame_register = static_cast<u16>(x64::gpr::RBP),
  			.frame_offset = 0,
  		};
 	 
@@ -533,7 +533,7 @@ namespace sigma::ir {
  				// mov rbp, rsp
 				{.o = {.code_offset = 4, .unwind_op = unwind_op::SET_FPREG, .op_info = 0 }},
  				// push rbp
-				{.o = {.code_offset = 1, .unwind_op = unwind_op::PUSH_NONVOL, .op_info = x64::RBP }},
+				{.o = {.code_offset = 1, .unwind_op = unwind_op::PUSH_NONVOL, .op_info = static_cast<u8>(x64::gpr::RBP)}},
  			};
 	 
  			buffer.append_type(codes);

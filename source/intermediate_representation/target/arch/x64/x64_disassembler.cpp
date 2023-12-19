@@ -273,17 +273,17 @@ namespace sigma::ir {
 
 		// info from the table
 		const u16 enc = first & 0xF000;
-		const bool uses_imm = enc == x64::OP_MI || enc == x64::OP_MI8;
+		const bool uses_imm = enc == x64::op_encoding::OP_MI || enc == x64::op_encoding::OP_MI8;
 
 		// in the "default" "type" "system", REX.W is 64bit, certain ops
 		// will mark they're 8bit and most will just be 32bit (with 16bit on ADDR16)
 		inst.data_type_1 = x64::DWORD;
 
-		if (flags & x64::OP_64BIT) {
+		if (flags & x64::op_type::OP_64BIT) {
 			// basically forced 64bit
 			inst.data_type_1 = x64::QWORD;
 		}
-		else if (flags & x64::OP_SSE) {
+		else if (flags & x64::op_type::OP_SSE) {
 			// ss REP    OPCODE
 			// sd REPNE  OPCODE
 			// ps __     OPCODE
@@ -307,7 +307,7 @@ namespace sigma::ir {
 			if (rex & 0x8) {
 				inst.data_type_1 = x64::QWORD;
 			}
-			else if (flags & x64::OP_8BIT) {
+			else if (flags & x64::op_type::OP_8BIT) {
 				inst.data_type_1 = x64::BYTE;
 			}
 			else if (address_16) {
@@ -315,9 +315,9 @@ namespace sigma::ir {
 			}
 		}
 
-		ASSERT(enc != x64::OP_BAD, "bad operation detected");
+		ASSERT(enc != x64::op_encoding::OP_BAD, "bad operation detected");
 
-		if (enc == x64::OP_IMM) {
+		if (enc == x64::op_encoding::OP_IMM) {
 			if (current + 4 > bytecode.get_size()) {
 				return false;
 			}
@@ -330,7 +330,7 @@ namespace sigma::ir {
 			return true;
 		}
 
-		if (enc == x64::OP_REL32) {
+		if (enc == x64::op_encoding::OP_REL32) {
 			inst.flags |= x64::USE_RIP_MEM;
 			inst.flags |= x64::USE_MEM_OP;
 			inst.base = 255;
@@ -347,12 +347,12 @@ namespace sigma::ir {
 			return true;
 		}
 
-		if (enc == x64::OP_0ARY) {
+		if (enc == x64::op_encoding::OP_0ARY) {
 			inst.length = current;
 			return true;
 		}
 
-		if (enc == x64::OP_PLUSR) {
+		if (enc == x64::op_encoding::OP_PLUSR) {
 			// bottom 8 bits of the opcode are the base reg
 			inst.registers[0] = (rex & 1 ? 1 : 0) | (inst.opcode & 7);
 			inst.opcode &= ~7;
@@ -372,7 +372,7 @@ namespace sigma::ir {
 		}
 		
 		// parse mod rm
-		const bool rm_slot = enc == x64::OP_RM;
+		const bool rm_slot = enc == x64::op_encoding::OP_RM;
 		const bool rx_slot = !rm_slot;
 
 		if (current + 1 > bytecode.get_size()) {
@@ -384,19 +384,19 @@ namespace sigma::ir {
 		const u8 rx = (mod_rm >> 3) & 7;
 		const u8 rm = mod_rm & 7;
 
-		if (flags & x64::OP_FAKERX) {
+		if (flags & x64::op_type::OP_FAKERX) {
 			inst.opcode <<= 4;
 			inst.opcode |= rx;
 
 			if (inst.opcode == 0xF60) {
-				flags = x64::OP_MI8;
+				flags = static_cast<u16>(x64::op_encoding::OP_MI8);
 			}
 			else if (inst.opcode == 0xF70) {
-				flags = x64::OP_MI;
+				flags = static_cast<u16>(x64::op_encoding::OP_MI);
 			}
 		}
 
-		if (flags & x64::OP_2DT) {
+		if (flags & x64::op_type::OP_2DT) {
 			if (inst.opcode == 0x0FB6 || inst.opcode == 0x0FB7) {
 				inst.flags |= x64::TWO_DATA_TYPES;
 				inst.data_type_2 = inst.opcode == 0x0FB6 ? x64::BYTE : x64::WORD;
@@ -407,11 +407,11 @@ namespace sigma::ir {
 			}
 		}
 
-		if (enc != x64::OP_M && !uses_imm) {
-			if (enc == x64::OP_MC) {
+		if (enc != x64::op_encoding::OP_M && !uses_imm) {
+			if (enc == x64::op_encoding::OP_MC) {
 				inst.flags |= x64::TWO_DATA_TYPES;
 				inst.data_type_2 = x64::BYTE;
-				inst.registers[rx_slot] = x64::RCX;
+				inst.registers[rx_slot] = static_cast<u8>(x64::gpr::RCX);
 			}
 			else {
 				i8 real_rx = static_cast<i8>((rex & 4 ? 8 : 0) | rx);
@@ -446,8 +446,8 @@ namespace sigma::ir {
 		// imul's ternary is a special case
 		if (uses_imm || op == 0x68 || op == 0x69) {
 			if (
-				(enc == x64::OP_MI && inst.data_type_1 == x64::BYTE) || 
-				enc == x64::OP_MI8 || op == 0x68
+				(enc == x64::op_encoding::OP_MI && inst.data_type_1 == x64::BYTE) ||
+				enc == x64::op_encoding::OP_MI8 || op == 0x68
 			) {
 				if (current + 1 > bytecode.get_size()) {
 					return false;
@@ -456,7 +456,7 @@ namespace sigma::ir {
 				inst.flags |= x64::IMMEDIATE;
 				inst.imm = bytecode[current++];
 			}
-			else if (enc == x64::OP_MI || op == 0x69) {
+			else if (enc == x64::op_encoding::OP_MI || op == 0x69) {
 				if (current + 4 > bytecode.get_size()) {
 					return false;
 				}
@@ -494,7 +494,7 @@ namespace sigma::ir {
 		inst.flags |= x64::USE_MEM_OP;
 
 		// indirect
-		if (rm == x64::RSP) {
+		if (rm == x64::gpr::RSP) {
 			if (current + 1 > length) {
 				return 0;
 			}
@@ -505,8 +505,8 @@ namespace sigma::ir {
 			const u8 index = (sib >> 3) & 7;
 			const u8 base = (sib & 7);
 
-			const u8 base_gpr = mod != x64::INDIRECT || base != x64::RSP ? ((rex & 1 ? 8 : 0) | base) : -1;
-			const u8 index_gpr = mod != x64::INDIRECT || index != x64::RSP ? ((rex & 2 ? 8 : 0) | index) : -1;
+			const u8 base_gpr = mod != x64::INDIRECT || base != x64::gpr::RSP ? ((rex & 1 ? 8 : 0) | base) : -1;
+			const u8 index_gpr = mod != x64::INDIRECT || index != x64::gpr::RSP ? ((rex & 2 ? 8 : 0) | index) : -1;
 
 			// odd rule but when mod=00,base=101,index=100
 			// and using SIB, enable displacement_32. this would technically
@@ -514,7 +514,7 @@ namespace sigma::ir {
 			//   lea rax, [r13 + rcx*2] or lea rax, [rbp + rcx*2]
 			// only
 			//   lea rax, [r13 + rcx*2 + 0] or lea rax, [rbp + rcx*2 + 0]
-			if (mod == 0 && base == x64::RBP) {
+			if (mod == 0 && base == x64::gpr::RBP) {
 				mod = x64::INDIRECT_DISPLACEMENT_32;
 			}
 
@@ -523,7 +523,7 @@ namespace sigma::ir {
 			inst.memory.sc = s;
 		}
 		else {
-			if (mod == x64::INDIRECT && rm == x64::RBP) {
+			if (mod == x64::INDIRECT && rm == x64::gpr::RBP) {
 				// RIP-relative addressing
 				if (current + 4 > length) {
 					return 0;
@@ -578,12 +578,12 @@ namespace sigma::ir {
 	std::array<u16, 256> x64_disassembler::get_first_table() {
 		std::array<u16, 256> first_table = {};
 
-		#define GENERATE_BINARY_OP(op)                         \
-		do {                                                   \
-			first_table[(op) + 0] = x64::OP_MR | x64::OP_8BIT; \
-			first_table[(op) + 1] = x64::OP_MR;                \
-			first_table[(op) + 2] = x64::OP_RM | x64::OP_8BIT; \
-			first_table[(op) + 3] = x64::OP_RM;                \
+		#define GENERATE_BINARY_OP(op)                                             \
+		do {                                                                       \
+			first_table[(op) + 0] = x64::op_encoding::OP_MR | x64::op_type::OP_8BIT; \
+			first_table[(op) + 1] = static_cast<u16>(x64::op_encoding::OP_MR);       \
+			first_table[(op) + 2] = x64::op_encoding::OP_RM | x64::op_type::OP_8BIT; \
+			first_table[(op) + 3] = static_cast<u16>(x64::op_encoding::OP_RM);       \
 		} while (false)
 		
 		GENERATE_BINARY_OP(0x00); // add
@@ -596,53 +596,53 @@ namespace sigma::ir {
 
 		#undef GENERATE_BINARY_OP
 
-		first_table[0x80] = x64::OP_MI8 | x64::OP_8BIT | x64::OP_FAKERX;
-		first_table[0x81] = x64::OP_MI | x64::OP_FAKERX;
-		first_table[0x83] = x64::OP_MI8 | x64::OP_FAKERX;
-		first_table[0x84] = x64::OP_MR | x64::OP_8BIT;
-		first_table[0x85] = x64::OP_MR;
-		first_table[0x8D] = x64::OP_RM;
-		first_table[0x63] = x64::OP_RM | x64::OP_2DT;
-		first_table[0x68] = x64::OP_IMM;
-		first_table[0x69] = x64::OP_RM;
-		first_table[0x90] = x64::OP_0ARY;
-		first_table[0x99] = x64::OP_0ARY;
-		first_table[0xC3] = x64::OP_0ARY;
-		first_table[0xC6] = x64::OP_MI | x64::OP_FAKERX | x64::OP_8BIT;
-		first_table[0xC7] = x64::OP_MI | x64::OP_FAKERX;
-		first_table[0xC0] = x64::OP_MI8 | x64::OP_FAKERX | x64::OP_8BIT;
-		first_table[0xC1] = x64::OP_MI8 | x64::OP_FAKERX;
-		first_table[0xD2] = x64::OP_MC | x64::OP_FAKERX | x64::OP_8BIT;
-		first_table[0xD3] = x64::OP_MC | x64::OP_FAKERX;
-		first_table[0xE8] = x64::OP_REL32;
-		first_table[0xE9] = x64::OP_REL32;
-		first_table[0xEB] = x64::OP_REL8;
-		first_table[0xF6] = x64::OP_M | x64::OP_FAKERX | x64::OP_8BIT;
-		first_table[0xF7] = x64::OP_M | x64::OP_FAKERX;
-		first_table[0xFF] = x64::OP_M | x64::OP_FAKERX;
+		first_table[0x80] = x64::op_encoding::OP_MI8 | x64::op_type::OP_8BIT | x64::op_type::OP_FAKERX;
+		first_table[0x81] = x64::op_encoding::OP_MI | x64::op_type::OP_FAKERX;
+		first_table[0x83] = x64::op_encoding::OP_MI8 | x64::op_type::OP_FAKERX;
+		first_table[0x84] = x64::op_encoding::OP_MR | x64::op_type::OP_8BIT;
+		first_table[0x85] = static_cast<u16>(x64::op_encoding::OP_MR);
+		first_table[0x8D] = static_cast<u16>(x64::op_encoding::OP_RM);
+		first_table[0x63] = x64::op_encoding::OP_RM | x64::op_type::OP_2DT;
+		first_table[0x68] = static_cast<u16>(x64::op_encoding::OP_IMM);
+		first_table[0x69] = static_cast<u16>(x64::op_encoding::OP_RM);
+		first_table[0x90] = static_cast<u16>(x64::op_encoding::OP_0ARY);
+		first_table[0x99] = static_cast<u16>(x64::op_encoding::OP_0ARY);
+		first_table[0xC3] = static_cast<u16>(x64::op_encoding::OP_0ARY);
+		first_table[0xC6] = x64::op_encoding::OP_MI | x64::op_type::OP_FAKERX | x64::op_type::OP_8BIT;
+		first_table[0xC7] = x64::op_encoding::OP_MI | x64::op_type::OP_FAKERX;
+		first_table[0xC0] = x64::op_encoding::OP_MI8 | x64::op_type::OP_FAKERX | x64::op_type::OP_8BIT;
+		first_table[0xC1] = x64::op_encoding::OP_MI8 | x64::op_type::OP_FAKERX;
+		first_table[0xD2] = x64::op_encoding::OP_MC | x64::op_type::OP_FAKERX | x64::op_type::OP_8BIT;
+		first_table[0xD3] = x64::op_encoding::OP_MC | x64::op_type::OP_FAKERX;
+		first_table[0xE8] = static_cast<u16>(x64::op_encoding::OP_REL32);
+		first_table[0xE9] = static_cast<u16>(x64::op_encoding::OP_REL32);
+		first_table[0xEB] = static_cast<u16>(x64::op_encoding::OP_REL8);
+		first_table[0xF6] = x64::op_encoding::OP_M | x64::op_type::OP_FAKERX | x64::op_type::OP_8BIT;
+		first_table[0xF7] = x64::op_encoding::OP_M | x64::op_type::OP_FAKERX;
+		first_table[0xFF] = x64::op_encoding::OP_M | x64::op_type::OP_FAKERX;
 
 		for (int i = 0x50; i <= 0x5F; ++i) {
-			first_table[i] = x64::OP_PLUSR | x64::OP_64BIT;
+			first_table[i] = x64::op_encoding::OP_PLUSR | x64::op_type::OP_64BIT;
 		}
 
 		for (int i = 0x70; i <= 0x7F; ++i) {
-			first_table[i] = x64::OP_REL8;
+			first_table[i] = static_cast<u16>(x64::op_encoding::OP_REL8);
 		}
 
 		for (int i = 0xB8; i <= 0xBF; ++i) {
-			first_table[i] = x64::OP_PLUSR | x64::OP_64BIT;
+			first_table[i] = x64::op_encoding::OP_PLUSR | x64::op_type::OP_64BIT;
 		}
 
 		for (int i = 0xA4; i <= 0xA5; ++i) {
-			first_table[i] = x64::OP_0ARY;
+			first_table[i] = static_cast<u16>(x64::op_encoding::OP_0ARY);
 		}
 
 		for (int i = 0xAA; i <= 0xAB; ++i) {
-			first_table[i] = x64::OP_0ARY;
+			first_table[i] = static_cast<u16>(x64::op_encoding::OP_0ARY);
 		}
 
 		for (int i = 0xAE; i <= 0xAF; ++i) {
-			first_table[i] = x64::OP_0ARY;
+			first_table[i] = static_cast<u16>(x64::op_encoding::OP_0ARY);
 		}
 
 		return first_table;
@@ -651,32 +651,32 @@ namespace sigma::ir {
 	std::array<u16, 256> x64_disassembler::get_ext_table() {
 		std::array<u16, 256> ext_table = {};
 
-		ext_table[0x0B] = x64::OP_0ARY;
-		ext_table[0x18] = x64::OP_FAKERX;
-		ext_table[0x10] = x64::OP_RM | x64::OP_SSE;
-		ext_table[0x11] = x64::OP_MR | x64::OP_SSE;
-		ext_table[0x2E] = x64::OP_RM | x64::OP_SSE;
-		ext_table[0x1F] = x64::OP_RM;
-		ext_table[0xAF] = x64::OP_RM;
+		ext_table[0x0B] = static_cast<u16>(x64::op_encoding::OP_0ARY);
+		ext_table[0x18] = static_cast<u16>(x64::op_type::OP_FAKERX);
+		ext_table[0x10] = x64::op_encoding::OP_RM | x64::op_type::OP_SSE;
+		ext_table[0x11] = x64::op_encoding::OP_MR | x64::op_type::OP_SSE;
+		ext_table[0x2E] = x64::op_encoding::OP_RM | x64::op_type::OP_SSE;
+		ext_table[0x1F] = static_cast<u16>(x64::op_encoding::OP_RM);
+		ext_table[0xAF] = static_cast<u16>(x64::op_encoding::OP_RM);
 
 		for (int i = 0x51; i <= 0x5F; ++i) {
-			ext_table[i] = x64::OP_RM | x64::OP_SSE;
+			ext_table[i] = x64::op_encoding::OP_RM | x64::op_type::OP_SSE;
 		}
 
 		for (int i = 0x40; i <= 0x4F; ++i) {
-			ext_table[i] = x64::OP_RM;
+			ext_table[i] = static_cast<u16>(x64::op_encoding::OP_RM);
 		}
 
 		for (int i = 0xB6; i <= 0xB7; ++i) {
-			ext_table[i] = x64::OP_RM | x64::OP_2DT;
+			ext_table[i] = x64::op_encoding::OP_RM | x64::op_type::OP_2DT;
 		}
 
 		for (int i = 0x80; i <= 0x8F; ++i) {
-			ext_table[i] = x64::OP_REL32;
+			ext_table[i] = static_cast<u16>(x64::op_encoding::OP_REL32);
 		}
 
 		for (int i = 0x90; i <= 0x9F; ++i) {
-			ext_table[i] = x64::OP_M;
+			ext_table[i] = static_cast<u16>(x64::op_encoding::OP_M);
 		}
 
 		return ext_table;

@@ -85,7 +85,7 @@ namespace sigma::ir {
 			};
 		}
 
-		// utility::console::out << assembly.get_underlying() << '\n';
+		utility::console::println("{}", assembly.get_underlying());
 	}
 
 	auto module::generate_object_file() -> utility::object_file {

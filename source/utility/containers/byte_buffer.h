@@ -202,7 +202,7 @@ namespace utility {
 		 * \param head Pointer to the head of the relocation chain
 		 * \param target Target address, to which the new relocations should point to
 		 */
-		void resolve_relocation_dword(u32* head, u64 target) const {
+		void resolve_relocation_dword(u32* head, u32 target) const {
 			u32 current = *head;
 
 			// walk previous relocations
@@ -221,7 +221,7 @@ namespace utility {
 		 * \param head Pointer to the head of the relocation chain
 		 * \param pos Position in the buffer where the relocation should be emitted
 		 */
-		void emit_relocation_dword(u32* head, u64 pos) const {
+		void emit_relocation_dword(u32* head, u32 pos) const {
 			const u32 current = *head;
 
 			if (current & 0x80000000) {

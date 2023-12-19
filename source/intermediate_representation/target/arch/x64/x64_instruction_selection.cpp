@@ -310,7 +310,9 @@ namespace sigma::ir {
 			case node::REGION: break;
 			case node::ENTRY: {
 				bool is_systemv = context.t.get_abi() == abi::SYSTEMV;
-				constexpr x64::gpr gpr_params[] = { x64::RCX, x64::RDX, x64::R8, x64::R9 };
+				constexpr x64::gpr gpr_params[] = {
+					x64::gpr::RCX, x64::gpr::RDX, x64::gpr::R8, x64::gpr::R9
+				};
 
 				u8 gpr_param_count = 4;
 				u8 xmm_param_count = is_systemv ? 8 : 4;
@@ -354,7 +356,7 @@ namespace sigma::ir {
 								context, projection, projection->dt
 							);
 
-							i32 reg_num = is_float ? id : gpr_params[id];
+							i32 reg_num = is_float ? id : static_cast<i32>(gpr_params[id]);
 							i32 virtual_reg = (is_float ? x64::register_class::FIRST_XMM : 0) + reg_num;
 
 							context.hint_reg(value->virtual_register.id, static_cast<u8>(virtual_reg));
@@ -432,7 +434,10 @@ namespace sigma::ir {
 			case node::SYSTEM_CALL:
 			case node::CALL: {
 				bool is_systemv = context.t.get_abi() == abi::SYSTEMV;
-				static reg default_return_registers[2] = { x64::RAX, x64::RDX };
+				static reg default_return_registers[2] = {
+					static_cast<reg::id_type>(x64::gpr::RAX), static_cast<reg::id_type>(x64::gpr::RDX)
+				};
+
 				const parameter_descriptor descriptor = context.t.get_parameter_descriptor();
 
 				if (node_type == node::SYSTEM_CALL) {
@@ -462,7 +467,7 @@ namespace sigma::ir {
 						return_count++;
 
 						if (return_node->dt.ty == data_type::FLOAT) {
-							caller_saved_xmm_registers &= ~(1ull << (x64::XMM0 + i));
+							caller_saved_xmm_registers &= ~(1ull << (x64::xmm::XMM0 + static_cast<u8>(i)));
 						}
 						else {
 							caller_saved_xmm_registers &= ~(1ull << default_return_registers[i].id);
@@ -522,7 +527,7 @@ namespace sigma::ir {
 							context,
 							use_xmm ? instruction::FP_MOV : instruction::MOV,
 							parameter_node->dt,
-							x64::RSP,
+							static_cast<u8>(x64::gpr::RSP),
 							reg::invalid_id,
 							scale::x1, 
 							reg * 8,
@@ -581,7 +586,7 @@ namespace sigma::ir {
 				handle<node> target = n->inputs[2];
 				bool static_call = n->ty != node::SYSTEM_CALL && target->ty == node::SYMBOL;
 
-				reg target_val = x64::RSP;
+				reg target_val = static_cast<u8>(x64::gpr::RSP);
 				if (!static_call) {
 					target_val = input_reg(context, target);
 				}
@@ -593,11 +598,11 @@ namespace sigma::ir {
 					// the number of float parameters is written into AL
 					if (callee_signature.has_var_args && is_systemv) {
 						context.append_instruction(create_immediate(
-							context, instruction::MOV, I8_TYPE, x64::RAX, used_xmm_count
+							context, instruction::MOV, I8_TYPE, static_cast<u8>(x64::gpr::RAX), used_xmm_count
 						));
 
-						ins[in_count++] = x64::register_class::FIRST_GPR + x64::RAX;
-						caller_saved_gp_registers &= ~(1ull << x64::RAX);
+						ins[in_count++] = x64::register_class::FIRST_GPR + x64::gpr::RAX;
+						caller_saved_gp_registers &= ~(1ull << x64::gpr::RAX);
 					}
 				}
 
@@ -832,7 +837,10 @@ namespace sigma::ir {
 
 			case node::EXIT: {
 				ASSERT(n->inputs.get_size() <= 5, "at most 2 return values :(");
-				static reg default_return_registers[2] = { x64::RAX, x64::RDX };
+				static reg default_return_registers[2] = {
+					static_cast<u8>(x64::gpr::RAX), static_cast<u8>(x64::gpr::RDX)
+				};
+
 				const u64 return_count = n->inputs.get_size() - 3;
 
 				for (u64 i = 0; i < return_count; ++i) {
@@ -984,12 +992,12 @@ namespace sigma::ir {
 							context, instruction::CMP, dt, key, static_cast<i32>(br.keys[0]))
 						);
 
-						cc = x64::NE;
+						cc = x64::conditional::NE;
 					}
 
 					// if flipping avoids a jmp, do that
 					if(context.fallthrough == t) {
-						context.append_instruction(create_jcc(context, f, x64::conditional(cc ^ 1)));
+						context.append_instruction(create_jcc(context, f, static_cast<x64::conditional>(cc ^ 1)));
 					}
 					else {
 						context.append_instruction(create_jcc(context, t, cc));
@@ -1062,7 +1070,7 @@ namespace sigma::ir {
 							i,
 							n->dt,
 							destination,
-							x64::RBP, 
+							static_cast<u8>(x64::gpr::RBP),
 							reg::invalid_id, 
 							scale::x1, 
 							16 + index * 8
@@ -1105,7 +1113,7 @@ namespace sigma::ir {
 			n->use_node(context);
 
 			offset += context.get_stack_slot(n);
-			base = x64::RBP;
+			base = static_cast<u8>(x64::gpr::RBP);
 		}
 		else {
 			base = input_reg(context, n);
@@ -1228,7 +1236,7 @@ namespace sigma::ir {
 			NOT_IMPLEMENTED();
 			// data_type cmp_dt = n->get<compare>()
 
-			return x64::NE; // temp
+			return x64::conditional::NE; // temp
 		}
 		else {
 			reg src = input_reg(context, n);
@@ -1243,7 +1251,7 @@ namespace sigma::ir {
 				);
 			}
 
-			return static_cast<x64::conditional>(x64::NE ^ invert);
+			return static_cast<x64::conditional>(x64::conditional::NE ^ invert);
 		}
 	}
 
@@ -1764,7 +1772,7 @@ namespace sigma::ir {
 		inst->flags = instruction::global;
 		inst->memory_slot = 1;
 		inst->operands[0] = dst.id;
-		inst->operands[1] = x64::RSP;
+		inst->operands[1] = static_cast<u8>(x64::gpr::RSP);
 		inst->get<handle<symbol>>() = s;
 		inst->displacement = 0;
 

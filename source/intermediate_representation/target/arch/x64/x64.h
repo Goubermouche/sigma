@@ -24,15 +24,19 @@ namespace sigma::ir {
 			};
 		};
 
-		enum gpr : u8 {
+		enum class gpr : u8 {
 			RAX, RCX, RDX, RBX, RSP, RBP, RSI, RDI,
 			R8,  R9,  R10, R11, R12, R13, R14, R15,
 		};
 
-		enum xmm : u8 {
+		INTEGRAL_ENUM(gpr);
+
+		enum class xmm : u8 {
 			XMM0, XMM1, XMM2,  XMM3,  XMM4,  XMM5,  XMM6,  XMM7,
 			XMM8, XMM9, XMM10, XMM11, XMM12, XMM13, XMM14, XMM15
 		};
+
+		INTEGRAL_ENUM(xmm);
 
 		inline auto get_register_name(reg reg, i32 dt) -> std::string {
 			static const char* s_gpr_names[4][16] = {
@@ -79,10 +83,12 @@ namespace sigma::ir {
 			DIRECT = 3,                   // rax
 		};
 
-		enum conditional {
+		enum class conditional {
 			O, NO, B, NB, E, NE, BE, A,
 			S, NS, P, NP, L, GE, LE, G
 		};
+
+		INTEGRAL_ENUM(conditional);
 	}
 	
 	static auto rex(bool is_64_bit, u8 rx, u8 base, u8 index) -> u8;

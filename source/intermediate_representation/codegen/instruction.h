@@ -139,4 +139,5 @@ namespace sigma::ir {
 
 	// declare as a flag enum
 	FLAG_ENUM(instruction::instruction_flags);
+	INTEGRAL_ENUM(instruction::instruction_flags);
 }

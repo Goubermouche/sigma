@@ -24,7 +24,7 @@ namespace sigma::ir {
 		// declare as a flag enum
 		FLAG_ENUM(x64_flags);
 
-		enum op_type {
+		enum class op_type : u16 {
 			OP_8BIT   = 1,
 			OP_64BIT  = 2,
 			OP_FAKERX = 4,
@@ -32,7 +32,9 @@ namespace sigma::ir {
 			OP_SSE    = 16,
 		};
 
-		enum op_encoding {
+		INTEGRAL_ENUM(op_type);
+
+		enum class op_encoding : u16 {
 			OP_BAD   = 0x0000,
 			OP_MR    = 0x1000,
 			OP_RM    = 0x2000,
@@ -46,6 +48,8 @@ namespace sigma::ir {
 			OP_REL32 = 0xA000,
 			OP_IMM   = 0xB000,
 		};
+
+		INTEGRAL_ENUM(op_encoding);
 
 		struct x64_instruction {
 			i32 opcode;

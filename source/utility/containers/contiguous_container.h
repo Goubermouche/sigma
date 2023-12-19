@@ -27,7 +27,7 @@ namespace utility {
 			std::memcpy(m_data, other.m_data, m_capacity * sizeof(type));
 		}
 
-		[[nodiscard]] contiguous_container& operator=(const contiguous_container& other) {
+		contiguous_container& operator=(const contiguous_container& other) {
 			if(&other == this) {
 				return *this;
 			}

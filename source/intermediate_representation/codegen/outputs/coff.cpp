@@ -438,7 +438,7 @@ namespace sigma::ir {
 	 	unwind->section_num = (xdata_section + 1) * 2;
 	 
 	 	// generate .pdata
-	 	unwind->pdata_chunk = utility::byte_buffer(function_count * 3 * sizeof(u32));
+		unwind->pdata_chunk = utility::byte_buffer(function_count * 3 * sizeof(u32));
 	 	const auto pdata = reinterpret_cast<uint32_t*>(unwind->pdata_chunk.get_data());
 	 
 	 	unwind->pdata_relocations = utility::byte_buffer((overflow + function_count * 3) * sizeof(coff_image_relocation));

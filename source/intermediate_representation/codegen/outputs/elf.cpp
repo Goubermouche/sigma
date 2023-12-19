@@ -103,7 +103,7 @@ namespace sigma::ir {
 		put_section_symbols(sections, string_table, local_symbol_table, ELF64_STB_LOCAL);
 		put_section_symbols(sections, string_table, global_symbol_table, ELF64_STB_GLOBAL);
 
-		for(const auto ex : exports) {
+		for(const handle<external>& ex : exports) {
 			const u32 name = static_cast<u32>(string_table.get_size());
 			string_table.append_string_nt(ex->sym.name);
 			ex->sym.symbol_id = global_symbol_table.get_size() / sizeof(elf64_symbol);
@@ -289,11 +289,11 @@ namespace sigma::ir {
 		utility::byte_buffer& stab,
 		i32 t
 	) {
-		for (const auto section : sections) {
+		for (const module_section& section : sections) {
 			const u16 section_index = section.section_index;
 
 			// insert function symbols
-			for(const auto function : section.functions) {
+			for(const handle<compiled_function>& function : section.functions) {
 				const std::string name_str = function->parent->sym.name;
 
 				u32 name = 0;
@@ -315,7 +315,7 @@ namespace sigma::ir {
 			const int acceptable = t == ELF64_STB_GLOBAL ? linkage::PUBLIC : linkage::PRIVATE;
 
 			// insert global symbols
-			for(const auto global : section.globals) {
+			for(const handle<global>& global : section.globals) {
 				if(global->link != acceptable) {
 					continue;
 				}

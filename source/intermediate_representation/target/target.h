@@ -8,10 +8,7 @@ namespace sigma::ir {
 
 	enum class system {
 		WINDOWS,
-		LINUX,
-		MAC_OS,
-		ANDROID,
-		WEB
+		LINUX
 	};
 
 	enum class abi {

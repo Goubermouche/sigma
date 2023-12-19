@@ -91,8 +91,8 @@ namespace sigma::ir {
 		INTEGRAL_ENUM(conditional);
 	}
 	
-	static auto rex(bool is_64_bit, u8 rx, u8 base, u8 index) -> u8;
-	static auto mod_rx_rm(x64::mod mod, u8 rx, u8 rm) -> u8;
+	auto rex(bool is_64_bit, u8 rx, u8 base, u8 index) -> u8;
+	auto mod_rx_rm(x64::mod mod, u8 rx, u8 rm) -> u8;
 
 	class x64_architecture : public architecture {
 	public:

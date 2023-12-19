@@ -44,6 +44,7 @@ namespace sigma {
 			case I64:     return sizeof(i64);
 			case BOOL:    return 4;
 			case CHAR:    return sizeof(char);
+			case VAR_ARG_PROMOTE: return 0;
 		}
 
 		NOT_IMPLEMENTED();

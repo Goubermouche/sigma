@@ -250,7 +250,7 @@ namespace sigma::ir {
 		n->inputs[2] = callee_symbol_address;
 		n->dt = TUPLE_TYPE;
 
-		for (int i = 0; i < arguments.size(); ++i) {
+		for (u64 i = 0; i < arguments.size(); ++i) {
 			n->inputs[3 + i] = arguments[i];
 		}
 

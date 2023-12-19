@@ -203,7 +203,8 @@ namespace sigma::ir {
 	bool x64_disassembler::disassemble_instruction(
 		const utility::byte_buffer& bytecode, x64::x64_instruction& inst
 	) {
-		inst = { 0 };
+		inst = x64::x64_instruction();
+
 		for(u8 i = 0; i < 4; ++i) {
 			inst.registers[i] = reg::invalid_id;
 		}
@@ -240,7 +241,7 @@ namespace sigma::ir {
 				case 0x4C:
 				case 0x4D:
 				case 0x4E:
-				case 0x4F: rex = op; break;
+				case 0x4F: /*rex = op;*/ break;
 				case 0xF0: inst.flags |= x64::LOCK; break;
 				case 0x66: address_16 = true; break;
 				case 0x67: address_32 = true; break;

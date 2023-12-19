@@ -39,7 +39,7 @@ namespace sigma {
 	}
 
 	void type_checker::type_check() {
-		for (const handle<node> top_level : m_context.ast.get_nodes()) {
+		for (const handle<node>& top_level : m_context.ast.get_nodes()) {
 			type_check_node(top_level);
 		}
 	}
@@ -82,7 +82,7 @@ namespace sigma {
 		m_functions[property.identifier_key] = &property;
 
 		// handle inner statements
-		for (const handle<node> statement : function_node->children) {
+		for (const handle<node>& statement : function_node->children) {
 			type_check_node(statement, property.return_type);
 		}
 	}
@@ -179,7 +179,7 @@ namespace sigma {
 	}
 
 	void type_checker::type_check_branch(handle<node> branch_node) {
-		for (const handle<node> statement : branch_node->children) {
+		for (const handle<node>& statement : branch_node->children) {
 			type_check_node(statement, {});
 		}
 	}
@@ -200,6 +200,7 @@ namespace sigma {
 	}
 
 	void type_checker::type_check_bool_literal(handle<node> literal_node, data_type expected) {
+		SUPPRESS_C4100(literal_node);
 		ASSERT(expected.type == data_type::BOOL, "unexpected type encountered");
 	}
 

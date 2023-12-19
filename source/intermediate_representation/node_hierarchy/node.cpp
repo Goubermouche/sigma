@@ -168,7 +168,7 @@ namespace sigma::ir {
 	}
 
 	auto node::is_pinned() const -> bool {
-		return ty >= ENTRY && ty <= SAFE_POINT_POLL || ty == PROJECTION;
+		return (ty >= ENTRY && ty <= SAFE_POINT_POLL) || ty == PROJECTION;
 	}
 
 	auto node::is_on_last_use(codegen_context& context) -> bool {
@@ -232,7 +232,7 @@ namespace sigma::ir {
 	auto node::is_block_begin() const -> bool {
 		return
 			ty == REGION ||
-			ty == PROJECTION && (inputs[0]->ty == ENTRY || inputs[0]->ty == BRANCH);
+			(ty == PROJECTION && (inputs[0]->ty == ENTRY || inputs[0]->ty == BRANCH));
 	}
 
 	auto node::is_mem_out_op() const  -> bool {

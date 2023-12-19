@@ -78,7 +78,7 @@ namespace sigma {
 		m_functions.register_function(prop.identifier_key, signature);
 
 		// handle inner statements
-		for (const handle<node> statement : function_node->children) {
+		for (const handle<node>& statement : function_node->children) {
 			translate_node(statement);
 		}
 
@@ -159,7 +159,7 @@ namespace sigma {
 	}
 
 	void ir_translator::translate_branch(handle<node> branch_node, handle<ir::node> exit_control) {
-		for (const handle<node> statement : branch_node->children) {
+		for (const handle<node>& statement : branch_node->children) {
 			translate_node(statement);
 		}
 
@@ -197,7 +197,8 @@ namespace sigma {
 			case node_type::OPERATOR_SUBTRACT: return m_builder.create_sub(left, right);
 			case node_type::OPERATOR_MULTIPLY: return m_builder.create_mul(left, right);
 			//case node_type::OPERATOR_DIVIDE:   
-			//case node_type::OPERATOR_MODULO:   
+			//case node_type::OPERATOR_MODULO:
+			default: PANIC("unexpected node type '{}' received", operator_node->type.to_string());
 		}
 
 		NOT_IMPLEMENTED();
@@ -210,7 +211,7 @@ namespace sigma {
 		std::vector<handle<ir::node>> parameters;
 		parameters.reserve(call_node->children.get_size());
 
-		for (const handle<node> parameter : call_node->children) {
+		for (const handle<node>& parameter : call_node->children) {
 			parameters.push_back(translate_node(parameter));
 		}
 
@@ -270,7 +271,7 @@ namespace sigma {
 	}
 
 	auto ir_translator::translate() -> ir::module {
-		for (const handle<node> top_level : m_context.ast.get_nodes()) {
+		for (const handle<node>& top_level : m_context.ast.get_nodes()) {
 			translate_node(top_level);
 		}
 

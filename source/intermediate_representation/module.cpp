@@ -31,7 +31,7 @@ namespace sigma::ir {
 		utility::string assembly;
 
 		// go through all declared functions and run codegen
-		for (const handle<function> function : m_functions) {
+		for (const handle<function>& function : m_functions) {
 			// utility::console::out << "compiling function: " << function->sym.name << '\n';
 
 			// every function has its own unique work list (thread safe), this list

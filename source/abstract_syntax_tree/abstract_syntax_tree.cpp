@@ -11,7 +11,7 @@ namespace sigma {
 	void abstract_syntax_tree::traverse(std::function<void(handle<node>, u16)>&& function) const {
 		utility::stack<std::pair<handle<node>, u16>> node_stack;
 
-		for(const handle<node> root_node : m_nodes) {
+		for(const handle<node>& root_node : m_nodes) {
 			node_stack.push_back({ root_node, 0 });
 
 			while (!node_stack.empty()) {

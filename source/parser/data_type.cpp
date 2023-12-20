@@ -3,17 +3,17 @@
 
 namespace sigma {
 	data_type::data_type(token token, u8 pointer_level)
-		: type(token_to_type(token)), pointer_level(pointer_level) {}
+		: base_type(token_to_type(token)), pointer_level(pointer_level) {}
 
-	data_type::data_type(base type, u8 pointer_level)
-		: type(type), pointer_level(pointer_level) {}
+	data_type::data_type(data_type_base type, u8 pointer_level)
+		: base_type(type), pointer_level(pointer_level) {}
 
 	auto data_type::operator==(data_type other) const -> bool {
-		return type == other.type && pointer_level == other.pointer_level;
+		return base_type == other.base_type && pointer_level == other.pointer_level;
 	}
 
 	auto data_type::to_string() const->std::string {
-		const static std::unordered_map<base, std::string> type_to_string_map = {
+		const static std::unordered_map<data_type_base, std::string> type_to_string_map = {
 			{ UNKNOWN ,        "unknown" },
 			{ VAR_ARG_PROMOTE, "promote" },
 			{ VOID ,           "void"    },
@@ -25,8 +25,14 @@ namespace sigma {
 			{ CHAR,            "char"    }
 		};
 
-		const auto it = type_to_string_map.find(type);
-		ASSERT(it != type_to_string_map.end(), "cannot convert the given type to a string");
+		const auto it = type_to_string_map.find(base_type);
+
+		ASSERT(
+			it != type_to_string_map.end(),
+			"cannot convert the given base type '{}' to a string",
+			static_cast<u8>(base_type)
+		);
+
 		return it->second + std::string(pointer_level, '*');
 	}
 
@@ -35,7 +41,7 @@ namespace sigma {
 			return sizeof(void*);
 		}
 
-		switch (type) {
+		switch (base_type) {
 			case UNKNOWN: return 0;
 			case VOID:    return 0;
 			case I8:      return sizeof(i8);
@@ -45,26 +51,25 @@ namespace sigma {
 			case BOOL:    return 4;
 			case CHAR:    return sizeof(char);
 			case VAR_ARG_PROMOTE: return 0;
+			default: PANIC("undefined byte width for type '{}'", to_string());
 		}
 
-		NOT_IMPLEMENTED();
 		return 0;
 	}
 
-	auto data_type::token_to_type(token token) -> base {
+	auto data_type::token_to_type(token token) -> data_type_base {
 		switch (token.type) {
 			case token_type::I8:   return I8;
 			case token_type::I16:  return I16;
 			case token_type::I32:  return I32;
 			case token_type::I64:  return I64;
 			case token_type::BOOL: return BOOL;
-			default: {
-				NOT_IMPLEMENTED();
-				return UNKNOWN;
-			}
+			default: PANIC("undefined token -> type conversion for token '{}'", token.to_string());
 		}
+
+		return UNKNOWN;
 	}
 
-  named_data_type::named_data_type(data_type ty, utility::string_table_key key)
-	  : type(ty), identifier_key(key) {}
+  named_data_type::named_data_type(data_type type, utility::string_table_key identifier_key)
+	  : type(type), identifier_key(identifier_key) {}
 } // sigma::parse

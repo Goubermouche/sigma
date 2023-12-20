@@ -2,8 +2,7 @@
 #include "compiler/compiler/compilation_context.h"
 
 namespace sigma {
-	parser::parser(compilation_context& context)
-		: m_context(context), m_tokens(context.tokens) {}
+	parser::parser(compilation_context& context) : m_context(context), m_tokens(context.tokens) {}
 
 	auto parser::parse(compilation_context& context) -> abstract_syntax_tree {
 		return parser(context).parse();
@@ -32,12 +31,10 @@ namespace sigma {
 		const data_type return_type = parse_type();
 		std::vector<named_data_type> parameters;
 
-		// IDENTIFIER (guaranteed)
-		m_tokens.next();
+		m_tokens.next(); // IDENTIFIER (guaranteed)
 		const auto identifier_key = m_tokens.get_current().symbol_key;
 
-		// LEFT_PARENTHESIS (guaranteed)
-		m_tokens.next();
+		m_tokens.next(); // LEFT_PARENTHESIS (guaranteed)
 
 		// parse function parameters
 		while (m_tokens.peek_next_token() != token_type::RIGHT_PARENTHESIS) {
@@ -52,8 +49,7 @@ namespace sigma {
 			parameters.emplace_back(parameter_type, parameter_identifier_key);
 
 			if (m_tokens.peek_next_token() == token_type::COMMA) {
-				// COMMA (guaranteed)
-				m_tokens.next();
+				m_tokens.next(); // COMMA (guaranteed)
 			}
 		}
 
@@ -74,7 +70,7 @@ namespace sigma {
 		// copy all statement pointers over to the memory arena
 		std::memcpy(
 			function_node->children.get_data(),
-			statements.data(),
+			statements.data(), 
 			statements.size() * sizeof(handle<node>)
 		);
 
@@ -88,17 +84,14 @@ namespace sigma {
 	}
 
 	auto parser::parse_statement_block() -> std::vector<handle<node>> {
-		// LEFT_BRACE
 		m_tokens.expect_next(token_type::LEFT_BRACE);
 		std::vector<handle<node>> statements;
 
 		while (m_tokens.peek_next_token() != token_type::RIGHT_BRACE) {
-			// prime the first statement keyword
-			m_tokens.next();
+			m_tokens.next(); // prime the first statement keyword
 			statements.push_back(parse_statement());
 		}
 
-		// RIGHT_BRACE
 		m_tokens.expect_next(token_type::RIGHT_BRACE);
 		return statements;
 	}
@@ -111,18 +104,9 @@ namespace sigma {
 		}
 		else {
 			switch (m_tokens.get_current_token()) {
-				case token_type::IDENTIFIER: {
-					result = parse_identifier_statement();
-					break;
-				}
-				case token_type::IF: {
-					return parse_if_else_statement_block();
-				}
-				case token_type::RET: {
-					result = parse_return_statement();
-					break;
-				}
-
+				case token_type::IDENTIFIER: result = parse_identifier_statement(); break;
+				case token_type::IF:         return parse_if_else_statement_block();
+				case token_type::RET:        result = parse_return_statement(); break;
 				default: NOT_IMPLEMENTED();
 			}
 		}
@@ -140,8 +124,7 @@ namespace sigma {
 			return nullptr;
 		}
 
-		// prime the expression start token
-		m_tokens.next();
+		m_tokens.next(); // prime the first expression token
 
 		handle<node> return_node = m_ast.create_node<return_statement>(node_type::RETURN, 1);
 		return_node->children[0] = parse_expression();
@@ -226,8 +209,7 @@ namespace sigma {
 
 			// check if we're assigning anything
 			if (m_tokens.peek_next_token() == token_type::EQUALS_SIGN) {
-				// consume the EQUALS_SIGN
-				m_tokens.next();
+				m_tokens.next(); // consume the EQUALS_SIGN
 
 				handle<node> assignment = parse_assignment();
 				assignment->children[0] = variable;
@@ -250,13 +232,11 @@ namespace sigma {
 		);
 
 		auto& prop = negation->get<literal>();
-		prop.value_key = m_context.strings.insert("-1");
-		prop.dt = { data_type::I32, 0 };
+		prop.value_key = m_context.string_table.insert("-1");
+		prop.type = { data_type::I32, 0 };
 
 		// negate the expression
-		return m_ast.create_binary_expression(
-			node_type::OPERATOR_MULTIPLY, negation, expression
-		);
+		return m_ast.create_binary_expression(node_type::OPERATOR_MULTIPLY, negation, expression);
 	}
 
 	auto parser::parse_function_call() -> handle<node> {
@@ -264,54 +244,47 @@ namespace sigma {
 		const auto identifier_key = m_tokens.get_current().symbol_key;
 		std::vector<handle<node>> parameters;
 
-		// LEFT_PARENTHESIS (guaranteed)
-		m_tokens.next();
+		m_tokens.next(); // LEFT_PARENTHESIS (guaranteed)
 
 		// parse call parameters
 		while (m_tokens.peek_next_token() != token_type::RIGHT_PARENTHESIS) {
-			// prime the expression token
-			m_tokens.next();
+			m_tokens.next(); // prime the expression token
 			parameters.push_back(parse_expression());
 
 			if (m_tokens.peek_next_token() == token_type::COMMA) {
-				// COMMA (guaranteed)
-				m_tokens.next();
+				m_tokens.next(); // COMMA (guaranteed)
 			}
 		}
 
-		// RIGHT_PARENTHESIS
 		m_tokens.expect_next(token_type::RIGHT_PARENTHESIS);
 
-		handle<node> call = m_ast.create_node<function_call>(
+		handle<node> call_node = m_ast.create_node<function_call>(
 			node_type::FUNCTION_CALL, parameters.size()
 		);
 
-		call->get<function_call>().callee_identifier_key = identifier_key;
+		call_node->get<function_call>().callee_identifier_key = identifier_key;
 
 		std::memcpy(
-			call->children.get_data(),
+			call_node->children.get_data(),
 			parameters.data(),
 			parameters.size() * sizeof(handle<node>)
 		);
 
-		return call;
+		return call_node;
 	}
 
 	auto parser::parse_variable_declaration() -> handle<node> {
 		// first token is the type
 		const data_type dt = parse_type();
-
-		// identifier
-		m_tokens.expect_next(token_type::IDENTIFIER);
-
-		const auto identifier_key = m_tokens.get_current().symbol_key;
 		handle<node> assigned_value = nullptr;
 
+		m_tokens.expect_next(token_type::IDENTIFIER);
+		const auto identifier_key = m_tokens.get_current().symbol_key;
+
+
 		if (m_tokens.peek_next_token() == token_type::EQUALS_SIGN) {
-			// consume the EQUALS_SIGN
-			m_tokens.next();
-			// prime the first expression token
-			m_tokens.next();
+			m_tokens.next(); // consume the EQUALS_SIGN
+			m_tokens.next(); // prime the first expression token
 
 			assigned_value = parse_expression();
 		}
@@ -320,9 +293,9 @@ namespace sigma {
 			node_type::VARIABLE_DECLARATION, assigned_value ? 1 : 0
 		);
 
-		auto& prop = declaration_node->get<variable>();
-		prop.dt = dt;
-		prop.identifier_key = identifier_key;
+		auto& var = declaration_node->get<variable>();
+		var.type = dt;
+		var.identifier_key = identifier_key;
 
 		if (assigned_value) {
 			declaration_node->children[0] = assigned_value;
@@ -382,10 +355,8 @@ namespace sigma {
 			operation == token_type::PLUS_SIGN ||
 			operation == token_type::MINUS_SIGN
 		) {
-			// consume the operator
-			m_tokens.next();
-			// prime the term
-			m_tokens.next();
+			m_tokens.next(); // consume the operator
+			m_tokens.next(); // prime the term
 
 			const handle<node> right = parse_factor();
 			node_type operator_type = node_type::UNKNOWN;
@@ -393,7 +364,7 @@ namespace sigma {
 			switch (operation) {
 				case token_type::PLUS_SIGN:  operator_type = node_type::OPERATOR_ADD; break;
 				case token_type::MINUS_SIGN: operator_type = node_type::OPERATOR_SUBTRACT; break;
-				default: NOT_IMPLEMENTED();
+				default: PANIC("unhandled term case for token '{}'", operation.to_string());
 			}
 
 			left = m_ast.create_binary_expression(operator_type, left, right);
@@ -412,10 +383,8 @@ namespace sigma {
 			operation == token_type::SLASH ||
 			operation == token_type::MODULO
 		) {
-			// consume the operator
-			m_tokens.next();
-			// prime the primary
-			m_tokens.next();
+			m_tokens.next(); // consume the operator
+			m_tokens.next(); // prime the primary
 
 			const handle<node> right = parse_primary();
 			node_type operator_type = node_type::UNKNOWN;
@@ -424,7 +393,7 @@ namespace sigma {
 				case token_type::ASTERISK: operator_type = node_type::OPERATOR_MULTIPLY; break;
 				case token_type::SLASH:    operator_type = node_type::OPERATOR_DIVIDE; break;
 				case token_type::MODULO:   operator_type = node_type::OPERATOR_MODULO; break;
-				default: NOT_IMPLEMENTED();
+				default: PANIC("unhandled factor case for token '{}'", operation.to_string());
 			}
 
 			left = m_ast.create_binary_expression(operator_type, left, right);
@@ -445,7 +414,8 @@ namespace sigma {
 			case token_type::MINUS_SIGN:         return parse_negative_expression();
 			case token_type::BOOL_LITERAL_TRUE:
 			case token_type::BOOL_LITERAL_FALSE: return parse_bool_literal();
-			default: NOT_IMPLEMENTED();
+			default: 
+				PANIC("unhandled primary case for token '{}'", m_tokens.get_current_token().to_string());
 		}
 
 		return nullptr;
@@ -453,35 +423,36 @@ namespace sigma {
 
 	auto parser::parse_type() const -> data_type {
 		const token type_token = m_tokens.get_current_token();
-		ASSERT(type_token.is_type(), "invalid type token");
+		ASSERT(type_token.is_type(), "invalid type token '{}' received", type_token.to_string());
 		return data_type{ type_token, 0 };
 	}
 
 	auto parser::parse_numerical_literal() -> handle<node> {
-		ASSERT(m_tokens.get_current_token().is_numerical_literal(), "invalid token type");
+		const token literal = m_tokens.get_current_token();
+		ASSERT(literal.is_numerical_literal(), "invalid token type received '{}'", literal.to_string());
 
 		// get a symbol key to the literal value
-		data_type::base base = data_type::UNKNOWN;
+		data_type::data_type_base base = data_type::UNKNOWN;
 
 		// these types won't be used most of the time, but its nice to hav a place we can
 		// fall back to
-		switch (m_tokens.get_current_token()) {
+		switch (literal) {
 			case token_type::SIGNED_LITERAL:      base = data_type::I32; break;
 			//case lex::token_type::UNSIGNED_LITERAL:    base = data_type::U32; break;
 			//case lex::token_type::F32_LITERAL:         base = data_type::F32; break;
 			//case lex::token_type::F64_LITERAL:         base = data_type::F64; break;
 			case token_type::HEXADECIMAL_LITERAL: base = data_type::I32; break;
 			case token_type::BINARY_LITERAL:      base = data_type::I32; break;
-			default: NOT_IMPLEMENTED();
+			default: PANIC("unhandled literal to data type conversion '{}'", literal.to_string());
 		}
 
-		const handle<node> literal_node = m_ast.create_node<literal>(
+		const handle<node> literal_node = m_ast.create_node<sigma::literal>(
 			node_type::NUMERICAL_LITERAL, 0
 		);
 
-		auto& prop = literal_node->get<literal>();
+		auto& prop = literal_node->get<sigma::literal>();
 		prop.value_key = m_tokens.get_current().symbol_key;
-		prop.dt = { base, 0 };
+		prop.type = { base, 0 };
 
 		return literal_node;
 	}
@@ -489,9 +460,9 @@ namespace sigma {
 	auto parser::parse_string_literal() -> handle<node> {
 		// the first token is a STRING_LITERAL
 		const handle<node> string = m_ast.create_node<literal>(node_type::STRING_LITERAL, 0);
-		auto& prop = string->get<literal>();
-		prop.value_key = m_tokens.get_current().symbol_key;
-		prop.dt = { data_type::CHAR, 1 }; // char*
+		auto& literal = string->get<sigma::literal>();
+		literal.value_key = m_tokens.get_current().symbol_key;
+		literal.type = { data_type::CHAR, 1 }; // char*
 		return string;
 	}
 

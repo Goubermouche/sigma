@@ -42,12 +42,6 @@ namespace sigma {
 		return m_token_infos[index];
 	}
 
-	void token_buffer::print() const {
-		for(const token_info info : m_token_infos) {
-			utility::console::print("{}\n", info.tok.to_string());
-		}
-	}
-
 	token_buffer_iterator::token_buffer_iterator(const token_buffer& tokens)
 		: m_tokens(tokens), m_current_info(tokens.first()) {}
 

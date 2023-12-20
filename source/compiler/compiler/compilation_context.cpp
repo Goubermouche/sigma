@@ -5,8 +5,8 @@ namespace sigma {
 	void compilation_context::print_tokens() const {
 		for(const auto& info : tokens) {
 			std::string symbol_value;
-			if(strings.contains(info.symbol_key)) {
-				symbol_value = utility::detail::escape_string(strings.get(info.symbol_key));
+			if(string_table.contains(info.symbol_key)) {
+				symbol_value = utility::detail::escape_string(string_table.get(info.symbol_key));
 			}
 
 			utility::console::println("{:<20} {}", info.tok.to_string(), symbol_value);
@@ -24,7 +24,7 @@ namespace sigma {
 					const auto& property = node->get<function>();
 
 					utility::console::print(
-						"['{} {} (", property.return_type.to_string(), strings.get(property.identifier_key)
+						"['{} {} (", property.return_type.to_string(), string_table.get(property.identifier_key)
 					);
 
 					for (u64 i = 0; i < property.parameter_types.get_size(); ++i) {
@@ -42,20 +42,20 @@ namespace sigma {
 					const auto& property = node->get<variable>();
 
 					utility::console::print(
-						"[{} '{}']", strings.get(property.identifier_key), property.dt.to_string()
+						"[{} '{}']", string_table.get(property.identifier_key), property.type.to_string()
 					);
 					break;
 				}
 				case node_type::VARIABLE_ACCESS: {
 					const auto& property = node->get<variable>();
-					utility::console::print("[{}]", strings.get(property.identifier_key));
+					utility::console::print("[{}]", string_table.get(property.identifier_key));
 					break;
 				}
 
 				case node_type::NUMERICAL_LITERAL: {
 					const auto& property = node->get<literal>();
 					utility::console::print(
-						"['{}' {}]", property.dt.to_string(), strings.get(property.value_key)
+						"['{}' {}]", property.type.to_string(), string_table.get(property.value_key)
 					);
 
 					break;
@@ -63,7 +63,7 @@ namespace sigma {
 				case node_type::STRING_LITERAL: {
 					const auto& property = node->get<literal>();
 					utility::console::print(
-						"[\"{}\"]", utility::detail::escape_string(strings.get(property.value_key))
+						"[\"{}\"]", utility::detail::escape_string(string_table.get(property.value_key))
 					);
 
 					break;

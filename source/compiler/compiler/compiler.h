@@ -14,10 +14,23 @@
 namespace sigma {
 	using namespace utility::types;
 
+	namespace ir { 
+		class module;
+	}
+
 	class compiler {
 	public:
 		static void compile(const filepath& path, ir::target target);
 	private:
+		compiler(const filepath& path, ir::target target);
+
+		void compile() const;
+		auto get_object_file_path(const std::string& name = "a") const -> filepath;
+
 		static void verify_file(const filepath& path);
+		static void emit_object_file(ir::module& module, const filepath& path);
+	private:
+		filepath m_path;
+		ir::target m_target;
 	};
 } // namespace sigma

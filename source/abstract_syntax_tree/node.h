@@ -9,7 +9,7 @@ namespace sigma {
 	using namespace utility::types;
 
 	struct node_type {
-		enum underlying {
+		enum underlying : u16 {
 			UNKNOWN,
 
 			FUNCTION_DECLARATION,
@@ -17,12 +17,16 @@ namespace sigma {
 
 			RETURN,
 
+			// children[1 - n] = statements
 			BRANCH,
+			// children[0] = condition
+			// children[1 - n] = statements
 			CONDITIONAL_BRANCH,
 
 			VARIABLE_DECLARATION,
 			VARIABLE_ACCESS,
-			// first child is the variable, second child is the assigned value
+			// children[0] = variable
+			// children[1] = assigned value
 			VARIABLE_ASSIGNMENT,
 
 			OPERATOR_ADD,
@@ -63,8 +67,8 @@ namespace sigma {
 	struct return_statement {};
 
 	struct literal {
-		utility::string_table_key value_key;
-		data_type dt;
+		utility::string_table_key value_key; // literal value represented as a string
+		data_type type;
 	};
 
 	struct bool_literal {
@@ -73,15 +77,8 @@ namespace sigma {
 
 	struct variable {
 		utility::string_table_key identifier_key;
-		data_type dt;
+		data_type type;
 	};
-
-	// implementation details of specific node types:
-	// CONDITIONAL_BRANCH:
-	// -   children[0] = condition
-	// -   children[1 - n] = statements
-	// BRANCH
-	// -   children[0 - n] = statements
 
 	using node_properties = utility::property<
 		function, return_statement, literal, function_call, variable, bool_literal

@@ -8,8 +8,8 @@ namespace sigma {
 
 	type_checker::type_checker(compilation_context& context) : m_context(context) {
 		{
-			const utility::string_table_key printf_key = context.strings.insert("printf");
-			const utility::string_table_key format_key = context.strings.insert("format");
+			const utility::string_table_key printf_key = context.string_table.insert("printf");
+			const utility::string_table_key format_key = context.string_table.insert("format");
 
 			auto printf_params = utility::slice<named_data_type>(m_context.ast.get_allocator(), 1);
 			printf_params[0] = named_data_type{ data_type(data_type::CHAR, 1), format_key };
@@ -23,8 +23,8 @@ namespace sigma {
 		}
 
 		{
-			const utility::string_table_key printf_key = context.strings.insert("puts");
-			const utility::string_table_key format_key = context.strings.insert("str");
+			const utility::string_table_key printf_key = context.string_table.insert("puts");
+			const utility::string_table_key format_key = context.string_table.insert("str");
 
 			auto printf_params = utility::slice<named_data_type>(m_context.ast.get_allocator(), 1);
 			printf_params[0] = named_data_type{ data_type(data_type::CHAR, 1), format_key };
@@ -91,11 +91,11 @@ namespace sigma {
 		const auto& property = variable_node->get<variable>();
 
 		// register the variable
-		m_local_variables[property.identifier_key] = property.dt;
+		m_local_variables[property.identifier_key] = property.type;
 
 		// type check the assigned value
 		if (variable_node->children.get_size() == 1) {
-			type_check_node(variable_node->children[0], property.dt);
+			type_check_node(variable_node->children[0], property.type);
 		}
 	}
 
@@ -191,17 +191,17 @@ namespace sigma {
 
 	void type_checker::type_check_numerical_literal(handle<node> literal_node, data_type expected) {
 		auto& prop = literal_node->get<literal>();
-		apply_expected_data_type(prop.dt, expected);
+		apply_expected_data_type(prop.type, expected);
 	}
 
 	void type_checker::type_check_string_literal(handle<node> literal_node, data_type expected) {
 		auto& prop = literal_node->get<literal>();
-		apply_expected_data_type(prop.dt, expected);
+		apply_expected_data_type(prop.type, expected);
 	}
 
 	void type_checker::type_check_bool_literal(handle<node> literal_node, data_type expected) {
 		SUPPRESS_C4100(literal_node);
-		ASSERT(expected.type == data_type::BOOL, "unexpected type encountered");
+		ASSERT(expected.base_type == data_type::BOOL, "unexpected type encountered");
 	}
 
 	void type_checker::type_check_variable_access(handle<node> access_node, data_type expected) {
@@ -210,9 +210,9 @@ namespace sigma {
 		const auto it = m_local_variables.find(prop.identifier_key);
 		ASSERT(it != m_local_variables.end(), "unknown local variable");
 
-		prop.dt = it->second; // default to the declared type 
+		prop.type = it->second; // default to the declared type 
 
-		apply_expected_data_type(prop.dt, expected);
+		apply_expected_data_type(prop.type, expected);
 	}
 
 	void type_checker::type_check_variable_assignment(handle<node> assignment_node) {
@@ -226,18 +226,18 @@ namespace sigma {
 	}
 
 	void type_checker::apply_expected_data_type(data_type& target, data_type source) {
-		if (source.type != data_type::UNKNOWN) {
-			if (source.type == data_type::VAR_ARG_PROMOTE) {
+		if (source.base_type != data_type::UNKNOWN) {
+			if (source.base_type == data_type::VAR_ARG_PROMOTE) {
 				// promote the variable
 				// don't promote pointers 
 				if (target.pointer_level > 0) {
 					return;
 				}
 
-				switch (target.type) {
+				switch (target.base_type) {
 					case data_type::UNKNOWN: PANIC("promotion on unknown data type"); break;
 					case data_type::I32:     return;
-					case data_type::BOOL:    target.type = data_type::I32; break;
+					case data_type::BOOL:    target.base_type = data_type::I32; break;
 					default: NOT_IMPLEMENTED();
 				}
 			}

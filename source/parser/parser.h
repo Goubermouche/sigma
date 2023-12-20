@@ -54,7 +54,6 @@ namespace sigma {
 		auto peek_is_variable_declaration() const -> bool;
 	private:
 		compilation_context& m_context;
-
 		token_buffer_iterator m_tokens;
 		abstract_syntax_tree m_ast;
 	};

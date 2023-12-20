@@ -12,65 +12,54 @@
 
 namespace sigma {
 	void compiler::compile(const filepath& path, ir::target target) {
-		utility::console::println("compiling file: {}", path.string());
+		compiler(path, target).compile();
+	}
 
-		verify_file(path);
-		const auto file = utility::file::read_text_file(path);
+	compiler::compiler(const filepath& path, ir::target target)
+		: m_path(path), m_target(target) {}
 
-		utility::timer total_timer;
-		utility::timer tokenizer_timer;
-		utility::timer parser_timer;
-		utility::timer type_checker_timer;
-		utility::timer ir_translator_timer;
-		utility::timer codegen_timer;
+	void compiler::compile() const {
+		utility::console::println("compiling file: {}", m_path.string());
 
-		total_timer.start();
-
-		// tokenizer
-		tokenizer_timer.start();
+		verify_file(m_path);
+		const std::string file = utility::file::read_text_file(m_path);
 		auto [tokens, symbols] = tokenizer::tokenize(file);
 
-		compilation_context context {
-			.strings = symbols,
+		compilation_context context{
+			.string_table = symbols,
 			.tokens = tokens
 		};
 
-		// context.print_tokens();
-
-		// parser
-		parser_timer.start();
 		context.ast = parser::parse(context);
 		context.print_ast();
 
-		// type checker
-		type_checker_timer.start();
 		type_checker::type_check(context);
-
-		// ir translator
-		ir_translator_timer.start();
-		auto module = ir_translator::translate(context, target);
-
-		// codegen
-		codegen_timer.start();
+		ir::module module = ir_translator::translate(context, m_target);
 		module.compile();
 
 		// emit the object file
-		auto object_file = module.generate_object_file();
-
-		static const char* object_formats[] = {
-			".obj", // WINDOWS
-			".o"    // LINUX
-		};
-
-		const char* active_format = object_formats[static_cast<u8>(target.get_system())];
-		auto object_path = path.parent_path() / (std::string("a") + active_format);
-
-		utility::file::write(object_file, object_path);
+		const filepath object_path = get_object_file_path();
+		emit_object_file(module, object_path);
 	}
 
 	void compiler::verify_file(const filepath& path) {
 		ASSERT(path.extension() == ".s", "invalid file extension detected");
 		ASSERT(std::filesystem::is_regular_file(path), "invalid file detected");
 	}
-} // namespace sigma
 
+	auto compiler::get_object_file_path(const std::string& name) const -> filepath {
+		ASSERT(!name.empty(), "cannot create an object file with no name");
+
+		static const char* object_formats[] = {
+			".obj", // WINDOWS
+			".o"    // LINUX
+		};
+
+		const char* format = object_formats[static_cast<u8>(m_target.get_system())];
+		return  m_path.parent_path() / (name + format);
+	}
+
+	void compiler::emit_object_file(ir::module& module, const filepath& path) {
+		utility::file::write(module.generate_object_file(), path);
+	}
+} // namespace sigma

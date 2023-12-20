@@ -10,7 +10,7 @@ namespace sigma {
 	}
 
 	auto tokenizer::tokenize() -> std::pair<token_buffer, utility::string_table> {
-		token_type current = token_type::UNKNOWN;
+		auto current = token_type::UNKNOWN;
 
 		while (current != token_type::END_OF_FILE) {
 			const token_info info = get_next_token();
@@ -73,7 +73,8 @@ namespace sigma {
 			get_next_char();
 
 			// hexadecimal char sequence
-			// note: don's use std::to_lower as the C standard doesn't allow \X escape sequences for hexadecimals
+			// note: don's use std::to_lower as the C standard doesn't allow \X escape sequences
+			//       for hexadecimals
 			if (m_last_character == 'x') {
 				NOT_IMPLEMENTED();
 			}
@@ -244,7 +245,8 @@ namespace sigma {
 		if (it != m_special_tokens.end()) {
 			get_next_char();
 
-			// we have a special token consisting of 1 character, check if we can find a longer one using that character
+			// we have a special token consisting of 1 character, check if we can find a longer
+			// one using that character
 			if (!isspace(m_last_character) && !isalnum(m_last_character)) {
 				m_current_section += m_last_character;
 

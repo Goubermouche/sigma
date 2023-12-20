@@ -12,14 +12,14 @@ namespace sigma {
 		compilation_context& context, ir::target target
 	) : m_context(context), m_module(target), m_builder(m_module),
 	m_functions(m_builder), m_variables(m_builder) {
-		m_functions.register_external_function(m_context.strings.insert("printf"), {
+		m_functions.register_external_function(m_context.string_table.insert("printf"), {
 			.identifier   = "printf",
 			.parameters   = { PTR_TYPE },
 			.returns      = { I32_TYPE },
 			.has_var_args = true
 		});
 
-		m_functions.register_external_function(m_context.strings.insert("puts"), {
+		m_functions.register_external_function(m_context.string_table.insert("puts"), {
 			.identifier   = "puts",
 			.parameters   = { PTR_TYPE },
 			.returns      = { I32_TYPE },
@@ -69,7 +69,7 @@ namespace sigma {
 
 		// TODO: the IR system should inherit our symbol table system
 		const ir::function_signature signature {
-			.identifier = m_context.strings.get(prop.identifier_key), // TEMP
+			.identifier = m_context.string_table.get(prop.identifier_key), // TEMP
 			.parameters = parameter_types,
 			.returns = { data_type_to_ir(prop.return_type) },
 			.has_var_args = false
@@ -87,7 +87,7 @@ namespace sigma {
 
 	void ir_translator::translate_variable_declaration(handle<node> variable_node) {
 		const auto& prop = variable_node->get<variable>();
-		const u16 byte_width = prop.dt.get_byte_width();
+		const u16 byte_width = prop.type.get_byte_width();
 
 		const handle<ir::node> local = m_variables.register_variable(
 			prop.identifier_key, byte_width, byte_width
@@ -97,7 +97,7 @@ namespace sigma {
 			const handle<ir::node> expression = translate_node(variable_node->children[0]);
 			m_builder.create_store(local, expression, byte_width, false);
 		}
-		else if (prop.dt.type == data_type::BOOL) {
+		else if (prop.type.base_type == data_type::BOOL) {
 			// boolean values should default to false
 			m_builder.create_store(local, m_builder.create_bool(false), byte_width, false);
 		}
@@ -175,7 +175,7 @@ namespace sigma {
 	auto ir_translator::translate_string_literal(
 		handle<node> string_literal_node
 	) const -> handle<ir::node> {
-		const std::string& value = m_context.strings.get(string_literal_node->get<literal>().value_key);
+		const std::string& value = m_context.string_table.get(string_literal_node->get<literal>().value_key);
 		return m_builder.create_string(value);
 	}
 
@@ -224,7 +224,7 @@ namespace sigma {
 		const auto& prop = access_node->get<variable>();
 
 		handle<ir::node> load = m_variables.create_load(
-			prop.identifier_key, data_type_to_ir(prop.dt), prop.dt.get_byte_width()
+			prop.identifier_key, data_type_to_ir(prop.type), prop.type.get_byte_width()
 		);
 
 		ASSERT(load, "unknown variable referenced");
@@ -238,19 +238,19 @@ namespace sigma {
 		const handle<ir::node> value = translate_node(assignment_node->children[1]);
 
 		// assign the variable
-		m_variables.create_store(var.identifier_key, value, var.dt.get_byte_width());
+		m_variables.create_store(var.identifier_key, value, var.type.get_byte_width());
 		return nullptr;
 	}
 
 	auto ir_translator::literal_to_ir(literal& literal) const -> handle<ir::node> {
-		const std::string& value = m_context.strings.get(literal.value_key);
+		const std::string& value = m_context.string_table.get(literal.value_key);
 
 		// handle pointers separately
-		if (literal.dt.pointer_level > 0) {
+		if (literal.type.pointer_level > 0) {
 			NOT_IMPLEMENTED();
 		}
 
-		switch (literal.dt.type) {
+		switch (literal.type.base_type) {
 			case data_type::I32: return m_builder.create_signed_integer(std::stoi(value), 32);
 			default: NOT_IMPLEMENTED();
 		}
@@ -261,7 +261,7 @@ namespace sigma {
 	auto ir_translator::data_type_to_ir(data_type dt) -> ir::data_type {
 		ASSERT(dt.pointer_level == 0, "invalid pointer level");
 
-		switch (dt.type) {
+		switch (dt.base_type) {
 			case data_type::I32:  return I32_TYPE;
 			case data_type::BOOL: return BOOL_TYPE;
 			default: NOT_IMPLEMENTED();

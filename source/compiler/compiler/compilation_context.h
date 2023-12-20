@@ -8,7 +8,7 @@ namespace sigma {
 		void print_tokens() const;
 		void print_ast() const;
 
-		utility::string_table strings;
+		utility::string_table string_table;
 		abstract_syntax_tree ast;
 		token_buffer tokens;
 	};

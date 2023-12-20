@@ -29,14 +29,13 @@ namespace sigma {
 			case STRING_LITERAL:       return "STRING_LITERAL";
 			case BOOL_LITERAL:         return "BOOL_LITERAL";
 
-			default: NOT_IMPLEMENTED();
+			default: PANIC("to_string() not implemented for node '{}'", static_cast<u16>(type));
 		}
 
-		return std::string();
+		return "";
 	}
 
 	node_type::operator underlying() const {
 		return type;
 	}
-
 } // sigma

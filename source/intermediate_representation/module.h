@@ -68,10 +68,7 @@ namespace sigma::ir {
 		auto generate_object_file() -> utility::object_file;
 
 		auto create_external(const std::string& name, linkage linkage) -> handle<external>;
-
-		auto create_function(
-			const function_signature& function_sig, linkage linkage
-		) -> handle<function>;
+		auto create_function(const function_signature& function_sig, linkage linkage) -> handle<function>;
 
 		auto create_global(const std::string& name, linkage linkage) -> handle<global>;
 		auto create_string(handle<function> parent_function, const std::string& value) -> handle<node>;
@@ -95,7 +92,6 @@ namespace sigma::ir {
 		static constexpr u8 get_tls_section()   { return 3; }
 
 		// rough memory layout:
-		//
 		//   module:
 		//   +---------------------------------------------------------+
 		//   | functions + symbols + globals + externals + export info |
@@ -109,9 +105,8 @@ namespace sigma::ir {
 		utility::block_allocator m_allocator;
 		codegen_target m_codegen;
 
-		std::vector<handle<symbol>> m_symbols;
-
 		std::vector<handle<function>> m_functions;
+		std::vector<handle<symbol>> m_symbols;
 		std::vector<handle<global>> m_globals;
 
 		std::vector<module_section> m_sections;

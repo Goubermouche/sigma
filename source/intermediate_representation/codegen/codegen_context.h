@@ -20,31 +20,32 @@ namespace sigma::ir {
 
 		template<typename extra_type = utility::empty_property>
 		auto create_instruction(u64 operand_count) const -> handle<instruction> {
-			void* inst_allocation = func->allocator.allocate(sizeof(instruction));
+			void* inst_allocation = function->allocator.allocate(sizeof(instruction));
 			const handle inst_ptr = static_cast<instruction*>(inst_allocation);
 
 			// assign data
-			inst_ptr->operands = utility::slice<i32>(func->allocator, operand_count);
-			inst_ptr->set_property(func->allocator.allocate(sizeof(extra_type)));
+			inst_ptr->operands = utility::slice<i32>(function->allocator, operand_count);
+			inst_ptr->set_property(function->allocator.allocate(sizeof(extra_type)));
 
 			return inst_ptr;
 		}
 
 		template<typename extra_type = utility::empty_property>
 		auto create_temporary() const -> handle<codegen_temporary> {
-			void* value_allocation = func->allocator.allocate(sizeof(codegen_temporary));
+			void* value_allocation = function->allocator.allocate(sizeof(codegen_temporary));
 			const handle value_ptr = static_cast<codegen_temporary*>(value_allocation);
 
-			value_ptr->set_property(func->allocator.allocate(sizeof(extra_type)));
+			value_ptr->set_property(function->allocator.allocate(sizeof(extra_type)));
 			return value_ptr;
 		}
 
 		auto create_symbol_patch() const -> handle<symbol_patch>;
 
-		handle<function> func;
-		handle<work_list> work;
+		handle<function> function;
+		target target;
+
 		control_flow_graph graph;
-		target t;
+		work_list& work;
 
 		std::vector<u64> basic_block_order;
 		utility::contiguous_container<phi_value> phi_values;
@@ -62,7 +63,7 @@ namespace sigma::ir {
 		std::unordered_map<handle<node>, handle<basic_block>> schedule;
 		std::unordered_map<handle<node>, machine_block> machine_blocks;
 
-		// TODO: replace with a linked list
+		// TODO: replace with a linked list?
 		handle<instruction> first;
 		handle<instruction> head;
 

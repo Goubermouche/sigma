@@ -42,7 +42,6 @@ namespace sigma::detail {
 		);
 	private:
 		ir::builder& m_builder;
-
 		std::unordered_map<utility::string_table_key, handle<ir::node>> m_variables;
 	};
 } // namespace sigma::detail

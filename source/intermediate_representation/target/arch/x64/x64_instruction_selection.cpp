@@ -5,7 +5,7 @@
 namespace sigma::ir {
 	void x64_architecture::select_instructions(codegen_context& context) {
 		ASSERT(
-			context.work->items.size() == context.graph.blocks.size(),
+			context.work.items.size() == context.graph.blocks.size(),
 			"misaligned control flow graph detected"
 		);
 
@@ -13,7 +13,7 @@ namespace sigma::ir {
 		u64 stop_block;
 
 		for (u64 i = 0; i < context.graph.blocks.size(); ++i) {
-			handle<node> basic_block = context.work->items[i];
+			handle<node> basic_block = context.work.items[i];
 
 			for (handle<user> use = basic_block->use; use; use = use->next_user) {
 				const handle<node> use_node = use->n;
@@ -23,7 +23,7 @@ namespace sigma::ir {
 					use_node->dt.ty != data_type::MEMORY
 				) {
 					context.virtual_values[use_node->global_value_index] = virtual_value();
-					context.work->visit(use_node);
+					context.work.visit(use_node);
 				}
 			}
 
@@ -40,7 +40,7 @@ namespace sigma::ir {
 		context.basic_block_order.push_back(stop_block);
 
 		for (u64 i = 0; i < context.basic_block_order.size(); ++i) {
-			handle<node> basic_block = context.work->items[context.basic_block_order[i]];
+			handle<node> basic_block = context.work.items[context.basic_block_order[i]];
 			const handle<instruction> label = create_label(context, basic_block);
 
 			context.labels[context.basic_block_order[i]] = 0;
@@ -68,7 +68,7 @@ namespace sigma::ir {
 		codegen_context& context, handle<node> block_entry, handle<node> block_end, u64 rpo_index
 	) {
 		ASSERT(
-			context.work->items.size() == context.graph.blocks.size(),
+			context.work.items.size() == context.graph.blocks.size(),
 			"invalid work list"
 		);
 
@@ -79,20 +79,20 @@ namespace sigma::ir {
 
 		// schedule params
 		if (rpo_index == 0) {
-			for (auto use = context.func->entry_node->use; use; use = use->next_user) {
+			for (auto use = context.function->entry_node->use; use; use = use->next_user) {
 				handle<node> user_node = use->n;
 
 				if (
-					user_node->ty == node::PROJECTION && context.work->visit(user_node)
+					user_node->ty == node::PROJECTION && context.work.visit(user_node)
 				) {
-					context.work->items.push_back(user_node);
+					context.work.items.push_back(user_node);
 				}
 			}
 		}
 
 		// define all the nodes in this block
-		for (u64 i = context.graph.blocks.size(); i < context.work->items.size(); ++i) {
-			handle<node> block_node = context.work->items[i];
+		for (u64 i = context.graph.blocks.size(); i < context.work.items.size(); ++i) {
+			handle<node> block_node = context.work.items[i];
 			u64 use_count = 0;
 
 			// track non-dead users
@@ -143,7 +143,7 @@ namespace sigma::ir {
 		}
 
 		if (rpo_index == 0) {
-			select_instruction(context, context.func->entry_node, reg::invalid_id);
+			select_instruction(context, context.function->entry_node, reg::invalid_id);
 		}
 
 		// walk all nodes (we're allowed to fold nodes into those which appear later)
@@ -154,8 +154,8 @@ namespace sigma::ir {
 		handle<instruction> last = nullptr;
 		handle<node> prev_effect = nullptr;
 
-		for (u64 i = context.work->items.size(); i-- > context.graph.blocks.size();) {
-			handle<node> target = context.work->items[i];
+		for (u64 i = context.work.items.size(); i-- > context.graph.blocks.size();) {
+			handle<node> target = context.work.items[i];
 
 			if (target->ty == node::ENTRY) {
 				continue;
@@ -299,7 +299,7 @@ namespace sigma::ir {
 			}
 		}
 
-		context.work->items.resize(context.graph.blocks.size());
+		context.work.items.resize(context.graph.blocks.size());
 	}
 
 	void x64_architecture::select_instruction(
@@ -309,7 +309,7 @@ namespace sigma::ir {
 			case node::PHI:
 			case node::REGION: break;
 			case node::ENTRY: {
-				bool is_systemv = context.t.get_abi() == abi::SYSTEMV;
+				bool is_systemv = context.target.get_abi() == abi::SYSTEMV;
 				constexpr x64::gpr gpr_params[] = {
 					x64::gpr::RCX, x64::gpr::RDX, x64::gpr::R8, x64::gpr::R9
 				};
@@ -325,9 +325,9 @@ namespace sigma::ir {
 				// handle known parameters
 				i32 used_gpr = 0;
 				i32 used_xmm = 0;
-				auto& params = context.func->parameters;
+				auto& params = context.function->parameters;
 
-				for (u64 i = 0; i < context.func->parameter_count; ++i) {
+				for (u64 i = 0; i < context.function->parameter_count; ++i) {
 					handle<node> projection = params[3 + i];
 					bool is_float = projection->dt.ty == data_type::FLOAT;
 					i32 reg_limit = is_float ? xmm_param_count : gpr_param_count;
@@ -390,7 +390,7 @@ namespace sigma::ir {
 				bool has_param_slots = false;
 
 				// walk the entry to find any parameter stack slots
-				for (u64 i = 0; i < context.func->parameter_count; ++i) {
+				for (u64 i = 0; i < context.function->parameter_count; ++i) {
 					handle<node> projection = params[3 + i];
 
 					handle<user> user = projection->use;
@@ -411,7 +411,7 @@ namespace sigma::ir {
 					u64 pos = 16 + i * 8;
 					context.stack_slots[address] = static_cast<i32>(pos);
 
-					if (i >= 4 && context.t.get_abi() == abi::WIN_64) {
+					if (i >= 4 && context.target.get_abi() == abi::WIN_64) {
 						if (auto* value = context.lookup_value(store)) {
 							value->virtual_register = 0;
 						}
@@ -421,7 +421,7 @@ namespace sigma::ir {
 				}
 
 				if (has_param_slots) {
-					context.stack_usage += 16 + context.func->parameter_count * 8;
+					context.stack_usage += 16 + context.function->parameter_count * 8;
 				}
 				else {
 					context.stack_usage += 16;
@@ -433,12 +433,12 @@ namespace sigma::ir {
 
 			case node::SYSTEM_CALL:
 			case node::CALL: {
-				bool is_systemv = context.t.get_abi() == abi::SYSTEMV;
+				bool is_systemv = context.target.get_abi() == abi::SYSTEMV;
 				static reg default_return_registers[2] = {
 					static_cast<reg::id_type>(x64::gpr::RAX), static_cast<reg::id_type>(x64::gpr::RDX)
 				};
 
-				const parameter_descriptor descriptor = context.t.get_parameter_descriptor();
+				const parameter_descriptor descriptor = context.target.get_parameter_descriptor();
 
 				if (node_type == node::SYSTEM_CALL) {
 					NOT_IMPLEMENTED();
@@ -920,7 +920,7 @@ namespace sigma::ir {
 					store_inst->in_count = store_inst->in_count - 1;
 					store_inst->dt = legalize_data_type(store_data_type);
 					store_inst->flags |= instruction::immediate;
-					store_inst->set_property(context.func->allocator.allocate(sizeof(immediate)));
+					store_inst->set_property(context.function->allocator.allocate(sizeof(immediate)));
 					store_inst->get<immediate>().value = immediate_value;
 
 					ASSERT(
@@ -1056,7 +1056,7 @@ namespace sigma::ir {
 			case node::PROJECTION: {
 				if (n->inputs[0]->ty == node::ENTRY) {
 					const i32 index = static_cast<i32>(n->get<projection>().index - 3);
-					i32 param_gpr_count = context.t.get_abi() == abi::WIN_64 ? 4 : 6;
+					i32 param_gpr_count = context.target.get_abi() == abi::WIN_64 ? 4 : 6;
 
 					// use stack space past the n registers we're given
 					if (index >= param_gpr_count) {
@@ -1262,7 +1262,7 @@ namespace sigma::ir {
 		codegen_context& context, handle<basic_block> bb, handle<node> n, bool is_end
 	) {
 		const auto it = context.schedule.find(n);
-		if (it == context.schedule.end() || it->second != bb || !context.work->visit(n)) {
+		if (it == context.schedule.end() || it->second != bb || !context.work.visit(n)) {
 			return;
 		}
 
@@ -1330,7 +1330,7 @@ namespace sigma::ir {
 			}
 		}
 
-		context.work->items.push_back(n);
+		context.work.items.push_back(n);
 
 		if (
 			n->is_mem_out_op() && n->ty != node::PHI &&

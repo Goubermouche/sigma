@@ -6,7 +6,7 @@ namespace sigma::ir {
 		const utility::byte_buffer& bytecode, const codegen_context& context
 	) -> utility::string {
 		utility::string assembly;
-		assembly.append("{}:\n", context.func->sym.name);
+		assembly.append("{}:\n", context.function->sym.name);
 
 		// disassemble the prologue
 		disassemble_block(
@@ -23,7 +23,7 @@ namespace sigma::ir {
 
 		for(u64 i = 0; i < context.basic_block_order.size(); ++i) {
 			const u64 block_index = context.basic_block_order[i];
-			handle<node> basic_block = context.work->items[block_index];
+			handle<node> basic_block = context.work.items[block_index];
 
 			const u64 start = context.labels[block_index] & ~0x80000000;
 			u64 end   = bytecode.get_size();

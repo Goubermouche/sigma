@@ -2,15 +2,12 @@
 #include <compiler/compiler/compilation_context.h>
 
 namespace sigma {
-	auto ir_translator::translate(
-		compilation_context& context, ir::target target
-	) -> ir::module { 
+	auto ir_translator::translate(compilation_context& context, ir::target target) -> ir::module { 
 		return ir_translator(context, target).translate();
 	}
 
-	ir_translator::ir_translator(
-		compilation_context& context, ir::target target
-	) : m_context(context), m_module(target), m_builder(m_module),
+	ir_translator::ir_translator(compilation_context& context, ir::target target)
+		: m_context(context), m_module(target), m_builder(m_module),
 	m_functions(m_builder), m_variables(m_builder) {
 		m_functions.register_external_function(m_context.string_table.insert("printf"), {
 			.identifier   = "printf",
@@ -29,10 +26,10 @@ namespace sigma {
 
 	handle<ir::node> ir_translator::translate_node(handle<node> ast_node) {
 		switch (ast_node->type) {
-			case node_type::FUNCTION_DECLARATION:             translate_function_declaration(ast_node); break;
+			case node_type::FUNCTION_DECLARATION: translate_function_declaration(ast_node); break;
 			case node_type::FUNCTION_CALL:        return translate_function_call(ast_node);
 
-			// // flow control
+			// flow control
 			case node_type::RETURN:               translate_return(ast_node); break;
 			case node_type::CONDITIONAL_BRANCH:   translate_conditional_branch(ast_node, nullptr); break;
 
@@ -40,18 +37,17 @@ namespace sigma {
 			case node_type::VARIABLE_ACCESS:      return translate_variable_access(ast_node);
 			case node_type::VARIABLE_ASSIGNMENT:  return translate_variable_assignment(ast_node);
 
-			// // operators:
+			// operators:
 			 case node_type::OPERATOR_ADD:
 			 case node_type::OPERATOR_SUBTRACT:
 			 case node_type::OPERATOR_MULTIPLY:
 			 case node_type::OPERATOR_DIVIDE:
 			 case node_type::OPERATOR_MODULO:     return translate_binary_math_operator(ast_node);
 
-			// // literals
+			// literals
 			case node_type::NUMERICAL_LITERAL:    return translate_numerical_literal(ast_node);
 			case node_type::STRING_LITERAL:       return translate_string_literal(ast_node);
 			case node_type::BOOL_LITERAL:         return translate_bool_literal(ast_node);
-			// default: NOT_IMPLEMENTED();
 			default: PANIC("irgen for node '{}' is not implemented", ast_node->type.to_string());
 		}
 
@@ -267,7 +263,7 @@ namespace sigma {
 			default: NOT_IMPLEMENTED();
 		}
 
-		return ir::data_type();
+		return {};
 	}
 
 	auto ir_translator::translate() -> ir::module {

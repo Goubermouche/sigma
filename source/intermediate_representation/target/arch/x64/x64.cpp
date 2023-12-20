@@ -41,7 +41,7 @@ namespace sigma::ir {
 	void x64_architecture::resolve_stack_usage(codegen_context& context) {
 		u64 caller_usage = context.caller_usage;
 
-		if(context.t.get_abi() == abi::WIN_64 && caller_usage > 0 && caller_usage < 4) {
+		if(context.target.get_abi() == abi::WIN_64 && caller_usage > 0 && caller_usage < 4) {
 			caller_usage = 4;
 		}
 
@@ -330,7 +330,7 @@ namespace sigma::ir {
 	void x64_architecture::emit_function_epilogue(
 		const codegen_context& context, utility::byte_buffer& bytecode
 	) {
-		ASSERT(context.func->exit_node != nullptr, "no exit node found");
+		ASSERT(context.function->exit_node != nullptr, "no exit node found");
 
 		if(context.stack_usage <= 16) {
 			bytecode.append_byte(0xC3);
@@ -355,7 +355,7 @@ namespace sigma::ir {
 		bytecode.append_byte(0x58 + x64::gpr::RBP);
 
 		// ret
-		const handle<node> remote_procedure_call = context.func->exit_node->inputs[2];
+		const handle<node> remote_procedure_call = context.function->exit_node->inputs[2];
 
 		if(
 			remote_procedure_call->ty == node::PROJECTION &&

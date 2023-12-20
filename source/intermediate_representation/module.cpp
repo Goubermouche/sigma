@@ -32,17 +32,14 @@ namespace sigma::ir {
 
 		// go through all declared functions and run codegen
 		for (const handle<function>& function : m_functions) {
-			// utility::console::out << "compiling function: " << function->sym.name << '\n';
-
-			// every function has its own unique work list (thread safe), this list
-			// is reused in all passes of the given function so that we don't have to
-			// reallocate memory needlessly
+			// every function has its own unique work list (thread safe), this list is reused in all passes
+			// of the given function so that we don't have to reallocate memory needlessly
 			work_list function_work_list;
 
 			// initialize the transformation pass
 			transformation_context transformation {
-				.func  = function,
-				.work = &function_work_list
+				.function = function,
+				.work = function_work_list
 			};
 
 			// run our transformations
@@ -51,9 +48,9 @@ namespace sigma::ir {
 
 			// initialize the code generation pass
 			codegen_context codegen {
-				.func = function,
-				.work = &function_work_list,
-				.t = m_codegen.get_target(),
+				.function = function,
+				.target = m_codegen.get_target(),
+				.work = function_work_list,
 				.intervals = m_codegen.get_register_intervals()
 			};
 
@@ -65,10 +62,6 @@ namespace sigma::ir {
 			determine_live_ranges(codegen);
 			register_allocator->allocate(codegen);
 			utility::byte_buffer bytecode = m_codegen.emit_bytecode(codegen);
-
-			// for(const auto byte : bytecode) {
-			// 	utility::console::print("{} ", byte.to_hex());
-			// }
 
 			// debug - emit an asm-like version of the function
 			assembly.append(m_codegen.disassemble(bytecode, codegen));

@@ -16,7 +16,7 @@ namespace sigma::ir {
 
 		// create intervals 
 		for (u64 i = context.basic_block_order.size(); i-- > 0;) {
-			handle<node> basic_block = context.work->items[context.basic_block_order[i]];
+			handle<node> basic_block = context.work.items[context.basic_block_order[i]];
 			const handle machine_block = &context.machine_blocks.at(basic_block);
 			const u64 block_start = machine_block->start;
 			const u64 black_end = machine_block->end + 2;
@@ -133,7 +133,7 @@ namespace sigma::ir {
 
 		// move the resolver
 		for(const u64 block_order : context.basic_block_order) {
-			handle<node> basic_block = context.work->items[block_order];
+			handle<node> basic_block = context.work.items[block_order];
 			auto machine_block = &context.machine_blocks.at(basic_block);
 			const auto end_node = machine_block->end_node;
 
@@ -275,7 +275,7 @@ namespace sigma::ir {
 	}
 
 	void linear_scan_allocator::mark_callee_saved_constraints(const codegen_context& context) {
-		const parameter_descriptor descriptor = context.t.get_parameter_descriptor();
+		const parameter_descriptor descriptor = context.target.get_parameter_descriptor();
 
 		// don't include RBP and RSP registers
 		u32 callee_saved_gp_registers = ~descriptor.caller_saved_gpr_count;

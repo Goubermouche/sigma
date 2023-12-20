@@ -4,8 +4,8 @@
 
 namespace sigma::ir {
 	struct transformation_context {
-		handle<function> func;
-		handle<work_list> work;
+		handle<function> function;
+		work_list& work;
 
 		// locals 
 		std::vector<handle<node>> locals;

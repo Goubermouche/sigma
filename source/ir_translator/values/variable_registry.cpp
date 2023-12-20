@@ -32,4 +32,3 @@ namespace sigma::detail {
 		ASSERT(false, "unknown variable referenced");
 	}
 } // namespace sigma::detail
-

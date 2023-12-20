@@ -9,14 +9,9 @@ namespace sigma {
 
 	class ir_translator {
 	public:
-		static auto translate(
-			compilation_context& context, ir::target target
-		) -> ir::module;
+		static auto translate(compilation_context& context, ir::target target) -> ir::module;
 	private:
-		ir_translator(
-			compilation_context& context, ir::target target
-		);
-
+		ir_translator(compilation_context& context, ir::target target);
 		auto translate() -> ir::module;
 
 		handle<ir::node> translate_node(handle<node> ast_node);

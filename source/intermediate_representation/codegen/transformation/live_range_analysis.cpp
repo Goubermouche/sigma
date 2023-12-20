@@ -9,7 +9,7 @@ namespace sigma::ir {
 		context.machine_blocks.reserve(context.basic_block_order.size());
 
 		for(const u64 block_order : context.basic_block_order) {
-			auto target = context.work->items[block_order];
+			auto target = context.work.items[block_order];
 			const auto basic_block = &context.graph.blocks.at(target);
 
 			const machine_block machine_block{
@@ -32,7 +32,7 @@ namespace sigma::ir {
 			);
 
 			// initial label
-			auto basic_block = context.work->items.front();
+			auto basic_block = context.work.items.front();
 			auto machine_block = &context.machine_blocks.at(basic_block);
 			u64 timeline = 4;
 
@@ -86,21 +86,21 @@ namespace sigma::ir {
 			machine_block->end = timeline;
 		}
 
-		const u64 item_base = context.work->items.size();
+		const u64 item_base = context.work.items.size();
 
 		// add all our nodes into the work list
 		for (const u64 block_order : context.basic_block_order) {
-			auto target = context.work->items[block_order];
-			context.work->items.push_back(target);
+			auto target = context.work.items[block_order];
+			context.work.items.push_back(target);
 
 			const auto machine_block = &context.machine_blocks.at(target);
 			machine_block->live_in.copy(machine_block->gen);
 		}
 
 		// generate global live sets
-		while (context.work->items.size() > item_base) {
-			handle<node> basic_block = context.work->items.back();
-			context.work->items.pop_back();
+		while (context.work.items.size() > item_base) {
+			handle<node> basic_block = context.work.items.back();
+			context.work.items.pop_back();
 
 			const auto machine_block = &context.machine_blocks.at(basic_block);
 			const auto block_end = machine_block->end_node;
@@ -145,7 +145,7 @@ namespace sigma::ir {
 				!(basic_block->ty == node::PROJECTION && basic_block->inputs[0]->ty == node::ENTRY)
 			) {
 				for (u64 i = 0; i < basic_block->inputs.get_size(); ++i) {
-					context.work->items.push_back(context.graph.get_predecessor(basic_block, i));
+					context.work.items.push_back(context.graph.get_predecessor(basic_block, i));
 				}
 			}
 		}

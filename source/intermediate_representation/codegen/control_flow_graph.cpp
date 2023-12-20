@@ -52,15 +52,15 @@ namespace sigma::ir {
 
 	auto control_flow_graph::compute_reverse_post_order(const codegen_context& context) -> control_flow_graph {
 		ASSERT(
-			context.work->items.empty(), 
+			context.work.items.empty(),
 			"invalid work list (expected an empty work list)"
 		);
 
 		std::vector<handle<node>> stack;
 		control_flow_graph graph;
 
-		const handle<node> entry = context.func->entry_node;
-		context.work->visit(entry);
+		const handle<node> entry = context.function->entry_node;
+		context.work.visit(entry);
 		stack.push_back(entry);
 
 		// depth-first search
@@ -79,7 +79,7 @@ namespace sigma::ir {
 					top->use->n->ty == node::REGION &&
 					!top->inputs[0]->is_critical_edge(top)
 				) {
-					if(!context.work->visit(top->use->n)) {
+					if(!context.work.visit(top->use->n)) {
 						// we've already seen this block, skip it
 						continue;
 					}
@@ -93,7 +93,7 @@ namespace sigma::ir {
 				basic_block.id = graph.blocks.size();
 
 				while(!top->is_terminator()) {
-					handle<node> next = context.work->mark_next_control(top);
+					handle<node> next = context.work.mark_next_control(top);
 
 					if(next == nullptr) {
 						break;
@@ -107,7 +107,7 @@ namespace sigma::ir {
 				basic_block.start           = block_entry;
 				basic_block.end             = top;
 
-				context.work->items.push_back(block_entry);
+				context.work.items.push_back(block_entry);
 				graph.blocks[block_entry] = basic_block;
 			}
 
@@ -120,7 +120,7 @@ namespace sigma::ir {
 				for(handle<user> user = top->use; user; user = user->next_user) {
 					const handle<node> successor = user->n;
 
-					if(successor->is_control() && context.work->visit(successor)) {
+					if(successor->is_control() && context.work.visit(successor)) {
 						ASSERT(
 							successor->ty == node::PROJECTION,
 							"successor node of a branch must be a projection"
@@ -137,7 +137,7 @@ namespace sigma::ir {
 				for(handle<user> user = top->use; user; user = user->next_user) {
 					const handle<node> successor = user->n;
 
-					if(successor->is_control() && context.work->visit(successor)) {
+					if(successor->is_control() && context.work.visit(successor)) {
 						stack.push_back(successor);
 					}
 				}

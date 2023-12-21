@@ -16,7 +16,6 @@ i32 test(i32 a) {
 
 i32 main() {
 	bool value = true;
-	value = false;
 
 	if(value) {
 		printf("true\n");
@@ -24,6 +23,8 @@ i32 main() {
 	else {
 		printf("false\n");
 	}
+
+	puts("Hello, world!\n");
 
 	ret 0;
 }

@@ -34,7 +34,7 @@ namespace sigma::ir {
 	auto node::get_fallthrough() -> handle<node> {
 		if(
 			m_type == type::PROJECTION &&
-			dt.ty == data_type::CONTROL &&
+			dt == data_type::base::CONTROL &&
 			inputs[0] != type::ENTRY
 		) {
 			// if it's single user and that user is the terminator we can skip it in the fallthrough logic
@@ -72,7 +72,7 @@ namespace sigma::ir {
 			case type::MEMSET:
 				return true;
 			case type::PROJECTION:
-				return dt.ty == data_type::CONTROL;
+				return dt == data_type::base::CONTROL;
 			// control flow
 			case type::ENTRY:
 			case type::REGION:
@@ -91,11 +91,11 @@ namespace sigma::ir {
 
 	auto node::is_control() const -> bool {
 		// easy case
-		if (dt.ty == data_type::CONTROL) {
+		if (dt == data_type::base::CONTROL) {
 			return true;
 		}
 
-		if (dt.ty != data_type::TUPLE) {
+		if (dt != data_type::base::TUPLE) {
 			return false;
 		}
 
@@ -180,7 +180,7 @@ namespace sigma::ir {
 
 	auto node::is_mem_out_op() const  -> bool {
 		return
-			dt.ty == data_type::MEMORY ||
+			dt == data_type::base::MEMORY ||
 			(m_type >= type::STORE && m_type < type::ATOMIC_CAS) ||
 			(m_type >= type::CALL && m_type <= type::SAFE_POINT_POLL);
 	}

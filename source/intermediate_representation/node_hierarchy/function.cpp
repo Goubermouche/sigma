@@ -27,7 +27,7 @@ namespace sigma::ir {
 		active_control_node = nullptr;
 
 		// just add the edge directly.
-		ASSERT(control->dt.ty == data_type::CONTROL, "invalid edge");
+		ASSERT(control->dt == data_type::base::CONTROL, "invalid edge");
 		add_input_late(target, control);
 		add_memory_edge(control, memory, target);
 	}
@@ -133,7 +133,7 @@ namespace sigma::ir {
 
 	auto function::create_signed_integer(i64 value, u8 bit_width) -> handle<node> {
 		const handle<node> integer = create_node<ir::integer>(node::type::INTEGER_CONSTANT, 1);
-		integer->dt = data_type(data_type::INTEGER, bit_width);
+		integer->dt = data_type(data_type::base::INTEGER, bit_width);
 
 		auto& property = integer->get<ir::integer>();
 		property.bit_width = bit_width;
@@ -256,7 +256,7 @@ namespace sigma::ir {
 	}
 
 	auto function::create_projection(data_type dt, handle<node> source, u64 index) -> handle<node> {
-		ASSERT(source->dt.ty == data_type::TUPLE, "projections must be of type tuple");
+		ASSERT(source->dt == data_type::base::TUPLE, "projections must be of type tuple");
 		const handle<node> projection = create_node<ir::projection>(node::type::PROJECTION, 1);
 
 		projection->get<ir::projection>().index = index;

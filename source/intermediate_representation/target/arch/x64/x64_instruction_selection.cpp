@@ -15,7 +15,7 @@ namespace sigma::ir {
 			for (handle<user> use = basic_block->use; use; use = use->next_user) {
 				const handle<node> use_node = use->target;
 
-				if (use_node == node::type::PHI && use_node->dt.ty != data_type::MEMORY) {
+				if (use_node == node::type::PHI && use_node->dt != data_type::base::MEMORY) {
 					context.virtual_values[use_node->global_value_index] = virtual_value();
 					context.work.visit(use_node);
 				}
@@ -106,7 +106,7 @@ namespace sigma::ir {
 			for (handle<user> user = block_entry->use; user; user = user->next_user) {
 				handle<node> user_node = user->target;
 
-				if (user_node == node::type::PHI && user_node->dt.ty != data_type::MEMORY) {
+				if (user_node == node::type::PHI && user_node->dt != data_type::base::MEMORY) {
 					// copy the phi into a temporary
 					const phi_value phi{
 						.phi = user_node,
@@ -155,7 +155,7 @@ namespace sigma::ir {
 			dummy.set_type(static_cast<instruction::type::underlying>(9999));
 			context.head = &dummy;
 
-			if (target != node::type::MUL_PAIR && (target->dt.ty == data_type::TUPLE || target->dt.ty == data_type::CONTROL || target->dt.ty == data_type::MEMORY)) {
+			if (target != node::type::MUL_PAIR && (target->dt == data_type::base::TUPLE || target->dt == data_type::base::CONTROL || target->dt == data_type::base::MEMORY)) {
 				if (target == node::type::BRANCH) {
 					ASSERT(old_phi_count == 0, "branches don't get phi edges, they should've been split");
 				}
@@ -279,7 +279,7 @@ namespace sigma::ir {
 
 				for (u64 i = 0; i < context.function->parameter_count; ++i) {
 					handle<node> projection = params[3 + i];
-					bool is_float = projection->dt.ty == data_type::FLOAT;
+					bool is_float = projection->dt == data_type::base::FLOAT;
 					i32 reg_limit = is_float ? xmm_param_count : gpr_param_count;
 					i32 id = is_float ? used_xmm : used_gpr;
 
@@ -416,7 +416,7 @@ namespace sigma::ir {
 						return_registers[i] = allocate_node_register(context, return_node);
 						return_count++;
 
-						if (return_node->dt.ty == data_type::FLOAT) {
+						if (return_node->dt == data_type::base::FLOAT) {
 							caller_saved_xmm_registers &= ~(1ull << (x64::xmm::XMM0 + static_cast<u8>(i)));
 						}
 						else {
@@ -450,7 +450,7 @@ namespace sigma::ir {
 					handle<node> parameter_node = n->inputs[i];
 					data_type param_dt = parameter_node->dt;
 
-					bool use_xmm = param_dt.ty == data_type::FLOAT;
+					bool use_xmm = param_dt == data_type::base::FLOAT;
 					u8 reg = use_xmm ? used_xmm_count : used_gpr_count;
 
 					if (is_systemv) {
@@ -512,7 +512,7 @@ namespace sigma::ir {
 				// perform last minute copies (this avoids keeping parameter registers alive for too long)
 				for (u64 i = 0; i < in_count; ++i) {
 					data_type dt = n->inputs[3 + i]->dt;
-					bool use_xmm = dt.ty == data_type::FLOAT;
+					bool use_xmm = dt == data_type::base::FLOAT;
 
 					context.append_instruction(create_move(
 						context, dt, static_cast<u8>(ins[i]), parameter_registers[i]
@@ -593,7 +593,7 @@ namespace sigma::ir {
 
 				for (u8 i = 0; i < 2; ++i) {
 					if (return_nodes[i] != nullptr) {
-						if (return_nodes[i]->dt.ty == data_type::FLOAT) {
+						if (return_nodes[i]->dt == data_type::base::FLOAT) {
 							*dst_ins++ = x64::register_class::FIRST_XMM + i;
 						}
 						else {
@@ -619,7 +619,7 @@ namespace sigma::ir {
 						ASSERT(return_registers[i].is_valid(), "invalid return register detected");
 						data_type dt = return_nodes[i]->dt;
 
-						if (dt.ty == data_type::FLOAT) {
+						if (dt == data_type::base::FLOAT) {
 							context.hint_reg(return_registers[i].id, x64::register_class::FIRST_GPR + i);
 
 							context.append_instruction(create_move(
@@ -644,11 +644,11 @@ namespace sigma::ir {
 
 				// mask off bits
 				u64 bits_in_type;
-				if(n->dt.ty == data_type::POINTER) {
+				if(n->dt == data_type::base::POINTER) {
 					bits_in_type = 64;
 				}
 				else {
-					bits_in_type = n->dt.bit_width;
+					bits_in_type = n->dt.get_bit_width();
 				}
 
 				if (bits_in_type < 64) {
@@ -717,7 +717,7 @@ namespace sigma::ir {
 
 					context.append_instruction(inst);
 				}
-				else if (try_for_imm32(n->inputs[2], n->dt.bit_width, immediate)) {
+				else if (try_for_imm32(n->inputs[2], n->dt.get_bit_width(), immediate)) {
 					n->inputs[2]->use_node(context);
 
 					if (node_type == node::type::ADD) {
@@ -755,14 +755,14 @@ namespace sigma::ir {
 				context.hint_reg(destination.id, left);
 
 				data_type dt = n->dt;
-				ASSERT(dt.ty == data_type::INTEGER, "invalid type for a MUL op");
+				ASSERT(dt == data_type::base::INTEGER, "invalid type for a MUL op");
 
-				if(dt.bit_width < 16) {
-					dt.bit_width = 16;
+				if(dt.get_bit_width() < 16) {
+					dt.set_bit_width(16);
 				}
 
 				i32 x;
-				if(try_for_imm32(n->inputs[2], dt.bit_width, x)) {
+				if(try_for_imm32(n->inputs[2], dt.get_bit_width(), x)) {
 					const handle<virtual_value> v = context.lookup_virtual_value(n->inputs[2]);
 					if(v) {
 						v->use_count -= 1;
@@ -798,7 +798,7 @@ namespace sigma::ir {
 					auto dt = n->inputs[3 + i]->dt;
 
 					// copy to the return register
-					if (dt.ty == data_type::FLOAT) {
+					if (dt == data_type::base::FLOAT) {
 						NOT_IMPLEMENTED();
 					}
 					else {
@@ -852,7 +852,7 @@ namespace sigma::ir {
 					source_node = source_node->inputs[2];
 				}
 				else {
-					if (store_data_type.ty == data_type::FLOAT) {
+					if (store_data_type == data_type::base::FLOAT) {
 						store_op = instruction::type::FP_MOV;
 					}
 					else {
@@ -860,7 +860,7 @@ namespace sigma::ir {
 					}
 				}
 
-				if (try_for_imm32(source_node, source_node->dt.bit_width, immediate_value)) {
+				if (try_for_imm32(source_node, source_node->dt.get_bit_width(), immediate_value)) {
 					source_node->use_node(context);
 
 					const handle<instruction> store_inst = select_array_access_instruction(
@@ -900,7 +900,6 @@ namespace sigma::ir {
 			}
 
 			case node::type::BRANCH: {
-				handle<node> bb = n->get_parent_region();
 				auto& br = n->get<branch>();
 
 				std::vector<u64> successors(br.successors.size());
@@ -979,7 +978,7 @@ namespace sigma::ir {
 			case node::type::LOAD:
 			case node::type::ATOMIC_LOAD: {
 				instruction::type mov_op;
-				if(n->dt.ty == data_type::FLOAT) {
+				if(n->dt == data_type::base::FLOAT) {
 					mov_op = instruction::type::FP_MOV;
 				}
 				else {
@@ -1011,7 +1010,7 @@ namespace sigma::ir {
 					// use stack space past the n registers we're given
 					if (index >= param_gpr_count) {
 						instruction::type i;
-						if(n->dt.ty == data_type::FLOAT) {
+						if(n->dt == data_type::base::FLOAT) {
 							i = instruction::type::FP_MOV;
 						}
 						else {
@@ -1105,7 +1104,7 @@ namespace sigma::ir {
 
 	auto x64_architecture::select_instruction_cmp(codegen_context& context, handle<node> target) -> x64::conditional {
 		bool invert = false;
-		if (target == node::type::CMP_EQ && target->dt.ty == data_type::INTEGER && target->dt.bit_width == 1 && target->inputs[2] == node::type::INTEGER_CONSTANT) {
+		if (target == node::type::CMP_EQ && target->dt == data_type::base::INTEGER && target->dt.get_bit_width() == 1 && target->inputs[2] == node::type::INTEGER_CONSTANT) {
 			const auto& b = target->inputs[2]->get<integer>();
 			if (b.value == 0) {
 				invert = true;
@@ -1123,7 +1122,7 @@ namespace sigma::ir {
 			const reg src = allocate_node_register(context, target);
 			const data_type dt = target->dt;
 
-			if (dt.ty == data_type::FLOAT) {
+			if (dt == data_type::base::FLOAT) {
 				NOT_IMPLEMENTED();
 			}
 			else {
@@ -1174,7 +1173,7 @@ namespace sigma::ir {
 				for (auto use = destination->use; use; use = use->next_user) {
 					const handle<node> phi = use->target;
 
-					if (phi == node::type::PHI && phi->dt.ty == data_type::MEMORY) {
+					if (phi == node::type::PHI && phi->dt == data_type::base::MEMORY) {
 						dfs_schedule_phi(context, bb, phi, phi_index);
 					}
 				}
@@ -1183,7 +1182,7 @@ namespace sigma::ir {
 				for (auto use = destination->use; use; use = use->next_user) {
 					const handle<node> phi = use->target;
 
-					if (phi == node::type::PHI && phi->dt.ty != data_type::MEMORY) {
+					if (phi == node::type::PHI && phi->dt != data_type::base::MEMORY) {
 						dfs_schedule_phi(context, bb, phi, phi_index);
 					}
 				}
@@ -1217,7 +1216,7 @@ namespace sigma::ir {
 		}
 
 		// push outputs (projections, if they apply)
-		if (n->dt.ty == data_type::TUPLE && n != node::type::BRANCH) {
+		if (n->dt == data_type::base::TUPLE && n != node::type::BRANCH) {
 			for (auto use = n->use; use; use = use->next_user) {
 				const handle<node> projection = use->target;
 
@@ -1232,7 +1231,7 @@ namespace sigma::ir {
 		const handle<node> value = phi->inputs[1 + phi_index];
 
 		// reserve phi space
-		if (phi->dt.ty != data_type::MEMORY) {
+		if (phi->dt != data_type::base::MEMORY) {
 			context.phi_values.emplace_back(phi_value{ 
 				.phi = phi, 
 				.target = value
@@ -1243,7 +1242,7 @@ namespace sigma::ir {
 	}
 
 	auto x64_architecture::classify_register_class(const data_type& data_type) -> u8 {
-		return data_type.ty == data_type::FLOAT ? x64::register_class::XMM : x64::register_class::GPR;
+		return data_type == data_type::base::FLOAT ? x64::register_class::XMM : x64::register_class::GPR;
 	}
 
 	auto x64_architecture::allocate_virtual_register(codegen_context& context, handle<node> target, const data_type& data_type) -> reg {
@@ -1522,7 +1521,7 @@ namespace sigma::ir {
 	}
 
 	auto x64_architecture::legalize_data_type(const data_type& data_type) -> i32 {
-		if (data_type.ty == data_type::type::FLOAT) {
+		if (data_type == data_type::base::FLOAT) {
 			NOT_IMPLEMENTED();
 		}
 
@@ -1531,16 +1530,15 @@ namespace sigma::ir {
 	}
 
 	auto x64_architecture::legalize_integer_data_type(u64* out_mask, const data_type& data_type) -> x64::data_type {
-		const data_type::type type = data_type.ty;
-		ASSERT(type == data_type::INTEGER || type == data_type::POINTER, "invalid type for integer legalization");
+		ASSERT(data_type == data_type::base::INTEGER || data_type == data_type::base::POINTER, "invalid type for integer legalization");
 
-		if (type == data_type::POINTER) {
+		if (data_type == data_type::base::POINTER) {
 			*out_mask = 0;
 			return x64::QWORD;
 		}
 
 		x64::data_type t = x64::NONE;
-		const u8 bit_width = data_type.bit_width;
+		const u8 bit_width = data_type.get_bit_width();
 		i32 bits = 0;
 
 		if (bit_width <= 8) {

@@ -12,13 +12,13 @@ namespace sigma::ir {
 		return dom ? dom->start : nullptr;
 	}
 
-	auto control_flow_graph::get_predecessor(handle<node> target, u64 i) -> handle<node> {
-		const auto it = blocks.find(target->inputs[i]);
+	auto control_flow_graph::get_predecessor(handle<node> target, u64 index) -> handle<node> {
+		const auto it = blocks.find(target->inputs[index]);
 		if (it != blocks.end()) {
-			return target->inputs[i];
+			return target->inputs[index];
 		}
 
-		return target->get_predecessor(i);
+		return target->get_predecessor(index);
 	}
 
 	auto control_flow_graph::try_get_traversal_index(handle<node> target) -> u64 {
@@ -73,18 +73,18 @@ namespace sigma::ir {
 				// a branch's projection that refers to a region would rather be
 				// coalesced but won't if it's a critical edge
 				if (
-					top->ty == node::PROJECTION &&
-					top->inputs[0]->ty == node::BRANCH &&
+					top == node::type::PROJECTION &&
+					top->inputs[0] == node::type::BRANCH &&
 					top->use->next_user == nullptr &&
-					top->use->n->ty == node::REGION &&
+					top->use->target == node::type::REGION &&
 					!top->inputs[0]->is_critical_edge(top)
 				) {
-					if(!context.work.visit(top->use->n)) {
+					if(!context.work.visit(top->use->target)) {
 						// we've already seen this block, skip it
 						continue;
 					}
 
-					top = top->use->n;
+					top = top->use->target;
 				}
 
 				// walk until we find a terminator
@@ -112,17 +112,17 @@ namespace sigma::ir {
 			}
 
 			// add successors
-			if(top->ty == node::BRANCH) {
-				u64 successor_count = top->get<branch>().successors.size();
+			if(top == node::type::BRANCH) {
+				const u64 successor_count = top->get<branch>().successors.size();
 				stack.resize(stack.size() + successor_count);
 				handle<node>* top_nodes = &stack.back();
 
 				for(handle<user> user = top->use; user; user = user->next_user) {
-					const handle<node> successor = user->n;
+					const handle<node> successor = user->target;
 
 					if(successor->is_control() && context.work.visit(successor)) {
 						ASSERT(
-							successor->ty == node::PROJECTION,
+							successor == node::type::PROJECTION,
 							"successor node of a branch must be a projection"
 						);
 
@@ -130,12 +130,10 @@ namespace sigma::ir {
 						top_nodes[-index] = successor;
 					}
 				}
-
-				// stack.append_range(successors);
 			}
 			else {
 				for(handle<user> user = top->use; user; user = user->next_user) {
-					const handle<node> successor = user->n;
+					const handle<node> successor = user->target;
 
 					if(successor->is_control() && context.work.visit(successor)) {
 						stack.push_back(successor);
@@ -146,4 +144,4 @@ namespace sigma::ir {
 
 		return graph;
 	}
-}
+} // namespace sigma::ir

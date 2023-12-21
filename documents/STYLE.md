@@ -31,7 +31,6 @@ toil both for authors of C++ code in the Sigma project and for code reviewers.
 -   Declare at most one variable at a time.
 -   Namespace closures should always provide a comment specifying which namespace is ending.
 -   Macro block closures should always provide a comment specifying which block is ending.
--   Your code should never exceed 100 characters/line, if this happens, its better to separate the statement into multiple sub statements, or space the entire statement into multiple lines.
 -   Use the `using`-based type alias syntax instead of `typedef`.
 -   Don't use `using` to support unqualified lookup on `std` types.
 -   Always use braces for conditional, `switch`, and loop statements, even when the body is a single statement, the opening brace should always be on the same line as the closing parenthesis.

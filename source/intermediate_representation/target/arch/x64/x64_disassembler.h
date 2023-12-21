@@ -75,34 +75,11 @@ namespace sigma::ir {
 
 	class x64_disassembler : public disassembler {
 	public:
-		auto disassemble(
-			const utility::byte_buffer& bytecode, const codegen_context& context
-		) -> utility::string override;
+		auto disassemble(const utility::byte_buffer& bytecode, const codegen_context& context) -> utility::string override;
 	private:
-		static handle<symbol_patch> disassemble_block(
-			const utility::byte_buffer& bytecode,
-			const codegen_context& context,
-			handle<symbol_patch> patch,
-			u64 basic_block, 
-			utility::range<u64> range,
-			utility::string& assembly
-		);
-
-		static bool disassemble_instruction(
-			const utility::byte_buffer& bytecode,
-			x64::x64_instruction& inst
-		);
-
-		static ptr_diff disassemble_memory_operand(
-			const utility::byte_buffer& bytecode,
-			u64 length,
-			i32 reg_slot,
-			u8 mod,
-			u8 rm,
-			u8 rex,
-			x64::x64_instruction& inst
-		);
-
+		static handle<symbol_patch> disassemble_block(const utility::byte_buffer& bytecode, const codegen_context& context, handle<symbol_patch> patch, u64 basic_block, utility::range<u64> range, utility::string& assembly);
+		static bool disassemble_instruction(const utility::byte_buffer& bytecode, x64::x64_instruction& inst);
+		static ptr_diff disassemble_memory_operand(const utility::byte_buffer& bytecode, u64 length, i32 reg_slot, u8 mod, u8 rm, u8 rex, x64::x64_instruction& inst);
 		static u64 emit_get_label(const codegen_context& context, u64 position);
 
 		static std::array<u16, 256> get_first_table();

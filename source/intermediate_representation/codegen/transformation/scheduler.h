@@ -3,4 +3,4 @@
 
 namespace sigma::ir {
 	void schedule_node_hierarchy(codegen_context& context);
-}
+} // namespace sigma::ir

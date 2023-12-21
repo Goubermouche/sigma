@@ -26,13 +26,13 @@ namespace sigma::ir {
 		class_type cl = invalid_class;
 	};
 
-	enum class scale : u8 {
+	enum class memory_scale : u8 {
 		x1, x2, x4, x8
 	};
 
 	struct mem {
 		u8 index;
-		scale sc;
+		memory_scale scale;
 		i32 displacement;
 	};
-}
+} // namespace sigma::ir

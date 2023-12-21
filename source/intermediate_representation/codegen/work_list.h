@@ -13,4 +13,4 @@ namespace sigma::ir {
 		std::unordered_set<handle<node>> visited_items;
 		std::vector<handle<node>> items;
 	};
-}
+}// namespace sigma::ir

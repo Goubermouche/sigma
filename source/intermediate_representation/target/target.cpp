@@ -3,8 +3,7 @@
 #include "intermediate_representation/target/system/win/win.h"
 
 namespace sigma::ir {
-	target::target(arch arch, system system)
-		: m_arch(arch), m_system(system) {
+	target::target(arch arch, system system) : m_arch(arch), m_system(system) {
 		m_abi = system == system::WINDOWS ? abi::WIN_64 : abi::SYSTEMV;
 	}
 
@@ -24,9 +23,9 @@ namespace sigma::ir {
 		switch(m_abi) {
 			case abi::SYSTEMV: return systemv::parameter_descriptor;
 			case abi::WIN_64:  return win::parameter_descriptor;
+			default: PANIC("unimplemented ABI referenced ('{}')", static_cast<u8>(m_abi));
 		}
 
-		NOT_IMPLEMENTED();
 		return {};
 	}
 }

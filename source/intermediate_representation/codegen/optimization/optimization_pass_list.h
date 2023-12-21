@@ -19,4 +19,4 @@ namespace sigma::ir {
 	private:
 		std::vector<s_ptr<optimization_pass>> m_passes;
 	};
-}
+} // namespace sigma::ir

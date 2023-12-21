@@ -2,57 +2,32 @@
 #include "intermediate_representation/target/arch/x64/x64.h"
 
 namespace sigma::ir {
-	auto x64_disassembler::disassemble(
-		const utility::byte_buffer& bytecode, const codegen_context& context
-	) -> utility::string {
+	auto x64_disassembler::disassemble(const utility::byte_buffer& bytecode, const codegen_context& context) -> utility::string {
 		utility::string assembly;
-		assembly.append("{}:\n", context.function->sym.name);
+		assembly.append("{}:\n", context.function->symbol.name);
 
 		// disassemble the prologue
-		disassemble_block(
-			bytecode, 
-			context,
-			nullptr,
-			std::numeric_limits<u64>::max(),
-			{ 0, context.prologue_length },
-			assembly
-		);
+		disassemble_block(bytecode, context, nullptr, std::numeric_limits<u64>::max(), { 0, context.prologue_length }, assembly);
 
 		// disassemble the function body
 		handle<symbol_patch> patch = context.first_patch;
 
 		for(u64 i = 0; i < context.basic_block_order.size(); ++i) {
 			const u64 block_index = context.basic_block_order[i];
-			handle<node> basic_block = context.work.items[block_index];
-
 			const u64 start = context.labels[block_index] & ~0x80000000;
-			u64 end   = bytecode.get_size();
+			u64 end = bytecode.get_size();
 
 			if(i + 1 < context.basic_block_order.size()) {
 				end = context.labels[context.basic_block_order[i + 1]] & ~0x80000000;
 			}
 
-			patch = disassemble_block(
-				bytecode,
-				context,
-				patch,
-				block_index,
-				{ start, end },
-				assembly
-			);
+			patch = disassemble_block(bytecode, context, patch, block_index, { start, end }, assembly);
 		}
 
 		return assembly;
 	}
 
-	handle<symbol_patch> x64_disassembler::disassemble_block(
-		const utility::byte_buffer& bytecode,
-		const codegen_context& context,
-		handle<symbol_patch> patch,
-		u64 basic_block,
-		utility::range<u64> range,
-		utility::string& assembly
-	) {
+	handle<symbol_patch> x64_disassembler::disassemble_block(const utility::byte_buffer& bytecode, const codegen_context& context, handle<symbol_patch> patch, u64 basic_block, utility::range<u64> range, utility::string& assembly) {
 		if(basic_block != std::numeric_limits<u64>::max()) {
 			assembly.append(".bb{}:\n", basic_block);
 		}
@@ -60,9 +35,7 @@ namespace sigma::ir {
 		while(range.start < range.end) {
 			x64::x64_instruction inst;
 
-			if(!disassemble_instruction(
-				bytecode.get_slice(range.start, range.end - range.start), inst)
-			) {
+			if(!disassemble_instruction(bytecode.get_slice(range.start, range.end - range.start), inst)) {
 				range.start++;
 				assembly.append("  ERROR\n");
 				continue;
@@ -100,11 +73,7 @@ namespace sigma::ir {
 						mem = false;
 
 						if (inst.flags & x64::USE_RIP_MEM) {
-							const bool is_label = 
-								inst.opcode == 0xE8 || 
-								inst.opcode == 0xE9 || 
-								(inst.opcode >= 0x70 && inst.opcode <= 0x7F) || 
-								(inst.opcode >= 0x0F80 && inst.opcode <= 0x0F8F);
+							const bool is_label = inst.opcode == 0xE8 || inst.opcode == 0xE9 || (inst.opcode >= 0x70 && inst.opcode <= 0x7F) || (inst.opcode >= 0x0F80 && inst.opcode <= 0x0F8F);
 
 							if (!is_label) {
 								assembly.append("[");
@@ -140,9 +109,7 @@ namespace sigma::ir {
 							}
 
 							if (inst.memory.index != 255) {
-								assembly.append(
-									" + {}*{}", get_register_name(inst.memory.index, x64::QWORD), 1 << static_cast<u8>(inst.memory.sc)
-								);
+								assembly.append(" + {}*{}", get_register_name(inst.memory.index, x64::QWORD), 1 << static_cast<u8>(inst.memory.scale));
 							}
 
 							if (inst.memory.displacement > 0) {
@@ -179,17 +146,12 @@ namespace sigma::ir {
 
 						// special case for certain ops with two data types
 						if (inst.flags & x64::TWO_DATA_TYPES) {
-							assembly.append(
-								"{}", x64::get_register_name(inst.registers[i], inst.data_type_2)
-							);
-
+							assembly.append("{}", x64::get_register_name(inst.registers[i], inst.data_type_2));
 							continue;
 						}
 					}
 
-					assembly.append(
-						"{}", x64::get_register_name(inst.registers[i], inst.data_type_1)
-					);
+					assembly.append("{}", x64::get_register_name(inst.registers[i], inst.data_type_1));
 				}
 			}
 
@@ -200,9 +162,7 @@ namespace sigma::ir {
 		return patch;
 	}
 
-	bool x64_disassembler::disassemble_instruction(
-		const utility::byte_buffer& bytecode, x64::x64_instruction& inst
-	) {
+	bool x64_disassembler::disassemble_instruction(const utility::byte_buffer& bytecode, x64::x64_instruction& inst) {
 		inst = x64::x64_instruction();
 
 		for(u8 i = 0; i < 4; ++i) {
@@ -427,15 +387,7 @@ namespace sigma::ir {
 		}
 
 		// writes out the RM reg (or base and index)
-		const ptr_diff delta = disassemble_memory_operand(
-			bytecode.get_slice(current, bytecode.get_size()),
-			bytecode.get_size() - current,
-			rm_slot, 
-			mod, 
-			rm, 
-			rex, 
-			inst
-		);
+		const ptr_diff delta = disassemble_memory_operand(bytecode.get_slice(current, bytecode.get_size()), bytecode.get_size() - current, rm_slot, mod, rm, rex, inst);
 
 		if (delta < 0) {
 			return false;
@@ -446,10 +398,7 @@ namespace sigma::ir {
 		// immediates might use RX for an extended opcode
 		// imul's ternary is a special case
 		if (uses_imm || op == 0x68 || op == 0x69) {
-			if (
-				(enc == x64::op_encoding::OP_MI && inst.data_type_1 == x64::BYTE) ||
-				enc == x64::op_encoding::OP_MI8 || op == 0x68
-			) {
+			if ((enc == x64::op_encoding::OP_MI && inst.data_type_1 == x64::BYTE) || enc == x64::op_encoding::OP_MI8 || op == 0x68) {
 				if (current + 1 > bytecode.get_size()) {
 					return false;
 				}
@@ -475,15 +424,7 @@ namespace sigma::ir {
 		return true;
 	}
 
-	ptr_diff x64_disassembler::disassemble_memory_operand(
-		const utility::byte_buffer& bytecode,
-		u64 length, 
-		i32 reg_slot,
-		u8 mod, 
-		u8 rm, 
-		u8 rex,
-		x64::x64_instruction& inst
-	) {
+	ptr_diff x64_disassembler::disassemble_memory_operand(const utility::byte_buffer& bytecode, u64 length, i32 reg_slot, u8 mod, u8 rm, u8 rex, x64::x64_instruction& inst) {
 		if (mod == x64::DIRECT) {
 			inst.registers[reg_slot] = (rex & 1 ? 8 : 0) | rm;
 			return 0;
@@ -502,7 +443,7 @@ namespace sigma::ir {
 
 			const u8 sib = bytecode[current++];
 
-			const scale s = static_cast<scale>((sib >> 6));
+			const memory_scale s = static_cast<memory_scale>((sib >> 6));
 			const u8 index = (sib >> 3) & 7;
 			const u8 base = (sib & 7);
 
@@ -521,7 +462,7 @@ namespace sigma::ir {
 
 			inst.base = base_gpr;
 			inst.memory.index = index_gpr;
-			inst.memory.sc = s;
+			inst.memory.scale = s;
 		}
 		else {
 			if (mod == x64::INDIRECT && rm == x64::gpr::RBP) {
@@ -539,7 +480,7 @@ namespace sigma::ir {
 			else {
 				inst.base = (rex & 1 ? 8 : 0) | rm;
 				inst.memory.index = 255;
-				inst.memory.sc = scale::x1;
+				inst.memory.scale = memory_scale::x1;
 			}
 		}
 
@@ -701,52 +642,98 @@ namespace sigma::ir {
 
 		switch (opcode) {
 			case 0x0F0B: return "ud2";
-
 			case 0x0F180: return "prefetchnta";
 			case 0x0F181: return "prefetch0";
 			case 0x0F182: return "prefetch1";
 			case 0x0F183: return "prefetch2";
 
-			case 0x00: case 0x01: case 0x02: case 0x03:
-				return "add";
-			case 0x08: case 0x09: case 0x0A: case 0x0B:
-				return "or";
-			case 0x20: case 0x21: case 0x22: case 0x23:
-				return "and";
-			case 0x28: case 0x29: case 0x2A: case 0x2B:
-				return "sub";
-			case 0x30: case 0x31: case 0x32: case 0x33:
-				return "xor";
-			case 0x38: case 0x39: case 0x3A: case 0x3B:
-			case 0x80: case 0x81: case 0x82: case 0x83:
-				return "cmp";
-			case 0x88: case 0x89: case 0x8A: case 0x8B:
-				return "mov";
+			case 0x00:
+			case 0x01:
+			case 0x02:
+			case 0x03: return "add";
+			case 0x08: 
+			case 0x09:
+			case 0x0A:
+			case 0x0B: return "or";
+			case 0x20: 
+			case 0x21:
+			case 0x22:
+			case 0x23: return "and";
+			case 0x28: 
+			case 0x29:
+			case 0x2A:
+			case 0x2B: return "sub";
+			case 0x30:
+			case 0x31:
+			case 0x32:
+			case 0x33: return "xor";
+			case 0x38:
+			case 0x39:
+			case 0x3A:
+			case 0x3B:
+			case 0x80:
+			case 0x81:
+			case 0x82:
+			case 0x83: return "cmp";
+			case 0x88: 
+			case 0x89:
+			case 0x8A:
+			case 0x8B: return "mov";
 
-			case 0xA4: case 0xA5: return "movs";
-			case 0xAA: case 0xAB: return "stos";
-			case 0xAE: case 0xAF: return "scas";
+			case 0xA4: 
+			case 0xA5: return "movs";
+			case 0xAA: 
+			case 0xAB: return "stos";
+			case 0xAE: 
+			case 0xAF: return "scas";
 
-			case 0xC00: case 0xC10: case 0xD20: case 0xD30: return "rol";
-			case 0xC01: case 0xC11: case 0xD21: case 0xD31: return "ror";
-			case 0xC04: case 0xC14: case 0xD24: case 0xD34: return "shl";
-			case 0xC05: case 0xC15: case 0xD25: case 0xD35: return "shr";
-			case 0xC07: case 0xC17: case 0xD27: case 0xD37: return "sar";
+			case 0xC00:
+			case 0xC10:
+			case 0xD20:
+			case 0xD30: return "rol";
+			case 0xC01:
+			case 0xC11:
+			case 0xD21:
+			case 0xD31: return "ror";
+			case 0xC04:
+			case 0xC14:
+			case 0xD24:
+			case 0xD34: return "shl";
+			case 0xC05:
+			case 0xC15:
+			case 0xD25:
+			case 0xD35: return "shr";
+			case 0xC07:
+			case 0xC17:
+			case 0xD27:
+			case 0xD37: return "sar";
 
-			case 0xF60: case 0xF70: return "test";
-			case 0xF66: case 0xF76: return "div";
-			case 0xF67: case 0xF77: return "idiv";
+			case 0xF60: 
+			case 0xF70: return "test";
+			case 0xF66:
+			case 0xF76: return "div";
+			case 0xF67: 
+			case 0xF77: return "idiv";
 
-			case 0x810: case 0x830: return "add";
-			case 0x811: case 0x831: return "or";
-			case 0x814: case 0x834: return "and";
-			case 0x815: case 0x835: return "sub";
-			case 0x816: case 0x836: return "xor";
-			case 0x817: case 0x837: return "cmp";
-			case 0xC60: case 0xC70: return "mov";
-			case 0x84: case 0x85: return "test";
+			case 0x810:
+			case 0x830: return "add";
+			case 0x811: 
+			case 0x831: return "or";
+			case 0x814:
+			case 0x834: return "and";
+			case 0x815:
+			case 0x835: return "sub";
+			case 0x816: 
+			case 0x836: return "xor";
+			case 0x817:
+			case 0x837: return "cmp";
+			case 0xC60:
+			case 0xC70: return "mov";
+			case 0x84:
+			case 0x85: return "test";
 
-			case 0x0F10: case 0x0F11: return "mov";
+			case 0x0F10: 
+			case 0x0F11: return "mov";
 			case 0x0F58: return "add";
 			case 0x0F59: return "mul";
 			case 0x0F5C: return "sub";
@@ -761,11 +748,17 @@ namespace sigma::ir {
 			case 0x0F56: return "or";
 			case 0x0F57: return "xor";
 
-			case 0xB8: case 0xB9: case 0xBA: case 0xBB:
-			case 0xBC: case 0xBD: case 0xBE: case 0xBF:
-				return "mov";
+			case 0xB8:
+			case 0xB9:
+			case 0xBA:
+			case 0xBB:
+			case 0xBC:
+			case 0xBD:
+			case 0xBE:
+			case 0xBF: return "mov";
 
-			case 0x0FB6: case 0x0FB7: return "movzx";
+			case 0x0FB6: 
+			case 0x0FB7: return "movzx";
 
 			case 0x8D: return "lea";
 			case 0x90: return "nop";
@@ -774,12 +767,17 @@ namespace sigma::ir {
 			case 0x50: return "push";
 			case 0x58: return "pop";
 
-			case 0xE8: case 0xFF2: return "call";
-			case 0xEB: case 0xE9: case 0xFF4: return "jmp";
+			case 0xE8: 
+			case 0xFF2: return "call";
+			case 0xEB:
+			case 0xE9:
+			case 0xFF4: return "jmp";
 
 			case 0x0F1F: return "nop";
 			case 0x68: return "push";
-			case 0x0FAF: case 0x69: case 0x6B: return "imul";
+			case 0x0FAF: 
+			case 0x69:
+			case 0x6B: return "imul";
 
 			case 0x0F40: return "cmovo";
 			case 0x0F41: return "cmovno";
@@ -815,22 +813,38 @@ namespace sigma::ir {
 			case 0x0F9E: return "setle";
 			case 0x0F9F: return "setg";
 
-			case 0x0F80: case 0x70: return "jo";
-			case 0x0F81: case 0x71: return "jno";
-			case 0x0F82: case 0x72: return "jb";
-			case 0x0F83: case 0x73: return "jnb";
-			case 0x0F84: case 0x74: return "je";
-			case 0x0F85: case 0x75: return "jne";
-			case 0x0F86: case 0x76: return "jbe";
-			case 0x0F87: case 0x77: return "ja";
-			case 0x0F88: case 0x78: return "js";
-			case 0x0F89: case 0x79: return "jns";
-			case 0x0F8A: case 0x7A: return "jp";
-			case 0x0F8B: case 0x7B: return "jnp";
-			case 0x0F8C: case 0x7C: return "jl";
-			case 0x0F8D: case 0x7D: return "jge";
-			case 0x0F8E: case 0x7E: return "jle";
-			case 0x0F8F: case 0x7F: return "jg";
+			case 0x0F80: 
+			case 0x70: return "jo";
+			case 0x0F81: 
+			case 0x71: return "jno";
+			case 0x0F82: 
+			case 0x72: return "jb";
+			case 0x0F83:
+			case 0x73: return "jnb";
+			case 0x0F84:
+			case 0x74: return "je";
+			case 0x0F85:
+			case 0x75: return "jne";
+			case 0x0F86:
+			case 0x76: return "jbe";
+			case 0x0F87: 
+			case 0x77: return "ja";
+			case 0x0F88: 
+			case 0x78: return "js";
+			case 0x0F89:
+			case 0x79: return "jns";
+			case 0x0F8A:
+			case 0x7A: return "jp";
+			case 0x0F8B:
+			case 0x7B: return "jnp";
+			case 0x0F8C:
+			case 0x7C: return "jl";
+			case 0x0F8D:
+			case 0x7D: return "jge";
+			case 0x0F8E:
+			case 0x7E: return "jle";
+			case 0x0F8F: 
+			case 0x7F: return "jg";
 
 			default: return "??";
 		}

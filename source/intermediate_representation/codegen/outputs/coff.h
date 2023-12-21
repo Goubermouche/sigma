@@ -1,5 +1,5 @@
 #pragma once
-#include "intermediate_representation/codegen/object_file_emitter.h"
+#include "intermediate_representation/codegen/outputs/object_file_emitter.h"
 #include "intermediate_representation/target/target.h"
 #include <utility/containers/handle.h>
 
@@ -87,8 +87,8 @@ namespace sigma::ir {
 		u32 value;
 		i16 section_number;
 		u16 type;
-		u8  storage_class;
-		u8  aux_symbols_count;
+		u8 storage_class;
+		u8 aux_symbols_count;
 	};
 
 	struct coff_section_header {
@@ -154,19 +154,18 @@ namespace sigma::ir {
 		u8 code_count;
 		u8 frame_register : 4;
 		u8 frame_offset : 4;
-		// unwind_code code[]; // ((code_count + 1) & ~1) - 1
 	};
 
 #pragma pack(push, 2)
 	struct coff_auxiliary_section_symbol {
-		u32 length;       // section length
-		u16 reloc_count;  // number of relocation entries
-		u16 lineno_count; // number of line numbers
-		u32 checksum;     // checksum for communal
-		i16  number;       // section number to associate with
-		u8  selection;    // communal selection type
-		u8  reserved;
-		u16  high_bits;    // high bits of the section number
+		u32 length;            // section length
+		u16 relocation_count;  // number of relocation entries
+		u16 line_number_count; // number of line numbers
+		u32 checksum;          // checksum for communal
+		i16 number;            // section number to associate with
+		u8 selection;          // communal selection type
+		u8 reserved;
+		u16 high_bits;         // high bits of the section number
 	};
 #pragma pack(pop)
 
@@ -174,14 +173,8 @@ namespace sigma::ir {
 	public:
 		utility::object_file emit(module& module) override;
 	private:
-		static auto generate_unwind_info(
-			module& module, u64 xdata_section, const module_section& section
-		) -> handle<coff_unwind_info>;
-
-		static void emit_win_unwind_info(
-			utility::byte_buffer& buffer, handle<compiled_function> function, u64 stack_usage
-		);
-
+		static auto generate_unwind_info(module& module, u64 xdata_section, const module_section& section) -> handle<coff_unwind_info>;
+		static void emit_win_unwind_info(utility::byte_buffer& buffer, handle<compiled_function> function, u64 stack_usage);
 		static auto machine_to_coff_machine(target target) -> coff_machine::value;
 	};
 } // namespace sigma::ir

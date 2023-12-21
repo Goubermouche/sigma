@@ -4,9 +4,9 @@ namespace sigma::ir {
 	void generate_use_lists(transformation_context& context) {
 		context.work.push_all(context.function);
 
-		for (const handle<node>& item : context.work.items) {
+		for (const handle<node> item : context.work.items) {
 			// append locals
-			if (item->ty == node::LOCAL) {
+			if (item == node::type::LOCAL) {
 				context.locals.emplace_back(item);
 			}
 
@@ -20,4 +20,4 @@ namespace sigma::ir {
 
 		context.work.clear();
 	}
-}
+} // namespace sigma::ir

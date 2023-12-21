@@ -15,17 +15,12 @@ namespace sigma {
 
 	void compilation_context::print_ast() const {
 		ast.traverse([&](const handle<node>& node, u16 depth) {
-			utility::console::print(
-				"{}{} ", std::string(static_cast<u64>(depth * 2), ' '), node->type.to_string()
-			);
+			utility::console::print("{}{} ", std::string(static_cast<u64>(depth * 2), ' '), node->type.to_string());
 
 			switch (node->type) {
 				case node_type::FUNCTION_DECLARATION: {
 					const auto& property = node->get<function>();
-
-					utility::console::print(
-						"['{} {} (", property.return_type.to_string(), string_table.get(property.identifier_key)
-					);
+					utility::console::print("['{} {} (", property.return_type.to_string(), string_table.get(property.identifier_key));
 
 					for (u64 i = 0; i < property.parameter_types.get_size(); ++i) {
 						utility::console::print("{}", property.parameter_types[i].type.to_string());
@@ -40,10 +35,7 @@ namespace sigma {
 
 				case node_type::VARIABLE_DECLARATION: {
 					const auto& property = node->get<variable>();
-
-					utility::console::print(
-						"[{} '{}']", string_table.get(property.identifier_key), property.type.to_string()
-					);
+					utility::console::print("[{} '{}']", string_table.get(property.identifier_key), property.type.to_string());
 					break;
 				}
 				case node_type::VARIABLE_ACCESS: {
@@ -54,26 +46,17 @@ namespace sigma {
 
 				case node_type::NUMERICAL_LITERAL: {
 					const auto& property = node->get<literal>();
-					utility::console::print(
-						"['{}' {}]", property.type.to_string(), string_table.get(property.value_key)
-					);
-
+					utility::console::print("['{}' {}]", property.type.to_string(), string_table.get(property.value_key));
 					break;
 				}
 				case node_type::STRING_LITERAL: {
 					const auto& property = node->get<literal>();
-					utility::console::print(
-						"[\"{}\"]", utility::detail::escape_string(string_table.get(property.value_key))
-					);
-
+					utility::console::print("[\"{}\"]", utility::detail::escape_string(string_table.get(property.value_key)));
 					break;
 				}
 				case node_type::BOOL_LITERAL: {
 					const auto& property = node->get<bool_literal>();
-					utility::console::print(
-						"[{}]", property.value ? "true" : "false"
-					);
-
+					utility::console::print("[{}]", property.value ? "true" : "false");
 					break;
 				}
 

@@ -26,13 +26,48 @@ namespace sigma::ir {
 	}
 
 	auto live_interval::split_at(codegen_context& context, u64 position) -> handle<live_interval> {
-		auto interval = this;
+		handle interval = this;
 
 		// skip past previous intervals
-		while (interval->split_kid >= 0 && position > interval->get_end()) {
-			interval = &context.intervals[interval->split_kid];
+		while (interval->split_child >= 0 && position > interval->get_end()) {
+			interval = &context.intervals[interval->split_child];
 		}
 
 		return interval;
 	}
-}
+	auto find_least_common_ancestor(handle<basic_block> a, handle<basic_block> b) -> handle<basic_block> {
+		if (a == nullptr) {
+			return b;
+		}
+
+		while (a->dominator_depth > b->dominator_depth) {
+			a = a->dominator;
+		}
+
+		while (b->dominator_depth > a->dominator_depth) {
+			b = b->dominator;
+		}
+
+		while (a != b) {
+			b = b->dominator;
+			a = a->dominator;
+		}
+
+		return a;
+	}
+
+	ptr_diff interval_intersect(handle<live_interval> a, handle<live_interval> b) {
+		for (u64 i = a->active_range + 1; i-- > 1;) {
+			for (u64 j = b->active_range + 1; j-- > 1;) {
+				const ptr_diff intersect = range_intersect(a->ranges[i], b->ranges[j]);
+
+				if (intersect >= 0) {
+					return intersect;
+				}
+			}
+		}
+
+		return -1;
+	}
+
+} // namespace sigma::ir

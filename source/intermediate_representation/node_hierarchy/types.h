@@ -4,6 +4,8 @@
 namespace sigma::ir {
 	using namespace utility::types;
 
+	// TODO: rework the IR type system
+
 	struct data_type {
 		enum type : u8 {
 			INTEGER,      // void is an i0 and bool is an i1

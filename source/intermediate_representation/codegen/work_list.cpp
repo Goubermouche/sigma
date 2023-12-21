@@ -4,13 +4,11 @@
 namespace sigma::ir {
 	auto work_list::mark_next_control(handle<node> target) -> handle<node> {
 		// unless it's a branch (aka a terminator), it'll have one successor
-		handle<node> next = nullptr;
-
 		for (handle<user> user = target->use; user; user = user->next_user) {
-			handle<node> successor = user->n;
+			const handle<node> successor = user->target;
 
 			// we can't treat regions in the chain
-			if (successor->ty == node::REGION) {
+			if (successor == node::type::REGION) {
 				break;
 			}
 
@@ -24,7 +22,7 @@ namespace sigma::ir {
 	}
 
 	void work_list::compute_dominators(control_flow_graph& cfg) const {
-		const auto entry = &cfg.blocks.at(items[0]);
+		const handle entry = &cfg.blocks.at(items[0]);
 		bool changed = true;
 
 		entry->dominator = entry;
@@ -54,7 +52,7 @@ namespace sigma::ir {
 				for (; j < predecessor_count; j++) {
 					const handle<node> predecessor = block->get_predecessor(j);
 
-					if (handle<node> immediate_dominator = cfg.get_immediate_dominator(predecessor)) {
+					if (cfg.get_immediate_dominator(predecessor)) {
 						ASSERT(predecessor->inputs.get_size() > 0, "panic");
 						u64 a = cfg.try_get_traversal_index(predecessor);
 
@@ -132,4 +130,4 @@ namespace sigma::ir {
 		visited_items.clear();
 		items.clear();
 	}
-}
+} // namespace sigma::ir

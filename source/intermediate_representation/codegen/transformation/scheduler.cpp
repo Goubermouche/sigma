@@ -1,9 +1,7 @@
 #include "scheduler.h"
 
 namespace sigma::ir {
-	void schedule_early(
-		codegen_context& context, const handle<node>& target
-	) {
+	void schedule_early(codegen_context& context, const handle<node>& target) {
 		if (!context.work.visit(target)) {
 			return;
 		}
@@ -49,9 +47,7 @@ namespace sigma::ir {
 		context.schedule[target] = best;
 	}
 
-	void schedule_late(
-		codegen_context& context, const handle<node>& target
-	) {
+	void schedule_late(codegen_context& context, const handle<node>& target) {
 		// skip pinned nodes
 		if(target->is_pinned()) {
 			return;
@@ -60,8 +56,8 @@ namespace sigma::ir {
 		handle<basic_block> least_common_ancestor = nullptr;
 
 		// find the least common ancestor
-		for (auto use = target->use; use; use = use->next_user) {
-			handle<node> user_node = use->n;
+		for (handle<user> use = target->use; use; use = use->next_user) {
+			handle<node> user_node = use->target;
 
 			auto it = context.schedule.find(user_node);
 			if (it == context.schedule.end()) {
@@ -70,18 +66,10 @@ namespace sigma::ir {
 
 			handle<basic_block> use_block = it->second;
 
-			if (user_node->ty == node::PHI) {
+			if (user_node == node::type::PHI) {
 				const handle<node> use_node = user_node->inputs[0];
-
-				ASSERT(
-					use_node->ty == node::REGION,
-					"user block expects a region node"
-				);
-
-				ASSERT(
-					user_node->inputs.get_size() == use_node->inputs.get_size() + 1,
-					"phi has parent with mismatched predecessors"
-				);
+				ASSERT(use_node == node::type::REGION, "user block expects a region node");
+				ASSERT(user_node->inputs.get_size() == use_node->inputs.get_size() + 1, "phi has parent with mismatched predecessors");
 
 				u64 j = 1;
 				for (; j < user_node->inputs.get_size(); ++j) {
@@ -141,11 +129,11 @@ namespace sigma::ir {
 
 				// add projections to the same block
 				for (handle<user> use = basic_block_end->use; use; use = use->next_user) {
-					handle<node> projection = use->n;
+					handle<node> projection = use->target;
 
 					if (
 						use->slot == 0 &&
-						(projection->ty == node::PROJECTION || projection->ty == node::PHI)
+						(projection == node::type::PROJECTION || projection == node::type::PHI)
 					) {
 						if (!context.schedule.contains(projection)) {
 							basic_block->items.insert(projection);
@@ -174,4 +162,4 @@ namespace sigma::ir {
 		context.work.visited_items.clear();
 		context.labels.resize(context.graph.blocks.size());
 	}
-}
+} // namespace sigma::ir

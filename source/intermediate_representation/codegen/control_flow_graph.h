@@ -6,7 +6,7 @@ namespace sigma::ir {
 
 	struct control_flow_graph {
 		auto get_immediate_dominator(handle<node> target) -> handle<node>;
-		auto get_predecessor(handle<node> target, u64 i) -> handle<node>;
+		auto get_predecessor(handle<node> target, u64 index) -> handle<node>;
 
 		auto try_get_traversal_index(handle<node> target) -> u64;
 		auto get_traversal_index(handle<node> target) const ->u64;
@@ -17,4 +17,4 @@ namespace sigma::ir {
 
 		std::unordered_map<handle<node>, basic_block> blocks;
 	};
-}
+} // namespace sigma::ir

@@ -13,7 +13,7 @@ namespace sigma::ir {
 
 	struct branch {
 		std::vector<handle<node>> successors;
-		std::vector<i64> keys;
+		std::vector<u64> keys;
 	};
 
 	struct projection {
@@ -21,7 +21,7 @@ namespace sigma::ir {
 	};
 
 	struct function_call {
-		function_signature signature; // function prototype
+		function_signature signature; // callee
 		std::vector<handle<node>> projections;
 	};
 }

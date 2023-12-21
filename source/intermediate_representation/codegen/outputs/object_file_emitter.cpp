@@ -2,19 +2,17 @@
 #include "intermediate_representation/module.h"
 
 namespace sigma::ir {
-	auto object_file_emitter::layout_relocations(
-		std::vector<module_section>& sections, u32 output_size, u32 relocation_size
-	) -> u32 {
+	auto object_file_emitter::layout_relocations(std::vector<module_section>& sections, u32 output_size, u32 relocation_size) -> u32 {
 		// calculate the relocation layout
-		for (auto& section : sections) {
+		for (module_section& section : sections) {
 			u32 relocation_count = 0;
 
-			for (const auto& function : section.functions) {
+			for (const handle<compiled_function> function : section.functions) {
 				relocation_count += emit_call_patches(function);
 			}
 
-			for (const auto& global : section.globals) {
-				for (const auto& object : global->objects) {
+			for (const handle<global> global : section.globals) {
+				for (const init_object& object : global->objects) {
 					relocation_count += object.type == init_object::RELOCATION;
 				}
 			}
@@ -33,7 +31,7 @@ namespace sigma::ir {
 		u64 ordinal = 0;
 
 		for (handle<symbol_patch> patch = compiled_func->first_patch; patch; patch = patch->next) {
-			if (patch->target->tag == symbol::symbol_tag::FUNCTION) {
+			if (patch->target->type == symbol::symbol_type::FUNCTION) {
 				const u64 destination_section = reinterpret_cast<function*>(patch->target.get())->output.parent->parent_section;
 
 				// you can't do relocations across sections
@@ -42,7 +40,7 @@ namespace sigma::ir {
 
 					const u64 actual_position = compiled_func->code_position + patch->pos + 4;
 					u32 position = static_cast<u32>(reinterpret_cast<function*>(patch->target.get())->output.code_position - actual_position);
-					memcpy(&compiled_func->bytecode[patch->pos], &position, sizeof(uint32_t));
+					std::memcpy(&compiled_func->bytecode[patch->pos], &position, sizeof(uint32_t));
 
 					ordinal += 1;
 					patch->internal = true;
@@ -58,24 +56,24 @@ namespace sigma::ir {
 		utility::byte* data = &buffer[pos];
 
 		// place functions
-		for (const auto& function : section->functions) {
+		for (const handle<compiled_function> function : section->functions) {
 			if (function != nullptr) {
-				memcpy(data + function->code_position, function->bytecode.get_data(), function->bytecode.get_size());
+				std::memcpy(data + function->code_position, function->bytecode.get_data(), function->bytecode.get_size());
 			}
 		}
 
 		// place globals
-		for (const auto& global : section->globals) {
-			memset(&data[global->position], 0, global->size);
+		for (const handle<global> global : section->globals) {
+			std::memset(&data[global->position], 0, global->size);
 
-			for (const auto& object : global->objects) {
+			for (const init_object& object : global->objects) {
 				if (object.type == init_object::REGION) {
-					ASSERT(object.offset + object.r.size <= global->size, "invalid object layout");
-					memcpy(&data[global->position + object.offset], object.r.ptr, object.r.size);
+					ASSERT(object.offset + object.region.size <= global->size, "invalid object layout");
+					memcpy(&data[global->position + object.offset], object.region.ptr, object.region.size);
 				}
 			}
 		}
 
 		return write_pos + section->total_size;
 	}
-}
+} // namespace sigma::ir

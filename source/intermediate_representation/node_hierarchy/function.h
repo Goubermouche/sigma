@@ -19,7 +19,7 @@ namespace sigma::ir {
 		u64 ordinal = 0;
 		u8 prologue_length;
 
-		uint64_t stack_usage;
+		u64 stack_usage;
 
 		u64 code_position; // relative to the export-specific text section
 		utility::byte_buffer bytecode;
@@ -39,85 +39,43 @@ namespace sigma::ir {
 		void add_input_late(handle<node> n, handle<node> input);
 		void add_memory_edge(handle<node> n, handle<node> mem_state, handle<node> target);
 
-		auto get_symbol_address(handle<symbol> sym) -> handle<node>;
+		auto get_symbol_address(handle<symbol> target) -> handle<node>;
 
 		// node hierarchy
 		void create_branch(handle<node> target);
-		void create_conditional_branch(
-			handle<node> condition, handle<node> if_true, handle<node> if_false
-		);
+		void create_conditional_branch(handle<node> condition, handle<node> if_true, handle<node> if_false);
 
 		auto create_region() -> handle<node>;
+		void create_return(const std::vector<handle<node>>& virtual_values);
 
-		void create_ret(const std::vector<handle<node>>& virtual_values);
-
-		auto create_call(
-			handle<external> target,
-			const function_signature& function_sig,
-			const std::vector<handle<node>>& arguments
-		) -> handle<node>;
-
-		auto create_call(
-			handle<function> target_func,
-			const std::vector<handle<node>>& arguments
-		) -> handle<node>;
+		auto create_call(handle<external> target, const function_signature& call_signature, const std::vector<handle<node>>& arguments) -> handle<node>;
+		auto create_call(handle<function> target, const std::vector<handle<node>>& arguments) -> handle<node>;
 
 		auto create_signed_integer(i64 value, u8 bit_width) -> handle<node>;
 		auto create_bool(bool value) -> handle<node>;
 
-		auto create_add(
-			handle<node> left,
-			handle<node> right, 
-			arithmetic_behaviour behaviour = arithmetic_behaviour::none
-		) -> handle<node>;
+		auto create_add(handle<node> left, handle<node> right, arithmetic_behaviour behaviour = arithmetic_behaviour::NONE) -> handle<node>;
+		auto create_sub(handle<node> left, handle<node> right, arithmetic_behaviour behaviour = arithmetic_behaviour::NONE) -> handle<node>;
+		auto create_mul(handle<node> left, handle<node> right, arithmetic_behaviour behaviour = arithmetic_behaviour::NONE) -> handle<node>;
 
-		auto create_sub(
-			handle<node> left,
-			handle<node> right,
-			arithmetic_behaviour behaviour = arithmetic_behaviour::none
-		) -> handle<node>;
+		void create_store(handle<node> destination, handle<node> value, u32 alignment, bool is_volatile);
+		auto create_load(handle<node> value_to_load, data_type data_type, u32 alignment, bool is_volatile) -> handle<node>;
 
-		auto create_mul(
-			handle<node> left, 
-			handle<node> right,
-			arithmetic_behaviour behaviour = arithmetic_behaviour::none
-		) -> handle<node>;
-
-		void create_store(
-			handle<node> destination, handle<node> value, u32 alignment, bool is_volatile
-		);
-
-		auto create_load(
-			handle<node> value_to_load, data_type data_type, u32 alignment, bool is_volatile
-		) -> handle<node>;
-
-		auto get_function_parameter(u64 index) -> handle<node>;
+		auto get_function_parameter(u64 index) const-> handle<node>;
 		auto create_local(u32 size, u32 alignment) -> handle<node>;
 	private:
-		auto create_call(
-			const function_signature& function_sig,
-			handle<node> callee_symbol_address,
-			const std::vector<handle<node>>& arguments
-		) -> handle<node>;
-
-		auto create_binary_arithmetic_operation(
-			node::type op_type,
-			handle<node> left,
-			handle<node> right, 
-			arithmetic_behaviour behaviour
-		) -> handle<node>;
+		auto create_call(const function_signature& function_sig, handle<node> callee_symbol_address,const std::vector<handle<node>>& arguments) -> handle<node>;
+		auto create_binary_arithmetic_operation(node::type type, handle<node> left, handle<node> right,  arithmetic_behaviour behaviour) -> handle<node>;
 
 		auto create_projection(data_type dt, handle<node> source, u64 index) -> handle<node>;
 		auto append_memory(handle<node> memory) const -> handle<node>;
 	public:
-		friend class module;
-		symbol sym; // symbol of the given function
+		symbol symbol;
 
 		compiled_function output;
 		function_signature signature;
-		linkage link;
 
-		u8 parent_section; // index of the parent module section
+		u8 parent_section = 0; // index of the parent module section
 
 		// allocator which is used for allocating child nodes
 		utility::block_allocator allocator;
@@ -136,13 +94,15 @@ namespace sigma::ir {
 		// m_parameter_count - m_return_count: function returns
 		std::vector<handle<node>> parameters;
 		std::vector<handle<node>> terminators;
+
+		friend class module;
 	};
 
 	template<typename extra_type>
 	auto function::create_node(node::type type, u64 input_count) -> handle<node> {
 		void* node_allocation = allocator.allocate(sizeof(node));
 		const handle node_ptr = static_cast<node*>(node_allocation);
-		node_ptr->ty = type;
+		node_ptr->set_type(type);
 
 		// initialize the base sea of nodes layout 
 		node_ptr->inputs = utility::slice<handle<node>>(allocator, input_count);

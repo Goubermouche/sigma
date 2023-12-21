@@ -4,10 +4,7 @@
 
 namespace sigma::ir {
 	void x64_architecture::select_instructions(codegen_context& context) {
-		ASSERT(
-			context.work.items.size() == context.graph.blocks.size(),
-			"misaligned control flow graph detected"
-		);
+		ASSERT(context.work.items.size() == context.graph.blocks.size(), "misaligned control flow graph detected");
 
 		context.basic_block_order.reserve(context.graph.blocks.size());
 		u64 stop_block;
@@ -16,12 +13,9 @@ namespace sigma::ir {
 			handle<node> basic_block = context.work.items[i];
 
 			for (handle<user> use = basic_block->use; use; use = use->next_user) {
-				const handle<node> use_node = use->n;
+				const handle<node> use_node = use->target;
 
-				if (
-					use_node->ty == node::PHI &&
-					use_node->dt.ty != data_type::MEMORY
-				) {
+				if (use_node == node::type::PHI && use_node->dt.ty != data_type::MEMORY) {
 					context.virtual_values[use_node->global_value_index] = virtual_value();
 					context.work.visit(use_node);
 				}
@@ -29,7 +23,7 @@ namespace sigma::ir {
 
 			const handle<node> basic_block_end = context.graph.blocks.at(basic_block).end;
 
-			if (basic_block_end->ty == node::EXIT) {
+			if (basic_block_end == node::type::EXIT) {
 				stop_block = i;
 			}
 			else {
@@ -64,14 +58,8 @@ namespace sigma::ir {
 		}
 	}
 
-	void x64_architecture::select_instructions_region(
-		codegen_context& context, handle<node> block_entry, handle<node> block_end, u64 rpo_index
-	) {
-		ASSERT(
-			context.work.items.size() == context.graph.blocks.size(),
-			"invalid work list"
-		);
-
+	void x64_architecture::select_instructions_region(codegen_context& context, handle<node> block_entry, handle<node> block_end, u64 rpo_index) {
+		ASSERT(context.work.items.size() == context.graph.blocks.size(), "invalid work list");
 		handle<basic_block> block = context.schedule.at(block_entry);
 
 		// logical schedule
@@ -80,11 +68,9 @@ namespace sigma::ir {
 		// schedule params
 		if (rpo_index == 0) {
 			for (auto use = context.function->entry_node->use; use; use = use->next_user) {
-				handle<node> user_node = use->n;
+				handle<node> user_node = use->target;
 
-				if (
-					user_node->ty == node::PROJECTION && context.work.visit(user_node)
-				) {
+				if (user_node == node::type::PROJECTION && context.work.visit(user_node)) {
 					context.work.items.push_back(user_node);
 				}
 			}
@@ -97,7 +83,7 @@ namespace sigma::ir {
 
 			// track non-dead users
 			for (auto use = block_node->use; use; use = use->next_user) {
-				if (context.schedule.contains(use->n)) {
+				if (context.schedule.contains(use->target)) {
 					use_count++;
 				}
 			}
@@ -113,22 +99,18 @@ namespace sigma::ir {
 			auto& phi = context.phi_values[i];
 
 			// mark the proper output, especially before we make the BB-local ones
-
-			phi.destination = input_reg(context, phi.phi);
+			phi.destination = allocate_node_register(context, phi.phi);
 		}
 
-		if (block_entry->ty == node::REGION) {
+		if (block_entry == node::type::REGION) {
 			for (handle<user> user = block_entry->use; user; user = user->next_user) {
-				handle<node> user_node = user->n;
+				handle<node> user_node = user->target;
 
-				if (
-					user_node->ty == node::PHI &&
-					user_node->dt.ty != data_type::MEMORY
-				) {
+				if (user_node == node::type::PHI && user_node->dt.ty != data_type::MEMORY) {
 					// copy the phi into a temporary
 					const phi_value phi{
 						.phi = user_node,
-						.destination = input_reg(context, user_node),
+						.destination = allocate_node_register(context, user_node),
 					};
 
 					context.phi_values.push_back(phi);
@@ -157,44 +139,30 @@ namespace sigma::ir {
 		for (u64 i = context.work.items.size(); i-- > context.graph.blocks.size();) {
 			handle<node> target = context.work.items[i];
 
-			if (target->ty == node::ENTRY) {
+			if(target == node::type::ENTRY) {
 				continue;
 			}
 
-			auto* value = context.lookup_value(target);
+			handle<virtual_value> value = context.lookup_virtual_value(target);
 
-			if (
-				target != block_end &&
-				value->virtual_register.is_valid() == false &&
-				target->should_rematerialize()
-			) {
+			if(target != block_end && value->virtual_register.is_valid() == false && target->should_rematerialize()) {
 				continue;
 			}
 
 			// attach to dummy list
 			instruction dummy;
 			dummy.next_instruction = nullptr;
-			dummy.type = static_cast<instruction::instruction_type>(9999);
+			dummy.set_type(static_cast<instruction::type::underlying>(9999));
 			context.head = &dummy;
 
-			if (
-				target->ty != node::MUL_PAIR &&
-				(
-					target->dt.ty == data_type::TUPLE || 
-					target->dt.ty == data_type::CONTROL ||
-					target->dt.ty == data_type::MEMORY
-				)
-			) {
-				if (target->ty == node::BRANCH) {
+			if (target != node::type::MUL_PAIR && (target->dt.ty == data_type::TUPLE || target->dt.ty == data_type::CONTROL || target->dt.ty == data_type::MEMORY)) {
+				if (target == node::type::BRANCH) {
 					ASSERT(old_phi_count == 0, "branches don't get phi edges, they should've been split");
 				}
 
 				select_instruction(context, target, value->virtual_register);
 
-				if (
-					(target->inputs.get_size() > 0 && target->inputs[0]->ty == node::ENTRY) ||
-					target->ty != node::PROJECTION
-				) {
+				if ((target->inputs.get_size() > 0 && target->inputs[0] == node::type::ENTRY) || target != node::type::PROJECTION) {
 					if (prev_effect != nullptr) {
 						// set location
 					}
@@ -202,10 +170,7 @@ namespace sigma::ir {
 					prev_effect = target;
 				}
 			}
-			else if (
-				value->use_count > 0 ||
-				value->virtual_register.is_valid()
-			) {
+			else if (value->use_count > 0 || value->virtual_register.is_valid()) {
 				if (value->virtual_register.is_valid() == false) {
 					value->virtual_register = allocate_virtual_register(context, target, target->dt);
 				}
@@ -216,10 +181,7 @@ namespace sigma::ir {
 			handle<instruction> seq_start = dummy.next_instruction;
 			handle<instruction> seq_end = context.head;
 
-			ASSERT(
-				seq_end->next_instruction == nullptr,
-				"sequence end contains subsequent nodes"
-			);
+			ASSERT(seq_end->next_instruction == nullptr, "sequence end contains subsequent nodes");
 
 			if (seq_start != nullptr) {
 				if (last == nullptr) {
@@ -260,36 +222,26 @@ namespace sigma::ir {
 		// restore the PHI value to normal
 		for (u64 i = old_phi_count; i < context.phi_values.get_size(); ++i) {
 			auto& value = context.phi_values[i];
-			context.lookup_value(value.phi)->virtual_register = value.destination;
+			context.lookup_virtual_value(value.phi)->virtual_register = value.destination;
 		}
 
 		context.phi_values.set_size(0);
 		context.head = last ? last : head;
 
-		if (
-			block_end->ty != node::EXIT &&
-			block_end->ty != node::TRAP &&
-			block_end->ty != node::BRANCH && 
-			block_end->ty != node::UNREACHABLE
-		) {
+		if (block_end != node::type::EXIT && block_end != node::type::TRAP && block_end != node::type::BRANCH && block_end != node::type::UNREACHABLE) {
 			// implicit goto
 			handle<node> successor = block_end->get_next_control();
-
-			context.append_instruction(create_instruction(
-				context, instruction::TERMINATOR, VOID_TYPE, 0, 0, 0
-			));
+			context.append_instruction(create_instruction(context, instruction::type::TERMINATOR, VOID_TYPE, 0, 0, 0));
 
 			// reset phi's
 			for (u64 i = 0; i < old_phi_count; ++i) {
 				auto& phi = context.phi_values[i];
 
 				auto dt = phi.phi->dt;
-				reg src = input_reg(context, phi.n);
+				reg src = allocate_node_register(context, phi.target);
 
 				context.hint_reg(phi.destination.id, src);
-				context.append_instruction(
-					create_move(context, dt, phi.destination, src)
-				);
+				context.append_instruction(create_move(context, dt, phi.destination, src));
 			}
 
 			u64 successor_id = context.graph.blocks.at(successor).id;
@@ -302,13 +254,11 @@ namespace sigma::ir {
 		context.work.items.resize(context.graph.blocks.size());
 	}
 
-	void x64_architecture::select_instruction(
-		codegen_context& context, handle<node> n, reg destination
-	) {
-		switch (const node::type node_type = n->ty) {
-			case node::PHI:
-			case node::REGION: break;
-			case node::ENTRY: {
+	void x64_architecture::select_instruction(codegen_context& context, handle<node> n, reg destination) {
+		switch (const node::type node_type = n->get_type()) {
+			case node::type::PHI:
+			case node::type::REGION: break;
+			case node::type::ENTRY: {
 				bool is_systemv = context.target.get_abi() == abi::SYSTEMV;
 				constexpr x64::gpr gpr_params[] = {
 					x64::gpr::RCX, x64::gpr::RDX, x64::gpr::R8, x64::gpr::R9
@@ -348,7 +298,7 @@ namespace sigma::ir {
 					}
 
 					if (id < reg_limit) {
-						auto value = context.lookup_value(projection);
+						auto value = context.lookup_virtual_value(projection);
 
 						if (value != nullptr) {
 							ASSERT(value->virtual_register.is_valid() == false, "unexpected valid register");
@@ -375,7 +325,7 @@ namespace sigma::ir {
 
 				// insert INST_ENTRY (this is where parameter register come from)
 				handle<instruction> entry_inst = create_instruction(
-					context, instruction::ENTRY, VOID_TYPE, out_count, 0, 0
+					context, instruction::type::ENTRY, VOID_TYPE, out_count, 0, 0
 				);
 
 				memcpy(entry_inst->operands.get_data(), outs, out_count * sizeof(i32));
@@ -398,13 +348,13 @@ namespace sigma::ir {
 						continue;
 					}
 
-					handle<node> store = user->n;
-					if (store->ty != node::STORE || store->inputs[0]->get_parent_region() != n) {
+					handle<node> store = user->target;
+					if (store != node::type::STORE || store->inputs[0]->get_parent_region() != n) {
 						continue;
 					}
 
 					handle<node> address = store->inputs[2];
-					if (address->ty != node::LOCAL) {
+					if (address != node::type::LOCAL) {
 						continue;
 					}
 
@@ -412,7 +362,7 @@ namespace sigma::ir {
 					context.stack_slots[address] = static_cast<i32>(pos);
 
 					if (i >= 4 && context.target.get_abi() == abi::WIN_64) {
-						if (auto* value = context.lookup_value(store)) {
+						if (handle<virtual_value> value = context.lookup_virtual_value(store)) {
 							value->virtual_register = 0;
 						}
 					}
@@ -431,8 +381,8 @@ namespace sigma::ir {
 				break;
 			}
 
-			case node::SYSTEM_CALL:
-			case node::CALL: {
+			case node::type::SYSTEM_CALL:
+			case node::type::CALL: {
 				bool is_systemv = context.target.get_abi() == abi::SYSTEMV;
 				static reg default_return_registers[2] = {
 					static_cast<reg::id_type>(x64::gpr::RAX), static_cast<reg::id_type>(x64::gpr::RDX)
@@ -440,7 +390,7 @@ namespace sigma::ir {
 
 				const parameter_descriptor descriptor = context.target.get_parameter_descriptor();
 
-				if (node_type == node::SYSTEM_CALL) {
+				if (node_type == node::type::SYSTEM_CALL) {
 					NOT_IMPLEMENTED();
 				}
 
@@ -463,7 +413,7 @@ namespace sigma::ir {
 
 					if (return_node) {
 						return_nodes[i] = return_node;
-						return_registers[i] = input_reg(context, return_node);
+						return_registers[i] = allocate_node_register(context, return_node);
 						return_count++;
 
 						if (return_node->dt.ty == data_type::FLOAT) {
@@ -520,16 +470,16 @@ namespace sigma::ir {
 
 					// first few parameters are passed as inputs to the CALL instruction.
 					// the rest are written into the stack at specific places.
-					sigma::ir::reg src = input_reg(context, parameter_node);
+					sigma::ir::reg src = allocate_node_register(context, parameter_node);
 
 					if (reg >= descriptor.gpr_count) {
 						context.append_instruction(create_mr(
 							context,
-							use_xmm ? instruction::FP_MOV : instruction::MOV,
+							use_xmm ? instruction::type::FP_MOV : instruction::type::MOV,
 							parameter_node->dt,
 							static_cast<u8>(x64::gpr::RSP),
 							reg::invalid_id,
-							scale::x1, 
+							memory_scale::x1, 
 							reg * 8,
 							src.id
 						));
@@ -574,7 +524,7 @@ namespace sigma::ir {
 						u8 phys_reg = descriptor.gpr_registers[i].id;
 
 						context.append_instruction(create_rr(
-							context, instruction::MOV_F2I, I64_TYPE, phys_reg, static_cast<u8>(ins[i])
+							context, instruction::type::MOV_F2I, I64_TYPE, phys_reg, static_cast<u8>(ins[i])
 						));
 
 						ins[in_count++] = x64::register_class::FIRST_GPR + phys_reg;
@@ -584,21 +534,21 @@ namespace sigma::ir {
 				// compute the target (unless it's a symbol) before the registers all need to be
 				// forcibly shuffled
 				handle<node> target = n->inputs[2];
-				bool static_call = n->ty != node::SYSTEM_CALL && target->ty == node::SYMBOL;
+				bool static_call = n != node::type::SYSTEM_CALL && target == node::type::SYMBOL;
 
 				reg target_val = static_cast<u8>(x64::gpr::RSP);
 				if (!static_call) {
-					target_val = input_reg(context, target);
+					target_val = allocate_node_register(context, target);
 				}
 
-				if (node_type == node::SYSTEM_CALL) {
+				if (node_type == node::type::SYSTEM_CALL) {
 					NOT_IMPLEMENTED();
 				}
 				else {
 					// the number of float parameters is written into AL
 					if (callee_signature.has_var_args && is_systemv) {
 						context.append_instruction(create_immediate(
-							context, instruction::MOV, I8_TYPE, static_cast<u8>(x64::gpr::RAX), used_xmm_count
+							context, instruction::type::MOV, I8_TYPE, static_cast<u8>(x64::gpr::RAX), used_xmm_count
 						));
 
 						ins[in_count++] = x64::register_class::FIRST_GPR + x64::gpr::RAX;
@@ -611,13 +561,13 @@ namespace sigma::ir {
 				const u8 caller_saved_gpr_pop_count = utility::pop_count(caller_saved_gp_registers);
 				const u8 caller_saved_xmm_pop_count = utility::pop_count(caller_saved_xmm_registers);
 				u8 clobber_count = caller_saved_gpr_pop_count + caller_saved_xmm_pop_count;
-				auto op = instruction::SYS_CALL;
+				auto op = instruction::type::SYS_CALL;
 
-				if (n->ty == node::CALL) {
-					op = instruction::CALL;
+				if (n == node::type::CALL) {
+					op = instruction::type::CALL;
 				}
-				else if(n->ty == node::TAIL_CALL) {
-					op = instruction::JMP;
+				else if(n == node::type::TAIL_CALL) {
+					op = instruction::type::JMP;
 				}
 
 				handle<instruction> call_inst = create_instruction<handle<symbol>>(
@@ -654,8 +604,8 @@ namespace sigma::ir {
 
 				// write inputs
 				if (static_call) {
-					call_inst->flags |= instruction::global;
-					call_inst->memory_slot = call_inst->out_count;
+					call_inst->flags |= instruction::GLOBAL;
+					call_inst->memory.index = call_inst->out_count;
 					call_inst->get<handle<symbol>>() = target->get<handle<symbol>>();
 				}
 
@@ -689,7 +639,7 @@ namespace sigma::ir {
 				break;
 			}
 
-			case node::INTEGER_CONSTANT: {
+			case node::type::INTEGER_CONSTANT: {
 				u64 value = n->get<integer>().value;
 
 				// mask off bits
@@ -714,44 +664,44 @@ namespace sigma::ir {
 				else if ((value >> 32ull) == std::numeric_limits<u32>::max()) {
 
 					context.append_instruction(create_immediate(
-						context, instruction::MOV, I32_TYPE, destination, static_cast<i32>(value)
+						context, instruction::type::MOV, I32_TYPE, destination, static_cast<i32>(value)
 					));
 				}
 				else if (bits_in_type <= 32 || (value >> 31ull) == 0) {
 
 					context.append_instruction(create_immediate(
-						context, instruction::MOV, n->dt, destination, static_cast<i32>(value)
+						context, instruction::type::MOV, n->dt, destination, static_cast<i32>(value)
 					));
 				}
 				else {
 					context.append_instruction(create_abs(
-						context, instruction::MOVABS, n->dt, destination, value
+						context, instruction::type::MOVABS, n->dt, destination, value
 					));
 				}
 
 				break;
 			}
 
-			case node::AND:
-			case node::OR:
-			case node::XOR:
-			case node::ADD:
-			case node::SUB: {
-				constexpr static instruction::instruction_type operations[] = {
-					instruction::AND,
-					instruction::OR,
-					instruction::XOR,
-					instruction::ADD,
-					instruction::SUB,
+			case node::type::AND:
+			case node::type::OR:
+			case node::type::XOR:
+			case node::type::ADD:
+			case node::type::SUB: {
+				static instruction::type operations[] = {
+					instruction::type::AND,
+					instruction::type::OR,
+					instruction::type::XOR,
+					instruction::type::ADD,
+					instruction::type::SUB,
 				};
 
-				const instruction::instruction_type operation = operations[node_type - node::AND];
-				const reg left = input_reg(context, n->inputs[1]);
+				const instruction::type operation = operations[node_type - node::type::AND];
+				const reg left = allocate_node_register(context, n->inputs[1]);
 				i32 immediate;
 
 				context.hint_reg(destination.id, left);
 
-				if (n->inputs[2]->ty == node::LOAD && n->inputs[2]->is_on_last_use(context)) {
+				if (n->inputs[2] == node::type::LOAD && n->inputs[2]->is_on_last_use(context)) {
 					n->inputs[2]->use_node(context);
 
 					context.append_instruction(create_move(
@@ -762,17 +712,17 @@ namespace sigma::ir {
 						context, n->inputs[2]->inputs[2], destination, -1, destination.id
 					);
 
-					inst->type = operation;
-					inst->dt = legalize_data_type(n->dt);
+					inst->set_type(operation);
+					inst->data_type = legalize_data_type(n->dt);
 
 					context.append_instruction(inst);
 				}
 				else if (try_for_imm32(n->inputs[2], n->dt.bit_width, immediate)) {
 					n->inputs[2]->use_node(context);
 
-					if (node_type == node::ADD) {
+					if (node_type == node::type::ADD) {
 						context.append_instruction(create_rm(
-							context, instruction::LEA, I64_TYPE, destination, left, -1, scale::x1, immediate
+							context, instruction::type::LEA, I64_TYPE, destination, left, -1, memory_scale::x1, immediate
 						));
 					}
 					else {
@@ -786,7 +736,7 @@ namespace sigma::ir {
 					}
 				}
 				else {
-					reg right = input_reg(context, n->inputs[2]);
+					reg right = allocate_node_register(context, n->inputs[2]);
 
 					context.append_instruction(create_move(
 						context, n->dt, destination, left
@@ -800,8 +750,8 @@ namespace sigma::ir {
 				break;
 			}
 
-			case node::MUL: {
-				reg left = input_reg(context, n->inputs[1]);
+			case node::type::MUL: {
+				reg left = allocate_node_register(context, n->inputs[1]);
 				context.hint_reg(destination.id, left);
 
 				data_type dt = n->dt;
@@ -813,29 +763,29 @@ namespace sigma::ir {
 
 				i32 x;
 				if(try_for_imm32(n->inputs[2], dt.bit_width, x)) {
-					virtual_value* v = context.lookup_value(n->inputs[2]);
+					const handle<virtual_value> v = context.lookup_virtual_value(n->inputs[2]);
 					if(v) {
 						v->use_count -= 1;
 					}
 
 					context.append_instruction(create_move(context, dt, destination, left));
 					context.append_instruction(create_rri(
-						context, instruction::IMUL, dt, destination, destination, x)
+						context, instruction::type::IMUL, dt, destination, destination, x)
 					);
 				}
 				else {
-					reg right = input_reg(context, n->inputs[2]);
+					reg right = allocate_node_register(context, n->inputs[2]);
 
 					context.append_instruction(create_move(context, dt, destination, left));
 					context.append_instruction(create_rrr(
-						context, instruction::IMUL, dt, destination, destination, right)
+						context, instruction::type::IMUL, dt, destination, destination, right)
 					);
 				}
 
 				break;
 			}
 
-			case node::EXIT: {
+			case node::type::EXIT: {
 				ASSERT(n->inputs.get_size() <= 5, "at most 2 return values :(");
 				static reg default_return_registers[2] = {
 					static_cast<u8>(x64::gpr::RAX), static_cast<u8>(x64::gpr::RDX)
@@ -844,7 +794,7 @@ namespace sigma::ir {
 				const u64 return_count = n->inputs.get_size() - 3;
 
 				for (u64 i = 0; i < return_count; ++i) {
-					reg source = input_reg(context, n->inputs[3 + i]);
+					reg source = allocate_node_register(context, n->inputs[3 + i]);
 					auto dt = n->inputs[3 + i]->dt;
 
 					// copy to the return register
@@ -863,22 +813,22 @@ namespace sigma::ir {
 				// it's the epilogue to tell the register allocator where callee registers need
 				// to get restored
 				context.append_instruction(create_instruction(
-					context, instruction::EPILOGUE, VOID_TYPE, 0, 0, 0)
+					context, instruction::type::EPILOGUE, VOID_TYPE, 0, 0, 0)
 				);
 				break;
 			}
 
-			case node::LOCAL:
-			case node::VARIADIC_START:
-			case node::MEMBER_ACCESS:
-			case node::ARRAY_ACCESS: {
+			case node::type::LOCAL:
+			case node::type::VARIADIC_START:
+			case node::type::MEMBER_ACCESS:
+			case node::type::ARRAY_ACCESS: {
 				context.append_instruction(select_memory_access_instruction(
 					context, n, destination, -1, -1)
 				);
 				break;
 			}
 
-			case node::STORE: {
+			case node::type::STORE: {
 				if (destination.is_valid()) {
 					n->inputs[2]->use_node(context);
 					n->inputs[3]->use_node(context);
@@ -903,10 +853,10 @@ namespace sigma::ir {
 				}
 				else {
 					if (store_data_type.ty == data_type::FLOAT) {
-						store_op = instruction::FP_MOV;
+						store_op = instruction::type::FP_MOV;
 					}
 					else {
-						store_op = instruction::MOV;
+						store_op = instruction::type::MOV;
 					}
 				}
 
@@ -918,28 +868,28 @@ namespace sigma::ir {
 					);
 
 					store_inst->in_count = store_inst->in_count - 1;
-					store_inst->dt = legalize_data_type(store_data_type);
-					store_inst->flags |= instruction::immediate;
+					store_inst->data_type = legalize_data_type(store_data_type);
+					store_inst->flags |= instruction::IMMEDIATE;
 					store_inst->set_property(context.function->allocator.allocate(sizeof(immediate)));
 					store_inst->get<immediate>().value = immediate_value;
 
 					ASSERT(
-						store_inst->flags & (instruction::mem_f | instruction::global),
+						store_inst->flags & (instruction::MEM | instruction::GLOBAL),
 						"invalid store instruction flags"
 					);
 
 					context.append_instruction(store_inst);
 				}
 				else {
-					const reg source = input_reg(context, source_node);
+					const reg source = allocate_node_register(context, source_node);
 					const handle<instruction> store_inst = select_array_access_instruction(
 						context, address, destination, store_op, source.id
 					);
 
-					store_inst->dt = legalize_data_type(store_data_type);
+					store_inst->data_type = legalize_data_type(store_data_type);
 
 					ASSERT(
-						store_inst->flags & (instruction::mem_f | instruction::global),
+						store_inst->flags & (instruction::MEM | instruction::GLOBAL),
 						"invalid store instruction flags"
 					);
 
@@ -949,7 +899,7 @@ namespace sigma::ir {
 				break;
 			}
 
-			case node::BRANCH: {
+			case node::type::BRANCH: {
 				handle<node> bb = n->get_parent_region();
 				auto& br = n->get<branch>();
 
@@ -958,9 +908,9 @@ namespace sigma::ir {
 
 				// fill successors
 				for (handle<user> u = n->use; u; u = u->next_user) {
-					if (u->n->ty == node::PROJECTION) {
-						u64 index = u->n->get<projection>().index;
-						handle<node> successor_node = u->n->get_next_block();
+					if (u->target == node::type::PROJECTION) {
+						u64 index = u->target->get<projection>().index;
+						handle<node> successor_node = u->target->get_next_block();
 
 						// if (index == 0) {
 						// 	has_default = !successor_node->is_unreachable();
@@ -973,7 +923,7 @@ namespace sigma::ir {
 				data_type dt = n->inputs[1]->dt;
 
 				context.append_instruction(create_instruction(
-					context, instruction::TERMINATOR, VOID_TYPE, 0, 0, 0)
+					context, instruction::type::TERMINATOR, VOID_TYPE, 0, 0, 0)
 				);
 
 				if (br.successors.size() == 1) {
@@ -988,9 +938,9 @@ namespace sigma::ir {
 						cc = select_instruction_cmp(context, n->inputs[1]);
 					}
 					else {
-						reg key = input_reg(context, n->inputs[1]);
+						reg key = allocate_node_register(context, n->inputs[1]);
 						context.append_instruction(create_ri(
-							context, instruction::CMP, dt, key, static_cast<i32>(br.keys[0]))
+							context, instruction::type::CMP, dt, key, static_cast<i32>(br.keys[0]))
 						);
 
 						cc = x64::conditional::NE;
@@ -1017,23 +967,23 @@ namespace sigma::ir {
 				break;
 			}
 
-			case node::SYMBOL: {
+			case node::type::SYMBOL: {
 				auto s = n->get<handle<symbol>>();
 
 				context.append_instruction(create_op_global(
-					context, instruction::LEA, n->dt, destination, s
+					context, instruction::type::LEA, n->dt, destination, s
 				));
 
 				break;
 			}
-			case node::LOAD:
-			case node::ATOMIC_LOAD: {
-				instruction::instruction_type mov_op;
+			case node::type::LOAD:
+			case node::type::ATOMIC_LOAD: {
+				instruction::type mov_op;
 				if(n->dt.ty == data_type::FLOAT) {
-					mov_op = instruction::FP_MOV;
+					mov_op = instruction::type::FP_MOV;
 				}
 				else {
-					mov_op = instruction::MOV;
+					mov_op = instruction::type::MOV;
 				}
 
 				handle<node> address = n->inputs[2];
@@ -1042,30 +992,30 @@ namespace sigma::ir {
 					context, address, destination, -1, -1
 				);
 
-				load_inst->type = mov_op;
-				load_inst->dt = legalize_data_type(n->dt);
+				load_inst->set_type(mov_op);
+				load_inst->data_type = legalize_data_type(n->dt);
 
-				if(n->ty == node::ATOMIC_LOAD) {
-					load_inst->flags |= instruction::lock;
+				if(n == node::type::ATOMIC_LOAD) {
+					load_inst->flags |= instruction::LOCK;
 				}
 
 				context.append_instruction(load_inst);
 				break;
 			}
 
-			case node::PROJECTION: {
-				if (n->inputs[0]->ty == node::ENTRY) {
+			case node::type::PROJECTION: {
+				if (n->inputs[0] == node::type::ENTRY) {
 					const i32 index = static_cast<i32>(n->get<projection>().index - 3);
 					i32 param_gpr_count = context.target.get_abi() == abi::WIN_64 ? 4 : 6;
 
 					// use stack space past the n registers we're given
 					if (index >= param_gpr_count) {
-						instruction::instruction_type i;
+						instruction::type i;
 						if(n->dt.ty == data_type::FLOAT) {
-							i = instruction::FP_MOV;
+							i = instruction::type::FP_MOV;
 						}
 						else {
-							i = instruction::MOV;
+							i = instruction::type::MOV;
 						}
 
 						context.append_instruction(create_rm(
@@ -1075,7 +1025,7 @@ namespace sigma::ir {
 							destination,
 							static_cast<u8>(x64::gpr::RBP),
 							reg::invalid_id, 
-							scale::x1, 
+							memory_scale::x1, 
 							16 + index * 8
 						));
 					}
@@ -1089,178 +1039,102 @@ namespace sigma::ir {
 		}
 	}
 
-	auto x64_architecture::select_memory_access_instruction(
-		codegen_context& context, handle<node> n, reg destination, i32 store_op, i32 source
-	) -> handle<instruction> {
+	auto x64_architecture::select_memory_access_instruction(codegen_context& context, handle<node> target, reg destination, i32 store_op, i32 source) -> handle<instruction> {
 		const bool has_second_in = store_op < 0 && source >= 0;
 		i32 offset = 0;
-		constexpr auto scale = scale::x1;
+		constexpr auto scale = memory_scale::x1;
 		constexpr i32 index = -1;
 		reg base;
 
-		if (n->ty == node::SYMBOL) {
+		if (target == node::type::SYMBOL) {
 			NOT_IMPLEMENTED();
 		}
-		else if (n->ty == node::VARIADIC_START) {
+		else if (target == node::type::VARIADIC_START) {
 			NOT_IMPLEMENTED();
 		}
-		else if (n->ty == node::MEMBER_ACCESS) {
-			NOT_IMPLEMENTED();
-		}
-
-		if (n->ty == node::ARRAY_ACCESS) {
+		else if (target == node::type::MEMBER_ACCESS) {
 			NOT_IMPLEMENTED();
 		}
 
-		if (n->ty == node::LOCAL) {
-			n->use_node(context);
+		if (target == node::type::ARRAY_ACCESS) {
+			NOT_IMPLEMENTED();
+		}
 
-			offset += context.get_stack_slot(n);
+		if (target == node::type::LOCAL) {
+			target->use_node(context);
+
+			offset += context.get_stack_slot(target);
 			base = static_cast<u8>(x64::gpr::RBP);
 		}
 		else {
-			base = input_reg(context, n);
+			base = allocate_node_register(context, target);
 		}
 
 		// compute the base
 		if (store_op < 0) {
 			if (has_second_in) {
-				return create_rrm(
-					context,
-					instruction::LEA, 
-					n->dt, 
-					destination, 
-					static_cast<u8>(source),
-					base, 
-					index, 
-					scale, 
-					offset
-				);
+				return create_rrm(context, instruction::type::LEA, target->dt, destination, static_cast<u8>(source), base, index, scale, offset);
 			}
 
-			return create_rm(
-				context,
-				instruction::LEA, 
-				n->dt, 
-				destination, 
-				base, 
-				index,
-				scale, 
-				offset
-			);
+			return create_rm(context, instruction::type::LEA, target->dt, destination, base, index, scale, offset);
 		}
 
-		return create_mr(
-			context, 
-			static_cast<instruction::instruction_type>(store_op),
-			n->dt,
-			base,
-			index,
-			scale,
-			offset,
-			source
-		);
+		return create_mr(context, static_cast<instruction::type::underlying>(store_op), target->dt, base, index, scale, offset, source);
 	}
 
-	auto x64_architecture::select_array_access_instruction(
-		codegen_context& context, handle<node> n, reg destination, i32 store_op, i32 source
-	) -> handle<instruction> {
-		const bool base_dir = 
-			context.virtual_values.at(n->global_value_index).use_count > 2 || 
-			context.virtual_values.at(n->global_value_index).virtual_register.is_valid();
+	auto x64_architecture::select_array_access_instruction(codegen_context& context, handle<node> target, reg destination, i32 store_op, i32 source) -> handle<instruction> {
+		const bool base_dir = context.virtual_values.at(target->global_value_index).use_count > 2 || context.virtual_values.at(target->global_value_index).virtual_register.is_valid();
 
 		// compute base
-		if (
-			n->ty == node::ARRAY_ACCESS &&
-			base_dir
-		) {
-			const reg base = input_reg(context, n);
+		if (target == node::type::ARRAY_ACCESS && base_dir) {
+			const reg base = allocate_node_register(context, target);
 
 			if (store_op < 0) {
 				if (source >= 0) {
-					return create_rrm(
-						context, 
-						instruction::LEA,
-						PTR_TYPE,
-						destination, 
-						static_cast<u8>(source),
-						base, 
-						-1, 
-						scale::x1,
-						0
-					);
+					return create_rrm(context, instruction::type::LEA, PTR_TYPE, destination, static_cast<u8>(source), base, -1, memory_scale::x1, 0);
 				}
 
-				return create_rm(
-					context, 
-					instruction::instruction_type::LEA,
-					PTR_TYPE,
-					destination,
-					base, 
-					-1, 
-					scale::x1,
-					0
-				);
+				return create_rm(context, instruction::type::LEA, PTR_TYPE, destination, base, -1, memory_scale::x1, 0);
 			}
 
-			return create_mr(
-				context, 
-				static_cast<instruction::instruction_type>(store_op),
-				PTR_TYPE,
-				base, 
-				-1,
-				scale::x1,
-				0, 
-				source
-			);
+			return create_mr(context, static_cast<instruction::type::underlying>(store_op), PTR_TYPE, base, -1, memory_scale::x1, 0, source);
 		}
 
-		return select_memory_access_instruction(context, n, destination, store_op, source);
+		return select_memory_access_instruction(context, target, destination, store_op, source);
 	}
 
-	auto x64_architecture::select_instruction_cmp(
-		codegen_context& context, handle<node> n
-	) -> x64::conditional {
+	auto x64_architecture::select_instruction_cmp(codegen_context& context, handle<node> target) -> x64::conditional {
 		bool invert = false;
-		if (
-			n->ty == node::CMP_EQ &&
-			n->dt.ty == data_type::INTEGER &&
-			n->dt.bit_width == 1 &&
-			n->inputs[2]->ty == node::INTEGER_CONSTANT
-		) {
-			const auto& b = n->inputs[2]->get<integer>();
+		if (target == node::type::CMP_EQ && target->dt.ty == data_type::INTEGER && target->dt.bit_width == 1 && target->inputs[2] == node::type::INTEGER_CONSTANT) {
+			const auto& b = target->inputs[2]->get<integer>();
 			if (b.value == 0) {
 				invert = true;
-				n = n->inputs[1];
+				target = target->inputs[1];
 			}
 		}
 
-		if (n->ty >= node::CMP_EQ && n->ty <= node::CMP_FLE) {
+		if (target->get_type() >= node::type::CMP_EQ && target->get_type() <= node::type::CMP_FLE) {
 			NOT_IMPLEMENTED();
 			// data_type cmp_dt = n->get<compare>()
 
 			return x64::conditional::NE; // temp
 		}
 		else {
-			const reg src = input_reg(context, n);
-			const data_type dt = n->dt;
+			const reg src = allocate_node_register(context, target);
+			const data_type dt = target->dt;
 
 			if (dt.ty == data_type::FLOAT) {
 				NOT_IMPLEMENTED();
 			}
 			else {
-				context.append_instruction(create_rr_no_destination(
-					context, instruction::TEST, dt, src, src)
-				);
+				context.append_instruction(create_rrd(context, instruction::type::TEST, dt, src, src));
 			}
 
 			return static_cast<x64::conditional>(x64::conditional::NE ^ invert);
 		}
 	}
 
-	void x64_architecture::dfs_schedule(
-		codegen_context& context, handle<basic_block> bb, handle<node> n, bool is_end
-	) {
+	void x64_architecture::dfs_schedule(codegen_context& context, handle<basic_block> bb, handle<node> n, bool is_end) {
 		const auto it = context.schedule.find(n);
 		if (it == context.schedule.end() || it->second != bb || !context.work.visit(n)) {
 			return;
@@ -1268,19 +1142,19 @@ namespace sigma::ir {
 
 		// if we're a branch, push our PHI nodes
 		if (is_end) {
-			const bool is_fallthrough = n->ty != node::BRANCH;
+			const bool is_fallthrough = n != node::type::BRANCH;
 
 			for (handle<user> user = n->use; user; user = user->next_user) {
-				if (!user->n->is_control()) {
+				if (!user->target->is_control()) {
 					continue;
 				}
 
 				handle<node> destination;
 				if(is_fallthrough) {
-					destination = user->n;
+					destination = user->target;
 				}
 				else {
-					destination = user->n->get_next_block();
+					destination = user->target->get_next_block();
 				}
 
 				// find predecessor index and do that edge
@@ -1298,18 +1172,18 @@ namespace sigma::ir {
 
 				// schedule memory phis
 				for (auto use = destination->use; use; use = use->next_user) {
-					const handle<node> phi = use->n;
+					const handle<node> phi = use->target;
 
-					if (phi->ty == node::PHI && phi->dt.ty == data_type::MEMORY) {
+					if (phi == node::type::PHI && phi->dt.ty == data_type::MEMORY) {
 						dfs_schedule_phi(context, bb, phi, phi_index);
 					}
 				}
 
 				// schedule data phis, we schedule these afterwards because it's "generally" better
 				for (auto use = destination->use; use; use = use->next_user) {
-					const handle<node> phi = use->n;
+					const handle<node> phi = use->target;
 
-					if (phi->ty == node::PHI && phi->dt.ty != data_type::MEMORY) {
+					if (phi == node::type::PHI && phi->dt.ty != data_type::MEMORY) {
 						dfs_schedule_phi(context, bb, phi, phi_index);
 					}
 				}
@@ -1332,41 +1206,36 @@ namespace sigma::ir {
 
 		context.work.items.push_back(n);
 
-		if (
-			n->is_mem_out_op() && n->ty != node::PHI &&
-			n->ty != node::PROJECTION
-		) {
+		if (n->is_mem_out_op() && n != node::type::PHI && n != node::type::PROJECTION) {
 			// memory effects have anti-dependencies, the previous loads
 			// must finish before the next memory effect is applied.
 			for (handle<user> use = n->inputs[1]->use; use; use = use->next_user) {
-				if (use->slot == 1 && use->n != n) {
-					dfs_schedule(context, bb, use->n, false);
+				if (use->slot == 1 && use->target != n) {
+					dfs_schedule(context, bb, use->target, false);
 				}
 			}
 		}
 
 		// push outputs (projections, if they apply)
-		if (n->dt.ty == data_type::TUPLE && n->ty != node::BRANCH) {
+		if (n->dt.ty == data_type::TUPLE && n != node::type::BRANCH) {
 			for (auto use = n->use; use; use = use->next_user) {
-				const handle<node> projection = use->n;
+				const handle<node> projection = use->target;
 
-				if (projection->ty == node::PROJECTION) {
+				if (projection == node::type::PROJECTION) {
 					dfs_schedule(context, bb, projection, false);
 				}
 			}
 		}
 	}
 
-	void x64_architecture::dfs_schedule_phi(
-		codegen_context& context, handle<basic_block> bb, handle<node> phi, ptr_diff phi_index
-	) {
+	void x64_architecture::dfs_schedule_phi(codegen_context& context, handle<basic_block> bb, handle<node> phi, ptr_diff phi_index) {
 		const handle<node> value = phi->inputs[1 + phi_index];
 
 		// reserve phi space
 		if (phi->dt.ty != data_type::MEMORY) {
 			context.phi_values.emplace_back(phi_value{ 
 				.phi = phi, 
-				.n = value
+				.target = value
 			});
 		}
 
@@ -1377,9 +1246,7 @@ namespace sigma::ir {
 		return data_type.ty == data_type::FLOAT ? x64::register_class::XMM : x64::register_class::GPR;
 	}
 
-	auto x64_architecture::allocate_virtual_register(
-		codegen_context& context, handle<node> n, const data_type& data_type
-	) -> reg {
+	auto x64_architecture::allocate_virtual_register(codegen_context& context, handle<node> target, const data_type& data_type) -> reg {
 		const u64 index = context.intervals.size();
 
 		classified_reg reg;
@@ -1388,8 +1255,8 @@ namespace sigma::ir {
 		// create a new live interval with an uninitialized register
 		live_interval it{
 			.assigned = reg::invalid_id,
-			.r = reg,
-			.n = n,
+			.reg = reg,
+			.target = target,
 			.data_type = legalize_data_type(data_type),
 			.ranges = { utility::range<u64>::max() }
 		};
@@ -1399,10 +1266,8 @@ namespace sigma::ir {
 		return { static_cast<reg::id_type>(index)};
 	}
 
-	auto x64_architecture::can_folded_store(
-		codegen_context& context, handle<node> memory, handle<node> address, handle<node> source
-	) -> i32 {
-		switch (source->ty) {
+	auto x64_architecture::can_folded_store(codegen_context& context, handle<node> memory, handle<node> address, handle<node> source) -> i32 {
+		switch (source->get_type()) {
 			default: {
 				return -1;
 			}
@@ -1413,21 +1278,21 @@ namespace sigma::ir {
 			case node::type::ADD:
 			case node::type::SUB: {
 				if (
-					source->inputs[1]->ty == node::type::LOAD &&
+					source->inputs[1] == node::type::LOAD &&
 					source->inputs[1]->inputs[1] == memory &&
 					source->inputs[1]->inputs[2] == address &&
 					source->is_on_last_use(context) &&
 					source->inputs[1]->is_on_last_use(context)
 				) {
-					constexpr static instruction::instruction_type operations[] = {
-						instruction::AND,
-						instruction::OR,
-						instruction::XOR,
-						instruction::ADD,
-						instruction::SUB,
+					static instruction::type operations[] = {
+						instruction::type::AND,
+						instruction::type::OR,
+						instruction::type::XOR,
+						instruction::type::ADD,
+						instruction::type::SUB,
 					};
 
-					return operations[source->ty - node::type::AND];
+					return operations[source->get_type() - node::type::AND];
 				}
 
 				return -1;
@@ -1436,7 +1301,7 @@ namespace sigma::ir {
 	}
 
 	auto x64_architecture::try_for_imm32(handle<node> n, i32 bits, i32& out) -> bool {
-		if (n->ty != node::INTEGER_CONSTANT) {
+		if (n != node::type::INTEGER_CONSTANT) {
 			return false;
 		}
 
@@ -1453,15 +1318,15 @@ namespace sigma::ir {
 		return true;
 	}
 
-	auto x64_architecture::input_reg(codegen_context& context, handle<node> n) -> reg {
+	auto x64_architecture::allocate_node_register(codegen_context& context, handle<node> target) -> reg {
 		// attempt to lookup an existing value
-		auto* value = context.lookup_value(n);
+		const handle<virtual_value> value = context.lookup_virtual_value(target);
 
 		// ASSERT(n->global_value_index != 5, "x");
 		// no value was found, allocate a new virtual register
 		if (value == nullptr) {
-			const reg tmp = allocate_virtual_register(context, n, n->dt);
-			select_instruction(context, n, tmp);
+			const reg tmp = allocate_virtual_register(context, target, target->dt);
+			select_instruction(context, target, tmp);
 			return tmp;
 		}
 
@@ -1473,65 +1338,46 @@ namespace sigma::ir {
 		}
 
 		// if the node should rematerialize we allocate a new virtual register
-		if (n->should_rematerialize()) {
-			const reg tmp = allocate_virtual_register(context, n, n->dt);
-			select_instruction(context, n, tmp);
+		if (target->should_rematerialize()) {
+			const reg tmp = allocate_virtual_register(context, target, target->dt);
+			select_instruction(context, target, tmp);
 			return tmp;
 		}
 
 		// fallback to just allocating a new virtual register
-		const reg tmp = allocate_virtual_register(context, n, n->dt);
+		const reg tmp = allocate_virtual_register(context, target, target->dt);
 		value->virtual_register = tmp;
 		return tmp;
 	}
 
-	auto x64_architecture::create_label(
-		codegen_context& context, handle<node> target
-	) -> handle<instruction> {
+	auto x64_architecture::create_label(codegen_context& context, handle<node> target) -> handle<instruction> {
 		const handle<instruction> inst = context.create_instruction<handle<node>>(0);
 		inst->get<handle<node>>() = target;
-		inst->type = instruction::LABEL;
-		inst->flags = instruction::node_f;
+		inst->set_type(instruction::type::LABEL);
+		inst->flags = instruction::NODE;
 		return inst;
 	}
 
-	auto x64_architecture::create_jump(
-		codegen_context& context, u64 target
-	) -> handle<instruction> {
-		const handle<instruction> inst = create_instruction<label>(
-			context, instruction::JMP, VOID_TYPE, 0, 0, 0
-		);
-
-		inst->flags = instruction::node_f;
+	auto x64_architecture::create_jump(codegen_context& context, u64 target) -> handle<instruction> {
+		const handle<instruction> inst = create_instruction<label>(context, instruction::type::JMP, VOID_TYPE, 0, 0, 0);
+		inst->flags = instruction::NODE;
 		inst->get<label>().value = target;
 		return inst;
 	}
 
-	auto x64_architecture::create_jcc(
-		codegen_context& context, int target, x64::conditional cc
-	) -> handle<instruction>{
-		const handle<instruction> inst = create_instruction<label>(
-			context, 
-			static_cast<instruction::instruction_type>(instruction::JO + cc), 
-			VOID_TYPE, 
-			0,
-			0,
-			0
-		);
-
-		inst->flags = instruction::node_f;
+	auto x64_architecture::create_jcc(codegen_context& context, int target, x64::conditional cc) -> handle<instruction>{
+		const handle<instruction> inst = create_instruction<label>(context, static_cast<instruction::type::underlying>(instruction::type::JO + cc), VOID_TYPE, 0, 0, 0);
+		inst->flags = instruction::NODE;
 		inst->get<label>().value = target;
 		return inst;
 	}
 
-	auto x64_architecture::create_move(
-		codegen_context& context, const data_type& data_type, reg destination, reg source
-	) -> handle<instruction> {
+	auto x64_architecture::create_move(codegen_context& context, const data_type& data_type, reg destination, reg source) -> handle<instruction> {
 		const i32 machine_data_type = legalize_data_type(data_type);
 		const handle<instruction> inst = context.create_instruction(2);
 
-		inst->type = machine_data_type >= x64::SSE_SS ? instruction::FP_MOV : instruction::MOV;
-		inst->dt = machine_data_type;
+		inst->set_type(machine_data_type >= x64::SSE_SS ? instruction::type::FP_MOV : instruction::type::MOV);
+		inst->data_type = machine_data_type;
 
 		inst->out_count = 1;
 		inst->in_count = 1;
@@ -1540,22 +1386,11 @@ namespace sigma::ir {
 		return inst;
 	}
 
-	auto x64_architecture::create_mr(
-		codegen_context& context, 
-		instruction::instruction_type type,
-		const data_type& data_type,
-		reg base, 
-		i32 index,
-		scale scale, 
-		i32 disp,
-		i32 source
-	) -> handle<instruction> {
-		const handle<instruction> inst = create_instruction(
-			context, type, data_type, 0, index >= 0 ? 3 : 2, 0
-		);
+	auto x64_architecture::create_mr(codegen_context& context, instruction::type type, const data_type& data_type, reg base, i32 index, memory_scale scale, i32 disp, i32 source) -> handle<instruction> {
+		const handle<instruction> inst = create_instruction(context, type, data_type, 0, index >= 0 ? 3 : 2, 0);
 
-		inst->flags = instruction::mem_f | (index >= 0 ? instruction::indexed : instruction::none);
-		inst->memory_slot = 0;
+		inst->flags = instruction::MEM | (index >= 0 ? instruction::INDEXED : instruction::NONE);
+		inst->memory.index = 0;
 
 		inst->operands[0] = base.id;
 
@@ -1567,27 +1402,16 @@ namespace sigma::ir {
 			inst->operands[1] = source;
 		}
 
-		inst->displacement = disp;
-		inst->sc = scale;
+		inst->memory.displacement = disp;
+		inst->memory.scale = scale;
 		return inst;
 	}
 
-	auto x64_architecture::create_rm(
-		codegen_context& context,
-		instruction::instruction_type type, 
-		const data_type& data_type, 
-		reg destination, 
-		reg base, 
-		i32 index,
-		scale scale, 
-		i32 disp
-	) -> handle<instruction> {
-		const handle<instruction> inst = create_instruction(
-			context, type, data_type, 1, index >= 0 ? 2 : 1, 0
-		);
+	auto x64_architecture::create_rm(codegen_context& context, instruction::type type, const data_type& data_type, reg destination, reg base, i32 index, memory_scale scale, i32 disp) -> handle<instruction> {
+		const handle<instruction> inst = create_instruction(context, type, data_type, 1, index >= 0 ? 2 : 1, 0);
 
-		inst->flags = instruction::mem_f | (index >= 0 ? instruction::indexed : instruction::none);
-		inst->memory_slot = 1;
+		inst->flags = instruction::MEM | (index >= 0 ? instruction::INDEXED : instruction::NONE);
+		inst->memory.index = 1;
 		inst->operands[0] = destination.id;
 		inst->operands[1] = base.id;
 
@@ -1595,163 +1419,83 @@ namespace sigma::ir {
 			inst->operands[2] = index;
 		}
 
-		inst->displacement = disp;
-		inst->sc = scale;
+		inst->memory.displacement = disp;
+		inst->memory.scale = scale;
 		return inst;
 	}
 
-	auto x64_architecture::create_rr(
-		codegen_context& context,
-		instruction::instruction_type type, 
-		const data_type& data_type,
-		reg destination, 
-		reg source
-	) -> handle<instruction> {
-		const handle<instruction> inst = create_instruction(
-			context, type, data_type, 1, 1, 0
-		);
-
+	auto x64_architecture::create_rr(codegen_context& context, instruction::type type, const data_type& data_type, reg destination, reg source) -> handle<instruction> {
+		const handle<instruction> inst = create_instruction(context, type, data_type, 1, 1, 0);
 		inst->operands[0] = destination.id;
 		inst->operands[1] = source.id;
 		return inst;
 	}
 
-	auto x64_architecture::create_rr_no_destination(
-		codegen_context& context,
-		instruction::instruction_type type,
-		const data_type& data_type, 
-		reg left,
-		reg right
-	) -> handle<instruction> {
-		const handle<instruction> inst = create_instruction(
-			context, type, data_type, 0, 2, 0
-		);
-
-		inst->operands[0] = left.id;
-		inst->operands[1] = right.id;
+	auto x64_architecture::create_rrd(codegen_context& context, instruction::type type, const data_type& data_type, reg destination, reg source) -> handle<instruction> {
+		const handle<instruction> inst = create_instruction(context, type, data_type, 0, 2, 0);
+		inst->operands[0] = destination.id;
+		inst->operands[1] = source.id;
 		return inst;
 	}
 
-	auto x64_architecture::create_immediate(
-		codegen_context& context,
-		instruction::instruction_type type,
-		const data_type& data_type, 
-		reg destination, 
-		i32 value
-	) -> handle<instruction> {
-		const handle<instruction> inst = create_instruction<immediate>(
-			context, type, data_type, 1, 0, 0
-		);
-
+	auto x64_architecture::create_immediate(codegen_context& context, instruction::type type, const data_type& data_type, reg destination, i32 value) -> handle<instruction> {
+		const handle<instruction> inst = create_instruction<immediate>(context, type, data_type, 1, 0, 0);
 		inst->get<immediate>().value = value;
-		inst->flags = instruction::immediate;
+		inst->flags = instruction::IMMEDIATE;
 		inst->operands[0]= destination.id;
 		return inst;
 	}
 
-	auto x64_architecture::create_zero(
-		codegen_context& context, 
-		const data_type& data_type, 
-		reg destination
-	) -> handle<instruction> {
-		const handle<instruction> inst = create_instruction(
-			context, instruction::ZERO, data_type, 1, 0, 0
-		);
-
+	auto x64_architecture::create_zero(codegen_context& context, const data_type& data_type, reg destination) -> handle<instruction> {
+		const handle<instruction> inst = create_instruction(context, instruction::type::ZERO, data_type, 1, 0, 0);
 		inst->operands[0] = destination.id;
 		return inst;
 	}
 
-	auto x64_architecture::create_abs(
-		codegen_context& context, 
-		instruction::instruction_type type,
-		const data_type& data_type,
-		reg destination,
-		u64 immediate
-	) -> handle<instruction> {
-		const handle<instruction> inst = create_instruction<absolute>(
-			context, type, data_type, 1, 0, 0
-		);
-
+	auto x64_architecture::create_abs(codegen_context& context, instruction::type type, const data_type& data_type, reg destination, u64 immediate) -> handle<instruction> {
+		const handle<instruction> inst = create_instruction<absolute>(context, type, data_type, 1, 0, 0);
 		inst->get<absolute>().value = immediate;
-		inst->flags = instruction::absolute;
+		inst->flags = instruction::ABSOLUTE;
 		inst->operands[0] = destination.id;
 		return inst;
 	}
 
-	auto x64_architecture::create_ri(
-		codegen_context& context,
-		instruction::instruction_type type,
-		const data_type& data_type,
-		reg src, 
-		i32 imm
-	) -> handle<instruction> {
-		const handle<instruction> inst = create_instruction<absolute>(
-			context, type, data_type, 0, 1, 0
-		);
-
-		inst->flags = instruction::immediate;
+	auto x64_architecture::create_ri(codegen_context& context, instruction::type type, const data_type& data_type, reg src, i32 imm) -> handle<instruction> {
+		const handle<instruction> inst = create_instruction<absolute>(context, type, data_type, 0, 1, 0);
+		inst->flags = instruction::IMMEDIATE;
 		inst->operands[0] = src.id;
 		inst->get<immediate>().value = imm;
 		return inst;
 	}
 
-	auto x64_architecture::create_rri(
-		codegen_context& context,
-		instruction::instruction_type type,
-		const data_type& data_type,
-		reg destination,
-		reg source, 
-		i32 immediate_value
-	) -> handle<instruction> {
-		const handle<instruction> inst = create_instruction<immediate>(
-			context, type, data_type, 1, 1, 0
-		);
+	auto x64_architecture::create_rri(codegen_context& context, instruction::type type, const data_type& data_type, reg destination, reg source, i32 immediate_value) -> handle<instruction> {
+		const handle<instruction> inst = create_instruction<immediate>(context, type, data_type, 1, 1, 0);
 
 		inst->get<immediate>().value = immediate_value;
-		inst->flags = instruction::immediate;
+		inst->flags = instruction::IMMEDIATE;
 		inst->operands[0] = destination.id;
 		inst->operands[1] = source.id;
+
 		return inst;
 	}
 
-	auto x64_architecture::create_rrr(
-		codegen_context& context,
-		instruction::instruction_type type,
-		const data_type& data_type,
-		reg destination,
-		reg left,
-		reg right
-	) -> handle<instruction> {
-		const handle<instruction> inst = create_instruction<immediate>(
-			context, type, data_type, 1, 2, 0
-		);
+	auto x64_architecture::create_rrr(codegen_context& context, instruction::type type, const data_type& data_type, reg destination, reg left, reg right) -> handle<instruction> {
+		const handle<instruction> inst = create_instruction<immediate>(context, type, data_type, 1, 2, 0);
 
 		inst->operands[0] = destination.id;
 		inst->operands[1] = left.id;
 		inst->operands[2] = right.id;
+
 		return inst;
 	}
 
-	auto x64_architecture::create_rrm(
-		codegen_context& context,
-		instruction::instruction_type type,
-		const data_type& data_type,
-		reg destination, 
-		reg source, 
-		reg base,
-		i32 index, 
-		scale scale,
-		i32 disp
-	) -> handle<instruction> {
-		const handle<instruction> inst = create_instruction(
-			context, type, data_type, 1, index >= 0 ? 3 : 2, 0
-		);
+	auto x64_architecture::create_rrm(codegen_context& context, instruction::type type, const data_type& data_type, reg destination, reg source, reg base, i32 index, memory_scale scale, i32 disp) -> handle<instruction> {
+		const handle<instruction> inst = create_instruction(context, type, data_type, 1, index >= 0 ? 3 : 2, 0);
 
-		inst->flags = instruction::mem_f | (index >= 0 ? instruction::indexed : instruction::none);
-		inst->sc = scale;
-		inst->displacement = disp;
-		inst->memory_slot = 2;
+		inst->flags = instruction::MEM | (index >= 0 ? instruction::INDEXED : instruction::NONE);
+		inst->memory.scale = scale;
+		inst->memory.displacement = disp;
+		inst->memory.index = 2;
 
 		inst->operands[0] = destination.id;
 		inst->operands[1] = source.id;
@@ -1764,23 +1508,15 @@ namespace sigma::ir {
 		return inst;
 	}
 
-	auto x64_architecture::create_op_global(
-		codegen_context& context,
-		instruction::instruction_type type,
-		const data_type& data_type,
-		reg dst, 
-		handle<symbol> s
-	) -> handle<instruction> {
-		const handle<instruction> inst = create_instruction<handle<symbol>>(
-			context, type, data_type, 1, 1, 0
-		);
+	auto x64_architecture::create_op_global(codegen_context& context,instruction::type type, const data_type& data_type, reg dst, handle<symbol> s) -> handle<instruction> {
+		const handle<instruction> inst = create_instruction<handle<symbol>>(context, type, data_type, 1, 1, 0);
 
-		inst->flags = instruction::global;
-		inst->memory_slot = 1;
+		inst->flags = instruction::GLOBAL;
+		inst->memory.index = 1;
 		inst->operands[0] = dst.id;
 		inst->operands[1] = static_cast<u8>(x64::gpr::RSP);
 		inst->get<handle<symbol>>() = s;
-		inst->displacement = 0;
+		inst->memory.displacement = 0;
 
 		return inst;
 	}
@@ -1794,15 +1530,9 @@ namespace sigma::ir {
 		return legalize_integer_data_type(&mask, data_type);
 	}
 
-	auto x64_architecture::legalize_integer_data_type(
-		u64* out_mask, const data_type& data_type
-	) -> x64::data_type {
+	auto x64_architecture::legalize_integer_data_type(u64* out_mask, const data_type& data_type) -> x64::data_type {
 		const data_type::type type = data_type.ty;
-
-		ASSERT(
-			type == data_type::INTEGER || type == data_type::POINTER,
-			"invalid type for integer legalization"
-		);
+		ASSERT(type == data_type::INTEGER || type == data_type::POINTER, "invalid type for integer legalization");
 
 		if (type == data_type::POINTER) {
 			*out_mask = 0;

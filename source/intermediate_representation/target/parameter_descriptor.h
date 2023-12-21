@@ -9,7 +9,6 @@ namespace sigma::ir {
 		u16 xmm_count;
 		u16 caller_saved_xmm_count;
 		u16 caller_saved_gpr_count;
-
 		reg gpr_registers[6];
 	};
 }

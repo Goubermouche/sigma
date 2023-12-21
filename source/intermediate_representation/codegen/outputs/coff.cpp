@@ -5,14 +5,12 @@
 namespace sigma::ir {
 	utility::object_file coff_file_emitter::emit(module& module) {
 		std::vector<handle<external>> externals = module.generate_externals();
-
-		auto sections = module.get_sections();
-		u64 section_count = sections.size();
-
+		auto output = module.get_output();
+		u64 section_count = output.sections.size();
 		std::vector<handle<coff_unwind_info>> unwinds(section_count);
 
 		// mark correct flags on sections
-		for (auto& section : sections) {
+		for (module_section& section : output.sections) {
 			u32 flags = coff::SECTION_READ;
 
 			flags |= section.flags & module_section::WRITE ? coff::SECTION_WRITE : 0;
@@ -28,32 +26,32 @@ namespace sigma::ir {
 		// generate unique ID's
 		u64 unique_id_counter = section_count * 2;
 
-		for (auto& section : sections) {
+		for (module_section& section : output.sections) {
 			if (!section.functions.empty()) {
 				unique_id_counter += 4;
 			}
 		}
 
-		for (auto& section : sections) {
-			for (const auto& func : section.functions) {
-				func->parent->sym.symbol_id = unique_id_counter++;
+		for (module_section& section : output.sections) {
+			for (const handle<compiled_function> function : section.functions) {
+				function->parent->symbol.id = unique_id_counter++;
 			}
 
-			for (const auto& global : section.globals) {
-				global->sym.symbol_id = unique_id_counter++;
+			for (const handle<global> global : section.globals) {
+				global->symbol.id = unique_id_counter++;
 			}
 		}
 
-		for (auto& ex : externals) {
-			ex->sym.symbol_id = unique_id_counter++;
+		for (handle<external> external : externals) {
+			external->symbol.id = unique_id_counter++;
 		}
 
-		for (u64 i = 0; i < sections.size(); ++i) {
-			sections[i].section_index = static_cast<u8>(i + 1);
+		for (u64 i = 0; i < output.sections.size(); ++i) {
+			output.sections[i].section_index = static_cast<u8>(i + 1);
 
 			// generate unwind information for each section with functions
-			if (!sections[i].functions.empty()) {
-				unwinds[i] = generate_unwind_info(module, section_count, sections[i]);
+			if (!output.sections[i].functions.empty()) {
+				unwinds[i] = generate_unwind_info(module, section_count, output.sections[i]);
 				section_count += 2; // .pdata + .xdata
 			}
 		}
@@ -73,9 +71,9 @@ namespace sigma::ir {
 		u32 output_size = sizeof(coff_file_header);
 		output_size += static_cast<u32>(section_count) * sizeof(coff_section_header);
 
-		for (u64 i = 0; i < sections.size(); ++i) {
-			sections[i].raw_data_pos = output_size;
-			output_size += sections[i].total_size;
+		for (u64 i = 0; i < output.sections.size(); ++i) {
+			output.sections[i].raw_data_pos = output_size;
+			output_size += output.sections[i].total_size;
 
 			if (handle<coff_unwind_info> unwind = unwinds[i]) {
 				unwind->pdata_header.raw_data_pos = output_size;
@@ -90,7 +88,7 @@ namespace sigma::ir {
 		}
 
 		// calculate relocation layout
-		output_size = layout_relocations(sections, output_size, sizeof(coff_image_relocation));
+		output_size = layout_relocations(output.sections, output_size, sizeof(coff_image_relocation));
 
 		header.symbol_table = output_size;
 		output_size += header.symbol_count * sizeof(coff_symbol);
@@ -102,17 +100,17 @@ namespace sigma::ir {
 		};
 
 		// compute string table size
-		for (const auto& section : sections) {
-			for (const auto& function : section.functions) {
-				u64 name_length = function->parent->sym.name.size() + 1;
+		for (const module_section& section : output.sections) {
+			for (const handle<compiled_function> function : section.functions) {
+				u64 name_length = function->parent->symbol.name.size() + 1;
 
 				if (name_length >= 8) {
 					string_table.size += static_cast<u32>(name_length) + 1;
 				}
 			}
 
-			for (const auto& global : section.globals) {
-				u64 name_length = global->sym.name.size() + 1;
+			for (const handle<global> global : section.globals) {
+				u64 name_length = global->symbol.name.size() + 1;
 
 				if (name_length >= 8) {
 					string_table.size += static_cast<u32>(name_length) + 1;
@@ -120,8 +118,8 @@ namespace sigma::ir {
 			}
 		}
 
-		for (const auto& ex : externals) {
-			u64 name_length = ex->sym.name.size() + 1;
+		for (const handle<external> external : externals) {
+			u64 name_length = external->symbol.name.size() + 1;
 
 			if (name_length >= 8) {
 				string_table.size += static_cast<u32>(name_length) + 1;
@@ -135,13 +133,13 @@ namespace sigma::ir {
 		utility::byte_buffer headers = utility::byte_buffer::zero_initialize(sizeof(coff_file_header) + sizeof(coff_section_header) * section_count);
 
 		// write the file header 
-		coff_file_header* file = reinterpret_cast<coff_file_header*>(headers.get_data());
+		auto* file = reinterpret_cast<coff_file_header*>(headers.get_data());
 		*file = header;
 
 		// write sections headers
 		auto sec_headers = reinterpret_cast<coff_section_header*>(file + 1);
 
-		for (auto& section : sections) {
+		for (module_section& section : output.sections) {
 			coff_section_header section_header = {
 				.raw_data_size = section.total_size,
 				.raw_data_pos = section.raw_data_pos,
@@ -150,7 +148,7 @@ namespace sigma::ir {
 			};
 
 			u64 section_name_length = section.name.size() + 1;
-			memcpy(section_header.name, section.name.c_str(), section_name_length > 8 ? 8 : section_name_length);
+			std::memcpy(section_header.name, section.name.c_str(), section_name_length > 8 ? 8 : section_name_length);
 
 			if (section.relocation_count >= 0xFFFF) {
 				section_header.relocation_count = 0xFFFF;
@@ -163,7 +161,7 @@ namespace sigma::ir {
 			*sec_headers++ = section_header;
 		}
 
-		for (u64 i = 0; i < sections.size(); ++i) {
+		for (u64 i = 0; i < output.sections.size(); ++i) {
 			if (unwinds[i]) {
 				memcpy(sec_headers + 0, &unwinds[i]->pdata_header, sizeof(coff_section_header));
 				memcpy(sec_headers + 1, &unwinds[i]->xdata_header, sizeof(coff_section_header));
@@ -173,9 +171,9 @@ namespace sigma::ir {
 
 		out_file.append(headers);
 
-		for (u64 i = 0; i < sections.size(); ++i) {
-			utility::byte_buffer sec = utility::byte_buffer::zero_initialize(sections[i].total_size);
-			helper_write_section(0, &sections[i], 0, sec);
+		for (u64 i = 0; i < output.sections.size(); ++i) {
+			utility::byte_buffer sec = utility::byte_buffer::zero_initialize(output.sections[i].total_size);
+			helper_write_section(0, &output.sections[i], 0, sec);
 			out_file.append(sec);
 
 			if (handle<coff_unwind_info> unwind = unwinds[i]) {
@@ -186,14 +184,14 @@ namespace sigma::ir {
 		}
 
 		// write relocations
-		for (auto& section : sections) {
+		for (module_section& section : output.sections) {
 			u32 relocation_count = section.relocation_count;
 			utility::byte_buffer relocations(relocation_count * sizeof(coff_image_relocation));
 			relocations.zero_fill();
 
 			auto relocations_ptr = reinterpret_cast<coff_image_relocation*>(relocations.get_data());
 
-			for (const auto& function : section.functions) {
+			for (const handle<compiled_function> function : section.functions) {
 				u64 source_offset = function->code_position;
 
 				for (handle<symbol_patch> patch = function->first_patch; patch; patch = patch->next) {
@@ -202,19 +200,19 @@ namespace sigma::ir {
 					}
 
 					u64 actual_pos = source_offset + patch->pos;
-					u64 symbol_id = patch->target->symbol_id;
+					u64 symbol_id = patch->target->id;
 					ASSERT(symbol_id != 0, "invalid symol ID");
 
-					if (patch->target->tag == symbol::symbol_tag::FUNCTION || patch->target->tag == symbol::symbol_tag::EXTERNAL) {
+					if (patch->target->type == symbol::symbol_type::FUNCTION || patch->target->type == symbol::symbol_type::EXTERNAL) {
 						*relocations_ptr++ = coff_image_relocation{
 							.virtual_address = static_cast<u32>(actual_pos),
 							.symbol_table_index = static_cast<u32>(symbol_id),
 							.type = IMAGE_REL_AMD64_REL32,
 						};
 					}
-					else if (patch->target->tag == symbol::symbol_tag::GLOBAL) {
+					else if (patch->target->type == symbol::symbol_type::GLOBAL) {
 						handle target_global = reinterpret_cast<global*>(patch->target.get());
-						bool is_tls = sections[target_global->parent_section].flags & module_section::TLS;
+						bool is_tls = output.sections[target_global->parent_section].flags & module_section::TLS;
 
 						*relocations_ptr++ = coff_image_relocation{
 							.virtual_address = static_cast<u32>(actual_pos),
@@ -228,14 +226,14 @@ namespace sigma::ir {
 				}
 			}
 
-			for (const auto& global : section.globals) {
-				for (const auto& object : global->objects) {
+			for (const handle<global> global : section.globals) {
+				for (const init_object& object : global->objects) {
 					u64 actual_pos = global->position + object.offset;
 
 					if (object.type == init_object::RELOCATION) {
 						*relocations_ptr++ = coff_image_relocation{
 							.virtual_address = static_cast<u32>(actual_pos),
-							.symbol_table_index = static_cast<u32>(object.relocation->symbol_id),
+							.symbol_table_index = static_cast<u32>(object.relocation->id),
 							.type = IMAGE_REL_AMD64_ADDR64,
 						};
 					}
@@ -259,19 +257,19 @@ namespace sigma::ir {
 		utility::byte_buffer symbol_table_writer = utility::byte_buffer::reserve_initialize(header.symbol_count * sizeof(coff_symbol));
 		u64 symbol_count = 1;
 
-		for (auto& section : sections) {
-			coff_symbol s = {
+		for (module_section& section : output.sections) {
+			coff_symbol symbol = {
 				.section_number = static_cast<i16>(symbol_count),
 				.storage_class = IMAGE_SYM_CLASS_STATIC,
 				.aux_symbols_count = 1
 			};
 
-			std::memcpy(s.short_name, section.name.c_str(), 8 * sizeof(char));
-			symbol_table_writer.append_type(s);
+			std::memcpy(symbol.short_name, section.name.c_str(), 8 * sizeof(char));
+			symbol_table_writer.append_type(symbol);
 
 			coff_auxiliary_section_symbol aux = {
 				.length = section.total_size,
-				.reloc_count = static_cast<u16>(section.relocation_count),
+				.relocation_count = static_cast<u16>(section.relocation_count),
 				.number = static_cast<i16>(symbol_count),
 				.selection = static_cast<u8>(section.com.ty != comdat::NONE ? 2 : 0),
 			};
@@ -280,13 +278,11 @@ namespace sigma::ir {
 			symbol_count++;
 		}
 
-		for (u64 i = 0; i < sections.size(); ++i) {
-			i16 section_num = sections[i].section_index;
-
+		for (u64 i = 0; i < output.sections.size(); ++i) {
 			if (handle<coff_unwind_info> unwind = unwinds[i]) {
 				// .pdata
 				// .xdata
-				coff_symbol s[2] = {
+				coff_symbol symbols[2] = {
 					{ 
 						.short_name = ".pdata",
 						.section_number = static_cast<i16>(symbol_count),
@@ -301,10 +297,10 @@ namespace sigma::ir {
 					},
 				};
 
-				coff_auxiliary_section_symbol aux[2] = {
+				coff_auxiliary_section_symbol auxiliary_symbols[2] = {
 					{
 						.length = static_cast<u32>(unwind->pdata_chunk.get_size()),
-						.reloc_count = static_cast<u16>(unwind->patch_count),
+						.relocation_count = static_cast<u16>(unwind->patch_count),
 						.number = static_cast<i16>(symbol_count)
 					},
 					{.
@@ -314,30 +310,30 @@ namespace sigma::ir {
 				};
 
 				if (i > 0) {
-					aux[0].selection = 5;
-					aux[0].number = section_num;
+					auxiliary_symbols[0].selection = 5;
+					auxiliary_symbols[0].number = static_cast<i16>(output.sections[i].section_index);
 				}
 
-				symbol_table_writer.append_type(s[0]);
-				symbol_table_writer.append_type(aux[0]);
-				symbol_table_writer.append_type(s[1]);
-				symbol_table_writer.append_type(aux[1]);
+				symbol_table_writer.append_type(symbols[0]);
+				symbol_table_writer.append_type(auxiliary_symbols[0]);
+				symbol_table_writer.append_type(symbols[1]);
+				symbol_table_writer.append_type(auxiliary_symbols[1]);
 				symbol_count += 2;
 			}
 		}
 
-		for (auto& section : sections) {
-			i16 section_index = section.section_index;
+		for (module_section& section : output.sections) {
+			i16 section_index = static_cast<i16>(section.section_index);
 
-			for (const auto& function : section.functions) {
-				bool is_extern = function->parent->link == PUBLIC;
+			for (const handle<compiled_function> function : section.functions) {
+				bool is_extern = function->parent->symbol.link == linkage::PUBLIC;
 				coff_symbol sym = {
 					.value = static_cast<u32>(function->code_position),
 					.section_number = section_index,
 					.storage_class = static_cast<u8>(is_extern ? IMAGE_SYM_CLASS_EXTERNAL : IMAGE_SYM_CLASS_STATIC)
 				};
 
-				std::string name = function->parent->sym.name;
+				std::string name = function->parent->symbol.name;
 				u64 name_length = name.size() + 1;
 
 				ASSERT(name_length < std::numeric_limits<u16>::max(), "invalid name");
@@ -356,8 +352,8 @@ namespace sigma::ir {
 				symbol_table_writer.append_type(sym);
 			}
 
-			for (const auto& global : section.globals) {
-				bool is_extern = global->link == PUBLIC;
+			for (const handle<global> global : section.globals) {
+				bool is_extern = global->symbol.link == linkage::PUBLIC;
 
 				ASSERT(section_index == global->parent_section + 1, "invalid parent section");
 				coff_symbol sym = {
@@ -366,48 +362,48 @@ namespace sigma::ir {
 					.storage_class = static_cast<u8>(is_extern ? IMAGE_SYM_CLASS_EXTERNAL : IMAGE_SYM_CLASS_STATIC)
 				};
 
-				if (global->sym.name[0] != 0) {
-					u64 name_len = global->sym.name.size() + 1;
+				if (global->symbol.name[0] != 0) {
+					u64 name_len = global->symbol.name.size() + 1;
 					ASSERT(name_len < std::numeric_limits<u16>::max(), "invalid name length");
 
 					if (name_len >= 8) {
 						sym.long_name[0] = 0; // this value is 0 for long names
 						sym.long_name[1] = string_table_mark;
 
-						string_table_data[string_table_length++] = global->sym.name;
+						string_table_data[string_table_length++] = global->symbol.name;
 						string_table_mark += static_cast<u32>(name_len) + 1;
 					}
 					else {
-						std::memcpy(sym.short_name, global->sym.name.c_str(), name_len + 1);
+						std::memcpy(sym.short_name, global->symbol.name.c_str(), name_len + 1);
 					}
 				}
 				else {
-					std::snprintf(reinterpret_cast<char*>(sym.short_name), 8, "$%06zx", global->sym.symbol_id);
+					ASSERT(std::snprintf(reinterpret_cast<char*>(sym.short_name), 8, "$%06zx", global->symbol.id) > 0, "invalid snprintf call");
 				}
 
 				symbol_table_writer.append_type(sym);
 			}
 		}
 
-		for (const auto& ext : externals) {
+		for (const handle<external> external : externals) {
 			coff_symbol sym = {
 				.value = 0,
 				.section_number = 0,
 				.storage_class = IMAGE_SYM_CLASS_EXTERNAL
 			};
 
-			u64 name_length = ext->sym.name.size() + 1;
+			u64 name_length = external->symbol.name.size() + 1;
 			ASSERT(name_length < std::numeric_limits<u16>::max(), "invalid name length");
 
 			if (name_length >= 8) {
 				sym.long_name[0] = 0; // this value is 0 for long names
 				sym.long_name[1] = string_table_mark;
 
-				string_table_data[string_table_length++] = ext->sym.name;
+				string_table_data[string_table_length++] = external->symbol.name;
 				string_table_mark += static_cast<u32>(name_length);
 			}
 			else {
-				std::memcpy(sym.short_name, ext->sym.name.c_str(), name_length);
+				std::memcpy(sym.short_name, external->symbol.name.c_str(), name_length);
 			}
 
 			symbol_table_writer.append_type(sym);
@@ -468,7 +464,7 @@ namespace sigma::ir {
 	 		pdata[j + 2] = unwind_info;
 	 
 	 		// .pdata has relocations
-	 		const u32 sym = static_cast<u32>(function->parent->sym.symbol_id);
+	 		const u32 sym = static_cast<u32>(function->parent->symbol.id);
 
 	 		relocations[j + 0] = coff_image_relocation{
 	 			.virtual_address = static_cast<u32>(j * 4),

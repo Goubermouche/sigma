@@ -7,7 +7,6 @@ namespace sigma::ir {
 	struct local {
 		u32 size;        // in bytes
 		u32 alignment;   // in bytes
-		i32 alias_index;
 	};
 
 	struct memory_access {

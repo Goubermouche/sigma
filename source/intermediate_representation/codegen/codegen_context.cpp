@@ -1,9 +1,9 @@
 #include "codegen_context.h"
 
 namespace sigma::ir {
-	void codegen_context::append_instruction(handle<instruction> inst) {
-		head->next_instruction = inst;
-		head = inst;
+	void codegen_context::append_instruction(handle<instruction> instruction) {
+		head->next_instruction = instruction;
+		head = instruction;
 	}
 
 	void codegen_context::hint_reg(u64 interval_index, reg reg) {
@@ -16,7 +16,7 @@ namespace sigma::ir {
 		return static_cast<symbol_patch*>(function->allocator.allocate(sizeof(symbol_patch)));
 	}
 
-	auto codegen_context::lookup_value(handle<node> value) -> virtual_value* {
+	auto codegen_context::lookup_virtual_value(handle<node> value) -> handle<virtual_value> {
 		const auto it = virtual_values.find(value->global_value_index);
 		if(it == virtual_values.end()) {
 			return nullptr;
@@ -30,9 +30,9 @@ namespace sigma::ir {
 		return -static_cast<i32>(stack_usage);
 	}
 
-	auto codegen_context::get_stack_slot(handle<node> n) -> i32 {
+	auto codegen_context::get_stack_slot(handle<node> node) -> i32 {
 		// check if a stack slot for the node already exists 
-		const auto it = stack_slots.find(n);
+		const auto it = stack_slots.find(node);
 
 		// if it exists, return the stack position
 		if (it != stack_slots.end()) {
@@ -40,9 +40,9 @@ namespace sigma::ir {
 		}
 
 		// allocate a new stack slot for the given node
-		const local& local_prop = n->get<local>();
+		const local& local_prop = node->get<local>();
 		const i32 position = allocate_stack(local_prop.size, local_prop.alignment);
-		stack_slots[n] = position;
+		stack_slots[node] = position;
 		return position;
 	}
-}
+} // namespace sigma::ir

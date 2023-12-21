@@ -7,11 +7,7 @@ namespace sigma {
 	class tokenizer {
 	public:
 		tokenizer(const std::string& source);
-
-		[[nodiscard]] static auto tokenize(
-			const std::string& source
-		) -> std::pair<token_buffer, utility::string_table>;
-
+		[[nodiscard]] static auto tokenize(const std::string& source) -> std::pair<token_buffer, utility::string_table>;
 		[[nodiscard]] auto tokenize() -> std::pair<token_buffer, utility::string_table>;
 	private:
 		[[nodiscard]] auto get_next_token() -> token_info;

@@ -26,9 +26,7 @@ namespace sigma {
 		 * \param end_control End control, nullptr by default, when set to a non-null value the branch
 		 * will go here after it finishes running
 		 */
-		void translate_conditional_branch(
-			handle<node> branch_node, handle<ir::node> end_control = nullptr
-		);
+		void translate_conditional_branch(handle<node> branch_node, handle<ir::node> end_control = nullptr);
 
 		/**
 		 * \brief Translates a non-conditional ast branch node into IR.

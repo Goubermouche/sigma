@@ -13,17 +13,19 @@ namespace sigma::ir {
 
 	class use_position {
 	public:
-		enum kind {
-			out, reg, mem_or_reg
+		enum type {
+			OUT,
+			REG,
+			MEM_OR_REG
 		};
 
 		u64 position;
-		kind kind;
+		type type;
 	};
 
 	struct phi_value {
 		handle<node> phi;
-		handle<node> n;
+		handle<node> target;
 
 		reg destination;
 		reg source;
@@ -43,28 +45,7 @@ namespace sigma::ir {
 		std::unordered_set<handle<node>> items;
 	};
 
-	inline auto find_least_common_ancestor(
-		handle<basic_block> a, handle<basic_block> b
-	) -> handle<basic_block> {
-		if (a == nullptr) {
-			return b;
-		}
-
-		while (a->dominator_depth > b->dominator_depth) {
-			a = a->dominator;
-		}
-
-		while (b->dominator_depth > a->dominator_depth) {
-			b = b->dominator;
-		}
-
-		while (a != b) {
-			b = b->dominator;
-			a = a->dominator;
-		}
-
-		return a;
-	}
+	auto find_least_common_ancestor(handle<basic_block> a, handle<basic_block> b) -> handle<basic_block>;
 
 	struct machine_block {
 		u64 terminator;
@@ -99,30 +80,18 @@ namespace sigma::ir {
 		reg assigned;
 		reg hint;
 
-		classified_reg r;
-		handle<node> n;
+		classified_reg reg;
+		handle<node> target;
 
 		u64 active_range = 0;
 
-		i32 data_type;
-		i32 split_kid = -1;
+		i32 data_type; // generic data type (= instruction.data_type)
+		i32 split_child = -1;
 		i32 spill = -1;
 
 		std::vector<utility::range<u64>> ranges;
 		std::vector<use_position> uses;
 	};
 
-	inline ptr_diff interval_intersect(handle<live_interval> a, handle<live_interval> b) {
-		for (u64 i = a->active_range + 1; i-- > 1;) {
-			for (u64 j = b->active_range + 1; j-- > 1;) {
-				const ptr_diff intersect = range_intersect(a->ranges[i], b->ranges[j]);
-
-				if (intersect >= 0) {
-					return intersect;
-				}
-			}
-		}
-
-		return -1;
-	}
-}
+	ptr_diff interval_intersect(handle<live_interval> a, handle<live_interval> b);
+} // namespace sigma::ir

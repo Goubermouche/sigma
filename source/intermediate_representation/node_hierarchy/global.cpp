@@ -5,7 +5,6 @@ namespace sigma::ir {
 	void global::set_storage(
 		u8 section_handle, u32 storage_size, u32 storage_alignment, u32 max_objects
 	) {
-		// parent = section
 		position = 0;
 		size = storage_size;
 		alignment = storage_alignment;
@@ -16,16 +15,16 @@ namespace sigma::ir {
 	auto global::add_region(u32 region_offset, u32 region_size) -> void* {
 		void* ptr = malloc(region_size);
 
-		init_object o {
+		const init_object object {
 			.type = init_object::REGION,
 			.offset = region_offset,
-			.r = {
+			.region = {
 				.size = region_size,
 				.ptr = ptr
 			}
 		};
 
-		objects.push_back(o);
+		objects.push_back(object);
 		return ptr;
 	}
 } // namespace sigma::ir

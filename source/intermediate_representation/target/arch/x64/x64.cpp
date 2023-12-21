@@ -3,6 +3,46 @@
 #include "intermediate_representation/codegen/instruction.h"
 
 namespace sigma::ir {
+	namespace x64 {
+		auto get_register_name(reg reg, i32 dt) -> std::string {
+			static const char* s_gpr_names[4][16] = {
+				{ "al",  "cl",  "dl",  "bl",  "spl", "bpl", "sil", "dil", "r8b", "r9b", "r10b", "r11b", "r12b", "r13b", "r14b", "r15b" },
+				{ "ax",  "cx",  "dx",  "bx",  "sp",  "bp",  "si",  "di",  "r8w", "r9w", "r10w", "r11w", "r12w", "r13w", "r14w", "r15w" },
+				{ "eax", "ecx", "edx", "ebx", "esp", "ebp", "esi", "edi", "r8d", "r9d", "r10d", "r11d", "r12d", "r13d", "r14d", "r15d" },
+				{ "rax", "rcx", "rdx", "rbx", "rsp", "rbp", "rsi", "rdi", "r8",  "r9",  "r10",  "r11",  "r12",  "r13",  "r14",  "r15"  }
+			};
+
+			if (dt >= BYTE && dt <= QWORD) {
+				return s_gpr_names[dt - BYTE][reg.id];
+			}
+
+			if (dt >= SSE_SS && dt <= SSE_PD) {
+				static const char* s_xmm_names[] = {
+					"xmm0", "xmm1", "xmm2",  "xmm3",  "xmm4",  "xmm5",  "xmm6",  "xmm7",
+					"xmm8", "xmm9", "xmm10", "xmm11", "xmm12", "xmm13", "xmm14", "xmm15",
+				};
+
+				return s_xmm_names[reg.id];
+			}
+
+			return "??";
+		}
+
+		auto get_type_name(i32 dt) -> std::string {
+			switch (dt) {
+			case BYTE:   return "byte";
+			case WORD:   return "word";
+			case DWORD:
+			case SSE_SS: return "dword";
+			case QWORD:
+			case SSE_SD: return "qword";
+			case SSE_PS:
+			case SSE_PD: return "xmmword";
+			default:     return "??";
+			}
+		}
+	}
+
 	utility::byte_buffer x64_architecture::emit_bytecode(codegen_context& context) {
 		resolve_stack_usage(context);
 
@@ -13,7 +53,8 @@ namespace sigma::ir {
 		emit_function_body(context, bytecode);
 		emit_function_epilogue(context, bytecode);
 
-		pad(bytecode);
+		// pad the instruction buffer to 16 bytes with nop instructions
+		emit_nops_to_width(bytecode);
 
 		return bytecode;
 	}
@@ -29,7 +70,7 @@ namespace sigma::ir {
 			reg.cl = is_gpr ? x64::register_class::GPR : x64::register_class::XMM;
 
 			intervals[i] = live_interval{
-				.r = reg,
+				.reg = reg,
 				.data_type = is_gpr ? x64::QWORD : x64::XMMWORD,
 				.ranges = { utility::range<u64>::max() }
 			};
@@ -49,7 +90,7 @@ namespace sigma::ir {
 		context.stack_usage = utility::align(usage, 16);
 	}
 
-	void x64_architecture::pad(utility::byte_buffer& bytecode) {
+	void x64_architecture::emit_nops_to_width(utility::byte_buffer& bytecode) {
 		// pad to 16 bytes
 		static constexpr u8 nops[8][8] = {
 				{ 0x90 },
@@ -66,23 +107,21 @@ namespace sigma::ir {
 
 		if(pad < 16) {
 			bytecode.reserve(bytecode.get_size() + pad);
-			utility::byte* dst = bytecode.get_data() + bytecode.get_size();
+			utility::byte* destination = bytecode.get_data() + bytecode.get_size();
 			bytecode.set_size(bytecode.get_size() + pad);
 
 			if(pad > 8) {
-				const u64 rem = pad - 8;
-				memset(dst, 0x66, rem);
-				pad -= rem;
-				dst += rem;
+				const u64 remaining = pad - 8;
+				memset(destination, 0x66, remaining);
+				pad -= remaining;
+				destination += remaining;
 			}
 
-			std::memcpy(dst, nops[pad - 1], pad);
+			std::memcpy(destination, nops[pad - 1], pad);
 		}
 	}
 
-	void x64_architecture::emit_function_prologue(
-		codegen_context& context, utility::byte_buffer& bytecode
-	) {
+	void x64_architecture::emit_function_prologue(codegen_context& context, utility::byte_buffer& bytecode) {
 		if(context.stack_usage <= 16) {
 			context.prologue_length = 0;
 			return;
@@ -120,73 +159,64 @@ namespace sigma::ir {
 		context.prologue_length = static_cast<u8>(bytecode.get_size());
 	}
 
-	void x64_architecture::emit_function_body(
-		codegen_context& context, utility::byte_buffer& bytecode
-	) {
+	void x64_architecture::emit_function_body(codegen_context& context, utility::byte_buffer& bytecode) {
 		for (handle<instruction> inst = context.first; inst; inst = inst->next_instruction) {
 			const u8 in_base = inst->out_count;
 			instruction::category cat;
 
-			if(inst->type >= s_instruction_table.size()) {
+			if(inst->get_type() >= s_instruction_table.size()) {
 				cat = instruction::category::BINOP;
 			}
 			else {
-				cat = s_instruction_table[inst->type].cat;;
+				cat = s_instruction_table[inst->get_type()].category;
 			}
 
-			if (
-				inst->type == instruction::ENTRY ||
-				inst->type == instruction::TERMINATOR
-			) { /*does nothing*/ }
-			else if(inst->type == instruction::instruction_type::LABEL) {
+			if (inst == instruction::type::ENTRY || inst == instruction::type::TERMINATOR) {
+				/*does nothing*/
+			}
+			else if(inst == instruction::type::LABEL) {
 				const handle<node> basic_block = inst->get<handle<node>>();
 				const u32 position = static_cast<u32>(bytecode.get_size());
 				const u64 id = context.graph.blocks.at(basic_block).id;
 
 				bytecode.resolve_relocation_dword(&context.labels[id], position);
 			}
-			else if(inst->type == instruction::INLINE) {
+			else if(inst == instruction::type::INLINE) {
 				NOT_IMPLEMENTED();
 			}
-			else if (inst->type == instruction::EPILOGUE) { /*does nothing*/ }
-			else if (inst->type == instruction::LINE) {
+			else if (inst == instruction::type::EPILOGUE) { /*does nothing*/ }
+			else if (inst == instruction::type::LINE) {
 				NOT_IMPLEMENTED();
 			}
-			else if (
-				cat == instruction::category::BYTE ||
-				cat == instruction::category::BYTE_EXT
-			) {
-				if(inst->type & static_cast<u32>(instruction::rep)) {
+			else if (cat == instruction::category::BYTE || cat == instruction::category::BYTE_EXT) {
+				if(inst->get_type() & static_cast<u32>(instruction::REP)) {
 					bytecode.append_byte(0xF3);
 				}
 
-				emit_instruction_0(inst->type, inst->dt, bytecode);
+				emit_instruction_0(inst->get_type(), inst->data_type, bytecode);
 			}
-			else if (inst->type == instruction::ZERO) {
-				const handle<codegen_temporary> destination = context.create_temporary();
-				const bool is_xmm = inst->dt >= x64::PBYTE && inst->dt <= x64::XMMWORD;
+			else if (inst->get_type() == instruction::type::ZERO) {
+				const handle<instruction_operand> destination = context.create_instruction_operand();
+				const bool is_xmm = inst->data_type >= x64::PBYTE && inst->data_type <= x64::XMMWORD;
 
 				resolve_interval(context, inst, 0, destination);
 
 				emit_instruction_2(
 					context, 
-					is_xmm ? instruction::FP_XOR : instruction::XOR, 
+					is_xmm ? instruction::type::FP_XOR : instruction::type::XOR,
 					destination, 
 					destination,
-					inst->dt,
+					inst->data_type,
 					bytecode
 				);
 			}
-			else if (
-				inst->type >= instruction::JMP &&
-				inst->type <= instruction::JG
-			) {
-				handle<codegen_temporary> target;
+			else if (inst->get_type() >= instruction::type::JMP && inst->get_type() <= instruction::type::JG) {
+				handle<instruction_operand> target;
 
-				if (inst->flags & instruction::node_f) {
-					target = codegen_temporary::create_label(context, inst->get<label>().value);
+				if (inst->flags & instruction::NODE) {
+					target = instruction_operand::create_label(context, inst->get<label>().value);
 				}
-				else if (inst->flags & instruction::global) {
+				else if (inst->flags & instruction::GLOBAL) {
 					NOT_IMPLEMENTED();
 				}
 				else {
@@ -194,65 +224,59 @@ namespace sigma::ir {
 					resolve_interval(context, inst, in_base, target);
 				}
 
-				emit_instruction_1(context, inst->type, target, inst->dt, bytecode);
+				emit_instruction_1(context, inst->get_type(), target, inst->data_type, bytecode);
 			}
-			else if (inst->type == instruction::CALL) {
-				const handle<codegen_temporary> target = context.create_temporary<handle<symbol>>();
+			else if (inst == instruction::type::CALL) {
+				const handle<instruction_operand> target = context.create_instruction_operand<handle<symbol>>();
 				resolve_interval(context, inst, in_base, target);
-				emit_instruction_1(context, instruction::CALL, target, x64::QWORD, bytecode);
+				emit_instruction_1(context, instruction::type::CALL, target, x64::QWORD, bytecode);
 			}
 			else {
 				i32 mov_op;
-				if(inst->dt >= x64::PBYTE && inst->dt <= x64::XMMWORD) {
-					mov_op = instruction::FP_MOV;
+				if(inst->data_type >= x64::PBYTE && inst->data_type <= x64::XMMWORD) {
+					mov_op = instruction::type::FP_MOV;
 				}
 				else {
-					mov_op = instruction::MOV;
+					mov_op = instruction::type::MOV;
 				}
 
 				// prefix
-				if (inst->flags & instruction::lock) {
+				if (inst->flags & instruction::LOCK) {
 					bytecode.append_byte(0xF0);
 				}
 
-				if (inst->flags & instruction::rep) {
+				if (inst->flags & instruction::REP) {
 					bytecode.append_byte(0xF3);
 				}
 
-				i32 dt = inst->dt;
+				i32 dt = inst->data_type;
 				if (dt == x64::XMMWORD) {
 					dt = x64::SSE_PD;
 				}
 
 				// resolve output
-				handle<codegen_temporary> out = context.create_temporary();
+				handle<instruction_operand> out = context.create_instruction_operand();
 				bool ternary = false;
-				u8 i = 0;
+				u8 resolved_operand_count = 0;
 
 				if (inst->out_count == 1) {
-					i += resolve_interval(context, inst, i, out);
-					ASSERT(i == in_base, "invalid instruction base");
+					resolved_operand_count += resolve_interval(context, inst, resolved_operand_count, out);
+					ASSERT(resolved_operand_count == in_base, "invalid instruction base");
 				}
 				else {
-					i = in_base;
+					resolved_operand_count = in_base;
 				}
 
 				if (inst->in_count > 0) {
-					const handle<codegen_temporary> left = context.create_temporary();
-					i += resolve_interval(context, inst, i, left);
-					ternary = 
-						(i < in_base + inst->in_count) ||
-						(inst->flags & (instruction::immediate | instruction::absolute));
+					const handle<instruction_operand> left = context.create_instruction_operand();
+					resolved_operand_count += resolve_interval(context, inst, resolved_operand_count, left);
+					ternary = (resolved_operand_count < in_base + inst->in_count) || (inst->flags & (instruction::IMMEDIATE | instruction::ABSOLUTE));
 
-					if (
-						ternary &&
-						inst->type == instruction::IMUL &&
-						(inst->flags & instruction::immediate)
-					) {
+					if (ternary && inst == instruction::type::IMUL && (inst->flags & instruction::IMMEDIATE)) {
 						// there's a special case for ternary IMUL r64, r/m64, imm32
-						emit_instruction_2(context, instruction::IMUL3, out, left, dt, bytecode);
+						emit_instruction_2(context, instruction::type::IMUL3, out, left, dt, bytecode);
 
-						if(inst->dt == x64::WORD) {
+						if(inst->data_type == x64::WORD) {
 							bytecode.append_word(static_cast<u16>(inst->get<immediate>().value));
 						}
 						else {
@@ -265,71 +289,53 @@ namespace sigma::ir {
 					if (inst->out_count == 0) {
 						out = left;
 					}
-					else if (inst->type == instruction::IDIV || inst->type == instruction::DIV) {
-						emit_instruction_1(context, inst->type, left, dt, bytecode);
+					else if (inst == instruction::type::IDIV || inst == instruction::type::DIV) {
+						emit_instruction_1(context, inst->get_type(), left, dt, bytecode);
 						continue;
 					}
 					else {
 						if (out == nullptr) {
-							out = context.create_temporary();
+							out = context.create_instruction_operand();
 						}
 
-						if (ternary || inst->type == instruction::MOV || inst->type == instruction::FP_MOV) {
+						if (ternary || inst == instruction::type::MOV || inst == instruction::type::FP_MOV) {
 							if (out->matches(left) == false) {
-								emit_instruction_2(
-									context, 
-									static_cast<instruction::instruction_type>(mov_op), 
-									out, 
-									left,
-									dt, 
-									bytecode
-								);
+								emit_instruction_2(context, instruction::type(static_cast<instruction::type::underlying>(mov_op)), out, left, dt, bytecode);
 							}
 						}
 						else {
-							emit_instruction_2(context, inst->type, out, left, dt, bytecode);
+							emit_instruction_2(context, inst->get_type(), out, left, dt, bytecode);
 						}
 					}
 				}
 
 				// unary ops
 				if (cat == instruction::category::UNARY || cat == instruction::category::UNARY_EXT) {
-					emit_instruction_1(context, inst->type, out, dt, bytecode);
+					emit_instruction_1(context, inst->get_type(), out, dt, bytecode);
 					continue;
 				}
 
-				if (inst->flags & instruction::immediate) {
-					const handle<codegen_temporary> right = codegen_temporary::create_imm(
-						context, inst->get<immediate>().value
-					);
-
-					emit_instruction_2(context, inst->type, out, right, dt, bytecode);
+				if (inst->flags & instruction::IMMEDIATE) {
+					const handle<instruction_operand> right = instruction_operand::create_imm(context, inst->get<immediate>().value);
+					emit_instruction_2(context, inst->get_type(), out, right, dt, bytecode);
 				}
-				else if (inst->flags & instruction::absolute) {
-					const handle<codegen_temporary> right = codegen_temporary::create_abs(
-						context, inst->get<immediate>().value
-					);
-
-					emit_instruction_2(context, inst->type, out, right, dt, bytecode);
+				else if (inst->flags & instruction::ABSOLUTE) {
+					const handle<instruction_operand> right = instruction_operand::create_abs(context, inst->get<immediate>().value);
+					emit_instruction_2(context, inst->get_type(), out, right, dt, bytecode);
 				}
 				else if (ternary) {
-					const handle<codegen_temporary> right = context.create_temporary();
-					resolve_interval(context, inst, i, right);
+					const handle<instruction_operand> right = context.create_instruction_operand();
+					resolve_interval(context, inst, resolved_operand_count, right);
 
-					if (
-						inst->type != instruction::MOV || 
-						(inst->type == instruction::MOV && out->matches(right) == false)
-					) {
-						emit_instruction_2(context, inst->type, out, right, dt, bytecode);
+					if (inst != instruction::type::MOV || (inst == instruction::type::MOV && out->matches(right) == false)) {
+						emit_instruction_2(context, inst->get_type(), out, right, dt, bytecode);
 					}
 				}
 			}
 		}
 	}
 
-	void x64_architecture::emit_function_epilogue(
-		const codegen_context& context, utility::byte_buffer& bytecode
-	) {
+	void x64_architecture::emit_function_epilogue(const codegen_context& context, utility::byte_buffer& bytecode) {
 		ASSERT(context.function->exit_node != nullptr, "no exit node found");
 
 		if(context.stack_usage <= 16) {
@@ -357,11 +363,7 @@ namespace sigma::ir {
 		// ret
 		const handle<node> remote_procedure_call = context.function->exit_node->inputs[2];
 
-		if(
-			remote_procedure_call->ty == node::PROJECTION &&
-			remote_procedure_call->inputs[0]->ty == node::ENTRY &&
-			remote_procedure_call->get<projection>().index == 2
-		) {
+		if(remote_procedure_call == node::type::PROJECTION && remote_procedure_call->inputs[0] == node::type::ENTRY && remote_procedure_call->get<projection>().index == 2) {
 			bytecode.append_byte(0xC3);
 		}
 	}
@@ -369,146 +371,144 @@ namespace sigma::ir {
 	auto x64_architecture::get_instruction_table() ->std::array<instruction::description, 120> {
 		std::array<instruction::description, 120> table = {};
 
-		table[instruction::RET        ] = { .mnemonic = "ret",       .cat = instruction::category::BYTE,     .op = 0xC3 };
-		table[instruction::INT3       ] = { .mnemonic = "int3",      .cat = instruction::category::BYTE,     .op = 0xCC };
-		table[instruction::STOSB      ] = { .mnemonic = "rep stosb", .cat = instruction::category::BYTE,     .op = 0xAA };
-		table[instruction::MOVSB      ] = { .mnemonic = "rep movsb", .cat = instruction::category::BYTE,     .op = 0xA4 };
-		table[instruction::CAST       ] = { .mnemonic = "cvt",       .cat = instruction::category::BYTE,     .op = 0x99 };
-		table[instruction::SYS_CALL   ] = { .mnemonic = "syscall",   .cat = instruction::category::BYTE_EXT, .op = 0x05 };
-		table[instruction::RDTSC      ] = { .mnemonic = "rdtsc",     .cat = instruction::category::BYTE_EXT, .op = 0x31 };
-		table[instruction::UD2        ] = { .mnemonic = "ud2",       .cat = instruction::category::BYTE_EXT, .op = 0x0B };
+		table[instruction::type::RET     ] = { .mnemonic = "ret",       .category = instruction::category::BYTE,     .op = 0xC3 };
+		table[instruction::type::INT3    ] = { .mnemonic = "int3",      .category = instruction::category::BYTE,     .op = 0xCC };
+		table[instruction::type::STOSB   ] = { .mnemonic = "rep stosb", .category = instruction::category::BYTE,     .op = 0xAA };
+		table[instruction::type::MOVSB   ] = { .mnemonic = "rep movsb", .category = instruction::category::BYTE,     .op = 0xA4 };
+		table[instruction::type::CAST    ] = { .mnemonic = "cvt",       .category = instruction::category::BYTE,     .op = 0x99 };
+		table[instruction::type::SYS_CALL] = { .mnemonic = "syscall",   .category = instruction::category::BYTE_EXT, .op = 0x05 };
+		table[instruction::type::RDTSC   ] = { .mnemonic = "rdtsc",     .category = instruction::category::BYTE_EXT, .op = 0x31 };
+		table[instruction::type::UD2     ] = { .mnemonic = "ud2",       .category = instruction::category::BYTE_EXT, .op = 0x0B };
 
-		table[instruction::NOT         ] = { .mnemonic = "not",  .cat = instruction::category::UNARY, .op = 0xF7, .rx_i = 0x02 };
-		table[instruction::NEG         ] = { .mnemonic = "neg",  .cat = instruction::category::UNARY, .op = 0xF7, .rx_i = 0x03 };
-		table[instruction::MUL         ] = { .mnemonic = "mul",  .cat = instruction::category::UNARY, .op = 0xF7, .rx_i = 0x04 };
-		table[instruction::DIV         ] = { .mnemonic = "div",  .cat = instruction::category::UNARY, .op = 0xF7, .rx_i = 0x06 };
-		table[instruction::IDIV        ] = { .mnemonic = "idiv", .cat = instruction::category::UNARY, .op = 0xF7, .rx_i = 0x07 };
-		table[instruction::CALL        ] = { .mnemonic = "call", .cat = instruction::category::UNARY, .op = 0xE8, .rx_i = 0x02 };
-		table[instruction::JMP         ] = { .mnemonic = "jmp",  .cat = instruction::category::UNARY, .op = 0xE9, .rx_i = 0x04 };
+		table[instruction::type::NOT ] = { .mnemonic = "not",  .category = instruction::category::UNARY, .op = 0xF7, .rx_i = 0x02 };
+		table[instruction::type::NEG ] = { .mnemonic = "neg",  .category = instruction::category::UNARY, .op = 0xF7, .rx_i = 0x03 };
+		table[instruction::type::MUL ] = { .mnemonic = "mul",  .category = instruction::category::UNARY, .op = 0xF7, .rx_i = 0x04 };
+		table[instruction::type::DIV ] = { .mnemonic = "div",  .category = instruction::category::UNARY, .op = 0xF7, .rx_i = 0x06 };
+		table[instruction::type::IDIV] = { .mnemonic = "idiv", .category = instruction::category::UNARY, .op = 0xF7, .rx_i = 0x07 };
+		table[instruction::type::CALL] = { .mnemonic = "call", .category = instruction::category::UNARY, .op = 0xE8, .rx_i = 0x02 };
+		table[instruction::type::JMP ] = { .mnemonic = "jmp",  .category = instruction::category::UNARY, .op = 0xE9, .rx_i = 0x04 };
 
 		// prefetching
-		table[instruction::PREFETCHNTA] = { .mnemonic = "prefetchnta", .cat = instruction::category::UNARY_EXT, .op = 0x18, .rx_i = 0 };
-		table[instruction::PREFETCH0  ] = { .mnemonic = "prefetch0",   .cat = instruction::category::UNARY_EXT, .op = 0x18, .rx_i = 1 };
-		table[instruction::PREFETCH1  ] = { .mnemonic = "prefetch1",   .cat = instruction::category::UNARY_EXT, .op = 0x18, .rx_i = 2 };
-		table[instruction::PREFETCH2  ] = { .mnemonic = "prefetch2",   .cat = instruction::category::UNARY_EXT, .op = 0x18, .rx_i = 3 };
+		table[instruction::type::PREFETCHNTA] = { .mnemonic = "prefetchnta", .category = instruction::category::UNARY_EXT, .op = 0x18, .rx_i = 0 };
+		table[instruction::type::PREFETCH0  ] = { .mnemonic = "prefetch0",   .category = instruction::category::UNARY_EXT, .op = 0x18, .rx_i = 1 };
+		table[instruction::type::PREFETCH1  ] = { .mnemonic = "prefetch1",   .category = instruction::category::UNARY_EXT, .op = 0x18, .rx_i = 2 };
+		table[instruction::type::PREFETCH2  ] = { .mnemonic = "prefetch2",   .category = instruction::category::UNARY_EXT, .op = 0x18, .rx_i = 3 };
 
 		// jcc
-		table[instruction::JO ] = { .mnemonic = "jo",  .cat = instruction::category::UNARY_EXT, .op = 0x80 };
-		table[instruction::JNO] = { .mnemonic = "jno", .cat = instruction::category::UNARY_EXT, .op = 0x81 };
-		table[instruction::JB] =  { .mnemonic = "jb",  .cat = instruction::category::UNARY_EXT, .op = 0x82 };
-		table[instruction::JNB] = { .mnemonic = "jnb", .cat = instruction::category::UNARY_EXT, .op = 0x83 };
-		table[instruction::JE] =  { .mnemonic = "je",  .cat = instruction::category::UNARY_EXT, .op = 0x84 };
-		table[instruction::JNE] = { .mnemonic = "jne", .cat = instruction::category::UNARY_EXT, .op = 0x85 };
-		table[instruction::JBE] = { .mnemonic = "jbe", .cat = instruction::category::UNARY_EXT, .op = 0x86 };
-		table[instruction::JA] =  { .mnemonic = "ja",  .cat = instruction::category::UNARY_EXT, .op = 0x87 };
-		table[instruction::JS] =  { .mnemonic = "js",  .cat = instruction::category::UNARY_EXT, .op = 0x88 };
-		table[instruction::JNS] = { .mnemonic = "jns", .cat = instruction::category::UNARY_EXT, .op = 0x89 };
-		table[instruction::JP] =  { .mnemonic = "jp",  .cat = instruction::category::UNARY_EXT, .op = 0x8A };
-		table[instruction::JNP] = { .mnemonic = "jnp", .cat = instruction::category::UNARY_EXT, .op = 0x8B };
-		table[instruction::JL] =  { .mnemonic = "jl",  .cat = instruction::category::UNARY_EXT, .op = 0x8C };
-		table[instruction::JGE] = { .mnemonic = "jge", .cat = instruction::category::UNARY_EXT, .op = 0x8D };
-		table[instruction::JLE] = { .mnemonic = "jle", .cat = instruction::category::UNARY_EXT, .op = 0x8E };
-		table[instruction::JG] =  { .mnemonic = "jg",  .cat = instruction::category::UNARY_EXT, .op = 0x8F };
+		table[instruction::type::JO ] = { .mnemonic = "jo",  .category = instruction::category::UNARY_EXT, .op = 0x80 };
+		table[instruction::type::JNO] = { .mnemonic = "jno", .category = instruction::category::UNARY_EXT, .op = 0x81 };
+		table[instruction::type::JB ] = { .mnemonic = "jb",  .category = instruction::category::UNARY_EXT, .op = 0x82 };
+		table[instruction::type::JNB] = { .mnemonic = "jnb", .category = instruction::category::UNARY_EXT, .op = 0x83 };
+		table[instruction::type::JE ] = { .mnemonic = "je",  .category = instruction::category::UNARY_EXT, .op = 0x84 };
+		table[instruction::type::JNE] = { .mnemonic = "jne", .category = instruction::category::UNARY_EXT, .op = 0x85 };
+		table[instruction::type::JBE] = { .mnemonic = "jbe", .category = instruction::category::UNARY_EXT, .op = 0x86 };
+		table[instruction::type::JA ] = { .mnemonic = "ja",  .category = instruction::category::UNARY_EXT, .op = 0x87 };
+		table[instruction::type::JS ] = { .mnemonic = "js",  .category = instruction::category::UNARY_EXT, .op = 0x88 };
+		table[instruction::type::JNS] = { .mnemonic = "jns", .category = instruction::category::UNARY_EXT, .op = 0x89 };
+		table[instruction::type::JP ] = { .mnemonic = "jp",  .category = instruction::category::UNARY_EXT, .op = 0x8A };
+		table[instruction::type::JNP] = { .mnemonic = "jnp", .category = instruction::category::UNARY_EXT, .op = 0x8B };
+		table[instruction::type::JL ] = { .mnemonic = "jl",  .category = instruction::category::UNARY_EXT, .op = 0x8C };
+		table[instruction::type::JGE] = { .mnemonic = "jge", .category = instruction::category::UNARY_EXT, .op = 0x8D };
+		table[instruction::type::JLE] = { .mnemonic = "jle", .category = instruction::category::UNARY_EXT, .op = 0x8E };
+		table[instruction::type::JG ] = { .mnemonic = "jg",  .category = instruction::category::UNARY_EXT, .op = 0x8F };
 
 		// setcc
-		table[instruction::SETO ] = { .mnemonic = "seto",  .cat = instruction::category::UNARY_EXT, .op = 0x90 };
-		table[instruction::SETNO] = { .mnemonic = "setno", .cat = instruction::category::UNARY_EXT, .op = 0x91 };
-		table[instruction::SETB ] = { .mnemonic = "setb",  .cat = instruction::category::UNARY_EXT, .op = 0x92 };
-		table[instruction::SETNB] = { .mnemonic = "setnb", .cat = instruction::category::UNARY_EXT, .op = 0x93 };
-		table[instruction::SETE ] = { .mnemonic = "sete",  .cat = instruction::category::UNARY_EXT, .op = 0x94 };
-		table[instruction::SETNE] = { .mnemonic = "setne", .cat = instruction::category::UNARY_EXT, .op = 0x95 };
-		table[instruction::SETBE] = { .mnemonic = "setbe", .cat = instruction::category::UNARY_EXT, .op = 0x96 };
-		table[instruction::SETA ] = { .mnemonic = "seta",  .cat = instruction::category::UNARY_EXT, .op = 0x97 };
-		table[instruction::SETS ] = { .mnemonic = "sets",  .cat = instruction::category::UNARY_EXT, .op = 0x98 };
-		table[instruction::SETNS] = { .mnemonic = "setns", .cat = instruction::category::UNARY_EXT, .op = 0x99 };
-		table[instruction::SETP ] = { .mnemonic = "setp",  .cat = instruction::category::UNARY_EXT, .op = 0x9A };
-		table[instruction::SETNP] = { .mnemonic = "setnp", .cat = instruction::category::UNARY_EXT, .op = 0x9B };
-		table[instruction::SETL ] = { .mnemonic = "setl",  .cat = instruction::category::UNARY_EXT, .op = 0x9C };
-		table[instruction::SETGE] = { .mnemonic = "setge", .cat = instruction::category::UNARY_EXT, .op = 0x9D };
-		table[instruction::SETLE] = { .mnemonic = "setle", .cat = instruction::category::UNARY_EXT, .op = 0x9E };
-		table[instruction::SETG ] = { .mnemonic = "setg",  .cat = instruction::category::UNARY_EXT, .op = 0x9F };
+		table[instruction::type::SETO ] = { .mnemonic = "seto",  .category = instruction::category::UNARY_EXT, .op = 0x90 };
+		table[instruction::type::SETNO] = { .mnemonic = "setno", .category = instruction::category::UNARY_EXT, .op = 0x91 };
+		table[instruction::type::SETB ] = { .mnemonic = "setb",  .category = instruction::category::UNARY_EXT, .op = 0x92 };
+		table[instruction::type::SETNB] = { .mnemonic = "setnb", .category = instruction::category::UNARY_EXT, .op = 0x93 };
+		table[instruction::type::SETE ] = { .mnemonic = "sete",  .category = instruction::category::UNARY_EXT, .op = 0x94 };
+		table[instruction::type::SETNE] = { .mnemonic = "setne", .category = instruction::category::UNARY_EXT, .op = 0x95 };
+		table[instruction::type::SETBE] = { .mnemonic = "setbe", .category = instruction::category::UNARY_EXT, .op = 0x96 };
+		table[instruction::type::SETA ] = { .mnemonic = "seta",  .category = instruction::category::UNARY_EXT, .op = 0x97 };
+		table[instruction::type::SETS ] = { .mnemonic = "sets",  .category = instruction::category::UNARY_EXT, .op = 0x98 };
+		table[instruction::type::SETNS] = { .mnemonic = "setns", .category = instruction::category::UNARY_EXT, .op = 0x99 };
+		table[instruction::type::SETP ] = { .mnemonic = "setp",  .category = instruction::category::UNARY_EXT, .op = 0x9A };
+		table[instruction::type::SETNP] = { .mnemonic = "setnp", .category = instruction::category::UNARY_EXT, .op = 0x9B };
+		table[instruction::type::SETL ] = { .mnemonic = "setl",  .category = instruction::category::UNARY_EXT, .op = 0x9C };
+		table[instruction::type::SETGE] = { .mnemonic = "setge", .category = instruction::category::UNARY_EXT, .op = 0x9D };
+		table[instruction::type::SETLE] = { .mnemonic = "setle", .category = instruction::category::UNARY_EXT, .op = 0x9E };
+		table[instruction::type::SETG ] = { .mnemonic = "setg",  .category = instruction::category::UNARY_EXT, .op = 0x9F };
 
 		// cmovcc
-		table[instruction::CMOVO ] = { .mnemonic = "cmovo",  .cat = instruction::category::BINOP_EXT_1, .op = 0x40 };
-		table[instruction::CMOVNO] = { .mnemonic = "cmovno", .cat = instruction::category::BINOP_EXT_1, .op = 0x41 };
-		table[instruction::CMOVB ] = { .mnemonic = "cmovb",  .cat = instruction::category::BINOP_EXT_1, .op = 0x42 };
-		table[instruction::CMOVNB] = { .mnemonic = "cmovnb", .cat = instruction::category::BINOP_EXT_1, .op = 0x43 };
-		table[instruction::CMOVE ] = { .mnemonic = "cmove",  .cat = instruction::category::BINOP_EXT_1, .op = 0x44 };
-		table[instruction::CMOVNE] = { .mnemonic = "cmovne", .cat = instruction::category::BINOP_EXT_1, .op = 0x45 };
-		table[instruction::CMOVBE] = { .mnemonic = "cmovbe", .cat = instruction::category::BINOP_EXT_1, .op = 0x46 };
-		table[instruction::CMOVA ] = { .mnemonic = "cmova",  .cat = instruction::category::BINOP_EXT_1, .op = 0x47 };
-		table[instruction::CMOVS ] = { .mnemonic = "cmovs",  .cat = instruction::category::BINOP_EXT_1, .op = 0x48 };
-		table[instruction::CMOVNS] = { .mnemonic = "cmovns", .cat = instruction::category::BINOP_EXT_1, .op = 0x49 };
-		table[instruction::CMOVP ] = { .mnemonic = "cmovp",  .cat = instruction::category::BINOP_EXT_1, .op = 0x4A };
-		table[instruction::CMOVNP] = { .mnemonic = "cmovnp", .cat = instruction::category::BINOP_EXT_1, .op = 0x4B };
-		table[instruction::CMOVL ] = { .mnemonic = "cmovl",  .cat = instruction::category::BINOP_EXT_1, .op = 0x4C };
-		table[instruction::CMOVGE] = { .mnemonic = "cmovge", .cat = instruction::category::BINOP_EXT_1, .op = 0x4D };
-		table[instruction::CMOVLE] = { .mnemonic = "cmovle", .cat = instruction::category::BINOP_EXT_1, .op = 0x4E };
-		table[instruction::CMOVG ] = { .mnemonic = "cmovg",  .cat = instruction::category::BINOP_EXT_1, .op = 0x4F };
+		table[instruction::type::CMOVO ] = { .mnemonic = "cmovo",  .category = instruction::category::BINOP_EXT_1, .op = 0x40 };
+		table[instruction::type::CMOVNO] = { .mnemonic = "cmovno", .category = instruction::category::BINOP_EXT_1, .op = 0x41 };
+		table[instruction::type::CMOVB ] = { .mnemonic = "cmovb",  .category = instruction::category::BINOP_EXT_1, .op = 0x42 };
+		table[instruction::type::CMOVNB] = { .mnemonic = "cmovnb", .category = instruction::category::BINOP_EXT_1, .op = 0x43 };
+		table[instruction::type::CMOVE ] = { .mnemonic = "cmove",  .category = instruction::category::BINOP_EXT_1, .op = 0x44 };
+		table[instruction::type::CMOVNE] = { .mnemonic = "cmovne", .category = instruction::category::BINOP_EXT_1, .op = 0x45 };
+		table[instruction::type::CMOVBE] = { .mnemonic = "cmovbe", .category = instruction::category::BINOP_EXT_1, .op = 0x46 };
+		table[instruction::type::CMOVA ] = { .mnemonic = "cmova",  .category = instruction::category::BINOP_EXT_1, .op = 0x47 };
+		table[instruction::type::CMOVS ] = { .mnemonic = "cmovs",  .category = instruction::category::BINOP_EXT_1, .op = 0x48 };
+		table[instruction::type::CMOVNS] = { .mnemonic = "cmovns", .category = instruction::category::BINOP_EXT_1, .op = 0x49 };
+		table[instruction::type::CMOVP ] = { .mnemonic = "cmovp",  .category = instruction::category::BINOP_EXT_1, .op = 0x4A };
+		table[instruction::type::CMOVNP] = { .mnemonic = "cmovnp", .category = instruction::category::BINOP_EXT_1, .op = 0x4B };
+		table[instruction::type::CMOVL ] = { .mnemonic = "cmovl",  .category = instruction::category::BINOP_EXT_1, .op = 0x4C };
+		table[instruction::type::CMOVGE] = { .mnemonic = "cmovge", .category = instruction::category::BINOP_EXT_1, .op = 0x4D };
+		table[instruction::type::CMOVLE] = { .mnemonic = "cmovle", .category = instruction::category::BINOP_EXT_1, .op = 0x4E };
+		table[instruction::type::CMOVG ] = { .mnemonic = "cmovg",  .category = instruction::category::BINOP_EXT_1, .op = 0x4F };
 
 		// bit magic
-		table[instruction::BSF] = { .mnemonic = "bsf", .cat = instruction::category::BINOP_EXT_1, .op = 0xBC };
-		table[instruction::BSF] = { .mnemonic = "bsr", .cat = instruction::category::BINOP_EXT_1, .op = 0xBD };
+		table[instruction::type::BSF] = { .mnemonic = "bsf", .category = instruction::category::BINOP_EXT_1, .op = 0xBC };
+		table[instruction::type::BSF] = { .mnemonic = "bsr", .category = instruction::category::BINOP_EXT_1, .op = 0xBD };
 
 		// binary ops but they have an implicit CL on the right-hand side
-		table[instruction::SHL] = { .mnemonic = "shl", .cat = instruction::category::BINOP_CL, .op = 0xD2, .op_i = 0xC0, .rx_i = 0x04 };
-		table[instruction::SHR] = { .mnemonic = "shr", .cat = instruction::category::BINOP_CL, .op = 0xD2, .op_i = 0xC0, .rx_i = 0x05 };
-		table[instruction::ROL] = { .mnemonic = "rol", .cat = instruction::category::BINOP_CL, .op = 0xD2, .op_i = 0xC0, .rx_i = 0x00 };
-		table[instruction::ROR] = { .mnemonic = "ror", .cat = instruction::category::BINOP_CL, .op = 0xD2, .op_i = 0xC0, .rx_i = 0x01 };
-		table[instruction::SAR] = { .mnemonic = "sar", .cat = instruction::category::BINOP_CL, .op = 0xD2, .op_i = 0xC0, .rx_i = 0x07 };
+		table[instruction::type::SHL] = { .mnemonic = "shl", .category = instruction::category::BINOP_CL, .op = 0xD2, .op_i = 0xC0, .rx_i = 0x04 };
+		table[instruction::type::SHR] = { .mnemonic = "shr", .category = instruction::category::BINOP_CL, .op = 0xD2, .op_i = 0xC0, .rx_i = 0x05 };
+		table[instruction::type::ROL] = { .mnemonic = "rol", .category = instruction::category::BINOP_CL, .op = 0xD2, .op_i = 0xC0, .rx_i = 0x00 };
+		table[instruction::type::ROR] = { .mnemonic = "ror", .category = instruction::category::BINOP_CL, .op = 0xD2, .op_i = 0xC0, .rx_i = 0x01 };
+		table[instruction::type::SAR] = { .mnemonic = "sar", .category = instruction::category::BINOP_CL, .op = 0xD2, .op_i = 0xC0, .rx_i = 0x07 };
 
-		table[instruction::ADD ] =  { .mnemonic = "add",  .cat = instruction::category::BINOP, .op = 0x00, .op_i = 0x80, .rx_i = 0x00 };
-		table[instruction::OR  ] =  { .mnemonic = "or",   .cat = instruction::category::BINOP, .op = 0x08, .op_i = 0x80, .rx_i = 0x01 };
-		table[instruction::AND ] =  { .mnemonic = "and",  .cat = instruction::category::BINOP, .op = 0x20, .op_i = 0x80, .rx_i = 0x04 };
-		table[instruction::SUB ] =  { .mnemonic = "sub",  .cat = instruction::category::BINOP, .op = 0x28, .op_i = 0x80, .rx_i = 0x05 };
-		table[instruction::XOR ] =  { .mnemonic = "xor",  .cat = instruction::category::BINOP, .op = 0x30, .op_i = 0x80, .rx_i = 0x06 };
-		table[instruction::CMP ] =  { .mnemonic = "cmp",  .cat = instruction::category::BINOP, .op = 0x38, .op_i = 0x80, .rx_i = 0x07 };
-		table[instruction::MOV ] =  { .mnemonic = "mov",  .cat = instruction::category::BINOP, .op = 0x88, .op_i = 0xC6, .rx_i = 0x00 };
-		table[instruction::TEST] =  { .mnemonic = "test", .cat = instruction::category::BINOP, .op = 0x84, .op_i = 0xF6, .rx_i = 0x00 };
+		table[instruction::type::ADD ] =  { .mnemonic = "add",  .category = instruction::category::BINOP, .op = 0x00, .op_i = 0x80, .rx_i = 0x00 };
+		table[instruction::type::OR  ] =  { .mnemonic = "or",   .category = instruction::category::BINOP, .op = 0x08, .op_i = 0x80, .rx_i = 0x01 };
+		table[instruction::type::AND ] =  { .mnemonic = "and",  .category = instruction::category::BINOP, .op = 0x20, .op_i = 0x80, .rx_i = 0x04 };
+		table[instruction::type::SUB ] =  { .mnemonic = "sub",  .category = instruction::category::BINOP, .op = 0x28, .op_i = 0x80, .rx_i = 0x05 };
+		table[instruction::type::XOR ] =  { .mnemonic = "xor",  .category = instruction::category::BINOP, .op = 0x30, .op_i = 0x80, .rx_i = 0x06 };
+		table[instruction::type::CMP ] =  { .mnemonic = "cmp",  .category = instruction::category::BINOP, .op = 0x38, .op_i = 0x80, .rx_i = 0x07 };
+		table[instruction::type::MOV ] =  { .mnemonic = "mov",  .category = instruction::category::BINOP, .op = 0x88, .op_i = 0xC6, .rx_i = 0x00 };
+		table[instruction::type::TEST] =  { .mnemonic = "test", .category = instruction::category::BINOP, .op = 0x84, .op_i = 0xF6, .rx_i = 0x00 };
 
 		// misc integer ops
-		table[instruction::MOVABS                 ] =  { .mnemonic = "mov",    .cat = instruction::category::BINOP_PLUS, .op = 0xB8 };
-		table[instruction::XCHG                   ] =  { .mnemonic = "xchg",   .cat = instruction::category::BINOP,      .op = 0x86 };
-		table[instruction::LEA                    ] =  { .mnemonic = "lea",    .cat = instruction::category::BINOP,      .op = 0x8D };
-		table[instruction::XADD                   ] =  { .mnemonic = "xadd",   .cat = instruction::category::BINOP_EXT_1,  .op = 0xC0 };
-		table[instruction::IMUL                   ] =  { .mnemonic = "imul",   .cat = instruction::category::BINOP_EXT_1,  .op = 0xAF };
-		table[instruction::IMUL3                  ] =  { .mnemonic = "imul",   .cat = instruction::category::BINOP,      .op = 0x69 };
-		table[instruction::MOVSXB                 ] =  { .mnemonic = "movsxb", .cat = instruction::category::BINOP_EXT_2, .op = 0xBE };
-		table[instruction::MOVSXW                 ] =  { .mnemonic = "movsxw", .cat = instruction::category::BINOP_EXT_2, .op = 0xBF };
-		table[instruction::MOVSXD                 ] =  { .mnemonic = "movsxd", .cat = instruction::category::BINOP,      .op = 0x63 };
-		table[instruction::MOVZXB                 ] =  { .mnemonic = "movzxb", .cat = instruction::category::BINOP_EXT_2, .op = 0xB6 };
-		table[instruction::MOVZXW                 ] =  { .mnemonic = "movzxw", .cat = instruction::category::BINOP_EXT_2, .op = 0xB7 };
+		table[instruction::type::MOVABS] =  { .mnemonic = "mov",    .category = instruction::category::BINOP_PLUS, .op = 0xB8 };
+		table[instruction::type::XCHG  ] =  { .mnemonic = "xchg",   .category = instruction::category::BINOP,      .op = 0x86 };
+		table[instruction::type::LEA   ] =  { .mnemonic = "lea",    .category = instruction::category::BINOP,      .op = 0x8D };
+		table[instruction::type::XADD  ] =  { .mnemonic = "xadd",   .category = instruction::category::BINOP_EXT_1,  .op = 0xC0 };
+		table[instruction::type::IMUL  ] =  { .mnemonic = "imul",   .category = instruction::category::BINOP_EXT_1,  .op = 0xAF };
+		table[instruction::type::IMUL3 ] =  { .mnemonic = "imul",   .category = instruction::category::BINOP,      .op = 0x69 };
+		table[instruction::type::MOVSXB] =  { .mnemonic = "movsxb", .category = instruction::category::BINOP_EXT_2, .op = 0xBE };
+		table[instruction::type::MOVSXW] =  { .mnemonic = "movsxw", .category = instruction::category::BINOP_EXT_2, .op = 0xBF };
+		table[instruction::type::MOVSXD] =  { .mnemonic = "movsxd", .category = instruction::category::BINOP,      .op = 0x63 };
+		table[instruction::type::MOVZXB] =  { .mnemonic = "movzxb", .category = instruction::category::BINOP_EXT_2, .op = 0xB6 };
+		table[instruction::type::MOVZXW] =  { .mnemonic = "movzxw", .category = instruction::category::BINOP_EXT_2, .op = 0xB7 };
 
 		// gpr<->xmm
-		table[instruction::MOV_I2F] = { .mnemonic = "mov", .cat = instruction::category::BINOP_EXT_3, .op = 0x6E };
-		table[instruction::MOV_F2I] = { .mnemonic = "mov", .cat = instruction::category::BINOP_EXT_3, .op = 0x7E };
+		table[instruction::type::MOV_I2F] = { .mnemonic = "mov", .category = instruction::category::BINOP_EXT_3, .op = 0x6E };
+		table[instruction::type::MOV_F2I] = { .mnemonic = "mov", .category = instruction::category::BINOP_EXT_3, .op = 0x7E };
 
 		// SSE binary operations
-		table[instruction::FP_MOV            ] = {  .mnemonic ="mov",   .cat = instruction::category::BINOP_SSE, .op = 0x10 };
-		table[instruction::FP_ADD            ] = {  .mnemonic ="add",   .cat = instruction::category::BINOP_SSE, .op = 0x58 };
-		table[instruction::FP_MUL            ] = {  .mnemonic ="mul",   .cat = instruction::category::BINOP_SSE, .op = 0x59 };
-		table[instruction::FP_SUB            ] = {  .mnemonic ="sub",   .cat = instruction::category::BINOP_SSE, .op = 0x5C };
-		table[instruction::FP_MIN            ] = {  .mnemonic ="min",   .cat = instruction::category::BINOP_SSE, .op = 0x5D };
-		table[instruction::FP_DIV            ] = {  .mnemonic ="div",   .cat = instruction::category::BINOP_SSE, .op = 0x5E };
-		table[instruction::FP_MAX            ] = {  .mnemonic ="max",   .cat = instruction::category::BINOP_SSE, .op = 0x5F };
-		table[instruction::FP_CMP            ] = {  .mnemonic ="cmp",   .cat = instruction::category::BINOP_SSE, .op = 0xC2 };
-		table[instruction::FP_UCOMI          ] = {  .mnemonic ="ucomi", .cat = instruction::category::BINOP_SSE, .op = 0x2E };
-		table[instruction::FP_CVT32          ] = {  .mnemonic ="cvtsi", .cat = instruction::category::BINOP_SSE, .op = 0x2A };
-		table[instruction::FP_CVT64          ] = {  .mnemonic ="cvtsi", .cat = instruction::category::BINOP_SSE, .op = 0x2A };
-		table[instruction::FP_CVT            ] = {  .mnemonic ="cvt",   .cat = instruction::category::BINOP_SSE, .op = 0x5A };
-		table[instruction::FP_CVTT           ] = {  .mnemonic ="rsqrt", .cat = instruction::category::BINOP_SSE, .op = 0x2C };
-		table[instruction::FP_SQRT           ] = {  .mnemonic ="and",   .cat = instruction::category::BINOP_SSE, .op = 0x51 };
-		table[instruction::FP_RSQRT          ] = {  .mnemonic ="or",    .cat = instruction::category::BINOP_SSE, .op = 0x52 };
-		table[instruction::FP_AND            ] = {  .mnemonic ="xor",   .cat = instruction::category::BINOP_SSE, .op = 0x54 };
-		table[instruction::FP_OR             ] = {  .mnemonic ="or",    .cat = instruction::category::BINOP_SSE, .op = 0x56 };
-		table[instruction::FP_XOR            ] = {  .mnemonic ="xor",   .cat = instruction::category::BINOP_SSE, .op = 0x57 };
+		table[instruction::type::FP_MOV  ] = {  .mnemonic ="mov",   .category = instruction::category::BINOP_SSE, .op = 0x10 };
+		table[instruction::type::FP_ADD  ] = {  .mnemonic ="add",   .category = instruction::category::BINOP_SSE, .op = 0x58 };
+		table[instruction::type::FP_MUL  ] = {  .mnemonic ="mul",   .category = instruction::category::BINOP_SSE, .op = 0x59 };
+		table[instruction::type::FP_SUB  ] = {  .mnemonic ="sub",   .category = instruction::category::BINOP_SSE, .op = 0x5C };
+		table[instruction::type::FP_MIN  ] = {  .mnemonic ="min",   .category = instruction::category::BINOP_SSE, .op = 0x5D };
+		table[instruction::type::FP_DIV  ] = {  .mnemonic ="div",   .category = instruction::category::BINOP_SSE, .op = 0x5E };
+		table[instruction::type::FP_MAX  ] = {  .mnemonic ="max",   .category = instruction::category::BINOP_SSE, .op = 0x5F };
+		table[instruction::type::FP_CMP  ] = {  .mnemonic ="cmp",   .category = instruction::category::BINOP_SSE, .op = 0xC2 };
+		table[instruction::type::FP_UCOMI] = {  .mnemonic ="ucomi", .category = instruction::category::BINOP_SSE, .op = 0x2E };
+		table[instruction::type::FP_CVT32] = {  .mnemonic ="cvtsi", .category = instruction::category::BINOP_SSE, .op = 0x2A };
+		table[instruction::type::FP_CVT64] = {  .mnemonic ="cvtsi", .category = instruction::category::BINOP_SSE, .op = 0x2A };
+		table[instruction::type::FP_CVT  ] = {  .mnemonic ="cvt",   .category = instruction::category::BINOP_SSE, .op = 0x5A };
+		table[instruction::type::FP_CVTT ] = {  .mnemonic ="rsqrt", .category = instruction::category::BINOP_SSE, .op = 0x2C };
+		table[instruction::type::FP_SQRT ] = {  .mnemonic ="and",   .category = instruction::category::BINOP_SSE, .op = 0x51 };
+		table[instruction::type::FP_RSQRT] = {  .mnemonic ="or",    .category = instruction::category::BINOP_SSE, .op = 0x52 };
+		table[instruction::type::FP_AND  ] = {  .mnemonic ="xor",   .category = instruction::category::BINOP_SSE, .op = 0x54 };
+		table[instruction::type::FP_OR   ] = {  .mnemonic ="or",    .category = instruction::category::BINOP_SSE, .op = 0x56 };
+		table[instruction::type::FP_XOR  ] = {  .mnemonic ="xor",   .category = instruction::category::BINOP_SSE, .op = 0x57 };
 
 		return table;
 	}
 
-	void x64_architecture::emit_instruction_0(
-		instruction::instruction_type type, i32 data_type, utility::byte_buffer& bytecode
-	) {
+	void x64_architecture::emit_instruction_0(instruction::type type, i32 data_type, utility::byte_buffer& bytecode) {
 		ASSERT(type < s_instruction_table.size(), "type is out of range");
 		const auto& description = &s_instruction_table[type];
 
@@ -516,7 +516,7 @@ namespace sigma::ir {
 			bytecode.append_byte(0x48);
 		}
 
-		if (description->cat == instruction::category::BYTE_EXT) {
+		if (description->category == instruction::category::BYTE_EXT) {
 			bytecode.append_byte(0x0F);
 		}
 
@@ -529,13 +529,7 @@ namespace sigma::ir {
 		}
 	}
 
-	void x64_architecture::emit_instruction_1(
-		codegen_context& context,
-		instruction::instruction_type type,
-		handle<codegen_temporary> r,
-		i32 dt, 
-		utility::byte_buffer& bytecode
-	) {
+	void x64_architecture::emit_instruction_1(codegen_context& context, instruction::type type, handle<instruction_operand> r, i32 dt, utility::byte_buffer& bytecode) {
 		ASSERT(type < s_instruction_table.size(), "invalid type");
 		const instruction::description& descriptor = s_instruction_table[type];
 
@@ -544,28 +538,28 @@ namespace sigma::ir {
 		const u8 op = descriptor.op_i;
 		const u8 rx = descriptor.rx_i;
 
-		if (r->type == codegen_temporary::GPR) {
+		if (r == instruction_operand::type::GPR) {
 			if (is_rex || r->reg >= 8) {
 				bytecode.append_byte(rex(is_rexw, 0x00, r->reg, 0x00));
 			}
 
-			if (descriptor.cat == instruction::category::UNARY_EXT) {
+			if (descriptor.category == instruction::category::UNARY_EXT) {
 				bytecode.append_byte(0x0F);
 			}
 
 			bytecode.append_byte(op ? op : descriptor.op);
 			bytecode.append_byte(mod_rx_rm(x64::DIRECT, rx, r->reg));
 		}
-		else if (r->type == codegen_temporary::MEM) {
-			const i32 displacement = r->IMM;
+		else if (r == instruction_operand::type::MEM) {
+			const i32 displacement = r->immediate;
 			const u8 index = r->index;
 			const u8 base = r->reg;
-			scale s = r->sc;
+			memory_scale s = r->scale;
 
 			const bool needs_index = (index != reg::invalid_id) || (base & 7) == x64::gpr::RSP;
 			bytecode.append_byte(rex(is_rexw, 0x00, base, index != reg::invalid_id ? index : 0));
 
-			if (descriptor.cat == instruction::category::UNARY_EXT) {
+			if (descriptor.category == instruction::category::UNARY_EXT) {
 				bytecode.append_byte(0x0F);
 			}
 
@@ -582,9 +576,7 @@ namespace sigma::ir {
 			bytecode.append_byte(mod_rx_rm(m, rx, needs_index ? static_cast<u8>(x64::gpr::RSP) : base));
 
 			if (needs_index) {
-				bytecode.append_byte(
-					mod_rx_rm(static_cast<x64::mod>(s), (base & 7) == x64::gpr::RSP ? static_cast<u8>(x64::gpr::RSP) : index, base)
-				);
+				bytecode.append_byte(mod_rx_rm(static_cast<x64::mod>(s), (base & 7) == x64::gpr::RSP ? static_cast<u8>(x64::gpr::RSP) : index, base));
 			}
 
 			if (m == x64::INDIRECT_DISPLACEMENT_8) {
@@ -594,9 +586,9 @@ namespace sigma::ir {
 				bytecode.append_dword(static_cast<i32>(displacement));
 			}
 		}
-		else if (r->type == codegen_temporary::GLOBAL) {
+		else if (r == instruction_operand::type::GLOBAL) {
 			if(descriptor.op) {
-				if(descriptor.cat == instruction::category::UNARY_EXT) {
+				if(descriptor.category == instruction::category::UNARY_EXT) {
 					bytecode.append_byte(0x0F);
 				}
 
@@ -607,7 +599,7 @@ namespace sigma::ir {
 					bytecode.append_byte(is_rexw ? 0x48 : 0x40);
 				}
 
-				if (descriptor.cat == instruction::category::UNARY_EXT) {
+				if (descriptor.category == instruction::category::UNARY_EXT) {
 					bytecode.append_byte(0x0F);
 				}
 
@@ -618,8 +610,8 @@ namespace sigma::ir {
 			bytecode.append_dword(r->immediate);
 			emit_symbol_patch(context, r->get<handle<symbol>>(), bytecode.get_size() - 4);
 		}
-		else if (r->type == codegen_temporary::LABEL) {
-			if (descriptor.cat == instruction::category::UNARY_EXT) {
+		else if (r == instruction_operand::type::LABEL) {
+			if (descriptor.category == instruction::category::UNARY_EXT) {
 				bytecode.append_byte(0x0F);
 			}
 
@@ -627,24 +619,14 @@ namespace sigma::ir {
 			bytecode.append_dword(0);
 
 			const u64 label = r->get<ir::label>().value;
-			bytecode.emit_relocation_dword(
-				&context.labels[label], 
-				static_cast<u32>(bytecode.get_size()) - 4
-			);
+			bytecode.emit_relocation_dword(&context.labels[label], static_cast<u32>(bytecode.get_size()) - 4);
 		}
 		else {
 			NOT_IMPLEMENTED();
 		}
 	}
 
-	void x64_architecture::emit_instruction_2(
-		codegen_context& context,
-		instruction::instruction_type type,
-		handle<codegen_temporary> a,
-		handle<codegen_temporary> b, 
-		i32 data_type,
-		utility::byte_buffer& bytecode
-	) {
+	void x64_architecture::emit_instruction_2(codegen_context& context, instruction::type type, handle<instruction_operand> a, handle<instruction_operand> b, i32 data_type, utility::byte_buffer& bytecode) {
 		if (data_type >= x64::SSE_SS && data_type <= x64::SSE_PD) {
 			NOT_IMPLEMENTED();
 		}
@@ -653,11 +635,11 @@ namespace sigma::ir {
 		ASSERT(type < s_instruction_table.size(), "invalid type");
 
 		const instruction::description& descriptor = s_instruction_table[type];
-		const bool dir = b->type == codegen_temporary::MEM || b->type == codegen_temporary::GLOBAL;
+		const bool dir = b == instruction_operand::type::MEM || b == instruction_operand::type::GLOBAL;
 
-		if (type == instruction::MOVABS) {
+		if (type == instruction::type::MOVABS) {
 			ASSERT(
-				a->type == codegen_temporary::GPR && b->type == codegen_temporary::ABS,
+				a == instruction_operand::type::GPR && b == instruction_operand::type::ABS,
 				"invalid data types for a movabs operation"
 			);
 
@@ -666,14 +648,13 @@ namespace sigma::ir {
 			bytecode.append_qword(b->get<absolute>().value);
 		}
 
-		if (
-			dir ||
+		if (dir ||
 			descriptor.op == 0x63 ||
 			descriptor.op == 0x69 ||
 			descriptor.op == 0x6E ||
-			(type >= instruction::CMOVO && type <= instruction::CMOVG) ||
+			(type >= instruction::type::CMOVO && type <= instruction::type::CMOVG) ||
 			descriptor.op == 0xAF ||
-			descriptor.cat == instruction::category::BINOP_EXT_2
+			descriptor.category == instruction::category::BINOP_EXT_2
 		) {
 			std::swap(a, b);
 		}
@@ -682,25 +663,19 @@ namespace sigma::ir {
 		bool sz = data_type != x64::BYTE;
 
 		// uses an imm value that works as a sign extended 8 bit number
-		const bool short_imm =
-			sz && b->type == codegen_temporary::IMM &&
-			b->immediate == static_cast<i8>(b->immediate) &&
-			descriptor.op_i == 0x80;
+		const bool short_imm = sz && b == instruction_operand::type::IMM && b->immediate == static_cast<i8>(b->immediate) && descriptor.op_i == 0x80;
 
 		// the destination can only be a GPR, no direction flag
 		const bool is_gpr_only_dst = descriptor.op & 1;
 		const bool dir_flag = dir != is_gpr_only_dst && descriptor.op != 0x69;
 
-		if (descriptor.cat != instruction::category::BINOP_EXT_3) {
+		if (descriptor.category != instruction::category::BINOP_EXT_3) {
 			// address size prefix
-			if (data_type == x64::WORD && descriptor.cat != instruction::category::BINOP_EXT_2) {
+			if (data_type == x64::WORD && descriptor.category != instruction::category::BINOP_EXT_2) {
 				bytecode.append_byte(0x66);
 			}
 
-			ASSERT(
-				b->type == codegen_temporary::GPR || b->type == codegen_temporary::IMM,
-				"secondary operand is invalid!"
-			);
+			ASSERT(b == instruction_operand::type::GPR || b == instruction_operand::type::IMM, "secondary operand is invalid!");
 		}
 		else {
 			bytecode.append_byte(0x66);
@@ -717,31 +692,27 @@ namespace sigma::ir {
 		u8 rex_prefix = 0x40 | (data_type == x64::QWORD ? 8 : 0);
 		u8 base;
 
-		if (a->type == codegen_temporary::MEM || a->type == codegen_temporary::GPR) {
+		if (a == instruction_operand::type::MEM || a == instruction_operand::type::GPR) {
 			base = a->reg;
 		}
 		else {
 			base = static_cast<u8>(x64::gpr::RBP);
 		}
 
-		if (a->type == codegen_temporary::MEM && a->index != reg::invalid_id) {
+		if (a == instruction_operand::type::MEM && a->index != reg::invalid_id) {
 			rex_prefix |= ((a->index >> 3) << 1);
 		}
 
 		u8 rx;
-		if(b->type == codegen_temporary::GPR || b->type == codegen_temporary::XMM) {
+		if(b == instruction_operand::type::GPR || b == instruction_operand::type::XMM) {
 			rx = b->reg;
 		}
 		else {
 			rx = descriptor.rx_i;
 		}
 
-		if (descriptor.cat == instruction::category::BINOP_CL) {
-			ASSERT(
-				b->type == codegen_temporary::IMM || 
-				(b->type == codegen_temporary::GPR && b->reg == x64::gpr::RCX),
-				"invalid binary operation"
-			);
+		if (descriptor.category == instruction::category::BINOP_CL) {
+			ASSERT(b == instruction_operand::type::IMM || (b == instruction_operand::type::GPR && b->reg == x64::gpr::RCX), "invalid binary operation");
 
 			data_type = x64::BYTE;
 			rx = descriptor.rx_i;
@@ -751,22 +722,19 @@ namespace sigma::ir {
 		rex_prefix |= (rx >> 3) << 2;
 
 		// if the REX stays as 0x40 then it's default and doesn't need to be here
-		if (rex_prefix != 0x40 || data_type == x64::BYTE || type == instruction::MOVZXB) {
+		if (rex_prefix != 0x40 || data_type == x64::BYTE || type == instruction::type::MOVZXB) {
 			bytecode.append_byte(rex_prefix);
 		}
 
-		if (descriptor.cat == instruction::category::BINOP_EXT_3) {
+		if (descriptor.category == instruction::category::BINOP_EXT_3) {
 			bytecode.append_byte(0x0F);
 			bytecode.append_byte(descriptor.op);
 		}
 		else {
 			// opcode
-			if (
-				descriptor.cat == instruction::category::BINOP_EXT_1 || 
-				descriptor.cat == instruction::category::BINOP_EXT_2
-			) {
+			if (descriptor.category == instruction::category::BINOP_EXT_1 || descriptor.category == instruction::category::BINOP_EXT_2) {
 				// DEF instructions can only be 32bit and 64bit... maybe?
-				if (type != instruction::XADD) {
+				if (type != instruction::type::XADD) {
 					sz = false;
 				}
 
@@ -774,12 +742,8 @@ namespace sigma::ir {
 			}
 
 			// immediates have a custom opcode
-			ASSERT(
-				b->type != codegen_temporary::IMM || descriptor.op_i != 0 || descriptor.rx_i != 0, 
-				"no immediate variant of instruction"
-			);
-
-			u8 opcode = b->type == codegen_temporary::IMM ? descriptor.op_i : descriptor.op;
+			ASSERT(b != instruction_operand::type::IMM || descriptor.op_i != 0 || descriptor.rx_i != 0, "no immediate variant of instruction");
+			u8 opcode = b == instruction_operand::type::IMM ? descriptor.op_i : descriptor.op;
 
 			// the bottom bit usually means size, 0 for 8bit, 1 for everything else
 			opcode |= static_cast<u8>(sz);
@@ -797,24 +761,17 @@ namespace sigma::ir {
 		// memory displacements go before immediates
 		const u64 disp_patch = bytecode.get_size() - 4;
 
-		if (b->type == codegen_temporary::IMM) {
+		if (b == instruction_operand::type::IMM) {
 			if (data_type == x64::BYTE || short_imm) {
 				if (short_imm) {
-					ASSERT(
-						b->immediate == static_cast<i8>(b->immediate), 
-						"invalid short immediate"
-					);
+					ASSERT(b->immediate == static_cast<i8>(b->immediate), "invalid short immediate");
 				}
 
 				bytecode.append_byte(static_cast<i8>(b->immediate));
 			}
 			else if (data_type == x64::WORD) {
 				const i32 imm = b->immediate;
-				ASSERT(
-					(imm & 0xFFFF0000) == 0xFFFF0000 || (imm & 0xFFFF0000) == 0,
-					"invalid immediate"
-				);
-
+				ASSERT((imm & 0xFFFF0000) == 0xFFFF0000 || (imm & 0xFFFF0000) == 0, "invalid immediate");
 				bytecode.append_word(static_cast<u16>(imm));
 			}
 			else {
@@ -822,26 +779,20 @@ namespace sigma::ir {
 			}
 		}
 
-		if (a->type == codegen_temporary::GLOBAL && 
-			disp_patch + 4 != bytecode.get_size()
-		) {
-			bytecode.patch_dword(
-				disp_patch, static_cast<u32>(disp_patch + 4 - bytecode.get_size())
-			);
+		if (a == instruction_operand::type::GLOBAL && disp_patch + 4 != bytecode.get_size()) {
+			bytecode.patch_dword(disp_patch, static_cast<u32>(disp_patch + 4 - bytecode.get_size()));
 		}
 	}
 
-	void x64_architecture::emit_memory_operand(
-		codegen_context& context, u8 rx, handle<codegen_temporary> a, utility::byte_buffer& bytecode
-	) {
+	void x64_architecture::emit_memory_operand(codegen_context& context, u8 rx, handle<instruction_operand> a, utility::byte_buffer& bytecode) {
 		// operand encoding
-		if (a->type == codegen_temporary::GPR || a->type == codegen_temporary::XMM) {
+		if (a == instruction_operand::type::GPR || a == instruction_operand::type::XMM) {
 			bytecode.append_byte(mod_rx_rm(x64::DIRECT, rx, a->reg));
 		}
-		else if (a->type == codegen_temporary::MEM) {
+		else if (a == instruction_operand::type::MEM) {
 			const u8 base = a->reg;
 			const u8 index = a->index;
-			scale scale = a->sc;
+			memory_scale scale = a->scale;
 			const i32 displacement = a->immediate;
 			const bool needs_index = (index != reg::invalid_id) || (base & 7) == x64::gpr::RSP;
 			
@@ -859,9 +810,7 @@ namespace sigma::ir {
 			bytecode.append_byte(mod_rx_rm(m, rx, needs_index ? static_cast<u8>(x64::gpr::RSP) : base));
 			
 			if (needs_index) {
-				bytecode.append_byte(
-					mod_rx_rm(static_cast<x64::mod>(scale), (base & 7) == x64::gpr::RSP ? static_cast<u8>(x64::gpr::RSP) : index, base)
-				);
+				bytecode.append_byte(mod_rx_rm(static_cast<x64::mod>(scale), (base & 7) == x64::gpr::RSP ? static_cast<u8>(x64::gpr::RSP) : index, base));
 			}
 			
 			if (m == x64::INDIRECT_DISPLACEMENT_8) {
@@ -871,7 +820,7 @@ namespace sigma::ir {
 				bytecode.append_dword(displacement);
 			}
 		}
-		else if (a->type == codegen_temporary::GLOBAL) {
+		else if (a == instruction_operand::type::GLOBAL) {
 			bytecode.append_byte(((rx & 7) << 3) | x64::gpr::RBP);
 			bytecode.append_dword(a->immediate);
 			emit_symbol_patch(context, a->get<handle<symbol>>(), bytecode.get_size() - 4);
@@ -881,28 +830,20 @@ namespace sigma::ir {
 		}
 	}
 
-	auto x64_architecture::resolve_interval(
-		const codegen_context& context,
-		handle<instruction> inst,
-		u8 i,
-		handle<codegen_temporary> val
-	) -> u8 {
+	auto x64_architecture::resolve_interval(const codegen_context& context, handle<instruction> inst, u8 i, handle<instruction_operand> val) -> u8 {
 		handle interval = &context.intervals[inst->operands[i]];
 
-		if (
-			(inst->flags & (instruction::mem_f |instruction::global)) &&
-			i == inst->memory_slot
-		) {
+		if ((inst->flags & (instruction::MEM |instruction::GLOBAL)) && i == inst->memory.index) {
 			ASSERT(interval->spill <= 0, "cannot use spilled value for a memory operand");
 
-			if (inst->flags & instruction::mem_f) {
-				val->type = codegen_temporary::MEM;
+			if (inst->flags & instruction::MEM) {
+				val->set_type(instruction_operand::type::MEM);
 				val->reg = interval->assigned.id;
 				val->index = reg::invalid_id;
-				val->sc = inst->sc;
-				val->immediate = inst->displacement;
+				val->scale = inst->memory.scale;
+				val->immediate = inst->memory.displacement;
 
-				if (inst->flags & instruction::indexed) {
+				if (inst->flags & instruction::INDEXED) {
 					interval = &context.intervals[inst->operands[i + 1]];
 					ASSERT(interval->spill <= 0, "cannot use spilled value for a memory operand");
 
@@ -913,25 +854,25 @@ namespace sigma::ir {
 				return 1;
 			}
 
-			val->type = codegen_temporary::GLOBAL;
-			val->immediate = inst->displacement;
+			val->set_type(instruction_operand::type::GLOBAL);
+			val->immediate = inst->memory.displacement;
 			val->get<handle<symbol>>() = inst->get<handle<symbol>>();
 
 			return 1;
 		}
 
 		if (interval->spill > 0) {
-			val->type = codegen_temporary::MEM;
+			val->set_type(instruction_operand::type::MEM);
 			val->reg = static_cast<u8>(x64::gpr::RBP);
 			val->index = reg::invalid_id;
 			val->immediate = -interval->spill;
 		}
 		else {
-			if(interval->r.cl == x64::register_class::XMM) {
-				val->type = codegen_temporary::XMM;
+			if(interval->reg.cl == x64::register_class::XMM) {
+				val->set_type(instruction_operand::type::XMM);
 			}
 			else {
-				val->type = codegen_temporary::GPR;
+				val->set_type(instruction_operand::type::GPR);
 			}
 
 			val->reg = interval->assigned.id;
@@ -940,9 +881,7 @@ namespace sigma::ir {
 		return 1;
 	}
 
-	void x64_architecture::emit_symbol_patch(
-		codegen_context& context, handle<symbol> target, u64 pos
-	) {
+	void x64_architecture::emit_symbol_patch(codegen_context& context, handle<symbol> target, u64 pos) {
 		const handle<symbol_patch> patch = context.create_symbol_patch();
 
 		patch->target = target;

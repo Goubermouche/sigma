@@ -2,8 +2,8 @@
 #include "intermediate_representation/module.h"
 
 // x64
-#include "intermediate_representation/target/arch/x64/x64_disassembler.h"
 #include "intermediate_representation/target/arch/x64/x64.h"
+#include "intermediate_representation/target/arch/x64/x64_disassembler.h"
 
 // object files
 #include "intermediate_representation/codegen/outputs/coff.h"
@@ -34,6 +34,16 @@ namespace sigma::ir {
 		ASSERT(m_architecture != nullptr, "target is not initialized");
 		return m_architecture->select_instructions(context);
 	}
+
+  auto codegen_target::generate_sections(module& module) const -> module_output {
+		switch (m_target.get_system()) {
+			case system::WINDOWS: return generate_windows_sections(module);
+			case system::LINUX:   return generate_linux_sections();
+		}
+
+		NOT_IMPLEMENTED();
+		return {};
+  }
 
 	auto codegen_target::disassemble(const utility::byte_buffer& bytecode, const codegen_context& context) const -> utility::string {
 		ASSERT(m_disassembler != nullptr, "target is not initialized");
@@ -71,5 +81,28 @@ namespace sigma::ir {
 
 		NOT_IMPLEMENTED();
 		return nullptr;
+	}
+
+	auto codegen_target::generate_windows_sections(module& module) -> module_output {
+		module_output sections;
+
+		sections.add_section(".text",  module_section::EXEC,  comdat::NONE );
+		sections.add_section(".data",  module_section::WRITE, comdat::NONE );
+		sections.add_section(".rdata", module_section::NONE,  comdat::NONE );
+		sections.add_section(".tls$",  module_section::WRITE | module_section::TLS, comdat::NONE);
+
+		sections.chkstk_extern = reinterpret_cast<symbol*>(module.create_external("__chkstk", linkage::SO_LOCAL).get());
+		return sections;
+	}
+
+	auto codegen_target::generate_linux_sections() -> module_output {
+		module_output sections;
+
+		sections.add_section(".text", module_section::EXEC, comdat::NONE);
+		sections.add_section(".data", module_section::WRITE, comdat::NONE);
+		sections.add_section(".rodata", module_section::NONE, comdat::NONE);
+		sections.add_section(".tls", module_section::WRITE | module_section::TLS, comdat::NONE);
+
+		return sections;
 	}
 } // namespace sigma::ir

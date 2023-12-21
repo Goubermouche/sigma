@@ -8,4 +8,4 @@ namespace sigma::ir {
 		virtual void allocate(codegen_context& context) = 0;
 		virtual ~allocator_base() = default;
 	};
-}
+} // namespace sigma::ir

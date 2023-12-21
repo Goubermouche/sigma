@@ -16,14 +16,7 @@ namespace sigma::ir {
 		struct {
 			u32 size;
 			const void* ptr;
-		} r;
-	};
-
-	enum linkage : u8 {
-		PUBLIC,
-		PRIVATE,
-		SO_LOCAL, // exports to the rest of the shared object
-		SO_EXPORT // exports outside of the shared object
+		} region;
 	};
 
 	class module;
@@ -33,9 +26,7 @@ namespace sigma::ir {
 		void set_storage(u8 section_handle, u32 storage_size, u32 storage_alignment, u32 max_objects);
 		auto add_region(u32 region_offset, u32 region_size) -> void*;
 
-		symbol sym;
-		linkage link;
-
+		symbol symbol;
 		u8 parent_section;
 
 		u32 position;
@@ -47,7 +38,6 @@ namespace sigma::ir {
 	};
 
 	struct external {
-		symbol sym;
-		linkage link;
+		symbol symbol;
 	};
 } // namespace sigma::ir

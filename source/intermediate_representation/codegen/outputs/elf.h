@@ -1,5 +1,5 @@
 #pragma once
-#include "intermediate_representation/codegen/object_file_emitter.h"
+#include "intermediate_representation/codegen/outputs/object_file_emitter.h"
 
 namespace sigma::ir {
 #define EM_NONE    0   // unknown machine
@@ -64,7 +64,7 @@ namespace sigma::ir {
 #define ELF64_ST_INFO(b, t) (((b) << 4) | ((t) & 0xF))
 #define ELF64_R_INFO(s, t) (((u64)(s) << 32ULL) + ((u64)(t) & 0xffffffffULL))
 
-	typedef struct {
+	struct elf64_e_header {
 		u8 ident[16];
 		u16 type;
 		u16 machine;
@@ -79,9 +79,9 @@ namespace sigma::ir {
 		u16 shentsize;
 		u16 shnum;
 		u16 shstrndx;
-	} elf64_e_header;
+	};
 
-	typedef struct {
+	struct elf64_s_header {
 		u32 name;
 		u32 type;
 		u64 flags;
@@ -92,22 +92,22 @@ namespace sigma::ir {
 		u32 info;
 		u64 addralign;
 		u64 entsize;
-	} elf64_s_header;
+	};
 
-	typedef struct {
+	struct elf64_relocation{
 		u64 offset;
 		u64 info;
-		int64_t  addend;
-	} elf64_relocation;
+		i64 addend;
+	};
 
-	typedef struct {
+	struct elf64_symbol {
 		u32 name;
 		u8 info;
 		u8 other;
 		u16 shndx;
 		u64 value;
 		u64 size;
-	} elf64_symbol;
+	};
 
 	enum elf_relocation_type {
 		ELF_X86_64_NONE = 0,
@@ -122,16 +122,8 @@ namespace sigma::ir {
 	public:
 		utility::object_file emit(module& module) override;
 	private:
-		static u64 put_symbol(
-			utility::byte_buffer& stab, u32 name, u8 sym_info, u16 section_index, u64 value, u64 size
-		);
-
-		static void put_section_symbols(
-			const std::vector<module_section>& sections,
-			utility::byte_buffer& string_table,
-			utility::byte_buffer& stab, 
-			i32 t
-		);
+		static u64 put_symbol(utility::byte_buffer& stab, u32 name, u8 sym_info, u16 section_index, u64 value, u64 size);
+		static void put_section_symbols(const std::vector<module_section>& sections, utility::byte_buffer& string_table,utility::byte_buffer& stab, i32 t);
 	};
 } // namespace sigma::ir
 

@@ -10,4 +10,4 @@ namespace sigma::ir {
 			pass->apply(context);
 		}
 	}
-}
+} // namespace sigma::ir

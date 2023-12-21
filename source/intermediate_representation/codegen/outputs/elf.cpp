@@ -5,13 +5,13 @@
 
 namespace sigma::ir {
 	utility::object_file elf_file_emitter::emit(module& module) {
-		std::vector<handle<external>> exports = module.generate_externals();
+		std::vector<handle<external>> externals = module.generate_externals();
 
 		// determine the machine type
 		u16 machine = 0;
+
 		switch (module.get_target().get_arch()) {
 			case arch::X64: machine = EM_X86_64; break;
-			default: NOT_IMPLEMENTED();
 		}
 
 		utility::byte_buffer string_table;
@@ -41,25 +41,25 @@ namespace sigma::ir {
 		header.ident[EI_ABIVERSION] = 0;
 
 		// accumulate all sections
-		std::vector<module_section> sections = module.get_sections();
-		u64 section_count = sections.size() + 2;
+		module_output sections = module.get_output();
+		u64 section_count = sections.sections.size() + 2;
 		u64 output_size = sizeof(elf64_e_header);
 
-		for(u64 i = 0; i < sections.size(); ++i) {
-			sections[i].section_index = static_cast<u16>(3 + i);
-			sections[i].raw_data_pos = static_cast<u32>(output_size);
-			output_size += sections[i].total_size;
+		for(u64 i = 0; i < sections.sections.size(); ++i) {
+			sections.sections[i].section_index = static_cast<u16>(3 + i);
+			sections.sections[i].raw_data_pos = static_cast<u32>(output_size);
+			output_size += sections.sections[i].total_size;
 		}
 
 		// calculate the relocation layout
 		// each section with relocations needs a matching .rel section
 		output_size = layout_relocations(
-			sections,
+			sections.sections,
 			static_cast<u32>(output_size), 
 			sizeof(elf64_relocation)
 		);
 
-		for (module_section& section : sections) {
+		for (module_section& section : sections.sections) {
 			if (section.relocation_count > 0) {
 				section_count += 1;
 				string_table.append_string(".rela");
@@ -75,38 +75,24 @@ namespace sigma::ir {
 
 		utility::byte_buffer global_symbol_table;
 
-		for (u64 i = 0; i < sections.size(); ++i) {
-			put_symbol(
-				local_symbol_table, 
-				sections[i].name_position,
-				ELF64_ST_INFO(ELF64_STB_LOCAL, ELF64_STT_SECTION), 
-				static_cast<u16>(1 + i), 
-				0, 
-				0
-			);
+		for (u64 i = 0; i < sections.sections.size(); ++i) {
+			put_symbol(local_symbol_table, sections.sections[i].name_position, ELF64_ST_INFO(ELF64_STB_LOCAL, ELF64_STT_SECTION), static_cast<u16>(1 + i), 0, 0);
 		}
 
 		// .rela sections
-		for (u64 i = 0; i < sections.size(); ++i) {
-			if(sections[i].relocation_count) {
-				put_symbol(
-					local_symbol_table,
-					sections[i].name_position - 5,
-					ELF64_ST_INFO(ELF64_STB_LOCAL, ELF64_STT_SECTION),
-					static_cast<u16>(1 + i),
-					0,
-					0
-				);
+		for (u64 i = 0; i < sections.sections.size(); ++i) {
+			if(sections.sections[i].relocation_count) {
+				put_symbol(local_symbol_table, sections.sections[i].name_position - 5, ELF64_ST_INFO(ELF64_STB_LOCAL, ELF64_STT_SECTION), static_cast<u16>(1 + i), 0, 0);
 			}
 		}
 
-		put_section_symbols(sections, string_table, local_symbol_table, ELF64_STB_LOCAL);
-		put_section_symbols(sections, string_table, global_symbol_table, ELF64_STB_GLOBAL);
+		put_section_symbols(sections.sections, string_table, local_symbol_table, ELF64_STB_LOCAL);
+		put_section_symbols(sections.sections, string_table, global_symbol_table, ELF64_STB_GLOBAL);
 
-		for(const handle<external>& ex : exports) {
+		for(const handle<external> ex : externals) {
 			const u32 name = static_cast<u32>(string_table.get_size());
-			string_table.append_string_nt(ex->sym.name);
-			ex->sym.symbol_id = global_symbol_table.get_size() / sizeof(elf64_symbol);
+			string_table.append_string_nt(ex->symbol.name);
+			ex->symbol.id = global_symbol_table.get_size() / sizeof(elf64_symbol);
 
 			put_symbol(global_symbol_table, name, ELF64_ST_INFO(ELF64_STB_GLOBAL, 0), 0, 0, 0);
 		}
@@ -158,7 +144,7 @@ namespace sigma::ir {
 		WRITE(&header, sizeof(header));
 
 		// write section contents
-		for (module_section& section : sections) {
+		for (module_section& section : sections.sections) {
 			write_position = helper_write_section(
 				write_position, 
 				&section,
@@ -169,7 +155,7 @@ namespace sigma::ir {
 
 		// write relocation arrays
 		u64 local_symbol_count = local_symbol_table.get_size() / sizeof(elf64_symbol);
-		for (const module_section& section : sections) {
+		for (const module_section& section : sections.sections) {
 			if(section.relocation_count > 0) {
 				ASSERT(section.relocation_position == write_position, "invalid relocations");
 				auto relocations = reinterpret_cast<elf64_relocation*>(&output[write_position]);
@@ -183,7 +169,7 @@ namespace sigma::ir {
 						}
 
 						u64 actual_position = source_offset + patch->pos;
-						u64 symbol_id = patch->target->symbol_id;
+						u64 symbol_id = patch->target->id;
 
 						if(patch->target->is_non_local()) {
 							symbol_id += local_symbol_count;
@@ -192,7 +178,7 @@ namespace sigma::ir {
 						ASSERT(symbol_id != 0, "invalid symbol id");
 
 						elf_relocation_type type;
-						if(patch->target->tag == symbol::GLOBAL) {
+						if(patch->target->type == symbol::GLOBAL) {
 							type = ELF_X86_64_PC32;
 						}
 						else {
@@ -225,7 +211,7 @@ namespace sigma::ir {
 		WRITE(&strtab, sizeof(strtab));
 		WRITE(&symtab, sizeof(symtab));
 
-		for (const module_section& section : sections) {
+		for (const module_section& section : sections.sections) {
 			elf64_s_header sec = {
 				.name = section.name_position,
 				.type = SHT_PROGBITS,
@@ -246,14 +232,14 @@ namespace sigma::ir {
 			WRITE(&sec, sizeof(sec));
 		}
 
-		for (u64 i = 0; i < sections.size(); ++i) {
-			if (sections[i].relocation_count > 0) {
+		for (u64 i = 0; i < sections.sections.size(); ++i) {
+			if (sections.sections[i].relocation_count > 0) {
 				elf64_s_header sec = {
-					 .name = sections[i].name_position - 5,
+					 .name = sections.sections[i].name_position - 5,
 					 .type = SHT_RELA,
 					 .flags = SHF_INFO_LINK,
-					 .offset = sections[i].relocation_position,
-					 .size = sections[i].relocation_count * sizeof(elf64_relocation),
+					 .offset = sections.sections[i].relocation_position,
+					 .size = sections.sections[i].relocation_count * sizeof(elf64_relocation),
 					 .link = 2,
 					 .info = static_cast<u32>(3 + i),
 					 .addralign = 16,
@@ -268,10 +254,8 @@ namespace sigma::ir {
 		return { output_buffer };
 	}
 
-	u64 elf_file_emitter::put_symbol(
-		utility::byte_buffer& stab, u32 name, u8 sym_info, u16 section_index, u64 value, u64 size
-	) {
-		const elf64_symbol sym = {
+	u64 elf_file_emitter::put_symbol(utility::byte_buffer& stab, u32 name, u8 sym_info, u16 section_index, u64 value, u64 size) {
+		const elf64_symbol symbol = {
 			 .name = name,
 			 .info = sym_info,
 			 .shndx = section_index,
@@ -279,22 +263,17 @@ namespace sigma::ir {
 			 .size = size
 		};
 
-		stab.append_type(sym);
+		stab.append_type(symbol);
 		return stab.get_size() / sizeof(elf64_symbol) - 1;
 	}
 
-	void elf_file_emitter::put_section_symbols(
-		const std::vector<module_section>& sections,
-		utility::byte_buffer& string_table,
-		utility::byte_buffer& stab,
-		i32 t
-	) {
+	void elf_file_emitter::put_section_symbols(const std::vector<module_section>& sections, utility::byte_buffer& string_table, utility::byte_buffer& stab, i32 t) {
 		for (const module_section& section : sections) {
 			const u16 section_index = section.section_index;
 
 			// insert function symbols
-			for(const handle<compiled_function>& function : section.functions) {
-				const std::string name_str = function->parent->sym.name;
+			for(const handle<compiled_function> function : section.functions) {
+				const std::string name_str = function->parent->symbol.name;
 
 				u32 name = 0;
 				if(!name_str.empty()) {
@@ -302,7 +281,7 @@ namespace sigma::ir {
 					string_table.append_string_nt(name_str);
 				}
 
-				function->parent->sym.symbol_id = put_symbol(
+				function->parent->symbol.id = put_symbol(
 					stab, 
 					name,
 					static_cast<u8>(ELF64_ST_INFO(t, ELF64_STT_FUNC)),
@@ -312,18 +291,18 @@ namespace sigma::ir {
 				);
 			}
 
-			const int acceptable = t == ELF64_STB_GLOBAL ? linkage::PUBLIC : linkage::PRIVATE;
+			const linkage acceptable = t == ELF64_STB_GLOBAL ? linkage::PUBLIC : linkage::PRIVATE;
 
 			// insert global symbols
-			for(const handle<global>& global : section.globals) {
-				if(global->link != acceptable) {
+			for(const handle<global> global : section.globals) {
+				if(global->symbol.link != acceptable) {
 					continue;
 				}
 
 				const u32 name = static_cast<u32>(string_table.get_size());
-				string_table.append_string_nt(global->sym.name);
+				string_table.append_string_nt(global->symbol.name);
 			
-				global->sym.symbol_id = put_symbol(
+				global->symbol.id = put_symbol(
 					stab,
 					name, 
 					static_cast<u8>(ELF64_ST_INFO(t, ELF64_STT_OBJECT)), 

@@ -14,4 +14,4 @@ namespace sigma::ir {
 	auto classified_reg::operator==(classified_reg other) const -> bool {
 		return id == other.id && cl == other.cl;
 	}
-}
+} // namespace sigma::ir

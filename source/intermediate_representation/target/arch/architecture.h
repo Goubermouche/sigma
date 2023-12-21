@@ -7,9 +7,7 @@
 namespace sigma::ir {
 	class disassembler {
 	public:
-		virtual auto disassemble(
-			const utility::byte_buffer& bytecode, const codegen_context& context
-		) -> utility::string = 0;
+		virtual auto disassemble(const utility::byte_buffer& bytecode, const codegen_context& context) -> utility::string = 0;
 
 		virtual ~disassembler() = default;
 	};

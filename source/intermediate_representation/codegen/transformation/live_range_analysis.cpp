@@ -25,11 +25,7 @@ namespace sigma::ir {
 	
 		if (context.first) {
 			handle<instruction> inst = context.first;
-
-			ASSERT(
-				inst->type == instruction::LABEL,
-				"entry instruction is not a label"
-			);
+			ASSERT(inst == instruction::type::LABEL, "entry instruction is not a label");
 
 			// initial label
 			auto basic_block = context.work.items.front();
@@ -42,14 +38,11 @@ namespace sigma::ir {
 			inst = inst->next_instruction;
 
 			for (; inst; inst = inst->next_instruction) {
-				if (inst->type == instruction::LABEL) {
+				if (inst == instruction::type::LABEL) {
 					context.machine_blocks.at(basic_block).end = timeline;
 					timeline += 4;
 
-					ASSERT(
-						inst->flags & instruction::node_f,
-						"instruction does not contain a node"
-					);
+					ASSERT(inst->flags & instruction::NODE, "instruction does not contain a node");
 
 					basic_block = inst->get<handle<node>>();
 					machine_block = &context.machine_blocks.at(basic_block);
@@ -59,7 +52,7 @@ namespace sigma::ir {
 				else if (inst->is_terminator() && machine_block->terminator == 0) {
 					machine_block->terminator = timeline;
 				}
-				else if (inst->type == instruction::EPILOGUE) {
+				else if (inst == instruction::type::EPILOGUE) {
 					epilogue = timeline;
 				}
 
@@ -109,19 +102,16 @@ namespace sigma::ir {
 			live_out.clear();
 
 			// walk all successors
-			if (block_end->ty == node::BRANCH) {
+			if (block_end == node::type::BRANCH) {
 				for (handle<user> user = block_end->use; user; user = user->next_user) {
-					if (user->n->ty == node::PROJECTION) {
+					if (user->target == node::type::PROJECTION) {
 						// union with successor's lives
-						handle<node> successor = user->n->get_next_block();
+						handle<node> successor = user->target->get_next_block();
 						live_out.set_union(context.machine_blocks.at(successor).live_in);
 					}
 				}
 			}
-			else if (
-				block_end->ty != node::EXIT && 
-				block_end->ty != node::UNREACHABLE
-			) {
+			else if (block_end != node::type::EXIT && block_end != node::type::UNREACHABLE) {
 				// union with successor's lives
 				handle<node> successor = block_end->get_next_control();
 				live_out.set_union(context.machine_blocks.at(successor).live_in);
@@ -140,10 +130,7 @@ namespace sigma::ir {
 			}
 
 			// if we have changes, mark the predecessors
-			if (
-				changes &&
-				!(basic_block->ty == node::PROJECTION && basic_block->inputs[0]->ty == node::ENTRY)
-			) {
+			if (changes && !(basic_block == node::type::PROJECTION && basic_block->inputs[0] == node::type::ENTRY)) {
 				for (u64 i = 0; i < basic_block->inputs.get_size(); ++i) {
 					context.work.items.push_back(context.graph.get_predecessor(basic_block, i));
 				}
@@ -152,4 +139,4 @@ namespace sigma::ir {
 
 		context.endpoint = epilogue;
 	}
-}
+} // namespace sigma::ir

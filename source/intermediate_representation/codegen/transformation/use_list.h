@@ -7,4 +7,4 @@ namespace sigma::ir {
 	 * \param context Code generation context
 	 */
 	void generate_use_lists(transformation_context& context);
-}
+} // namespace sigma::ir

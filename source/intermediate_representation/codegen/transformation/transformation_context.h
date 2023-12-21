@@ -10,4 +10,4 @@ namespace sigma::ir {
 		// locals 
 		std::vector<handle<node>> locals;
 	};
-}
+} // namespace sigma::ir

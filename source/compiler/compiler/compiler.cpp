@@ -20,24 +20,28 @@ namespace sigma {
 
 	void compiler::compile() const {
 		utility::console::println("compiling file: {}", m_path.string());
-
 		verify_file(m_path);
+
+		compilation_context context;
+
+		// generate tokens
 		const std::string file = utility::file::read_text_file(m_path);
 		auto [tokens, symbols] = tokenizer::tokenize(file);
 
-		compilation_context context{
-			.string_table = symbols,
-			.tokens = tokens
-		};
-
+		// parse the source code
+		context.string_table = symbols;
+		context.tokens = tokens;
 		context.ast = parser::parse(context);
 		context.print_ast();
 
+		// run analysis on the generated AST
 		type_checker::type_check(context);
 		ir::module module = ir_translator::translate(context, m_target);
+
+		// compile the generated IR
 		module.compile();
 
-		// emit the object file
+		// emit as an object file
 		const filepath object_path = get_object_file_path();
 		emit_object_file(module, object_path);
 	}
@@ -56,7 +60,7 @@ namespace sigma {
 		};
 
 		const char* format = object_formats[static_cast<u8>(m_target.get_system())];
-		return  m_path.parent_path() / (name + format);
+		return m_path.parent_path() / (name + format);
 	}
 
 	void compiler::emit_object_file(ir::module& module, const filepath& path) {

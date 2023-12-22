@@ -2,7 +2,7 @@
 #include <compiler/compiler/compilation_context.h>
 
 namespace sigma {
-	auto ir_translator::translate(compilation_context& context, ir::target target) -> ir::module { 
+	auto ir_translator::translate(compilation_context& context, ir::target target) -> utility::result<ir::module> {
 		return ir_translator(context, target).translate();
 	}
 
@@ -266,7 +266,7 @@ namespace sigma {
 		return {};
 	}
 
-	auto ir_translator::translate() -> ir::module {
+	auto ir_translator::translate() -> utility::result<ir::module> {
 		for (const handle<node>& top_level : m_context.ast.get_nodes()) {
 			translate_node(top_level);
 		}

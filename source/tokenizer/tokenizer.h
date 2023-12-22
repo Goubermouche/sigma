@@ -5,16 +5,17 @@
 
 namespace sigma {
 	class tokenizer {
+		using tokenized = utility::result<std::pair<token_buffer, utility::string_table>>;
 	public:
 		tokenizer(const std::string& source);
-		[[nodiscard]] static auto tokenize(const std::string& source) -> std::pair<token_buffer, utility::string_table>;
-		[[nodiscard]] auto tokenize() -> std::pair<token_buffer, utility::string_table>;
+		[[nodiscard]] static auto tokenize(const std::string& source) -> tokenized;
+		[[nodiscard]] auto tokenize() -> tokenized;
 	private:
-		[[nodiscard]] auto get_next_token() -> token_info;
-		[[nodiscard]] auto get_alphabetical_token() -> token_info;
-		[[nodiscard]] auto get_numerical_token() -> token_info;
-		[[nodiscard]] auto get_string_literal_token() -> token_info;
-		[[nodiscard]] auto get_special_token() -> token_info;
+		[[nodiscard]] auto get_next_token() -> utility::result<token_info>;
+		[[nodiscard]] auto get_alphabetical_token() -> utility::result<token_info>;
+		[[nodiscard]] auto get_numerical_token() -> utility::result<token_info>;
+		[[nodiscard]] auto get_string_literal_token() -> utility::result<token_info>;
+		[[nodiscard]] auto get_special_token() -> utility::result<token_info>;
 
 		void consume_spaces();
 		auto get_escaped_character() -> char;

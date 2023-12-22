@@ -12,6 +12,10 @@ namespace utility {
 			return std::filesystem::is_directory(path);
 		}
 
+		static auto is_file(const filepath& path) -> bool {
+			return std::filesystem::is_regular_file(path);
+		}
+
 		static auto get_canonical_path(const filepath& path) -> filepath {
 			try {
 				return canonical(path);
@@ -44,18 +48,15 @@ namespace utility {
 			file.close();
 		}
 
-		static auto read_text_file(const filepath& path) -> std::string {
+		static auto read_text_file(const filepath& path) -> result<std::string> {
 			std::ifstream file(path);
 
 			if(!file) {
-				std::cout << "err file\n";
-				ASSERT(false, "failure");
+				return error::create(error::code::CANNOT_READ_FILE, path.string());
 			}
 
 			return std::string(std::istreambuf_iterator<char>(file), std::istreambuf_iterator<char>());
 		}
-
-
 	};
 
 	class directory {

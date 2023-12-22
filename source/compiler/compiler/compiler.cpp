@@ -10,45 +10,64 @@
 #include <utility/string_helper.h>
 #include <utility/timer.h>
 
+#define LANG_FILE_EXTENSION ".s"
+
 namespace sigma {
-	void compiler::compile(const filepath& path, ir::target target) {
-		compiler(path, target).compile();
+	auto compiler::compile(const compiler_description& description) -> utility::result<void> {
+		return compiler(description).compile();
 	}
 
-	compiler::compiler(const filepath& path, ir::target target)
-		: m_path(path), m_target(target) {}
+	compiler::compiler(const compiler_description& description)
+		: m_description(description) {}
 
-	void compiler::compile() const {
-		utility::console::println("compiling file: {}", m_path.string());
-		verify_file(m_path);
+	auto compiler::compile() const -> utility::result<void> {
+		utility::console::println("compiling file: {}", m_description.path.string());
+		TRY(verify_file(m_description.path));
 
+		// declare a global compilation context
+		// NOTE: it may be a good idea to separate our contexts a bit for when we want to add support
+		//       for multiple files
 		compilation_context context;
 
 		// generate tokens
-		const std::string file = utility::file::read_text_file(m_path);
-		auto [tokens, symbols] = tokenizer::tokenize(file);
+		TRY(const std::string& file, utility::file::read_text_file(m_description.path));
+		TRY(auto tokenized, tokenizer::tokenize(file));
 
-		// parse the source code
-		context.string_table = symbols;
-		context.tokens = tokens;
-		context.ast = parser::parse(context);
-		context.print_ast();
+		context.string_table = tokenized.second;
+		context.tokens = tokenized.first;
+
+		// parse the token list
+		TRY(context.ast, parser::parse(context));
+
+		// context.print_ast();
 
 		// run analysis on the generated AST
-		type_checker::type_check(context);
-		ir::module module = ir_translator::translate(context, m_target);
+		TRY(type_checker::type_check(context));
+		TRY(ir::module module, ir_translator::translate(context, m_description.target));
 
-		// compile the generated IR
+		// compile the generated IR module
 		module.compile();
 
 		// emit as an object file
 		const filepath object_path = get_object_file_path();
 		emit_object_file(module, object_path);
+		return SUCCESS;
 	}
 
-	void compiler::verify_file(const filepath& path) {
-		ASSERT(path.extension() == ".s", "invalid file extension detected");
-		ASSERT(std::filesystem::is_regular_file(path), "invalid file detected");
+	auto compiler::verify_file(const filepath& path) -> utility::result<void> {
+		if(!utility::fs::exists(path)) {
+			return utility::error::create(utility::error::code::FILE_DOES_NOT_EXIST, path.string());
+		}
+
+		if(!utility::fs::is_file(path)) {
+			return utility::error::create(utility::error::code::EXPECTED_FILE, path.string());
+		}
+
+		if(path.extension() != LANG_FILE_EXTENSION) {
+			return utility::error::create(utility::error::code::INVALID_FILE_EXTENSION, path.string(), LANG_FILE_EXTENSION);
+		}
+
+		return SUCCESS;
 	}
 
 	auto compiler::get_object_file_path(const std::string& name) const -> filepath {
@@ -59,8 +78,8 @@ namespace sigma {
 			".o"    // LINUX
 		};
 
-		const char* format = object_formats[static_cast<u8>(m_target.get_system())];
-		return m_path.parent_path() / (name + format);
+		const char* format = object_formats[static_cast<u8>(m_description.target.get_system())];
+		return m_description.path.parent_path() / (name + format);
 	}
 
 	void compiler::emit_object_file(ir::module& module, const filepath& path) {

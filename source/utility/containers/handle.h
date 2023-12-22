@@ -38,7 +38,7 @@ namespace utility::types {
 	private:
     type* m_ptr = nullptr;
 	};
-}
+} // namespace utility
 
 namespace std {
   template<typename type>
@@ -63,4 +63,4 @@ namespace std {
       return format_to(ctx.out(), "0");
     }
   };
-} // namespace utility
+} // namespace std

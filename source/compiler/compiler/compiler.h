@@ -10,27 +10,33 @@
 
 #pragma once
 #include <intermediate_representation/target/target.h>
+#include <utility/diagnostics.h>
+#include <utility/macros.h>
 
 namespace sigma {
 	using namespace utility::types;
 
 	namespace ir { 
 		class module;
-	}
+	} // namespace sigma::ir
+
+	struct compiler_description {
+		filepath path;
+		ir::target target;
+	};
 
 	class compiler {
 	public:
-		static void compile(const filepath& path, ir::target target);
+		static auto compile(const compiler_description& description) -> utility::result<void>;
 	private:
-		compiler(const filepath& path, ir::target target);
+		compiler(const compiler_description& description);
 
-		void compile() const;
+		auto compile() const -> utility::result<void>;
 		auto get_object_file_path(const std::string& name = "a") const -> filepath;
 
-		static void verify_file(const filepath& path);
+		static auto verify_file(const filepath& path) -> utility::result<void>;
 		static void emit_object_file(ir::module& module, const filepath& path);
 	private:
-		filepath m_path;
-		ir::target m_target;
+		compiler_description m_description;
 	};
 } // namespace sigma

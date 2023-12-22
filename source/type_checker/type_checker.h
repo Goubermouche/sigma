@@ -10,10 +10,10 @@ namespace sigma {
 	 */
 	class type_checker {
 	public:
-		static void type_check(compilation_context& context);
+		static auto type_check(compilation_context& context) -> utility::result<void>;
 	private:
 		type_checker(compilation_context& context);
-		void type_check();
+		auto type_check() -> utility::result<void>;
 
 		void type_check_node(handle<node> ast_node, data_type expected = {});
 

@@ -15,9 +15,9 @@ auto compile_file(const filepath& path) -> bool {
 	const bool error = system(command.c_str());
 
 	if(error) {
-		std::string message = utility::file::read_text_file(ERR_FILE_PATH);
-		message.erase(message.size() - 1); // remove the trailing newline
-		utility::console::println("\033[31m'{}'\033[0m", message);
+		// std::string message = utility::file::read_text_file(ERR_FILE_PATH);
+		// message.erase(message.size() - 1); // remove the trailing newline
+		// utility::console::println("\033[31m'{}'\033[0m", message);
 	}
 
 	return error;

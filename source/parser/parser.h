@@ -11,10 +11,10 @@ namespace sigma {
 
 	class parser {
 	public:
-		[[nodiscard]] static auto parse(compilation_context& context) -> abstract_syntax_tree;
+		[[nodiscard]] static auto parse(compilation_context& context) -> utility::result<abstract_syntax_tree>;
 	private:
 		parser(compilation_context& context);
-		[[nodiscard]] auto parse() -> abstract_syntax_tree;
+		[[nodiscard]] auto parse() -> utility::result<abstract_syntax_tree>;
 
 		auto parse_function_declaration() -> handle<node>;
 

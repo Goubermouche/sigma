@@ -3,26 +3,24 @@
 namespace sigma {
 	tokenizer::tokenizer(const std::string& source) : m_source(source) {}
 
-	auto tokenizer::tokenize(
-		const std::string& source
-	) -> std::pair<token_buffer, utility::string_table> {
+	auto tokenizer::tokenize(const std::string& source) -> tokenized {
 		return tokenizer(source).tokenize();
 	}
 
-	auto tokenizer::tokenize() -> std::pair<token_buffer, utility::string_table> {
+	auto tokenizer::tokenize() -> tokenized {
 		auto current = token_type::UNKNOWN;
 
 		while (current != token_type::END_OF_FILE) {
-			const token_info info = get_next_token();
-			current = info.tok.type;
+			TRY(const token_info info, get_next_token());
 
+			current = info.tok.type;
 			m_tokens.add_token(info);
 		}
 
-		return { std::move(m_tokens), std::move(m_symbols) };
+		return std::pair{ std::move(m_tokens), std::move(m_symbols) };
 	}
 
-	auto tokenizer::get_next_token() -> token_info {
+	auto tokenizer::get_next_token() -> utility::result<token_info> {
 		// consume preceding spaces
 		consume_spaces();
 
@@ -33,7 +31,10 @@ namespace sigma {
 
 		// check for EOF so we don't have to do it in the individual brace checks
 		if (m_source.end()) {
-			return { .tok = { token_type::END_OF_FILE }, .location = m_current_location };
+			return token_info{
+				.tok = { token_type::END_OF_FILE },
+				.location = m_current_location
+			};
 		}
 
 		// at this point we have a non-space character
@@ -113,8 +114,9 @@ namespace sigma {
 		return m_last_character;
 	}
 
-	auto tokenizer::get_alphabetical_token() -> token_info {
+	auto tokenizer::get_alphabetical_token() -> utility::result<token_info> {
 		// TODO: implement a non-owning string
+		// TODO: check for "__" sequences
 		m_current_section = m_last_character;
 
 		// consume a sequence of alphanumeric characters
@@ -126,18 +128,18 @@ namespace sigma {
 		const auto it = m_keyword_tokens.find(m_current_section);
 		if (it != m_keyword_tokens.end()) {
 			// the string is a keyword
-			return { .tok = { it->second }, .location = m_token_start_location };
+			return token_info{ .tok = { it->second }, .location = m_token_start_location };
 		}
 
 		// the string isn't a keyword, treat it as an identifier
-		return {
+		return token_info{
 			.tok = { token_type::IDENTIFIER },
-			.location   = m_token_start_location,
+			.location = m_token_start_location,
 			.symbol_key = m_symbols.insert(m_current_section)
 		};
 	}
 
-	auto tokenizer::get_numerical_token() -> token_info {
+	auto tokenizer::get_numerical_token() -> utility::result<token_info> {
 		m_current_section = m_last_character; // prime the value string
 		const char first_character = m_last_character; // store the first char of the sequence
 		bool dot_met = false; // keep track of whether we've met the '.' character
@@ -165,18 +167,18 @@ namespace sigma {
 		while (!std::isspace(m_last_character) && !m_source.end()) {
 			if (m_last_character == '.') {
 				if (dot_met) {
-					// more than one dot
+					return utility::error::create(utility::error::code::NUMERICAL_LITERAL_MORE_THAN_ONE_DOT);
 				}
 
 				dot_met = true;
 			}
 			else if (m_last_character == 'u') {
 				if (dot_met) {
-					// unsigned with dot
+					return utility::error::create(utility::error::code::NUMERICAL_LITERAL_UNSIGNED_WITH_DOT);
 				}
 
 				get_next_char();
-				return {
+				return token_info{
 					.tok = { token_type::UNSIGNED_LITERAL },
 					.location   = m_token_start_location,
 					.symbol_key = m_symbols.insert(m_current_section)
@@ -184,11 +186,11 @@ namespace sigma {
 			}
 			else if (m_last_character == 'f') {
 				if (!dot_met) {
-					// floating point without a dot
+					return utility::error::create(utility::error::code::NUMERICAL_LITERAL_FP_WITHOUT_DOT);
 				}
 
 				get_next_char();
-				return {
+				return token_info{
 					.tok = { token_type::F32_LITERAL },
 					.location   = m_token_start_location,
 					.symbol_key = m_symbols.insert(m_current_section)
@@ -204,7 +206,7 @@ namespace sigma {
 
 		// 0.0 format
 		if (dot_met) {
-			return {
+			return token_info{
 				.tok = { token_type::F64_LITERAL },
 				.location = m_token_start_location,
 				.symbol_key = m_symbols.insert(m_current_section)
@@ -212,14 +214,14 @@ namespace sigma {
 		}
 
 		// 0 format
-		return {
+		return token_info{
 			.tok = { token_type::SIGNED_LITERAL },
 			.location   = m_token_start_location,
 			.symbol_key = m_symbols.insert(m_current_section)
 		};
 	}
 
-	auto tokenizer::get_string_literal_token() -> token_info {
+	auto tokenizer::get_string_literal_token() -> utility::result<token_info> {
 		m_current_section.clear();
 		get_next_char(); // read the character after the opening double quote
 
@@ -228,17 +230,20 @@ namespace sigma {
 			get_next_char();
 		}
 
-		ASSERT(m_last_character == '"', "invalid string literal terminator");
+		if(m_last_character != '"') {
+			return utility::error::create(utility::error::code::INVALID_STRING_TERMINATOR);
+		}
+
 		get_next_char();
 
-		return {
-			.tok      = { token_type::STRING_LITERAL },
-			.location   = m_token_start_location,
+		return token_info{
+			.tok = { token_type::STRING_LITERAL },
+			.location = m_token_start_location,
 			.symbol_key = m_symbols.insert(m_current_section)
 		};
 	}
 
-	auto tokenizer::get_special_token() -> token_info {
+	auto tokenizer::get_special_token() -> utility::result<token_info> {
 		m_current_section = m_last_character;
 
 		const auto it = m_special_tokens.find(m_current_section);
@@ -263,7 +268,10 @@ namespace sigma {
 				}
 			}
 
-			return { .tok = { it->second }, .location = m_token_start_location };
+			return token_info{
+				.tok = { it->second },
+				.location = m_token_start_location
+			};
 		}
 
 		NOT_IMPLEMENTED();

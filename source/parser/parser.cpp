@@ -4,11 +4,11 @@
 namespace sigma {
 	parser::parser(compilation_context& context) : m_context(context), m_tokens(context.tokens) {}
 
-	auto parser::parse(compilation_context& context) -> abstract_syntax_tree {
+	auto parser::parse(compilation_context& context) -> utility::result<abstract_syntax_tree> {
 		return parser(context).parse();
 	}
 
-	auto parser::parse() -> abstract_syntax_tree {
+	auto parser::parse() -> utility::result<abstract_syntax_tree> {
 		// TODO: handle peeks looking past EOF
 		// TODO: manage local context (ie. function body, loop body, if body etc), probably use
 		//       a stack

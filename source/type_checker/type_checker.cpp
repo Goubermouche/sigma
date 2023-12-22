@@ -2,8 +2,8 @@
 #include <compiler/compiler/compilation_context.h>
 
 namespace sigma {
-	void type_checker::type_check(compilation_context& context) {
-		type_checker(context).type_check();
+	auto type_checker::type_check(compilation_context& context) -> utility::result<void> {
+		return type_checker(context).type_check();
 	}
 
 	type_checker::type_checker(compilation_context& context) : m_context(context) {
@@ -38,10 +38,12 @@ namespace sigma {
 		}
 	}
 
-	void type_checker::type_check() {
+	auto type_checker::type_check() -> utility::result<void> {
 		for (const handle<node>& top_level : m_context.ast.get_nodes()) {
 			type_check_node(top_level);
 		}
+
+		return SUCCESS;
 	}
 
 	void type_checker::type_check_node(handle<node> ast_node, data_type expected) {

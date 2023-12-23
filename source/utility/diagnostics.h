@@ -4,6 +4,8 @@
 #include <format>
 #include <list>
 
+#include "macros.h"
+
 namespace utility {
 	class console {
 	public:
@@ -52,7 +54,13 @@ namespace utility {
 			INVALID_STRING_TERMINATOR,
 			NUMERICAL_LITERAL_FP_WITHOUT_DOT,
 			NUMERICAL_LITERAL_UNSIGNED_WITH_DOT,
-			NUMERICAL_LITERAL_MORE_THAN_ONE_DOT
+			NUMERICAL_LITERAL_MORE_THAN_ONE_DOT,
+
+			// parser
+			INVALID_TYPE_TOKEN,
+			UNEXPECTED_NON_NUMERICAL,
+			UNEXPECTED_TOKEN,
+			UNEXPECTED_TOKEN_WITH_EXPECTED,
 		};
 
 		error(const std::string& message) : m_message(message) {}
@@ -78,7 +86,12 @@ namespace utility {
 			{ code::INVALID_STRING_TERMINATOR, "invalid string literal terminator detected" },
 			{ code::NUMERICAL_LITERAL_FP_WITHOUT_DOT, "numerical floating-point literal without '.' character detected" },
 			{ code::NUMERICAL_LITERAL_UNSIGNED_WITH_DOT, "unsigned numerical literal with '.' character detected" },
-			{ code::NUMERICAL_LITERAL_MORE_THAN_ONE_DOT, "numerical literal with more than one '.' character detected" }
+			{ code::NUMERICAL_LITERAL_MORE_THAN_ONE_DOT, "numerical literal with more than one '.' character detected" },
+			// parser
+			{ code::INVALID_TYPE_TOKEN, "invalid type token received ('{}')" },
+			{ code::UNEXPECTED_NON_NUMERICAL, "unexpected non-numerical literal token received ('{}')" },
+			{ code::UNEXPECTED_TOKEN, "unexpected token received ('{}')" },
+			{ code::UNEXPECTED_TOKEN_WITH_EXPECTED, "unexpected token received (expected '{}', but got '{}')" },
 		};
 	};
 

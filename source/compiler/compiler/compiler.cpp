@@ -36,7 +36,7 @@ namespace sigma {
 		context.string_table = tokenized.second;
 		context.tokens = tokenized.first;
 
-		// parse the token list
+		// parse the token list and generate an AST
 		TRY(context.ast, parser::parse(context));
 
 		// context.print_ast();

@@ -52,12 +52,6 @@ namespace sigma {
 		m_current_info = m_tokens[m_index];
 	}
 
-	void token_buffer_iterator::expect_next(token token) {
-		SUPPRESS_C4100(token);
-		next();
-		ASSERT(m_current_info.tok == token, "invalid token received");
-	}
-
 	void token_buffer_iterator::prev() {
 		m_index--;
 		m_peek_index--;

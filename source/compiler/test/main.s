@@ -16,14 +16,13 @@ i32 test(i32 a) {
 
 i32 main() {
 	bool value = true;
-
 	if(value) {
 		printf("true\n");
 	}
 	else {
 		printf("false\n");
 	}
-
+	
 	puts("Hello, world!\n");
 
 	ret 0;

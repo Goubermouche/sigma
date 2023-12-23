@@ -12,6 +12,5 @@ auto main(i32 argc, char* argv[]) -> i32 {
 
 	// compile the specified description, check for errors after we finish
 	PRINT_ERROR(sigma::compiler::compile(description));
-
   return 0;
 }

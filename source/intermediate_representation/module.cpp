@@ -61,10 +61,10 @@ namespace sigma::ir {
 			register_allocator->allocate(codegen);
 
 			// generate a bytecode representation of the given function for the specified target
-			utility::byte_buffer bytecode = m_codegen.emit_bytecode(codegen);
+			const utility::byte_buffer bytecode = m_codegen.emit_bytecode(codegen);
 
 			// DEBUG
-			// assembly.append(m_codegen.disassemble(bytecode, codegen));
+			assembly.append(m_codegen.disassemble(bytecode, codegen));
 
 			// finally, emit the compiled function
 			function->output = {
@@ -79,7 +79,7 @@ namespace sigma::ir {
 		}
 
 		// DEBUG
-		// utility::console::println("{}", assembly.get_underlying());
+		utility::console::println("{}", assembly.get_underlying());
 	}
 
 	auto module::generate_object_file() -> utility::object_file {

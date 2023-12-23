@@ -32,7 +32,6 @@ namespace sigma {
 		token_buffer_iterator(const token_buffer& tokens);
 
 		void next();
-		void expect_next(token token);
 
 		void prev();
 

@@ -21,6 +21,8 @@ namespace sigma {
 			BRANCH,
 			// children[0] = condition
 			// children[1 - n] = statements
+			// whenever children[1] == nullptr, the branch goes back to the source control, otherwise
+			// it continues to the branch at children[1]
 			CONDITIONAL_BRANCH,
 
 			VARIABLE_DECLARATION,

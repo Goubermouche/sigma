@@ -8,7 +8,6 @@
 
 #include <utility/filesystem/file.h>
 #include <utility/string_helper.h>
-#include <utility/timer.h>
 
 #define LANG_FILE_EXTENSION ".s"
 

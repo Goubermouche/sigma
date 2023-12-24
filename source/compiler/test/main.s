@@ -22,8 +22,7 @@ i32 main() {
 	else {
 		printf("false\n");
 	}
-	
-	puts("Hello, world!\n");
 
+	puts("Hello, world!\n");
 	ret 0;
 }

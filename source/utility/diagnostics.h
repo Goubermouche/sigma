@@ -61,6 +61,13 @@ namespace utility {
 			UNEXPECTED_NON_NUMERICAL,
 			UNEXPECTED_TOKEN,
 			UNEXPECTED_TOKEN_WITH_EXPECTED,
+
+			// type checker
+			UNKNOWN_FUNCTION,
+			INVALID_FUNCTION_PARAMETER_COUNT,
+			VOID_RETURN,
+			UNEXPECTED_TYPE,
+			UNKNOWN_VARIABLE,
 		};
 
 		error(const std::string& message) : m_message(message) {}
@@ -82,16 +89,25 @@ namespace utility {
 			{ code::FILE_DOES_NOT_EXIST, "specified file does not exist ('{}')" },
 			{ code::INVALID_FILE_EXTENSION, "specified file has an invalid file extension ('{}' - expected '{}')" },
 			{ code::CANNOT_READ_FILE, "unable to read the specified file ('{}')" },
+
 			// tokenizer
 			{ code::INVALID_STRING_TERMINATOR, "invalid string literal terminator detected" },
 			{ code::NUMERICAL_LITERAL_FP_WITHOUT_DOT, "numerical floating-point literal without '.' character detected" },
 			{ code::NUMERICAL_LITERAL_UNSIGNED_WITH_DOT, "unsigned numerical literal with '.' character detected" },
 			{ code::NUMERICAL_LITERAL_MORE_THAN_ONE_DOT, "numerical literal with more than one '.' character detected" },
+
 			// parser
 			{ code::INVALID_TYPE_TOKEN, "invalid type token received ('{}')" },
 			{ code::UNEXPECTED_NON_NUMERICAL, "unexpected non-numerical literal token received ('{}')" },
 			{ code::UNEXPECTED_TOKEN, "unexpected token received ('{}')" },
-			{ code::UNEXPECTED_TOKEN_WITH_EXPECTED, "unexpected token received (expected '{}', but got '{}')" },
+			{ code::UNEXPECTED_TOKEN_WITH_EXPECTED, "unexpected token received (expected '{}', but got '{}' instead)" },
+
+			// type checker
+			{ code::UNKNOWN_FUNCTION, "attempting to call an unknown function ('{}')" },
+			{ code::INVALID_FUNCTION_PARAMETER_COUNT, "attempting to call a function with an invalid number of parameters (expected '{}', but got '{}' instead)" },
+			{ code::VOID_RETURN, "invalid void return statement (expected 'ret;', but got 'ret {};' instead)" },
+			{ code::UNEXPECTED_TYPE, "encountered an unexpected type (expected '{}', but got '{}' instead" },
+			{ code::UNKNOWN_VARIABLE, "unknown variable '{}' referenced" },
 		};
 	};
 

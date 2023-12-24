@@ -7,6 +7,8 @@ namespace sigma {
 	}
 
 	type_checker::type_checker(compilation_context& context) : m_context(context) {
+		// TODO: replace this by a global function manager
+
 		{
 			const utility::string_table_key printf_key = context.string_table.insert("printf");
 			const utility::string_table_key format_key = context.string_table.insert("format");
@@ -40,56 +42,69 @@ namespace sigma {
 
 	auto type_checker::type_check() -> utility::result<void> {
 		for (const handle<node>& top_level : m_context.ast.get_nodes()) {
-			type_check_node(top_level);
+			TRY(type_check_node(top_level));
 		}
 
 		return SUCCESS;
 	}
 
-	void type_checker::type_check_node(handle<node> ast_node, data_type expected) {
-		switch (ast_node->type) {
-			case node_type::FUNCTION_DECLARATION:             type_check_function(ast_node); break;
-			case node_type::FUNCTION_CALL:        type_check_function_call(ast_node, expected); break;
+	auto type_checker::type_check_node(handle<node> ast_node, data_type expected) -> utility::result<void> {
+		// map type check functions to node types
+		using type_check_function = utility::result<void>(type_checker::*)(handle<node>, data_type);
+		static std::unordered_map<node_type::underlying, type_check_function> s_checkers = {
+			// functions
+			{ node_type::FUNCTION_DECLARATION, &type_checker::type_check_function             },
+			{ node_type::FUNCTION_CALL,        &type_checker::type_check_function_call        },
 
-			// flow control
-			case node_type::RETURN:               type_check_return(ast_node, expected); break;
-			case node_type::CONDITIONAL_BRANCH:   type_check_conditional_branch(ast_node); break;
-			case node_type::BRANCH:               type_check_branch(ast_node); break;
+			// control flow
+			{ node_type::RETURN,               &type_checker::type_check_return               },
+			{ node_type::CONDITIONAL_BRANCH,   &type_checker::type_check_conditional_branch   },
+			{ node_type::BRANCH,               &type_checker::type_check_branch               },
 
 			// variables
-			case node_type::VARIABLE_DECLARATION: type_check_variable_declaration(ast_node); break;
-			case node_type::VARIABLE_ACCESS:      type_check_variable_access(ast_node, expected); break;
-			case node_type::VARIABLE_ASSIGNMENT:  type_check_variable_assignment(ast_node); break;
+			{ node_type::VARIABLE_DECLARATION, &type_checker::type_check_variable_declaration },
+			{ node_type::VARIABLE_ACCESS,      &type_checker::type_check_variable_access      },
+			{ node_type::VARIABLE_ASSIGNMENT,  &type_checker::type_check_variable_assignment  },
 
-			// operators:
-			case node_type::OPERATOR_ADD:
-			case node_type::OPERATOR_SUBTRACT:
-			case node_type::OPERATOR_MULTIPLY:
-			case node_type::OPERATOR_DIVIDE:
-			case node_type::OPERATOR_MODULO:      type_check_binary_math_operator(ast_node, expected); break;
+			// binary operators
+			{ node_type::OPERATOR_ADD,         &type_checker::type_check_binary_math_operator },
+			{ node_type::OPERATOR_SUBTRACT,    &type_checker::type_check_binary_math_operator },
+			{ node_type::OPERATOR_MULTIPLY,    &type_checker::type_check_binary_math_operator },
+			{ node_type::OPERATOR_DIVIDE,      &type_checker::type_check_binary_math_operator },
+			{ node_type::OPERATOR_MODULO,      &type_checker::type_check_binary_math_operator },
 
 			// literals
-			case node_type::NUMERICAL_LITERAL:    type_check_numerical_literal(ast_node, expected); break;
-			case node_type::STRING_LITERAL:       type_check_string_literal(ast_node, expected); break;
-			case node_type::BOOL_LITERAL:         type_check_bool_literal(ast_node, expected); break;
+			{ node_type::NUMERICAL_LITERAL,    &type_checker::type_check_numerical_literal    },
+			{ node_type::STRING_LITERAL,       &type_checker::type_check_string_literal       },
+			{ node_type::BOOL_LITERAL,         &type_checker::type_check_bool_literal         }
+		};
 
-			default: PANIC("type checking for node '{}' is not implemented", ast_node->type.to_string());
-		}
+		// locate the relevant type check function
+		const auto it = s_checkers.find(ast_node->type);
+		ASSERT(it != s_checkers.end(), "unhandled node type detected");
+
+		// run the relevant function
+		TRY((this->*it->second)(ast_node, expected));
+		return SUCCESS;
 	}
 
-	void type_checker::type_check_function(handle<node> function_node) {
+	auto type_checker::type_check_function(handle<node> function_node, data_type expected) -> utility::result<void> {
+		SUPPRESS_C4100(expected);
 		auto& property = function_node->get<function>();
 
 		// register the function
 		m_functions[property.identifier_key] = &property;
 
-		// handle inner statements
+		// type check inner statements
 		for (const handle<node>& statement : function_node->children) {
-			type_check_node(statement, property.return_type);
+			TRY(type_check_node(statement, property.return_type));
 		}
+
+		return SUCCESS;
 	}
 
-	void type_checker::type_check_variable_declaration(handle<node> variable_node) {
+	auto type_checker::type_check_variable_declaration(handle<node> variable_node, data_type expected) -> utility::result<void> {
+		SUPPRESS_C4100(expected);
 		const auto& property = variable_node->get<variable>();
 
 		// register the variable
@@ -97,24 +112,28 @@ namespace sigma {
 
 		// type check the assigned value
 		if (variable_node->children.get_size() == 1) {
-			type_check_node(variable_node->children[0], property.type);
+			TRY(type_check_node(variable_node->children[0], property.type));
 		}
+
+		return SUCCESS;
 	}
 
-	void type_checker::type_check_function_call(handle<node> call_node, data_type expected) {
+	auto type_checker::type_check_function_call(handle<node> call_node, data_type expected) -> utility::result<void> {
 		SUPPRESS_C4100(expected);
-
-		// TODO: move the function check in here?
 		auto& property = call_node->get<function_call>();
 
+		// locate the callee
 		handle<function> callee;
 		const auto local_call = m_functions.find(property.callee_identifier_key);
 
 		if (local_call == m_functions.end()) {
 			const auto external_call = m_external_functions.find(property.callee_identifier_key);
-			ASSERT(external_call != m_external_functions.end(), "call to an unknown function detected");
-			callee = &external_call->second;
 
+			if(external_call == m_external_functions.end()) {
+				return utility::error::create(utility::error::code::UNKNOWN_FUNCTION, m_context.string_table.get(property.callee_identifier_key));
+			}
+
+			callee = &external_call->second;
 			property.is_external = true;
 		}
 		else {
@@ -122,112 +141,162 @@ namespace sigma {
 			property.is_external = false;
 		}
 
-		if (callee->has_var_args) {
-			ASSERT(
-				call_node->children.get_size() >= callee->parameter_types.get_size(),
-				"invalid parameter count"
-			);
-		}
-		else {
-			ASSERT(
-				callee->parameter_types.get_size() == call_node->children.get_size(),
-				"invalid parameter count"
+		// verify the supplied parameter count
+		// var args
+		if(callee->has_var_args && call_node->children.get_size() < callee->parameter_types.get_size()) {
+			return utility::error::create(
+				utility::error::code::INVALID_FUNCTION_PARAMETER_COUNT,
+				std::to_string(callee->parameter_types.get_size()) + "+", 
+				call_node->children.get_size()
 			);
 		}
 
+		// regular functions
+		if(callee->parameter_types.get_size() != call_node->children.get_size()) {
+			return utility::error::create(
+				utility::error::code::INVALID_FUNCTION_PARAMETER_COUNT,
+				callee->parameter_types.get_size(), 
+				call_node->children.get_size()
+			);
+		}
+
+		// type check regular function parameters (non-var arg)
 		u64 i = 0;
 		for (; i < callee->parameter_types.get_size(); ++i) {
-			type_check_node(call_node->children[i], callee->parameter_types[i].type);
+			TRY(type_check_node(call_node->children[i], callee->parameter_types[i].type));
 		}
 
-		// variable arguments should be promoted
-		// bool -> i32
-		// f32  -> f64
+		// type check var args
+		// these should be promoted to an expected type:
+		// -   bool -> i32
+		// -   f32  -> f64
 		for (; i < call_node->children.get_size(); ++i) {
-			type_check_node(call_node->children[i], { data_type::VAR_ARG_PROMOTE, 0 });
+			TRY(type_check_node(call_node->children[i], { data_type::VAR_ARG_PROMOTE, 0 }));
 		}
+
+		return SUCCESS;
 	}
 
-	void type_checker::type_check_return(handle<node> return_node, data_type expected) {
+	auto type_checker::type_check_return(handle<node> return_node, data_type expected) -> utility::result<void> {
 		if (return_node->children.get_size() == 0) {
-			ASSERT(
-				expected == data_type(data_type::VOID, 0),
-				"invalid return data type"
-			);
+			// 'ret' - verify that the parent function expects an empty return type
+			if(expected != data_type(data_type::VOID, 0)) {
+				return utility::error::create(utility::error::code::VOID_RETURN, expected.to_string());
+			}
 		}
 		else {
-			type_check_node(return_node->children[0], expected);
+			// 'ret type'
+			TRY(type_check_node(return_node->children[0], expected));
 		}
+
+		return SUCCESS;
 	}
 
-	void type_checker::type_check_conditional_branch(handle<node> branch_node) {
-		type_check_node(branch_node->children[0], data_type(data_type::BOOL, 0));
+	auto type_checker::type_check_conditional_branch(handle<node> branch_node, data_type expected) -> utility::result<void> {
+		SUPPRESS_C4100(expected);
+		// type check the condition
+		TRY(type_check_node(branch_node->children[0], data_type(data_type::BOOL, 0)));
 
+		// if children[1] exists, we have another branch node
 		if (branch_node->children[1]) {
+			// type check another conditional branch
 			if (branch_node->children[1]->type == node_type::CONDITIONAL_BRANCH) {
-				type_check_conditional_branch(branch_node->children[1]);
+				TRY(type_check_conditional_branch(branch_node->children[1], expected));
 			}
+			// type check a regular branch
 			else if (branch_node->children[1]->type == node_type::BRANCH) {
-				type_check_branch(branch_node->children[1]);
+				TRY(type_check_branch(branch_node->children[1], expected));
 			}
 			else {
-				PANIC("unexpected node type");
+				PANIC("unexpected node type"); // unreachable
 			}
 		}
 
+		// type check inner statements
 		for (u64 i = 2; i < branch_node->children.get_size(); ++i) {
-			type_check_node(branch_node->children[i], {});
+			TRY(type_check_node(branch_node->children[i], {}));
 		}
+
+		return SUCCESS;
 	}
 
-	void type_checker::type_check_branch(handle<node> branch_node) {
+	auto type_checker::type_check_branch(handle<node> branch_node, data_type expected) -> utility::result<void> {
+		SUPPRESS_C4100(expected);
+		
+		// just type check all inner statements
 		for (const handle<node>& statement : branch_node->children) {
-			type_check_node(statement, {});
+			TRY(type_check_node(statement, {}));
 		}
+
+		return SUCCESS;
 	}
 
-	void type_checker::type_check_binary_math_operator(handle<node> operator_node, data_type expected) {
-		type_check_node(operator_node->children[0], expected);
-		type_check_node(operator_node->children[1], expected);
+	auto type_checker::type_check_binary_math_operator(handle<node> operator_node, data_type expected) -> utility::result<void> {
+		// type check both operands
+		TRY(type_check_node(operator_node->children[0], expected));
+		TRY(type_check_node(operator_node->children[1], expected));
+		return SUCCESS;
 	}
 
-	void type_checker::type_check_numerical_literal(handle<node> literal_node, data_type expected) {
-		auto& prop = literal_node->get<literal>();
-		apply_expected_data_type(prop.type, expected);
+	auto type_checker::type_check_numerical_literal(handle<node> literal_node, data_type expected) -> utility::result<void> {
+		auto& property = literal_node->get<literal>();
+		apply_expected_data_type(property.type, expected);
+		return SUCCESS;
 	}
 
-	void type_checker::type_check_string_literal(handle<node> literal_node, data_type expected) {
-		auto& prop = literal_node->get<literal>();
-		apply_expected_data_type(prop.type, expected);
+	auto type_checker::type_check_string_literal(handle<node> literal_node, data_type expected) -> utility::result<void> {
+		auto& property = literal_node->get<literal>();
+		apply_expected_data_type(property.type, expected);
+		return SUCCESS;
 	}
 
-	void type_checker::type_check_bool_literal(handle<node> literal_node, data_type expected) {
+	auto type_checker::type_check_bool_literal(handle<node> literal_node, data_type expected) -> utility::result<void> {
 		SUPPRESS_C4100(literal_node);
-		ASSERT(expected.base_type == data_type::BOOL, "unexpected type encountered");
+		const data_type boolean(data_type::BOOL, 0);
+
+		// NOTE: we should probably check for the ability to upcast integers to booleans etc.
+		if(expected != boolean) {
+			return utility::error::create(utility::error::code::UNEXPECTED_TYPE, boolean.to_string(), expected.to_string());
+		}
+
+		return SUCCESS;
 	}
 
-	void type_checker::type_check_variable_access(handle<node> access_node, data_type expected) {
-		auto& prop = access_node->get<variable>();
+	auto type_checker::type_check_variable_access(handle<node> access_node, data_type expected) -> utility::result<void> {
+		auto& property = access_node->get<variable>();
 
-		const auto it = m_local_variables.find(prop.identifier_key);
-		ASSERT(it != m_local_variables.end(), "unknown local variable");
+		// locate the variable
+		const auto it = m_local_variables.find(property.identifier_key);
 
-		prop.type = it->second; // default to the declared type 
+		if(it == m_local_variables.end()) {
+			return utility::error::create(utility::error::code::UNKNOWN_VARIABLE, m_context.string_table.get(property.identifier_key));
+		}
 
-		apply_expected_data_type(prop.type, expected);
+		property.type = it->second; // default to the declared type
+		apply_expected_data_type(property.type, expected);
+		return SUCCESS;
 	}
 
-	void type_checker::type_check_variable_assignment(handle<node> assignment_node) {
+	auto type_checker::type_check_variable_assignment(handle<node> assignment_node, data_type expected) -> utility::result<void> {
+		SUPPRESS_C4100(expected);
+
+		// locate the variable
 		const handle<node> variable_node = assignment_node->children[0];
-		const auto& variable_prop = variable_node->get<variable>();
+		const auto& variable_property = variable_node->get<variable>();
+		const auto it = m_local_variables.find(variable_property.identifier_key);
 
-		const auto it = m_local_variables.find(variable_prop.identifier_key);
-		ASSERT(it != m_local_variables.end(), "unknown local variable referenced");
+		if (it == m_local_variables.end()) {
+			return utility::error::create(utility::error::code::UNKNOWN_VARIABLE, m_context.string_table.get(variable_property.identifier_key));
+		}
 
-		type_check_node(assignment_node->children[1], it->second);
+		// type check the assigned value against the declared type
+		TRY(type_check_node(assignment_node->children[1], it->second));
+		return SUCCESS;
 	}
 
 	void type_checker::apply_expected_data_type(data_type& target, data_type source) {
+		// basically a cast call
+
 		if (source.base_type != data_type::UNKNOWN) {
 			if (source.base_type == data_type::VAR_ARG_PROMOTE) {
 				// promote the variable

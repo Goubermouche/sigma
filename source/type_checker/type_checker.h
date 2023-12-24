@@ -15,22 +15,22 @@ namespace sigma {
 		type_checker(compilation_context& context);
 		auto type_check() -> utility::result<void>;
 
-		void type_check_node(handle<node> ast_node, data_type expected = {});
+		auto type_check_node(handle<node> ast_node, data_type expected = {}) -> utility::result<void>;
 
-		void type_check_function(handle<node> function_node);
-		void type_check_variable_declaration(handle<node> variable_node);
+		auto type_check_function(handle<node> function_node, data_type expected) -> utility::result<void>;
+		auto type_check_variable_declaration(handle<node> variable_node, data_type expected) -> utility::result<void>;
 
-		void type_check_function_call(handle<node> call_node, data_type expected);
-		void type_check_return(handle<node> return_node, data_type expected);
-		void type_check_conditional_branch(handle<node> branch_node);
-		void type_check_branch(handle<node> branch_node);
-		void type_check_binary_math_operator(handle<node> operator_node, data_type expected);
-		void type_check_variable_access(handle<node> access_node, data_type expected);
-		void type_check_variable_assignment(handle<node> assignment_node);
+		auto type_check_function_call(handle<node> call_node, data_type expected) -> utility::result<void>;
+		auto type_check_return(handle<node> return_node, data_type expected) -> utility::result<void>;
+		auto type_check_conditional_branch(handle<node> branch_node, data_type expected)->utility::result<void>;
+		auto type_check_branch(handle<node> branch_node, data_type expected)->utility::result<void>;
+		auto type_check_binary_math_operator(handle<node> operator_node, data_type expected)->utility::result<void>;
+		auto type_check_variable_access(handle<node> access_node, data_type expected)->utility::result<void>;
+		auto type_check_variable_assignment(handle<node> assignment_node, data_type expected)->utility::result<void>;
 
-		static void type_check_numerical_literal(handle<node> literal_node, data_type expected);
-		static void type_check_string_literal(handle<node> literal_node, data_type expected);
-		static void type_check_bool_literal(handle<node> literal_node, data_type expected);
+		auto type_check_numerical_literal(handle<node> literal_node, data_type expected) -> utility::result<void>;
+		auto type_check_string_literal(handle<node> literal_node, data_type expected) -> utility::result<void>;
+		auto type_check_bool_literal(handle<node> literal_node, data_type expected) -> utility::result<void>;
 
 		static void apply_expected_data_type(data_type& target, data_type source);
 	private:

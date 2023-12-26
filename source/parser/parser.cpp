@@ -16,9 +16,9 @@ m_tokens.next();             \
 EXPECT_CURRENT((__token))
 
 namespace sigma {
-	parser::parser(compilation_context& context) : m_context(context), m_tokens(context.tokens) {}
+	parser::parser(frontend_context& context) : m_context(context), m_tokens(context.tokens) {}
 
-	auto parser::parse(compilation_context& context) -> utility::result<abstract_syntax_tree> {
+	auto parser::parse(frontend_context& context) -> utility::result<abstract_syntax_tree> {
 		return parser(context).parse();
 	}
 
@@ -72,9 +72,9 @@ namespace sigma {
 		EXPECT_NEXT(token_type::RIGHT_PARENTHESIS);
 		TRY(const std::vector<handle<node>> statements, parse_statement_block());
 
-		const handle<node> function_node = m_ast.create_node<function>(node_type::FUNCTION_DECLARATION, statements.size());
+		const handle<node> function_node = m_ast.create_node<function_signature>(node_type::FUNCTION_DECLARATION, statements.size());
 
-		auto& function = function_node->get<sigma::function>();
+		auto& function = function_node->get<sigma::function_signature>();
 		function.return_type = return_type;
 		function.identifier_key = identifier_key;
 		function.parameter_types = utility::slice<named_data_type>(m_ast.get_allocator(), parameters.size());
@@ -228,7 +228,7 @@ namespace sigma {
 		const handle<node> negation_node = m_ast.create_node<literal>(node_type::NUMERICAL_LITERAL, 0);
 
 		auto& literal = negation_node->get<sigma::literal>();
-		literal.value_key = m_context.string_table.insert("-1");
+		literal.value_key = m_context.syntax.string_table.insert("-1");
 		literal.type = { data_type::I32, 0 };
 
 		// negate the expression
@@ -257,9 +257,9 @@ namespace sigma {
 		EXPECT_NEXT(token_type::RIGHT_PARENTHESIS);
 
 		// create the call node
-		const handle<node> call_node = m_ast.create_node<function_call>(node_type::FUNCTION_CALL, parameters.size());
+		const handle<node> call_node = m_ast.create_node<function_signature>(node_type::FUNCTION_CALL, parameters.size());
 		std::memcpy(call_node->children.get_data(), parameters.data(), parameters.size() * sizeof(handle<node>));
-		call_node->get<function_call>().callee_identifier_key = identifier_key;
+		call_node->get<function_signature>().identifier_key = identifier_key;
 
 		return call_node;
 	}

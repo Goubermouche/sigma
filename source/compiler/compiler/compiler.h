@@ -2,7 +2,9 @@
 // sub-processes. The main invocation point is located in the main.cpp file. The required
 // steps which need to be taken to create a valid compilation together with their specific
 // order can be seen below:
-//
+//                        +---------------------------------+
+//                        | Type system (WIP)               |
+//                        +---------------------------------+
 // AST generation                           Lowering (IR)      Lowering (Machine bytecode)
 // +-------+  +--------+  +--------------+  +---------------+  +----------------+  +------------+
 // | lexer +->| parser +->+ type_checker +->+ IR_translator +->| code_generator +->| executable |

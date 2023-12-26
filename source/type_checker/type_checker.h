@@ -2,7 +2,7 @@
 #include <abstract_syntax_tree/abstract_syntax_tree.h>
 
 namespace sigma {
-	struct compilation_context;
+	struct backend_context;
 
 	/**
 	 * \brief A simple type checker implementation, traverses the provided AST and
@@ -10,36 +10,30 @@ namespace sigma {
 	 */
 	class type_checker {
 	public:
-		static auto type_check(compilation_context& context) -> utility::result<void>;
+		static auto type_check(backend_context& context) -> utility::result<void>;
 	private:
-		type_checker(compilation_context& context);
+		type_checker(backend_context& context);
 		auto type_check() -> utility::result<void>;
 
-		auto type_check_node(handle<node> ast_node, data_type expected = {}) -> utility::result<void>;
+		auto type_check_node(handle<node> ast_node, data_type expected = {}) -> utility::result<data_type>;
 
-		auto type_check_function(handle<node> function_node, data_type expected) -> utility::result<void>;
-		auto type_check_variable_declaration(handle<node> variable_node, data_type expected) -> utility::result<void>;
+		auto type_check_function_declaration(handle<node> function_node, data_type expected) -> utility::result<data_type>;
+		auto type_check_variable_declaration(handle<node> variable_node, data_type expected) -> utility::result<data_type>;
 
-		auto type_check_function_call(handle<node> call_node, data_type expected) -> utility::result<void>;
-		auto type_check_return(handle<node> return_node, data_type expected) -> utility::result<void>;
-		auto type_check_conditional_branch(handle<node> branch_node, data_type expected)->utility::result<void>;
-		auto type_check_branch(handle<node> branch_node, data_type expected)->utility::result<void>;
-		auto type_check_binary_math_operator(handle<node> operator_node, data_type expected)->utility::result<void>;
-		auto type_check_variable_access(handle<node> access_node, data_type expected)->utility::result<void>;
-		auto type_check_variable_assignment(handle<node> assignment_node, data_type expected)->utility::result<void>;
+		auto type_check_function_call(handle<node> call_node, data_type expected) -> utility::result<data_type>;
+		auto type_check_return(handle<node> return_node, data_type expected) -> utility::result<data_type>;
+		auto type_check_conditional_branch(handle<node> branch_node, data_type expected)->utility::result<data_type>;
+		auto type_check_branch(handle<node> branch_node, data_type expected)->utility::result<data_type>;
+		auto type_check_binary_math_operator(handle<node> operator_node, data_type expected)->utility::result<data_type>;
+		auto type_check_variable_access(handle<node> access_node, data_type expected)->utility::result<data_type>;
+		auto type_check_variable_assignment(handle<node> assignment_node, data_type expected)->utility::result<data_type>;
 
-		auto type_check_numerical_literal(handle<node> literal_node, data_type expected) -> utility::result<void>;
-		auto type_check_string_literal(handle<node> literal_node, data_type expected) -> utility::result<void>;
-		auto type_check_bool_literal(handle<node> literal_node, data_type expected) -> utility::result<void>;
+		auto type_check_numerical_literal(handle<node> literal_node, data_type expected) -> utility::result<data_type>;
+		auto type_check_string_literal(handle<node> literal_node, data_type expected) -> utility::result<data_type>;
+		auto type_check_bool_literal(handle<node> literal_node, data_type expected) -> utility::result<data_type>;
 
 		static void apply_expected_data_type(data_type& target, data_type source);
 	private:
-		compilation_context& m_context;
-
-		// TODO: create a function registry
-		std::unordered_map<utility::string_table_key, handle<function>> m_functions;
-		std::unordered_map<utility::string_table_key, function> m_external_functions;
-
-		std::unordered_map<utility::string_table_key, data_type> m_local_variables;
+		backend_context& m_context;
 	};
 } // namespace sigma

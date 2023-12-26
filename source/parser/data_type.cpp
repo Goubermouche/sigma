@@ -8,9 +8,21 @@ namespace sigma {
 	data_type::data_type(data_type_base type, u8 pointer_level)
 		: base_type(type), pointer_level(pointer_level) {}
 
-	auto data_type::operator==(data_type other) const -> bool {
+	bool data_type::operator==(data_type other) const {
 		return base_type == other.base_type && pointer_level == other.pointer_level;
 	}
+
+  bool data_type::operator<(data_type other) const {
+		if (pointer_level < other.pointer_level) {
+			return true;
+		}
+
+		if (pointer_level > other.pointer_level) {
+			return false;
+		}
+
+		return base_type < other.base_type;
+  }
 
 	auto data_type::to_string() const->std::string {
 		const static std::unordered_map<data_type_base, std::string> type_to_string_map = {
@@ -70,6 +82,26 @@ namespace sigma {
 		return UNKNOWN;
 	}
 
+  bool data_type::is_integer() const {
+		if(pointer_level > 0) {
+			return false;
+		}
+
+		switch (base_type) {
+			case I8:
+			case I16:
+			case I32:
+			case I64:
+				return true;
+			default:
+				return false;
+			}
+  }
+
   named_data_type::named_data_type(data_type type, utility::string_table_key identifier_key)
 	  : type(type), identifier_key(identifier_key) {}
+
+	bool named_data_type::operator==(const named_data_type& other) const {
+		return type == other.type && identifier_key == other.identifier_key;
+	}
 } // sigma::parse

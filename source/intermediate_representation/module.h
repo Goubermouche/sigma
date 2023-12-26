@@ -4,8 +4,8 @@
 // The entire IR system is based off of an implementation in Cuik's Tilde backend
 // (https://github.com/RealNeGate/Cuik/tree/master/tb)
 
-// Root code generation file, contains the main module structure. Each module
-// contains a list of functions, and every function contains an allocator through
+// Root code generation file, contains_function the main module structure. Each module
+// contains_function a list of functions, and every function contains_function an allocator through
 // which it allocates and stores nodes, which represent the operation tree of the
 // given function.
 // Whilst it is possible to use the module class and its member to modify the node

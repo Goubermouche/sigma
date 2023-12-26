@@ -23,33 +23,32 @@ namespace sigma {
 		utility::console::println("compiling file: {}", m_description.path.string());
 		TRY(verify_file(m_description.path));
 
-		// declare a global compilation context
-		// NOTE: it may be a good idea to separate our contexts a bit for when we want to add support
-		//       for multiple files
-		compilation_context context;
+		// frontend
+		// TODO: the entire frontend can be multi-threaded
+		frontend_context frontend;
 
 		// generate tokens
-		TRY(const std::string& file, utility::file::read_text_file(m_description.path));
+		TRY(const std::string file, utility::file::read_text_file(m_description.path));
 		TRY(auto tokenized, tokenizer::tokenize(file));
 
-		context.string_table = tokenized.second;
-		context.tokens = tokenized.first;
+		frontend.syntax.string_table = tokenized.second;
+		frontend.tokens = tokenized.first;
 
-		// parse the token list and generate an AST
-		TRY(context.ast, parser::parse(context));
+		TRY(frontend.syntax.ast, parser::parse(frontend));
 
-		// context.print_ast();
+		// backend
+		backend_context backend(std::move(frontend.syntax), m_description.target);
 
 		// run analysis on the generated AST
-		TRY(type_checker::type_check(context));
-		TRY(ir::module module, ir_translator::translate(context, m_description.target));
+		TRY(type_checker::type_check(backend));
+		TRY(ir_translator::translate(backend));
 
 		// compile the generated IR module
-		module.compile();
+		backend.module.compile();
 
 		// emit as an object file
 		const filepath object_path = get_object_file_path();
-		emit_object_file(module, object_path);
+		emit_object_file(backend.module, object_path);
 		return SUCCESS;
 	}
 

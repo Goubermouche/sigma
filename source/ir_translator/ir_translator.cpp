@@ -2,27 +2,11 @@
 #include <compiler/compiler/compilation_context.h>
 
 namespace sigma {
-	auto ir_translator::translate(compilation_context& context, ir::target target) -> utility::result<ir::module> {
-		return ir_translator(context, target).translate();
+	auto ir_translator::translate(backend_context& context) -> utility::result<void> {
+		return ir_translator(context).translate();
 	}
 
-	ir_translator::ir_translator(compilation_context& context, ir::target target)
-		: m_context(context), m_module(target), m_builder(m_module),
-	m_functions(m_builder), m_variables(m_builder) {
-		m_functions.register_external_function(m_context.string_table.insert("printf"), {
-			.identifier   = "printf",
-			.parameters   = { PTR_TYPE },
-			.returns      = { I32_TYPE },
-			.has_var_args = true
-		});
-
-		m_functions.register_external_function(m_context.string_table.insert("puts"), {
-			.identifier   = "puts",
-			.parameters   = { PTR_TYPE },
-			.returns      = { I32_TYPE },
-			.has_var_args = false
-		});
-	}
+	ir_translator::ir_translator(backend_context& context) : m_context(context) {}
 
 	handle<ir::node> ir_translator::translate_node(handle<node> ast_node) {
 		switch (ast_node->type) {
@@ -38,11 +22,11 @@ namespace sigma {
 			case node_type::VARIABLE_ASSIGNMENT:  return translate_variable_assignment(ast_node);
 
 			// operators:
-			 case node_type::OPERATOR_ADD:
-			 case node_type::OPERATOR_SUBTRACT:
-			 case node_type::OPERATOR_MULTIPLY:
-			 case node_type::OPERATOR_DIVIDE:
-			 case node_type::OPERATOR_MODULO:     return translate_binary_math_operator(ast_node);
+			case node_type::OPERATOR_ADD:
+			case node_type::OPERATOR_SUBTRACT:
+			case node_type::OPERATOR_MULTIPLY:
+			case node_type::OPERATOR_DIVIDE:
+			case node_type::OPERATOR_MODULO:      return translate_binary_math_operator(ast_node);
 
 			// literals
 			case node_type::NUMERICAL_LITERAL:    return translate_numerical_literal(ast_node);
@@ -55,65 +39,43 @@ namespace sigma {
 	}
 
 	void ir_translator::translate_function_declaration(handle<node> function_node) {
-		auto& prop = function_node->get<function>();
-
-		std::vector<ir::data_type> parameter_types(prop.parameter_types.get_size());
-
-		for (u64 i = 0; i < parameter_types.size(); ++i) {
-			parameter_types[i] = data_type_to_ir(prop.parameter_types[i].type);
-		}
-
-		// TODO: the IR system should inherit our symbol table system
-		const ir::function_signature signature {
-			.identifier = m_context.string_table.get(prop.identifier_key), // TEMP
-			.parameters = parameter_types,
-			.returns = { data_type_to_ir(prop.return_type) },
-			.has_var_args = false
-		};
-
-		m_functions.register_function(prop.identifier_key, signature);
+		const function_signature& signature = function_node->get<function_signature>();
+		m_context.function_registry.declare_local_function(signature);
 
 		// handle inner statements
 		for (const handle<node>& statement : function_node->children) {
 			translate_node(statement);
 		}
-
-		// TODO: safety checks?
 	}
 
 	void ir_translator::translate_variable_declaration(handle<node> variable_node) {
 		const auto& prop = variable_node->get<variable>();
 		const u16 byte_width = prop.type.get_byte_width();
-
-		const handle<ir::node> local = m_variables.register_variable(
-			prop.identifier_key, byte_width, byte_width
-		);
+		const handle<ir::node> local = m_context.variable_registry.declare_variable(prop.identifier_key, byte_width, byte_width);
 
 		if (variable_node->children.get_size() == 1) {
 			const handle<ir::node> expression = translate_node(variable_node->children[0]);
-			m_builder.create_store(local, expression, byte_width, false);
+			m_context.builder.create_store(local, expression, byte_width, false);
 		}
 		else if (prop.type.base_type == data_type::BOOL) {
 			// boolean values should default to false
-			m_builder.create_store(local, m_builder.create_bool(false), byte_width, false);
+			m_context.builder.create_store(local, m_context.builder.create_bool(false), byte_width, false);
 		}
 	}
 
 	void ir_translator::translate_return(handle<node> return_node) {
 		if (return_node->children.get_size() == 0) {
-			m_builder.create_return({}); // TODO: maybe this should return a VOID_TY?
+			m_context.builder.create_return({}); // TODO: maybe this should return a VOID_TY?
 		}
 		else {
-			m_builder.create_return({ translate_node(return_node->children[0]) });
+			m_context.builder.create_return({ translate_node(return_node->children[0]) });
 		}
 	}
 
-	void ir_translator::translate_conditional_branch(
-		handle<node> branch_node, handle<ir::node> end_control
-	) {
-		const handle<ir::node> true_control = m_builder.create_region();
-		const handle<ir::node> false_control = m_builder.create_region();
-		end_control = end_control ? end_control : m_builder.create_region();
+	void ir_translator::translate_conditional_branch(handle<node> branch_node, handle<ir::node> end_control) {
+		const handle<ir::node> true_control = m_context.builder.create_region();
+		const handle<ir::node> false_control = m_context.builder.create_region();
+		end_control = end_control ? end_control : m_context.builder.create_region();
 
 		// translate the condition
 		const handle<ir::node> condition = translate_node(branch_node->children[0]);
@@ -121,8 +83,8 @@ namespace sigma {
 		// check if there is a successor branch node
 		if (const handle<node> successor = branch_node->children[1]) {
 			// successor node
-			m_builder.create_conditional_branch(condition, true_control, false_control);
-			m_builder.set_control(false_control);
+			m_context.builder.create_conditional_branch(condition, true_control, false_control);
+			m_context.builder.set_control(false_control);
 
 			[[likely]]
 			if (successor->type == node_type::CONDITIONAL_BRANCH) {
@@ -138,20 +100,20 @@ namespace sigma {
 			}
 		}
 		else {
-			m_builder.create_conditional_branch(condition, true_control, end_control);
+			m_context.builder.create_conditional_branch(condition, true_control, end_control);
 		}
 
 		// this all happens if CONDITION IS true
-		m_builder.set_control(true_control);
+		m_context.builder.set_control(true_control);
 
 		for (u64 i = 2; i < branch_node->children.get_size(); ++i) {
 			translate_node(branch_node->children[i]);
 		}
 
-		m_builder.create_branch(end_control);
+		m_context.builder.create_branch(end_control);
 
 		// restore the control region
-		m_builder.set_control(end_control);
+		m_context.builder.set_control(end_control);
 	}
 
 	void ir_translator::translate_branch(handle<node> branch_node, handle<ir::node> exit_control) {
@@ -159,39 +121,31 @@ namespace sigma {
 			translate_node(statement);
 		}
 
-		m_builder.create_branch(exit_control);
+		m_context.builder.create_branch(exit_control);
 	}
 
-	auto ir_translator::translate_numerical_literal(
-		handle<node> numerical_literal_node
-	) const -> handle<ir::node> {
+	auto ir_translator::translate_numerical_literal(handle<node> numerical_literal_node) const -> handle<ir::node> {
 		return literal_to_ir(numerical_literal_node->get<literal>());
 	}
 
-	auto ir_translator::translate_string_literal(
-		handle<node> string_literal_node
-	) const -> handle<ir::node> {
-		const std::string& value = m_context.string_table.get(string_literal_node->get<literal>().value_key);
-		return m_builder.create_string(value);
+	auto ir_translator::translate_string_literal(handle<node> string_literal_node) const -> handle<ir::node> {
+		const std::string& value = m_context.syntax.string_table.get(string_literal_node->get<literal>().value_key);
+		return m_context.builder.create_string(value);
 	}
 
-	auto ir_translator::translate_bool_literal(
-		handle<node> bool_literal_node
-	) const -> handle<ir::node> {
+	auto ir_translator::translate_bool_literal(handle<node> bool_literal_node) const -> handle<ir::node> {
 		const auto& prop = bool_literal_node->get<bool_literal>();
-		return m_builder.create_bool(prop.value);
+		return m_context.builder.create_bool(prop.value);
 	}
 
-	auto ir_translator::translate_binary_math_operator(
-		handle<node> operator_node
-	) -> handle<ir::node> {
+	auto ir_translator::translate_binary_math_operator(handle<node> operator_node) -> handle<ir::node> {
 		const handle<ir::node> left  = translate_node(operator_node->children[0]);
 		const handle<ir::node> right = translate_node(operator_node->children[1]);
 
 		switch (operator_node->type) {
-			case node_type::OPERATOR_ADD:      return m_builder.create_add(left, right);
-			case node_type::OPERATOR_SUBTRACT: return m_builder.create_sub(left, right);
-			case node_type::OPERATOR_MULTIPLY: return m_builder.create_mul(left, right);
+			case node_type::OPERATOR_ADD:      return m_context.builder.create_add(left, right);
+			case node_type::OPERATOR_SUBTRACT: return m_context.builder.create_sub(left, right);
+			case node_type::OPERATOR_MULTIPLY: return m_context.builder.create_mul(left, right);
 			//case node_type::OPERATOR_DIVIDE:   
 			//case node_type::OPERATOR_MODULO:
 			default: PANIC("unexpected node type '{}' received", operator_node->type.to_string());
@@ -202,7 +156,7 @@ namespace sigma {
 	}
 
 	auto ir_translator::translate_function_call(handle<node> call_node) -> handle<ir::node> {
-		const auto& prop = call_node->get<function_call>();
+		const auto& callee_signature = call_node->get<function_signature>();
 
 		std::vector<handle<ir::node>> parameters;
 		parameters.reserve(call_node->children.get_size());
@@ -211,15 +165,14 @@ namespace sigma {
 			parameters.push_back(translate_node(parameter));
 		}
 
-		handle<ir::node> call_result = m_functions.create_call(prop.callee_identifier_key, parameters);
-		ASSERT(call_result, "unknown function called");
+		const handle<ir::node> call_result = m_context.function_registry.create_call(callee_signature, parameters);
 		return call_result;
 	}
 
-	auto ir_translator::translate_variable_access(handle<node> access_node) -> handle<ir::node> {
+	auto ir_translator::translate_variable_access(handle<node> access_node) const -> handle<ir::node> {
 		const auto& prop = access_node->get<variable>();
 
-		handle<ir::node> load = m_variables.create_load(
+		const handle<ir::node> load = m_context.variable_registry.create_load(
 			prop.identifier_key, data_type_to_ir(prop.type), prop.type.get_byte_width()
 		);
 
@@ -227,19 +180,17 @@ namespace sigma {
 		return load;
 	}
 
-	auto ir_translator::translate_variable_assignment(
-		handle<node> assignment_node
-	) -> handle<ir::node> {
+	auto ir_translator::translate_variable_assignment(handle<node> assignment_node) -> handle<ir::node> {
 		const auto& var = assignment_node->children[0]->get<variable>();
 		const handle<ir::node> value = translate_node(assignment_node->children[1]);
 
 		// assign the variable
-		m_variables.create_store(var.identifier_key, value, var.type.get_byte_width());
+		m_context.variable_registry.create_store(var.identifier_key, value, var.type.get_byte_width());
 		return nullptr;
 	}
 
 	auto ir_translator::literal_to_ir(literal& literal) const -> handle<ir::node> {
-		const std::string& value = m_context.string_table.get(literal.value_key);
+		const std::string& value = m_context.syntax.string_table.get(literal.value_key);
 
 		// handle pointers separately
 		if (literal.type.pointer_level > 0) {
@@ -247,7 +198,7 @@ namespace sigma {
 		}
 
 		switch (literal.type.base_type) {
-			case data_type::I32: return m_builder.create_signed_integer(std::stoi(value), 32);
+			case data_type::I32: return m_context.builder.create_signed_integer(std::stoi(value), 32);
 			default: NOT_IMPLEMENTED();
 		}
 
@@ -266,11 +217,11 @@ namespace sigma {
 		return {};
 	}
 
-	auto ir_translator::translate() -> utility::result<ir::module> {
-		for (const handle<node>& top_level : m_context.ast.get_nodes()) {
+	auto ir_translator::translate() -> utility::result<void> {
+		for (const handle<node>& top_level : m_context.syntax.ast.get_nodes()) {
 			translate_node(top_level);
 		}
 
-		return std::move(m_module);
+		return SUCCESS;
 	}
 } // namespace sigma

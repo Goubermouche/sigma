@@ -11,18 +11,27 @@
 //     -   dynamic programming impl? 
 
 i32 test(i32 a) {
+  printf("candidate 1\n");
+	ret 0;
+}
+
+i32 test(i32 a, i32 b) {
+	printf("candidate 2\n");
+	ret 0;
+}
+
+i32 test(i8 a, i16 b) {
+	printf("candidate 3\n");
+	ret 0;
+}
+
+i32 test(i32 a, i16 b) {
+	printf("candidate 4\n");
 	ret 0;
 }
 
 i32 main() {
-	bool value = true;
-	if(value) {
-		printf("true\n");
-	}
-	else {
-		printf("false\n");
-	}
-
-	puts("Hello, world!\n");
+	i32 value = 100;
+	test(value, 1);
 	ret 0;
 }

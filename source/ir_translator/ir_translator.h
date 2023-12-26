@@ -1,18 +1,16 @@
 #pragma once
-#include "ir_translator/values/function_registry.h"
-#include "ir_translator/values/variable_registry.h"
-
 #include <abstract_syntax_tree/abstract_syntax_tree.h>
+#include <intermediate_representation/builder.h>
 
 namespace sigma {
-	struct compilation_context;
+	struct backend_context;
 
 	class ir_translator {
 	public:
-		static auto translate(compilation_context& context, ir::target target) -> utility::result<ir::module>;
+		static auto translate(backend_context& context) -> utility::result<void>;
 	private:
-		ir_translator(compilation_context& context, ir::target target);
-		auto translate() -> utility::result<ir::module>;
+		ir_translator(backend_context& context);
+		auto translate() -> utility::result<void>;
 
 		handle<ir::node> translate_node(handle<node> ast_node);
 
@@ -42,18 +40,12 @@ namespace sigma {
 		auto translate_binary_math_operator(handle<node> operator_node) -> handle<ir::node>;
 		auto translate_function_call(handle<node> call_node) -> handle<ir::node>;
 
-		auto translate_variable_access(handle<node> access_node) -> handle<ir::node>;
+		auto translate_variable_access(handle<node> access_node) const-> handle<ir::node>;
 		auto translate_variable_assignment(handle<node> assignment_node) -> handle<ir::node>;
 
 		auto literal_to_ir(literal& literal) const-> handle<ir::node>;
 		static auto data_type_to_ir(data_type dt) -> ir::data_type;
 	private:
-		compilation_context& m_context;
-
-		ir::module m_module;
-		ir::builder m_builder;
-
-		detail::function_registry m_functions;
-		detail::variable_registry m_variables;
+		backend_context& m_context;
 	};
 } // namespace sigma

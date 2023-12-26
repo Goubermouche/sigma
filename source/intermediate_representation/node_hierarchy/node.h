@@ -103,7 +103,7 @@ namespace sigma::ir {
 				// pointers
 				// statically allocates stack space
 				LOCAL,
-				// contains a pointer to a symbol object
+				// contains_function a pointer to a symbol object
 				SYMBOL,
 				// offsets a pointer by a constant value
 				MEMBER_ACCESS,

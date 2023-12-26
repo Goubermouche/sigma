@@ -13,6 +13,8 @@ namespace sigma {
 			UNKNOWN,
 
 			FUNCTION_DECLARATION,
+
+			// function_signature
 			FUNCTION_CALL,
 
 			RETURN,
@@ -53,17 +55,16 @@ namespace sigma {
 
 	struct node;
 
-	struct function {
+	// a higher-level function signature (contains_function info about custom types and generics)
+	struct function_signature {
+		bool operator==(const function_signature& other) const;
+		bool operator<(const function_signature& other) const;
+
 		data_type return_type;
 		utility::slice<named_data_type> parameter_types;
 		bool has_var_args = false;
 
 		utility::string_table_key identifier_key;
-	};
-
-	struct function_call {
-		utility::string_table_key callee_identifier_key;
-		bool is_external;
 	};
 
 	struct return_statement {};
@@ -83,7 +84,7 @@ namespace sigma {
 	};
 
 	using node_properties = utility::property<
-		function, return_statement, literal, function_call, variable, bool_literal
+		function_signature, return_statement, literal, variable, bool_literal
 	>;
 
 	struct node : node_properties {

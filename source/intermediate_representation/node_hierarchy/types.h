@@ -66,11 +66,11 @@ namespace sigma::ir {
 
 // floating point types
 #define F32_TYPE sigma::ir::data_type(          \
-	sigma::ir::data_type::base::FLOAT,                  \
+	sigma::ir::data_type::base::FLOAT,            \
 	static_cast<u8>(sigma::ir::float_format::f32) \
 )
 #define F64_TYPE sigma::ir::data_type(          \
-	sigma::ir::data_type::base::FLOAT,                  \
+	sigma::ir::data_type::base::FLOAT,            \
 	static_cast<u8>(sigma::ir::float_format::f64) \
 )
 

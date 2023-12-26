@@ -21,8 +21,12 @@ namespace sigma {
 		data_type(token token, u8 pointer_level);
 		data_type(data_type_base type, u8 pointer_level);
 
-		auto operator==(data_type other) const -> bool;
+		bool operator==(data_type other) const;
+		bool operator<(data_type other) const;
+
 		static auto token_to_type(token token) -> data_type_base;
+
+		bool is_integer() const;
 
 		auto to_string() const -> std::string;
 		auto get_byte_width() const -> u16;
@@ -33,6 +37,8 @@ namespace sigma {
 
 	struct named_data_type {
 		named_data_type(data_type type, utility::string_table_key identifier_key);
+
+		bool operator==(const named_data_type& other) const;
 
 		data_type type;
 		utility::string_table_key identifier_key;

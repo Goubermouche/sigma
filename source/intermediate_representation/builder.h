@@ -6,7 +6,7 @@
 //   ir::module = ...
 //   ir::builder builder(module);
 //
-//   builder.create_function(...); // create a function which now serves as the insert point
+//   builder.create_function(...); // create a function which now serves as the pre_declare_local_function point
 //   builder.create_ret(...);      // create a return in the given function
 //
 // The insertion point is set automatically, whenever a new function is created, but, if need

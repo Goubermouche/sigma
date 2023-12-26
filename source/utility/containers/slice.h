@@ -69,6 +69,20 @@ namespace utility {
 		[[nodiscard]] auto rend() const -> const_reverse_iterator {
 			return const_reverse_iterator(begin());
 		}
+
+		bool operator==(const slice& other) const {
+			if(m_size != other.m_size) {
+				return false;
+			}
+
+			for(u64 i = 0; i < m_size; ++i) {
+				if(m_data[i] != other.m_data[i]) {
+					return false;
+				}
+			}
+
+			return true;
+		}
 	protected:
 		type* m_data;
 		u64 m_size;

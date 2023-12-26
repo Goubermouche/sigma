@@ -64,8 +64,8 @@ namespace utility {
 
 			// type checker
 			UNKNOWN_FUNCTION,
+			NO_FUNCTION_OVERLOAD,
 			FUNCTION_ALREADY_DECLARED,
-			INVALID_FUNCTION_PARAMETER_COUNT,
 			VOID_RETURN,
 			UNEXPECTED_TYPE,
 			UNKNOWN_VARIABLE,
@@ -105,10 +105,10 @@ namespace utility {
 
 			// type checker
 			{ code::UNKNOWN_FUNCTION, "attempting to call an unknown function ('{}')" },
+			{ code::NO_FUNCTION_OVERLOAD, "invalid function call to function '{}' detected (no matching overload found)"},
 			{ code::FUNCTION_ALREADY_DECLARED, "function '{}' has already been declared before" },
-			{ code::INVALID_FUNCTION_PARAMETER_COUNT, "attempting to call a function with an invalid number of parameters (expected '{}', but got '{}' instead)" },
 			{ code::VOID_RETURN, "invalid void return statement (expected 'ret;', but got 'ret {};' instead)" },
-			{ code::UNEXPECTED_TYPE, "encountered an unexpected type (expected '{}', but got '{}' instead" },
+			{ code::UNEXPECTED_TYPE, "encountered an unexpected type (expected '{}', but got '{}' instead)" },
 			{ code::UNKNOWN_VARIABLE, "unknown variable '{}' referenced" },
 		};
 	};

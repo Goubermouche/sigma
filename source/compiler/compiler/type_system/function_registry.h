@@ -53,7 +53,7 @@ namespace sigma {
 		 * \param parameter_types Parameter types to match with
 		 * \return Closest-matching signature.
 		 */
-		auto get_callee_signature(utility::string_table_key identifier, const std::vector<data_type>& parameter_types) -> function_signature;
+		auto get_callee_signature(utility::string_table_key identifier, const std::vector<data_type>& parameter_types) -> utility::result<function_signature>;
 		auto create_call(const function_signature& callee_signature, const std::vector<handle<ir::node>>& parameters) -> handle<ir::node>;
 	private:
 		static auto calculate_parameter_cast_cost(const function_signature& signature, const std::vector<data_type>& parameter_types) -> u16;

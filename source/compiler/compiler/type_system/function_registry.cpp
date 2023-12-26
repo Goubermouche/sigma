@@ -7,11 +7,13 @@ namespace sigma {
 	function_registry::function_registry(backend_context& context) : m_context(context) {}
 
 	bool function_registry::contains_function(const function_signature& signature) const {
+		// try to find a locally declared function
 		const auto local_it = m_local_functions.find(signature.identifier_key);
 		if(local_it != m_local_functions.end()) {
 			return local_it->second.contains(signature);
 		}
 
+		// fall back to external functions
 		const auto external_it = m_external_functions.find(signature.identifier_key);
 		if (external_it != m_external_functions.end()) {
 			return external_it->second.contains(signature);
@@ -20,14 +22,18 @@ namespace sigma {
 		return false;
 	}
 
-	auto function_registry::get_callee_signature(utility::string_table_key identifier, const std::vector<data_type>& parameter_types) -> function_signature {
+	auto function_registry::get_callee_signature(utility::string_table_key identifier, const std::vector<data_type>& parameter_types) -> utility::result<function_signature> {
 		using function_call_cost = std::pair<function_signature, u16>;
 		std::vector<function_call_cost> candidates;
+		bool valid_identifier = false;
 
+		// helper for getting potential candidates
 		auto add_candidates = [&](const auto& function_map) {
 			const auto it = function_map.find(identifier);
 			if (it != function_map.end()) {
-				for (const auto& signature : it->second | std::views::keys) {
+				valid_identifier |= true;
+
+				for (const auto& [signature, function] : it->second) {
 					if (
 						signature.parameter_types.get_size() == parameter_types.size() ||
 						(signature.parameter_types.get_size() < parameter_types.size() && signature.has_var_args)
@@ -45,10 +51,18 @@ namespace sigma {
 		add_candidates(m_local_functions);
 		add_candidates(m_external_functions);
 
-		ASSERT(!candidates.empty(), "invalid function call");
-		utility::console::println("creating call to '{}' ({} candidates considered)", m_context.syntax.string_table.get(identifier), candidates.size());
+		if(!valid_identifier) {
+			// no function with the specified identifier was found
+			return utility::error::create(utility::error::code::UNKNOWN_FUNCTION, m_context.syntax.string_table.get(identifier));
+		}
 
-		const auto best_match = std::ranges::min_element(candidates, [](const function_call_cost& a, const function_call_cost& b) {
+		if(candidates.empty()) {
+			// TODO: it's probably a good idea to specify the parameters that were provided and which
+			//       candidates were even considered
+			return utility::error::create(utility::error::code::NO_FUNCTION_OVERLOAD, m_context.syntax.string_table.get(identifier));
+		}
+
+		const auto best_match = std::min_element(candidates.begin(), candidates.end(), [](const function_call_cost& a, const function_call_cost& b) {
 			return a.second < b.second;
 		});
 
@@ -96,6 +110,10 @@ namespace sigma {
 	}
 
 	auto function_registry::calculate_parameter_cast_cost(const function_signature& signature, const std::vector<data_type>& parameter_types) -> u16 {
+		// NOTE: right now, we just traverse all non-var arg type and match compare against those, it's
+		//       probably a good idea to add a heavy-ish cost (~200) to var-arg functions, as we want to
+		//       prefer non var-arg functions by default (?)
+
 		u16 total_cost = 0;
 
 		for (u64 i = 0; i < signature.parameter_types.get_size(); ++i) {

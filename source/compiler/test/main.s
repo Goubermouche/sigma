@@ -33,5 +33,7 @@ i32 test(i32 a, i16 b) {
 i32 main() {
 	i32 value = 100;
 	test(value, 1);
+
+	printf("value is: %d\n", value);
 	ret 0;
 }

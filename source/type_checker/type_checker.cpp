@@ -108,7 +108,7 @@ namespace sigma {
 			// std::cout << "type: " << parameter_data_types[i].to_string() << '\n';
 		}
 
-		callee_signature = m_context.function_registry.get_callee_signature(callee_signature.identifier_key, parameter_data_types);
+		TRY(callee_signature, m_context.function_registry.get_callee_signature(callee_signature.identifier_key, parameter_data_types));
 
 		// TODO: upcast cast everything according to the callee signature
 
@@ -203,14 +203,10 @@ namespace sigma {
 
 	auto type_checker::type_check_bool_literal(handle<node> literal_node, data_type expected) -> utility::result<data_type> {
 		SUPPRESS_C4100(literal_node);
+		SUPPRESS_C4100(expected);
+
 		const data_type boolean(data_type::BOOL, 0);
-
-		// NOTE: we should probably check for the ability to upcast integers to booleans etc.
-		if(expected != boolean) {
-			return utility::error::create(utility::error::code::UNEXPECTED_TYPE, boolean.to_string(), expected.to_string());
-		}
-
-		return SUCCESS;
+		return boolean;
 	}
 
 	auto type_checker::type_check_variable_access(handle<node> access_node, data_type expected) -> utility::result<data_type> {

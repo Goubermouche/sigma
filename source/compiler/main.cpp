@@ -1,4 +1,7 @@
 #include "compiler/compiler.h"
+#include <intermediate_representation/builder.h>
+
+#include "utility/filesystem/file.h"
 
 using namespace utility::types;
 

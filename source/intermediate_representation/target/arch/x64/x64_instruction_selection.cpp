@@ -1082,21 +1082,21 @@ namespace sigma::ir {
 	}
 
 	auto x64_architecture::select_array_access_instruction(codegen_context& context, handle<node> target, reg destination, i32 store_op, i32 source) -> handle<instruction> {
-		const bool base_dir = context.virtual_values.at(target->global_value_index).use_count > 2 || context.virtual_values.at(target->global_value_index).virtual_register.is_valid();
-
 		// compute base
-		if (target == node::type::ARRAY_ACCESS && base_dir) {
-			const reg base = allocate_node_register(context, target);
+		if (target == node::type::ARRAY_ACCESS) {
+			if(context.virtual_values.at(target->global_value_index).use_count > 2 || context.virtual_values.at(target->global_value_index).virtual_register.is_valid()) {
+				const reg base = allocate_node_register(context, target);
 
-			if (store_op < 0) {
-				if (source >= 0) {
-					return create_rrm(context, instruction::type::LEA, PTR_TYPE, destination, static_cast<u8>(source), base, -1, memory_scale::x1, 0);
+				if (store_op < 0) {
+					if (source >= 0) {
+						return create_rrm(context, instruction::type::LEA, PTR_TYPE, destination, static_cast<u8>(source), base, -1, memory_scale::x1, 0);
+					}
+
+					return create_rm(context, instruction::type::LEA, PTR_TYPE, destination, base, -1, memory_scale::x1, 0);
 				}
 
-				return create_rm(context, instruction::type::LEA, PTR_TYPE, destination, base, -1, memory_scale::x1, 0);
+				return create_mr(context, static_cast<instruction::type::underlying>(store_op), PTR_TYPE, base, -1, memory_scale::x1, 0, source);
 			}
-
-			return create_mr(context, static_cast<instruction::type::underlying>(store_op), PTR_TYPE, base, -1, memory_scale::x1, 0, source);
 		}
 
 		return select_memory_access_instruction(context, target, destination, store_op, source);

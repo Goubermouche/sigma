@@ -6,7 +6,9 @@ namespace sigma {
 		return ir_translator(context).translate();
 	}
 
-	ir_translator::ir_translator(backend_context& context) : m_context(context) {}
+	ir_translator::ir_translator(backend_context& context) : m_context(context) {
+		m_context.variable_registry.reset_active_scope();
+	}
 
 	handle<ir::node> ir_translator::translate_node(handle<node> ast_node) {
 		switch (ast_node->type) {
@@ -40,12 +42,16 @@ namespace sigma {
 
 	void ir_translator::translate_function_declaration(handle<node> function_node) {
 		const function_signature& signature = function_node->get<function_signature>();
+
 		m_context.function_registry.declare_local_function(signature);
+		m_context.variable_registry.trace_push_scope();
 
 		// handle inner statements
 		for (const handle<node>& statement : function_node->children) {
 			translate_node(statement);
 		}
+
+		m_context.variable_registry.trace_pop_scope();
 	}
 
 	void ir_translator::translate_variable_declaration(handle<node> variable_node) {
@@ -105,11 +111,13 @@ namespace sigma {
 
 		// this all happens if CONDITION IS true
 		m_context.builder.set_control(true_control);
+		m_context.variable_registry.trace_push_scope();
 
 		for (u64 i = 2; i < branch_node->children.get_size(); ++i) {
 			translate_node(branch_node->children[i]);
 		}
 
+		m_context.variable_registry.trace_pop_scope();
 		m_context.builder.create_branch(end_control);
 
 		// restore the control region
@@ -117,10 +125,13 @@ namespace sigma {
 	}
 
 	void ir_translator::translate_branch(handle<node> branch_node, handle<ir::node> exit_control) {
+		m_context.variable_registry.trace_push_scope();
+
 		for (const handle<node>& statement : branch_node->children) {
 			translate_node(statement);
 		}
 
+		m_context.variable_registry.trace_pop_scope();
 		m_context.builder.create_branch(exit_control);
 	}
 

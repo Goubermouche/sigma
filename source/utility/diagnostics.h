@@ -69,6 +69,7 @@ namespace utility {
 			VOID_RETURN,
 			UNEXPECTED_TYPE,
 			UNKNOWN_VARIABLE,
+			VARIABLE_ALREADY_DECLARED,
 		};
 
 		error(const std::string& message) : m_message(message) {}
@@ -110,6 +111,7 @@ namespace utility {
 			{ code::VOID_RETURN, "invalid void return statement (expected 'ret;', but got 'ret {};' instead)" },
 			{ code::UNEXPECTED_TYPE, "encountered an unexpected type (expected '{}', but got '{}' instead)" },
 			{ code::UNKNOWN_VARIABLE, "unknown variable '{}' referenced" },
+			{ code::VARIABLE_ALREADY_DECLARED, "variable '{}' has already been declared before" },
 		};
 	};
 

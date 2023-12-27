@@ -71,11 +71,14 @@ namespace sigma {
 
 		// register the function
 		m_context.function_registry.pre_declare_local_function(property);
+		m_context.variable_registry.push_scope();
 
 		// type check inner statements
 		for(const handle<node>& statement : function_node->children) {
 			TRY(type_check_node(statement, property.return_type));
 		}
+
+		m_context.variable_registry.pop_scope();
 
 		return SUCCESS;
 	}
@@ -83,6 +86,14 @@ namespace sigma {
 	auto type_checker::type_check_variable_declaration(handle<node> variable_node, data_type expected) -> utility::result<data_type> {
 		SUPPRESS_C4100(expected);
 		const auto& property = variable_node->get<variable>();
+
+		// check, whether the variable has already been declared in the current context
+		if(m_context.variable_registry.contains(property.identifier_key)) {
+			return utility::error::create(
+				utility::error::code::VARIABLE_ALREADY_DECLARED,
+				m_context.syntax.string_table.get(property.identifier_key)
+			);
+		}
 
 		// register the variable
 		m_context.variable_registry.pre_declare_variable(property.identifier_key, property.type);
@@ -110,7 +121,7 @@ namespace sigma {
 
 		TRY(callee_signature, m_context.function_registry.get_callee_signature(callee_signature.identifier_key, parameter_data_types));
 
-		// TODO: upcast cast everything according to the callee signature
+		// TODO: cast everything according to the callee signature
 
 		//u64 i = 0;
 		//for (; i < callee_signature.parameter_types.get_size(); ++i) {
@@ -156,6 +167,7 @@ namespace sigma {
 			}
 			// type check a regular branch
 			else if (branch_node->children[1]->type == node_type::BRANCH) {
+
 				TRY(type_check_branch(branch_node->children[1], expected));
 			}
 			else {
@@ -164,21 +176,26 @@ namespace sigma {
 		}
 
 		// type check inner statements
+		m_context.variable_registry.push_scope();
+
 		for (u64 i = 2; i < branch_node->children.get_size(); ++i) {
 			TRY(type_check_node(branch_node->children[i], {}));
 		}
 
+		m_context.variable_registry.pop_scope();
 		return SUCCESS;
 	}
 
 	auto type_checker::type_check_branch(handle<node> branch_node, data_type expected) -> utility::result<data_type> {
 		SUPPRESS_C4100(expected);
-		
+		m_context.variable_registry.push_scope();
+
 		// just type check all inner statements
 		for (const handle<node>& statement : branch_node->children) {
 			TRY(type_check_node(statement, {}));
 		}
 
+		m_context.variable_registry.pop_scope();
 		return SUCCESS;
 	}
 

@@ -10,29 +10,24 @@
 // -   IR translator 
 //     -   dynamic programming impl? 
 
-i32 test(i32 a) {
-  printf("candidate 1\n");
-	ret 0;
-}
-
-i32 test(i32 a, i32 b) {
-	printf("candidate 2\n");
-	ret 0;
-}
-
-i32 test(i8 a, i16 b) {
-	printf("candidate 3\n");
-	ret 0;
-}
-
-i32 test(i32 a, i16 b) {
-	printf("candidate 4\n");
-	ret 0;
-}
+// BUGS: 
+// i32 main() {
+// 	i32 value;
+// 	if(true) {
+// 		value = 200;
+// 	}
+// 
+// 	printf("value is: %d\n", value);
+// 	ret 0;
+// }
 
 i32 main() {
-	i32 value = 100;
-	test(value, 1);
+	i32 value = 0;
+
+	if(false) {}
+	else {
+		value = 100;
+	}
 
 	printf("value is: %d\n", value);
 	ret 0;

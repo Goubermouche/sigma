@@ -47,15 +47,19 @@ namespace sigma {
 		m_context.variable_registry.trace_push_scope();
 
 		// TODO: handle varargs
-		// push temporaries for function parameters
+		// declare parameter temporaries
 		for (u64 i = 0; i < signature.parameter_types.get_size(); ++i) {
-			// TODO: create proxies? 
 			const auto variable = m_context.variable_registry.get_variable(signature.parameter_types[i].identifier_key);
 			ASSERT(variable, "function parameter pre declaration is invalid");
 
-			const handle<ir::node> value = m_context.builder.get_function_parameter(i);
-			variable->flags |= variable_registry::variable::FUNCTION_PARAMETER;
-			variable->value = value;
+			// since we can't update the projection value directly we have to create a proxy for it, this
+			// allows us to update the value of our parameters
+			const u16 byte_width = signature.parameter_types[i].type.get_byte_width();
+			variable->value = m_context.builder.create_local(byte_width, byte_width);
+
+			// assign the parameter value to the proxy
+			const handle<ir::node> parameter_projection = m_context.builder.get_function_parameter(i);
+			m_context.builder.create_store(variable->value, parameter_projection, byte_width, false);
 		}
 
 		// handle inner statements

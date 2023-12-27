@@ -11,9 +11,6 @@ namespace sigma {
 		struct variable {
 			enum variable_flags {
 				NONE = 0,
-
-				// variable is a function parameter, function parameters don't need to be loaded
-				FUNCTION_PARAMETER = 1 
 			};
 
 			handle<ir::node> value;

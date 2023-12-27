@@ -21,13 +21,16 @@
 // 	ret 0;
 // }
 
-i32 test(i32 x) {
-	// x = x + 10;
-	ret x;
+i32 deep(i32 x) {
+	ret x * 2;
+}
+
+i32 test(i32 x, i32 y) {
+	ret deep(x) + y;
 }
 
 i32 main() {
-	i32 val = test(100);
+	i32 val = test(100, 20);
 	printf("val : %d\n", val);
 	ret 0;
 }

@@ -48,15 +48,19 @@ namespace sigma {
 
 	auto variable_registry::create_load(utility::string_table_key identifier, ir::data_type type, u16 alignment) const -> handle<ir::node> {
 		const handle<variable> variable = m_active_scope->get_variable(identifier);
-		if(variable != nullptr) {
-			return m_context.builder.create_load(variable->value, type, alignment, false);
+		ASSERT(variable, "attempting to load an invalid variable");
+
+		if(variable->flags & variable::FUNCTION_PARAMETER) {
+			return variable->value;
 		}
 
-		return nullptr;
+		return m_context.builder.create_load(variable->value, type, alignment, false);
   }
 
 	void variable_registry::create_store(utility::string_table_key identifier, handle<ir::node> value, u16 alignment) const {
 		const handle<variable> variable = m_active_scope->get_variable(identifier);
+		// ASSERT(!(variable->flags & variable::FUNCTION_PARAMETER), "not implemented");
+
 		if (variable != nullptr) {
 			m_context.builder.create_store(variable->value, value, alignment, false);
 			return;

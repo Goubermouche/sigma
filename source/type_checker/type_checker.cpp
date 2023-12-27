@@ -59,23 +59,29 @@ namespace sigma {
 
 	auto type_checker::type_check_function_declaration(handle<node> function_node, data_type expected) -> utility::result<data_type> {
 		SUPPRESS_C4100(expected);
-		const auto& property = function_node->get<function_signature>();
+		const auto& signature = function_node->get<function_signature>();
 
 		// check if the function hasn't been declared before
-		if(m_context.function_registry.contains_function(property)) {
+		if(m_context.function_registry.contains_function(signature)) {
 			return utility::error::create(
 				utility::error::code::FUNCTION_ALREADY_DECLARED, 
-				m_context.syntax.string_table.get(property.identifier_key)
+				m_context.syntax.string_table.get(signature.identifier_key)
 			);
 		}
 
 		// register the function
-		m_context.function_registry.pre_declare_local_function(property);
+		m_context.function_registry.pre_declare_local_function(signature);
 		m_context.variable_registry.push_scope();
+
+		// TODO: handle varargs
+		// push temporaries for function parameters
+		for(const named_data_type& parameter : signature.parameter_types) {
+			m_context.variable_registry.pre_declare_variable(parameter.identifier_key, parameter.type);
+		}
 
 		// type check inner statements
 		for(const handle<node>& statement : function_node->children) {
-			TRY(type_check_node(statement, property.return_type));
+			TRY(type_check_node(statement, signature.return_type));
 		}
 
 		m_context.variable_registry.pop_scope();

@@ -21,14 +21,13 @@
 // 	ret 0;
 // }
 
+i32 test(i32 x) {
+	// x = x + 10;
+	ret x;
+}
+
 i32 main() {
-	i32 value = 0;
-
-	if(false) {}
-	else {
-		value = 100;
-	}
-
-	printf("value is: %d\n", value);
+	i32 val = test(100);
+	printf("val : %d\n", val);
 	ret 0;
 }

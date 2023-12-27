@@ -7,8 +7,17 @@ namespace sigma {
 	struct backend_context;
 
 	class variable_registry {
+	public:
 		struct variable {
+			enum variable_flags {
+				NONE = 0,
+
+				// variable is a function parameter, function parameters don't need to be loaded
+				FUNCTION_PARAMETER = 1 
+			};
+
 			handle<ir::node> value;
+			variable_flags flags;
 			data_type type;
 		};
 
@@ -22,7 +31,7 @@ namespace sigma {
 			std::unordered_map<utility::string_table_key, variable> variables;
 			u16 trace_index = 0;
 		};
-	public:
+
 		variable_registry(backend_context& context);
 
 		// NOTE: since we have two step analysis we need to traverse the scope system twice - first,
@@ -57,4 +66,6 @@ namespace sigma {
 		scope m_global_scope;
 		handle<scope> m_active_scope;
 	};
+
+	FLAG_ENUM(variable_registry::variable::variable_flags);
 } // namespace sigma

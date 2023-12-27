@@ -46,6 +46,18 @@ namespace sigma {
 		m_context.function_registry.declare_local_function(signature);
 		m_context.variable_registry.trace_push_scope();
 
+		// TODO: handle varargs
+		// push temporaries for function parameters
+		for (u64 i = 0; i < signature.parameter_types.get_size(); ++i) {
+			// TODO: create proxies? 
+			const auto variable = m_context.variable_registry.get_variable(signature.parameter_types[i].identifier_key);
+			ASSERT(variable, "function parameter pre declaration is invalid");
+
+			const handle<ir::node> value = m_context.builder.get_function_parameter(i);
+			variable->flags |= variable_registry::variable::FUNCTION_PARAMETER;
+			variable->value = value;
+		}
+
 		// handle inner statements
 		for (const handle<node>& statement : function_node->children) {
 			translate_node(statement);

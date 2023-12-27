@@ -9,8 +9,6 @@
 [![Linux](https://github.com/Goubermouche/sigma/actions/workflows/linux.yml/badge.svg)](https://github.com/Goubermouche/sigma/actions/workflows/linux.yml)   [![Windows](https://github.com/Goubermouche/sigma/actions/workflows/windows.yml/badge.svg)](https://github.com/Goubermouche/sigma/actions/workflows/windows.yml)
 </div>
 
-
-
 <p align="center">
 Sigma is a compiled, statically typed, C-like, data oriented language with a focus on performance and low-level optimization using GPU acceleration via kernels.  
 </p>
@@ -33,13 +31,10 @@ sigma main.s
 
 ## Project status
 As Sigma is currently under heavy development, it isn't ready for stable use, and many breaking changes may (and most likely will) be made. Please note that why the end goal is to target GPU's and other massivelly parallel targets, the current goal is to get a basic CPU-oriented language going, and there isn't a hard timeframe set - for more details see the current status bellow: 
--   Parser/Lexer rework: 
-    -   Implemented a faster, simpler tokenizer & `token_buffer` combo. *(working draft)*
-    -   Began work on a new recursive descent parser.
--   AST rework:
-    -   WIP *(working draft)*
--   Typechecker:
-    -   WIP *(working draft)*
+-   Language features
+    -   Implicit & explicit type casts
+    -   Custom structured types
+    -   Namespaces / modules / some kind of way of separating large sections of code
 -   Future:
     -   Unified package manager
     -   Official GPU support via kernels

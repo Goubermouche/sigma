@@ -76,7 +76,8 @@ namespace sigma {
 		// TODO: handle varargs
 		// push temporaries for function parameters
 		for(const named_data_type& parameter : signature.parameter_types) {
-			m_context.variable_registry.pre_declare_variable(parameter.identifier_key, parameter.type);
+			auto& var = m_context.variable_registry.pre_declare_variable(parameter.identifier_key, parameter.type);
+			var.flags |= variable_registry::variable::FUNCTION_PARAMETER | variable_registry::variable::LOCAL;
 		}
 
 		// type check inner statements
@@ -102,7 +103,8 @@ namespace sigma {
 		}
 
 		// register the variable
-		m_context.variable_registry.pre_declare_variable(property.identifier_key, property.type);
+		auto& var = m_context.variable_registry.pre_declare_variable(property.identifier_key, property.type);
+		var.flags |= variable_registry::variable::LOCAL;
 
 		// type check the assigned value
 		if (variable_node->children.get_size() == 1) {
@@ -207,9 +209,11 @@ namespace sigma {
 
 	auto type_checker::type_check_binary_math_operator(handle<node> operator_node, data_type expected) -> utility::result<data_type> {
 		// type check both operands
-		TRY(type_check_node(operator_node->children[0], expected));
+		TRY(const data_type left, type_check_node(operator_node->children[0], expected));
+
+		// TODO: maybe expected should be == left?
 		TRY(type_check_node(operator_node->children[1], expected));
-		return SUCCESS;
+		return left;
 	}
 
 	auto type_checker::type_check_numerical_literal(handle<node> literal_node, data_type expected) -> utility::result<data_type> {

@@ -10,13 +10,12 @@
 // -   IR translator 
 //     -   dynamic programming impl? 
 
+i32 test() {
+	printf("test\n");
+	ret 0;
+}
+
 i32 main() {
-	i32 value;
-
-	if(true) {
-		value = 200;
-	}
-
-	printf("value is: %d\n", value);
+	test();
 	ret 0;
 }

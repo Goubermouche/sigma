@@ -20,6 +20,7 @@ namespace utility {
 			try {
 				return canonical(path);
 			}	catch(const std::filesystem::filesystem_error& err) {
+				SUPPRESS_C4100(err);
 				PANIC("{}", err.what());
 				return {};
 			}

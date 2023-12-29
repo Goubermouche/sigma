@@ -87,31 +87,31 @@ namespace utility {
 
 		const static inline std::unordered_map<code, std::string> m_errors = {
 			// filesystem
-			{ code::EXPECTED_FILE, "expected a file but got a directory ('{}')" },
-			{ code::FILE_DOES_NOT_EXIST, "specified file does not exist ('{}')" },
-			{ code::INVALID_FILE_EXTENSION, "specified file has an invalid file extension ('{}' - expected '{}')" },
-			{ code::CANNOT_READ_FILE, "unable to read the specified file ('{}')" },
+			{ code::EXPECTED_FILE,                       "expected a file but got a directory ('{}')"                                   },
+			{ code::FILE_DOES_NOT_EXIST,                 "specified file does not exist ('{}')"                                         },
+			{ code::INVALID_FILE_EXTENSION,              "specified file has an invalid file extension ('{}' - expected '{}')"          },
+			{ code::CANNOT_READ_FILE,                    "unable to read the specified file ('{}')"                                     },
 
 			// tokenizer
-			{ code::INVALID_STRING_TERMINATOR, "invalid string literal terminator detected" },
-			{ code::NUMERICAL_LITERAL_FP_WITHOUT_DOT, "numerical floating-point literal without '.' character detected" },
-			{ code::NUMERICAL_LITERAL_UNSIGNED_WITH_DOT, "unsigned numerical literal with '.' character detected" },
-			{ code::NUMERICAL_LITERAL_MORE_THAN_ONE_DOT, "numerical literal with more than one '.' character detected" },
+			{ code::INVALID_STRING_TERMINATOR,           "invalid string literal terminator detected"                                   },
+			{ code::NUMERICAL_LITERAL_FP_WITHOUT_DOT,    "numerical floating-point literal without '.' character detected"              },
+			{ code::NUMERICAL_LITERAL_UNSIGNED_WITH_DOT, "unsigned numerical literal with '.' character detected"                       },
+			{ code::NUMERICAL_LITERAL_MORE_THAN_ONE_DOT, "numerical literal with more than one '.' character detected"                  },
 
 			// parser
-			{ code::INVALID_TYPE_TOKEN, "invalid type token received ('{}')" },
-			{ code::UNEXPECTED_NON_NUMERICAL, "unexpected non-numerical literal token received ('{}')" },
-			{ code::UNEXPECTED_TOKEN, "unexpected token received ('{}')" },
-			{ code::UNEXPECTED_TOKEN_WITH_EXPECTED, "unexpected token received (expected '{}', but got '{}' instead)" },
+			{ code::INVALID_TYPE_TOKEN,                  "invalid type token received ('{}')"                                           },
+			{ code::UNEXPECTED_NON_NUMERICAL,            "unexpected non-numerical literal token received ('{}')"                       },
+			{ code::UNEXPECTED_TOKEN,                    "unexpected token received ('{}')"                                             },
+			{ code::UNEXPECTED_TOKEN_WITH_EXPECTED,      "unexpected token received (expected '{}', but got '{}' instead)"              },
 
 			// type checker
-			{ code::UNKNOWN_FUNCTION, "attempting to call an unknown function ('{}')" },
-			{ code::NO_FUNCTION_OVERLOAD, "invalid function call to function '{}' detected (no matching overload found)"},
-			{ code::FUNCTION_ALREADY_DECLARED, "function '{}' has already been declared before" },
-			{ code::VOID_RETURN, "invalid void return statement (expected 'ret;', but got 'ret {};' instead)" },
-			{ code::UNEXPECTED_TYPE, "encountered an unexpected type (expected '{}', but got '{}' instead)" },
-			{ code::UNKNOWN_VARIABLE, "unknown variable '{}' referenced" },
-			{ code::VARIABLE_ALREADY_DECLARED, "variable '{}' has already been declared before" },
+			{ code::UNKNOWN_FUNCTION,                    "attempting to call an unknown function ('{}')"                                },
+			{ code::NO_FUNCTION_OVERLOAD,                "invalid function call to function '{}' detected (no matching overload found)" },
+			{ code::FUNCTION_ALREADY_DECLARED,           "function '{}' has already been declared before"                               },
+			{ code::VOID_RETURN,                         "invalid void return statement (expected 'ret;', but got 'ret {};' instead)"   },
+			{ code::UNEXPECTED_TYPE,                     "encountered an unexpected type (expected '{}', but got '{}' instead)"         },
+			{ code::UNKNOWN_VARIABLE,                    "unknown variable '{}' referenced"                                             },
+			{ code::VARIABLE_ALREADY_DECLARED,           "variable '{}' has already been declared before"                               },
 		};
 	};
 

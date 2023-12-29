@@ -1,5 +1,5 @@
 workspace "sigma"
-    configurations { "Release", "Debug" }
+    configurations { "Release", "Debug", "Profile" }
     startproject "compiler"
 
     architecture "x64"
@@ -14,6 +14,7 @@ workspace "sigma"
         defines { "NDEBUG" }
         optimize "On"
         warnings "High"
+        symbols "Off"
 
     filter "configurations:Debug"
         symbols "On"
@@ -21,6 +22,12 @@ workspace "sigma"
         runtime "Debug"
         defines { "DEBUG", "_DEBUG" }
         warnings "Extra"
+
+    filter "configurations:Profile"
+        defines { "NDEBUG" }
+        optimize "On"
+        warnings "High"
+        symbols "On"
 
 -- utility 
 project "utility"

@@ -109,7 +109,12 @@ namespace sigma::ir {
 							}
 
 							if (inst.memory.index != 255) {
-								assembly.append(" + {}*{}", get_register_name(inst.memory.index, x64::QWORD), 1 << static_cast<u8>(inst.memory.scale));
+								assembly.append(" + {}", get_register_name(inst.memory.index, x64::QWORD));
+								const i32 scale = 1 << static_cast<u8>(inst.memory.scale);
+
+								if(scale != 1) {
+									assembly.append("*{}", scale);
+								}
 							}
 
 							if (inst.memory.displacement > 0) {

@@ -30,8 +30,10 @@ namespace sigma {
 		m_active_scope = &m_global_scope;
 	}
 
-	void variable_registry::pre_declare_variable(utility::string_table_key identifier, data_type type) const {
-		m_active_scope->variables[identifier].type = type;
+	auto variable_registry::pre_declare_variable(utility::string_table_key identifier, data_type type) const -> variable& {
+		auto& var = m_active_scope->variables[identifier];
+		var.type = type;
+		return var;
 	}
 
 	auto variable_registry::declare_variable(utility::string_table_key identifier, u16 size, u16 alignment) const -> handle<ir::node> {

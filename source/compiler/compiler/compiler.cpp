@@ -29,6 +29,7 @@ namespace sigma {
 
 		// generate tokens
 		TRY(const std::string file, utility::file::read_text_file(m_description.path));
+
 		TRY(auto tokenized, tokenizer::tokenize(file));
 
 		frontend.syntax.string_table = tokenized.second;

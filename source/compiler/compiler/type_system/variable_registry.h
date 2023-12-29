@@ -10,7 +10,10 @@ namespace sigma {
 	public:
 		struct variable {
 			enum variable_flags {
-				NONE = 0,
+				NONE               = 0,
+				FUNCTION_PARAMETER = 1,
+				LOCAL              = 2,
+				GLOBAL             = 4
 			};
 
 			handle<ir::node> value;
@@ -43,7 +46,7 @@ namespace sigma {
 
 		void reset_active_scope();
 
-		void pre_declare_variable(utility::string_table_key identifier, data_type type) const;
+		auto pre_declare_variable(utility::string_table_key identifier, data_type type) const -> variable&;
 		auto declare_variable(utility::string_table_key identifier, u16 size, u16 alignment) const -> handle<ir::node>;
 
 		/**

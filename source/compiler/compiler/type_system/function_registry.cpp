@@ -191,12 +191,15 @@ namespace sigma {
 	}
 
 	auto mangle_function_identifier(const function_signature& signature, const utility::string_table& string_table) -> std::string {
+		// TODO: names are a bit sus right now, longer names don't appear ot be stored correctly in
+		//       object files (see COFF & ELF)
+
 		// don't rename the main function
 		if(string_table.get(signature.identifier_key) == "main") {
 			return "main";
 		}
 
 		static u64 counter = 0;
-		return std::to_string(counter++);
+		return "f" + std::to_string(counter++);
 	}
 } // namespace sigma

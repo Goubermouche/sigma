@@ -2,21 +2,15 @@
 #include "utility/macros.h"
 
 namespace utility {
-	auto string_table_key::create_key() -> string_table_key {
-		static std::random_device s_random_device;
-		static std::mt19937 s_random_engine(s_random_device());
-		static std::uniform_int_distribution<uint32_t> s_uniform_distribution;
-
-		string_table_key key;
-		key.m_value = s_uniform_distribution(s_random_engine);
-		return key;
-	}
+	string_table_key::string_table_key() : m_value(0) {}
+	string_table_key::string_table_key(const std::string& string)
+		: m_value(std::hash<std::string>{}(string)) {} // TODO: use a better hashing function (preferably XXHASH)
 
 	auto string_table_key::operator==(string_table_key other) const -> bool {
 		return m_value == other.m_value;
 	}
 
-	auto string_table_key::get_value() const -> u32 {
+	auto string_table_key::get_value() const -> u64 {
 		return m_value;
 	}
 
@@ -28,17 +22,17 @@ namespace utility {
 		return m_key_to_string.contains(key);
 	}
 
-	auto string_table::insert(const std::string& symbol) -> string_table_key {
-		const auto str_to_key = m_string_to_key.find(symbol);
+	auto string_table::insert(const std::string& string) -> string_table_key {
+		const string_table_key new_key(string);
 
-		if (str_to_key != m_string_to_key.end()) {
-			return str_to_key->second;
+		const auto it = m_key_to_string.find(new_key);
+		if (it != m_key_to_string.end()) {
+			// the key is already contained in the table
+			return new_key;
 		}
 
-		const auto key = string_table_key::create_key();
-		m_key_to_string[key] = symbol;
-		m_string_to_key[symbol] = key;
-		return key;
+		m_key_to_string[new_key] = string;
+		return new_key;
 	}
 
 	auto string_table::get(string_table_key key) const -> const std::string& {

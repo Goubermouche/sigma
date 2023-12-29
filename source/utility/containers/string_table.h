@@ -4,46 +4,35 @@
 
 namespace utility {
 	struct string_table_key {
-		static auto create_key() -> string_table_key;
+		string_table_key();
+		string_table_key(const std::string& string);
 
 		auto operator==(string_table_key other) const -> bool;
 
-		auto get_value() const->u32;
+		auto get_value() const -> u64;
 		auto is_valid() const -> bool;
 	private:
-		u32 m_value = 0;
+		u64 m_value; // already hashed
 	};
 } // namespace utility
 
 template <>
 struct std::hash<utility::string_table_key> {
-	auto operator()(const utility::string_table_key& k) const -> utility::u64 {
-		return std::hash<utility::types::u32>()(k.get_value());
+	auto operator()(const utility::string_table_key& k) const noexcept -> utility::u64 {
+		// since we've already hashed the string in the constructor we can use the value
+		return k.get_value();
 	}
 };
 
 namespace utility {
-	// TODO: implement a more memory efficient symbol table (don't forget to maintain key stability)
-	// what we need:
-	// -   fast lookup (main priority)
-	// -   reasonably fast insertions
-	// -   memory efficiency
-	// -   stable keys (that is, keys need to be stable so that when we concatenate multiple symbol
-	//     tables into one big symbol table (after parsing is done), the addresses remain valid and
-	//     point to the correct strings)
-	// -   thread safe behaviour
-	// potential ideas:
-	// -   some sort of in place allocator where the index offsets of strings would be the addresses
-
 	class string_table {
 	public:
 		string_table() = default;
 
 		bool contains(string_table_key key) const;
-		auto insert(const std::string& symbol) -> string_table_key;
+		auto insert(const std::string& string) -> string_table_key;
 		auto get(string_table_key key) const -> const std::string&;
 	private:
-		std::unordered_map<std::string, string_table_key> m_string_to_key;
 		std::unordered_map<string_table_key, std::string> m_key_to_string;
 	};
 } // namespace utility

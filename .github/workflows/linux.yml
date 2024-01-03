@@ -27,16 +27,6 @@ jobs:
         echo "CC=clang" >> $GITHUB_ENV
         echo "CXX=clang++" >> $GITHUB_ENV
 
-    - name: Cache Compilation Outputs
-      uses: actions/cache@v2
-      with:
-        path: |
-          output/**/bin/
-          output/**/obj/
-        key: ${{ runner.os }}-compilation-${{ hashFiles('**/*.cpp', '**/*.h') }}
-        restore-keys: |
-          ${{ runner.os }}-compilation-
-
     - name: Run Premake
       run: premake5 gmake
       

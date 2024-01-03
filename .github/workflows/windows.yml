@@ -18,8 +18,14 @@ jobs:
     - name: Setup MSBuild
       uses: microsoft/setup-msbuild@v1.1
 
-    - name: Run Premake for Visual Studio
+    - name: Run Premake
       run: .\setup.bat
 
-    - name: Compile Project with MSBuild
+    - name: Compile Project (Compiler)
       run: msbuild sigma.sln /p:Configuration=Debug /p:Platform="x64"
+      
+    - name: Compile Project (Tests)
+      run: msbuild tests.sln /p:Configuration=Debug /p:Platform="x64"
+
+    - name: Run Tests
+      run: output\tests\bin\Debug\tests.exe run tests output\compiler\bin\Debug\compiler.exe

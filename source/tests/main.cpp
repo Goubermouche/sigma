@@ -7,19 +7,8 @@ using namespace utility::types;
 #define STOUD_FILE "STDOUT.txt"
 #define STERR_FILE "STDERR.txt"
 
-auto get_compiler_path() -> std::string {
-#ifdef SYSTEM_WINDOWS
-	return utility::fs::get_canonical_path("../../output/compiler/bin/Debug/compiler.exe").string();
-#elif defined SYSTEM_LINUX
-	return utility::fs::get_canonical_path("../../output/compiler/bin/Debug/compiler").string();
-#else
-	PANIC("unhandled system path");
-	return std::string();
-#endif
-}
-
-bool test_file(const filepath& path) {
-	const std::string command = std::format("{} compile {} -e none > {} 2> {}", get_compiler_path(), path.string(), STOUD_FILE, STERR_FILE);
+bool test_file(const filepath& path, const filepath& compiler_path) {
+	const std::string command = std::format("{} compile {} -e none > {} 2> {}", compiler_path.string(), path.string(), STOUD_FILE, STERR_FILE);
 	const i32 return_code = utility::shell::execute(command);
 
 	if(return_code == 0) {
@@ -41,6 +30,8 @@ bool test_file(const filepath& path) {
 
 i32 run_all_tests(const parametric::parameters& params) {
 	const auto test_directory = params.get<std::string>("directory");
+	const auto compiler_path = params.get<std::string>("compiler");
+
 	std::queue<filepath> paths({ utility::fs::get_canonical_path(test_directory) });
 	bool encountered_error = false;
 
@@ -56,7 +47,7 @@ i32 run_all_tests(const parametric::parameters& params) {
 					return;
 				}
 
-				encountered_error |= test_file(path);
+				encountered_error |= test_file(path, compiler_path);
 			});
 		}
 	} catch(const std::exception& exception) {
@@ -81,6 +72,7 @@ i32 main(i32 argc, char* argv[]) {
 
 	auto& run_all = program.add_command("run", "run all tests in the specified directory", run_all_tests);
 	run_all.add_positional_argument<std::string>("directory", "test directory");
+	run_all.add_positional_argument<std::string>("compiler", "compiler executable path");
 
 	return program.parse(argc, argv);
 }

@@ -129,7 +129,7 @@ namespace utility {
 		//       copy construct it again
 
 		template <class current = type>
-		requires (!std::is_same_v<std::remove_cvref_t<current>, std::in_place_t> && !std::is_same_v<std::remove_cv_t<type>, bool>&& std::is_constructible_v<type, current>)
+		requires (!std::is_same_v<std::remove_cvref_t<current>, std::in_place_t> && std::is_constructible_v<type, current>)
 		constexpr explicit(!std::is_convertible_v<current, type>)
 		result(current value) noexcept(std::is_nothrow_constructible_v<type, current>) : m_success(std::move(value)) {}
 

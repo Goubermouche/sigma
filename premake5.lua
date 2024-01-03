@@ -188,8 +188,7 @@ project "compiler"
     kind "ConsoleApp"
     location "source/compiler"
 
-    -- debugargs { "compile", "-s", "test/main.s", "-o", "test/app.exe" }
-    debugargs { "./test/main.s" }
+    debugargs { "compile", "./test/main.s" }
 
     files {
         "source/compiler/**.h",
@@ -226,6 +225,38 @@ project "compiler"
             "-lstdc++"
         }
 
+workspace "tests"
+    configurations { "Release", "Debug", "Profile" }
+    startproject "tests"
+
+    architecture "x64"
+    language "C++"
+    cppdialect "C++latest"
+
+    flags {
+        "MultiProcessorCompile"
+    }
+
+    filter "configurations:Release"
+        defines { "NDEBUG" }
+        optimize "On"
+        warnings "High"
+        symbols "Off"
+
+    filter "configurations:Debug"
+        symbols "On"
+        optimize "Off"
+        runtime "Debug"
+        defines { "DEBUG", "_DEBUG" }
+        warnings "Extra"
+
+    filter "configurations:Profile"
+        defines { "NDEBUG" }
+        optimize "On"
+        warnings "High"
+        symbols "On"
+
+
 project "tests"
     kind "ConsoleApp"
     location "source/tests"
@@ -234,6 +265,8 @@ project "tests"
         "source/tests/**.h",
         "source/tests/**.cpp"
     }
+
+    libdirs { "../sigma/output/compiler/bin/%{cfg.buildcfg}" }
 
     includedirs {
         "source"

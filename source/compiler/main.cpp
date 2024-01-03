@@ -1,62 +1,56 @@
 #include "compiler/compiler.h"
-#include <intermediate_representation/builder.h>
-
-#include "utility/filesystem/file.h"
+#include <utility/shell.h>
 
 using namespace utility::types;
 
-auto main(i32 argc, char* argv[]) -> i32 {
-	SUPPRESS_C4100(argc);
-
+i32 compile(const parametric::parameters& params) {
 	const sigma::compiler_description description {
-	.path = argv[1],
-	.target = { sigma::ir::arch::X64, sigma::ir::system::WINDOWS }
+		.path = params.get<filepath>("file"),
+		// default to x64 win for now
+		.target = { sigma::ir::arch::X64, sigma::ir::system::WINDOWS },
+		.emit = params.get<sigma::emit_target>("emit")
 	};
 
 	// compile the specified description, check for errors after we finish
-	PRINT_ERROR(sigma::compiler::compile(description));
+	const auto result = sigma::compiler::compile(description);
+
+	if (result.has_error()) {
+		utility::console::println(result.get_error_message());
+		return 1;
+	}
+
 	return 0;
+}
 
-	//sigma::ir::target target(sigma::ir::arch::X64, sigma::ir::system::WINDOWS);
-	//sigma::ir::module module(target);
-	//sigma::ir::builder builder(module);
+i32 show_docs(const parametric::parameters& params) {
+	SUPPRESS_C4100(params);
 
-	//// printf
-	//const sigma::ir::function_signature printf_func_ty{
-	//	.identifier = "printf",
-	//	.parameters = { PTR_TYPE },
-	//	.returns = { I32_TYPE },
-	//	.has_var_args = true
-	//};
+	// TODO: add a link to the relevant github wiki
+	const std::string link = "https://github.com/Goubermouche/sigma";
 
-	//const auto printf_external = builder.create_external(printf_func_ty, sigma::ir::linkage::SO_LOCAL);
+	if(utility::shell::open_link(link) == 0) {
+		return 0;
+	}
 
-	//// test
-	//const sigma::ir::function_signature test_func_ty {
-	//	.identifier = "test",
-	//	.parameters = { },
-	//	.returns = { I32_TYPE },
-	//	.has_var_args = false
-	//};
+	std::cout << std::format("error: unable to open the documentation link ({})\n", link);
+	return 1;
+}
 
-	//const auto test = builder.create_function(test_func_ty, sigma::ir::linkage::PUBLIC);
-	//const auto message = builder.create_string("test\n");
-	//builder.create_call(printf_external, printf_func_ty, { message });
-	//builder.create_return({ builder.create_signed_integer(0, 32) });
+auto main(i32 argc, char* argv[]) -> i32 {
+	parametric::program program;
 
-	//// main
-	//const sigma::ir::function_signature main_func_ty{
-	//.identifier = "main",
-	//.returns = { I32_TYPE }
-	//};
+	// compilation
+	auto& compile_command = program.add_command("compile", "compile the specified source file", compile);
 
-	//builder.create_function(main_func_ty, sigma::ir::linkage::PUBLIC);
-	//builder.create_call(test, {});
-	//builder.create_return({ builder.create_signed_integer(0, 32) });
+	compile_command.add_positional_argument<filepath>("file", "source file to compile");
+	compile_command.add_flag<sigma::ir::arch>("arch", "CPU architecture to compile for [x64]");
+	compile_command.add_flag<sigma::ir::system>("system", "operating system to compile for [windows, linux]");
+	compile_command.add_flag<sigma::emit_target>("emit", "file the compiler should emit [object, executable]", "e", sigma::emit_target::OBJECT);
 
-	//module.compile();
+	// TODO: add support for emitting multiple files at once
 
-	//auto object_file = module.generate_object_file();
-	//utility::file::write(object_file, "./test/a.obj");
-	return 0;
+	// documentation
+	program.add_command("docs", "show project documentation", show_docs);
+
+	return program.parse(argc, argv);
 }

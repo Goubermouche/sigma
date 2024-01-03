@@ -9,11 +9,7 @@ namespace utility::detail {
 	 * \param plural Plural strings
 	 * \return Singular/plural string based on the \a count. 
 	 */
-	std::string format_ending(
-		u64 count,
-		const std::string& singular,
-		const std::string& plural
-	);
+	auto format_ending(u64 count, const std::string& singular, const std::string& plural) -> std::string;
 
 	/**
 	 * \brief Creates a string of length \a end with caret characters ('^') starting at \a start.
@@ -22,11 +18,7 @@ namespace utility::detail {
 	 * \param end End index
 	 * \return String containing a caret underline.
 	 */
-	std::string create_caret_underline(
-		const std::string& str,
-		u64 start,
-		u64 end
-	);
+	auto create_caret_underline(const std::string& str, u64 start, u64 end) -> std::string;
 
 	/**
 	 * \brief Checks if the char \a c is part of the hexadecimal character set (0123456789ABCDEF).
@@ -47,15 +39,11 @@ namespace utility::detail {
 	 * \param input String to escape.
 	 * \return Escaped version of the given string.
 	 */
-	std::string escape_string(const std::string& input);
+	auto escape_string(const std::string& input) -> std::string;
 
-	std::pair<u64, std::string> remove_leading_spaces(
-		const std::string& str
-	);
+	auto remove_leading_spaces(const std::string& str) -> std::pair<u64, std::string>;
 
-	void string_replace(
-		std::string& str,
-		const std::string& from,
-		const std::string& to
-	);
-}
+	void string_replace(std::string& str, const std::string& from, const std::string& to);
+
+	auto remove_first_line(const std::string& string) -> std::string;
+} // namespace sigma

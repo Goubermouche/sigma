@@ -12,6 +12,7 @@
 
 #pragma once
 #include <intermediate_representation/target/target.h>
+#include <utility/parametric/parametric.h>
 #include <utility/diagnostics.h>
 #include <utility/macros.h>
 
@@ -22,9 +23,16 @@ namespace sigma {
 		class module;
 	} // namespace sigma::ir
 
+	enum emit_target : u8 {
+		OBJECT,
+		EXECUTABLE
+	};
+
 	struct compiler_description {
 		filepath path;
 		ir::target target;
+
+		emit_target emit;
 	};
 
 	class compiler {
@@ -42,3 +50,51 @@ namespace sigma {
 		compiler_description m_description;
 	};
 } // namespace sigma
+
+template<>
+struct parametric::options_parser<sigma::filepath> {
+	static auto parse(const std::string& value) -> sigma::filepath {
+		return value;
+	}
+};
+
+template<>
+struct parametric::options_parser<sigma::ir::arch> {
+	static auto parse(const std::string& value) -> sigma::ir::arch {
+		if (value == "x64") {
+			return sigma::ir::arch::X64;
+		}
+
+		throw std::invalid_argument("invalid argument");
+	}
+};
+
+template<>
+struct parametric::options_parser<sigma::ir::system> {
+	static auto parse(const std::string& value) -> sigma::ir::system {
+		if (value == "windows") {
+			return sigma::ir::system::WINDOWS;
+		}
+
+		if (value == "linux") {
+			return sigma::ir::system::WINDOWS;
+		}
+
+		throw std::invalid_argument("invalid argument");
+	}
+};
+
+template<>
+struct parametric::options_parser<sigma::emit_target> {
+	static auto parse(const std::string& value) -> sigma::emit_target {
+		if (value == "object") {
+			return sigma::emit_target::OBJECT;
+		}
+
+		if (value == "executable") {
+			return sigma::emit_target::EXECUTABLE;
+		}
+
+		throw std::invalid_argument("invalid argument");
+	}
+};

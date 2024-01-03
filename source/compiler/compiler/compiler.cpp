@@ -21,6 +21,8 @@ namespace sigma {
 
 	auto compiler::compile() const -> utility::result<void> {
 		utility::console::println("compiling file: {}", m_description.path.string());
+
+		ASSERT(m_description.emit != emit_target::EXECUTABLE, "executable support not implemented");
 		TRY(verify_file(m_description.path));
 
 		// frontend
@@ -48,8 +50,11 @@ namespace sigma {
 		backend.module.compile();
 
 		// emit as an object file
-		const filepath object_path = get_object_file_path();
-		emit_object_file(backend.module, object_path);
+		if(m_description.emit == OBJECT) {
+			const filepath object_path = get_object_file_path();
+			emit_object_file(backend.module, object_path);
+		}
+		
 		return SUCCESS;
 	}
 

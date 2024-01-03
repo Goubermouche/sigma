@@ -4,10 +4,12 @@
 
 #ifdef _WIN32
   #include <intrin.h>
+
   #define DEBUG_BREAK() __debugbreak()
 	#define SYSTEM_WINDOWS
 #elif __linux__
   #include <signal.h>
+
   #define DEBUG_BREAK() raise(SIGTRAP)
 	#define SYSTEM_LINUX
 #else

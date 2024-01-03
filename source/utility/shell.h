@@ -1,5 +1,5 @@
 #pragma once
-#include "utility/types.h"
+#include "utility/macros.h"
 
 namespace utility {
 	/**

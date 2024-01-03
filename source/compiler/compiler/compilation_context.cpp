@@ -52,7 +52,7 @@ namespace sigma {
 				default: break; // suppress unhandled enumeration warnings
 			}
 
-			utility::console::println();
+			utility::console::print("\n");
 		});
 	}
 
@@ -63,7 +63,7 @@ namespace sigma {
 				symbol_value = utility::detail::escape_string(syntax.string_table.get(info.symbol_key));
 			}
 
-			utility::console::println("{:<20} {}", info.tok.to_string(), symbol_value);
+			utility::console::print("{:<20} {}\n", info.tok.to_string(), symbol_value);
 		}
 	}
 

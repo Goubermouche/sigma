@@ -24,6 +24,7 @@ namespace sigma {
 	} // namespace sigma::ir
 
 	enum emit_target : u8 {
+		NONE,
 		OBJECT,
 		EXECUTABLE
 	};
@@ -87,6 +88,10 @@ struct parametric::options_parser<sigma::ir::system> {
 template<>
 struct parametric::options_parser<sigma::emit_target> {
 	static auto parse(const std::string& value) -> sigma::emit_target {
+		if (value == "none") {
+			return sigma::emit_target::NONE;
+		}
+
 		if (value == "object") {
 			return sigma::emit_target::OBJECT;
 		}

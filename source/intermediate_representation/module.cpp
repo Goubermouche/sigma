@@ -79,7 +79,7 @@ namespace sigma::ir {
 		}
 
 		// DEBUG
-		utility::console::println("{}", assembly.get_underlying());
+		utility::console::print("{}\n", assembly.get_underlying());
 	}
 
 	auto module::generate_object_file() -> utility::object_file {

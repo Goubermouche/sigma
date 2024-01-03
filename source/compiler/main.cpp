@@ -15,7 +15,7 @@ i32 compile(const parametric::parameters& params) {
 	const auto result = sigma::compiler::compile(description);
 
 	if (result.has_error()) {
-		utility::console::println(result.get_error_message());
+		utility::console::printerr(result.get_error_message());
 		return 1;
 	}
 

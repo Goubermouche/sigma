@@ -268,6 +268,8 @@ project "tests"
 
     libdirs { "../sigma/output/compiler/bin/%{cfg.buildcfg}" }
 
+    debugargs { "run", "../../tests" }
+
     includedirs {
         "source"
     }

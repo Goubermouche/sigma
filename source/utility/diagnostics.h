@@ -18,21 +18,21 @@ namespace utility {
 			std::cout << format_str(std::move(fmt), std::forward<arguments>(args)...);
 		}
 
-		static void println(const std::string& message) {
-			std::cout << message << '\n';
+		static void printerr(const std::string& message) {
+			std::cerr << message;
 		}
 
 		template<typename... arguments>
-		static void println(std::format_string<arguments...> fmt, arguments&&... args) {
-			std::cout << format_str(std::move(fmt), std::forward<arguments>(args)...) << '\n';
-		}
-
-		static void println() {
-			std::cout << '\n';
+		static void printerr(std::format_string<arguments...> fmt, arguments&&... args) {
+			std::cerr << format_str(std::move(fmt), std::forward<arguments>(args)...);
 		}
 
 		static void flush() {
 			std::cout << std::flush;
+		}
+
+		static void errflush() {
+			std::cerr << std::flush;
 		}
 	private:
 		template<typename... arguments>

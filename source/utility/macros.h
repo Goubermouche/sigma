@@ -17,29 +17,31 @@
 #endif
 
 #ifdef DEBUG
-#define ASSERT(__condition, __fmt, ...)                                           \
-	do {                                                                            \
-		if(!(__condition)) {                                                          \
-			utility::console::print("ASSERTION FAILED: ({}:{}): ", __FILE__, __LINE__); \
-			utility::console::println((__fmt), ##__VA_ARGS__);                          \
-			utility::console::flush();                                                  \
-			DEBUG_BREAK();                                                              \
-		}                                                                             \
+#define ASSERT(__condition, __fmt, ...)                                              \
+	do {                                                                               \
+		if(!(__condition)) {                                                             \
+			utility::console::printerr("ASSERTION FAILED: ({}:{}): ", __FILE__, __LINE__); \
+			utility::console::printerr((__fmt), ##__VA_ARGS__);                            \
+			utility::console::printerr("\n");                                              \
+			utility::console::flush();                                                     \
+			DEBUG_BREAK();                                                                 \
+		}                                                                                \
 	} while(false)
 
-#define NOT_IMPLEMENTED()                                                                        \
-	do {                                                                                           \
-		utility::console::println("ASSERTION FAILED: ({}:{}): NOT IMPLEMENTED", __FILE__, __LINE__); \
-		utility::console::flush();                                                                   \
-		DEBUG_BREAK();                                                                               \
+#define NOT_IMPLEMENTED()                                                                           \
+	do {                                                                                              \
+		utility::console::printerr("ASSERTION FAILED: ({}:{}): NOT IMPLEMENTED\n", __FILE__, __LINE__); \
+		utility::console::errflush();                                                                   \
+		DEBUG_BREAK();                                                                                  \
 	} while(false)
 
-#define PANIC( __fmt, ...)                                                      \
-	do {                                                                          \
-		utility::console::print("ASSERTION FAILED: ({}:{}): ", __FILE__, __LINE__); \
-		utility::console::println((__fmt), ##__VA_ARGS__);                          \
-		utility::console::flush();                                                  \
-		DEBUG_BREAK();                                                              \
+#define PANIC( __fmt, ...)                                                         \
+	do {                                                                             \
+		utility::console::printerr("ASSERTION FAILED: ({}:{}): ", __FILE__, __LINE__); \
+		utility::console::printerr((__fmt), ##__VA_ARGS__);                            \
+		utility::console::printerr("\n");                                              \
+		utility::console::errflush();                                                  \
+		DEBUG_BREAK();                                                                 \
 	} while(false)
 #else
 #define ASSERT(__condition, __fmt, ...)

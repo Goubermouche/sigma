@@ -1,68 +1,86 @@
-#include <utility/diagnostics.h>
 #include <utility/filesystem/file.h>
-#include <utility/string_helper.h>
+#include <utility/parametric/parametric.h>
+#include <utility/shell.h>
 
-// Runs all tests in sigma/tests and checks against a database of expected results. Should only
-// be invoked via the run_tests.bat file.
-
-//#define WIN_COMPILER_PATH utility::fs::get_canonical_path("../../../../output/compiler/bin/Debug/compiler.exe").string()
-//#define ERR_FILE_PATH "err.txt"
-//
 using namespace utility::types;
-//
-//auto compile_file(const filepath& path) -> utility::result<bool> {
-//	const std::string command = WIN_COMPILER_PATH + " " + utility::fs::get_canonical_path(path).string() + " NO_EMIT" + " 1> err.txt";
-//	const bool has_error = system(command.c_str());
-//
-//	if(has_error) {
-//		TRY(std::string message, utility::file::read_text_file(ERR_FILE_PATH));
-//
-//		// message = utility::detail::remove_first_line(message);
-//		// message.erase(message.size() - 1); // remove the trailing newline
-//		// utility::console::println("\033[31m'{}'\033[0m", message);
-//	}
-//
-//	return has_error;
-//}
 
-//i32 main() {
-//	std::queue<filepath> paths({ utility::fs::get_canonical_path("../../../../tests") });
-//
-//	std::cout << paths.front() << '\n';
-//
-//	utility::console::println("running tests...");
-//	utility::console::println("{}", std::string(32, '-'));
-//
-//	while(!paths.empty()) {
-//		const filepath current = paths.front();
-//		paths.pop();
-//
-//		utility::directory::for_all_directory_items(current, [&](const filepath& path) {
-//			if(utility::fs::is_directory(path)) {
-//				paths.push(path);
-//				return;
-//			}
-//
-//			static const char* result_codes[] = {
-//				"OK",
-//				"ERROR",
-//			};
-//
-//			const auto result = compile_file(path);
-//
-//			if(result.has_error()) {
-//				utility::console::println(result.get_error_message());
-//				return;
-//			}
-//
-//			utility::console::println("{:<30}{}", path.stem().string(), result_codes[result.get_value()]);
-//		});
-//	}
-//
-//	utility::fs::remove(ERR_FILE_PATH);
-//	return 0;
-//}
+#define STOUD_FILE "STDOUT.txt"
+#define STERR_FILE "STDERR.txt"
+
+auto get_compiler_path() -> std::string {
+#ifdef SYSTEM_WINDOWS
+	return utility::fs::get_canonical_path("../../output/compiler/bin/Debug/compiler.exe").string();
+#elif defined SYSTEM_LINUX
+	return utility::fs::get_canonical_path("../../output/compiler/bin/Debug/compiler").string();
+#else
+	PANIC("unhandled system path");
+	return std::string();
+#endif
+}
+
+bool test_file(const filepath& path) {
+	const std::string command = std::format("{} compile {} -e none > {} 2> {}", get_compiler_path(), path.string(), STOUD_FILE, STERR_FILE);
+	const i32 return_code = utility::shell::execute(command);
+
+	if(return_code == 0) {
+		utility::console::print("{:<20} OK\n", path.filename().string());
+		return false;
+	}
+
+	utility::console::printerr("{:<20} ERROR\n", path.filename().string());
+
+	const auto file_result = utility::file::read_text_file(STERR_FILE);
+	if(file_result.has_error()) {
+		throw std::exception(std::format("cannot open file {}", STERR_FILE).c_str());
+	}
+
+	utility::console::printerr("'{}'\n", file_result.get_value());
+
+	return true;
+}
+
+i32 run_all_tests(const parametric::parameters& params) {
+	const auto test_directory = params.get<std::string>("directory");
+	std::queue<filepath> paths({ utility::fs::get_canonical_path(test_directory) });
+	bool encountered_error = false;
+
+	// run our tests
+	try {
+		while (!paths.empty()) {
+			const filepath current = paths.front();
+			paths.pop();
+
+			utility::directory::for_all_directory_items(current, [&](const filepath& path) {
+				if (utility::fs::is_directory(path)) {
+					paths.push(path);
+					return;
+				}
+
+				encountered_error |= test_file(path);
+			});
+		}
+	} catch(const std::exception& exception) {
+		utility::console::printerr("error: {}\n", exception.what());
+		encountered_error = true;
+	}
+
+	// cleanup
+	try {
+		utility::fs::remove(STOUD_FILE);
+		utility::fs::remove(STERR_FILE);
+	} catch(const std::exception& exception) {
+		utility::console::printerr("error: {}\n", exception.what());
+		encountered_error = true;
+	}
+
+	return encountered_error ? 1 : 0;
+}
 
 i32 main(i32 argc, char* argv[]) {
-	// 
+	parametric::program program;
+
+	auto& run_all = program.add_command("run", "run all tests in the specified directory", run_all_tests);
+	run_all.add_positional_argument<std::string>("directory", "test directory");
+
+	return program.parse(argc, argv);
 }

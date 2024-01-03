@@ -16,6 +16,10 @@ namespace utility {
 			return std::filesystem::is_regular_file(path);
 		}
 
+		static auto get_working_directory() -> filepath {
+			return std::filesystem::current_path();
+		}
+
 		static auto get_canonical_path(const filepath& path) -> filepath {
 			try {
 				return canonical(path);

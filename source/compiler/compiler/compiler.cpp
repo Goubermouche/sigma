@@ -20,7 +20,7 @@ namespace sigma {
 		: m_description(description) {}
 
 	auto compiler::compile() const -> utility::result<void> {
-		utility::console::println("compiling file: {}", m_description.path.string());
+		utility::console::print("compiling file: {}\n", m_description.path.string());
 
 		ASSERT(m_description.emit != emit_target::EXECUTABLE, "executable support not implemented");
 		TRY(verify_file(m_description.path));

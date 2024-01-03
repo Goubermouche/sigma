@@ -20,7 +20,7 @@ bool test_file(const filepath& path, const filepath& compiler_path) {
 
 	const auto file_result = utility::file::read_text_file(STERR_FILE);
 	if(file_result.has_error()) {
-		throw std::exception(std::format("cannot open file {}", STERR_FILE).c_str());
+		throw std::runtime_error(std::format("cannot open file {}", STERR_FILE).c_str());
 	}
 
 	utility::console::printerr("'{}'\n", file_result.get_value());

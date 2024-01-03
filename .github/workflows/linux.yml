@@ -34,4 +34,4 @@ jobs:
       run: ls -a
       
     - name: Compile Project
-      run: make config=debug CC=clang
+      run: make -f sigma.make config=debug CC=clang

@@ -29,6 +29,9 @@ jobs:
 
     - name: Run Premake
       run: premake5 gmake
+
+    - name: Print working directory
+      run: ls -a
       
     - name: Compile Project
       run: make config=debug CC=clang

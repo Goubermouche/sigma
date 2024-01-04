@@ -12,11 +12,11 @@ bool test_file(const filepath& path, const filepath& compiler_path) {
 	const i32 return_code = utility::shell::execute(command);
 
 	if(return_code == 0) {
-		utility::console::print("{:<20} OK\n", path.filename().string());
+		utility::console::print("{:<30} OK\n", path.filename().string());
 		return false;
 	}
 
-	utility::console::printerr("{:<20} ERROR\n", path.filename().string());
+	utility::console::printerr("{:<30} ERROR\n", path.filename().string());
 
 	const auto file_result = utility::file::read_text_file(STERR_FILE);
 	if(file_result.has_error()) {

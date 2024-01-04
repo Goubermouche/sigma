@@ -104,5 +104,5 @@ namespace utility {
 
     template<typename type>
     struct is_container : std::integral_constant<bool, has_const_iterator<type>::value&& has_begin_end<type>::beg_value&& has_begin_end<type>::end_value> {};
-	} // namespace utility::detail
+	} // namespace detail
 } // namespace utility

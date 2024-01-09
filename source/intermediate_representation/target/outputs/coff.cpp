@@ -3,7 +3,7 @@
 #include "intermediate_representation/module.h"
 
 namespace sigma::ir {
-	utility::object_file coff_file_emitter::emit(module& module) {
+	utility::byte_buffer coff_file_emitter::emit(module& module) {
 		std::vector<handle<external>> externals = module.generate_externals();
 		auto output = module.get_output();
 		u64 section_count = output.sections.size();
@@ -129,7 +129,7 @@ namespace sigma::ir {
 		output_size += string_table.size;
 
 		// write the file
-		utility::object_file out_file;
+		utility::byte_buffer out_file;
 		utility::byte_buffer headers = utility::byte_buffer::zero_initialize(sizeof(coff_file_header) + sizeof(coff_section_header) * section_count);
 
 		// write the file header 

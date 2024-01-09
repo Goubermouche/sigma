@@ -59,7 +59,6 @@ namespace utility {
 		using f32 = float;
 		using f64 = double;
 
-		using filepath = std::filesystem::path;
     using ptr_diff = ptrdiff_t;
 
     template<typename type>

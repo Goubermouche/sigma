@@ -4,7 +4,7 @@
 #define WRITE(data, size) (memcpy(&output[write_position], data, size), write_position += (size))
 
 namespace sigma::ir {
-	utility::object_file elf_file_emitter::emit(module& module) {
+	utility::byte_buffer elf_file_emitter::emit(module& module) {
 		std::vector<handle<external>> externals = module.generate_externals();
 
 		// determine the machine type

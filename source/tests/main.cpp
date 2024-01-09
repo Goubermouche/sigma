@@ -1,6 +1,6 @@
-#include <utility/filesystem/file.h>
 #include <utility/parametric/parametric.h>
 #include <utility/shell.h>
+#include <utility/file.h>
 
 using namespace utility::types;
 
@@ -8,17 +8,17 @@ using namespace utility::types;
 #define STERR_FILE "STDERR.txt"
 
 bool test_file(const filepath& path, const filepath& compiler_path) {
-	const std::string command = std::format("{} compile {} -e none > {} 2> {}", compiler_path.string(), path.string(), STOUD_FILE, STERR_FILE);
+	const std::string command = std::format("{} compile {} -e none > {} 2> {}", compiler_path, path, STOUD_FILE, STERR_FILE);
 	const i32 return_code = utility::shell::execute(command);
 
 	if(return_code == 0) {
-		utility::console::print("{:<30} OK\n", path.filename().string());
+		utility::console::print("{:<30} OK\n", path.get_filename().to_string());
 		return false;
 	}
 
-	utility::console::printerr("{:<30} ERROR\n", path.filename().string());
+	utility::console::printerr("{:<30} ERROR\n", path.get_filename().to_string());
 
-	const auto file_result = utility::file::read_text_file(STERR_FILE);
+	const auto file_result = utility::fs::file<std::string>::load(STERR_FILE);
 	if(file_result.has_error()) {
 		throw std::runtime_error(std::format("cannot open file {}", STERR_FILE).c_str());
 	}
@@ -29,10 +29,10 @@ bool test_file(const filepath& path, const filepath& compiler_path) {
 }
 
 i32 run_all_tests(const parametric::parameters& params) {
-	const auto test_directory = params.get<std::string>("directory");
-	const auto compiler_path = params.get<std::string>("compiler");
+	const filepath test_directory = params.get<std::string>("directory");
+	const filepath compiler_path = params.get<std::string>("compiler");
 
-	std::queue<filepath> paths({ utility::fs::get_canonical_path(test_directory) });
+	std::queue<filepath> paths({ test_directory.get_canonical_path() });
 	bool encountered_error = false;
 
 	// run our tests
@@ -41,8 +41,8 @@ i32 run_all_tests(const parametric::parameters& params) {
 			const filepath current = paths.front();
 			paths.pop();
 
-			utility::directory::for_all_directory_items(current, [&](const filepath& path) {
-				if (utility::fs::is_directory(path)) {
+			utility::fs::directory::for_all_directory_items(current, [&](const filepath& path) {
+				if (path.is_directory()) {
 					paths.push(path);
 					return;
 				}

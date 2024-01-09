@@ -1,5 +1,5 @@
 #pragma once
-#include "intermediate_representation/codegen/outputs/object_file_emitter.h"
+#include "intermediate_representation/target/outputs/object_file_emitter.h"
 #include "intermediate_representation/target/arch/architecture.h"
 #include "intermediate_representation/module_output.h"
 #include "intermediate_representation/target/target.h"
@@ -19,7 +19,7 @@ namespace sigma::ir {
 		void select_instructions(codegen_context& context) const;
 		auto generate_sections(module& module) const -> module_output;
 		auto disassemble(const utility::byte_buffer& bytecode, const codegen_context& context) const -> utility::string;
-		auto emit_object_file(module& module) const -> utility::object_file;
+		auto emit_object_file(module& module) const -> utility::byte_buffer;
 	private:
 		static auto pick_object_file_emitter(system system) -> s_ptr<object_file_emitter>;
 		static auto pick_architecture(arch arch) -> s_ptr<architecture>;

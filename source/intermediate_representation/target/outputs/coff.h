@@ -1,5 +1,5 @@
 #pragma once
-#include "intermediate_representation/codegen/outputs/object_file_emitter.h"
+#include "intermediate_representation/target/outputs/object_file_emitter.h"
 #include "intermediate_representation/target/target.h"
 #include <utility/containers/handle.h>
 
@@ -171,7 +171,7 @@ namespace sigma::ir {
 
 	class coff_file_emitter : public object_file_emitter {
 	public:
-		utility::object_file emit(module& module) override;
+		utility::byte_buffer emit(module& module) override;
 	private:
 		static auto generate_unwind_info(module& module, u64 xdata_section, const module_section& section) -> handle<coff_unwind_info>;
 		static void emit_win_unwind_info(utility::byte_buffer& buffer, handle<compiled_function> function, u64 stack_usage);

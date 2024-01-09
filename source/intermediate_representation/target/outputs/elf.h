@@ -1,5 +1,5 @@
 #pragma once
-#include "intermediate_representation/codegen/outputs/object_file_emitter.h"
+#include "intermediate_representation/target/outputs/object_file_emitter.h"
 
 namespace sigma::ir {
 #define EM_NONE    0   // unknown machine
@@ -120,7 +120,7 @@ namespace sigma::ir {
 
 	class elf_file_emitter : public object_file_emitter {
 	public:
-		utility::object_file emit(module& module) override;
+		utility::byte_buffer emit(module& module) override;
 	private:
 		static u64 put_symbol(utility::byte_buffer& stab, u32 name, u8 sym_info, u16 section_index, u64 value, u64 size);
 		static void put_section_symbols(const std::vector<module_section>& sections, utility::byte_buffer& string_table,utility::byte_buffer& stab, i32 t);

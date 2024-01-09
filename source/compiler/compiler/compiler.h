@@ -14,6 +14,7 @@
 #include <intermediate_representation/target/target.h>
 #include <utility/parametric/parametric.h>
 #include <utility/diagnostics.h>
+#include <utility/file.h>
 
 namespace sigma {
 	using namespace utility::types;

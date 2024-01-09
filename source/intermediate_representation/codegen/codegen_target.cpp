@@ -6,8 +6,8 @@
 #include "intermediate_representation/target/arch/x64/x64_disassembler.h"
 
 // object files
-#include "intermediate_representation/codegen/outputs/coff.h"
-#include "intermediate_representation/codegen/outputs/elf.h"
+#include "intermediate_representation/target/outputs/coff.h"
+#include "intermediate_representation/target/outputs/elf.h"
 
 namespace sigma::ir {
 	codegen_target::codegen_target(target target) : m_target(target) {
@@ -50,7 +50,7 @@ namespace sigma::ir {
 		return m_disassembler->disassemble(bytecode, context);
 	}
 
-	auto codegen_target::emit_object_file(module& module) const -> utility::object_file {
+	auto codegen_target::emit_object_file(module& module) const -> utility::byte_buffer {
 		ASSERT(m_object_file_emitter != nullptr, "target is not initialized");
 		return m_object_file_emitter->emit(module);
 	}

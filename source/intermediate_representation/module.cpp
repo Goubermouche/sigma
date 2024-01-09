@@ -82,7 +82,7 @@ namespace sigma::ir {
 		utility::console::print("{}\n", assembly.get_underlying());
 	}
 
-	auto module::generate_object_file() -> utility::object_file {
+	auto module::generate_object_file() -> utility::byte_buffer {
 		return m_codegen.emit_object_file(*this);
 	}
 

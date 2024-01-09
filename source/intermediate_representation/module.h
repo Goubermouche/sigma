@@ -27,7 +27,7 @@ namespace sigma::ir {
 		module(target target);
 
 		void compile() const;
-		auto generate_object_file() -> utility::object_file;
+		auto generate_object_file() -> utility::byte_buffer;
 
 		auto create_external(const std::string& name, linkage linkage) -> handle<external>;
 		auto create_function(const function_signature& signature, linkage linkage) -> handle<function>;

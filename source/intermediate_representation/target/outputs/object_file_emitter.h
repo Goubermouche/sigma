@@ -1,5 +1,4 @@
 #pragma once
-#include <utility/filesystem/file_types/object_file.h>
 #include <utility/containers/byte_buffer.h>
 #include <utility/containers/handle.h>
 
@@ -17,7 +16,7 @@ namespace sigma::ir {
 	 */
 	class object_file_emitter {
 	public:
-		virtual utility::object_file emit(module& module) = 0;
+		virtual utility::byte_buffer emit(module& module) = 0;
 		virtual ~object_file_emitter() = default;
 	protected:
 		static auto layout_relocations(std::vector<module_section>& sections, u32 output_size, u32 relocation_size) -> u32;

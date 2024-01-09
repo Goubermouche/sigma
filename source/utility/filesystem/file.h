@@ -1,77 +1,9 @@
 #pragma once
-#include "utility/macros.h"
 #include "utility/containers/contiguous_container.h"
+#include "utility/filesystem/filepath.h"
+#include "utility/macros.h"
 
 namespace utility {
-	namespace types {
-		class filepath {
-		public:
-			using path_type = std::filesystem::path;
-
-			filepath() = default;
-			filepath(const path_type& path) : m_path(path) {}
-			filepath(const std::string& path) : m_path(path) {}
-			filepath(const char* path) : m_path(path) {}
-
-			auto operator==(const filepath& other) const -> bool {
-				return m_path == other.m_path;
-			}
-
-			auto operator/(const filepath& other) const -> filepath {
-				return m_path / other.m_path;
-			}
-
-			auto exists() const -> bool {
-				return std::filesystem::exists(m_path);
-			}
-
-			auto is_directory() const -> bool {
-				return std::filesystem::is_directory(m_path);
-			}
-
-			auto is_file() const -> bool {
-				return std::filesystem::is_regular_file(m_path);
-			}
-
-			auto get_canonical_path() const -> filepath {
-				try {
-					return std::filesystem::canonical(m_path);
-				}
-				catch (const std::filesystem::filesystem_error& err) {
-					SUPPRESS_C4100(err);
-					PANIC("{}", err.what());
-					return {};
-				}
-			}
-
-			auto to_string() const -> std::string {
-				return m_path.string();
-			}
-
-			auto remove() const -> bool {
-				return std::filesystem::remove(m_path);
-			}
-
-			auto get_parent_path() const -> filepath {
-				return m_path.parent_path();
-			}
-
-			auto get_path() const -> const path_type& {
-				return m_path;
-			}
-
-			auto get_extension() const -> filepath {
-				return m_path.extension();
-			}
-
-			auto get_filename() const -> filepath {
-				return m_path.filename();
-			}
-		private:
-			path_type m_path;
-		};
-	}
-
 	namespace fs {
 		template<typename type>
 		struct file {
@@ -138,16 +70,3 @@ namespace utility {
 		}
 	}
 } // namespace utility::fs
-
-template<>
-struct std::formatter<utility::types::filepath> {
-	template<typename parse_context>
-	constexpr auto parse(parse_context& ctx) {
-		return ctx.begin();
-	}
-
-	template<typename format_context>
-	auto format(const utility::types::filepath& p, format_context& ctx) const {
-		return format_to(ctx.out(), "{}", p.to_string());
-	}
-};

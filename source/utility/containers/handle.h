@@ -3,7 +3,7 @@
 #include <format>
 
 namespace utility::types {
-  // NOTE: due to the lightweight nature of ptr, atomic operations are NOT used
+  // NOTE: due to the lightweight nature of this class, atomic operations are NOT used
   //       and thus the container is not thread-safe. 
 
   /**
@@ -40,27 +40,25 @@ namespace utility::types {
 	};
 } // namespace utility
 
-namespace std {
-  template<typename type>
-  struct hash<utility::types::handle<type>> {
-    utility::u64 operator()(const utility::types::handle<type>& h) const noexcept {
-      // hash the internal pointer
-      return hash<type*>{}(h.get());
-    }
-  };
+template<typename type>
+struct std::hash<utility::types::handle<type>> {
+  utility::u64 operator()(const utility::types::handle<type>& h) const noexcept {
+    // hash the internal pointer
+    return std::hash<type*>{}(h.get());
+  }
+};
 
-  template<typename type>
-  struct formatter<utility::types::handle<type>> {
-    auto parse(format_parse_context& ctx) {
-      return ctx.begin();
-    }
+template<typename type>
+struct std::formatter<utility::types::handle<type>> {
+	auto parse(format_parse_context& ctx) {
+		return ctx.begin();
+	}
 
-    auto format(const utility::types::handle<type>& obj, format_context& ctx) {
-      if (obj) {
-          return format_to(ctx.out(), "{}", static_cast<utility::u64>(obj.get()));
-      }
+	auto format(const utility::types::handle<type>& obj, format_context& ctx) {
+		if (obj) {
+			return format_to(ctx.out(), "{}", static_cast<utility::u64>(obj.get()));
+		}
 
-      return format_to(ctx.out(), "0");
-    }
-  };
-} // namespace std
+		return format_to(ctx.out(), "0");
+	}
+};

@@ -7,7 +7,6 @@
 #include <ir_translator/ir_translator.h>
 
 #include <utility/string_helper.h>
-#include <utility/file.h>
 
 #define LANG_FILE_EXTENSION ".s"
 

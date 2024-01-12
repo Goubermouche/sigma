@@ -275,6 +275,6 @@ namespace sigma {
 		}
 
 		NOT_IMPLEMENTED();
-		return {};
+		return token_info{};
 	}
 } // namespace sigma::lex

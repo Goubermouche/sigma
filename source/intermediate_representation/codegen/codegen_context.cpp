@@ -13,7 +13,7 @@ namespace sigma::ir {
 	}
 
 	auto codegen_context::create_symbol_patch() const -> handle<symbol_patch> {
-		return static_cast<symbol_patch*>(function->allocator.allocate(sizeof(symbol_patch)));
+		return static_cast<symbol_patch*>(function->allocator.allocate_zero(sizeof(symbol_patch)));
 	}
 
 	auto codegen_context::lookup_virtual_value(handle<node> value) -> handle<virtual_value> {

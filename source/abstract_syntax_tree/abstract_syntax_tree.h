@@ -22,9 +22,9 @@ namespace sigma {
 
 		template<typename extra_type>
 		auto create_node(node_type type, u64 child_count) -> handle<node> {
-			const handle node_ptr = static_cast<node*>(m_allocator.allocate(sizeof(node)));
+			const handle node_ptr = static_cast<node*>(m_allocator.allocate_zero(sizeof(node)));
 
-			node_ptr->set_property(m_allocator.allocate(sizeof(extra_type)));
+			node_ptr->set_property(m_allocator.allocate_zero(sizeof(extra_type)));
 			node_ptr->children = allocate_node_list(child_count);
 			node_ptr->type = type;
 

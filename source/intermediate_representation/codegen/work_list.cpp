@@ -98,7 +98,7 @@ namespace sigma::ir {
 	void work_list::push_all(handle<function> function) {
 		std::stack<handle<node>> stack;
 
-		for (const handle<node>& end : function->terminators) {
+		for(const handle<node> end : function->terminators) {
 			// place the endpoint, we'll construct the rest from there
 			if (!visit(end)) {
 				continue;

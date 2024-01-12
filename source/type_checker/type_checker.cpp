@@ -87,7 +87,8 @@ namespace sigma {
 
 		m_context.variable_registry.pop_scope();
 
-		return SUCCESS;
+		// this value won't be used
+		return data_type();
 	}
 
 	auto type_checker::type_check_variable_declaration(handle<node> variable_node, data_type expected) -> utility::result<data_type> {
@@ -111,7 +112,8 @@ namespace sigma {
 			TRY(type_check_node(variable_node->children[0], property.type));
 		}
 
-		return SUCCESS;
+		// this value won't be used
+		return data_type();
 	}
 
 	auto type_checker::type_check_function_call(handle<node> call_node, data_type expected) -> utility::result<data_type> {
@@ -144,7 +146,8 @@ namespace sigma {
 		//	TRY(type_check_node(call_node->children[i], { data_type::VAR_ARG_PROMOTE, 0 }));
 		//}
 
-		return SUCCESS;
+		// this value won't be used
+		return data_type();
 	}
 
 	auto type_checker::type_check_return(handle<node> return_node, data_type expected) -> utility::result<data_type> {
@@ -159,7 +162,8 @@ namespace sigma {
 			TRY(type_check_node(return_node->children[0], expected));
 		}
 
-		return SUCCESS;
+		// this value won't be used
+		return data_type();
 	}
 
 	auto type_checker::type_check_conditional_branch(handle<node> branch_node, data_type expected) -> utility::result<data_type> {
@@ -191,7 +195,8 @@ namespace sigma {
 		}
 
 		m_context.variable_registry.pop_scope();
-		return SUCCESS;
+		// this value won't be used
+		return data_type();
 	}
 
 	auto type_checker::type_check_branch(handle<node> branch_node, data_type expected) -> utility::result<data_type> {
@@ -204,7 +209,8 @@ namespace sigma {
 		}
 
 		m_context.variable_registry.pop_scope();
-		return SUCCESS;
+		// this value won't be used
+		return data_type();
 	}
 
 	auto type_checker::type_check_binary_math_operator(handle<node> operator_node, data_type expected) -> utility::result<data_type> {
@@ -264,7 +270,8 @@ namespace sigma {
 
 		// type check the assigned value against the declared type
 		TRY(type_check_node(assignment_node->children[1], variable->type));
-		return SUCCESS;
+		// this value won't be used
+		return data_type();
 	}
 
 	void type_checker::apply_expected_data_type(data_type& target, data_type source) {

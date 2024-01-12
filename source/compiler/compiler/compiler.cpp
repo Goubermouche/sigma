@@ -35,19 +35,19 @@ namespace sigma {
 
 		frontend.syntax.string_table = tokenized.second;
 		frontend.tokens = tokenized.first;
-
-		TRY(frontend.syntax.ast, parser::parse(frontend));
-
+		 
+		TRY(parser::parse(frontend));
+		 
 		// backend
 		backend_context backend(std::move(frontend.syntax), m_description.target);
-
+		 
 		// run analysis on the generated AST
 		TRY(type_checker::type_check(backend));
 		TRY(ir_translator::translate(backend));
-
+		
 		// compile the generated IR module
 		backend.module.compile();
-
+		
 		// emit as an object file
 		if(m_description.emit == OBJECT) {
 			const filepath object_path = get_object_file_path();

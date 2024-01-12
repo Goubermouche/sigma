@@ -100,13 +100,13 @@ namespace sigma::ir {
 
 	template<typename extra_type>
 	auto function::create_node(node::type type, u64 input_count) -> handle<node> {
-		void* node_allocation = allocator.allocate(sizeof(node));
-		const handle node_ptr = static_cast<node*>(node_allocation);
-		node_ptr->set_type(type);
+		const handle node_ptr = allocator.allocate_zero<node>();
 
-		// initialize the base sea of nodes layout 
+		// initialize the base sea of nodes layout
+		node_ptr->set_type(type);
+		node_ptr->set_property(allocator.allocate_zero(sizeof(extra_type)));
+
 		node_ptr->inputs = utility::slice<handle<node>>(allocator, input_count);
-		node_ptr->set_property(allocator.allocate(sizeof(extra_type)));
 		node_ptr->global_value_index = node_count++;
 
 		return node_ptr;

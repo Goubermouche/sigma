@@ -11,10 +11,10 @@ namespace sigma {
 
 	class parser {
 	public:
-		[[nodiscard]] static auto parse(frontend_context& context) -> utility::result<abstract_syntax_tree>;
+		[[nodiscard]] static auto parse(frontend_context& context) -> utility::result<void>;
 	private:
 		parser(frontend_context& context);
-		[[nodiscard]] auto parse() -> utility::result<abstract_syntax_tree>;
+		[[nodiscard]] auto parse() -> utility::result<void>;
 
 		auto parse_function_declaration() -> utility::result<handle<node>>;
 
@@ -55,6 +55,5 @@ namespace sigma {
 	private:
 		frontend_context& m_context;
 		token_buffer_iterator m_tokens;
-		abstract_syntax_tree m_ast;
 	};
 } // namespace sigma

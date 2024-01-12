@@ -37,7 +37,7 @@ namespace sigma::ir {
 			// run our transformations
 			generate_use_lists(transformation); // mandatory (move over to an optimization?)
 			optimizations.apply(transformation);
-
+			 
 			// initialize the code generation pass
 			codegen_context codegen {
 				.function = function,
@@ -45,27 +45,27 @@ namespace sigma::ir {
 				.work = function_work_list,
 				.intervals = m_codegen.get_register_intervals()
 			};
-
+			
 			// generate a control flow graph
 			codegen.graph = control_flow_graph::compute_reverse_post_order(codegen);
-
+			
 			// schedule nodes
 			schedule_node_hierarchy(codegen);
-
+			
 			// select instructions for the architecture specified by the target
 			m_codegen.select_instructions(codegen);
-
+			
 			// allocate registers (determine live ranges, use these ranges to construct live
 			// intervals, which are then used by the selected register allocator.
 			determine_live_ranges(codegen);
 			register_allocator->allocate(codegen);
-
+			
 			// generate a bytecode representation of the given function for the specified target
 			const utility::byte_buffer bytecode = m_codegen.emit_bytecode(codegen);
-
+			
 			// DEBUG
 			assembly.append(m_codegen.disassemble(bytecode, codegen));
-
+			
 			// finally, emit the compiled function
 			function->output = {
 				.parent = function,

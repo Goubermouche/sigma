@@ -56,12 +56,12 @@ namespace sigma::ir {
 		 */
 		template<typename extra_type = utility::empty_property>
 		auto create_instruction(u64 operand_count) const -> handle<instruction> {
-			void* inst_allocation = function->allocator.allocate(sizeof(instruction));
+			void* inst_allocation = function->allocator.allocate_zero(sizeof(instruction));
 			const handle inst_ptr = static_cast<instruction*>(inst_allocation);
 
 			// assign data
 			inst_ptr->operands = utility::slice<i32>(function->allocator, operand_count);
-			inst_ptr->set_property(function->allocator.allocate(sizeof(extra_type)));
+			inst_ptr->set_property(function->allocator.allocate_zero(sizeof(extra_type)));
 
 			return inst_ptr;
 		}
@@ -73,10 +73,10 @@ namespace sigma::ir {
 		 */
 		template<typename extra_type = utility::empty_property>
 		auto create_instruction_operand() const -> handle<instruction_operand> {
-			void* allocation = function->allocator.allocate(sizeof(instruction_operand));
+			void* allocation = function->allocator.allocate_zero(sizeof(instruction_operand));
 			const handle ptr = static_cast<instruction_operand*>(allocation);
 
-			ptr->set_property(function->allocator.allocate(sizeof(extra_type)));
+			ptr->set_property(function->allocator.allocate_zero(sizeof(extra_type)));
 			return ptr;
 		}
 

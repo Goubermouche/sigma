@@ -30,6 +30,7 @@
 #include <type_traits>
 #include <bitset>
 #include <cstdlib>
+#include <cstring>
 
 // platform specific 
 #ifdef _WIN32

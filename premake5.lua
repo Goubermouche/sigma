@@ -1,10 +1,11 @@
 workspace "sigma"
-    configurations { "Release", "Debug", "Profile" }
+    configurations { "Release", "Debug", "Test" }
     startproject "compiler"
 
     architecture "x64"
     language "C++"
     cppdialect "C++latest"
+    warnings "Extra"
 
     flags {
         "MultiProcessorCompile"
@@ -13,7 +14,6 @@ workspace "sigma"
     filter "configurations:Release"
         defines { "NDEBUG" }
         optimize "On"
-        warnings "High"
         symbols "Off"
 
     filter "configurations:Debug"
@@ -21,15 +21,15 @@ workspace "sigma"
         optimize "Off"
         runtime "Debug"
         defines { "DEBUG", "_DEBUG" }
-        warnings "Extra"
         sanitize { "Address" }
         debugformat "C7" 
 
-    filter "configurations:Profile"
-        defines { "NDEBUG" }
-        optimize "On"
-        warnings "High"
+    -- used when running CI tests
+    filter "configurations:Test"
         symbols "On"
+        optimize "Off"
+        runtime "Debug"
+        defines { "DEBUG", "_DEBUG" }
 
 -- utility 
 project "utility"

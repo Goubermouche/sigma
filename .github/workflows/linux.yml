@@ -31,10 +31,10 @@ jobs:
       run: premake5 gmake
 
     - name: Compile Project (Compiler)
-      run: make -f sigma.make config=debug CC=clang
+      run: make -f sigma.make config=test CC=clang
       
     - name: Compile Project (Tests)
       run: make -f tests.make config=debug CC=clang
 
     - name: Run Tests
-      run: ./output/tests/bin/Debug/tests run tests ./output/compiler/bin/Debug/compiler
+      run: ./output/tests/bin/Debug/tests run tests ./output/compiler/bin/test/compiler

@@ -22,10 +22,10 @@ jobs:
       run: .\setup.bat
 
     - name: Compile Project (Compiler)
-      run: msbuild sigma.sln /p:Configuration=Debug /p:Platform="x64"
+      run: msbuild sigma.sln /p:Configuration=Test /p:Platform="x64"
       
     - name: Compile Project (Tests)
       run: msbuild tests.sln /p:Configuration=Debug /p:Platform="x64"
 
     - name: Run Tests
-      run: output\tests\bin\Debug\tests.exe run tests output\compiler\bin\Debug\compiler.exe
+      run: output\tests\bin\Debug\tests.exe run tests output\compiler\bin\Test\compiler.exe

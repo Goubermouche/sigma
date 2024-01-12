@@ -23,7 +23,7 @@ namespace utility {
 			changes |= (old ^ new_val);
 		}
 
-		return changes;
+		return static_cast<bool>(changes);
 	}
 
 	void dense_set::copy(const dense_set& src) {

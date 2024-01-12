@@ -22,6 +22,8 @@ workspace "sigma"
         runtime "Debug"
         defines { "DEBUG", "_DEBUG" }
         warnings "Extra"
+        sanitize { "Address" }
+        debugformat "C7" 
 
     filter "configurations:Profile"
         defines { "NDEBUG" }

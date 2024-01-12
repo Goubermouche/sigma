@@ -1,5 +1,5 @@
 workspace "sigma"
-    configurations { "Release", "Debug", "Test" }
+    configurations { "Release", "Debug" }
     startproject "compiler"
 
     architecture "x64"
@@ -17,15 +17,6 @@ workspace "sigma"
         symbols "Off"
 
     filter "configurations:Debug"
-        symbols "On"
-        optimize "Off"
-        runtime "Debug"
-        defines { "DEBUG", "_DEBUG" }
-        sanitize { "Address" }
-        debugformat "C7" 
-
-    -- used when running CI tests
-    filter "configurations:Test"
         symbols "On"
         optimize "Off"
         runtime "Debug"
@@ -270,7 +261,7 @@ project "tests"
 
     libdirs { "../sigma/output/compiler/bin/%{cfg.buildcfg}" }
 
-    debugargs { "run", "../../tests" }
+    debugargs { "run", "../../tests", "..\\..\\output\\compiler\\bin\\Debug\\compiler.exe" }
 
     includedirs {
         "source"

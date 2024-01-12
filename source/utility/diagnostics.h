@@ -4,8 +4,6 @@
 #include <format>
 #include <list>
 
-#include "macros.h"
-
 namespace utility {
 	class console {
 	public:
@@ -79,7 +77,7 @@ namespace utility {
 			return error(std::vformat(m_errors.find(code)->second, std::make_format_args(args...)));
 		}
 
-		auto get_message() const -> const std::string& {
+		auto get_message() -> const std::string& {
 			return m_message;
 		}
 	private:
@@ -131,13 +129,13 @@ namespace utility {
 		template <class current = type>
 		requires (!std::is_same_v<std::remove_cvref_t<current>, std::in_place_t> && std::is_constructible_v<type, current>)
 		constexpr explicit(!std::is_convertible_v<current, type>)
-		result(current value) noexcept(std::is_nothrow_constructible_v<type, current>) : m_success(std::move(value)) {}
+		result(current value) noexcept(std::is_nothrow_constructible_v<type, current>)
+			: m_value(std::move(type(std::move(value)))) {}
 
-		result(const error& failure) noexcept : m_error_message(failure.get_message()) {}
-		result() {}
+		result(error failure) noexcept : m_value(std::move(failure)) {}
 
 		bool has_error() const {
-			return !m_error_message.empty();
+			return std::holds_alternative<error>(m_value);
 		}
 
 		bool has_value() const {
@@ -145,26 +143,25 @@ namespace utility {
 		}
 
 		auto get_value() const -> const type& {
-			return m_success;
+			return std::get<type>(m_value);
 		}
 
 		auto get_value() -> type {
-			return  std::move(m_success);
+			return std::move(std::get<type>(m_value));
 		}
 
-		auto get_error_message() const -> const std::string& {
-			return m_error_message;
+		auto get_error() const -> const error& {
+			return std::get<error>(m_value);
 		}
 	private:
-		type m_success;
-		std::string m_error_message;
+		std::variant<type, error> m_value;
 	};
 
 	template<>
 	class result<void> {
 	public:
 		result() noexcept = default;
-		result(const error& failure) noexcept : m_error_message(failure.get_message()) {}
+		result(error failure) noexcept : m_error_message(failure.get_message()) {}
 
 		bool has_error() const {
 			return !m_error_message.empty();
@@ -174,8 +171,8 @@ namespace utility {
 			return !has_error();
 		}
 
-		auto get_error_message() const -> const std::string& {
-			return m_error_message;
+		auto get_error() const -> error {
+			return error(m_error_message);
 		}
 	private:
 		std::string m_error_message;
@@ -201,14 +198,14 @@ namespace utility {
 do {                                                                            \
 	auto CONCATENATE(result, __LINE__) = __result;                                \
 	if (CONCATENATE(result, __LINE__).has_error()) {                              \
-    return utility::error((CONCATENATE(result, __LINE__)).get_error_message()); \
+    return utility::error((CONCATENATE(result, __LINE__)).get_error());         \
 	}                                                                             \
 } while(false)
 
 #define TRY_2(__success, __result)                                            \
 auto CONCATENATE(result, __LINE__) = (__result);                              \
 if(CONCATENATE(result, __LINE__).has_error()) {                               \
-  return utility::error((CONCATENATE(result, __LINE__)).get_error_message()); \
+  return utility::error((CONCATENATE(result, __LINE__)).get_error());         \
 }                                                                             \
 __success = CONCATENATE(result, __LINE__).get_value()
 

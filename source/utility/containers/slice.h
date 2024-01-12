@@ -19,8 +19,7 @@ namespace utility {
 
 		template<typename allocator>
 		slice(allocator& alloc, u64 count) :
-			m_data(static_cast<type*>(alloc.allocate(sizeof(type) * count))),
-			m_size(count) {}
+			m_data(static_cast<type*>(alloc.allocate_zero(sizeof(type) * count))), m_size(count) {}
 
 		[[nodiscard]] auto get_data() const -> type* {
 			return m_data;

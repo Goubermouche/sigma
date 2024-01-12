@@ -70,6 +70,18 @@ namespace utility {
 
 	using namespace types;
 
+	template <class type>
+	auto num_digits(type number) -> u8 {
+		u8 digits = 0;
+
+		while (number) {
+			number /= 10;
+			digits++;
+		}
+
+		return digits;
+	}
+
 	namespace detail {
     template<typename type>
     struct has_const_iterator {

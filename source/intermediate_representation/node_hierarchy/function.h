@@ -30,7 +30,6 @@ namespace sigma::ir {
 	};
 
 	struct function {
-		function() = default;
 		function(const std::string& name);
 
 		template<typename extra_type>

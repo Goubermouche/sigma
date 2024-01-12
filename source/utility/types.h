@@ -31,6 +31,7 @@
 #include <bitset>
 #include <cstdlib>
 #include <cstring>
+#include <memory>
 
 // platform specific 
 #ifdef _WIN32

@@ -2,6 +2,8 @@
 #include "utility/macros.h"
 
 namespace utility {
+	block_allocator::block::block(u8* memory) : memory(memory), position(0) {}
+
 	block_allocator::block::~block() {
 		std::free(memory);
 	}
@@ -84,6 +86,6 @@ namespace utility {
 	}
 
 	void block_allocator::allocate_block() {
-		m_blocks.emplace_back(static_cast<unsigned char*>(std::malloc(m_block_size)));
+		m_blocks.emplace_back(static_cast<u8*>(std::malloc(m_block_size)));
 	}
 }

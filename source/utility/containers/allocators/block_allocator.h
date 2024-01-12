@@ -4,10 +4,11 @@
 namespace utility {
 	class block_allocator {
 		struct block {
+			block(u8* memory);
 			~block();
 
-			unsigned char* memory = nullptr;
-			u64 position = 0;
+			u8* memory;
+			u64 position;
 		};
 	public:
 		/**

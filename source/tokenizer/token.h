@@ -1,6 +1,7 @@
 #pragma once
 #include <utility/containers/string_table.h>
 #include <utility/containers/handle.h>
+#include <utility/filesystem/filepath.h>
 
 namespace sigma {
 	using namespace utility::types;
@@ -73,6 +74,7 @@ namespace sigma {
 	};
 
 	struct token_location {
+		handle<filepath> file;
 		u32 line_index = 0;
 		u32 char_index = 0;
 	};

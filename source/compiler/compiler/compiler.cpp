@@ -1,5 +1,6 @@
 #include "compiler.h"
-#include "compiler/compiler/compilation_context.h"
+#include <compiler/compiler/compilation_context.h>
+#include <compiler/compiler/diagnostics.h>
 
 #include <tokenizer/tokenizer.h>
 #include <parser/parser.h>
@@ -18,7 +19,7 @@ namespace sigma {
 	compiler::compiler(const compiler_description& description)
 		: m_description(description) {}
 
-	auto compiler::compile() const -> utility::result<void> {
+	auto compiler::compile() -> utility::result<void> {
 		utility::console::print("compiling file: {}\n", m_description.path);
 
 		ASSERT(m_description.emit != emit_target::EXECUTABLE, "executable support not implemented");
@@ -30,7 +31,7 @@ namespace sigma {
 
 		// generate tokens
 		TRY(const std::string file, utility::fs::file<std::string>::load(m_description.path));
-		TRY(tokenizer::tokenize(file, frontend));
+		TRY(tokenizer::tokenize(file, &m_description.path, frontend));
 		TRY(parser::parse(frontend));
 
 		// backend
@@ -55,15 +56,15 @@ namespace sigma {
 
 	auto compiler::verify_file(const filepath& path) -> utility::result<void> {
 		if(!path.exists()) {
-			return utility::error::create(utility::error::code::FILE_DOES_NOT_EXIST, path);
+			return error::emit(error::code::FILE_DOES_NOT_EXIST, path);
 		}
 
 		if(!path.is_file()) {
-			return utility::error::create(utility::error::code::EXPECTED_FILE, path);
+			return error::emit(error::code::EXPECTED_FILE, path);
 		}
 
 		if(path.get_extension() != LANG_FILE_EXTENSION) {
-			return utility::error::create(utility::error::code::INVALID_FILE_EXTENSION, path, LANG_FILE_EXTENSION);
+			return error::emit(error::code::INVALID_FILE_EXTENSION, path, LANG_FILE_EXTENSION);
 		}
 
 		return SUCCESS;

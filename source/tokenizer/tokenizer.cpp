@@ -1,11 +1,15 @@
 #include "tokenizer.h"
 #include <compiler/compiler/compilation_context.h>
+#include <compiler/compiler/diagnostics.h>
 
 namespace sigma {
-	tokenizer::tokenizer(const std::string& source, frontend_context& context) : m_source(source), m_context(context) {}
+	tokenizer::tokenizer(const std::string& source, handle<filepath> source_path, frontend_context& context) : m_source(source), m_context(context) {
+		m_token_start_location.file = source_path;
+		m_current_location.file = source_path;
+	}
 
-	auto tokenizer::tokenize(const std::string& source, frontend_context& context) -> utility::result<void> {
-		return tokenizer(source, context).tokenize();
+	auto tokenizer::tokenize(const std::string& source, handle<filepath> source_path, frontend_context& context) -> utility::result<void> {
+		return tokenizer(source, source_path, context).tokenize();
 	}
 
 	auto tokenizer::tokenize() -> utility::result<void> {
@@ -25,10 +29,8 @@ namespace sigma {
 		// consume preceding spaces
 		consume_spaces();
 
-		m_token_start_location = {
-			m_current_location.line_index,
-			m_current_location.char_index - 1
-		};
+		m_token_start_location.line_index = m_current_location.line_index;
+		m_token_start_location.char_index = m_current_location.char_index - 1;
 
 		// check for EOF so we don't have to do it in the individual brace checks
 		if (m_source.end()) {
@@ -171,14 +173,14 @@ namespace sigma {
 		while (!std::isspace(m_last_character) && !m_source.end()) {
 			if (m_last_character == '.') {
 				if (dot_met) {
-					return utility::error::create(utility::error::code::NUMERICAL_LITERAL_MORE_THAN_ONE_DOT);
+					return error::emit(error::code::NUMERICAL_LITERAL_MORE_THAN_ONE_DOT);
 				}
 
 				dot_met = true;
 			}
 			else if (m_last_character == 'u') {
 				if (dot_met) {
-					return utility::error::create(utility::error::code::NUMERICAL_LITERAL_UNSIGNED_WITH_DOT);
+					return error::emit(error::code::NUMERICAL_LITERAL_UNSIGNED_WITH_DOT);
 				}
 
 				get_next_char();
@@ -190,7 +192,7 @@ namespace sigma {
 			}
 			else if (m_last_character == 'f') {
 				if (!dot_met) {
-					return utility::error::create(utility::error::code::NUMERICAL_LITERAL_FP_WITHOUT_DOT);
+					return error::emit(error::code::NUMERICAL_LITERAL_FP_WITHOUT_DOT);
 				}
 
 				get_next_char();
@@ -235,7 +237,7 @@ namespace sigma {
 		}
 
 		if(m_last_character != '"') {
-			return utility::error::create(utility::error::code::INVALID_STRING_TERMINATOR);
+			return error::emit(error::code::INVALID_STRING_TERMINATOR);
 		}
 
 		get_next_char();

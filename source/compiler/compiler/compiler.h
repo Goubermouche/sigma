@@ -42,7 +42,7 @@ namespace sigma {
 	private:
 		compiler(const compiler_description& description);
 
-		auto compile() const -> utility::result<void>;
+		auto compile() -> utility::result<void>;
 		auto get_object_file_path(const std::string& name = "a") const -> filepath;
 
 		static auto verify_file(const filepath& path) -> utility::result<void>;

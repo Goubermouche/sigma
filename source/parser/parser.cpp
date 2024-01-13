@@ -1,11 +1,13 @@
 #include "parser.h"
-#include "compiler/compiler/compilation_context.h"
+#include <compiler/compiler/compilation_context.h>
+#include <compiler/compiler/diagnostics.h>
 
 #define EXPECT_CURRENT(__token)                                             \
 do {                                                                        \
 	if (m_tokens.get_current_token() != (__token)) {                          \
-		return utility::error::create(                                          \
-			utility::error::code::UNEXPECTED_TOKEN_WITH_EXPECTED,                 \
+		return error::emit(                                                     \
+			m_tokens.get_current_token_location(),                                \
+			error::code::UNEXPECTED_TOKEN_WITH_EXPECTED,                          \
 			token(__token).to_string(), m_tokens.get_current_token().to_string()  \
 		);                                                                      \
 	}                                                                         \
@@ -119,7 +121,7 @@ namespace sigma {
 					TRY(result, parse_return_statement()); break;
 				}
 				default: {
-					return utility::error::create(utility::error::code::UNEXPECTED_TOKEN, m_tokens.get_current_token().to_string());
+					return error::emit(m_tokens.get_current_token_location(), error::code::UNEXPECTED_TOKEN, m_tokens.get_current_token().to_string());
 				}
 			}
 		}
@@ -403,7 +405,7 @@ namespace sigma {
 			case token_type::MINUS_SIGN:         return parse_negative_expression();
 			case token_type::BOOL_LITERAL_TRUE:
 			case token_type::BOOL_LITERAL_FALSE: return parse_bool_literal();
-			default: utility::error::create(utility::error::code::UNEXPECTED_TOKEN, m_tokens.get_current_token().to_string());
+			default: error::emit(m_tokens.get_current_token_location(), error::code::UNEXPECTED_TOKEN, m_tokens.get_current_token().to_string());
 		}
 
 		return nullptr;
@@ -413,7 +415,7 @@ namespace sigma {
 		const token type_token = m_tokens.get_current_token();
 
 		if(!type_token.is_type()) {
-			return utility::error::create(utility::error::code::INVALID_TYPE_TOKEN, type_token.to_string());
+			return error::emit(m_tokens.get_current_token_location(), error::code::UNEXPECTED_TOKEN, type_token.to_string());
 		}
 
 		return data_type{ type_token, 0 };
@@ -423,7 +425,7 @@ namespace sigma {
 		const token literal_token = m_tokens.get_current_token();
 
 		if(!literal_token.is_numerical_literal()) {
-			return utility::error::create(utility::error::code::UNEXPECTED_NON_NUMERICAL, literal_token.to_string());
+			return error::emit(m_tokens.get_current_token_location(), error::code::UNEXPECTED_NON_NUMERICAL, literal_token.to_string());
 		}
 
 		// get a symbol key to the literal value

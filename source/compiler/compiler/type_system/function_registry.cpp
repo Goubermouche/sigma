@@ -1,5 +1,7 @@
 #include "function_registry.h"
-#include "compiler/compiler/compilation_context.h"
+
+#include <compiler/compiler/compilation_context.h>
+#include <compiler/compiler/diagnostics.h>
 
 #define INVALID_CAST_COST 1000
 
@@ -53,13 +55,13 @@ namespace sigma {
 
 		if(!valid_identifier) {
 			// no function with the specified identifier was found
-			return utility::error::create(utility::error::code::UNKNOWN_FUNCTION, m_context.strings.get(identifier));
+			return error::emit(error::code::UNKNOWN_FUNCTION, m_context.strings.get(identifier));
 		}
 
 		if(candidates.empty()) {
 			// TODO: it's probably a good idea to specify the parameters that were provided and which
 			//       candidates were even considered
-			return utility::error::create(utility::error::code::NO_FUNCTION_OVERLOAD, m_context.strings.get(identifier));
+			return error::emit(error::code::NO_FUNCTION_OVERLOAD, m_context.strings.get(identifier));
 		}
 
 		const auto best_match = std::min_element(candidates.begin(), candidates.end(), [](const function_call_cost& a, const function_call_cost& b) {

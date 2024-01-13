@@ -84,4 +84,16 @@ namespace sigma {
 	auto token_buffer_iterator::get_current_token() const -> token {
 		return m_current_info.tok;
 	}
+
+	auto token_buffer_iterator::get_current_token_location() const -> handle<token_location> {
+		return m_current_info.location;
+	}
+
+	auto token_buffer_iterator::get_current_token_line_index() const -> u32 {
+		return m_current_info.location->line_index;
+	}
+
+	auto token_buffer_iterator::get_current_token_char_index() const -> u32 {
+		return m_current_info.location->char_index;
+	}
 } // namespace sigma::lex

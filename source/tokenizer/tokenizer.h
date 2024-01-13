@@ -8,8 +8,8 @@ namespace sigma {
 
 	class tokenizer {
 	public:
-		tokenizer(const std::string& source, frontend_context& context);
-		[[nodiscard]] static auto tokenize(const std::string& source, frontend_context& context) -> utility::result<void>;
+		tokenizer(const std::string& source, handle<filepath> source_path, frontend_context& context);
+		[[nodiscard]] static auto tokenize(const std::string& source, handle<filepath> source_path, frontend_context& context) -> utility::result<void>;
 		[[nodiscard]] auto tokenize() -> utility::result<void>;
 	private:
 		[[nodiscard]] auto get_next_token() -> utility::result<token_info>;

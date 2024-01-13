@@ -1,7 +1,8 @@
 #include "type_checker.h"
-#include <compiler/compiler/compilation_context.h>
 
-#include "intermediate_representation/target/system/win/win.h"
+#include <intermediate_representation/target/system/win/win.h>
+#include <compiler/compiler/compilation_context.h>
+#include <compiler/compiler/diagnostics.h>
 
 namespace sigma {
 	auto type_checker::type_check(backend_context& context) -> utility::result<void> {
@@ -63,10 +64,7 @@ namespace sigma {
 
 		// check if the function hasn't been declared before
 		if(m_context.function_registry.contains_function(signature)) {
-			return utility::error::create(
-				utility::error::code::FUNCTION_ALREADY_DECLARED, 
-				m_context.strings.get(signature.identifier_key)
-			);
+			return error::emit(error::code::FUNCTION_ALREADY_DECLARED, m_context.strings.get(signature.identifier_key));
 		}
 
 		// register the function
@@ -97,10 +95,7 @@ namespace sigma {
 
 		// check, whether the variable has already been declared in the current context
 		if(m_context.variable_registry.contains(property.identifier_key)) {
-			return utility::error::create(
-				utility::error::code::VARIABLE_ALREADY_DECLARED,
-				m_context.strings.get(property.identifier_key)
-			);
+			return error::emit(error::code::VARIABLE_ALREADY_DECLARED, m_context.strings.get(property.identifier_key));
 		}
 
 		// register the variable
@@ -154,7 +149,7 @@ namespace sigma {
 		if (return_node->children.get_size() == 0) {
 			// 'ret' - verify that the parent function expects an empty return type
 			if(expected != data_type(data_type::VOID, 0)) {
-				return utility::error::create(utility::error::code::VOID_RETURN, expected.to_string());
+				return error::emit(error::code::VOID_RETURN, expected.to_string());
 			}
 		}
 		else {
@@ -248,7 +243,7 @@ namespace sigma {
 		// locate the variable
 		const auto variable = m_context.variable_registry.get_variable(property.identifier_key);
 		if(variable == nullptr) {
-			return utility::error::create(utility::error::code::UNKNOWN_VARIABLE, m_context.strings.get(property.identifier_key));
+			return error::emit(error::code::UNKNOWN_VARIABLE, m_context.strings.get(property.identifier_key));
 		}
 
 		property.type = variable->type; // default to the declared type
@@ -265,7 +260,7 @@ namespace sigma {
 		const auto variable = m_context.variable_registry.get_variable(variable_property.identifier_key);
 
 		if (variable == nullptr) {
-			return utility::error::create(utility::error::code::UNKNOWN_VARIABLE, m_context.strings.get(variable_property.identifier_key));
+			return error::emit(error::code::UNKNOWN_VARIABLE, m_context.strings.get(variable_property.identifier_key));
 		}
 
 		// type check the assigned value against the declared type

@@ -3,7 +3,6 @@
 
 #include <utility/containers/contiguous_container.h>
 #include <utility/containers/string_table.h>
-#include <utility/containers/allocators/block_allocator.h>
 
 namespace sigma {
 	class token_buffer {
@@ -46,6 +45,9 @@ namespace sigma {
 
 		auto get_current() const-> token_info;
 		auto get_current_token() const -> token;
+		auto get_current_token_location() const -> handle<token_location>;
+		auto get_current_token_line_index() const -> u32;
+		auto get_current_token_char_index() const -> u32;
 	private:
 		const token_buffer& m_tokens;
 

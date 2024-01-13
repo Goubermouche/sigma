@@ -27,7 +27,7 @@ namespace utility {
 				std::ofstream file(path.get_path(), std::ios::binary);
 
 				if (!file) {
-					return error::create(error::code::CANNOT_READ_FILE, path);
+					// return error::create(error::code::CANNOT_READ_FILE, path);
 				}
 
 				for (const type* ptr = value.begin(); ptr != value.end(); ++ptr) {
@@ -46,7 +46,7 @@ namespace utility {
 				std::ifstream file(path.get_path());
 
 				if (!file) {
-					return error::create(error::code::CANNOT_READ_FILE, path);
+					// return error::create(error::code::CANNOT_READ_FILE, path);
 				}
 
 				return std::string(std::istreambuf_iterator<char>(file), std::istreambuf_iterator<char>());

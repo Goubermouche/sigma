@@ -2,20 +2,20 @@
 #include <compiler/compiler/compilation_context.h>
 #include <compiler/compiler/diagnostics.h>
 
-#define EXPECT_CURRENT(__token)                                             \
+#define EXPECT_CURRENT_TOKEN(__token)                                       \
 do {                                                                        \
 	if (m_tokens.get_current_token() != (__token)) {                          \
 		return error::emit(                                                     \
-			m_tokens.get_current_token_location(),                                \
 			error::code::UNEXPECTED_TOKEN_WITH_EXPECTED,                          \
+			m_tokens.get_current_token_location(),                                \
 			token(__token).to_string(), m_tokens.get_current_token().to_string()  \
 		);                                                                      \
 	}                                                                         \
 } while(false)
 
-#define EXPECT_NEXT(__token) \
-m_tokens.next();             \
-EXPECT_CURRENT((__token))
+#define EXPECT_NEXT_TOKEN(__token) \
+m_tokens.next();                   \
+EXPECT_CURRENT_TOKEN((__token))
 
 namespace sigma {
 	parser::parser(frontend_context& context) : m_context(context), m_tokens(context.tokens) {}
@@ -26,7 +26,8 @@ namespace sigma {
 
 	auto parser::parse() -> utility::result<void> {
 		// TODO: handle peeks looking past EOF
-		// TODO: manage local context (ie. function body, loop body, if body etc), probably use a stack
+		// TODO: manage local context (ie. function body, loop body, if body etc),
+		//       probably use a stack
 
 		while (m_tokens.get_current_token() != token_type::END_OF_FILE) {
 			handle<node> node;
@@ -45,11 +46,12 @@ namespace sigma {
 	}
 
 	auto parser::parse_function_declaration() -> utility::result<handle<node>> {
+		handle<token_location> function_location = m_tokens.get_current_token_location();
 		TRY(const data_type return_type, parse_type());
 		std::vector<named_data_type> parameters;
 
 		// parse the function identifier
-		EXPECT_NEXT(token_type::IDENTIFIER);
+		EXPECT_NEXT_TOKEN(token_type::IDENTIFIER);
 		const utility::string_table_key identifier_key = m_tokens.get_current().symbol_key;
 
 		m_tokens.next(); // LEFT_PARENTHESIS (guaranteed)
@@ -61,35 +63,42 @@ namespace sigma {
 			TRY(data_type parameter_type, parse_type());
 
 			// prime the identifier
-			EXPECT_NEXT(token_type::IDENTIFIER);
+			EXPECT_NEXT_TOKEN(token_type::IDENTIFIER);
 			const auto parameter_identifier_key = m_tokens.get_current().symbol_key;
 			parameters.emplace_back(parameter_type, parameter_identifier_key);
 
 			if (m_tokens.peek_next_token() == token_type::COMMA) {
-				EXPECT_NEXT(token_type::COMMA);
+				EXPECT_NEXT_TOKEN(token_type::COMMA);
 			}
 		}
 
 		// parse the function body
-		EXPECT_NEXT(token_type::RIGHT_PARENTHESIS);
+		EXPECT_NEXT_TOKEN(token_type::RIGHT_PARENTHESIS);
 		TRY(const std::vector<handle<node>> statements, parse_statement_block());
 
-		const handle<node> function_node = create_node<function_signature>(node_type::FUNCTION_DECLARATION, statements.size());
+		function_signature signature = {
+			.return_type     = return_type,
+			.parameter_types = utility::slice<named_data_type>(m_context.ast.get_allocator(), parameters.size()),
+			.identifier_key  = identifier_key
+		};
 
-		auto& function = function_node->get<function_signature>();
-		function.return_type = return_type;
-		function.identifier_key = identifier_key;
-		function.parameter_types = utility::slice<named_data_type>(m_context.ast.get_allocator(), parameters.size());
+		const handle<node> function_node = create_node<ast_function>(node_type::FUNCTION_DECLARATION, statements.size());
+
+		// initialize the function signature
+		auto& function = function_node->get<ast_function>();
+
+		function.location = function_location;
+		function.signature = signature;
 
 		// copy all statement pointers over to the memory arena
 		std::memcpy(function_node->children.get_data(), statements.data(), statements.size() * sizeof(handle<node>));
-		std::memcpy(function.parameter_types.get_data(), parameters.data(), parameters.size() * sizeof(named_data_type));
+		std::memcpy(function.signature.parameter_types.get_data(), parameters.data(), parameters.size() * sizeof(named_data_type));
 
 		return function_node;
 	}
 
 	auto parser::parse_statement_block() -> utility::result<std::vector<handle<node>>> {
-		EXPECT_NEXT(token_type::LEFT_BRACE);
+		EXPECT_NEXT_TOKEN(token_type::LEFT_BRACE);
 		std::vector<handle<node>> statements;
 
 		while (m_tokens.peek_next_token() != token_type::RIGHT_BRACE) {
@@ -98,7 +107,7 @@ namespace sigma {
 			statements.push_back(statement);
 		}
 
-		EXPECT_NEXT(token_type::RIGHT_BRACE);
+		EXPECT_NEXT_TOKEN(token_type::RIGHT_BRACE);
 		return statements;
 	}
 
@@ -121,17 +130,19 @@ namespace sigma {
 					TRY(result, parse_return_statement()); break;
 				}
 				default: {
-					return error::emit(m_tokens.get_current_token_location(), error::code::UNEXPECTED_TOKEN, m_tokens.get_current_token().to_string());
+					return error::emit(error::code::UNEXPECTED_TOKEN, m_tokens.get_current_token_location(), m_tokens.get_current_token().to_string());
 				}
 			}
 		}
 
 		// expect a trailing semicolon
-		EXPECT_NEXT(token_type::SEMICOLON);
+		EXPECT_NEXT_TOKEN(token_type::SEMICOLON);
 		return result;
 	}
 
 	auto parser::parse_return_statement() -> utility::result<handle<node>> {
+		const handle<token_location> location = m_tokens.get_current_token_location();
+
 		// first token is the RET keyword
 		// allow return statements without any expressions
 		if (m_tokens.peek_next_token() == token_type::SEMICOLON) {
@@ -141,15 +152,17 @@ namespace sigma {
 
 		m_tokens.next(); // prime the first expression token
 
-		const handle<node> return_node = create_node<return_statement>(node_type::RETURN, 1);
-		TRY(return_node->children[0], parse_expression());
-		return return_node;
+		const handle<node> ret = create_node<ast_return>(node_type::RETURN, 1);
+		ret->get<ast_return>().location = location;
+		TRY(ret->children[0], parse_expression());
+
+		return ret;
 	}
 
 	auto parser::parse_if_else_statement_block() -> utility::result<handle<node>> {
 		// the first token is an IF keyword
 		TRY(const handle<node> entry, parse_if_statement());
-		handle<node> branch_before = entry;
+		handle<node> preceding_branch = entry;
 
 		// parse succeeding if else statements
 		while (m_tokens.peek_next_token() == token_type::ELSE) {
@@ -157,11 +170,11 @@ namespace sigma {
 
 			if (m_tokens.peek_next_token() == token_type::IF) {
 				// if else
-				EXPECT_NEXT(token_type::IF);
+				EXPECT_NEXT_TOKEN(token_type::IF);
 				TRY(const handle<node> branch, parse_if_statement());
 
-				branch_before->children[1] = branch; // point to the next branch
-				branch_before = branch;
+				preceding_branch->children[1] = branch; // point to the next branch
+				preceding_branch = branch;
 			}
 			else if (m_tokens.peek_next_token() == token_type::LEFT_BRACE) {
 				// else
@@ -169,7 +182,7 @@ namespace sigma {
 
 				const handle<node> branch_node = create_node<utility::empty_property>(node_type::BRANCH, statements.size());
 				std::memcpy(branch_node->children.get_data(), statements.data(), statements.size() * sizeof(handle<node>));
-				branch_before->children[1] = branch_node; // point to the next branch
+				preceding_branch->children[1] = branch_node; // point to the next branch
 				break;
 			}
 		}
@@ -181,21 +194,21 @@ namespace sigma {
 		// parses a statement in the following format:
 		// IF ( condition ) { statements }
 
-		EXPECT_NEXT(token_type::LEFT_PARENTHESIS);
+		EXPECT_NEXT_TOKEN(token_type::LEFT_PARENTHESIS);
 		m_tokens.next(); // prime the expression token
 
 		TRY(const handle<node> condition, parse_expression());
 
-		EXPECT_NEXT(token_type::RIGHT_PARENTHESIS);
+		EXPECT_NEXT_TOKEN(token_type::RIGHT_PARENTHESIS);
 		TRY(const std::vector<handle<node>> statements, parse_statement_block());
 
 		const handle<node> branch_node = create_node<utility::empty_property>(node_type::CONDITIONAL_BRANCH, statements.size() + 2);
 
-		branch_node->children[0] = condition; // condition
-		branch_node->children[1] = nullptr;   // false condition target
-
 		// copy all child statements
 		std::memcpy(branch_node->children.get_data() + 2, statements.data(), statements.size() * sizeof(handle<node>));
+
+		branch_node->children[0] = condition; // condition
+		branch_node->children[1] = nullptr;   // false condition target
 
 		return branch_node;
 	}
@@ -207,30 +220,30 @@ namespace sigma {
 			return parse_function_call();
 		}
 		else {
-			TRY(const handle<node> variable, parse_variable_access());
+			TRY(const handle<node> variable_node, parse_variable_access());
 
 			// check if we're assigning anything
 			if (m_tokens.peek_next_token() == token_type::EQUALS_SIGN) {
-				EXPECT_NEXT(token_type::EQUALS_SIGN);
-				TRY(const handle<node> assignment, parse_assignment());
+				EXPECT_NEXT_TOKEN(token_type::EQUALS_SIGN);
+				TRY(const handle<node> assignment_node, parse_assignment());
 
-				assignment->children[0] = variable;
-				return assignment;
+				assignment_node->children[0] = variable_node;
+				return assignment_node;
 			}
 			else {
-				return variable;
+				return variable_node;
 			}
 		}
 	}
 
 	auto parser::parse_negative_expression() -> utility::result<handle<node>> {
-		EXPECT_CURRENT(token_type::MINUS_SIGN);
+		EXPECT_CURRENT_TOKEN(token_type::MINUS_SIGN);
 		m_tokens.next(); // prime the first expression token
 
 		TRY(const handle<node> expression_node, parse_expression());
-		const handle<node> negation_node = create_node<literal>(node_type::NUMERICAL_LITERAL, 0);
+		const handle<node> negation_node = create_node<ast_literal>(node_type::NUMERICAL_LITERAL, 0);
 
-		auto& literal = negation_node->get<sigma::literal>();
+		ast_literal& literal = negation_node->get<ast_literal>();
 		literal.value_key = m_context.strings.insert("-1");
 		literal.type = { data_type::I32, 0 };
 
@@ -241,52 +254,64 @@ namespace sigma {
 	auto parser::parse_function_call() -> utility::result<handle<node>> {
 		ASSERT(m_tokens.get_current_token() == token_type::IDENTIFIER, "invalid token - expected a 'MINUS_SIGN'");
 
+		const handle<token_location> call_location = m_tokens.get_current_token_location();
 		const utility::string_table_key identifier_key = m_tokens.get_current().symbol_key;
 		std::vector<handle<node>> parameters;
 
-		EXPECT_NEXT(token_type::LEFT_PARENTHESIS); 
+		EXPECT_NEXT_TOKEN(token_type::LEFT_PARENTHESIS); 
 
 		// parse call parameters
 		while (m_tokens.peek_next_token() != token_type::RIGHT_PARENTHESIS) {
 			m_tokens.next(); // prime the expression token
-			TRY(handle<node> expression, parse_expression());
-			parameters.push_back(expression);
+			TRY(handle<node> expression_node, parse_expression());
+			parameters.push_back(expression_node);
 
 			if (m_tokens.peek_next_token() == token_type::COMMA) {
-				EXPECT_NEXT(token_type::COMMA);
+				EXPECT_NEXT_TOKEN(token_type::COMMA);
 			}
 		}
 
-		EXPECT_NEXT(token_type::RIGHT_PARENTHESIS);
+		EXPECT_NEXT_TOKEN(token_type::RIGHT_PARENTHESIS);
 
-		// create the call node
-		const handle<node> call_node = create_node<function_signature>(node_type::FUNCTION_CALL, parameters.size());
+		// create the callee
+		const handle<node> call_node = create_node<ast_function>(node_type::FUNCTION_CALL, parameters.size());
+
+		// copy over function parameters
 		std::memcpy(call_node->children.get_data(), parameters.data(), parameters.size() * sizeof(handle<node>));
-		call_node->get<function_signature>().identifier_key = identifier_key;
+
+		// initialize the callee
+		ast_function& function = call_node->get<ast_function>();
+		function.signature.identifier_key = identifier_key;
+		function.location = call_location;
 
 		return call_node;
 	}
 
 	auto parser::parse_variable_declaration() -> utility::result<handle<node>> {
+		const handle<token_location> location = m_tokens.get_current_token_location();
+
 		// first token is the type
 		TRY(const data_type type, parse_type());
 		handle<node> assigned_value = nullptr;
 
-		EXPECT_NEXT(token_type::IDENTIFIER);
+		EXPECT_NEXT_TOKEN(token_type::IDENTIFIER);
 		const auto identifier_key = m_tokens.get_current().symbol_key;
 
 		if (m_tokens.peek_next_token() == token_type::EQUALS_SIGN) {
-			EXPECT_NEXT(token_type::EQUALS_SIGN);
+			EXPECT_NEXT_TOKEN(token_type::EQUALS_SIGN);
 			m_tokens.next(); // prime the first expression token
 
 			TRY(assigned_value, parse_expression());
 		}
 
 		// create the variable node
-		const handle<node> variable_node = create_node<variable>(node_type::VARIABLE_DECLARATION, assigned_value ? 1 : 0);
-		auto& variable = variable_node->get<sigma::variable>();
-		variable.type = type;
+		const handle<node> variable_node = create_node<ast_variable>(node_type::VARIABLE_DECLARATION, assigned_value ? 1 : 0);
+
+		// initialize the variable
+		auto& variable = variable_node->get<ast_variable>();
 		variable.identifier_key = identifier_key;
+		variable.location = location;
+		variable.type = type;
 
 		if (assigned_value) {
 			variable_node->children[0] = assigned_value;
@@ -296,25 +321,29 @@ namespace sigma {
 	}
 
 	auto parser::parse_variable_access() const -> utility::result<handle<node>> {
-		EXPECT_CURRENT(token_type::IDENTIFIER);
+		const handle<token_location> location = m_tokens.get_current_token_location();
+		EXPECT_CURRENT_TOKEN(token_type::IDENTIFIER);
 
 		// create the access node
-		const handle<node> access_node = create_node<variable>(node_type::VARIABLE_ACCESS, 0);
-		access_node->get<variable>().identifier_key = m_tokens.get_current().symbol_key;
+		const handle<node> variable_node = create_node<ast_variable>(node_type::VARIABLE_ACCESS, 0);
 
-		return access_node;
+		// initialize the variable
+		auto& variable = variable_node->get<ast_variable>();
+		variable.identifier_key = m_tokens.get_current().symbol_key;
+		variable.location = location;
+
+		return variable_node;
 	}
 
 	auto parser::parse_assignment() -> utility::result<handle<node>> {
-		EXPECT_CURRENT(token_type::EQUALS_SIGN);
-
-		// handle the assigned expression
-		m_tokens.next(); // prime the expression token
-		TRY(const handle<node> expression, parse_expression());
+		EXPECT_CURRENT_TOKEN(token_type::EQUALS_SIGN);
+		m_tokens.next(); 
 
 		// create the assignment node
 		const handle<node> assignment_node = create_node<utility::empty_property>(node_type::VARIABLE_ASSIGNMENT, 2);
-		assignment_node->children[1] = expression;
+
+		// handle the assigned expression
+		TRY(assignment_node->children[1], parse_expression()); 
 
 		return assignment_node;
 	}
@@ -324,22 +353,22 @@ namespace sigma {
 	}
 
 	auto parser::parse_logical_conjunction() -> utility::result<handle<node>> {
-		TRY(const handle<node> left, parse_logical_disjunction());
-		return left;
+		TRY(const handle<node> left_node, parse_logical_disjunction());
+		return left_node;
 	}
 
 	auto parser::parse_logical_disjunction() -> utility::result<handle<node>> {
-		TRY(const handle<node> left, parse_comparison());
-		return left;
+		TRY(const handle<node> left_node, parse_comparison());
+		return left_node;
 	}
 
 	auto parser::parse_comparison() -> utility::result<handle<node>> {
-		TRY(const handle<node> left, parse_term());
-		return left;
+		TRY(const handle<node> left_node, parse_term());
+		return left_node;
 	}
 
 	auto parser::parse_term() -> utility::result<handle<node>> {
-		TRY(handle<node> left, parse_factor());
+		TRY(handle<node> left_node, parse_factor());
 		token operation = m_tokens.peek_next_token();
 
 		while (
@@ -349,7 +378,7 @@ namespace sigma {
 			m_tokens.next(); // consume the operator
 			m_tokens.next(); // prime the term
 
-			TRY(const handle<node> right, parse_factor());
+			TRY(const handle<node> right_node, parse_factor());
 			node_type operator_type = node_type::UNKNOWN;
 
 			switch (operation) {
@@ -358,15 +387,15 @@ namespace sigma {
 				default: PANIC("unhandled term case for token '{}'", operation.to_string());
 			}
 
-			left = create_binary_expression(operator_type, left, right);
+			left_node = create_binary_expression(operator_type, left_node, right_node);
 			operation = m_tokens.peek_next_token();
 		}
 
-		return left;
+		return left_node;
 	}
 
 	auto parser::parse_factor() -> utility::result<handle<node>> {
-		TRY(handle<node> left, parse_primary());
+		TRY(handle<node> left_node, parse_primary());
 		token operation = m_tokens.peek_next_token();
 
 		while (
@@ -377,7 +406,7 @@ namespace sigma {
 			m_tokens.next(); // consume the operator
 			m_tokens.next(); // prime the primary
 
-			TRY(const handle<node> right, parse_primary());
+			TRY(const handle<node> right_node, parse_primary());
 			node_type operator_type = node_type::UNKNOWN;
 
 			switch (operation) {
@@ -387,11 +416,11 @@ namespace sigma {
 				default: PANIC("unhandled factor case for token '{}'", operation.to_string());
 			}
 
-			left = create_binary_expression(operator_type, left, right);
+			left_node = create_binary_expression(operator_type, left_node, right_node);
 			operation = m_tokens.peek_next_token();
 		}
 
-		return left;
+		return left_node;
 	}
 
 	auto parser::parse_primary() -> utility::result<handle<node>> {
@@ -405,7 +434,7 @@ namespace sigma {
 			case token_type::MINUS_SIGN:         return parse_negative_expression();
 			case token_type::BOOL_LITERAL_TRUE:
 			case token_type::BOOL_LITERAL_FALSE: return parse_bool_literal();
-			default: error::emit(m_tokens.get_current_token_location(), error::code::UNEXPECTED_TOKEN, m_tokens.get_current_token().to_string());
+			default: error::emit(error::code::UNEXPECTED_TOKEN, m_tokens.get_current_token_location(), m_tokens.get_current_token().to_string());
 		}
 
 		return nullptr;
@@ -415,7 +444,7 @@ namespace sigma {
 		const token type_token = m_tokens.get_current_token();
 
 		if(!type_token.is_type()) {
-			return error::emit(m_tokens.get_current_token_location(), error::code::UNEXPECTED_TOKEN, type_token.to_string());
+			return error::emit(error::code::UNEXPECTED_TOKEN, m_tokens.get_current_token_location(), type_token.to_string());
 		}
 
 		return data_type{ type_token, 0 };
@@ -425,7 +454,7 @@ namespace sigma {
 		const token literal_token = m_tokens.get_current_token();
 
 		if(!literal_token.is_numerical_literal()) {
-			return error::emit(m_tokens.get_current_token_location(), error::code::UNEXPECTED_NON_NUMERICAL, literal_token.to_string());
+			return error::emit(error::code::UNEXPECTED_NON_NUMERICAL, m_tokens.get_current_token_location(), literal_token.to_string());
 		}
 
 		// get a symbol key to the literal value
@@ -444,8 +473,10 @@ namespace sigma {
 		}
 
 		// create the literal node
-		const handle<node> literal_node = create_node<literal>(node_type::NUMERICAL_LITERAL, 0);
-		auto& literal = literal_node->get<sigma::literal>();
+		const handle<node> literal_node = create_node<ast_literal>(node_type::NUMERICAL_LITERAL, 0);
+
+		// initialize the literal
+		auto& literal = literal_node->get<ast_literal>();
 		literal.value_key = m_tokens.get_current().symbol_key;
 		literal.type = { base, 0 };
 
@@ -453,11 +484,13 @@ namespace sigma {
 	}
 
 	auto parser::parse_string_literal() const -> utility::result<handle<node>> {
-		EXPECT_CURRENT(token_type::STRING_LITERAL);
+		EXPECT_CURRENT_TOKEN(token_type::STRING_LITERAL);
 
 		// create the string node
-		const handle<node> string_node = create_node<literal>(node_type::STRING_LITERAL, 0);
-		auto& literal = string_node->get<sigma::literal>();
+		const handle<node> string_node = create_node<ast_literal>(node_type::STRING_LITERAL, 0);
+
+		// initialize the literal
+		auto& literal = string_node->get<ast_literal>();
 		literal.value_key = m_tokens.get_current().symbol_key;
 		literal.type = { data_type::CHAR, 1 }; // char*
 
@@ -472,8 +505,10 @@ namespace sigma {
 		);
 
 		// create the bool node
-		const handle<node> bool_node = create_node<bool_literal>(node_type::BOOL_LITERAL, 0);
-		bool_node->get<bool_literal>().value = m_tokens.get_current_token() == token_type::BOOL_LITERAL_TRUE;
+		const handle<node> bool_node = create_node<ast_bool_literal>(node_type::BOOL_LITERAL, 0);
+
+		// initialize the literal
+		bool_node->get<ast_bool_literal>().value = m_tokens.get_current_token() == token_type::BOOL_LITERAL_TRUE;
 
 		return bool_node;
 	}

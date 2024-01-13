@@ -60,6 +60,8 @@ namespace utility {
 	}
 
 	auto block_allocator::allocate(u64 size) -> void* {
+		ASSERT(size <= m_block_size, "insufficient block size for allocation of {}B", size);
+
 		// if this allocation incurs a buffer overflow allocate a new block
 		if (m_blocks.back().position + size > m_block_size) {
 			allocate_block();

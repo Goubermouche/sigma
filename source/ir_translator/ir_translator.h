@@ -43,7 +43,7 @@ namespace sigma {
 		auto translate_variable_access(handle<node> access_node) const-> handle<ir::node>;
 		auto translate_variable_assignment(handle<node> assignment_node) -> handle<ir::node>;
 
-		auto literal_to_ir(literal& literal) const-> handle<ir::node>;
+		auto literal_to_ir(ast_literal& literal) const-> handle<ir::node>;
 		static auto data_type_to_ir(data_type dt) -> ir::data_type;
 	private:
 		backend_context& m_context;

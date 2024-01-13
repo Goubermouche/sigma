@@ -7,13 +7,10 @@
 // -   IR translator 
 //     -   dynamic programming impl?
 
-i32 test() {
-	printf("a\n");
-	ret 0;
-}
+i32 test(i32 a) { ret 0; }
+i32 test(i32 a, i32 b) { ret 0; }
 
 i32 main() {
-	printf("b\n");
-	test();
+	printf("b\n", aawdwawdaw);
 	ret 0;
 }

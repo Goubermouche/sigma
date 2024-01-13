@@ -55,6 +55,7 @@ namespace sigma {
 
 	struct node;
 
+	// TODO: move this elsewhere
 	// a higher-level function signature (contains_function info about custom types and generics)
 	struct function_signature {
 		bool operator==(const function_signature& other) const;
@@ -67,24 +68,32 @@ namespace sigma {
 		utility::string_table_key identifier_key;
 	};
 
-	struct return_statement {};
+	struct ast_function {
+		function_signature signature;
+		handle<token_location> location; // debug location
+	};
 
-	struct literal {
+	struct ast_return {
+		handle<token_location> location; // debug location
+	};
+
+	struct ast_literal {
 		utility::string_table_key value_key; // literal value represented as a string
 		data_type type;
 	};
 
-	struct bool_literal {
+	struct ast_bool_literal {
 		bool value;
 	};
 
-	struct variable {
-		utility::string_table_key identifier_key;
+	struct ast_variable {
 		data_type type;
+		utility::string_table_key identifier_key;
+		handle<token_location> location; // debug location
 	};
 
 	using node_properties = utility::property<
-		function_signature, return_statement, literal, variable, bool_literal
+		ast_function, ast_return, ast_literal, ast_variable, ast_bool_literal
 	>;
 
 	struct node : node_properties {

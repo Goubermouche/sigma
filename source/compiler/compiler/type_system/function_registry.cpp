@@ -24,18 +24,19 @@ namespace sigma {
 		return false;
 	}
 
-	auto function_registry::get_callee_signature(utility::string_table_key identifier, const std::vector<data_type>& parameter_types) -> utility::result<function_signature> {
-		using function_call_cost = std::pair<function_signature, u16>;
-		std::vector<function_call_cost> candidates;
+	auto function_registry::get_callee_signature(const ast_function& function, const std::vector<data_type>& parameter_types) -> utility::result<function_signature> {
+		using call_candidate = std::pair<function_signature, u16>;
+
+		std::vector<call_candidate> candidates;
 		bool valid_identifier = false;
 
 		// helper for getting potential candidates
 		auto add_candidates = [&](const auto& function_map) {
-			const auto it = function_map.find(identifier);
+			const auto it = function_map.find(function.signature.identifier_key);
 			if (it != function_map.end()) {
-				valid_identifier |= true;
+				valid_identifier = true;
 
-				for (const auto& [signature, function] : it->second) {
+				for (const auto& [signature, ir_function] : it->second) {
 					if (
 						signature.parameter_types.get_size() == parameter_types.size() ||
 						(signature.parameter_types.get_size() < parameter_types.size() && signature.has_var_args)
@@ -55,18 +56,18 @@ namespace sigma {
 
 		if(!valid_identifier) {
 			// no function with the specified identifier was found
-			return error::emit(error::code::UNKNOWN_FUNCTION, m_context.strings.get(identifier));
+			const std::string& identifier_str = m_context.strings.get(function.signature.identifier_key);
+			return error::emit(error::code::UNKNOWN_FUNCTION, identifier_str);
 		}
 
 		if(candidates.empty()) {
-			// TODO: it's probably a good idea to specify the parameters that were provided and which
-			//       candidates were even considered
-			return error::emit(error::code::NO_FUNCTION_OVERLOAD, m_context.strings.get(identifier));
+			return emit_no_viable_overload_error(function);
 		}
 
-		const auto best_match = std::min_element(candidates.begin(), candidates.end(), [](const function_call_cost& a, const function_call_cost& b) {
-			return a.second < b.second;
-		});
+		const auto best_match = std::min_element(
+			candidates.begin(), candidates.end(),
+			[](const call_candidate& a, const call_candidate& b) { return a.second < b.second; }
+		);
 
 		// TODO: implement casting
 		ASSERT(best_match->second == 0, "implement casting in the type checker!");
@@ -109,6 +110,45 @@ namespace sigma {
 
 		PANIC("unknown function called");
 		return nullptr;
+	}
+
+	auto function_registry::emit_no_viable_overload_error(const ast_function& function) -> utility::error {
+		// construct a list of all potentially viable functions
+		std::stringstream candidate_stream;
+		const std::string& identifier_str = m_context.strings.get(function.signature.identifier_key);
+
+		auto add_considered_candidate = [&](const auto& function_map) {
+			const auto it = function_map.find(function.signature.identifier_key);
+			if (it != function_map.end()) {
+				for (const auto& [signature, ir_function] : it->second) {
+					candidate_stream
+						<< "  "
+						<< signature.return_type.to_string()
+						<< " "
+						<< identifier_str
+						<< "(";
+
+					for (u64 i = 0; i < signature.parameter_types.get_size(); ++i) {
+						candidate_stream
+							<< signature.parameter_types[i].type.to_string()
+							<< " "
+							<< m_context.strings.get(signature.parameter_types[i].identifier_key);
+
+						if (i + 1 != signature.parameter_types.get_size()) {
+							candidate_stream << ", ";
+						}
+					}
+
+					candidate_stream << ")\n";
+				}
+			}
+		};
+
+		add_considered_candidate(m_local_functions);
+		add_considered_candidate(m_external_functions);
+
+		// TODO: when we get allocator-based strings working, remove the trailing \n
+		return error::emit(error::code::NO_CALL_OVERLOAD, function.location, identifier_str, candidate_stream.str());
 	}
 
 	auto function_registry::calculate_parameter_cast_cost(const function_signature& signature, const std::vector<data_type>& parameter_types) -> u16 {

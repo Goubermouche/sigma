@@ -50,12 +50,14 @@ namespace sigma {
 		 * \b parameter_types. The best match is determined via determining the overall 'cast cost' of
 		 * calling the given function with the provided \b parameter_types.
 		 * \param identifier Identifier of the function
+		 * \param callee_location Token location of the callee in the source file
 		 * \param parameter_types Parameter types to match with
 		 * \return Closest-matching signature.
 		 */
-		auto get_callee_signature(utility::string_table_key identifier, const std::vector<data_type>& parameter_types) -> utility::result<function_signature>;
+		auto get_callee_signature(const ast_function& function, const std::vector<data_type>& parameter_types) -> utility::result<function_signature>;
 		auto create_call(const function_signature& callee_signature, const std::vector<handle<ir::node>>& parameters) -> handle<ir::node>;
 	private:
+		auto emit_no_viable_overload_error(const ast_function& function) -> utility::error;
 		static auto calculate_parameter_cast_cost(const function_signature& signature, const std::vector<data_type>& parameter_types) -> u16;
 		static auto calculate_cast_cost(const data_type& provided, const data_type& required) -> u16;
 	private:

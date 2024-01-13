@@ -22,7 +22,7 @@ namespace sigma {
 
 		template<typename extra_type>
 		auto create_node(node_type type, u64 child_count) -> handle<node> {
-			const handle node_ptr = static_cast<node*>(m_allocator.allocate_zero(sizeof(node)));
+			const handle node_ptr = m_allocator.allocate_zero<node>();
 
 			node_ptr->set_property(m_allocator.allocate_zero(sizeof(extra_type)));
 			node_ptr->children = allocate_node_list(child_count);
@@ -31,7 +31,7 @@ namespace sigma {
 			return node_ptr;
 		}
 	private:
-		// handles pointing to the main nodes (function and global declarations)
+		// handles pointing to the main nodes (functions and globals)
 		utility::contiguous_container<handle<node>> m_nodes;
 
 		// the actual node data is stored in a block allocator

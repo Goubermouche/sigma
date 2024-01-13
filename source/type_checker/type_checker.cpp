@@ -60,27 +60,27 @@ namespace sigma {
 
 	auto type_checker::type_check_function_declaration(handle<node> function_node, data_type expected) -> utility::result<data_type> {
 		SUPPRESS_C4100(expected);
-		const auto& signature = function_node->get<function_signature>();
+		const ast_function& function = function_node->get<ast_function>();
 
 		// check if the function hasn't been declared before
-		if(m_context.function_registry.contains_function(signature)) {
-			return error::emit(error::code::FUNCTION_ALREADY_DECLARED, m_context.strings.get(signature.identifier_key));
+		if(m_context.function_registry.contains_function(function.signature)) {
+			const std::string& identifier = m_context.strings.get(function.signature.identifier_key);
+			return error::emit(error::code::FUNCTION_ALREADY_DECLARED, function.location, identifier);
 		}
 
 		// register the function
-		m_context.function_registry.pre_declare_local_function(signature);
+		m_context.function_registry.pre_declare_local_function(function.signature);
 		m_context.variable_registry.push_scope();
 
-		// TODO: handle varargs
 		// push temporaries for function parameters
-		for(const named_data_type& parameter : signature.parameter_types) {
-			auto& var = m_context.variable_registry.pre_declare_variable(parameter.identifier_key, parameter.type);
-			var.flags |= variable_registry::variable::FUNCTION_PARAMETER | variable_registry::variable::LOCAL;
+		for(const named_data_type& parameter : function.signature.parameter_types) {
+			auto& variable = m_context.variable_registry.pre_declare_variable(parameter.identifier_key, parameter.type);
+			variable.flags |= variable_registry::variable::FUNCTION_PARAMETER | variable_registry::variable::LOCAL;
 		}
 
 		// type check inner statements
 		for(const handle<node>& statement : function_node->children) {
-			TRY(type_check_node(statement, signature.return_type));
+			TRY(type_check_node(statement, function.signature.return_type));
 		}
 
 		m_context.variable_registry.pop_scope();
@@ -91,20 +91,21 @@ namespace sigma {
 
 	auto type_checker::type_check_variable_declaration(handle<node> variable_node, data_type expected) -> utility::result<data_type> {
 		SUPPRESS_C4100(expected);
-		const auto& property = variable_node->get<variable>();
+		const ast_variable& variable = variable_node->get<ast_variable>();
 
 		// check, whether the variable has already been declared in the current context
-		if(m_context.variable_registry.contains(property.identifier_key)) {
-			return error::emit(error::code::VARIABLE_ALREADY_DECLARED, m_context.strings.get(property.identifier_key));
+		if(m_context.variable_registry.contains(variable.identifier_key)) {
+			const std::string& identifier_str = m_context.strings.get(variable.identifier_key);
+			return error::emit(error::code::VARIABLE_ALREADY_DECLARED, variable.location, identifier_str);
 		}
 
 		// register the variable
-		auto& var = m_context.variable_registry.pre_declare_variable(property.identifier_key, property.type);
-		var.flags |= variable_registry::variable::LOCAL;
+		auto& declaration = m_context.variable_registry.pre_declare_variable(variable.identifier_key, variable.type);
+		declaration.flags |= variable_registry::variable::LOCAL;
 
 		// type check the assigned value
 		if (variable_node->children.get_size() == 1) {
-			TRY(type_check_node(variable_node->children[0], property.type));
+			TRY(type_check_node(variable_node->children[0], variable.type));
 		}
 
 		// this value won't be used
@@ -113,18 +114,18 @@ namespace sigma {
 
 	auto type_checker::type_check_function_call(handle<node> call_node, data_type expected) -> utility::result<data_type> {
 		SUPPRESS_C4100(expected);
-		// at this point the function signature is empty
-		auto& callee_signature = call_node->get<function_signature>();
+
 		std::vector<data_type> parameter_data_types(call_node->children.get_size());
+		ast_function& function = call_node->get<ast_function>();
 
 		// type check all parameters and store their inherent type
 		for(u64 i = 0; i < parameter_data_types.size(); ++i) {
 			TRY(parameter_data_types[i], type_check_node(call_node->children[i]));
-			ASSERT(parameter_data_types[i].base_type != data_type::UNKNOWN, "unknown typ detected");
-			// std::cout << "type: " << parameter_data_types[i].to_string() << '\n';
+			ASSERT(parameter_data_types[i].base_type != data_type::UNKNOWN, "unknown parameter type detected");
 		}
 
-		TRY(callee_signature, m_context.function_registry.get_callee_signature(callee_signature.identifier_key, parameter_data_types));
+		// at this point the function signature is empty, we gotta find a valid one
+		TRY(function.signature, m_context.function_registry.get_callee_signature(function, parameter_data_types));
 
 		// TODO: cast everything according to the callee signature
 
@@ -147,13 +148,14 @@ namespace sigma {
 
 	auto type_checker::type_check_return(handle<node> return_node, data_type expected) -> utility::result<data_type> {
 		if (return_node->children.get_size() == 0) {
-			// 'ret' - verify that the parent function expects an empty return type
+			// return an empty
+			// verify that the parent function expects an empty return type
 			if(expected != data_type(data_type::VOID, 0)) {
-				return error::emit(error::code::VOID_RETURN, expected.to_string());
+				return error::emit(error::code::VOID_RETURN, return_node->get<ast_return>().location, expected.to_string());
 			}
 		}
 		else {
-			// 'ret type'
+			// return a value
 			TRY(type_check_node(return_node->children[0], expected));
 		}
 
@@ -174,7 +176,6 @@ namespace sigma {
 			}
 			// type check a regular branch
 			else if (branch_node->children[1]->type == node_type::BRANCH) {
-
 				TRY(type_check_branch(branch_node->children[1], expected));
 			}
 			else {
@@ -218,37 +219,38 @@ namespace sigma {
 	}
 
 	auto type_checker::type_check_numerical_literal(handle<node> literal_node, data_type expected) -> utility::result<data_type> {
-		auto& property = literal_node->get<literal>();
-		apply_expected_data_type(property.type, expected);
-		return property.type;
+		auto& literal = literal_node->get<ast_literal>();
+		apply_expected_data_type(literal.type, expected);
+		return literal.type;
 	}
 
 	auto type_checker::type_check_string_literal(handle<node> literal_node, data_type expected) -> utility::result<data_type> {
-		auto& property = literal_node->get<literal>();
-		apply_expected_data_type(property.type, expected);
-		return property.type;
+		auto& literal = literal_node->get<ast_literal>();
+		apply_expected_data_type(literal.type, expected);
+		return literal.type;
 	}
 
 	auto type_checker::type_check_bool_literal(handle<node> literal_node, data_type expected) -> utility::result<data_type> {
 		SUPPRESS_C4100(literal_node);
 		SUPPRESS_C4100(expected);
 
-		const data_type boolean(data_type::BOOL, 0);
-		return boolean;
+		return data_type(data_type::BOOL, 0);
 	}
 
 	auto type_checker::type_check_variable_access(handle<node> access_node, data_type expected) -> utility::result<data_type> {
-		auto& property = access_node->get<variable>();
+		auto& variable = access_node->get<ast_variable>();
 
 		// locate the variable
-		const auto variable = m_context.variable_registry.get_variable(property.identifier_key);
-		if(variable == nullptr) {
-			return error::emit(error::code::UNKNOWN_VARIABLE, m_context.strings.get(property.identifier_key));
+		const auto declaration = m_context.variable_registry.get_variable(variable.identifier_key);
+		if(declaration == nullptr) {
+			const std::string& identifier_str = m_context.strings.get(variable.identifier_key);
+			return error::emit(error::code::UNKNOWN_VARIABLE, variable.location, identifier_str);
 		}
 
-		property.type = variable->type; // default to the declared type
-		apply_expected_data_type(property.type, expected);
-		return property.type;
+		variable.type = declaration->type; // default to the declared type
+		apply_expected_data_type(variable.type, expected);
+
+		return variable.type;
 	}
 
 	auto type_checker::type_check_variable_assignment(handle<node> assignment_node, data_type expected) -> utility::result<data_type> {
@@ -256,22 +258,23 @@ namespace sigma {
 
 		// locate the variable
 		const handle<node> variable_node = assignment_node->children[0];
-		const auto& variable_property = variable_node->get<variable>();
-		const auto variable = m_context.variable_registry.get_variable(variable_property.identifier_key);
+		const auto& variable = variable_node->get<ast_variable>();
+		const auto declaration = m_context.variable_registry.get_variable(variable.identifier_key);
 
-		if (variable == nullptr) {
-			return error::emit(error::code::UNKNOWN_VARIABLE, m_context.strings.get(variable_property.identifier_key));
+		if (declaration == nullptr) {
+			const std::string& identifier_str = m_context.strings.get(variable.identifier_key);
+			return error::emit(error::code::UNKNOWN_VARIABLE_ASSIGN, variable.location, identifier_str);
 		}
 
 		// type check the assigned value against the declared type
-		TRY(type_check_node(assignment_node->children[1], variable->type));
+		TRY(type_check_node(assignment_node->children[1], declaration->type));
+
 		// this value won't be used
 		return data_type();
 	}
 
 	void type_checker::apply_expected_data_type(data_type& target, data_type source) {
 		// basically a cast call
-
 		if (source.base_type != data_type::UNKNOWN) {
 			if (source.base_type == data_type::VAR_ARG_PROMOTE) {
 				// promote the variable

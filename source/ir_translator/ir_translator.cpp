@@ -41,20 +41,20 @@ namespace sigma {
 	}
 
 	void ir_translator::translate_function_declaration(handle<node> function_node) {
-		const function_signature& signature = function_node->get<function_signature>();
+		const ast_function& function = function_node->get<ast_function>();
 
-		m_context.function_registry.declare_local_function(signature);
+		m_context.function_registry.declare_local_function(function.signature);
 		m_context.variable_registry.trace_push_scope();
 
 		// TODO: handle varargs
 		// declare parameter temporaries
-		for (u64 i = 0; i < signature.parameter_types.get_size(); ++i) {
-			const auto variable = m_context.variable_registry.get_variable(signature.parameter_types[i].identifier_key);
+		for (u64 i = 0; i < function.signature.parameter_types.get_size(); ++i) {
+			const auto variable = m_context.variable_registry.get_variable(function.signature.parameter_types[i].identifier_key);
 			ASSERT(variable, "function parameter pre declaration is invalid");
 
 			// since we can't update the projection value directly we have to create a proxy for it, this
 			// allows us to update the value of our parameters
-			const u16 byte_width = signature.parameter_types[i].type.get_byte_width();
+			const u16 byte_width = function.signature.parameter_types[i].type.get_byte_width();
 			variable->value = m_context.builder.create_local(byte_width, byte_width);
 
 			// assign the parameter value to the proxy
@@ -71,7 +71,7 @@ namespace sigma {
 	}
 
 	void ir_translator::translate_variable_declaration(handle<node> variable_node) {
-		const auto& prop = variable_node->get<variable>();
+		const auto& prop = variable_node->get<ast_variable>();
 		const u16 byte_width = prop.type.get_byte_width();
 		const handle<ir::node> local = m_context.variable_registry.declare_variable(prop.identifier_key, byte_width, byte_width);
 
@@ -152,16 +152,16 @@ namespace sigma {
 	}
 
 	auto ir_translator::translate_numerical_literal(handle<node> numerical_literal_node) const -> handle<ir::node> {
-		return literal_to_ir(numerical_literal_node->get<literal>());
+		return literal_to_ir(numerical_literal_node->get<ast_literal>());
 	}
 
 	auto ir_translator::translate_string_literal(handle<node> string_literal_node) const -> handle<ir::node> {
-		const std::string& value = m_context.strings.get(string_literal_node->get<literal>().value_key);
+		const std::string& value = m_context.strings.get(string_literal_node->get<ast_literal>().value_key);
 		return m_context.builder.create_string(value);
 	}
 
 	auto ir_translator::translate_bool_literal(handle<node> bool_literal_node) const -> handle<ir::node> {
-		const auto& prop = bool_literal_node->get<bool_literal>();
+		const auto& prop = bool_literal_node->get<ast_bool_literal>();
 		return m_context.builder.create_bool(prop.value);
 	}
 
@@ -183,7 +183,7 @@ namespace sigma {
 	}
 
 	auto ir_translator::translate_function_call(handle<node> call_node) -> handle<ir::node> {
-		const auto& callee_signature = call_node->get<function_signature>();
+		const ast_function& callee = call_node->get<ast_function>();
 
 		std::vector<handle<ir::node>> parameters;
 		parameters.reserve(call_node->children.get_size());
@@ -192,12 +192,12 @@ namespace sigma {
 			parameters.push_back(translate_node(parameter));
 		}
 
-		const handle<ir::node> call_result = m_context.function_registry.create_call(callee_signature, parameters);
+		const handle<ir::node> call_result = m_context.function_registry.create_call(callee.signature, parameters);
 		return call_result;
 	}
 
 	auto ir_translator::translate_variable_access(handle<node> access_node) const -> handle<ir::node> {
-		const auto& prop = access_node->get<variable>();
+		const auto& prop = access_node->get<ast_variable>();
 
 		const handle<ir::node> load = m_context.variable_registry.create_load(
 			prop.identifier_key, data_type_to_ir(prop.type), prop.type.get_byte_width()
@@ -208,7 +208,7 @@ namespace sigma {
 	}
 
 	auto ir_translator::translate_variable_assignment(handle<node> assignment_node) -> handle<ir::node> {
-		const auto& var = assignment_node->children[0]->get<variable>();
+		const auto& var = assignment_node->children[0]->get<ast_variable>();
 		const handle<ir::node> value = translate_node(assignment_node->children[1]);
 
 		// assign the variable
@@ -216,7 +216,7 @@ namespace sigma {
 		return nullptr;
 	}
 
-	auto ir_translator::literal_to_ir(literal& literal) const -> handle<ir::node> {
+	auto ir_translator::literal_to_ir(ast_literal& literal) const -> handle<ir::node> {
 		const std::string& value = m_context.strings.get(literal.value_key);
 
 		// handle pointers separately

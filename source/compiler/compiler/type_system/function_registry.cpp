@@ -53,13 +53,13 @@ namespace sigma {
 
 		if(!valid_identifier) {
 			// no function with the specified identifier was found
-			return utility::error::create(utility::error::code::UNKNOWN_FUNCTION, m_context.syntax.string_table.get(identifier));
+			return utility::error::create(utility::error::code::UNKNOWN_FUNCTION, m_context.strings.get(identifier));
 		}
 
 		if(candidates.empty()) {
 			// TODO: it's probably a good idea to specify the parameters that were provided and which
 			//       candidates were even considered
-			return utility::error::create(utility::error::code::NO_FUNCTION_OVERLOAD, m_context.syntax.string_table.get(identifier));
+			return utility::error::create(utility::error::code::NO_FUNCTION_OVERLOAD, m_context.strings.get(identifier));
 		}
 
 		const auto best_match = std::min_element(candidates.begin(), candidates.end(), [](const function_call_cost& a, const function_call_cost& b) {
@@ -72,16 +72,16 @@ namespace sigma {
 	}
 
 	void function_registry::declare_external_function(const function_signature& signature) {
-		const std::string& identifier = m_context.syntax.string_table.get(signature.identifier_key);
+		const std::string& identifier = m_context.strings.get(signature.identifier_key);
 
 		m_external_functions[signature.identifier_key][signature] = {
 			.ir_function = m_context.module.create_external(identifier, ir::linkage::SO_LOCAL),
-			.ir_signature = signature_to_ir(signature, m_context.syntax.string_table)
+			.ir_signature = signature_to_ir(signature, m_context.strings)
 		};
 	}
 
 	void function_registry::declare_local_function(const function_signature& signature) {
-		const ir::function_signature ir_signature = signature_to_ir(signature, m_context.syntax.string_table);
+		const ir::function_signature ir_signature = signature_to_ir(signature, m_context.strings);
 		const	handle<ir::function> function = m_context.builder.create_function(ir_signature, ir::linkage::PUBLIC);
 
 		m_local_functions.at(signature.identifier_key).at(signature) = function;

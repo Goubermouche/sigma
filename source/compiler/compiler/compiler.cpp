@@ -30,17 +30,13 @@ namespace sigma {
 
 		// generate tokens
 		TRY(const std::string file, utility::fs::file<std::string>::load(m_description.path));
-
-		TRY(auto tokenized, tokenizer::tokenize(file));
-
-		frontend.syntax.string_table = tokenized.second;
-		frontend.tokens = tokenized.first;
-		 
+		TRY(tokenizer::tokenize(file, frontend));
 		TRY(parser::parse(frontend));
-		 
+
 		// backend
-		backend_context backend(std::move(frontend.syntax), m_description.target);
-		 
+		// at this point we want to merge all frontend contexts into the backend context
+		backend_context backend(std::move(frontend.strings), std::move(frontend.ast), m_description.target);
+		
 		// run analysis on the generated AST
 		TRY(type_checker::type_check(backend));
 		TRY(ir_translator::translate(backend));

@@ -1,7 +1,7 @@
 #include "token_buffer.h"
 
 namespace sigma {
-	auto token_buffer::add_token(token_info info) -> u64 {
+  auto token_buffer::add_token(token_info info) -> u64 {
 		m_token_infos.push_back(info);
 		return m_token_infos.get_size() - 1;
 	}

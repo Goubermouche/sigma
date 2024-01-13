@@ -73,14 +73,13 @@ namespace sigma {
 	};
 
 	struct token_location {
-		// handle<text_file> file
 		u32 line_index = 0;
 		u32 char_index = 0;
 	};
 
 	struct token_info {
 		token tok;
-		token_location location;
+		handle<token_location> location;
 		utility::string_table_key symbol_key;
 	};
 }

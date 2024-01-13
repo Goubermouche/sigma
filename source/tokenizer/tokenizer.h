@@ -4,12 +4,13 @@
 #include <utility/containers/string_accessor.h>
 
 namespace sigma {
+	struct frontend_context;
+
 	class tokenizer {
-		using tokenized = utility::result<std::pair<token_buffer, utility::string_table>>;
 	public:
-		tokenizer(const std::string& source);
-		[[nodiscard]] static auto tokenize(const std::string& source) -> tokenized;
-		[[nodiscard]] auto tokenize() -> tokenized;
+		tokenizer(const std::string& source, frontend_context& context);
+		[[nodiscard]] static auto tokenize(const std::string& source, frontend_context& context) -> utility::result<void>;
+		[[nodiscard]] auto tokenize() -> utility::result<void>;
 	private:
 		[[nodiscard]] auto get_next_token() -> utility::result<token_info>;
 		[[nodiscard]] auto get_alphabetical_token() -> utility::result<token_info>;
@@ -29,9 +30,7 @@ namespace sigma {
 		char m_last_character = ' '; // prime with a space character
 
 		utility::detail::string_accessor m_source;
-
-		utility::string_table m_symbols;
-		token_buffer m_tokens;
+		frontend_context& m_context;
 
 		// keywords
 		const std::unordered_map<std::string, token_type> m_keyword_tokens = {
@@ -47,7 +46,6 @@ namespace sigma {
 			{ "i64",   token_type::I64                },
 			{ "bool",  token_type::BOOL               },
 			{ "true",  token_type::BOOL_LITERAL_TRUE  },
-			{ "false", token_type::BOOL_LITERAL_FALSE },
 			{ "false", token_type::BOOL_LITERAL_FALSE },
 		};
 

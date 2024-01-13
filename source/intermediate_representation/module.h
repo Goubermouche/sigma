@@ -16,8 +16,6 @@
 // files, etc.).
 
 namespace sigma::ir {
-	// TODO: implement a more performant, aligned memory allocator
-
 	/**
 	 * \brief Basic builder which serves as a facade around the process of
 	 * constructing proper IR.

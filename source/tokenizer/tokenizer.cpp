@@ -1,23 +1,24 @@
 #include "tokenizer.h"
+#include <compiler/compiler/compilation_context.h>
 
 namespace sigma {
-	tokenizer::tokenizer(const std::string& source) : m_source(source) {}
+	tokenizer::tokenizer(const std::string& source, frontend_context& context) : m_source(source), m_context(context) {}
 
-	auto tokenizer::tokenize(const std::string& source) -> tokenized {
-		return tokenizer(source).tokenize();
+	auto tokenizer::tokenize(const std::string& source, frontend_context& context) -> utility::result<void> {
+		return tokenizer(source, context).tokenize();
 	}
 
-	auto tokenizer::tokenize() -> tokenized {
+	auto tokenizer::tokenize() -> utility::result<void> {
 		auto current = token_type::UNKNOWN;
 
 		while (current != token_type::END_OF_FILE) {
 			TRY(const token_info info, get_next_token());
 
 			current = info.tok.type;
-			m_tokens.add_token(info);
+			m_context.tokens.add_token(info);
 		}
 
-		return std::pair{ std::move(m_tokens), std::move(m_symbols) };
+		return SUCCESS;
 	}
 
 	auto tokenizer::get_next_token() -> utility::result<token_info> {
@@ -33,7 +34,7 @@ namespace sigma {
 		if (m_source.end()) {
 			return token_info{
 				.tok = { token_type::END_OF_FILE },
-				.location = m_current_location
+				.location = m_context.allocator.emplace<token_location>(m_token_start_location)
 			};
 		}
 
@@ -128,14 +129,17 @@ namespace sigma {
 		const auto it = m_keyword_tokens.find(m_current_section);
 		if (it != m_keyword_tokens.end()) {
 			// the string is a keyword
-			return token_info{ .tok = { it->second }, .location = m_token_start_location };
+			return token_info{
+				.tok      = { it->second },
+				.location = m_context.allocator.emplace<token_location>(m_token_start_location)
+			};
 		}
 
 		// the string isn't a keyword, treat it as an identifier
 		return token_info{
-			.tok = { token_type::IDENTIFIER },
-			.location = m_token_start_location,
-			.symbol_key = m_symbols.insert(m_current_section)
+			.tok        = { token_type::IDENTIFIER },
+			.location   = m_context.allocator.emplace<token_location>(m_token_start_location),
+			.symbol_key = m_context.strings.insert(m_current_section)
 		};
 	}
 
@@ -179,9 +183,9 @@ namespace sigma {
 
 				get_next_char();
 				return token_info{
-					.tok = { token_type::UNSIGNED_LITERAL },
-					.location   = m_token_start_location,
-					.symbol_key = m_symbols.insert(m_current_section)
+					.tok        = { token_type::UNSIGNED_LITERAL },
+					.location   = m_context.allocator.emplace<token_location>(m_token_start_location),
+					.symbol_key = m_context.strings.insert(m_current_section)
 				};
 			}
 			else if (m_last_character == 'f') {
@@ -191,9 +195,9 @@ namespace sigma {
 
 				get_next_char();
 				return token_info{
-					.tok = { token_type::F32_LITERAL },
-					.location   = m_token_start_location,
-					.symbol_key = m_symbols.insert(m_current_section)
+					.tok        = { token_type::F32_LITERAL },
+					.location   = m_context.allocator.emplace<token_location>(m_token_start_location),
+					.symbol_key = m_context.strings.insert(m_current_section)
 				};
 			}
 			else if (!std::isdigit(m_last_character)) {
@@ -207,17 +211,17 @@ namespace sigma {
 		// 0.0 format
 		if (dot_met) {
 			return token_info{
-				.tok = { token_type::F64_LITERAL },
-				.location = m_token_start_location,
-				.symbol_key = m_symbols.insert(m_current_section)
+				.tok        = { token_type::F64_LITERAL },
+				.location   = m_context.allocator.emplace<token_location>(m_token_start_location),
+				.symbol_key = m_context.strings.insert(m_current_section)
 			};
 		}
 
 		// 0 format
 		return token_info{
-			.tok = { token_type::SIGNED_LITERAL },
-			.location   = m_token_start_location,
-			.symbol_key = m_symbols.insert(m_current_section)
+			.tok        = { token_type::SIGNED_LITERAL },
+			.location   = m_context.allocator.emplace<token_location>(m_token_start_location),
+			.symbol_key = m_context.strings.insert(m_current_section)
 		};
 	}
 
@@ -237,9 +241,9 @@ namespace sigma {
 		get_next_char();
 
 		return token_info{
-			.tok = { token_type::STRING_LITERAL },
-			.location = m_token_start_location,
-			.symbol_key = m_symbols.insert(m_current_section)
+			.tok        = { token_type::STRING_LITERAL },
+			.location   = m_context.allocator.emplace<token_location>(m_token_start_location),
+			.symbol_key = m_context.strings.insert(m_current_section)
 		};
 	}
 
@@ -269,8 +273,8 @@ namespace sigma {
 			}
 
 			return token_info{
-				.tok = { it->second },
-				.location = m_token_start_location
+				.tok      = { it->second },
+				.location = m_context.allocator.emplace<token_location>(m_token_start_location)
 			};
 		}
 

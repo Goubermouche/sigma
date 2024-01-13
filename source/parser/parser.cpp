@@ -35,7 +35,7 @@ namespace sigma {
 				NOT_IMPLEMENTED();
 			}
 
-			m_context.syntax.ast.add_node(node);
+			m_context.ast.add_node(node);
 			m_tokens.next();
 		}
 
@@ -72,12 +72,12 @@ namespace sigma {
 		EXPECT_NEXT(token_type::RIGHT_PARENTHESIS);
 		TRY(const std::vector<handle<node>> statements, parse_statement_block());
 
-		const handle<node> function_node = m_context.syntax.ast.create_node<function_signature>(node_type::FUNCTION_DECLARATION, statements.size());
+		const handle<node> function_node = create_node<function_signature>(node_type::FUNCTION_DECLARATION, statements.size());
 
-		auto& function = function_node->get<sigma::function_signature>();
+		auto& function = function_node->get<function_signature>();
 		function.return_type = return_type;
 		function.identifier_key = identifier_key;
-		function.parameter_types = utility::slice<named_data_type>(m_context.syntax.ast.get_allocator(), parameters.size());
+		function.parameter_types = utility::slice<named_data_type>(m_context.ast.get_allocator(), parameters.size());
 
 		// copy all statement pointers over to the memory arena
 		std::memcpy(function_node->children.get_data(), statements.data(), statements.size() * sizeof(handle<node>));
@@ -139,7 +139,7 @@ namespace sigma {
 
 		m_tokens.next(); // prime the first expression token
 
-		const handle<node> return_node = m_context.syntax.ast.create_node<return_statement>(node_type::RETURN, 1);
+		const handle<node> return_node = create_node<return_statement>(node_type::RETURN, 1);
 		TRY(return_node->children[0], parse_expression());
 		return return_node;
 	}
@@ -165,7 +165,7 @@ namespace sigma {
 				// else
 				TRY(const std::vector<handle<node>> statements, parse_statement_block());
 
-				const handle<node> branch_node = m_context.syntax.ast.create_node<utility::empty_property>(node_type::BRANCH, statements.size());
+				const handle<node> branch_node = create_node<utility::empty_property>(node_type::BRANCH, statements.size());
 				std::memcpy(branch_node->children.get_data(), statements.data(), statements.size() * sizeof(handle<node>));
 				branch_before->children[1] = branch_node; // point to the next branch
 				break;
@@ -187,11 +187,12 @@ namespace sigma {
 		EXPECT_NEXT(token_type::RIGHT_PARENTHESIS);
 		TRY(const std::vector<handle<node>> statements, parse_statement_block());
 
-		const handle<node> branch_node = m_context.syntax.ast.create_node<utility::empty_property>(node_type::CONDITIONAL_BRANCH, statements.size() + 2);
+		const handle<node> branch_node = create_node<utility::empty_property>(node_type::CONDITIONAL_BRANCH, statements.size() + 2);
 
 		branch_node->children[0] = condition; // condition
 		branch_node->children[1] = nullptr;   // false condition target
 
+		// copy all child statements
 		std::memcpy(branch_node->children.get_data() + 2, statements.data(), statements.size() * sizeof(handle<node>));
 
 		return branch_node;
@@ -225,14 +226,14 @@ namespace sigma {
 		m_tokens.next(); // prime the first expression token
 
 		TRY(const handle<node> expression_node, parse_expression());
-		const handle<node> negation_node = m_context.syntax.ast.create_node<literal>(node_type::NUMERICAL_LITERAL, 0);
+		const handle<node> negation_node = create_node<literal>(node_type::NUMERICAL_LITERAL, 0);
 
 		auto& literal = negation_node->get<sigma::literal>();
-		literal.value_key = m_context.syntax.string_table.insert("-1");
+		literal.value_key = m_context.strings.insert("-1");
 		literal.type = { data_type::I32, 0 };
 
 		// negate the expression
-		return m_context.syntax.ast.create_binary_expression(node_type::OPERATOR_MULTIPLY, negation_node, expression_node);
+		return create_binary_expression(node_type::OPERATOR_MULTIPLY, negation_node, expression_node);
 	}
 
 	auto parser::parse_function_call() -> utility::result<handle<node>> {
@@ -257,7 +258,7 @@ namespace sigma {
 		EXPECT_NEXT(token_type::RIGHT_PARENTHESIS);
 
 		// create the call node
-		const handle<node> call_node = m_context.syntax.ast.create_node<function_signature>(node_type::FUNCTION_CALL, parameters.size());
+		const handle<node> call_node = create_node<function_signature>(node_type::FUNCTION_CALL, parameters.size());
 		std::memcpy(call_node->children.get_data(), parameters.data(), parameters.size() * sizeof(handle<node>));
 		call_node->get<function_signature>().identifier_key = identifier_key;
 
@@ -280,7 +281,7 @@ namespace sigma {
 		}
 
 		// create the variable node
-		const handle<node> variable_node = m_context.syntax.ast.create_node<variable>(node_type::VARIABLE_DECLARATION, assigned_value ? 1 : 0);
+		const handle<node> variable_node = create_node<variable>(node_type::VARIABLE_DECLARATION, assigned_value ? 1 : 0);
 		auto& variable = variable_node->get<sigma::variable>();
 		variable.type = type;
 		variable.identifier_key = identifier_key;
@@ -292,11 +293,11 @@ namespace sigma {
 		return variable_node;
 	}
 
-	auto parser::parse_variable_access() -> utility::result<handle<node>> {
+	auto parser::parse_variable_access() const -> utility::result<handle<node>> {
 		EXPECT_CURRENT(token_type::IDENTIFIER);
 
 		// create the access node
-		const handle<node> access_node = m_context.syntax.ast.create_node<variable>(node_type::VARIABLE_ACCESS, 0);
+		const handle<node> access_node = create_node<variable>(node_type::VARIABLE_ACCESS, 0);
 		access_node->get<variable>().identifier_key = m_tokens.get_current().symbol_key;
 
 		return access_node;
@@ -310,7 +311,7 @@ namespace sigma {
 		TRY(const handle<node> expression, parse_expression());
 
 		// create the assignment node
-		const handle<node> assignment_node = m_context.syntax.ast.create_node<utility::empty_property>(node_type::VARIABLE_ASSIGNMENT, 2);
+		const handle<node> assignment_node = create_node<utility::empty_property>(node_type::VARIABLE_ASSIGNMENT, 2);
 		assignment_node->children[1] = expression;
 
 		return assignment_node;
@@ -355,7 +356,7 @@ namespace sigma {
 				default: PANIC("unhandled term case for token '{}'", operation.to_string());
 			}
 
-			left = m_context.syntax.ast.create_binary_expression(operator_type, left, right);
+			left = create_binary_expression(operator_type, left, right);
 			operation = m_tokens.peek_next_token();
 		}
 
@@ -384,7 +385,7 @@ namespace sigma {
 				default: PANIC("unhandled factor case for token '{}'", operation.to_string());
 			}
 
-			left = m_context.syntax.ast.create_binary_expression(operator_type, left, right);
+			left = create_binary_expression(operator_type, left, right);
 			operation = m_tokens.peek_next_token();
 		}
 
@@ -418,7 +419,7 @@ namespace sigma {
 		return data_type{ type_token, 0 };
 	}
 
-	auto parser::parse_numerical_literal() -> utility::result<handle<node>> {
+	auto parser::parse_numerical_literal() const -> utility::result<handle<node>> {
 		const token literal_token = m_tokens.get_current_token();
 
 		if(!literal_token.is_numerical_literal()) {
@@ -441,7 +442,7 @@ namespace sigma {
 		}
 
 		// create the literal node
-		const handle<node> literal_node = m_context.syntax.ast.create_node<literal>(node_type::NUMERICAL_LITERAL, 0);
+		const handle<node> literal_node = create_node<literal>(node_type::NUMERICAL_LITERAL, 0);
 		auto& literal = literal_node->get<sigma::literal>();
 		literal.value_key = m_tokens.get_current().symbol_key;
 		literal.type = { base, 0 };
@@ -449,11 +450,11 @@ namespace sigma {
 		return literal_node;
 	}
 
-	auto parser::parse_string_literal() -> utility::result<handle<node>> {
+	auto parser::parse_string_literal() const -> utility::result<handle<node>> {
 		EXPECT_CURRENT(token_type::STRING_LITERAL);
 
 		// create the string node
-		const handle<node> string_node = m_context.syntax.ast.create_node<literal>(node_type::STRING_LITERAL, 0);
+		const handle<node> string_node = create_node<literal>(node_type::STRING_LITERAL, 0);
 		auto& literal = string_node->get<sigma::literal>();
 		literal.value_key = m_tokens.get_current().symbol_key;
 		literal.type = { data_type::CHAR, 1 }; // char*
@@ -461,14 +462,15 @@ namespace sigma {
 		return string_node;
 	}
 
-	auto parser::parse_bool_literal() -> utility::result<handle<node>> {
+	auto parser::parse_bool_literal() const -> utility::result<handle<node>> {
 		ASSERT(
-			m_tokens.get_current_token() == token_type::BOOL_LITERAL_FALSE || m_tokens.get_current_token() == token_type::BOOL_LITERAL_TRUE, 
+			m_tokens.get_current_token() == token_type::BOOL_LITERAL_FALSE ||
+			m_tokens.get_current_token() == token_type::BOOL_LITERAL_TRUE, 
 			"invalid token - expected an a boolean literal"
 		);
 
 		// create the bool node
-		const handle<node> bool_node = m_context.syntax.ast.create_node<bool_literal>(node_type::BOOL_LITERAL, 0);
+		const handle<node> bool_node = create_node<bool_literal>(node_type::BOOL_LITERAL, 0);
 		bool_node->get<bool_literal>().value = m_tokens.get_current_token() == token_type::BOOL_LITERAL_TRUE;
 
 		return bool_node;
@@ -517,5 +519,9 @@ namespace sigma {
 		}
 
 		return m_tokens.peek_next_token() == token_type::IDENTIFIER;
+	}
+
+	auto parser::create_binary_expression(node_type type, handle<node> left, handle<node> right) const -> handle<node> {
+		return m_context.ast.create_binary_expression(type, left, right);
 	}
 } // namespace sigma

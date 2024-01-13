@@ -156,7 +156,7 @@ namespace sigma {
 	}
 
 	auto ir_translator::translate_string_literal(handle<node> string_literal_node) const -> handle<ir::node> {
-		const std::string& value = m_context.syntax.string_table.get(string_literal_node->get<literal>().value_key);
+		const std::string& value = m_context.strings.get(string_literal_node->get<literal>().value_key);
 		return m_context.builder.create_string(value);
 	}
 
@@ -217,7 +217,7 @@ namespace sigma {
 	}
 
 	auto ir_translator::literal_to_ir(literal& literal) const -> handle<ir::node> {
-		const std::string& value = m_context.syntax.string_table.get(literal.value_key);
+		const std::string& value = m_context.strings.get(literal.value_key);
 
 		// handle pointers separately
 		if (literal.type.pointer_level > 0) {
@@ -245,7 +245,7 @@ namespace sigma {
 	}
 
 	auto ir_translator::translate() -> utility::result<void> {
-		for (const handle<node>& top_level : m_context.syntax.ast.get_nodes()) {
+		for (const handle<node>& top_level : m_context.ast.get_nodes()) {
 			translate_node(top_level);
 		}
 

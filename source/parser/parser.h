@@ -4,6 +4,8 @@
 #include <tokenizer/token_buffer.h>
 #include <abstract_syntax_tree/abstract_syntax_tree.h>
 
+#include "compiler/compiler/compilation_context.h"
+
 namespace sigma {
 	using namespace utility::types;
 
@@ -40,18 +42,25 @@ namespace sigma {
 		auto parse_type() const -> utility::result<data_type>;
 		auto parse_function_call() -> utility::result<handle<node>>;
 		auto parse_variable_declaration() -> utility::result<handle<node>>;
-		auto parse_variable_access() -> utility::result<handle<node>>;
+		auto parse_variable_access() const-> utility::result<handle<node>>;
 		auto parse_assignment() -> utility::result<handle<node>>;
 
 		// literals
-		auto parse_numerical_literal() -> utility::result<handle<node>>;
-		auto parse_string_literal() -> utility::result<handle<node>>;
-		auto parse_bool_literal() -> utility::result<handle<node>>;
+		auto parse_numerical_literal() const-> utility::result<handle<node>>;
+		auto parse_string_literal() const-> utility::result<handle<node>>;
+		auto parse_bool_literal() const -> utility::result<handle<node>>;
 
 		auto is_current_token_type() const -> bool;
 		auto peek_is_function_definition() -> bool;
 		auto peek_is_function_call() const -> bool;
 		auto peek_is_variable_declaration() const -> bool;
+
+		template<typename extra_type>
+		auto create_node(node_type type, u64 child_count) const -> handle<node> {
+			return m_context.ast.create_node<extra_type>(type, child_count);
+		}
+
+		auto create_binary_expression(node_type type, handle<node> left, handle<node> right) const -> handle<node>;
 	private:
 		frontend_context& m_context;
 		token_buffer_iterator m_tokens;

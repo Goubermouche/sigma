@@ -11,7 +11,7 @@ namespace sigma {
 	type_checker::type_checker(backend_context& context) : m_context(context) {}
 
 	auto type_checker::type_check() -> utility::result<void> {
-		for (const handle<node>& top_level : m_context.syntax.ast.get_nodes()) {
+		for (const handle<node>& top_level : m_context.ast.get_nodes()) {
 			TRY(type_check_node(top_level));
 		}
 
@@ -65,7 +65,7 @@ namespace sigma {
 		if(m_context.function_registry.contains_function(signature)) {
 			return utility::error::create(
 				utility::error::code::FUNCTION_ALREADY_DECLARED, 
-				m_context.syntax.string_table.get(signature.identifier_key)
+				m_context.strings.get(signature.identifier_key)
 			);
 		}
 
@@ -99,7 +99,7 @@ namespace sigma {
 		if(m_context.variable_registry.contains(property.identifier_key)) {
 			return utility::error::create(
 				utility::error::code::VARIABLE_ALREADY_DECLARED,
-				m_context.syntax.string_table.get(property.identifier_key)
+				m_context.strings.get(property.identifier_key)
 			);
 		}
 
@@ -248,7 +248,7 @@ namespace sigma {
 		// locate the variable
 		const auto variable = m_context.variable_registry.get_variable(property.identifier_key);
 		if(variable == nullptr) {
-			return utility::error::create(utility::error::code::UNKNOWN_VARIABLE, m_context.syntax.string_table.get(property.identifier_key));
+			return utility::error::create(utility::error::code::UNKNOWN_VARIABLE, m_context.strings.get(property.identifier_key));
 		}
 
 		property.type = variable->type; // default to the declared type
@@ -265,7 +265,7 @@ namespace sigma {
 		const auto variable = m_context.variable_registry.get_variable(variable_property.identifier_key);
 
 		if (variable == nullptr) {
-			return utility::error::create(utility::error::code::UNKNOWN_VARIABLE, m_context.syntax.string_table.get(variable_property.identifier_key));
+			return utility::error::create(utility::error::code::UNKNOWN_VARIABLE, m_context.strings.get(variable_property.identifier_key));
 		}
 
 		// type check the assigned value against the declared type

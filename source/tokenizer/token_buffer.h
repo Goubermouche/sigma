@@ -3,6 +3,7 @@
 
 #include <utility/containers/contiguous_container.h>
 #include <utility/containers/string_table.h>
+#include <utility/containers/allocators/block_allocator.h>
 
 namespace sigma {
 	class token_buffer {

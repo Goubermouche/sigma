@@ -18,7 +18,7 @@ namespace sigma {
 		auto get_nodes() const -> const utility::contiguous_container<handle<node>>&;
 		auto get_allocator() -> utility::block_allocator&;
 
-		handle<node> create_binary_expression(node_type type, handle<node> left, handle<node> right);
+		auto create_binary_expression(node_type type, handle<node> left, handle<node> right) -> handle<node>;
 
 		template<typename extra_type>
 		auto create_node(node_type type, u64 child_count) -> handle<node> {

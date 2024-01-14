@@ -142,8 +142,8 @@ namespace sigma {
 		//	TRY(type_check_node(call_node->children[i], { data_type::VAR_ARG_PROMOTE, 0 }));
 		//}
 
-		// this value won't be used
-		return data_type();
+		// pass the return type along
+		return function.signature.return_type;
 	}
 
 	auto type_checker::type_check_return(handle<node> return_node, data_type expected) -> utility::result<data_type> {
@@ -220,6 +220,7 @@ namespace sigma {
 
 	auto type_checker::type_check_numerical_literal(handle<node> literal_node, data_type expected) -> utility::result<data_type> {
 		auto& literal = literal_node->get<ast_literal>();
+
 		apply_expected_data_type(literal.type, expected);
 		return literal.type;
 	}

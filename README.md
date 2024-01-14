@@ -26,7 +26,7 @@ $ premake5 vs2022
 After downloading and building the project you can compile a .s file [WIP]: 
 ```shell
 # Compile main.s as a Sigma source file
-sigma main.s
+$ sigma compile main.s
 ```
 
 ## Project status

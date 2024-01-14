@@ -23,6 +23,7 @@ namespace sigma::ir {
 	class module {
 	public:
 		module(target target);
+		~module();
 
 		void compile() const;
 		auto generate_object_file() -> utility::byte_buffer;

@@ -30,7 +30,7 @@ namespace sigma::ir {
 	};
 
 	struct function {
-		function(const std::string& name);
+		function(const std::string& name, linkage linkage, u8 parent_section);
 
 		template<typename extra_type>
 		auto create_node(node::type type, u64 input_count) -> handle<node>;

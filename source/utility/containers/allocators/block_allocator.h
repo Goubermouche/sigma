@@ -9,6 +9,7 @@ namespace utility {
 
 			u8* memory;
 			u64 position;
+			block* next = nullptr;
 		};
 	public:
 		/**
@@ -16,12 +17,13 @@ namespace utility {
 		 * \param block_size Size of individual blocks [bytes]
 		 */
 		block_allocator(u64 block_size);
+		~block_allocator();
 
 		block_allocator(const block_allocator& other) = delete;
-		block_allocator(block_allocator&& other) noexcept;
+		block_allocator(block_allocator&& other) = delete;
 
 		block_allocator& operator=(const block_allocator& other) = delete;
-		block_allocator& operator=(block_allocator&& other) noexcept;
+		block_allocator& operator=(block_allocator&& other) = delete;
 
 		/**
 		 * \brief Prints owned blocks and their contents.
@@ -91,7 +93,7 @@ namespace utility {
 		 * \brief Retrieves the current amount of allocated blocks.
 		 * \return Count of currently allocated blocks.
 		 */
-		auto get_block_count() const -> u64;
+		auto get_block_count() const->u64;
 
 		/**
 		 * \brief Retrieves the max size of individual blocks [bytes].
@@ -104,7 +106,10 @@ namespace utility {
 		 */
 		void allocate_block();
 	private:
-		std::list<block> m_blocks;
+		block* m_first_block = nullptr;
+		block* m_current_block = nullptr;
+
 		u64 m_block_size;
+		u64 m_block_count = 0;
 	};
 }

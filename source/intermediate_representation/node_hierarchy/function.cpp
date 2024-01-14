@@ -2,12 +2,8 @@
 #include "intermediate_representation/codegen/work_list.h"
 
 namespace sigma::ir {
-	function::function(const std::string& name) : allocator(NODE_ALLOCATION_BLOCK_SIZE) {
-		symbol.name = name;
-		symbol.type = symbol::symbol_type::FUNCTION;
-
-		parameters.resize(3);
-	}
+	function::function(const std::string& name, linkage linkage, u8 parent_section)
+		: symbol(symbol::symbol_type::FUNCTION, name, nullptr, linkage), parent_section(parent_section), allocator(1024), parameters(3) {}
 
 	auto function::get_symbol_address(handle<ir::symbol> target) -> handle<node> {
 		ASSERT(target != nullptr, "invalid symbol");

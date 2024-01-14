@@ -23,6 +23,8 @@ namespace sigma::ir {
 	struct module_section;
 
 	struct global {
+		global(symbol sym);
+
 		void set_storage(u8 section_handle, u32 storage_size, u32 storage_alignment, u32 max_objects);
 		auto add_region(u32 region_offset, u32 region_size) -> void*;
 

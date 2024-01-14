@@ -34,7 +34,7 @@ namespace sigma::ir {
 		symbol_type type;
 		std::string name;
 
-		handle<module> parent_module;
+		handle<module> parent_module; // not used rn
 
 		linkage link;
 

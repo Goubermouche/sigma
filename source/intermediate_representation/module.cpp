@@ -11,9 +11,15 @@
 #include "intermediate_representation/codegen/transformation/use_list.h"
 
 namespace sigma::ir {
-	module::module(target target)
-		: m_allocator(1024), m_codegen(target) {
+	module::module(target target) : m_allocator(1024), m_codegen(target) {
 		m_output = m_codegen.generate_sections(*this);
+	}
+
+	module::~module() {
+		// free individual functions (and their respective allocators) allocated in the block alloc first
+		for (const handle<function> function : m_functions) {
+			function->~function();
+		}
 	}
 
 	void module::compile() const {
@@ -23,7 +29,7 @@ namespace sigma::ir {
 		// utility::string assembly;
 
 		// go through all declared functions and run codegen
-		for (const handle<function>& function : m_functions) {
+		for (const handle<function> function : m_functions) {
 			// every function has its own unique work list (thread safe), this list is reused in all passes
 			// of the given function so that we don't have to reallocate memory needlessly
 			work_list function_work_list;
@@ -87,8 +93,7 @@ namespace sigma::ir {
 	}
 
 	auto module::create_external(const std::string& name, linkage linkage) -> handle<external> {
-		const auto memory = m_allocator.allocate(sizeof(external));
-		const handle external = new (memory) ir::external();
+		const handle external = m_allocator.emplace<ir::external>();
 
 		// construct the external symbol
 		external->symbol = symbol(symbol::EXTERNAL, std::string(name), this, linkage);
@@ -98,37 +103,32 @@ namespace sigma::ir {
 	}
 
 	auto module::create_global(const std::string& name, linkage linkage) -> handle<global> {
-		const auto memory = m_allocator.allocate(sizeof(global));
-		const handle global = new (memory) ir::global();
-
-		// construct the global
-		global->symbol = symbol(symbol::GLOBAL, std::string(name), this, linkage);
-		global->objects = std::vector<init_object>();
+		const handle global = m_allocator.emplace<ir::global>(
+			symbol(symbol::GLOBAL, std::string(name), this, linkage)
+		);
 
 		m_globals.emplace_back(global);
 		m_symbols.emplace_back(&global->symbol);
+
 		return global;
 	}
 
 	auto module::create_function(const function_signature& signature, linkage linkage) -> handle<function> {
-		const auto memory = m_allocator.allocate(sizeof(function));
-		const handle function = new (memory) ir::function(signature.identifier);
-
-		function->symbol.link = linkage;
-		function->parent_section = get_text_section();
+		const handle function = m_allocator.emplace<ir::function>(signature.identifier, linkage, get_text_section());
 
 		m_functions.push_back(function);
 		m_symbols.emplace_back(&function->symbol);
 
 		// allocate the entry node
 		const handle<node> entry_node = function->create_node<region>(node::type::ENTRY, 0);
+
 		auto& entry_region = entry_node->get<region>();
+		function->entry_node = entry_node;
 		entry_node->dt = TUPLE_TYPE;
 
-		function->entry_node = entry_node;
+		// initialize the acceleration structure
 		const handle<node> projection_node = function->create_projection(CONTROL_TYPE, entry_node, 0);
 
-		// initialize the acceleration structure
 		function->parameters[0] = projection_node;
 		function->parameters[1] = function->create_projection(MEMORY_TYPE, entry_node, 1);
 		function->parameters[2] = function->create_projection(CONTINUATION_TYPE, entry_node, 2);
@@ -152,7 +152,7 @@ namespace sigma::ir {
 	}
 
 	auto module::create_string(handle<function> function, const std::string& value) -> handle<node> {
-		const auto dummy = create_global("", linkage::PRIVATE);
+		const handle<global> dummy = create_global("", linkage::PRIVATE);
 		dummy->set_storage(get_rdata_section(), static_cast<u32>(value.size() + 1), 1, 1);
 
 		const auto destination = static_cast<char*>(dummy->add_region(0, static_cast<u32>(value.size() + 1)));

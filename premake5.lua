@@ -11,6 +11,10 @@ workspace "sigma"
         "MultiProcessorCompile"
     }
 
+    -- buildoptions { "-fsanitize=address" }
+    -- linkoptions { "-fsanitize=address" }
+    -- debugformat "C7"
+    
     filter "configurations:Release"
         defines { "NDEBUG" }
         optimize "On"
@@ -40,7 +44,7 @@ project "utility"
     targetdir "output/compiler/bin/%{cfg.buildcfg}"
     objdir "output/compiler/obj/%{cfg.buildcfg}"
 
--- -- tokenizer
+-- tokenizer
 project "tokenizer"
     kind "StaticLib"
     location "source/tokenizer"

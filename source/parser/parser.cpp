@@ -26,6 +26,8 @@ namespace sigma {
 
 	auto parser::parse() -> utility::result<void> {
 		// TODO: handle peeks looking past EOF
+		// TODO: update the allocation strategy -> right now we can request more
+		//       memory that our allocator can allocate per block
 		// TODO: manage local context (ie. function body, loop body, if body etc),
 		//       probably use a stack
 

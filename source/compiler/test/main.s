@@ -8,9 +8,15 @@
 //     -   dynamic programming impl?
 
 i32 test(i32 a) { ret 1; }
-i32 test(i32 a, i32 b) { ret 2; }
+i32 test(i32 a, i32 b) { ret a + b; }
 
 i32 main() {
-	printf("%d\n", test(120, 12));
+	i32 a = 30;
+	
+	if(true) {
+		a = 40;
+	}
+
+	printf("%d\n", test(a, 12));
 	ret 0;
 }

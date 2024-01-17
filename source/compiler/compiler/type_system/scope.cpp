@@ -1,0 +1,40 @@
+#include "scope.h"
+
+namespace sigma {
+	scope::scope(scope_type type) : type(type) {}
+
+	auto scope::find_parent_namespace() const -> handle<namespace_scope> {
+		if (parent->type == scope_type::NAMESPACE) {
+			return parent;
+		}
+
+		return parent->find_parent_namespace();
+	}
+
+	auto scope::find_variable(const utility::string_table_key& identifier) -> handle<variable> {
+		const auto it = variables.find(identifier);
+		if (it != variables.end()) {
+			return &it->second;
+		}
+
+		if (parent) {
+			return parent->find_variable(identifier);
+		}
+
+		return nullptr;
+	}
+
+	auto namespace_scope::find_namespace(const std::vector<utility::string_table_key>& namespaces, u64 index) -> handle<scope> {
+		if (index == namespaces.size()) {
+			return this;
+		}
+
+		// we still have namespace directives, traverse into those scopes
+		const auto it = child_namespaces.find(namespaces[index]);
+		if (it != child_namespaces.end()) {
+			return it->second->find_namespace(namespaces, index + 1);
+		}
+
+		return nullptr;
+	}
+} // namespace sigma 

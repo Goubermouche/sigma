@@ -63,19 +63,19 @@ namespace sigma {
 		const ast_function& function = function_node->get<ast_function>();
 
 		// check if the function hasn't been declared before
-		if(m_context.function_registry.contains_function(function.signature)) {
+		if(m_context.semantics.contains_function(function.signature)) {
 			const std::string& identifier = m_context.strings.get(function.signature.identifier_key);
 			return error::emit(error::code::FUNCTION_ALREADY_DECLARED, function.location, identifier);
 		}
 
 		// register the function
-		m_context.function_registry.pre_declare_local_function(function.signature);
-		m_context.variable_registry.push_scope();
+		m_context.semantics.pre_declare_local_function(function.signature);
+		m_context.semantics.push_scope();
 
 		// push temporaries for function parameters
 		for(const named_data_type& parameter : function.signature.parameter_types) {
-			auto& variable = m_context.variable_registry.pre_declare_variable(parameter.identifier_key, parameter.type);
-			variable.flags |= variable_registry::variable::FUNCTION_PARAMETER | variable_registry::variable::LOCAL;
+			auto& variable = m_context.semantics.pre_declare_variable(parameter.identifier_key, parameter.type);
+			variable.flags |= variable::FUNCTION_PARAMETER | variable::LOCAL;
 		}
 
 		// type check inner statements
@@ -83,7 +83,7 @@ namespace sigma {
 			TRY(type_check_node(statement, function.signature.return_type));
 		}
 
-		m_context.variable_registry.pop_scope();
+		m_context.semantics.pop_scope();
 
 		// this value won't be used
 		return data_type();
@@ -94,14 +94,14 @@ namespace sigma {
 		const ast_variable& variable = variable_node->get<ast_variable>();
 
 		// check, whether the variable has already been declared in the current context
-		if(m_context.variable_registry.contains(variable.identifier_key)) {
+		if(m_context.semantics.contains_variable(variable.identifier_key)) {
 			const std::string& identifier_str = m_context.strings.get(variable.identifier_key);
 			return error::emit(error::code::VARIABLE_ALREADY_DECLARED, variable.location, identifier_str);
 		}
 
 		// register the variable
-		auto& declaration = m_context.variable_registry.pre_declare_variable(variable.identifier_key, variable.type);
-		declaration.flags |= variable_registry::variable::LOCAL;
+		auto& declaration = m_context.semantics.pre_declare_variable(variable.identifier_key, variable.type);
+		declaration.flags |= variable::LOCAL;
 
 		// type check the assigned value
 		if (variable_node->children.get_size() == 1) {
@@ -125,7 +125,7 @@ namespace sigma {
 		}
 
 		// at this point the function signature is empty, we gotta find a valid one
-		TRY(function.signature, m_context.function_registry.get_callee_signature(function, parameter_data_types));
+		TRY(function.signature, m_context.semantics.create_callee_signature(function, parameter_data_types));
 
 		// TODO: cast everything according to the callee signature
 
@@ -184,27 +184,27 @@ namespace sigma {
 		}
 
 		// type check inner statements
-		m_context.variable_registry.push_scope();
+		m_context.semantics.push_scope();
 
 		for (u64 i = 2; i < branch_node->children.get_size(); ++i) {
 			TRY(type_check_node(branch_node->children[i], {}));
 		}
 
-		m_context.variable_registry.pop_scope();
+		m_context.semantics.pop_scope();
 		// this value won't be used
 		return data_type();
 	}
 
 	auto type_checker::type_check_branch(handle<node> branch_node, data_type expected) -> utility::result<data_type> {
 		SUPPRESS_C4100(expected);
-		m_context.variable_registry.push_scope();
+		m_context.semantics.push_scope();
 
 		// just type check all inner statements
 		for (const handle<node>& statement : branch_node->children) {
 			TRY(type_check_node(statement, {}));
 		}
 
-		m_context.variable_registry.pop_scope();
+		m_context.semantics.pop_scope();
 		// this value won't be used
 		return data_type();
 	}
@@ -242,7 +242,8 @@ namespace sigma {
 		auto& variable = access_node->get<ast_variable>();
 
 		// locate the variable
-		const auto declaration = m_context.variable_registry.get_variable(variable.identifier_key);
+		TRY(const auto declaration, m_context.semantics.find_variable(variable.identifier_key));
+
 		if(declaration == nullptr) {
 			const std::string& identifier_str = m_context.strings.get(variable.identifier_key);
 			return error::emit(error::code::UNKNOWN_VARIABLE, variable.location, identifier_str);
@@ -260,7 +261,8 @@ namespace sigma {
 		// locate the variable
 		const handle<node> variable_node = assignment_node->children[0];
 		const auto& variable = variable_node->get<ast_variable>();
-		const auto declaration = m_context.variable_registry.get_variable(variable.identifier_key);
+
+		TRY(const auto declaration, m_context.semantics.find_variable(variable.identifier_key));
 
 		if (declaration == nullptr) {
 			const std::string& identifier_str = m_context.strings.get(variable.identifier_key);

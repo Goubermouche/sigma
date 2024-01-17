@@ -37,6 +37,7 @@ namespace sigma {
 			UNKNOWN_VARIABLE,
 			UNKNOWN_VARIABLE_ASSIGN,
 			VARIABLE_ALREADY_DECLARED,
+			UNKNOWN_NAMESPACE,
 		};
 
 		/**
@@ -101,6 +102,7 @@ namespace sigma {
 			{ code::UNKNOWN_VARIABLE,                    "unknown variable '{}' referenced"                                                  },
 			{ code::UNKNOWN_VARIABLE_ASSIGN,             "attempting to assign to an unknown variable '{}'"                                  },
 			{ code::VARIABLE_ALREADY_DECLARED,           "variable '{}' has already been declared before"                                    },
+			{ code::UNKNOWN_NAMESPACE,                   "attempting to access an unknown namespace '{}'"                                    },
 		};
 	};
 } // namespace sigma

@@ -1,7 +1,7 @@
 #pragma once
-#include "compiler/compiler/type_system/function_registry.h"
-#include "compiler/compiler/type_system/variable_registry.h"
+#include "compiler/compiler/type_system/semantic_context.h"
 
+#include <abstract_syntax_tree/abstract_syntax_tree.h>
 #include <intermediate_representation/builder.h>
 #include <utility/containers/string_table.h>
 #include <tokenizer/token_buffer.h>
@@ -20,8 +20,7 @@ namespace sigma {
 		ir::module module;
 		ir::builder builder;
 
-		function_registry function_registry;
-		variable_registry variable_registry;
+		semantic_context semantics;
 	};
 
 	struct frontend_context {

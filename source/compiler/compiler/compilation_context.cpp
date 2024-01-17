@@ -3,7 +3,7 @@
 
 namespace sigma {
 	backend_context::backend_context(utility::string_table strings, abstract_syntax_tree& ast, ir::target target)
-		: allocator(1024), strings(std::move(strings)), ast(ast), module(target), builder(module), function_registry(*this), variable_registry(*this) {
+		: allocator(1024), strings(std::move(strings)), ast(ast), module(target), builder(module), semantics(*this) {
 
 		const utility::string_table_key printf_key = this->strings.insert("printf");
 		const utility::string_table_key format_key = this->strings.insert("format");
@@ -18,7 +18,7 @@ namespace sigma {
 			.identifier_key = printf_key
 		};
 
-		function_registry.declare_external_function(printf_function);
+		semantics.declare_external_function(printf_function);
 	}
 
 	frontend_context::frontend_context() : allocator(sizeof(token_location) * 10) {}

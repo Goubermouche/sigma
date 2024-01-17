@@ -7,7 +7,7 @@ namespace sigma {
 	}
 
 	ir_translator::ir_translator(backend_context& context) : m_context(context) {
-		m_context.variable_registry.reset_active_scope();
+		m_context.semantics.reset_active_scope();
 	}
 
 	handle<ir::node> ir_translator::translate_node(handle<node> ast_node) {
@@ -43,13 +43,13 @@ namespace sigma {
 	void ir_translator::translate_function_declaration(handle<node> function_node) {
 		const ast_function& function = function_node->get<ast_function>();
 
-		m_context.function_registry.declare_local_function(function.signature);
-		m_context.variable_registry.trace_push_scope();
+		m_context.semantics.declare_local_function(function.signature);
+		m_context.semantics.trace_push_scope();
 
 		// TODO: handle varargs
 		// declare parameter temporaries
 		for (u64 i = 0; i < function.signature.parameter_types.get_size(); ++i) {
-			const auto variable = m_context.variable_registry.get_variable(function.signature.parameter_types[i].identifier_key);
+			const auto variable = m_context.semantics.get_variable(function.signature.parameter_types[i].identifier_key);
 			ASSERT(variable, "function parameter pre declaration is invalid");
 
 			// since we can't update the projection value directly we have to create a proxy for it, this
@@ -67,13 +67,13 @@ namespace sigma {
 			translate_node(statement);
 		}
 
-		m_context.variable_registry.trace_pop_scope();
+		m_context.semantics.trace_pop_scope();
 	}
 
 	void ir_translator::translate_variable_declaration(handle<node> variable_node) {
 		const auto& prop = variable_node->get<ast_variable>();
 		const u16 byte_width = prop.type.get_byte_width();
-		const handle<ir::node> local = m_context.variable_registry.declare_variable(prop.identifier_key, byte_width, byte_width);
+		const handle<ir::node> local = m_context.semantics.declare_variable(prop.identifier_key, byte_width, byte_width);
 
 		if (variable_node->children.get_size() == 1) {
 			const handle<ir::node> expression = translate_node(variable_node->children[0]);
@@ -127,13 +127,13 @@ namespace sigma {
 
 		// this all happens if CONDITION IS true
 		m_context.builder.set_control(true_control);
-		m_context.variable_registry.trace_push_scope();
+		m_context.semantics.trace_push_scope();
 
 		for (u64 i = 2; i < branch_node->children.get_size(); ++i) {
 			translate_node(branch_node->children[i]);
 		}
 
-		m_context.variable_registry.trace_pop_scope();
+		m_context.semantics.trace_pop_scope();
 		m_context.builder.create_branch(end_control);
 
 		// restore the control region
@@ -141,13 +141,13 @@ namespace sigma {
 	}
 
 	void ir_translator::translate_branch(handle<node> branch_node, handle<ir::node> exit_control) {
-		m_context.variable_registry.trace_push_scope();
+		m_context.semantics.trace_push_scope();
 
 		for (const handle<node>& statement : branch_node->children) {
 			translate_node(statement);
 		}
 
-		m_context.variable_registry.trace_pop_scope();
+		m_context.semantics.trace_pop_scope();
 		m_context.builder.create_branch(exit_control);
 	}
 
@@ -192,14 +192,14 @@ namespace sigma {
 			parameters.push_back(translate_node(parameter));
 		}
 
-		const handle<ir::node> call_result = m_context.function_registry.create_call(callee.signature, parameters);
+		const handle<ir::node> call_result = m_context.semantics.create_call(callee.signature, parameters);
 		return call_result;
 	}
 
 	auto ir_translator::translate_variable_access(handle<node> access_node) const -> handle<ir::node> {
 		const auto& prop = access_node->get<ast_variable>();
 
-		const handle<ir::node> load = m_context.variable_registry.create_load(
+		const handle<ir::node> load = m_context.semantics.create_load(
 			prop.identifier_key, data_type_to_ir(prop.type), prop.type.get_byte_width()
 		);
 
@@ -212,7 +212,7 @@ namespace sigma {
 		const handle<ir::node> value = translate_node(assignment_node->children[1]);
 
 		// assign the variable
-		m_context.variable_registry.create_store(var.identifier_key, value, var.type.get_byte_width());
+		m_context.semantics.create_store(var.identifier_key, value, var.type.get_byte_width());
 		return nullptr;
 	}
 

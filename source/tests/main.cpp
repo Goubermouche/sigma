@@ -7,7 +7,7 @@ using namespace utility::types;
 #define STOUD_FILE "STDOUT.txt"
 #define STERR_FILE "STDERR.txt"
 
-bool test_file(const filepath& path, const filepath& compiler_path) {
+bool run_test(const filepath& path, const filepath& compiler_path) {
 	const std::string command = std::format("{} compile {} -e none > {} 2> {}", compiler_path, path, STOUD_FILE, STERR_FILE);
 	const i32 return_code = utility::shell::execute(command);
 
@@ -47,7 +47,7 @@ i32 run_all_tests(const parametric::parameters& params) {
 					return;
 				}
 
-				encountered_error |= test_file(path, compiler_path);
+				encountered_error |= run_test(path, compiler_path);
 			});
 		}
 	} catch(const std::exception& exception) {

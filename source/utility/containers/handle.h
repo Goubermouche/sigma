@@ -16,6 +16,12 @@ namespace utility::types {
     handle() = default;
     handle(type* ptr) : m_ptr(ptr) {}
 
+		template<typename other_type>
+		handle(other_type* other) : m_ptr(static_cast<type*>(other)) {}
+
+		template<typename other_type>
+		handle(handle<other_type> other) : m_ptr(static_cast<type*>(other.get())) {}
+
     auto operator*() const -> type& {
       return *m_ptr;
     }
@@ -35,7 +41,7 @@ namespace utility::types {
     operator bool() const noexcept {
       return m_ptr != nullptr;
     }
-	private:
+	protected:
     type* m_ptr = nullptr;
 	};
 } // namespace utility

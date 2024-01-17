@@ -56,6 +56,8 @@ namespace sigma {
 	 * \brief Scope representing a namespace. 
 	 */
 	struct namespace_scope : scope {
+		namespace_scope(scope_type type);
+
 		auto find_namespace(const std::vector<utility::string_table_key>& namespaces, u64 index) -> handle<scope>;
 
 		// NOTE: we're using std::map instead of std::unordered_map because we need deterministic order

@@ -43,7 +43,7 @@ namespace sigma {
 		auto parse_negative_expression() -> utility::result<handle<node>>;
 
 		auto parse_type() const -> utility::result<data_type>;
-		auto parse_function_call() -> utility::result<handle<node>>;
+		auto parse_function_call(const std::vector<utility::string_table_key>& namespaces) -> utility::result<handle<node>>;
 		auto parse_variable_declaration() -> utility::result<handle<node>>;
 		auto parse_variable_access() const-> utility::result<handle<node>>;
 		auto parse_assignment() -> utility::result<handle<node>>;
@@ -57,6 +57,8 @@ namespace sigma {
 		auto peek_is_function_definition() -> bool;
 		auto peek_is_function_call() const -> bool;
 		auto peek_is_variable_declaration() const -> bool;
+		auto peek_is_namespace_access() -> bool;
+		auto peek_is_double_colon() -> bool;
 
 		template<typename extra_type>
 		auto create_node(node_type type, u64 child_count) const -> handle<node> {

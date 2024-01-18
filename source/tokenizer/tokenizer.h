@@ -66,7 +66,8 @@ namespace sigma {
 			{ "*" ,  token_type::ASTERISK          },
 			{ "+" ,  token_type::PLUS_SIGN         },
 			{ "-" ,  token_type::MINUS_SIGN        },
-			{ "=" ,  token_type::EQUALS_SIGN       }
+			{ "=" ,  token_type::EQUALS_SIGN       },
+			{ ":" ,  token_type::COLON             },
 		};
 	};
 } // namespace sigma

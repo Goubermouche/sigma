@@ -27,6 +27,7 @@ namespace sigma {
 		PLUS_SIGN,         // +
 		MINUS_SIGN,        // +
 		EQUALS_SIGN,       // =
+		COLON,             // :
 
 		// default type keywords
 		I8,

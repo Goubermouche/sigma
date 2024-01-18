@@ -75,6 +75,12 @@ namespace sigma {
 		handle<token_location> location; // debug location
 	};
 
+	struct ast_function_call {
+		function_signature signature;
+		handle<token_location> location; // debug location
+		std::vector<utility::string_table_key> namespaces; // TEMP
+	};
+
 	struct ast_return {
 		handle<token_location> location; // debug location
 	};
@@ -99,7 +105,7 @@ namespace sigma {
 	};
 
 	using node_properties = utility::property<
-		ast_function, ast_return, ast_literal, ast_variable, ast_bool_literal, ast_namespace
+		ast_function, ast_function_call, ast_return, ast_literal, ast_variable, ast_bool_literal, ast_namespace
 	>;
 
 	struct node : node_properties {

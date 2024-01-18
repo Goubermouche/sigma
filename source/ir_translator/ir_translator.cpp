@@ -194,7 +194,7 @@ namespace sigma {
 	}
 
 	auto ir_translator::translate_function_call(handle<node> call_node) -> handle<ir::node> {
-		const ast_function& callee = call_node->get<ast_function>();
+		const ast_function_call& callee = call_node->get<ast_function_call>();
 
 		std::vector<handle<ir::node>> parameters;
 		parameters.reserve(call_node->children.get_size());
@@ -203,7 +203,7 @@ namespace sigma {
 			parameters.push_back(translate_node(parameter));
 		}
 
-		const handle<ir::node> call_result = m_context.semantics.create_call(callee.signature, parameters);
+		const handle<ir::node> call_result = m_context.semantics.create_call(callee.signature, callee.namespaces, parameters);
 		return call_result;
 	}
 

@@ -130,7 +130,7 @@ namespace sigma {
 		SUPPRESS_C4100(expected);
 
 		std::vector<data_type> parameter_data_types(call_node->children.get_size());
-		ast_function& function = call_node->get<ast_function>();
+		ast_function_call& function = call_node->get<ast_function_call>();
 
 		// type check all parameters and store their inherent type
 		for(u64 i = 0; i < parameter_data_types.size(); ++i) {

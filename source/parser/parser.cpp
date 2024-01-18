@@ -107,7 +107,7 @@ namespace sigma {
 		m_tokens.next(); // LEFT_PARENTHESIS (guaranteed)
 
 		// parse function parameters
-		while (m_tokens.peek_next_token() != token_type::RIGHT_PARENTHESIS) {
+		while(m_tokens.peek_next_token() != token_type::RIGHT_PARENTHESIS) {
 			// prime the type token
 			m_tokens.next();
 			TRY(data_type parameter_type, parse_type());
@@ -266,8 +266,19 @@ namespace sigma {
 	auto parser::parse_identifier_statement() -> utility::result<handle<node>> {
 		// parse a statement which starts with an identifier
 
+		// parse a namespace, if there is one
+		std::vector<utility::string_table_key> namespaces;
+
+		while(peek_is_namespace_access()) {
+			// first token here is an IDENTIFIER
+			namespaces.push_back(m_tokens.get_current().symbol_key);
+			m_tokens.next(); // COLON 1
+			m_tokens.next(); // COLON 2
+			m_tokens.next(); // prime the next token
+		}
+
 		if (peek_is_function_call()) {
-			return parse_function_call();
+			return parse_function_call(namespaces);
 		}
 		else {
 			TRY(const handle<node> variable_node, parse_variable_access());
@@ -301,7 +312,7 @@ namespace sigma {
 		return create_binary_expression(node_type::OPERATOR_MULTIPLY, negation_node, expression_node);
 	}
 
-	auto parser::parse_function_call() -> utility::result<handle<node>> {
+	auto parser::parse_function_call(const std::vector<utility::string_table_key>& namespaces) -> utility::result<handle<node>> {
 		ASSERT(m_tokens.get_current_token() == token_type::IDENTIFIER, "invalid token - expected a 'MINUS_SIGN'");
 
 		const handle<token_location> call_location = m_tokens.get_current_token_location();
@@ -324,15 +335,16 @@ namespace sigma {
 		EXPECT_NEXT_TOKEN(token_type::RIGHT_PARENTHESIS);
 
 		// create the callee
-		const handle<node> call_node = create_node<ast_function>(node_type::FUNCTION_CALL, parameters.size());
+		const handle<node> call_node = create_node<ast_function_call>(node_type::FUNCTION_CALL, parameters.size());
 
 		// copy over function parameters
 		std::memcpy(call_node->children.get_data(), parameters.data(), parameters.size() * sizeof(handle<node>));
 
 		// initialize the callee
-		ast_function& function = call_node->get<ast_function>();
+		ast_function_call& function = call_node->get<ast_function_call>();
 		function.signature.identifier_key = identifier_key;
 		function.location = call_location;
+		function.namespaces = namespaces;
 
 		return call_node;
 	}
@@ -606,6 +618,35 @@ namespace sigma {
 		}
 
 		return m_tokens.peek_next_token() == token_type::IDENTIFIER;
+	}
+
+	auto parser::peek_is_namespace_access() -> bool {
+		// matches 'IDENTIFIER COLON COLON'
+		//         'IDENTIFIER::'
+
+		if(m_tokens.get_current_token() != token_type::IDENTIFIER) {
+			return false;
+		}
+
+		if (m_tokens.peek_token() != token_type::COLON) {
+			m_tokens.synchronize();
+			return false;
+		}
+
+		const bool res = m_tokens.peek_token() == token_type::COLON;
+		m_tokens.synchronize();
+		return res;
+	}
+
+	auto parser::peek_is_double_colon() -> bool {
+		if(m_tokens.peek_token() != token_type::COLON) {
+			m_tokens.synchronize();
+			return false;
+		}
+
+		const bool res = m_tokens.peek_token() == token_type::COLON;
+		m_tokens.synchronize();
+		return res;
 	}
 
 	auto parser::create_binary_expression(node_type type, handle<node> left, handle<node> right) const -> handle<node> {

@@ -10,7 +10,7 @@
 </div>
 
 <p align="center">
-Sigma is a compiled, statically typed, C-like, data oriented language with a focus on performance and low-level optimization using GPU acceleration via kernels.  
+Sigma is a compiled, statically typed, C-like, data oriented language with a focus on performance and low-level optimization using GPU acceleration via kernels. Sigma is currently under heavy development and isn't ready for stable use. 
 </p>
 
 ## Getting up and running      
@@ -30,11 +30,12 @@ $ sigma compile main.s
 ```
 
 ## Project status
-As Sigma is currently under heavy development, it isn't ready for stable use, and many breaking changes may (and most likely will) be made. Please note that why the end goal is to target GPU's and other massivelly parallel targets, the current goal is to get a basic CPU-oriented language going, and there isn't a hard timeframe set - for more details see the current status bellow: 
+As Sigma is currently under heavy development, it isn't ready for stable use, and many breaking changes may (and most likely will) be made. Please note that while the end goal is to target GPU's and other massivelly parallel targets, the current goal is to get a basic CPU-oriented language going, and there isn't a hard timeframe set - for more details see the current status bellow: 
 -   Language features
     -   Implicit & explicit type casts
     -   Custom structured types
     -   Namespaces / modules / some kind of way of separating large sections of code
+        - Namespaces are currently under dev (functions done, globals TBD)
 -   Future:
     -   Unified package manager
     -   Official GPU support via kernels

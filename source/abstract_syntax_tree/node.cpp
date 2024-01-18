@@ -10,6 +10,8 @@ namespace sigma {
 			case FUNCTION_DECLARATION: return "FUNCTION_DECLARATION";
 			case FUNCTION_CALL:        return "FUNCTION_CALL";
 
+			case NAMESPACE_DECLARATION:            return "NAMESPACE_DECLARATION";
+
 			case RETURN:               return "RETURN";
 
 			case BRANCH:               return "BRANCH";

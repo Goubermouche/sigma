@@ -16,6 +16,8 @@ namespace sigma {
 
 		void translate_function_declaration(handle<node> function_node);
 		void translate_variable_declaration(handle<node> variable_node);
+		void translate_namespace_declaration(handle<node> namespace_node);
+
 		void translate_return(handle<node> return_node);
 
 		/**

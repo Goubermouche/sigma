@@ -49,7 +49,7 @@ namespace sigma {
 			case token_type::MINUS_SIGN:          return "+";
 			case token_type::EQUALS_SIGN:         return "=";
 
-				// default type keywords
+			// default type keywords
 			case token_type::I8:                  return "I8";
 			case token_type::I16:                 return "I16";
 			case token_type::I32:                 return "I32";
@@ -57,12 +57,15 @@ namespace sigma {
 
 			case token_type::BOOL:                return "BOOL";
 
-				// control flow
+			// control flow
 			case token_type::RET:                 return "RET";
 			case token_type::IF:                  return "IF";
 			case token_type::ELSE:                return "ELSE";
 
-				// literals
+			// other keywords
+			case token_type::NAMESPACE:           return "NAMESPACE";
+
+			// literals
 			case token_type::SIGNED_LITERAL:      return "SIGNED_LITERAL";
 			case token_type::UNSIGNED_LITERAL:    return "UNSIGNED_LITERAL";
 			case token_type::F32_LITERAL:         return "F32_LITERAL";

@@ -35,18 +35,21 @@ namespace sigma {
 		// keywords
 		const std::unordered_map<std::string, token_type> m_keyword_tokens = {
 			// flow control
-			{ "ret",  token_type::RET                 },
-			{ "if",   token_type::IF                  },
-			{ "else", token_type::ELSE                },
+			{ "ret",       token_type::RET                },
+			{ "if",        token_type::IF                 },
+			{ "else",      token_type::ELSE               },
+
+			// other keywords
+			{ "namespace", token_type::NAMESPACE          },
 
 			// native type keywords
-			{ "i8",    token_type::I8                 },
-			{ "i16",   token_type::I16                },
-			{ "i32",   token_type::I32                },
-			{ "i64",   token_type::I64                },
-			{ "bool",  token_type::BOOL               },
-			{ "true",  token_type::BOOL_LITERAL_TRUE  },
-			{ "false", token_type::BOOL_LITERAL_FALSE },
+			{ "i8",        token_type::I8                 },
+			{ "i16",       token_type::I16                },
+			{ "i32",       token_type::I32                },
+			{ "i64",       token_type::I64                },
+			{ "bool",      token_type::BOOL               },
+			{ "true",      token_type::BOOL_LITERAL_TRUE  },
+			{ "false",     token_type::BOOL_LITERAL_FALSE },
 		};
 
 		const std::unordered_map<std::string, token_type> m_special_tokens = {

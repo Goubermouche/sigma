@@ -19,8 +19,11 @@ namespace sigma {
 		[[nodiscard]] auto parse() -> utility::result<void>;
 
 		auto parse_function_declaration() -> utility::result<handle<node>>;
+		auto parse_namespace_declaration() -> utility::result<handle<node>>;
 
+		auto parse_namespace_block() -> utility::result<std::vector<handle<node>>>;
 		auto parse_statement_block() -> utility::result<std::vector<handle<node>>>;
+
 		auto parse_statement() -> utility::result<handle<node>>;
 
 		// expressions

@@ -20,6 +20,49 @@ EXPECT_CURRENT_TOKEN((__token))
 namespace sigma {
 	parser::parser(frontend_context& context) : m_context(context), m_tokens(context.tokens) {}
 
+	auto parser::parse_namespace_declaration() -> utility::result<handle<node>> {
+		// the first token is a NAMESPACE_DECLARATION
+		// parse the namespace identifier
+		EXPECT_NEXT_TOKEN(token_type::IDENTIFIER);
+		const utility::string_table_key identifier_key = m_tokens.get_current().symbol_key;
+
+		TRY(const auto top, parse_namespace_block());
+
+		const handle<node> namespace_node = m_context.ast.create_node<ast_namespace>(node_type::NAMESPACE_DECLARATION, top.size());
+		namespace_node->get<ast_namespace>().identifier_key = identifier_key;
+
+		std::memcpy(namespace_node->children.get_data(), top.data(), top.size() * sizeof(handle<node>));
+		return namespace_node;
+	}
+
+	auto parser::parse_namespace_block() -> utility::result<std::vector<handle<node>>> {
+		EXPECT_NEXT_TOKEN(token_type::LEFT_BRACE);
+		std::vector<handle<node>> block;
+
+		while(m_tokens.peek_next_token() != token_type::RIGHT_BRACE) {
+			m_tokens.next(); // commit 
+
+			handle<node> result = nullptr;
+
+			if(m_tokens.get_current_token() == token_type::NAMESPACE) {
+				TRY(result, parse_namespace_declaration());
+			}
+			else if (peek_is_function_definition()) {
+				TRY(result, parse_function_declaration());
+			}
+			else {
+				// global
+				NOT_IMPLEMENTED();
+			}
+
+			block.push_back(result);
+		}
+
+		EXPECT_NEXT_TOKEN(token_type::RIGHT_BRACE);
+
+		return block;
+	}
+
 	auto parser::parse(frontend_context& context) -> utility::result<void> {
 		return parser(context).parse();
 	}
@@ -32,15 +75,20 @@ namespace sigma {
 		//       probably use a stack
 
 		while (m_tokens.get_current_token() != token_type::END_OF_FILE) {
-			handle<node> node;
-			if (peek_is_function_definition()) {
-				TRY(node, parse_function_declaration());
+			handle<node> result;
+
+			if(m_tokens.get_current_token() == token_type::NAMESPACE) {
+				TRY(result, parse_namespace_declaration());
+			}
+			else if (peek_is_function_definition()) {
+				TRY(result, parse_function_declaration());
 			}
 			else {
+				// global
 				NOT_IMPLEMENTED();
 			}
 
-			m_context.ast.add_node(node);
+			m_context.ast.add_node(result);
 			m_tokens.next();
 		}
 

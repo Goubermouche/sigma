@@ -75,7 +75,11 @@ namespace sigma {
 				utility::console::print(")']");
 				break;
 			}
-
+			case node_type::NAMESPACE_DECLARATION: {
+				const auto& property = node->get<ast_namespace>();
+				utility::console::print("['{}']", strings.get(property.identifier_key));
+				break;
+			}
 			case node_type::VARIABLE_DECLARATION: {
 				const auto& property = node->get<ast_variable>();
 				utility::console::print("[{} '{}']", strings.get(property.identifier_key), property.type.to_string());

@@ -41,6 +41,9 @@ namespace sigma {
 		IF,                  // if
 		ELSE,                // else
 
+		// other keywords
+		NAMESPACE,           // namespace
+
 		// literals
 		SIGNED_LITERAL,      // 0
 		UNSIGNED_LITERAL,    // 0u

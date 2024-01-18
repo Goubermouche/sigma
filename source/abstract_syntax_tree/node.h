@@ -17,6 +17,8 @@ namespace sigma {
 			// function_signature
 			FUNCTION_CALL,
 
+			NAMESPACE_DECLARATION,
+
 			RETURN,
 
 			// children[1 - n] = statements
@@ -92,8 +94,12 @@ namespace sigma {
 		handle<token_location> location; // debug location
 	};
 
+	struct ast_namespace {
+		utility::string_table_key identifier_key;
+	};
+
 	using node_properties = utility::property<
-		ast_function, ast_return, ast_literal, ast_variable, ast_bool_literal
+		ast_function, ast_return, ast_literal, ast_variable, ast_bool_literal, ast_namespace
 	>;
 
 	struct node : node_properties {

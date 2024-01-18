@@ -24,30 +24,31 @@ namespace sigma {
 		using type_check_function = utility::result<data_type>(type_checker::*)(handle<node>, data_type);
 		static std::unordered_map<node_type::underlying, type_check_function> s_checkers = {
 			// functions
-			{ node_type::FUNCTION_DECLARATION, &type_checker::type_check_function_declaration },
-			{ node_type::FUNCTION_CALL,        &type_checker::type_check_function_call        },
+			{ node_type::FUNCTION_DECLARATION,  &type_checker::type_check_function_declaration  },
+			{ node_type::FUNCTION_CALL,         &type_checker::type_check_function_call         },
+			{ node_type::NAMESPACE_DECLARATION, &type_checker::type_check_namespace_declaration },
 
 			// control flow
-			{ node_type::RETURN,               &type_checker::type_check_return               },
-			{ node_type::CONDITIONAL_BRANCH,   &type_checker::type_check_conditional_branch   },
-			{ node_type::BRANCH,               &type_checker::type_check_branch               },
+			{ node_type::RETURN,                &type_checker::type_check_return                },
+			{ node_type::CONDITIONAL_BRANCH,    &type_checker::type_check_conditional_branch    },
+			{ node_type::BRANCH,                &type_checker::type_check_branch                },
 
 			// variables
-			{ node_type::VARIABLE_DECLARATION, &type_checker::type_check_variable_declaration },
-			{ node_type::VARIABLE_ACCESS,      &type_checker::type_check_variable_access      },
-			{ node_type::VARIABLE_ASSIGNMENT,  &type_checker::type_check_variable_assignment  },
+			{ node_type::VARIABLE_DECLARATION,  &type_checker::type_check_variable_declaration  },
+			{ node_type::VARIABLE_ACCESS,       &type_checker::type_check_variable_access       },
+			{ node_type::VARIABLE_ASSIGNMENT,   &type_checker::type_check_variable_assignment   },
 
 			// binary operators
-			{ node_type::OPERATOR_ADD,         &type_checker::type_check_binary_math_operator },
-			{ node_type::OPERATOR_SUBTRACT,    &type_checker::type_check_binary_math_operator },
-			{ node_type::OPERATOR_MULTIPLY,    &type_checker::type_check_binary_math_operator },
-			{ node_type::OPERATOR_DIVIDE,      &type_checker::type_check_binary_math_operator },
-			{ node_type::OPERATOR_MODULO,      &type_checker::type_check_binary_math_operator },
+			{ node_type::OPERATOR_ADD,          &type_checker::type_check_binary_math_operator  },
+			{ node_type::OPERATOR_SUBTRACT,     &type_checker::type_check_binary_math_operator  },
+			{ node_type::OPERATOR_MULTIPLY,     &type_checker::type_check_binary_math_operator  },
+			{ node_type::OPERATOR_DIVIDE,       &type_checker::type_check_binary_math_operator  },
+			{ node_type::OPERATOR_MODULO,       &type_checker::type_check_binary_math_operator  },
 
 			// literals
-			{ node_type::NUMERICAL_LITERAL,    &type_checker::type_check_numerical_literal    },
-			{ node_type::STRING_LITERAL,       &type_checker::type_check_string_literal       },
-			{ node_type::BOOL_LITERAL,         &type_checker::type_check_bool_literal         }
+			{ node_type::NUMERICAL_LITERAL,     &type_checker::type_check_numerical_literal     },
+			{ node_type::STRING_LITERAL,        &type_checker::type_check_string_literal        },
+			{ node_type::BOOL_LITERAL,          &type_checker::type_check_bool_literal          },
 		};
 
 		// locate the relevant type check function
@@ -56,6 +57,19 @@ namespace sigma {
 
 		// run the relevant function
 		return (this->*it->second)(ast_node, expected);
+	}
+
+	auto type_checker::type_check_namespace_declaration(handle<node> variable_node, data_type expected) -> utility::result<data_type> {
+		SUPPRESS_C4100(expected);
+		const ast_namespace& namespace_scope = variable_node->get<ast_namespace>();
+		m_context.semantics.push_namespace(namespace_scope.identifier_key);
+
+		for(const handle<node> statement : variable_node->children) {
+			TRY(type_check_node(statement));
+		}
+
+		m_context.semantics.pop_scope();
+		return data_type();
 	}
 
 	auto type_checker::type_check_function_declaration(handle<node> function_node, data_type expected) -> utility::result<data_type> {

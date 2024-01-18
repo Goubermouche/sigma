@@ -12,28 +12,29 @@ namespace sigma {
 
 	handle<ir::node> ir_translator::translate_node(handle<node> ast_node) {
 		switch (ast_node->type) {
-			case node_type::FUNCTION_DECLARATION: translate_function_declaration(ast_node); break;
-			case node_type::FUNCTION_CALL:        return translate_function_call(ast_node);
+			case node_type::FUNCTION_DECLARATION:  translate_function_declaration(ast_node); break;
+			case node_type::FUNCTION_CALL:         return translate_function_call(ast_node);
+			case node_type::NAMESPACE_DECLARATION: translate_namespace_declaration(ast_node); break;
 
 			// flow control
-			case node_type::RETURN:               translate_return(ast_node); break;
-			case node_type::CONDITIONAL_BRANCH:   translate_conditional_branch(ast_node, nullptr); break;
+			case node_type::RETURN:                translate_return(ast_node); break;
+			case node_type::CONDITIONAL_BRANCH:    translate_conditional_branch(ast_node, nullptr); break;
 
-			case node_type::VARIABLE_DECLARATION: translate_variable_declaration(ast_node); break;
-			case node_type::VARIABLE_ACCESS:      return translate_variable_access(ast_node);
-			case node_type::VARIABLE_ASSIGNMENT:  return translate_variable_assignment(ast_node);
+			case node_type::VARIABLE_DECLARATION:  translate_variable_declaration(ast_node); break;
+			case node_type::VARIABLE_ACCESS:       return translate_variable_access(ast_node);
+			case node_type::VARIABLE_ASSIGNMENT:   return translate_variable_assignment(ast_node);
 
 			// operators:
 			case node_type::OPERATOR_ADD:
 			case node_type::OPERATOR_SUBTRACT:
 			case node_type::OPERATOR_MULTIPLY:
 			case node_type::OPERATOR_DIVIDE:
-			case node_type::OPERATOR_MODULO:      return translate_binary_math_operator(ast_node);
+			case node_type::OPERATOR_MODULO:       return translate_binary_math_operator(ast_node);
 
 			// literals
-			case node_type::NUMERICAL_LITERAL:    return translate_numerical_literal(ast_node);
-			case node_type::STRING_LITERAL:       return translate_string_literal(ast_node);
-			case node_type::BOOL_LITERAL:         return translate_bool_literal(ast_node);
+			case node_type::NUMERICAL_LITERAL:     return translate_numerical_literal(ast_node);
+			case node_type::STRING_LITERAL:        return translate_string_literal(ast_node);
+			case node_type::BOOL_LITERAL:          return translate_bool_literal(ast_node);
 			default: PANIC("irgen for node '{}' is not implemented", ast_node->type.to_string());
 		}
 
@@ -83,6 +84,16 @@ namespace sigma {
 			// boolean values should default to false
 			m_context.builder.create_store(local, m_context.builder.create_bool(false), byte_width, false);
 		}
+	}
+
+	void ir_translator::translate_namespace_declaration(handle<node> namespace_node) {
+		m_context.semantics.trace_push_scope();
+
+		for(const handle<node> statement : namespace_node->children) {
+			translate_node(statement);
+		}
+
+		m_context.semantics.trace_pop_scope();
 	}
 
 	void ir_translator::translate_return(handle<node> return_node) {

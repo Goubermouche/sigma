@@ -11,6 +11,8 @@ namespace a {
 	}
 }
 
+i32 test(i32 a, i32 b) { ret a + 1; }
+
 i32 main() {
 	i32 a = 30;
 	
@@ -18,6 +20,6 @@ i32 main() {
 		a = 40;
 	}
 
-	printf("%d\n", a::test(a, 12));
+	printf("%d\n", test(a, 12));
 	ret 0;
 }

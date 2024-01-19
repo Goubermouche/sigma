@@ -5,21 +5,11 @@
 // -   check for memory oversteps in the parser
 // -   add namespaces to error messages, whenever applicable (ie. x::y::test)
 // -   namespace directives should probably be a part of the function signature? 
-namespace a {
-	namespace xxxx {
-		i32 test(i32 a, i32 b) { ret a; }
-	}
-}
-
-i32 test(i32 a, i32 b) { ret a + 1; }
-
 i32 main() {
-	i32 a = 30;
-	
-	if(true) {
-		a = 40;
-	}
+    i32* a;
+    i32** aa;
+    i32*** aaa;
+    i32**** aaaa;
 
-	printf("%d\n", test(a, 12));
-	ret 0;
+    ret 0;
 }

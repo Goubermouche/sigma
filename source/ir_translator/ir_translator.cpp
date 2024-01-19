@@ -244,7 +244,9 @@ namespace sigma {
 	}
 
 	auto ir_translator::data_type_to_ir(data_type dt) -> ir::data_type {
-		ASSERT(dt.pointer_level == 0, "invalid pointer level");
+		if(dt.pointer_level > 0) {
+			return PTR_TYPE;
+		}
 
 		switch (dt.base_type) {
 			case data_type::I32:  return I32_TYPE;

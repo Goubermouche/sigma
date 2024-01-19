@@ -48,6 +48,8 @@ namespace sigma {
 		auto get_current_token_location() const -> handle<token_location>;
 		auto get_current_token_line_index() const -> u32;
 		auto get_current_token_char_index() const -> u32;
+
+		auto get_current_peek_token() const -> token;
 	private:
 		const token_buffer& m_tokens;
 

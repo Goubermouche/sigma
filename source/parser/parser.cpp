@@ -502,14 +502,20 @@ namespace sigma {
 		return nullptr;
 	}
 
-	auto parser::parse_type() const -> utility::result<data_type> {
+	auto parser::parse_type() -> utility::result<data_type> {
 		const token type_token = m_tokens.get_current_token();
+		u8 pointer_level = 0;
 
 		if(!type_token.is_type()) {
 			return error::emit(error::code::UNEXPECTED_TOKEN, m_tokens.get_current_token_location(), type_token.to_string());
 		}
 
-		return data_type{ type_token, 0 };
+		while(m_tokens.peek_next_token() == token_type::ASTERISK) {
+			m_tokens.next();
+			pointer_level++;
+		}
+
+		return data_type{ type_token, pointer_level };
 	}
 
 	auto parser::parse_numerical_literal() const -> utility::result<handle<node>> {
@@ -612,12 +618,17 @@ namespace sigma {
 		return m_tokens.peek_next_token() == token_type::LEFT_PARENTHESIS;
 	}
 
-	auto parser::peek_is_variable_declaration() const -> bool {
+	auto parser::peek_is_variable_declaration() -> bool {
 		if (!is_current_token_type()) {
 			return false;
 		}
 
-		return m_tokens.peek_next_token() == token_type::IDENTIFIER;
+		// consume pointers
+		while(m_tokens.peek_token() == token_type::ASTERISK) {}
+
+		const bool res = m_tokens.get_current_peek_token() == token_type::IDENTIFIER;
+		m_tokens.synchronize();
+		return res;
 	}
 
 	auto parser::peek_is_namespace_access() -> bool {

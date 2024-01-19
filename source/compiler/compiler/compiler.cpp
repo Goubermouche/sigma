@@ -39,14 +39,14 @@ namespace sigma {
 		// backend
 		// at this point we want to merge all frontend contexts into the backend context
 		backend_context backend(std::move(frontend.strings), frontend.ast, m_description.target);
-		
+
 		// run analysis on the generated AST
 		TRY(type_checker::type_check(backend));
 		TRY(ir_translator::translate(backend));
 
 		// compile the generated IR module
 		backend.module.compile();
-		
+
 		// emit as an object file
 		if(m_description.emit == OBJECT) {
 			const filepath object_path = get_object_file_path();

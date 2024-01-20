@@ -88,6 +88,7 @@ namespace sigma {
 			case token_type::U32:  return U32;
 			case token_type::U64:  return U64;
 			case token_type::BOOL: return BOOL;
+			case token_type::VOID: return VOID;
 			default: PANIC("undefined token -> type conversion for token '{}'", token.to_string());
 		}
 
@@ -113,6 +114,10 @@ namespace sigma {
 				return false;
 			}
   }
+
+	bool data_type::is_void() const {
+		return base_type == VOID && pointer_level == 0;
+	}
 
   named_data_type::named_data_type(data_type type, utility::string_table_key identifier_key)
 	  : type(type), identifier_key(identifier_key) {}

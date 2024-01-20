@@ -54,6 +54,7 @@ namespace sigma {
 			{ "bool",      token_type::BOOL               },
 			{ "true",      token_type::BOOL_LITERAL_TRUE  },
 			{ "false",     token_type::BOOL_LITERAL_FALSE },
+			{ "void",      token_type::VOID               },
 		};
 
 		const std::unordered_map<std::string, token_type> m_special_tokens = {

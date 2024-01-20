@@ -3,6 +3,7 @@
 #include <intermediate_representation/target/system/win/win.h>
 #include <compiler/compiler/compilation_context.h>
 #include <compiler/compiler/diagnostics.h>
+#include <utility/string_helper.h>
 
 namespace sigma {
 	auto type_checker::type_check(backend_context& context) -> utility::result<void> {
@@ -106,6 +107,12 @@ namespace sigma {
 	auto type_checker::type_check_variable_declaration(handle<node> variable_node, data_type expected) -> utility::result<data_type> {
 		SUPPRESS_C4100(expected);
 		const ast_variable& variable = variable_node->get<ast_variable>();
+
+		// we cannot declare purely 'void' variables
+		if(variable.type.is_void()) {
+			const std::string& identifier_str = m_context.strings.get(variable.identifier_key);
+			return error::emit(error::code::VOID_VARIABLE, variable.location, identifier_str);
+		}
 
 		// check, whether the variable has already been declared in the current context
 		if(m_context.semantics.contains_variable(variable.identifier_key)) {
@@ -235,6 +242,30 @@ namespace sigma {
 	auto type_checker::type_check_numerical_literal(handle<node> literal_node, data_type expected) -> utility::result<data_type> {
 		auto& literal = literal_node->get<ast_literal>();
 		apply_expected_data_type(literal.type, expected);
+
+		const std::string& value_str = m_context.strings.get(literal.value_key);
+		bool overflow = false;
+
+		// check for type overflow
+		switch (literal.type.base_type) {
+			case data_type::I32: {
+				const auto value = utility::detail::from_string<i32>(value_str, overflow);
+				if(overflow) { warning::emit(warning::code::LITERAL_OVERFLOW, literal.location, value_str, value, "i32"); }
+				break;
+			}
+			case data_type::U32: {
+				const auto value = utility::detail::from_string<u32>(value_str, overflow);
+				if(overflow) { warning::emit(warning::code::LITERAL_OVERFLOW, literal.location, value_str, value, "u32"); }
+				break;
+			}
+			case data_type::U64: {
+				const auto value = utility::detail::from_string<u64>(value_str, overflow);
+				if(overflow) { warning::emit(warning::code::LITERAL_OVERFLOW, literal.location, value_str, value, "u64"); }
+				break;
+			}
+			default: NOT_IMPLEMENTED();
+		}
+
 		return literal.type;
 	}
 

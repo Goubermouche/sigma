@@ -40,6 +40,7 @@ namespace sigma {
 		U64,
 
 		BOOL,
+		VOID,
 
 		// control flow
 		RET,                 // ret

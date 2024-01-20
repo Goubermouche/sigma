@@ -11,25 +11,25 @@ namespace sigma {
 		 * \brief Predeclared error codes
 		 */
 		enum class code : u32 {
-			// filesystem (0 - 999)
-			EXPECTED_FILE = 0,
+			// filesystem (1000 - 1999)
+			EXPECTED_FILE = 1000,
 			FILE_DOES_NOT_EXIST,
 			INVALID_FILE_EXTENSION,
 			CANNOT_READ_FILE,
 
-			// tokenizer (1000 - 1999)
-			INVALID_STRING_TERMINATOR = 1000,
+			// tokenizer (2000 - 2999)
+			INVALID_STRING_TERMINATOR = 2000,
 			NUMERICAL_LITERAL_FP_WITHOUT_DOT,
 			NUMERICAL_LITERAL_UNSIGNED_WITH_DOT,
 			NUMERICAL_LITERAL_MORE_THAN_ONE_DOT,
 
-			// parser (2000 - 2999)
-			UNEXPECTED_NON_NUMERICAL = 2000,
+			// parser (3000 - 3999)
+			UNEXPECTED_NON_NUMERICAL = 3000,
 			UNEXPECTED_TOKEN,
 			UNEXPECTED_TOKEN_WITH_EXPECTED,
 
-			// type checker (3000 - 3999)
-			UNKNOWN_FUNCTION = 3000,
+			// type checker (4000 - 4999)
+			UNKNOWN_FUNCTION = 4000,
 			NO_CALL_OVERLOAD,
 			FUNCTION_ALREADY_DECLARED,
 			VOID_RETURN,
@@ -38,6 +38,7 @@ namespace sigma {
 			UNKNOWN_VARIABLE_ASSIGN,
 			VARIABLE_ALREADY_DECLARED,
 			UNKNOWN_NAMESPACE,
+			VOID_VARIABLE,
 		};
 
 		/**
@@ -103,13 +104,14 @@ namespace sigma {
 			{ code::UNKNOWN_VARIABLE_ASSIGN,             "attempting to assign to an unknown variable '{}'"                                  },
 			{ code::VARIABLE_ALREADY_DECLARED,           "variable '{}' has already been declared before"                                    },
 			{ code::UNKNOWN_NAMESPACE,                   "attempting to access an unknown namespace '{}'"                                    },
+			{ code::VOID_VARIABLE,                       "cannot declare a variable of type 'void' ('{}')"                                   },
 		};
 	};
 
 	class warning {
 	public:
 		enum class code : u32 {
-			LITERAL_OVERFLOW = 0
+			LITERAL_OVERFLOW = 1000
 		};
 
 		template<typename... arguments>

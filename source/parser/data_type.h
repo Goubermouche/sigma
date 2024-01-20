@@ -31,6 +31,7 @@ namespace sigma {
 		static auto token_to_type(token token) -> data_type_base;
 
 		bool is_integer() const;
+		bool is_void() const;
 
 		auto to_string() const -> std::string;
 		auto get_byte_width() const -> u16;

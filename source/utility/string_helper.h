@@ -46,4 +46,48 @@ namespace utility::detail {
 	void string_replace(std::string& str, const std::string& from, const std::string& to);
 
 	auto remove_first_line(const std::string& string) -> std::string;
+
+	/**
+	 * \brief Converts \b str to type, allows overflow behavior, when overflow occurs the \b overflow
+	 * flag is set. It's expected that \b str contains a valid value for \b type.
+	 * \tparam type Type to convert string to
+	 * \param str Str to parse
+	 * \param overflowed Overflow flag
+	 * \return \b str parsed as \b type.
+	 */
+	template<typename type>
+	type from_string(const std::string& str, bool& overflowed) {
+		static_assert(
+			std::is_integral_v<type> || std::is_floating_point_v<type>,
+			"'type' must be integral or floating point"
+			);
+
+		std::istringstream stream(str);
+		overflowed = false;
+
+		if constexpr (std::is_integral_v<type>) {
+			if constexpr (std::is_signed_v<type>) {
+				// read directly
+				type value;
+				stream >> value;
+				overflowed = stream.fail() || value > std::numeric_limits<type>::max() || value < std::numeric_limits<type>::lowest();
+				return value;
+			}
+			else {
+				// read into a larger signed type
+				i64 temp;
+				stream >> temp;
+				overflowed = stream.fail() || temp < 0 || static_cast<u64>(temp) > std::numeric_limits<type>::max();
+				return static_cast<type>(temp);
+			}
+		}
+		else if constexpr (std::is_floating_point_v<type>) {
+			type value;
+			stream >> value;
+			overflowed = stream.fail() || value > std::numeric_limits<type>::max() || value < std::numeric_limits<type>::lowest();
+			return value;
+		}
+
+		return type();
+	}
 } // namespace sigma

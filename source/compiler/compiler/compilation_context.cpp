@@ -4,6 +4,7 @@
 namespace sigma {
 	backend_context::backend_context(utility::string_table strings, abstract_syntax_tree& ast, ir::target target)
 		: allocator(1024), strings(std::move(strings)), ast(ast), module(target), builder(module), semantics(*this) {
+		// TODO: we don't have to initialize these if they're not used
 
 		// printf
 		{
@@ -24,22 +25,22 @@ namespace sigma {
 		}
 
 		// malloc
-		// {
-		// 	const utility::string_table_key malloc_key = this->strings.insert("malloc");
-		// 	const utility::string_table_key size_key = this->strings.insert("size");
-		// 
-		// 	auto malloc_params = utility::slice<named_data_type>(this->ast.get_allocator(), 1);
-		// 	malloc_params[0] = named_data_type{ data_type(data_type::I64, 1), size_key };
-		// 
-		// 	const function_signature printf_function = {
-		// 		.return_type = data_type(data_type::I32, 0),
-		// 		.parameter_types = malloc_params,
-		// 		.has_var_args = true,
-		// 		.identifier_key = malloc_key
-		// 	};
-		// 
-		// 	semantics.declare_external_function(printf_function);
-		// }
+		{
+			const utility::string_table_key malloc_key = this->strings.insert("malloc");
+			const utility::string_table_key size_key = this->strings.insert("size");
+		
+			auto malloc_params = utility::slice<named_data_type>(this->ast.get_allocator(), 1);
+			malloc_params[0] = named_data_type{ data_type(data_type::U64, 0), size_key };
+		
+			const function_signature malloc_function = {
+				.return_type = data_type(data_type::VOID, 1),
+				.parameter_types = malloc_params,
+				.has_var_args = false,
+				.identifier_key = malloc_key
+			};
+		
+			semantics.declare_external_function(malloc_function);
+		}
 	}
 
 	frontend_context::frontend_context() : allocator(sizeof(token_location) * 10) {}

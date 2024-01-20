@@ -240,6 +240,7 @@ namespace sigma {
 		);
 
 		// TODO: implement casting
+		// TODO: literals can just be upcasted implicitly
 		ASSERT(best_match->second == 0, "implement casting in the type checker!");
 		return best_match->first;
 	}
@@ -258,6 +259,16 @@ namespace sigma {
 		const	handle<ir::function> function = m_context.builder.create_function(ir_signature, ir::linkage::PUBLIC);
 
 		find_parent_namespace()->local_functions.at(signature.identifier_key).at(signature) = function;
+	}
+
+	void semantic_context::declare_implicit_return() const {
+		// declare an implicit return value for the active function
+		const handle<ir::function> function = m_context.builder.get_insert_point();
+
+		if(function->exit_node == nullptr) {
+			// declare an implicit return value
+			m_context.builder.create_return({});
+		}
 	}
 
 	auto semantic_context::create_call(const function_signature& callee_signature, const std::vector<utility::string_table_key>& namespaces, const std::vector<handle<ir::node>>& parameters) const -> handle<ir::node> {
@@ -383,12 +394,17 @@ namespace sigma {
 		ASSERT(type.pointer_level <= 1, "invalid pointer level");
 
 		switch (type.base_type) {
-		case data_type::I8:   return I8_TYPE;
-		case data_type::I16:  return I16_TYPE;
-		case data_type::I32:  return I32_TYPE;
-		case data_type::I64:  return I64_TYPE;
-		case data_type::BOOL: return BOOL_TYPE;
-		default: NOT_IMPLEMENTED();
+			case data_type::BOOL: return BOOL_TYPE;
+			case data_type::VOID: return VOID_TYPE;
+			case data_type::I8:
+			case data_type::U8:   return I8_TYPE;
+			case data_type::I16:
+			case data_type::U16:  return I16_TYPE;
+			case data_type::I32:
+			case data_type::U32:  return I32_TYPE;
+			case data_type::I64:
+			case data_type::U64:  return I64_TYPE;
+			default: NOT_IMPLEMENTED();
 		}
 
 		return {};

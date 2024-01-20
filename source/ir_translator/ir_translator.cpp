@@ -1,6 +1,7 @@
 #include "ir_translator.h"
 #include <compiler/compiler/compilation_context.h>
 #include <compiler/compiler/diagnostics.h>
+#include <utility/string_helper.h>
 
 namespace sigma {
 	auto ir_translator::translate(backend_context& context) -> utility::result<void> {
@@ -69,6 +70,7 @@ namespace sigma {
 			translate_node(statement);
 		}
 
+		m_context.semantics.declare_implicit_return();
 		m_context.semantics.trace_pop_scope();
 	}
 
@@ -237,44 +239,15 @@ namespace sigma {
 		}
 
 		bool overflow = false;
-		handle<ir::node> literal_node = nullptr;
 
 		switch (literal.type.base_type) {
-			case data_type::I32: {
-				literal_node = m_context.builder.create_signed_integer(from_string<i32>(value, overflow), 32);
-				if(overflow) { warning::emit(warning::code::LITERAL_OVERFLOW, literal.location, value, from_string<i32>(value, overflow), "i32"); }
-				break;
-			}
-			case data_type::U32: {
-				literal_node = m_context.builder.create_unsigned_integer(from_string<u32>(value, overflow), 32);
-				if(overflow) { warning::emit(warning::code::LITERAL_OVERFLOW, literal.location, value, from_string<u32>(value, overflow), "u32"); }
-				break;
-			}
+			case data_type::I32: return m_context.builder.create_signed_integer(utility::detail::from_string<i32>(value, overflow), 32);
+			case data_type::U32: return m_context.builder.create_unsigned_integer(utility::detail::from_string<u32>(value, overflow), 32);
+			case data_type::U64: return m_context.builder.create_unsigned_integer(utility::detail::from_string<u64>(value, overflow), 64);
 			default: NOT_IMPLEMENTED();
 		}
 
-		return literal_node;
-	}
-
-	auto ir_translator::data_type_to_ir(data_type dt) -> ir::data_type {
-		if(dt.pointer_level > 0) {
-			return PTR_TYPE;
-		}
-
-		switch (dt.base_type) {
-			case data_type::I8:
-			case data_type::U8:  return I8_TYPE;
-			case data_type::I16:
-			case data_type::U16:  return I16_TYPE;
-			case data_type::I32: 
-			case data_type::U32:  return I32_TYPE;
-			case data_type::I64:
-			case data_type::U64:  return I64_TYPE;
-			case data_type::BOOL: return BOOL_TYPE;
-			default: NOT_IMPLEMENTED();
-		}
-
-		return {};
+		return nullptr;
 	}
 
 	auto ir_translator::translate() -> utility::result<void> {

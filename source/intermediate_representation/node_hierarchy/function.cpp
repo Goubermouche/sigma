@@ -119,6 +119,9 @@ namespace sigma::ir {
 			terminators.push_back(exit_node);
 		}
 		else {
+			// NOTE: the IR gen currently checks if the exit node is nullptr, and if it is, it adds an
+			//       implicit return, this might not work 100% of the time if this gets updated, for more
+			//       info see declare_implicit_return()
 			NOT_IMPLEMENTED();
 		}
 

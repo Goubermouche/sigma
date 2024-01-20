@@ -5,9 +5,13 @@
 // -   check for memory oversteps in the parser
 // -   add namespaces to error messages, whenever applicable (ie. x::y::test)
 // -   namespace directives should probably be a part of the function signature? 
+// -   handle literal overflow in the typechecker, instead of the IR translator
+
 i32 main() {
-		i32 a = -1;
-		i32 aa = -5;
-		printf("%d\n", a * -aa);
-    ret 0;
+	u64 size = 20;
+	i32* value = malloc(size);
+	printf("%d\n", value);
+	void x;
+
+  ret 0;
 }

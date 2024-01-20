@@ -15,6 +15,7 @@ namespace sigma {
 		case token_type::U32:
 		case token_type::U64:
 		case token_type::BOOL:
+		case token_type::VOID:
 			return true;
 		default:
 			return false;
@@ -65,6 +66,7 @@ namespace sigma {
 			case token_type::U64:                 return "U64";
 
 			case token_type::BOOL:                return "BOOL";
+			case token_type::VOID:                return "VOID";
 
 			// control flow
 			case token_type::RET:                 return "RET";

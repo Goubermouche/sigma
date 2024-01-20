@@ -196,8 +196,9 @@ namespace sigma {
 		// first token is the RET keyword
 		// allow return statements without any expressions
 		if (m_tokens.peek_next_token() == token_type::SEMICOLON) {
-			NOT_IMPLEMENTED();
-			return nullptr;
+			const handle<node> ret = create_node<ast_return>(node_type::RETURN, 0);
+			ret->get<ast_return>().location = location;
+			return ret;
 		}
 
 		m_tokens.next(); // prime the first expression token

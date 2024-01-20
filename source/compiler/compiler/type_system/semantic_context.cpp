@@ -400,6 +400,7 @@ namespace sigma {
 			case data_type::U8:   return I8_TYPE;
 			case data_type::I16:
 			case data_type::U16:  return I16_TYPE;
+			case data_type::CHAR:
 			case data_type::I32:
 			case data_type::U32:  return I32_TYPE;
 			case data_type::I64:

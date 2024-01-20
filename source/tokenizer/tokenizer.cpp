@@ -59,7 +59,7 @@ namespace sigma {
 
 		// single quote characters are interpreted as character literals
 		if(m_last_character == '\'') {
-			NOT_IMPLEMENTED();
+			return get_char_literal_token();
 		}
 
 		// double quote characters are interpreted as string literals
@@ -251,6 +251,24 @@ namespace sigma {
 		return token_info{
 			.tok        = { token_type::STRING_LITERAL },
 			.location   = m_context.allocator.emplace<token_location>(m_token_start_location),
+			.symbol_key = m_context.strings.insert(m_current_section)
+		};
+	}
+
+	auto tokenizer::get_char_literal_token() -> utility::result<token_info> {
+		get_next_char(); // read the character after the opening quote
+		m_current_section = get_escaped_character();
+		get_next_char(); // read the closing quote
+
+		if(m_last_character != '\'') {
+			return error::emit(error::code::INVALID_CHAR_TERMINATOR);
+		}
+
+		get_next_char();
+
+		return token_info{
+			.tok = { token_type::CHARACTER_LITERAL },
+			.location = m_context.allocator.emplace<token_location>(m_token_start_location),
 			.symbol_key = m_context.strings.insert(m_current_section)
 		};
 	}

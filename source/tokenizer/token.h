@@ -41,6 +41,7 @@ namespace sigma {
 
 		BOOL,
 		VOID,
+		CHAR,
 
 		// control flow
 		RET,                 // ret
@@ -58,6 +59,7 @@ namespace sigma {
 		HEXADECIMAL_LITERAL, // 0x / 0X
 		BINARY_LITERAL,      // 0b / 0B
 		STRING_LITERAL,      // "text"
+		CHARACTER_LITERAL,   // 'x'
 		BOOL_LITERAL_TRUE,   // true
 		BOOL_LITERAL_FALSE,  // false
 

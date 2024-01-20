@@ -89,6 +89,7 @@ namespace sigma {
 			case token_type::U64:  return U64;
 			case token_type::BOOL: return BOOL;
 			case token_type::VOID: return VOID;
+			case token_type::CHAR: return CHAR;
 			default: PANIC("undefined token -> type conversion for token '{}'", token.to_string());
 		}
 

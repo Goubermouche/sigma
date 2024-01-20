@@ -35,6 +35,7 @@ namespace sigma {
 
 			// literals
 			case node_type::NUMERICAL_LITERAL:     return translate_numerical_literal(ast_node);
+			case node_type::CHARACTER_LITERAL:     return translate_character_literal(ast_node);
 			case node_type::STRING_LITERAL:        return translate_string_literal(ast_node);
 			case node_type::BOOL_LITERAL:          return translate_bool_literal(ast_node);
 			default: PANIC("irgen for node '{}' is not implemented", ast_node->type.to_string());
@@ -169,6 +170,12 @@ namespace sigma {
 		return literal_to_ir(numerical_literal_node->get<ast_literal>());
 	}
 
+	auto ir_translator::translate_character_literal(handle<node> character_literal_node) const -> handle<ir::node> {
+		const std::string& value = m_context.strings.get(character_literal_node->get<ast_literal>().value_key);
+		ASSERT(value.size() == 1, "invalid char literal length");
+		return m_context.builder.create_signed_integer(value[0], 32);
+	}
+
 	auto ir_translator::translate_string_literal(handle<node> string_literal_node) const -> handle<ir::node> {
 		const std::string& value = m_context.strings.get(string_literal_node->get<ast_literal>().value_key);
 		return m_context.builder.create_string(value);
@@ -238,10 +245,15 @@ namespace sigma {
 			NOT_IMPLEMENTED();
 		}
 
-		bool overflow = false;
+		bool overflow; // ignored
 
 		switch (literal.type.base_type) {
+			case data_type::I8:  return m_context.builder.create_signed_integer(utility::detail::from_string<i32>(value, overflow), 8);
+			case data_type::I16: return m_context.builder.create_signed_integer(utility::detail::from_string<i32>(value, overflow), 16);
 			case data_type::I32: return m_context.builder.create_signed_integer(utility::detail::from_string<i32>(value, overflow), 32);
+			case data_type::I64: return m_context.builder.create_signed_integer(utility::detail::from_string<i32>(value, overflow), 64);
+			case data_type::U8:  return m_context.builder.create_unsigned_integer(utility::detail::from_string<u32>(value, overflow), 8);
+			case data_type::U16: return m_context.builder.create_unsigned_integer(utility::detail::from_string<u32>(value, overflow), 16);
 			case data_type::U32: return m_context.builder.create_unsigned_integer(utility::detail::from_string<u32>(value, overflow), 32);
 			case data_type::U64: return m_context.builder.create_unsigned_integer(utility::detail::from_string<u64>(value, overflow), 64);
 			default: NOT_IMPLEMENTED();

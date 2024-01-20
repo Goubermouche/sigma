@@ -16,6 +16,7 @@ namespace sigma {
 		case token_type::U64:
 		case token_type::BOOL:
 		case token_type::VOID:
+		case token_type::CHAR:
 			return true;
 		default:
 			return false;
@@ -67,6 +68,7 @@ namespace sigma {
 
 			case token_type::BOOL:                return "BOOL";
 			case token_type::VOID:                return "VOID";
+			case token_type::CHAR:                return "CHAR";
 
 			// control flow
 			case token_type::RET:                 return "RET";
@@ -84,6 +86,7 @@ namespace sigma {
 			case token_type::HEXADECIMAL_LITERAL: return "HEXADECIMAL_LITERAL";
 			case token_type::BINARY_LITERAL:      return "BINARY_LITERAL";
 			case token_type::STRING_LITERAL:      return "STRING_LITERAL";
+			case token_type::CHARACTER_LITERAL:   return "CHARACTER_LITERAL";
 			case token_type::BOOL_LITERAL_TRUE:   return "BOOL_LITERAL_TRUE";
 			case token_type::BOOL_LITERAL_FALSE:  return "BOOL_LITERAL_FALSE";
 

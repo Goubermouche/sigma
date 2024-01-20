@@ -19,6 +19,7 @@ namespace sigma {
 
 			// tokenizer (2000 - 2999)
 			INVALID_STRING_TERMINATOR = 2000,
+			INVALID_CHAR_TERMINATOR,
 			NUMERICAL_LITERAL_FP_WITHOUT_DOT,
 			NUMERICAL_LITERAL_UNSIGNED_WITH_DOT,
 			NUMERICAL_LITERAL_MORE_THAN_ONE_DOT,
@@ -85,6 +86,7 @@ namespace sigma {
 
 			// tokenizer
 			{ code::INVALID_STRING_TERMINATOR,           "invalid string literal terminator detected"                                        },
+			{ code::INVALID_CHAR_TERMINATOR,             "invalid char literal terminator detected"                                          },
 			{ code::NUMERICAL_LITERAL_FP_WITHOUT_DOT,    "numerical floating-point literal without '.' character detected"                   },
 			{ code::NUMERICAL_LITERAL_UNSIGNED_WITH_DOT, "unsigned numerical literal with '.' character detected"                            },
 			{ code::NUMERICAL_LITERAL_MORE_THAN_ONE_DOT, "numerical literal with more than one '.' character detected"                       },

@@ -48,6 +48,7 @@ namespace sigma {
 
 			// literals
 			{ node_type::NUMERICAL_LITERAL,     &type_checker::type_check_numerical_literal     },
+			{ node_type::CHARACTER_LITERAL,     &type_checker::type_check_character_literal     },
 			{ node_type::STRING_LITERAL,        &type_checker::type_check_string_literal        },
 			{ node_type::BOOL_LITERAL,          &type_checker::type_check_bool_literal          },
 		};
@@ -266,6 +267,12 @@ namespace sigma {
 			default: NOT_IMPLEMENTED();
 		}
 
+		return literal.type;
+	}
+
+	auto type_checker::type_check_character_literal(handle<node> literal_node, data_type expected) -> utility::result<data_type> {
+		auto& literal = literal_node->get<ast_literal>();
+		apply_expected_data_type(literal.type, expected);
 		return literal.type;
 	}
 

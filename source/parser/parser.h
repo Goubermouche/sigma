@@ -51,6 +51,7 @@ namespace sigma {
 
 		// literals
 		auto parse_numerical_literal() const-> utility::result<handle<node>>;
+		auto parse_character_literal() const->utility::result<handle<node>>;
 		auto parse_string_literal() const-> utility::result<handle<node>>;
 		auto parse_bool_literal() const -> utility::result<handle<node>>;
 

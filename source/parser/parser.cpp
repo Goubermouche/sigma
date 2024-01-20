@@ -496,6 +496,7 @@ namespace sigma {
 		switch (m_tokens.get_current_token()) {
 			case token_type::IDENTIFIER:         return parse_identifier_statement();
 			case token_type::STRING_LITERAL:     return parse_string_literal();
+			case token_type::CHARACTER_LITERAL:  return parse_character_literal();
 			case token_type::MINUS_SIGN:         return parse_negative_expression();
 			case token_type::BOOL_LITERAL_TRUE:
 			case token_type::BOOL_LITERAL_FALSE: return parse_bool_literal();
@@ -554,6 +555,22 @@ namespace sigma {
 		literal.type = { base, 0 };
 
 		return literal_node;
+	}
+
+	auto parser::parse_character_literal() const -> utility::result<handle<node>> {
+		EXPECT_CURRENT_TOKEN(token_type::CHARACTER_LITERAL);
+		const handle<token_location> location = m_tokens.get_current_token_location();
+
+		// create the string node
+		const handle<node> char_node = create_node<ast_literal>(node_type::CHARACTER_LITERAL, 0);
+
+		// initialize the literal
+		auto& literal = char_node->get<ast_literal>();
+		literal.value_key = m_tokens.get_current().symbol_key;
+		literal.location = location;
+		literal.type = { data_type::CHAR, 0 }; // char
+
+		return char_node;
 	}
 
 	auto parser::parse_string_literal() const -> utility::result<handle<node>> {

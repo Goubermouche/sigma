@@ -36,6 +36,7 @@ namespace sigma {
 		void translate_branch(handle<node> branch_node, handle<ir::node> exit_control);
 
 		auto translate_numerical_literal(handle<node> numerical_literal_node) const->handle<ir::node>;
+		auto translate_character_literal(handle<node> character_literal_node) const->handle<ir::node>;
 		auto translate_string_literal(handle<node> string_literal_node) const->handle<ir::node>;
 		auto translate_bool_literal(handle<node> bool_literal_node) const->handle<ir::node>;
 

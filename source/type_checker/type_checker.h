@@ -30,6 +30,7 @@ namespace sigma {
 		auto type_check_variable_assignment(handle<node> assignment_node, data_type expected)->utility::result<data_type>;
 
 		auto type_check_numerical_literal(handle<node> literal_node, data_type expected) -> utility::result<data_type>;
+		auto type_check_character_literal(handle<node> literal_node, data_type expected) -> utility::result<data_type>;
 		auto type_check_string_literal(handle<node> literal_node, data_type expected) -> utility::result<data_type>;
 		auto type_check_bool_literal(handle<node> literal_node, data_type expected) -> utility::result<data_type>;
 

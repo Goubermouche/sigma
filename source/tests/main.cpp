@@ -4,23 +4,25 @@
 
 using namespace utility::types;
 
-#define STOUD_FILE "STDOUT.txt"
-#define STERR_FILE "STDERR.txt"
+#define STDOUT_FILE "STDOUT.txt"
+#define STDERR_FILE "STDERR.txt"
 
 bool run_test(const filepath& path, const filepath& compiler_path) {
-	const std::string command = std::format("{} compile {} -e none > {} 2> {}", compiler_path, path, STOUD_FILE, STERR_FILE);
+	const std::string command = std::format("{} compile {} -e none > {} 2> {}", compiler_path, path, STDOUT_FILE, STDERR_FILE);
+	const filepath& pretty_path = path.get_parent_path().get_filename() / path.get_filename();
+
 	const i32 return_code = utility::shell::execute(command);
 
 	if(return_code == 0) {
-		utility::console::print("{:<30} OK\n", path.get_filename().to_string());
+		utility::console::print("{:<40} OK\n", pretty_path.to_string());
 		return false;
 	}
 
-	utility::console::printerr("{:<30} ERROR\n", path.get_filename().to_string());
+	utility::console::printerr("{:<40} ERROR\n", pretty_path.to_string());
 
-	const auto file_result = utility::fs::file<std::string>::load(STERR_FILE);
+	const auto file_result = utility::fs::file<std::string>::load(STDERR_FILE);
 	if(file_result.has_error()) {
-		throw std::runtime_error(std::format("cannot open file {}", STERR_FILE).c_str());
+		throw std::runtime_error(std::format("cannot open file {}", STDERR_FILE).c_str());
 	}
 
 	utility::console::printerr("'{}'\n", file_result.get_value());
@@ -57,8 +59,8 @@ i32 run_all_tests(const parametric::parameters& params) {
 
 	// cleanup
 	try {
-		utility::fs::remove(STOUD_FILE);
-		utility::fs::remove(STERR_FILE);
+		utility::fs::remove(STDOUT_FILE);
+		utility::fs::remove(STDERR_FILE);
 	} catch(const std::exception& exception) {
 		utility::console::printerr("error: {}\n", exception.what());
 		encountered_error = true;

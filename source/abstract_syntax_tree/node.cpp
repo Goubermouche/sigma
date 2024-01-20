@@ -28,6 +28,7 @@ namespace sigma {
 			case OPERATOR_MODULO:      return "OPERATOR_MODULO";
 
 			case NUMERICAL_LITERAL:    return "NUMERICAL_LITERAL";
+			case CHARACTER_LITERAL:    return "CHARACTER_LITERAL";
 			case STRING_LITERAL:       return "STRING_LITERAL";
 			case BOOL_LITERAL:         return "BOOL_LITERAL";
 

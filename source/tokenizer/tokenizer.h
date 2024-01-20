@@ -16,6 +16,7 @@ namespace sigma {
 		[[nodiscard]] auto get_alphabetical_token() -> utility::result<token_info>;
 		[[nodiscard]] auto get_numerical_token() -> utility::result<token_info>;
 		[[nodiscard]] auto get_string_literal_token() -> utility::result<token_info>;
+		[[nodiscard]] auto get_char_literal_token() -> utility::result<token_info>;
 		[[nodiscard]] auto get_special_token() -> utility::result<token_info>;
 
 		void consume_spaces();
@@ -52,9 +53,11 @@ namespace sigma {
 			{ "u32",       token_type::U32                },
 			{ "u64",       token_type::U64                },
 			{ "bool",      token_type::BOOL               },
+			{ "void",      token_type::VOID               },
+			{ "char",      token_type::CHAR               },
+
 			{ "true",      token_type::BOOL_LITERAL_TRUE  },
 			{ "false",     token_type::BOOL_LITERAL_FALSE },
-			{ "void",      token_type::VOID               },
 		};
 
 		const std::unordered_map<std::string, token_type> m_special_tokens = {

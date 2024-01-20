@@ -58,6 +58,10 @@ namespace utility::types {
 		auto get_filename() const -> filepath {
 			return m_path.filename();
 		}
+
+		auto operator/(const filepath& other) {
+			return m_path / other.m_path;
+		}
 	private:
 		path_type m_path;
 	};

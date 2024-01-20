@@ -299,6 +299,7 @@ namespace sigma {
 
 	auto parser::parse_negative_expression() -> utility::result<handle<node>> {
 		EXPECT_CURRENT_TOKEN(token_type::MINUS_SIGN);
+		const handle<token_location> location = m_tokens.get_current_token_location();
 		m_tokens.next(); // prime the first expression token
 
 		TRY(const handle<node> expression_node, parse_expression());
@@ -306,6 +307,7 @@ namespace sigma {
 
 		ast_literal& literal = negation_node->get<ast_literal>();
 		literal.value_key = m_context.strings.insert("-1");
+		literal.location = location;
 		literal.type = { data_type::I32, 0 };
 
 		// negate the expression
@@ -520,6 +522,7 @@ namespace sigma {
 
 	auto parser::parse_numerical_literal() const -> utility::result<handle<node>> {
 		const token literal_token = m_tokens.get_current_token();
+		const handle<token_location> location = m_tokens.get_current_token_location();
 
 		if(!literal_token.is_numerical_literal()) {
 			return error::emit(error::code::UNEXPECTED_NON_NUMERICAL, m_tokens.get_current_token_location(), literal_token.to_string());
@@ -546,6 +549,7 @@ namespace sigma {
 		// initialize the literal
 		auto& literal = literal_node->get<ast_literal>();
 		literal.value_key = m_tokens.get_current().symbol_key;
+		literal.location = location;
 		literal.type = { base, 0 };
 
 		return literal_node;
@@ -553,6 +557,7 @@ namespace sigma {
 
 	auto parser::parse_string_literal() const -> utility::result<handle<node>> {
 		EXPECT_CURRENT_TOKEN(token_type::STRING_LITERAL);
+		const handle<token_location> location = m_tokens.get_current_token_location();
 
 		// create the string node
 		const handle<node> string_node = create_node<ast_literal>(node_type::STRING_LITERAL, 0);
@@ -560,6 +565,7 @@ namespace sigma {
 		// initialize the literal
 		auto& literal = string_node->get<ast_literal>();
 		literal.value_key = m_tokens.get_current().symbol_key;
+		literal.location = location;
 		literal.type = { data_type::CHAR, 1 }; // char*
 
 		return string_node;

@@ -113,10 +113,16 @@ namespace sigma {
 		};
 
 		template<typename... arguments>
-		static void emit(code code, arguments&&... args) {
+		static void emit(code code, handle<token_location> location, arguments&&... args) {
 			auto formatted_args = std::make_format_args(std::forward<arguments>(args)...);
 			std::string message = std::vformat(m_warnings.find(code)->second, formatted_args);
-			utility::console::print("warning C{}: {}\n", static_cast<u32>(code), message);
+			utility::console::print(
+				"{}:{}:{}: warning C{}: {}\n",
+				location->file->get_filename(),
+				location->line_index + 1,
+				location->char_index + 1,
+				static_cast<u32>(code), 
+				message);
 		}
 	private:
 		const static inline std::unordered_map<code, std::string> m_warnings = {

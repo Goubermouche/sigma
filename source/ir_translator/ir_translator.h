@@ -25,9 +25,12 @@ namespace sigma {
 		overflowed = false;
 
 		if constexpr (std::is_integral_v<type>) {
-			u64 temp;
+			using temp_type = std::conditional_t<std::is_signed_v<type>, i64, u64>;
+			temp_type temp;
 			stream >> temp;
-			overflowed = temp > std::numeric_limits<type>::max();
+
+			// check for overflows
+			overflowed = temp > std::numeric_limits<type>::max() || temp < std::numeric_limits<type>::lowest();
 			return static_cast<type>(temp);
 		}
 		else if constexpr (std::is_floating_point_v<type>) {
@@ -39,6 +42,7 @@ namespace sigma {
 				return std::numeric_limits<type>::quiet_NaN();
 			}
 
+			// check for overflows
 			overflowed = temp > std::numeric_limits<type>::max() || temp < std::numeric_limits<type>::lowest();
 			return static_cast<type>(temp);
 		}

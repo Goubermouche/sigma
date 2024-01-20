@@ -242,12 +242,12 @@ namespace sigma {
 		switch (literal.type.base_type) {
 			case data_type::I32: {
 				literal_node = m_context.builder.create_signed_integer(from_string<i32>(value, overflow), 32);
-				if(overflow) { warning::emit(warning::code::LITERAL_OVERFLOW, value, from_string<i32>(value, overflow), "i32"); }
+				if(overflow) { warning::emit(warning::code::LITERAL_OVERFLOW, literal.location, value, from_string<i32>(value, overflow), "i32"); }
 				break;
 			}
 			case data_type::U32: {
 				literal_node = m_context.builder.create_unsigned_integer(from_string<u32>(value, overflow), 32);
-				if(overflow) { warning::emit(warning::code::LITERAL_OVERFLOW, value, from_string<u32>(value, overflow), "u32"); }
+				if(overflow) { warning::emit(warning::code::LITERAL_OVERFLOW, literal.location, value, from_string<u32>(value, overflow), "u32"); }
 				break;
 			}
 			default: NOT_IMPLEMENTED();

@@ -87,6 +87,7 @@ namespace sigma {
 
 	struct ast_literal {
 		utility::string_table_key value_key; // literal value represented as a string
+		handle<token_location> location; // debug location
 		data_type type;
 	};
 

@@ -105,4 +105,23 @@ namespace sigma {
 			{ code::UNKNOWN_NAMESPACE,                   "attempting to access an unknown namespace '{}'"                                    },
 		};
 	};
+
+	class warning {
+	public:
+		enum class code : u32 {
+			LITERAL_OVERFLOW = 0
+		};
+
+		template<typename... arguments>
+		static void emit(code code, arguments&&... args) {
+			auto formatted_args = std::make_format_args(std::forward<arguments>(args)...);
+			std::string message = std::vformat(m_warnings.find(code)->second, formatted_args);
+			utility::console::print("warning C{}: {}\n", static_cast<u32>(code), message);
+		}
+	private:
+		const static inline std::unordered_map<code, std::string> m_warnings = {
+			// filesystem
+			{ code::LITERAL_OVERFLOW, "literal overflow detected ('{}' to '{}' for type '{}')" },
+		};
+	};
 } // namespace sigma

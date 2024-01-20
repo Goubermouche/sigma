@@ -11,7 +11,8 @@ namespace sigma {
 
 	struct frontend_context;
 
-	class parser {
+	class
+	parser {
 	public:
 		[[nodiscard]] static auto parse(frontend_context& context) -> utility::result<void>;
 	private:

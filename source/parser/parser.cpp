@@ -532,7 +532,7 @@ namespace sigma {
 		// fall back to
 		switch (literal_token) {
 			case token_type::SIGNED_LITERAL:      base = data_type::I32; break;
-			//case lex::token_type::UNSIGNED_LITERAL:    base = data_type::U32; break;
+			case token_type::UNSIGNED_LITERAL:    base = data_type::U32; break;
 			//case lex::token_type::F32_LITERAL:         base = data_type::F32; break;
 			//case lex::token_type::F64_LITERAL:         base = data_type::F64; break;
 			case token_type::HEXADECIMAL_LITERAL: base = data_type::I32; break;

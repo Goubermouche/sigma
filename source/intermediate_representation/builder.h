@@ -125,6 +125,8 @@ namespace sigma::ir {
 		 */
 		auto create_signed_integer(i64 value, u8 bit_width) const -> handle<node>;
 
+		auto create_unsigned_integer(u64 value, u8 bit_width) const->handle<node>;
+
 		/**
 		 * \brief Creates a new boolean value.
 		 * \param value Value of the boolean

@@ -51,6 +51,7 @@ namespace sigma::ir {
 		auto create_call(handle<function> target, const std::vector<handle<node>>& arguments) -> handle<node>;
 
 		auto create_signed_integer(i64 value, u8 bit_width) -> handle<node>;
+		auto create_unsigned_integer(u64 value, u8 bit_width) -> handle<node>;
 		auto create_bool(bool value) -> handle<node>;
 
 		auto create_add(handle<node> left, handle<node> right, arithmetic_behaviour behaviour = arithmetic_behaviour::NONE) -> handle<node>;

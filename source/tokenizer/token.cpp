@@ -10,6 +10,10 @@ namespace sigma {
 		case token_type::I16:
 		case token_type::I32:
 		case token_type::I64:
+		case token_type::U8:
+		case token_type::U16:
+		case token_type::U32:
+		case token_type::U64:
 		case token_type::BOOL:
 			return true;
 		default:
@@ -55,6 +59,10 @@ namespace sigma {
 			case token_type::I16:                 return "I16";
 			case token_type::I32:                 return "I32";
 			case token_type::I64:                 return "I64";
+			case token_type::U8:                  return "U8";
+			case token_type::U16:                 return "U16";
+			case token_type::U32:                 return "U32";
+			case token_type::U64:                 return "U64";
 
 			case token_type::BOOL:                return "BOOL";
 

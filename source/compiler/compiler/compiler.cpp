@@ -34,7 +34,7 @@ namespace sigma {
 		TRY(tokenizer::tokenize(file, &m_description.path, frontend));
 		TRY(parser::parse(frontend));
 
-		frontend.print_ast();
+		// frontend.print_ast();
 
 		// backend
 		// at this point we want to merge all frontend contexts into the backend context

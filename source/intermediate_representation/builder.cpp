@@ -3,7 +3,7 @@
 // #define DEBUG_PRINT_BUILDER
 
 #ifdef DEBUG_PRINT_BUILDER
-#define DEBUG_PRINT(__message) utility::console::println((__message))
+#define DEBUG_PRINT(__message) utility::console::print("{}\n", (__message))
 #else
 #define DEBUG_PRINT(__message)
 #endif
@@ -80,6 +80,11 @@ namespace sigma::ir {
 	auto builder::create_signed_integer(i64 value, u8 bit_width) const -> handle<node> {
 		DEBUG_PRINT("creating signed integer");
 		return get_insert_point_checked()->create_signed_integer(value, bit_width);
+	}
+
+	auto builder::create_unsigned_integer(u64 value, u8 bit_width) const -> handle<node> {
+		DEBUG_PRINT("creating unsigned integer");
+		return get_insert_point_checked()->create_unsigned_integer(value, bit_width);
 	}
 
 	auto builder::create_bool(bool value) const -> handle<node> {

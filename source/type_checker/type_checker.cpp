@@ -234,7 +234,6 @@ namespace sigma {
 
 	auto type_checker::type_check_numerical_literal(handle<node> literal_node, data_type expected) -> utility::result<data_type> {
 		auto& literal = literal_node->get<ast_literal>();
-
 		apply_expected_data_type(literal.type, expected);
 		return literal.type;
 	}

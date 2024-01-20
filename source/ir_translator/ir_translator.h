@@ -5,6 +5,48 @@
 namespace sigma {
 	struct backend_context;
 
+
+	/**
+	 * \brief Converts \b str to type, allows overflow behavior, when overflow occurs the \b overflow
+	 * flag is set. It's expected that \b str contains a valid value for \b type.
+	 * \tparam type Type to convert string to
+	 * \param str Str to parse
+	 * \param overflowed Overflow flag
+	 * \return \b str parsed as \b type.
+	 */
+	template<typename type>
+	type from_string(const std::string& str, bool& overflowed) {
+		static_assert(
+			std::is_integral_v<type> || std::is_floating_point_v<type>,
+			"'type' must be integral or floating point"
+		);
+
+		std::istringstream stream(str);
+		overflowed = false;
+
+		if constexpr (std::is_integral_v<type>) {
+			u64 temp;
+			stream >> temp;
+			overflowed = temp > std::numeric_limits<type>::max();
+			return static_cast<type>(temp);
+		}
+		else if constexpr (std::is_floating_point_v<type>) {
+			f64 temp;
+			stream >> temp;
+
+			if (stream.fail()) {
+				overflowed = true;
+				return std::numeric_limits<type>::quiet_NaN();
+			}
+
+			overflowed = temp > std::numeric_limits<type>::max() || temp < std::numeric_limits<type>::lowest();
+			return static_cast<type>(temp);
+		}
+
+		// unreachable
+		return type();
+	}
+
 	class ir_translator {
 	public:
 		static auto translate(backend_context& context) -> utility::result<void>;

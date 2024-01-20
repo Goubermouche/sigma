@@ -138,6 +138,22 @@ namespace sigma::ir {
 		return integer;
 	}
 
+	auto function::create_unsigned_integer(u64 value, u8 bit_width) -> handle<node> {
+		const handle<node> integer = create_node<ir::integer>(node::type::INTEGER_CONSTANT, 1);
+		integer->dt = data_type(data_type::base::INTEGER, bit_width);
+
+		if (bit_width < 64) {
+			const u64 mask = ~UINT64_C(0) >> (64 - bit_width);
+			value &= mask;
+		}
+
+		auto& property = integer->get<ir::integer>();
+		property.bit_width = bit_width;
+		property.value = value;
+
+		return integer;
+	}
+
 	auto function::create_bool(bool value) -> handle<node> {
 		const handle<node> boolean = create_node<integer>(node::type::INTEGER_CONSTANT, 1);
 		boolean->dt = BOOL_TYPE;

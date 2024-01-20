@@ -33,6 +33,10 @@ namespace sigma {
 			{ I16,             "i16"     },
 			{ I32,             "i32"     },
 			{ I64,             "i64"     },
+			{ U8,              "u8"      },
+			{ U16,             "u16"     },
+			{ U32,             "u32"     },
+			{ U64,             "u64"     },
 			{ BOOL,            "bool"    },
 			{ CHAR,            "char"    }
 		};
@@ -60,6 +64,10 @@ namespace sigma {
 			case I16:     return sizeof(i16);
 			case I32:     return sizeof(i32);
 			case I64:     return sizeof(i64);
+			case U8:      return sizeof(u8);
+			case U16:     return sizeof(u16);
+			case U32:     return sizeof(u32);
+			case U64:     return sizeof(u64);
 			case BOOL:    return 4;
 			case CHAR:    return sizeof(char);
 			case VAR_ARG_PROMOTE: return 0;
@@ -75,6 +83,10 @@ namespace sigma {
 			case token_type::I16:  return I16;
 			case token_type::I32:  return I32;
 			case token_type::I64:  return I64;
+			case token_type::U8:   return U8;
+			case token_type::U16:  return U16;
+			case token_type::U32:  return U32;
+			case token_type::U64:  return U64;
 			case token_type::BOOL: return BOOL;
 			default: PANIC("undefined token -> type conversion for token '{}'", token.to_string());
 		}
@@ -92,6 +104,10 @@ namespace sigma {
 			case I16:
 			case I32:
 			case I64:
+			case U8:
+			case U16:
+			case U32:
+			case U64:
 				return true;
 			default:
 				return false;

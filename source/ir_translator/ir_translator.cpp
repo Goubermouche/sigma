@@ -1,5 +1,6 @@
 #include "ir_translator.h"
 #include <compiler/compiler/compilation_context.h>
+#include <compiler/compiler/diagnostics.h>
 
 namespace sigma {
 	auto ir_translator::translate(backend_context& context) -> utility::result<void> {
@@ -235,12 +236,24 @@ namespace sigma {
 			NOT_IMPLEMENTED();
 		}
 
+		bool overflow = false;
+		handle<ir::node> literal_node = nullptr;
+
 		switch (literal.type.base_type) {
-			case data_type::I32: return m_context.builder.create_signed_integer(std::stoi(value), 32);
+			case data_type::I32: {
+				literal_node = m_context.builder.create_signed_integer(from_string<i32>(value, overflow), 32);
+				if(overflow) { warning::emit(warning::code::LITERAL_OVERFLOW, value, from_string<i32>(value, overflow), "i32"); }
+				break;
+			}
+			case data_type::U32: {
+				literal_node = m_context.builder.create_unsigned_integer(from_string<u32>(value, overflow), 32);
+				if(overflow) { warning::emit(warning::code::LITERAL_OVERFLOW, value, from_string<u32>(value, overflow), "u32"); }
+				break;
+			}
 			default: NOT_IMPLEMENTED();
 		}
 
-		return nullptr;
+		return literal_node;
 	}
 
 	auto ir_translator::data_type_to_ir(data_type dt) -> ir::data_type {
@@ -249,7 +262,14 @@ namespace sigma {
 		}
 
 		switch (dt.base_type) {
-			case data_type::I32:  return I32_TYPE;
+			case data_type::I8:
+			case data_type::U8:  return I8_TYPE;
+			case data_type::I16:
+			case data_type::U16:  return I16_TYPE;
+			case data_type::I32: 
+			case data_type::U32:  return I32_TYPE;
+			case data_type::I64:
+			case data_type::U64:  return I64_TYPE;
 			case data_type::BOOL: return BOOL_TYPE;
 			default: NOT_IMPLEMENTED();
 		}

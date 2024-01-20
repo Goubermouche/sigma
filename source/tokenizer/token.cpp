@@ -50,7 +50,7 @@ namespace sigma {
 			case token_type::SLASH:               return "/";
 			case token_type::ASTERISK:            return "*";
 			case token_type::PLUS_SIGN:           return "+";
-			case token_type::MINUS_SIGN:          return "+";
+			case token_type::MINUS_SIGN:          return "-";
 			case token_type::EQUALS_SIGN:         return "=";
 			case token_type::COLON:               return ":";
 

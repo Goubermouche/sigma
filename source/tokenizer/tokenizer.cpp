@@ -34,7 +34,7 @@ namespace sigma {
 		m_token_start_location.char_index = m_current_location.char_index - 1;
 
 		// check for EOF so we don't have to do it in the individual brace checks
-		if (m_source.end()) {
+		if(m_source.end()) {
 			return token_info{
 				.tok = { token_type::END_OF_FILE },
 				.location = m_context.allocator.emplace<token_location>(m_token_start_location)
@@ -43,22 +43,27 @@ namespace sigma {
 
 		// at this point we have a non-space character
 		// alphabetical tokens can either be keywords or identifiers
-		if (std::isalpha(m_last_character)) {
+		if(std::isalpha(m_last_character)) {
 			return get_alphabetical_token();
 		}
 
 		// sequences starting with a number should be interpreted as numerical tokens
-		if (std::isdigit(m_last_character)) {
+		if(std::isdigit(m_last_character)) {
+			return get_numerical_token();
+		}
+
+		// parse negative numerical literals as well
+		if(m_last_character == '-' && std::isdigit(m_source.get())) {
 			return get_numerical_token();
 		}
 
 		// single quote characters are interpreted as character literals
-		if (m_last_character == '\'') {
+		if(m_last_character == '\'') {
 			NOT_IMPLEMENTED();
 		}
 
 		// double quote characters are interpreted as string literals
-		if (m_last_character == '"') {
+		if(m_last_character == '"') {
 			return get_string_literal_token();
 		}
 

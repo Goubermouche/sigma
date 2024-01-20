@@ -13,6 +13,11 @@ namespace utility::detail {
 		m_position--;
 	}
 
+  auto string_accessor::peek_next_char() const -> char {
+		ASSERT(m_position + 1 <= m_string.size(), "accessor out of range! (peek_next_char)");
+		return m_string[m_position + 1];
+  }
+
 	auto string_accessor::get() const -> char {
 		// check if we are inside of our strings' bounds
 		ASSERT(m_position <= m_string.size(), "accessor out of range! (get)");

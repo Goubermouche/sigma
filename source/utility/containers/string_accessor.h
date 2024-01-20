@@ -25,6 +25,8 @@ namespace utility::detail {
 		 */
 		void retreat();
 
+		auto peek_next_char() const -> char;
+
 		/**
 		 * \brief Retrieves the character at the current caret location, if we are out of bounds an assertion is triggered.
 		 * \returns Character at the current caret location

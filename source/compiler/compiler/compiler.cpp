@@ -32,9 +32,11 @@ namespace sigma {
 		// generate tokens
 		TRY(const std::string file, utility::fs::file<std::string>::load(m_description.path));
 		TRY(tokenizer::tokenize(file, &m_description.path, frontend));
+
+		frontend.print_tokens();
 		TRY(parser::parse(frontend));
 
-		// frontend.print_ast();
+		frontend.print_ast();
 
 		// backend
 		// at this point we want to merge all frontend contexts into the backend context

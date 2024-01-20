@@ -7,11 +7,7 @@
 // -   namespace directives should probably be a part of the function signature? 
 i32 main() {
 		i32 a = -1;
-		u32 a1 = -1;
-		u32 ab = -1;
-		u32 a2 = -1;
-		u32 a3 = -1;
-		printf("%lu\n", a);
-
+		i32 aa = -5;
+		printf("%d\n", a * -aa);
     ret 0;
 }

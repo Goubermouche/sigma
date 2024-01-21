@@ -8,6 +8,38 @@ namespace sigma {
 	data_type::data_type(data_type_base type, u8 pointer_level)
 		: base_type(type), pointer_level(pointer_level) {}
 
+	auto data_type::create_i8(u8 pointer_level) -> data_type {
+		return { I8, pointer_level };
+	}
+
+	auto data_type::create_i16(u8 pointer_level) -> data_type {
+		return { I16, pointer_level };
+	}
+
+	auto data_type::create_i32(u8 pointer_level) -> data_type {
+		return { I32, pointer_level };
+	}
+
+	auto data_type::create_i64(u8 pointer_level) -> data_type {
+		return { I64, pointer_level };
+	}
+
+	auto data_type::create_u8(u8 pointer_level) -> data_type {
+		return { U8, pointer_level };
+	}
+
+	auto data_type::create_u16(u8 pointer_level) -> data_type {
+		return { U16, pointer_level };
+	}
+
+	auto data_type::create_u32(u8 pointer_level) -> data_type {
+		return { U32, pointer_level };
+	}
+
+	auto data_type::create_u64(u8 pointer_level) -> data_type {
+		return { U64, pointer_level };
+	}
+
 	bool data_type::operator==(data_type other) const {
 		return base_type == other.base_type && pointer_level == other.pointer_level;
 	}
@@ -54,22 +86,22 @@ namespace sigma {
 
 	auto data_type::get_byte_width() const -> u16 {
 		if(pointer_level > 0) {
-			return sizeof(void*);
+			return 8;
 		}
 
 		switch (base_type) {
 			case UNKNOWN: return 0;
 			case VOID:    return 0;
-			case I8:      return sizeof(i8);
-			case I16:     return sizeof(i16);
-			case I32:     return sizeof(i32);
-			case I64:     return sizeof(i64);
-			case U8:      return sizeof(u8);
-			case U16:     return sizeof(u16);
-			case U32:     return sizeof(u32);
-			case U64:     return sizeof(u64);
+			case I8:      return 1;
+			case I16:     return 2;
+			case I32:     return 4;
+			case I64:     return 8;
+			case U8:      return 1;
+			case U16:     return 2;
+			case U32:     return 4;
+			case U64:     return 8;
 			case BOOL:    return 4;
-			case CHAR:    return sizeof(char);
+			case CHAR:    return 1;
 			case VAR_ARG_PROMOTE: return 0;
 			default: PANIC("undefined byte width for type '{}'", to_string());
 		}
@@ -124,6 +156,10 @@ namespace sigma {
 		return base_type == UNKNOWN;
   }
 
+	bool data_type::is_promote() const {
+		return base_type == VAR_ARG_PROMOTE;
+	}
+
   bool data_type::is_pointer() const {
 		return pointer_level > 0;
   }
@@ -144,6 +180,23 @@ namespace sigma {
 				return false;
 		}
   }
+
+	bool data_type::is_unsigned() const {
+		if (pointer_level > 0) {
+			return false;
+		}
+
+		switch (base_type) {
+		case U8:
+		case U16:
+		case U32:
+		case U64:
+		case BOOL:
+			return true;
+		default:
+			return false;
+		}
+	}
 
   named_data_type::named_data_type(data_type type, utility::string_table_key identifier_key)
 	  : type(type), identifier_key(identifier_key) {}

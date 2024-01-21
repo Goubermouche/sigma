@@ -25,16 +25,29 @@ namespace sigma {
 		data_type(token token, u8 pointer_level);
 		data_type(data_type_base type, u8 pointer_level);
 
+		static auto create_i8(u8 pointer_level = 0) -> data_type;
+		static auto create_i16(u8 pointer_level = 0) -> data_type;
+		static auto create_i32(u8 pointer_level = 0) -> data_type;
+		static auto create_i64(u8 pointer_level = 0) -> data_type;
+
+		static auto create_u8(u8 pointer_level = 0) -> data_type;
+		static auto create_u16(u8 pointer_level = 0) -> data_type;
+		static auto create_u32(u8 pointer_level = 0) -> data_type;
+		static auto create_u64(u8 pointer_level = 0) -> data_type;
+
 		bool operator==(data_type other) const;
 		bool operator<(data_type other) const;
 
 		static auto token_to_type(token token) -> data_type_base;
 
+		bool is_unknown() const;
+		bool is_promote() const;
+
 		bool is_integer() const;
 		bool is_void() const;
-		bool is_unknown() const;
 		bool is_pointer() const;
 		bool is_signed() const;
+		bool is_unsigned() const;
 
 		auto to_string() const -> std::string;
 		auto get_byte_width() const -> u16;

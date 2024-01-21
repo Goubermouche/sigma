@@ -40,6 +40,7 @@ namespace sigma {
 			VARIABLE_ALREADY_DECLARED,
 			UNKNOWN_NAMESPACE,
 			VOID_VARIABLE,
+			INVALID_IMPLICIT_CAST,
 		};
 
 		/**
@@ -107,6 +108,7 @@ namespace sigma {
 			{ code::VARIABLE_ALREADY_DECLARED,           "variable '{}' has already been declared before"                                    },
 			{ code::UNKNOWN_NAMESPACE,                   "attempting to access an unknown namespace '{}'"                                    },
 			{ code::VOID_VARIABLE,                       "cannot declare a variable of type 'void' ('{}')"                                   },
+			{ code::INVALID_IMPLICIT_CAST,               "cannot cast '{}' to '{}' implicitly"                                               },
 		};
 	};
 

@@ -78,22 +78,15 @@ namespace sigma {
 
 	struct ast_function {
 		function_signature signature;
-		handle<token_location> location; // debug location
 	};
 
 	struct ast_function_call {
 		function_signature signature;
-		handle<token_location> location; // debug location
 		std::vector<utility::string_table_key> namespaces; // TEMP
-	};
-
-	struct ast_return {
-		handle<token_location> location; // debug location
 	};
 
 	struct ast_literal {
 		utility::string_table_key value_key; // literal value represented as a string
-		handle<token_location> location; // debug location
 		data_type type;
 	};
 
@@ -104,7 +97,6 @@ namespace sigma {
 	struct ast_variable {
 		data_type type;
 		utility::string_table_key identifier_key;
-		handle<token_location> location; // debug location
 	};
 
 	struct ast_cast {
@@ -118,12 +110,13 @@ namespace sigma {
 	};
 
 	using node_properties = utility::property<
-		ast_function, ast_function_call, ast_return, ast_literal, ast_variable, ast_bool_literal, ast_namespace, ast_cast
+		ast_function, ast_function_call, ast_literal, ast_variable, ast_bool_literal, ast_namespace, ast_cast
 	>;
 
 	struct node : node_properties {
 		node_type type;
 		handle<node> parent = nullptr;
 		utility::slice<handle<node>> children;
+		handle<token_location> location = nullptr; // debug location
 	};
 } // namespace sigma

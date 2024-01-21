@@ -38,16 +38,8 @@ namespace sigma {
 		// at this point we want to merge all frontend contexts into the backend context
 		backend_context backend(std::move(frontend.strings), frontend.ast, m_description.target);
 
-		backend.print_ast();
-
-		std::cout << '\n';
-		std::cout << '\n';
-		std::cout << '\n';
-
 		// run analysis on the generated AST
 		TRY(type_checker::type_check(backend));
-		backend.print_ast();
-
 		TRY(ir_translator::translate(backend));
 
 		// compile the generated IR module

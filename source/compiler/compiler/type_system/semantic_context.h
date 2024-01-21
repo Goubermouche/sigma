@@ -58,7 +58,7 @@ namespace sigma {
 		void create_store(utility::string_table_key identifier, handle<ir::node> value, u16 alignment) const;
 
 		auto create_call(const function_signature& callee_signature, const std::vector<utility::string_table_key>& namespaces, const std::vector<handle<ir::node>>& parameters) const -> handle<ir::node>;
-		auto create_callee_signature(const ast_function_call& function, const std::vector<data_type>& parameter_types) -> utility::result<function_signature>;
+		auto create_callee_signature(handle<node> function_node, const std::vector<data_type>& parameter_types) -> utility::result<function_signature>;
 
 		/**
 		 * \brief Attempts to locate a variable given an \b identifier and a list of \b namespaces.
@@ -100,7 +100,7 @@ namespace sigma {
 
 		auto construct_namespace_chain(const std::vector<utility::string_table_key>& namespaces) const ->std::stringstream;
 
-		auto emit_no_viable_overload_error(const ast_function_call& function) -> utility::error;
+		auto emit_no_viable_overload_error(handle<node> function_node) -> utility::error;
 		auto emit_unknown_namespace_error(const std::vector<utility::string_table_key>& namespaces) const-> utility::error;
 
 		static auto calculate_parameter_cast_cost(const function_signature& signature, const std::vector<data_type>& parameter_types) -> u16;

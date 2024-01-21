@@ -7,7 +7,10 @@
 // -   namespace directives should probably be a part of the function signature? 
 
 i32 main() {
-	i32 small = 10;
-	i8 regular = small;
-  ret regular;
+	i32 value1 = 120;
+	u8 value2 = -12;
+	i32 vv = value2;
+
+	printf("%d, %d\n", value1, -vv);
+  ret 0;
 }

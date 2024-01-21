@@ -402,22 +402,22 @@ namespace sigma::ir {
 				data_type src_dt = src->dt;
 				bool sign_ext = node_type == node::type::SIGN_EXTEND;
 				i32 bits_in_type = src_dt.get_base().get_underlying() == data_type::base::POINTER ? 64 : src_dt.get_bit_width();
-
 				i32 imm;
+
 				if(try_for_imm32(src, bits_in_type, imm)) {
-					#define MASK_UPTO(pos) (~UINT64_C(0) >> (64 - pos))
+					#define MASK_UPTO(pos) (~UINT64_C(0) >> (64 - (pos)))
 					src->use_node(context);
 
-					u64 src = imm;
-					u64 sign_bit = (src >> (bits_in_type - 1)) & 1;
+					u64 src_value = imm;
+					u64 sign_bit = (src_value >> (bits_in_type - 1)) & 1;
 					u64 mask = MASK_UPTO(64) & ~MASK_UPTO(bits_in_type);
 
-					src = (src & ~mask) | (sign_bit ? mask : 0);
-					if(!utility::fits_into_32_bits(src)) {
-						context.append_instruction(create_abs(context, instruction::type::MOVABS, n->dt, destination, src));
+					src_value = (src_value & ~mask) | (sign_bit ? mask : 0);
+					if(!utility::fits_into_32_bits(src_value)) {
+						context.append_instruction(create_abs(context, instruction::type::MOVABS, n->dt, destination, src_value));
 					}
 					else {
-						context.append_instruction(create_immediate(context, instruction::type::MOV, n->dt, destination, src));
+						context.append_instruction(create_immediate(context, instruction::type::MOV, n->dt, destination, static_cast<i32>(src_value)));
 					}
 
 					#undef MASK_UPTO

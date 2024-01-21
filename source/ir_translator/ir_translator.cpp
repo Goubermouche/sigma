@@ -250,8 +250,6 @@ namespace sigma {
 	auto ir_translator::translate_variable_access(handle<node> access_node) const -> handle<ir::node> {
 		const auto& accessed_variable = access_node->get<ast_variable>();
 
-		utility::console::print("var access {}\n", accessed_variable.type.to_string());
-
 		const handle<ir::node> load = m_context.semantics.create_load(
 			accessed_variable.identifier_key, 
 			data_type_to_ir(accessed_variable.type),
@@ -282,12 +280,12 @@ namespace sigma {
 		bool overflow; // ignored
 
 		switch (literal.type.base_type) {
-			case data_type::I8:  return m_context.builder.create_signed_integer(utility::detail::from_string<i32>(value, overflow), 8);
-			case data_type::I16: return m_context.builder.create_signed_integer(utility::detail::from_string<i32>(value, overflow), 16);
+			case data_type::I8:  return m_context.builder.create_signed_integer(utility::detail::from_string<i8>(value, overflow), 8);
+			case data_type::I16: return m_context.builder.create_signed_integer(utility::detail::from_string<i16>(value, overflow), 16);
 			case data_type::I32: return m_context.builder.create_signed_integer(utility::detail::from_string<i32>(value, overflow), 32);
-			case data_type::I64: return m_context.builder.create_signed_integer(utility::detail::from_string<i32>(value, overflow), 64);
-			case data_type::U8:  return m_context.builder.create_unsigned_integer(utility::detail::from_string<u32>(value, overflow), 8);
-			case data_type::U16: return m_context.builder.create_unsigned_integer(utility::detail::from_string<u32>(value, overflow), 16);
+			case data_type::I64: return m_context.builder.create_signed_integer(utility::detail::from_string<i64>(value, overflow), 64);
+			case data_type::U8:  return m_context.builder.create_unsigned_integer(utility::detail::from_string<u8>(value, overflow), 8);
+			case data_type::U16: return m_context.builder.create_unsigned_integer(utility::detail::from_string<u16>(value, overflow), 16);
 			case data_type::U32: return m_context.builder.create_unsigned_integer(utility::detail::from_string<u32>(value, overflow), 32);
 			case data_type::U64: return m_context.builder.create_unsigned_integer(utility::detail::from_string<u64>(value, overflow), 64);
 			default: NOT_IMPLEMENTED();

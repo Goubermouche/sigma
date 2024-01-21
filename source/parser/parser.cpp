@@ -137,7 +137,7 @@ namespace sigma {
 		// initialize the function signature
 		auto& function = function_node->get<ast_function>();
 
-		function.location = function_location;
+		function_node->location = function_location;
 		function.signature = signature;
 
 		// copy all statement pointers over to the memory arena
@@ -196,15 +196,15 @@ namespace sigma {
 		// first token is the RET keyword
 		// allow return statements without any expressions
 		if (m_tokens.peek_next_token() == token_type::SEMICOLON) {
-			const handle<node> ret = create_node<ast_return>(node_type::RETURN, 0);
-			ret->get<ast_return>().location = location;
+			const handle<node> ret = create_node<utility::empty_property>(node_type::RETURN, 0);
+			ret->location = location;
 			return ret;
 		}
 
 		m_tokens.next(); // prime the first expression token
 
-		const handle<node> ret = create_node<ast_return>(node_type::RETURN, 1);
-		ret->get<ast_return>().location = location;
+		const handle<node> ret = create_node<utility::empty_property>(node_type::RETURN, 1);
+		ret->location = location;
 		TRY(ret->children[0], parse_expression());
 		ret->children[0]->parent = ret;
 
@@ -306,10 +306,10 @@ namespace sigma {
 
 		TRY(const handle<node> expression_node, parse_expression());
 		const handle<node> negation_node = create_node<ast_literal>(node_type::NUMERICAL_LITERAL, 0);
+		negation_node->location = location;
 
 		ast_literal& literal = negation_node->get<ast_literal>();
 		literal.value_key = m_context.strings.insert("-1");
-		literal.location = location;
 		literal.type = { data_type::I32, 0 };
 
 		// negate the expression
@@ -326,12 +326,12 @@ namespace sigma {
 		EXPECT_NEXT_TOKEN(token_type::LEFT_PARENTHESIS); 
 
 		// parse call parameters
-		while (m_tokens.peek_next_token() != token_type::RIGHT_PARENTHESIS) {
+		while(m_tokens.peek_next_token() != token_type::RIGHT_PARENTHESIS) {
 			m_tokens.next(); // prime the expression token
 			TRY(handle<node> expression_node, parse_expression());
 			parameters.push_back(expression_node);
 
-			if (m_tokens.peek_next_token() == token_type::COMMA) {
+			if(m_tokens.peek_next_token() == token_type::COMMA) {
 				EXPECT_NEXT_TOKEN(token_type::COMMA);
 			}
 		}
@@ -340,6 +340,12 @@ namespace sigma {
 
 		// create the callee
 		const handle<node> call_node = create_node<ast_function_call>(node_type::FUNCTION_CALL, parameters.size());
+		call_node->location = call_location;
+
+		// update the parent nodes
+		for(const handle<node> parameter : parameters) {
+			parameter->parent = call_node;
+		}
 
 		// copy over function parameters
 		std::memcpy(call_node->children.get_data(), parameters.data(), parameters.size() * sizeof(handle<node>));
@@ -347,7 +353,6 @@ namespace sigma {
 		// initialize the callee
 		ast_function_call& function = call_node->get<ast_function_call>();
 		function.signature.identifier_key = identifier_key;
-		function.location = call_location;
 		function.namespaces = namespaces;
 
 		return call_node;
@@ -372,11 +377,11 @@ namespace sigma {
 
 		// create the variable node
 		const handle<node> variable_node = create_node<ast_variable>(node_type::VARIABLE_DECLARATION, assigned_value ? 1 : 0);
+		variable_node->location = location;
 
 		// initialize the variable
 		auto& variable = variable_node->get<ast_variable>();
 		variable.identifier_key = identifier_key;
-		variable.location = location;
 		variable.type = type;
 
 		if(assigned_value) {
@@ -393,11 +398,11 @@ namespace sigma {
 
 		// create the access node
 		const handle<node> variable_node = create_node<ast_variable>(node_type::VARIABLE_ACCESS, 0);
+		variable_node->location = location;
 
 		// initialize the variable
 		auto& variable = variable_node->get<ast_variable>();
 		variable.identifier_key = m_tokens.get_current().symbol_key;
-		variable.location = location;
 
 		return variable_node;
 	}
@@ -549,11 +554,11 @@ namespace sigma {
 
 		// create the literal node
 		const handle<node> literal_node = create_node<ast_literal>(node_type::NUMERICAL_LITERAL, 0);
+		literal_node->location = location;
 
 		// initialize the literal
 		auto& literal = literal_node->get<ast_literal>();
 		literal.value_key = m_tokens.get_current().symbol_key;
-		literal.location = location;
 		literal.type = { base, 0 };
 
 		return literal_node;
@@ -565,11 +570,11 @@ namespace sigma {
 
 		// create the string node
 		const handle<node> char_node = create_node<ast_literal>(node_type::CHARACTER_LITERAL, 0);
+		char_node->location = location;
 
 		// initialize the literal
 		auto& literal = char_node->get<ast_literal>();
 		literal.value_key = m_tokens.get_current().symbol_key;
-		literal.location = location;
 		literal.type = { data_type::CHAR, 0 }; // char
 
 		return char_node;
@@ -581,11 +586,11 @@ namespace sigma {
 
 		// create the string node
 		const handle<node> string_node = create_node<ast_literal>(node_type::STRING_LITERAL, 0);
+		string_node->location = location;
 
 		// initialize the literal
 		auto& literal = string_node->get<ast_literal>();
 		literal.value_key = m_tokens.get_current().symbol_key;
-		literal.location = location;
 		literal.type = { data_type::CHAR, 1 }; // char*
 
 		return string_node;

@@ -184,9 +184,10 @@ namespace sigma {
 		return false;
 	}
 
-	auto semantic_context::create_callee_signature(const ast_function_call& function, const std::vector<data_type>& parameter_types) -> utility::result<function_signature> {
+	auto semantic_context::create_callee_signature(handle<node> function_node, const std::vector<data_type>& parameter_types) -> utility::result<function_signature> {
 		using call_candidate = std::pair<function_signature, u16>;
 
+		const ast_function_call& function = function_node->get<ast_function_call>();
 		std::vector<call_candidate> candidates;
 		bool valid_identifier = false;
 
@@ -231,7 +232,7 @@ namespace sigma {
 		}
 
 		if (candidates.empty()) {
-			return emit_no_viable_overload_error(function);
+			return emit_no_viable_overload_error(function_node);
 		}
 
 		const auto best_match = std::min_element(
@@ -241,7 +242,7 @@ namespace sigma {
 
 		// TODO: implement casting
 		// TODO: literals can just be upcasted implicitly
-		ASSERT(best_match->second == 0, "implement casting in the type checker!");
+		// ASSERT(best_match->second == 0, "implement casting in the type checker!");
 		return best_match->first;
 	}
 
@@ -292,7 +293,9 @@ namespace sigma {
 		return nullptr;
 	}
 
-	auto semantic_context::emit_no_viable_overload_error(const ast_function_call& function) -> utility::error {
+	auto semantic_context::emit_no_viable_overload_error(handle<node> function_node) -> utility::error {
+		const ast_function_call& function = function_node->get<ast_function_call>();
+
 		// construct a list of all potentially viable functions
 		std::stringstream candidate_stream;
 		const std::string& identifier_str = m_context.strings.get(function.signature.identifier_key);
@@ -335,7 +338,7 @@ namespace sigma {
 		add_considered_candidate(scope->external_functions);
 
 		// TODO: when we get allocator-based strings working, remove the trailing \n
-		return error::emit(error::code::NO_CALL_OVERLOAD, function.location, identifier_str, candidate_stream.str());
+		return error::emit(error::code::NO_CALL_OVERLOAD, function_node->location, identifier_str, candidate_stream.str());
 	}
 
 	auto semantic_context::emit_unknown_namespace_error(const std::vector<utility::string_table_key>& namespaces) const -> utility::error {

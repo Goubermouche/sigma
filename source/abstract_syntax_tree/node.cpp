@@ -46,22 +46,23 @@ namespace sigma {
 	}
 
 	bool function_signature::operator==(const function_signature& other) const {
-		return identifier_key == other.identifier_key &&
+		return
+			identifier_key == other.identifier_key &&
 			return_type == other.return_type &&
 			parameter_types == other.parameter_types &&
 			has_var_args == other.has_var_args;
 	}
 
   bool function_signature::operator<(const function_signature& other) const {
-		if (return_type < other.return_type) { return true;  }
-		if (return_type < other.return_type) { return false; }
+		// we explicitly don't take the return type into account, since we cannot reason about which
+		// function is being called when the only difference is the return type itself
 
-		if (parameter_types.get_size() < other.parameter_types.get_size()) { return true;  }
-		if (parameter_types.get_size() > other.parameter_types.get_size()) { return false; }
+		if(parameter_types.get_size() < other.parameter_types.get_size()) { return true;  }
+		if(parameter_types.get_size() > other.parameter_types.get_size()) { return false; }
 
 		for (size_t i = 0; i < other.parameter_types.get_size(); ++i) {
-			if (parameter_types[i].type < other.parameter_types[i].type) { return true;  }
-			if (parameter_types[i].type < other.parameter_types[i].type) { return false; }
+			if(parameter_types[i].type < other.parameter_types[i].type) { return true;  }
+			if(parameter_types[i].type < other.parameter_types[i].type) { return false; }
 		}
 
 		return has_var_args < other.has_var_args;

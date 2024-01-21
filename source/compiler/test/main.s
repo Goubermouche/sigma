@@ -6,11 +6,14 @@
 // -   add namespaces to error messages, whenever applicable (ie. x::y::test)
 // -   namespace directives should probably be a part of the function signature? 
 
-i32 main() {
-	i32 value1 = 120;
-	u8 value2 = -12;
-	i32 vv = value2;
+void test() {
 
-	printf("%d, %d\n", value1, -vv);
+}
+
+i32 test() {
+	ret 1;
+}
+
+i32 main() {
   ret 0;
 }

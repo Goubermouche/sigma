@@ -32,6 +32,9 @@ namespace sigma {
 
 		bool is_integer() const;
 		bool is_void() const;
+		bool is_unknown() const;
+		bool is_pointer() const;
+		bool is_signed() const;
 
 		auto to_string() const -> std::string;
 		auto get_byte_width() const -> u16;

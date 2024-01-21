@@ -206,6 +206,7 @@ namespace sigma {
 		const handle<node> ret = create_node<ast_return>(node_type::RETURN, 1);
 		ret->get<ast_return>().location = location;
 		TRY(ret->children[0], parse_expression());
+		ret->children[0]->parent = ret;
 
 		return ret;
 	}
@@ -282,19 +283,19 @@ namespace sigma {
 			return parse_function_call(namespaces);
 		}
 		else {
-			TRY(const handle<node> variable_node, parse_variable_access());
+			TRY(const handle<node> access_node, parse_variable_access());
 
 			// check if we're assigning anything
 			if (m_tokens.peek_next_token() == token_type::EQUALS_SIGN) {
 				EXPECT_NEXT_TOKEN(token_type::EQUALS_SIGN);
-				TRY(const handle<node> assignment_node, parse_assignment());
 
-				assignment_node->children[0] = variable_node;
+				TRY(const handle<node> assignment_node, parse_assignment());
+				assignment_node->children[0] = access_node;
+
 				return assignment_node;
 			}
-			else {
-				return variable_node;
-			}
+
+			return access_node;
 		}
 	}
 
@@ -362,7 +363,7 @@ namespace sigma {
 		EXPECT_NEXT_TOKEN(token_type::IDENTIFIER);
 		const auto identifier_key = m_tokens.get_current().symbol_key;
 
-		if (m_tokens.peek_next_token() == token_type::EQUALS_SIGN) {
+		if(m_tokens.peek_next_token() == token_type::EQUALS_SIGN) {
 			EXPECT_NEXT_TOKEN(token_type::EQUALS_SIGN);
 			m_tokens.next(); // prime the first expression token
 
@@ -378,8 +379,9 @@ namespace sigma {
 		variable.location = location;
 		variable.type = type;
 
-		if (assigned_value) {
+		if(assigned_value) {
 			variable_node->children[0] = assigned_value;
+			assigned_value->parent = variable_node;
 		}
 
 		return variable_node;

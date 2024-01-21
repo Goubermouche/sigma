@@ -41,6 +41,7 @@ namespace sigma {
 		auto translate_bool_literal(handle<node> bool_literal_node) const->handle<ir::node>;
 
 		auto translate_binary_math_operator(handle<node> operator_node) -> handle<ir::node>;
+		auto translate_cast(handle<node> cast_node) -> handle<ir::node>;
 		auto translate_function_call(handle<node> call_node) -> handle<ir::node>;
 
 		auto translate_variable_access(handle<node> access_node) const-> handle<ir::node>;

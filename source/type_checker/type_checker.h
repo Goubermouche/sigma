@@ -23,18 +23,20 @@ namespace sigma {
 
 		auto type_check_function_call(handle<node> call_node, data_type expected) -> utility::result<data_type>;
 		auto type_check_return(handle<node> return_node, data_type expected) -> utility::result<data_type>;
-		auto type_check_conditional_branch(handle<node> branch_node, data_type expected)->utility::result<data_type>;
-		auto type_check_branch(handle<node> branch_node, data_type expected)->utility::result<data_type>;
-		auto type_check_binary_math_operator(handle<node> operator_node, data_type expected)->utility::result<data_type>;
-		auto type_check_variable_access(handle<node> access_node, data_type expected)->utility::result<data_type>;
-		auto type_check_variable_assignment(handle<node> assignment_node, data_type expected)->utility::result<data_type>;
+		auto type_check_conditional_branch(handle<node> branch_node, data_type expected) -> utility::result<data_type>;
+		auto type_check_branch(handle<node> branch_node, data_type expected) -> utility::result<data_type>;
+		auto type_check_binary_math_operator(handle<node> operator_node, data_type expected) -> utility::result<data_type>;
+		auto type_check_variable_access(handle<node> access_node, data_type expected) -> utility::result<data_type>;
+		auto type_check_variable_assignment(handle<node> assignment_node, data_type expected) -> utility::result<data_type>;
 
 		auto type_check_numerical_literal(handle<node> literal_node, data_type expected) -> utility::result<data_type>;
 		auto type_check_character_literal(handle<node> literal_node, data_type expected) -> utility::result<data_type>;
 		auto type_check_string_literal(handle<node> literal_node, data_type expected) -> utility::result<data_type>;
 		auto type_check_bool_literal(handle<node> literal_node, data_type expected) -> utility::result<data_type>;
 
-		static void apply_expected_data_type(data_type& target, data_type source);
+		// static void apply_expected_data_type(data_type& target, data_type source);
+		static auto inherent_type_cast(data_type original_type, data_type target_type) -> data_type;
+		auto implicit_type_cast(data_type original_type, data_type target_type, handle<token_location> location, handle<node> original) -> data_type;
 	private:
 		backend_context& m_context;
 	};

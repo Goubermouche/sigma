@@ -113,12 +113,37 @@ namespace sigma {
 				return true;
 			default:
 				return false;
-			}
+		}
   }
 
 	bool data_type::is_void() const {
 		return base_type == VOID && pointer_level == 0;
 	}
+
+  bool data_type::is_unknown() const {
+		return base_type == UNKNOWN;
+  }
+
+  bool data_type::is_pointer() const {
+		return pointer_level > 0;
+  }
+
+  bool data_type::is_signed() const {
+		if (pointer_level > 0) {
+			return false;
+		}
+
+		switch (base_type) {
+			case I8:
+			case I16:
+			case I32:
+			case I64:
+			case CHAR:
+				return true;
+			default:
+				return false;
+		}
+  }
 
   named_data_type::named_data_type(data_type type, utility::string_table_key identifier_key)
 	  : type(type), identifier_key(identifier_key) {}

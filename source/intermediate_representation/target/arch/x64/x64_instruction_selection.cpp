@@ -1,5 +1,7 @@
 #include "x64.h"
 #include "intermediate_representation/codegen/instruction.h"
+#include "intermediate_representation/codegen/instruction.h"
+#include "intermediate_representation/codegen/instruction.h"
 #include "intermediate_representation/target/system/win/win.h"
 
 namespace sigma::ir {
@@ -378,6 +380,77 @@ namespace sigma::ir {
 				}
 
 				// TODO: handle varargs
+				break;
+			}
+
+			case node::type::TRUNCATE: {
+				reg src = allocate_node_register(context, n->inputs[1]);
+
+				if(n->dt.get_base().get_underlying() == data_type::base::FLOAT) {
+					context.append_instruction(create_rr(context, instruction::type::FP_CVT, n->inputs[1]->dt, destination, src));
+				}
+				else {
+					context.append_instruction(create_move(context, n->dt, destination, src));
+				}
+
+				break;
+			}
+
+			case node::type::SIGN_EXTEND:
+			case node::type::ZERO_EXTEND: {
+				handle<node> src = n->inputs[1];
+				data_type src_dt = src->dt;
+				bool sign_ext = node_type == node::type::SIGN_EXTEND;
+				i32 bits_in_type = src_dt.get_base().get_underlying() == data_type::base::POINTER ? 64 : src_dt.get_bit_width();
+
+				i32 imm;
+				if(try_for_imm32(src, bits_in_type, imm)) {
+					#define MASK_UPTO(pos) (~UINT64_C(0) >> (64 - pos))
+					src->use_node(context);
+
+					u64 src = imm;
+					u64 sign_bit = (src >> (bits_in_type - 1)) & 1;
+					u64 mask = MASK_UPTO(64) & ~MASK_UPTO(bits_in_type);
+
+					src = (src & ~mask) | (sign_bit ? mask : 0);
+					if(!utility::fits_into_32_bits(src)) {
+						context.append_instruction(create_abs(context, instruction::type::MOVABS, n->dt, destination, src));
+					}
+					else {
+						context.append_instruction(create_immediate(context, instruction::type::MOV, n->dt, destination, src));
+					}
+
+					#undef MASK_UPTO
+				}
+				else {
+					data_type dt = n->dt;
+					instruction::type op = instruction::type::MOV;
+
+					if (bits_in_type <= 8) {
+						op = sign_ext ? instruction::type::MOVSXB : instruction::type::MOVZXB;
+					}
+					else if (bits_in_type <= 16) {
+						op = sign_ext ? instruction::type::MOVSXW : instruction::type::MOVZXW;
+					}
+					else if (bits_in_type <= 32) {
+						if (sign_ext) {
+							op = instruction::type::MOVSXD;
+						}
+						else {
+							dt = src_dt;
+						}
+					}
+					else if (bits_in_type <= 64) {
+						op = instruction::type::MOV;
+					}
+					else {
+						NOT_IMPLEMENTED();
+					}
+
+					reg val = allocate_node_register(context, src);
+					context.append_instruction(create_rr(context, op, dt, destination, val));
+				}
+
 				break;
 			}
 

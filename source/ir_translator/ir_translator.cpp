@@ -32,6 +32,8 @@ namespace sigma {
 			case node_type::OPERATOR_MULTIPLY:
 			case node_type::OPERATOR_DIVIDE:
 			case node_type::OPERATOR_MODULO:       return translate_binary_math_operator(ast_node);
+			case node_type::CAST_EXTEND:
+			case node_type::CAST_TRUNCATE:         return translate_cast(ast_node);
 
 			// literals
 			case node_type::NUMERICAL_LITERAL:     return translate_numerical_literal(ast_node);
@@ -203,6 +205,34 @@ namespace sigma {
 		return nullptr;
 	}
 
+	auto ir_translator::translate_cast(handle<node> cast_node) -> handle<ir::node> {
+		const ast_cast& cast = cast_node->get<ast_cast>();
+
+		const handle<ir::node> value_to_cast = translate_node(cast_node->children[0]);
+		const ir::data_type target_type = data_type_to_ir(cast.target_type);
+
+		if(cast.original_type.is_pointer() || cast.target_type.is_pointer()) {
+			NOT_IMPLEMENTED();
+		}
+
+		if(cast_node->type == node_type::CAST_TRUNCATE) {
+			return m_context.builder.create_truncate(value_to_cast, target_type);
+		}
+
+		if(cast_node->type == node_type::CAST_EXTEND) {
+			if(cast.original_type.is_signed()) {
+				// signed extend
+				return m_context.builder.create_sxt(value_to_cast, target_type);
+			}
+
+			// zero extend
+			return m_context.builder.create_zxt(value_to_cast, target_type);
+		}
+
+		NOT_IMPLEMENTED();
+		return nullptr;
+	}
+
 	auto ir_translator::translate_function_call(handle<node> call_node) -> handle<ir::node> {
 		const ast_function_call& callee = call_node->get<ast_function_call>();
 
@@ -218,10 +248,14 @@ namespace sigma {
 	}
 
 	auto ir_translator::translate_variable_access(handle<node> access_node) const -> handle<ir::node> {
-		const auto& prop = access_node->get<ast_variable>();
+		const auto& accessed_variable = access_node->get<ast_variable>();
+
+		utility::console::print("var access {}\n", accessed_variable.type.to_string());
 
 		const handle<ir::node> load = m_context.semantics.create_load(
-			prop.identifier_key, data_type_to_ir(prop.type), prop.type.get_byte_width()
+			accessed_variable.identifier_key, 
+			data_type_to_ir(accessed_variable.type),
+			accessed_variable.type.get_byte_width()
 		);
 
 		ASSERT(load, "unknown variable referenced");

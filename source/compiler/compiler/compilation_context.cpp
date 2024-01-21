@@ -43,6 +43,76 @@ namespace sigma {
 		}
 	}
 
+	void backend_context::print_ast() const {
+		ast.traverse([&](const handle<node>& node, u16 depth) {
+			utility::console::print("{}{} ", std::string(static_cast<u64>(depth * 2), ' '), node->type.to_string());
+
+			switch (node->type) {
+			case node_type::FUNCTION_DECLARATION: {
+				const auto& property = node->get<ast_function>();
+				utility::console::print("['{} {} (", property.signature.return_type.to_string(), strings.get(property.signature.identifier_key));
+
+				for (u64 i = 0; i < property.signature.parameter_types.get_size(); ++i) {
+					utility::console::print("{}", property.signature.parameter_types[i].type.to_string());
+
+					if (i + 1 != property.signature.parameter_types.get_size()) {
+						utility::console::print(", ");
+					}
+				}
+				utility::console::print(")']");
+				break;
+			}
+			case node_type::FUNCTION_CALL: {
+				const auto& property = node->get<ast_function_call>();
+
+				utility::console::print("['");
+
+				for (const utility::string_table_key key : property.namespaces) {
+					utility::console::print("{}::", strings.get(key));
+				}
+
+				utility::console::print("{}']", strings.get(property.signature.identifier_key));
+				break;
+			}
+			case node_type::NAMESPACE_DECLARATION: {
+				const auto& property = node->get<ast_namespace>();
+				utility::console::print("['{}']", strings.get(property.identifier_key));
+				break;
+			}
+			case node_type::VARIABLE_DECLARATION: {
+				const auto& property = node->get<ast_variable>();
+				utility::console::print("[{} '{}']", strings.get(property.identifier_key), property.type.to_string());
+				break;
+			}
+			case node_type::VARIABLE_ACCESS: {
+				const auto& property = node->get<ast_variable>();
+				utility::console::print("[{}]", strings.get(property.identifier_key));
+				break;
+			}
+
+			case node_type::NUMERICAL_LITERAL: {
+				const auto& property = node->get<ast_literal>();
+				utility::console::print("['{}' {}]", property.type.to_string(), strings.get(property.value_key));
+				break;
+			}
+			case node_type::STRING_LITERAL: {
+				const auto& property = node->get<ast_literal>();
+				utility::console::print("[\"{}\"]", utility::detail::escape_string(strings.get(property.value_key)));
+				break;
+			}
+			case node_type::BOOL_LITERAL: {
+				const auto& property = node->get<ast_bool_literal>();
+				utility::console::print("[{}]", property.value ? "true" : "false");
+				break;
+			}
+
+			default: break; // suppress unhandled enumeration warnings
+			}
+
+			utility::console::print("\n");
+			});
+	}
+
 	frontend_context::frontend_context() : allocator(sizeof(token_location) * 10) {}
 
 	void frontend_context::print_tokens() const {

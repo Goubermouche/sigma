@@ -12,6 +12,8 @@ namespace sigma {
 	struct backend_context {
 		backend_context(utility::string_table strings, abstract_syntax_tree& ast, ir::target target);
 
+		void print_ast() const;
+
 		utility::block_allocator allocator;
 		utility::string_table strings;
 

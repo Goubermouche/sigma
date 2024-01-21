@@ -113,7 +113,9 @@ namespace sigma {
 	class warning {
 	public:
 		enum class code : u32 {
-			LITERAL_OVERFLOW = 1000
+			LITERAL_OVERFLOW = 1000,
+			IMPLICIT_EXTENSION_CAST,
+			IMPLICIT_TRUNCATION_CAST,
 		};
 
 		template<typename... arguments>
@@ -131,7 +133,9 @@ namespace sigma {
 	private:
 		const static inline std::unordered_map<code, std::string> m_warnings = {
 			// filesystem
-			{ code::LITERAL_OVERFLOW, "literal overflow detected ('{}' to '{}' for type '{}')" },
+			{ code::LITERAL_OVERFLOW,         "literal overflow detected ('{}' to '{}' for type '{}')" },
+			{ code::IMPLICIT_EXTENSION_CAST,  "implicit extending type cast ('{}' to '{}')"            },
+			{ code::IMPLICIT_TRUNCATION_CAST, "implicit truncating type cast ('{}' to '{}')"           },
 		};
 	};
 } // namespace sigma

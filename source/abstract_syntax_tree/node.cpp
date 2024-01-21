@@ -27,6 +27,9 @@ namespace sigma {
 			case OPERATOR_DIVIDE:      return "OPERATOR_DIVIDE";
 			case OPERATOR_MODULO:      return "OPERATOR_MODULO";
 
+			case CAST_EXTEND:          return "CAST_EXTEND";
+			case CAST_TRUNCATE:        return "CAST_TRUNCATE";
+
 			case NUMERICAL_LITERAL:    return "NUMERICAL_LITERAL";
 			case CHARACTER_LITERAL:    return "CHARACTER_LITERAL";
 			case STRING_LITERAL:       return "STRING_LITERAL";

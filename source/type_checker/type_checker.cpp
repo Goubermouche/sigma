@@ -242,13 +242,18 @@ namespace sigma {
 
 	auto type_checker::type_check_numerical_literal(handle<node> literal_node, data_type expected) -> utility::result<data_type> {
 		auto& literal = literal_node->get<ast_literal>();
-		apply_expected_data_type(literal.type, expected);
+		literal.type = inherent_type_cast(literal.type, expected);
 
 		const std::string& value_str = m_context.strings.get(literal.value_key);
 		bool overflow = false;
 
 		// check for type overflow
 		switch (literal.type.base_type) {
+			case data_type::I8: {
+				const auto value = utility::detail::from_string<i8>(value_str, overflow);
+				if (overflow) { warning::emit(warning::code::LITERAL_OVERFLOW, literal.location, value_str, value, "i8"); }
+				break;
+			}
 			case data_type::I32: {
 				const auto value = utility::detail::from_string<i32>(value_str, overflow);
 				if(overflow) { warning::emit(warning::code::LITERAL_OVERFLOW, literal.location, value_str, value, "i32"); }
@@ -272,13 +277,15 @@ namespace sigma {
 
 	auto type_checker::type_check_character_literal(handle<node> literal_node, data_type expected) -> utility::result<data_type> {
 		auto& literal = literal_node->get<ast_literal>();
-		apply_expected_data_type(literal.type, expected);
+		NOT_IMPLEMENTED();
+		// apply_expected_data_type(literal.type, expected);
 		return literal.type;
 	}
 
 	auto type_checker::type_check_string_literal(handle<node> literal_node, data_type expected) -> utility::result<data_type> {
 		auto& literal = literal_node->get<ast_literal>();
-		apply_expected_data_type(literal.type, expected);
+		NOT_IMPLEMENTED();
+		// apply_expected_data_type(literal.type, expected);
 		return literal.type;
 	}
 
@@ -289,21 +296,90 @@ namespace sigma {
 		return data_type(data_type::BOOL, 0);
 	}
 
-	auto type_checker::type_check_variable_access(handle<node> access_node, data_type expected) -> utility::result<data_type> {
-		auto& variable = access_node->get<ast_variable>();
-
-		// locate the variable
-		TRY(const auto declaration, m_context.semantics.find_variable(variable.identifier_key));
-
-		if(declaration == nullptr) {
-			const std::string& identifier_str = m_context.strings.get(variable.identifier_key);
-			return error::emit(error::code::UNKNOWN_VARIABLE, variable.location, identifier_str);
+	auto type_checker::inherent_type_cast(data_type original_type, data_type target_type) -> data_type {
+		if(target_type.is_unknown()) {
+			utility::console::print("inherent {} -> {}\n", original_type.to_string(), original_type.to_string());
+			return original_type;
 		}
 
-		variable.type = declaration->type; // default to the declared type
-		apply_expected_data_type(variable.type, expected);
+		utility::console::print("inherent {} -> {}\n", original_type.to_string(), target_type.to_string());
+		return target_type;
+	}
 
-		return variable.type;
+	auto type_checker::implicit_type_cast(data_type original_type, data_type target_type, handle<token_location> location, handle<node> original) -> data_type {
+		if(target_type.is_unknown()) {
+			return original_type;
+		}
+
+		// no cast needed
+		if(original_type == target_type) {
+			return original_type;
+		}
+
+		// TODO: pointer casts
+		if (original_type.is_pointer() || target_type.is_pointer()) {
+			NOT_IMPLEMENTED();
+		}
+
+		// target type is known at this point, try to cast to it
+		const u16 original_byte_width = original_type.get_byte_width();
+		const u16 target_byte_width = target_type.get_byte_width();
+
+		// no cast needed, neither type is a pointer, just return
+		if(original_byte_width == target_byte_width) {
+			return original_type;
+		}
+
+		std::cout << "org: " << original->type.to_string() << '\n';
+		ASSERT(original->parent, "parent is nulltr");
+
+		// truncation
+		if(original_byte_width > target_byte_width) {
+			warning::emit(warning::code::IMPLICIT_TRUNCATION_CAST, location, original_type.to_string(), target_type.to_string());
+
+			const handle<node> cast_node = m_context.ast.create_node<ast_cast>(node_type::CAST_TRUNCATE, 1);
+			ast_cast& cast = cast_node->get<ast_cast>();
+			cast.original_type = original_type;
+			cast.target_type = target_type;
+
+			original->parent->children[0] = cast_node;
+			cast_node->children[0] = original;
+
+			return target_type;
+		}
+
+		// extension
+		if(original_byte_width < target_byte_width) {
+			warning::emit(warning::code::IMPLICIT_EXTENSION_CAST, location, original_type.to_string(), target_type.to_string());
+
+			const handle<node> cast_node = m_context.ast.create_node<ast_cast>(node_type::CAST_EXTEND, 1);
+		  ast_cast& cast = cast_node->get<ast_cast>();
+			cast.original_type = original_type;
+			cast.target_type = target_type;
+
+			original->parent->children[0] = cast_node;
+			cast_node->children[0] = original;
+
+			return target_type;
+		}
+
+		return {}; // unreachable
+	}
+
+	auto type_checker::type_check_variable_access(handle<node> access_node, data_type expected) -> utility::result<data_type> {
+		auto& accessed_variable = access_node->get<ast_variable>();
+
+		// locate the variable
+		TRY(const auto accessed, m_context.semantics.find_variable(accessed_variable.identifier_key));
+
+		if(accessed == nullptr) {
+			const std::string& identifier_str = m_context.strings.get(accessed_variable.identifier_key);
+			return error::emit(error::code::UNKNOWN_VARIABLE, accessed_variable.location, identifier_str);
+		}
+
+		// default to the declared type
+		accessed_variable.type = implicit_type_cast(accessed->type, expected, accessed_variable.location, access_node);
+		return accessed_variable.type; // return the type checked value
 	}
 
 	auto type_checker::type_check_variable_assignment(handle<node> assignment_node, data_type expected) -> utility::result<data_type> {
@@ -327,26 +403,28 @@ namespace sigma {
 		return data_type();
 	}
 
-	void type_checker::apply_expected_data_type(data_type& target, data_type source) {
-		// basically a cast call
-		if (source.base_type != data_type::UNKNOWN) {
-			if (source.base_type == data_type::VAR_ARG_PROMOTE) {
-				// promote the variable
-				// don't promote pointers 
-				if (target.pointer_level > 0) {
-					return;
-				}
-
-				switch (target.base_type) {
-					case data_type::UNKNOWN: PANIC("promotion on unknown data type"); break;
-					case data_type::I32:     return;
-					case data_type::BOOL:    target.base_type = data_type::I32; break;
-					default: NOT_IMPLEMENTED();
-				}
-			}
-			else {
-				target = source;
-			}
-		}
-	}
+	// void type_checker::apply_expected_data_type(data_type& target, data_type source) {
+	// 	// basically a cast call
+	// 	//if (source.base_type != data_type::UNKNOWN) {
+	// 	//	if (source.base_type == data_type::VAR_ARG_PROMOTE) {
+	// 	//		// promote the variable
+	// 	//		// don't promote pointers 
+	// 	//		if (target.pointer_level > 0) {
+	// 	//			return;
+	// 	//		}
+	// 
+	// 	//		switch (target.base_type) {
+	// 	//			case data_type::UNKNOWN: PANIC("promotion on unknown data type"); break;
+	// 	//			case data_type::I32:     return;
+	// 	//			case data_type::BOOL:    target.base_type = data_type::I32; break;
+	// 	//			default: NOT_IMPLEMENTED();
+	// 	//		}
+	// 	//	}
+	// 	//	else {
+	// 	//		target = source;
+	// 	//	}
+	// 	//}
+	// 
+	// 
+	// }
 } // namespace sigma

@@ -41,6 +41,11 @@ namespace sigma {
 			OPERATOR_DIVIDE,
 			OPERATOR_MODULO,
 
+			// ast_cast
+			// children[0] = value
+			CAST_TRUNCATE,
+			CAST_EXTEND,
+
 			NUMERICAL_LITERAL,
 			CHARACTER_LITERAL,
 			STRING_LITERAL,
@@ -102,16 +107,23 @@ namespace sigma {
 		handle<token_location> location; // debug location
 	};
 
+	struct ast_cast {
+		// cast original_type -> target_type
+		data_type original_type;
+		data_type target_type;
+	};
+
 	struct ast_namespace {
 		utility::string_table_key identifier_key;
 	};
 
 	using node_properties = utility::property<
-		ast_function, ast_function_call, ast_return, ast_literal, ast_variable, ast_bool_literal, ast_namespace
+		ast_function, ast_function_call, ast_return, ast_literal, ast_variable, ast_bool_literal, ast_namespace, ast_cast
 	>;
 
 	struct node : node_properties {
 		node_type type;
+		handle<node> parent = nullptr;
 		utility::slice<handle<node>> children;
 	};
 } // namespace sigma

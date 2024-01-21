@@ -177,6 +177,18 @@ namespace sigma::ir {
 		return create_binary_arithmetic_operation(node::type::MUL, left, right, behaviour);
 	}
 
+  auto function::create_sxt(handle<node> src, data_type dt) -> handle<node> {
+		return create_unary_operation(node::type::SIGN_EXTEND, dt, src);
+  }
+
+	auto function::create_zxt(handle<node> src, data_type dt) -> handle<node> {
+		return create_unary_operation(node::type::ZERO_EXTEND, dt, src);
+	}
+
+	auto function::create_truncate(handle<node> src, data_type dt) -> handle<node> {
+		return create_unary_operation(node::type::TRUNCATE, dt, src);
+	}
+
 	void function::create_store(handle<node> destination, handle<node> value, u32 alignment, bool is_volatile) {
 		const handle<node> store = create_node<memory_access>(is_volatile ? node::type::WRITE : node::type::STORE, 4);
 
@@ -267,6 +279,13 @@ namespace sigma::ir {
 		operation->inputs[2] = right;
 		operation->dt = left->dt;
 
+		return operation;
+	}
+
+	auto function::create_unary_operation(node::type type, data_type dt, handle<node> src) -> handle<node> {
+		const handle<node> operation = create_node<utility::empty_property>(type, 2);
+		operation->dt = dt;
+		operation->inputs[1] = src;
 		return operation;
 	}
 

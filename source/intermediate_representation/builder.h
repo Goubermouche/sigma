@@ -139,6 +139,11 @@ namespace sigma::ir {
 		auto create_sub(handle<node> left, handle<node> right, arithmetic_behaviour behaviour = arithmetic_behaviour::NONE) const -> handle<node>;
 		auto create_mul(handle<node> left, handle<node> right, arithmetic_behaviour behaviour = arithmetic_behaviour::NONE) const -> handle<node>;
 
+		// casting
+		auto create_sxt(handle<node> src, data_type dt) const -> handle<node>;
+		auto create_zxt(handle<node> src, data_type dt) const -> handle<node>;
+		auto create_truncate(handle<node> src, data_type dt) const -> handle<node>;
+
 		/**
 		 * \brief Creates a new load operation. 
 		 * \param value_to_load Value to be loaded (local / global)

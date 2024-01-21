@@ -58,6 +58,10 @@ namespace sigma::ir {
 		auto create_sub(handle<node> left, handle<node> right, arithmetic_behaviour behaviour = arithmetic_behaviour::NONE) -> handle<node>;
 		auto create_mul(handle<node> left, handle<node> right, arithmetic_behaviour behaviour = arithmetic_behaviour::NONE) -> handle<node>;
 
+		auto create_sxt(handle<node> src, data_type dt) -> handle<node>;
+		auto create_zxt(handle<node> src, data_type dt) -> handle<node>;
+		auto create_truncate(handle<node> src, data_type dt) -> handle<node>;
+
 		void create_store(handle<node> destination, handle<node> value, u32 alignment, bool is_volatile);
 		auto create_load(handle<node> value_to_load, data_type data_type, u32 alignment, bool is_volatile) -> handle<node>;
 
@@ -65,7 +69,9 @@ namespace sigma::ir {
 		auto create_local(u32 size, u32 alignment) -> handle<node>;
 	private:
 		auto create_call(const function_signature& function_sig, handle<node> callee_symbol_address,const std::vector<handle<node>>& arguments) -> handle<node>;
-		auto create_binary_arithmetic_operation(node::type type, handle<node> left, handle<node> right,  arithmetic_behaviour behaviour) -> handle<node>;
+
+		auto create_binary_arithmetic_operation(node::type type, handle<node> left, handle<node> right, arithmetic_behaviour behaviour) -> handle<node>;
+		auto create_unary_operation(node::type type, data_type dt, handle<node> src) -> handle<node>;
 
 		auto create_projection(data_type dt, handle<node> source, u64 index) -> handle<node>;
 		auto append_memory(handle<node> memory) const -> handle<node>;

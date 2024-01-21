@@ -107,6 +107,21 @@ namespace sigma::ir {
 		return get_insert_point_checked()->create_mul(left, right, behaviour);
 	}
 
+  auto builder::create_sxt(handle<node> src, data_type dt) const -> handle<node> {
+		DEBUG_PRINT("creating sxt");
+		return get_insert_point_checked()->create_sxt(src, dt);
+  }
+
+	auto builder::create_zxt(handle<node> src, data_type dt) const -> handle<node> {
+		DEBUG_PRINT("creating zxt");
+		return get_insert_point_checked()->create_zxt(src, dt);
+	}
+
+	auto builder::create_truncate(handle<node> src, data_type dt) const -> handle<node> {
+		DEBUG_PRINT("creating truncate");
+		return get_insert_point_checked()->create_truncate(src, dt);
+	}
+
 	void builder::create_store(handle<node> destination, handle<node> value, u32 alignment, bool is_volatile) const {
 		DEBUG_PRINT("creating store");
 		get_insert_point_checked()->create_store(destination, value, alignment, is_volatile);

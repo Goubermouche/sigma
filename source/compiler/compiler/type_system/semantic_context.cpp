@@ -384,6 +384,9 @@ namespace sigma {
 				// narrowing cast, higher cost
 				return 2 * (provided_width - required_width);
 			}
+
+			// the types aren't equal, but their bit width is - sign difference
+			return 15;
 		}
 
 		return INVALID_CAST_COST; // invalid operation

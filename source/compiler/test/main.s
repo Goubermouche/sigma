@@ -6,14 +6,20 @@
 // -   add namespaces to error messages, whenever applicable (ie. x::y::test)
 // -   namespace directives should probably be a part of the function signature? 
 
-void test() {
+// -   rework the AST
+// -   better retracing in function args
+// -   support for binop locations etc (location in create_node)
+// -   
+// -   
 
-}
+void test(u8 value) {}
 
-i32 test() {
-	ret 1;
+i8 run(i8 value) {
+    test(value);
+    ret 42;
 }
 
 i32 main() {
-  ret 0;
+    printf("test %d %s", run(100), "xd");
+    ret 0;
 }

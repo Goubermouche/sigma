@@ -150,13 +150,10 @@ namespace sigma {
 		u64 i = 0;
 		for(; i < function.signature.parameter_types.get_size(); ++i) {
 			implicit_type_cast(parameter_data_types[i], function.signature.parameter_types[i].type, call_node->children[i]);
-
-			// TRY(type_check_node(call_node->children[i], function.signature.parameter_types[i].type));
 		}
 
 		// type check var args
 		for(; i < call_node->children.get_size(); ++i) {
-			// TRY(type_check_node(call_node->children[i], { data_type::VAR_ARG_PROMOTE, 0 }));
 			implicit_type_cast(parameter_data_types[i], { data_type::VAR_ARG_PROMOTE, 0 }, call_node->children[i]);
 		}
 
@@ -347,8 +344,9 @@ namespace sigma {
 		const u16 original_byte_width = original_type.get_byte_width();
 		const u16 target_byte_width = target_type.get_byte_width();
 
-		// no cast needed, neither type is a pointer, just return
+		// no cast needed, probably a sign diff
 		if(original_byte_width == target_byte_width) {
+			warning::emit(warning::code::IMPLICIT_CAST, original->location, original_type.to_string(), target_type.to_string());
 			return original_type;
 		}
 
@@ -370,7 +368,6 @@ namespace sigma {
 		const handle<node> parent = original->parent;
 
 		// find the 'original' node in the parent
-
 		u64 index_in_parent = 0;
 		for(; index_in_parent < parent->children.get_size(); index_in_parent++) {
 			if(parent->children[index_in_parent] == original) {

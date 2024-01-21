@@ -1,5 +1,5 @@
 i32 main() {
-	i32 min = 0;
-	i32 max = 255;
+	u8 min = 0;
+	u8 max = 255;
 	ret 0;
 }

@@ -12,18 +12,12 @@
 // -   
 // -   
 
-void test(u8 value) {}
-
-i8 run(i8 value) {
-    test(value);
-    ret 42;
-}
-
 i32 main() {
-    bool b = true;
-		i32 x = b;
+	i32 value = 10;
 
-		printf("%d\n", x);
+	if(value) {
+		printf("yippee\n");
+	}
 
-    ret 0;
+  ret 0;
 }

@@ -8,6 +8,14 @@ namespace sigma {
 	data_type::data_type(data_type_base type, u8 pointer_level)
 		: base_type(type), pointer_level(pointer_level) {}
 
+	auto data_type::create_unknown() -> data_type {
+		return {};
+	}
+
+  auto data_type::create_bool(u8 pointer_level) -> data_type {
+		return { BOOL, pointer_level };
+  }
+
 	auto data_type::create_i8(u8 pointer_level) -> data_type {
 		return { I8, pointer_level };
 	}
@@ -206,8 +214,12 @@ namespace sigma {
 	}
 
   auto get_larger_type(data_type a, data_type b) -> data_type {
-		if (a.base_type == data_type::UNKNOWN || b.base_type == data_type::UNKNOWN ||
-			a.base_type == data_type::VAR_ARG_PROMOTE || b.base_type == data_type::VAR_ARG_PROMOTE) {
+		if (
+			a.base_type == data_type::UNKNOWN || 
+			b.base_type == data_type::UNKNOWN ||
+			a.base_type == data_type::VAR_ARG_PROMOTE || 
+			b.base_type == data_type::VAR_ARG_PROMOTE
+		) {
 			return { data_type::UNKNOWN, 0 };
 		}
 
@@ -215,19 +227,48 @@ namespace sigma {
 			return a; // same type
 		}
 
-		// Prioritize higher types in the hierarchy
-		static const std::unordered_map<data_type::data_type_base, u8> type_priority = {
-			{ data_type::VOID, 0 }, { data_type::BOOL, 1  }, { data_type::CHAR, 2 },
-			{ data_type::I8,   3 }, { data_type::U8,   4  }, { data_type::I16,  5 },
-			{ data_type::U16,  6 }, { data_type::I32,  7  }, { data_type::U32,  8 },
-			{ data_type::I64,  9 }, { data_type::U64,  10 }
-		};
+		const auto width_a = a.get_byte_width();
+		const auto width_b = b.get_byte_width();
 
-		// Compare based on type hierarchy.
-		const u8 priority_a = type_priority.at(a.base_type);
-		const u8 priority_b = type_priority.at(b.base_type);
+		if (width_a == width_b) {
+			// prefer signed over unsigned
+			if (a.is_signed() && b.is_unsigned()) {
+				return a;
+			}
 
-		// return the type with the higher priority.
-		return priority_a > priority_b ? a : b;
+			if (a.is_unsigned() && b.is_signed()) {
+				return b;
+			}
+
+			// if both are either signed or unsigned, return either.
+			return a;
+		}
+
+		// return the type with the larger byte width.
+		return width_a > width_b ? a : b;
   }
+
+	auto promote_type(data_type type) -> data_type {
+		if (type.is_pointer()) {
+			return type; // don't promote pointers
+		}
+
+		switch (type.base_type) {
+			case data_type::VOID: PANIC("cannot dereference a void*");
+			case data_type::I8:
+			case data_type::I16:
+			case data_type::U8:
+			case data_type::U16:
+			case data_type::BOOL:
+			case data_type::CHAR: return data_type::create_i32();
+			case data_type::I32:
+			case data_type::I64:
+			case data_type::U32:
+			case data_type::U64:  return type;
+			default: NOT_IMPLEMENTED();
+		}
+
+		// unreachable
+		return {};
+	}
 } // sigma::parse

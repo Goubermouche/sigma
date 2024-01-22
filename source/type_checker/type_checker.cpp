@@ -21,44 +21,40 @@ namespace sigma {
 	}
 
 	auto type_checker::type_check_node(handle<node> ast_node, data_type expected) -> utility::result<data_type> {
-		// map type check functions to node types
-		using type_check_function = utility::result<data_type>(type_checker::*)(handle<node>, data_type);
-		static std::unordered_map<node_type::underlying, type_check_function> s_checkers = {
+		switch(ast_node->type) {
 			// functions
-			{ node_type::FUNCTION_DECLARATION,  &type_checker::type_check_function_declaration  },
-			{ node_type::FUNCTION_CALL,         &type_checker::type_check_function_call         },
-			{ node_type::NAMESPACE_DECLARATION, &type_checker::type_check_namespace_declaration },
+			case node_type::FUNCTION_DECLARATION:  return type_check_function_declaration(ast_node, expected);
+			case node_type::FUNCTION_CALL:         return type_check_function_call(ast_node, expected);
+			case node_type::NAMESPACE_DECLARATION: return type_check_namespace_declaration(ast_node, expected);
 
 			// control flow
-			{ node_type::RETURN,                &type_checker::type_check_return                },
-			{ node_type::CONDITIONAL_BRANCH,    &type_checker::type_check_conditional_branch    },
-			{ node_type::BRANCH,                &type_checker::type_check_branch                },
+			case node_type::RETURN:                return type_check_return(ast_node, expected);
+			case node_type::CONDITIONAL_BRANCH:    return type_check_conditional_branch(ast_node, expected);
+			case node_type::BRANCH:                return type_check_branch(ast_node, expected);
 
 			// variables
-			{ node_type::VARIABLE_DECLARATION,  &type_checker::type_check_variable_declaration  },
-			{ node_type::VARIABLE_ACCESS,       &type_checker::type_check_variable_access       },
-			{ node_type::VARIABLE_ASSIGNMENT,   &type_checker::type_check_variable_assignment   },
+			case node_type::VARIABLE_DECLARATION:  return type_check_variable_declaration(ast_node, expected);
+			case node_type::VARIABLE_ACCESS:       return type_check_variable_access(ast_node, expected);
+			case node_type::VARIABLE_ASSIGNMENT:   return type_check_variable_assignment(ast_node, expected);
 
 			// binary operators
-			{ node_type::OPERATOR_ADD,          &type_checker::type_check_binary_math_operator  },
-			{ node_type::OPERATOR_SUBTRACT,     &type_checker::type_check_binary_math_operator  },
-			{ node_type::OPERATOR_MULTIPLY,     &type_checker::type_check_binary_math_operator  },
-			{ node_type::OPERATOR_DIVIDE,       &type_checker::type_check_binary_math_operator  },
-			{ node_type::OPERATOR_MODULO,       &type_checker::type_check_binary_math_operator  },
+			case node_type::OPERATOR_ADD:
+			case node_type::OPERATOR_SUBTRACT:
+			case node_type::OPERATOR_MULTIPLY:
+			case node_type::OPERATOR_DIVIDE:
+			case node_type::OPERATOR_MODULO:       return type_check_binary_math_operator(ast_node, expected);
 
 			// literals
-			{ node_type::NUMERICAL_LITERAL,     &type_checker::type_check_numerical_literal     },
-			{ node_type::CHARACTER_LITERAL,     &type_checker::type_check_character_literal     },
-			{ node_type::STRING_LITERAL,        &type_checker::type_check_string_literal        },
-			{ node_type::BOOL_LITERAL,          &type_checker::type_check_bool_literal          },
-		};
+			case node_type::NUMERICAL_LITERAL:     return type_check_numerical_literal(ast_node, expected);
+			case node_type::CHARACTER_LITERAL:     return type_check_character_literal(ast_node, expected);
+			case node_type::STRING_LITERAL:        return type_check_string_literal(ast_node, expected);
+			case node_type::BOOL_LITERAL:          return type_check_bool_literal(ast_node, expected);
 
-		// locate the relevant type check function
-		const auto it = s_checkers.find(ast_node->type);
-		ASSERT(it != s_checkers.end(), "unhandled node type detected");
+			// unhandled node types
+			default: PANIC("undefined type check for node '{}'", ast_node->type.to_string());
+		}
 
-		// run the relevant function
-		return (this->*it->second)(ast_node, expected);
+		return data_type::create_unknown(); // unreachable
 	}
 
 	auto type_checker::type_check_namespace_declaration(handle<node> variable_node, data_type expected) -> utility::result<data_type> {
@@ -173,7 +169,7 @@ namespace sigma {
 			// return an empty
 			// verify that the parent function expects an empty return type
 			if(expected != data_type(data_type::VOID, 0)) {
-				return error::emit(error::code::VOID_RETURN, return_node->location, expected.to_string());
+				return error::emit(error::code::UNEXPECTED_VOID_RET, return_node->location);
 			}
 		}
 		else {
@@ -183,7 +179,7 @@ namespace sigma {
 		}
 
 		// this value won't be used
-		return data_type();
+		return data_type::create_unknown();
 	}
 
 	auto type_checker::type_check_conditional_branch(handle<node> branch_node, data_type expected) -> utility::result<data_type> {
@@ -197,10 +193,12 @@ namespace sigma {
 		if (branch_node->children[1]) {
 			// type check another conditional branch
 			if (branch_node->children[1]->type == node_type::CONDITIONAL_BRANCH) {
+				m_current_parent_node = branch_node;
 				TRY(type_check_conditional_branch(branch_node->children[1], expected));
 			}
 			// type check a regular branch
 			else if (branch_node->children[1]->type == node_type::BRANCH) {
+				m_current_parent_node = branch_node;
 				TRY(type_check_branch(branch_node->children[1], expected));
 			}
 			else {
@@ -217,8 +215,9 @@ namespace sigma {
 		}
 
 		m_context.semantics.pop_scope();
+
 		// this value won't be used
-		return data_type();
+		return data_type::create_unknown();
 	}
 
 	auto type_checker::type_check_branch(handle<node> branch_node, data_type expected) -> utility::result<data_type> {
@@ -232,8 +231,9 @@ namespace sigma {
 		}
 
 		m_context.semantics.pop_scope();
+
 		// this value won't be used
-		return data_type();
+		return data_type::create_unknown();
 	}
 
 	auto type_checker::type_check_binary_math_operator(handle<node> operator_node, data_type expected) -> utility::result<data_type> {
@@ -254,8 +254,10 @@ namespace sigma {
 		return larger_type;
 	}
 
-	auto type_checker::type_check_numerical_literal(handle<node> literal_node, data_type expected) -> utility::result<data_type> {
+	auto type_checker::type_check_numerical_literal(handle<node> literal_node, data_type expected) const -> utility::result<data_type> {
 		auto& literal = literal_node->get<ast_literal>();
+
+		// upcast to the expected type, without throwing warnings/errors
 		literal.type = inherent_type_cast(literal.type, expected);
 
 		const std::string& value_str = m_context.strings.get(literal.value_key);
@@ -309,27 +311,24 @@ namespace sigma {
 		return literal.type;
 	}
 
-	auto type_checker::type_check_character_literal(handle<node> literal_node, data_type expected) -> utility::result<data_type> {
+	auto type_checker::type_check_character_literal(handle<node> literal_node, data_type expected) const -> utility::result<data_type> {
 		auto& literal = literal_node->get<ast_literal>();
 		TRY(literal.type, implicit_type_cast(literal.type, expected, literal_node));
 		return literal.type;
 	}
 
-	auto type_checker::type_check_string_literal(handle<node> literal_node, data_type expected) -> utility::result<data_type> {
+	auto type_checker::type_check_string_literal(handle<node> literal_node, data_type expected) const -> utility::result<data_type> {
 		auto& literal = literal_node->get<ast_literal>();
 		TRY(literal.type, implicit_type_cast(literal.type, expected, literal_node));
 		return literal.type;
 	}
 
-	auto type_checker::type_check_bool_literal(handle<node> literal_node, data_type expected) -> utility::result<data_type> {
-		SUPPRESS_C4100(literal_node);
-		SUPPRESS_C4100(expected);
-
-		return data_type(data_type::BOOL, 0);
+	auto type_checker::type_check_bool_literal(handle<node> literal_node, data_type expected) const -> utility::result<data_type> {
+		TRY(const data_type type, implicit_type_cast(data_type::create_bool(), expected, literal_node));
+		return type;
 	}
 
 	auto type_checker::inherent_type_cast(data_type original_type, data_type target_type) -> data_type {
-
 		if(target_type.is_unknown()) {
 			return original_type;
 		}
@@ -405,19 +404,19 @@ namespace sigma {
 		return target_type;
 	}
 
-	auto type_checker::type_check_variable_access(handle<node> access_node, data_type expected) -> utility::result<data_type> {
+	auto type_checker::type_check_variable_access(handle<node> access_node, data_type expected) const -> utility::result<data_type> {
 		auto& accessed_variable = access_node->get<ast_variable>();
 
 		// locate the variable
-		TRY(const auto accessed, m_context.semantics.find_variable(accessed_variable.identifier_key));
+		TRY(const auto variable_decl, m_context.semantics.find_variable(accessed_variable.identifier_key));
 
-		if(accessed == nullptr) {
+		if(variable_decl == nullptr) {
 			const std::string& identifier_str = m_context.strings.get(accessed_variable.identifier_key);
 			return error::emit(error::code::UNKNOWN_VARIABLE, access_node->location, identifier_str);
 		}
 
 		// default to the declared type
-		TRY(accessed_variable.type, implicit_type_cast(accessed->type, expected, access_node));
+		TRY(accessed_variable.type, implicit_type_cast(variable_decl->type, expected, access_node));
 		return accessed_variable.type; // return the type checked value
 	}
 
@@ -440,31 +439,6 @@ namespace sigma {
 		TRY(type_check_node(assignment_node->children[1], declaration->type));
 
 		// this value won't be used
-		return data_type();
-	}
-
-	auto promote_type(data_type type) -> data_type {
-		if (type.is_pointer()) {
-			return type; // don't promote pointers
-		}
-
-		switch (type.base_type) {
-			case data_type::VOID: PANIC("cannot deref a void*");
-			case data_type::I8:
-			case data_type::I16:
-			case data_type::U8:
-			case data_type::U16:
-			case data_type::BOOL:
-			case data_type::CHAR: return data_type::create_i32();
-			case data_type::I32:
-			case data_type::I64:
-			case data_type::U32:
-			case data_type::U64:  return type;
-
-			default: NOT_IMPLEMENTED();
-		}
-
-		// unreachable
-		return {}; 
+		return data_type::create_unknown();
 	}
 } // namespace sigma

@@ -25,6 +25,9 @@ namespace sigma {
 		data_type(token token, u8 pointer_level);
 		data_type(data_type_base type, u8 pointer_level);
 
+		static auto create_unknown() -> data_type;
+		static auto create_bool(u8 pointer_level = 0) -> data_type;
+
 		static auto create_i8(u8 pointer_level = 0) -> data_type;
 		static auto create_i16(u8 pointer_level = 0) -> data_type;
 		static auto create_i32(u8 pointer_level = 0) -> data_type;
@@ -57,6 +60,7 @@ namespace sigma {
 	};
 
 	auto get_larger_type(data_type a, data_type b) -> data_type;
+	auto promote_type(data_type type) -> data_type;
 
 	struct named_data_type {
 		named_data_type(data_type type, utility::string_table_key identifier_key);

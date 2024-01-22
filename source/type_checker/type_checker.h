@@ -5,13 +5,6 @@ namespace sigma {
 	struct backend_context;
 
 	/**
-	 * \brief Promotes \b type into the relevant var arg counterpart.
-	 * \param type Type to promote
-	 * \return Promoted type.
-	 */
-	static auto promote_type(data_type type) -> data_type;
-
-	/**
 	 * \brief A simple type checker implementation, traverses the provided AST and
 	 * resolves type relationships, including generics.
 	 */
@@ -33,15 +26,14 @@ namespace sigma {
 		auto type_check_conditional_branch(handle<node> branch_node, data_type expected) -> utility::result<data_type>;
 		auto type_check_branch(handle<node> branch_node, data_type expected) -> utility::result<data_type>;
 		auto type_check_binary_math_operator(handle<node> operator_node, data_type expected) -> utility::result<data_type>;
-		auto type_check_variable_access(handle<node> access_node, data_type expected) -> utility::result<data_type>;
+		auto type_check_variable_access(handle<node> access_node, data_type expected) const-> utility::result<data_type>;
 		auto type_check_variable_assignment(handle<node> assignment_node, data_type expected) -> utility::result<data_type>;
 
-		auto type_check_numerical_literal(handle<node> literal_node, data_type expected) -> utility::result<data_type>;
-		auto type_check_character_literal(handle<node> literal_node, data_type expected) -> utility::result<data_type>;
-		auto type_check_string_literal(handle<node> literal_node, data_type expected) -> utility::result<data_type>;
-		auto type_check_bool_literal(handle<node> literal_node, data_type expected) -> utility::result<data_type>;
+		auto type_check_numerical_literal(handle<node> literal_node, data_type expected) const-> utility::result<data_type>;
+		auto type_check_character_literal(handle<node> literal_node, data_type expected) const-> utility::result<data_type>;
+		auto type_check_string_literal(handle<node> literal_node, data_type expected) const -> utility::result<data_type>;
+		auto type_check_bool_literal(handle<node> literal_node, data_type expected) const -> utility::result<data_type>;
 
-		// static void apply_expected_data_type(data_type& target, data_type source);
 		static auto inherent_type_cast(data_type original_type, data_type target_type) -> data_type;
 		auto implicit_type_cast(data_type original_type, data_type target_type, handle<node> original) const -> utility::result<data_type>;
 	private:

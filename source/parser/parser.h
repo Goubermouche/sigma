@@ -64,7 +64,7 @@ namespace sigma {
 
 		template<typename extra_type>
 		auto create_node(node_type type, u64 child_count, handle<token_location> location) const -> handle<node> {
-			return m_context.ast.create_node<extra_type>(type, child_count, location);
+			return m_context.syntax.ast.create_node<extra_type>(type, child_count, location);
 		}
 
 		auto create_binary_expression(node_type type, handle<node> left, handle<node> right) const -> handle<node>;

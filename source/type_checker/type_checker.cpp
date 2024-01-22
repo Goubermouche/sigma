@@ -12,7 +12,7 @@ namespace sigma {
 	type_checker::type_checker(backend_context& context) : m_context(context) {}
 
 	auto type_checker::type_check() -> utility::result<void> {
-		for (const handle<node>& top_level : m_context.ast.get_nodes()) {
+		for (const handle<node>& top_level : m_context.syntax.ast.get_nodes()) {
 			TRY(type_check_node(top_level, nullptr));
 		}
 
@@ -77,7 +77,7 @@ namespace sigma {
 
 		// check if the function hasn't been declared before
 		if(m_context.semantics.contains_function(function.signature)) {
-			const std::string& identifier = m_context.strings.get(function.signature.identifier_key);
+			const std::string& identifier = m_context.syntax.strings.get(function.signature.identifier_key);
 			return error::emit(error::code::FUNCTION_ALREADY_DECLARED, function_node->location, identifier);
 		}
 
@@ -109,13 +109,13 @@ namespace sigma {
 
 		// we cannot declare purely 'void' variables
 		if(variable.type.is_void()) {
-			const std::string& identifier_str = m_context.strings.get(variable.identifier_key);
+			const std::string& identifier_str = m_context.syntax.strings.get(variable.identifier_key);
 			return error::emit(error::code::VOID_VARIABLE, variable_node->location, identifier_str);
 		}
 
 		// check, whether the variable has already been declared in the current context
 		if(m_context.semantics.contains_variable(variable.identifier_key)) {
-			const std::string& identifier_str = m_context.strings.get(variable.identifier_key);
+			const std::string& identifier_str = m_context.syntax.strings.get(variable.identifier_key);
 			return error::emit(error::code::VARIABLE_ALREADY_DECLARED, variable_node->location, identifier_str);
 		}
 
@@ -251,7 +251,7 @@ namespace sigma {
 		// upcast to the expected type, without throwing warnings/errors
 		literal.type = inherent_type_cast(literal.type, expected);
 
-		const std::string& value_str = m_context.strings.get(literal.value_key);
+		const std::string& value_str = m_context.syntax.strings.get(literal.value_key);
 		bool overflow = false;
 
 		// check for type overflow
@@ -368,7 +368,7 @@ namespace sigma {
 		// original     	original
 
 		const bool truncate = original_byte_width > target_byte_width;
-		const handle<node> cast_node = m_context.ast.create_node<ast_cast>(truncate ? node_type::CAST_TRUNCATE : node_type::CAST_EXTEND, 1, nullptr);
+		const handle<node> cast_node = m_context.syntax.ast.create_node<ast_cast>(truncate ? node_type::CAST_TRUNCATE : node_type::CAST_EXTEND, 1, nullptr);
 		ast_cast& cast = cast_node->get<ast_cast>();
 		cast.original_type = original_type;
 		cast.target_type = target_type;
@@ -402,7 +402,7 @@ namespace sigma {
 		TRY(const auto variable_decl, m_context.semantics.find_variable(accessed_variable.identifier_key));
 
 		if(variable_decl == nullptr) {
-			const std::string& identifier_str = m_context.strings.get(accessed_variable.identifier_key);
+			const std::string& identifier_str = m_context.syntax.strings.get(accessed_variable.identifier_key);
 			return error::emit(error::code::UNKNOWN_VARIABLE, access_node->location, identifier_str);
 		}
 
@@ -421,7 +421,7 @@ namespace sigma {
 		TRY(const auto declaration, m_context.semantics.find_variable(variable.identifier_key));
 
 		if (declaration == nullptr) {
-			const std::string& identifier_str = m_context.strings.get(variable.identifier_key);
+			const std::string& identifier_str = m_context.syntax.strings.get(variable.identifier_key);
 			return error::emit(error::code::UNKNOWN_VARIABLE_ASSIGN, variable_node->location, identifier_str);
 		}
 

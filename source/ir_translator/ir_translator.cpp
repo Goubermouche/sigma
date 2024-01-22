@@ -173,13 +173,13 @@ namespace sigma {
 	}
 
 	auto ir_translator::translate_character_literal(handle<node> character_literal_node) const -> handle<ir::node> {
-		const std::string& value = m_context.strings.get(character_literal_node->get<ast_literal>().value_key);
+		const std::string& value = m_context.syntax.strings.get(character_literal_node->get<ast_literal>().value_key);
 		ASSERT(value.size() == 1, "invalid char literal length");
 		return m_context.builder.create_signed_integer(value[0], 32);
 	}
 
 	auto ir_translator::translate_string_literal(handle<node> string_literal_node) const -> handle<ir::node> {
-		const std::string& value = m_context.strings.get(string_literal_node->get<ast_literal>().value_key);
+		const std::string& value = m_context.syntax.strings.get(string_literal_node->get<ast_literal>().value_key);
 		return m_context.builder.create_string(value);
 	}
 
@@ -270,7 +270,7 @@ namespace sigma {
 	}
 
 	auto ir_translator::literal_to_ir(ast_literal& literal) const -> handle<ir::node> {
-		const std::string& value = m_context.strings.get(literal.value_key);
+		const std::string& value = m_context.syntax.strings.get(literal.value_key);
 
 		// handle pointers separately
 		if (literal.type.pointer_level > 0) {
@@ -295,7 +295,7 @@ namespace sigma {
 	}
 
 	auto ir_translator::translate() -> utility::result<void> {
-		for (const handle<node>& top_level : m_context.ast.get_nodes()) {
+		for (const handle<node>& top_level : m_context.syntax.ast.get_nodes()) {
 			translate_node(top_level);
 		}
 

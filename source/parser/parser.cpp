@@ -92,7 +92,7 @@ namespace sigma {
 				NOT_IMPLEMENTED();
 			}
 
-			m_context.ast.add_node(result);
+			m_context.syntax.ast.add_node(result);
 			m_tokens.next();
 		}
 
@@ -132,7 +132,7 @@ namespace sigma {
 
 		function_signature signature = {
 			.return_type     = return_type,
-			.parameter_types = utility::slice<named_data_type>(m_context.ast.get_allocator(), parameters.size()),
+			.parameter_types = utility::slice<named_data_type>(m_context.syntax.ast.get_allocator(), parameters.size()),
 			.identifier_key  = identifier_key
 		};
 
@@ -307,7 +307,7 @@ namespace sigma {
 		const handle<node> negation_node = create_node<ast_literal>(node_type::NUMERICAL_LITERAL, 0, location);
 
 		ast_literal& literal = negation_node->get<ast_literal>();
-		literal.value_key = m_context.strings.insert("-1");
+		literal.value_key = m_context.syntax.strings.insert("-1");
 		literal.type = { data_type::I32, 0 };
 
 		// negate the expression
@@ -681,6 +681,6 @@ namespace sigma {
 	}
 
 	auto parser::create_binary_expression(node_type type, handle<node> left, handle<node> right) const -> handle<node> {
-		return m_context.ast.create_binary_expression(type, left, right);
+		return m_context.syntax.ast.create_binary_expression(type, left, right);
 	}
 } // namespace sigma

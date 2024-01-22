@@ -147,7 +147,7 @@ namespace sigma {
 		return token_info{
 			.tok        = { token_type::IDENTIFIER },
 			.location   = m_context.allocator.emplace<token_location>(m_token_start_location),
-			.symbol_key = m_context.strings.insert(m_current_section)
+			.symbol_key = m_context.syntax.strings.insert(m_current_section)
 		};
 	}
 
@@ -193,7 +193,7 @@ namespace sigma {
 				return token_info{
 					.tok        = { token_type::UNSIGNED_LITERAL },
 					.location   = m_context.allocator.emplace<token_location>(m_token_start_location),
-					.symbol_key = m_context.strings.insert(m_current_section)
+					.symbol_key = m_context.syntax.strings.insert(m_current_section)
 				};
 			}
 			else if (m_last_character == 'f') {
@@ -205,7 +205,7 @@ namespace sigma {
 				return token_info{
 					.tok        = { token_type::F32_LITERAL },
 					.location   = m_context.allocator.emplace<token_location>(m_token_start_location),
-					.symbol_key = m_context.strings.insert(m_current_section)
+					.symbol_key = m_context.syntax.strings.insert(m_current_section)
 				};
 			}
 			else if (!std::isdigit(m_last_character)) {
@@ -221,7 +221,7 @@ namespace sigma {
 			return token_info{
 				.tok        = { token_type::F64_LITERAL },
 				.location   = m_context.allocator.emplace<token_location>(m_token_start_location),
-				.symbol_key = m_context.strings.insert(m_current_section)
+				.symbol_key = m_context.syntax.strings.insert(m_current_section)
 			};
 		}
 
@@ -229,7 +229,7 @@ namespace sigma {
 		return token_info{
 			.tok        = { token_type::SIGNED_LITERAL },
 			.location   = m_context.allocator.emplace<token_location>(m_token_start_location),
-			.symbol_key = m_context.strings.insert(m_current_section)
+			.symbol_key = m_context.syntax.strings.insert(m_current_section)
 		};
 	}
 
@@ -251,7 +251,7 @@ namespace sigma {
 		return token_info{
 			.tok        = { token_type::STRING_LITERAL },
 			.location   = m_context.allocator.emplace<token_location>(m_token_start_location),
-			.symbol_key = m_context.strings.insert(m_current_section)
+			.symbol_key = m_context.syntax.strings.insert(m_current_section)
 		};
 	}
 
@@ -269,7 +269,7 @@ namespace sigma {
 		return token_info{
 			.tok = { token_type::CHARACTER_LITERAL },
 			.location = m_context.allocator.emplace<token_location>(m_token_start_location),
-			.symbol_key = m_context.strings.insert(m_current_section)
+			.symbol_key = m_context.syntax.strings.insert(m_current_section)
 		};
 	}
 

@@ -9,32 +9,35 @@
 // TODO: add support for emitting to .dot files
 
 namespace sigma {
-	struct backend_context {
-		backend_context(utility::string_table strings, abstract_syntax_tree& ast, ir::target target);
-
+	struct syntax {
 		void print_ast() const;
 
-		utility::block_allocator allocator;
 		utility::string_table strings;
+		abstract_syntax_tree ast;
+	};
 
-		abstract_syntax_tree& ast;
+	struct backend_context {
+		backend_context(syntax& syntax, ir::target target);
+
+		utility::block_allocator allocator;
+
+		// TEMP: the reference here is just temporary, and will be replaced when we add support for
+		//       multiple source files
+		syntax& syntax; 
+		semantic_context semantics;
 
 		ir::module module;
 		ir::builder builder;
-
-		semantic_context semantics;
 	};
 
 	struct frontend_context {
 		frontend_context();
 
 		void print_tokens() const;
-		void print_ast() const;
 
 		utility::block_allocator allocator; // one allocator per file
-		utility::string_table strings;      // all strings used in the relevant file
 
-		abstract_syntax_tree ast;           // AST of the given source file
 		token_buffer tokens;                // tokenized representation of the source file
+		syntax syntax;
 	};
 } // namespace sigma

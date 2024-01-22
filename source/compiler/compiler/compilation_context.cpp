@@ -2,16 +2,16 @@
 #include <utility/string_helper.h>
 
 namespace sigma {
-	backend_context::backend_context(utility::string_table strings, abstract_syntax_tree& ast, ir::target target)
-		: allocator(1024), strings(std::move(strings)), ast(ast), module(target), builder(module), semantics(*this) {
+	backend_context::backend_context(sigma::syntax& syntax, ir::target target)
+		: allocator(1024), syntax(syntax), semantics(*this), module(target), builder(module) {
 		// TODO: we don't have to initialize these if they're not used
 
 		// printf
 		{
-			const utility::string_table_key printf_key = this->strings.insert("printf");
-			const utility::string_table_key format_key = this->strings.insert("format");
+			const utility::string_table_key printf_key = this->syntax.strings.insert("printf");
+			const utility::string_table_key format_key = this->syntax.strings.insert("format");
 
-			auto printf_params = utility::slice<named_data_type>(this->ast.get_allocator(), 1);
+			auto printf_params = utility::slice<named_data_type>(this->syntax.ast.get_allocator(), 1);
 			printf_params[0] = named_data_type{ data_type(data_type::CHAR, 1), format_key };
 
 			const function_signature printf_function = {
@@ -26,10 +26,10 @@ namespace sigma {
 
 		// malloc
 		{
-			const utility::string_table_key malloc_key = this->strings.insert("malloc");
-			const utility::string_table_key size_key = this->strings.insert("size");
+			const utility::string_table_key malloc_key = this->syntax.strings.insert("malloc");
+			const utility::string_table_key size_key = this->syntax.strings.insert("size");
 		
-			auto malloc_params = utility::slice<named_data_type>(this->ast.get_allocator(), 1);
+			auto malloc_params = utility::slice<named_data_type>(this->syntax.ast.get_allocator(), 1);
 			malloc_params[0] = named_data_type{ data_type(data_type::U64, 0), size_key };
 		
 			const function_signature malloc_function = {
@@ -43,77 +43,8 @@ namespace sigma {
 		}
 	}
 
-  void backend_context::print_ast() const {
-		ast.traverse([&](const handle<node>& node, u16 depth) {
-			utility::console::print("{}{} ", std::string(static_cast<u64>(depth * 2), ' '), node->type.to_string());
-
-			switch (node->type) {
-			case node_type::FUNCTION_DECLARATION: {
-				const auto& property = node->get<ast_function>();
-				utility::console::print("['{} {} (", property.signature.return_type.to_string(), strings.get(property.signature.identifier_key));
-
-				for (u64 i = 0; i < property.signature.parameter_types.get_size(); ++i) {
-					utility::console::print("{}", property.signature.parameter_types[i].type.to_string());
-
-					if (i + 1 != property.signature.parameter_types.get_size()) {
-						utility::console::print(", ");
-					}
-				}
-				utility::console::print(")']");
-				break;
-			}
-			case node_type::FUNCTION_CALL: {
-				const auto& property = node->get<ast_function_call>();
-
-				utility::console::print("['");
-
-				for (const utility::string_table_key key : property.namespaces) {
-					utility::console::print("{}::", strings.get(key));
-				}
-
-				utility::console::print("{}']", strings.get(property.signature.identifier_key));
-				break;
-			}
-			case node_type::NAMESPACE_DECLARATION: {
-				const auto& property = node->get<ast_namespace>();
-				utility::console::print("['{}']", strings.get(property.identifier_key));
-				break;
-			}
-			case node_type::VARIABLE_DECLARATION: {
-				const auto& property = node->get<ast_variable>();
-				utility::console::print("[{} '{}']", strings.get(property.identifier_key), property.type.to_string());
-				break;
-			}
-			case node_type::VARIABLE_ACCESS: {
-				const auto& property = node->get<ast_variable>();
-				utility::console::print("[{}]", strings.get(property.identifier_key));
-				break;
-			}
-
-			case node_type::NUMERICAL_LITERAL: {
-				const auto& property = node->get<ast_literal>();
-				utility::console::print("['{}' {}]", property.type.to_string(), strings.get(property.value_key));
-				break;
-			}
-			case node_type::STRING_LITERAL: {
-				const auto& property = node->get<ast_literal>();
-				utility::console::print("[\"{}\"]", utility::detail::escape_string(strings.get(property.value_key)));
-				break;
-			}
-			case node_type::BOOL_LITERAL: {
-				const auto& property = node->get<ast_bool_literal>();
-				utility::console::print("[{}]", property.value ? "true" : "false");
-				break;
-			}
-
-			default: break; // suppress unhandled enumeration warnings
-			}
-
-			utility::console::print("\n");
-			});
-	}
-
-	frontend_context::frontend_context() : allocator(sizeof(token_location) * 10) {}
+	frontend_context::frontend_context()
+		: allocator(sizeof(token_location) * 10) {}
 
 	void frontend_context::print_tokens() const {
 		if (tokens.empty()) {
@@ -135,8 +66,8 @@ namespace sigma {
 		for (const auto& info : tokens) {
 			std::string symbol_value;
 			// check if the token has a string value associated with it 
-			if (strings.contains(info.symbol_key)) {
-				symbol_value = utility::detail::escape_string(strings.get(info.symbol_key));
+			if (syntax.strings.contains(info.symbol_key)) {
+				symbol_value = utility::detail::escape_string(syntax.strings.get(info.symbol_key));
 			}
 
 			utility::console::print(
@@ -148,7 +79,8 @@ namespace sigma {
 			);
 		}
 	}
-	void frontend_context::print_ast() const {
+
+	void syntax::print_ast() const {
 		ast.traverse([&](const handle<node>& node, u16 depth) {
 			utility::console::print("{}{} ", std::string(static_cast<u64>(depth * 2), ' '), node->type.to_string());
 

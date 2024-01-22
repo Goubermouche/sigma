@@ -149,7 +149,7 @@ namespace sigma {
 		std::stringstream namespace_str;
 
 		for (u64 i = 0; i < namespaces.size(); ++i) {
-			namespace_str << m_context.strings.get(namespaces[i]);
+			namespace_str << m_context.syntax.strings.get(namespaces[i]);
 			if (i + 1 < namespaces.size()) {
 				namespace_str << "::";
 			}
@@ -226,7 +226,7 @@ namespace sigma {
 			// no function with the specified identifier was found
 			std::stringstream function_name = construct_namespace_chain(function.namespaces);
 			function_name << "::";
-			function_name << m_context.strings.get(function.signature.identifier_key);
+			function_name << m_context.syntax.strings.get(function.signature.identifier_key);
 
 			return error::emit(error::code::UNKNOWN_FUNCTION, function_name.str());
 		}
@@ -247,16 +247,16 @@ namespace sigma {
 	}
 
 	void semantic_context::declare_external_function(const function_signature& signature) const {
-		const std::string& identifier = m_context.strings.get(signature.identifier_key);
+		const std::string& identifier = m_context.syntax.strings.get(signature.identifier_key);
 
 		find_parent_namespace()->external_functions[signature.identifier_key][signature] = {
 			.ir_function = m_context.module.create_external(identifier, ir::linkage::SO_LOCAL),
-			.ir_signature = signature_to_ir(signature, m_context.strings)
+			.ir_signature = signature_to_ir(signature, m_context.syntax.strings)
 		};
 	}
 
 	void semantic_context::declare_local_function(const function_signature& signature) const {
-		const ir::function_signature ir_signature = signature_to_ir(signature, m_context.strings);
+		const ir::function_signature ir_signature = signature_to_ir(signature, m_context.syntax.strings);
 		const	handle<ir::function> function = m_context.builder.create_function(ir_signature, ir::linkage::PUBLIC);
 
 		find_parent_namespace()->local_functions.at(signature.identifier_key).at(signature) = function;
@@ -298,7 +298,7 @@ namespace sigma {
 
 		// construct a list of all potentially viable functions
 		std::stringstream candidate_stream;
-		const std::string& identifier_str = m_context.strings.get(function.signature.identifier_key);
+		const std::string& identifier_str = m_context.syntax.strings.get(function.signature.identifier_key);
 
 		auto add_considered_candidate = [&](const auto& function_map) {
 			const auto it = function_map.find(function.signature.identifier_key);
@@ -316,7 +316,7 @@ namespace sigma {
 						candidate_stream
 							<< signature.parameter_types[i].type.to_string()
 							<< " "
-							<< m_context.strings.get(signature.parameter_types[i].identifier_key);
+							<< m_context.syntax.strings.get(signature.parameter_types[i].identifier_key);
 
 						if (i + 1 != signature.parameter_types.get_size()) {
 							candidate_stream << ", ";

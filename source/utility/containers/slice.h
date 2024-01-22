@@ -2,7 +2,7 @@
 #include "utility/types.h"
 
 namespace utility {
-	template<typename type>
+	template<typename type, typename size_type = u64>
 	class slice {
 	public:
 		using iterator = type*;
@@ -11,21 +11,21 @@ namespace utility {
 		using const_reverse_iterator = std::reverse_iterator<const_iterator>;
 
 		slice() = default;
-		slice(void* data, u64 size) :
+		slice(void* data, size_type size) :
 			m_data(static_cast<type*>(data)), m_size(size) {}
 
-		slice(type* data, u64 size) :
+		slice(type* data, size_type size) :
 			m_data(data), m_size(size) {}
 
 		template<typename allocator>
-		slice(allocator& alloc, u64 count) :
+		slice(allocator& alloc, size_type count) :
 			m_data(static_cast<type*>(alloc.allocate_zero(sizeof(type) * count))), m_size(count) {}
 
 		[[nodiscard]] auto get_data() const -> type* {
 			return m_data;
 		}
 
-		[[nodiscard]] auto get_size() const -> u64 {
+		[[nodiscard]] auto get_size() const -> size_type {
 			return m_size;
 		}
 
@@ -74,7 +74,7 @@ namespace utility {
 				return false;
 			}
 
-			for(u64 i = 0; i < m_size; ++i) {
+			for(size_type i = 0; i < m_size; ++i) {
 				if(m_data[i] != other.m_data[i]) {
 					return false;
 				}
@@ -84,6 +84,6 @@ namespace utility {
 		}
 	protected:
 		type* m_data;
-		u64 m_size;
+		size_type m_size;
 	};
 }

@@ -113,10 +113,16 @@ namespace sigma {
 		ast_function, ast_function_call, ast_literal, ast_variable, ast_bool_literal, ast_namespace, ast_cast
 	>;
 
+	struct sl {
+		node* x;
+		u16 y;
+	};
+
 	struct node : node_properties {
+		utility::slice<handle<node>, u16> children;
+
+		// metadata
 		node_type type;
-		handle<node> parent = nullptr;
-		utility::slice<handle<node>> children;
-		handle<token_location> location = nullptr; // debug location
+		handle<token_location> location = nullptr;
 	};
 } // namespace sigma

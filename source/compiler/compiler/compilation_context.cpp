@@ -43,7 +43,7 @@ namespace sigma {
 		}
 	}
 
-	void backend_context::print_ast() const {
+  void backend_context::print_ast() const {
 		ast.traverse([&](const handle<node>& node, u16 depth) {
 			utility::console::print("{}{} ", std::string(static_cast<u64>(depth * 2), ' '), node->type.to_string());
 

@@ -1,6 +1,5 @@
 #include "type_checker.h"
 
-#include <intermediate_representation/target/system/win/win.h>
 #include <compiler/compiler/compilation_context.h>
 #include <compiler/compiler/diagnostics.h>
 #include <utility/string_helper.h>
@@ -14,6 +13,7 @@ namespace sigma {
 
 	auto type_checker::type_check() -> utility::result<void> {
 		for (const handle<node>& top_level : m_context.ast.get_nodes()) {
+			m_current_parent_node = nullptr;
 			TRY(type_check_node(top_level));
 		}
 
@@ -67,6 +67,7 @@ namespace sigma {
 		m_context.semantics.push_namespace(namespace_scope.identifier_key);
 
 		for(const handle<node> statement : variable_node->children) {
+			m_current_parent_node = variable_node;
 			TRY(type_check_node(statement));
 		}
 
@@ -96,6 +97,7 @@ namespace sigma {
 
 		// type check inner statements
 		for(const handle<node>& statement : function_node->children) {
+			m_current_parent_node = function_node;
 			TRY(type_check_node(statement, {}));
 		}
 
@@ -127,6 +129,7 @@ namespace sigma {
 
 		// type check the assigned value
 		if (variable_node->children.get_size() == 1) {
+			m_current_parent_node = variable_node;
 			TRY(type_check_node(variable_node->children[0], variable.type));
 		}
 
@@ -140,6 +143,7 @@ namespace sigma {
 
 		// type check all parameters and store their inherent type
 		for(u64 i = 0; i < parameter_data_types.size(); ++i) {
+			m_current_parent_node = call_node;
 			TRY(parameter_data_types[i], type_check_node(call_node->children[i]));
 			ASSERT(parameter_data_types[i].base_type != data_type::UNKNOWN, "unknown parameter type detected");
 		}
@@ -174,6 +178,7 @@ namespace sigma {
 		}
 		else {
 			// return a value
+			m_current_parent_node = return_node;
 			TRY(type_check_node(return_node->children[0], expected));
 		}
 
@@ -184,6 +189,8 @@ namespace sigma {
 	auto type_checker::type_check_conditional_branch(handle<node> branch_node, data_type expected) -> utility::result<data_type> {
 		SUPPRESS_C4100(expected);
 		// type check the condition
+
+		m_current_parent_node = branch_node;
 		TRY(type_check_node(branch_node->children[0], data_type(data_type::BOOL, 0)));
 
 		// if children[1] exists, we have another branch node
@@ -205,6 +212,7 @@ namespace sigma {
 		m_context.semantics.push_scope();
 
 		for (u64 i = 2; i < branch_node->children.get_size(); ++i) {
+			m_current_parent_node = branch_node;
 			TRY(type_check_node(branch_node->children[i], {}));
 		}
 
@@ -219,6 +227,7 @@ namespace sigma {
 
 		// just type check all inner statements
 		for (const handle<node>& statement : branch_node->children) {
+			m_current_parent_node = branch_node;
 			TRY(type_check_node(statement, {}));
 		}
 
@@ -229,11 +238,20 @@ namespace sigma {
 
 	auto type_checker::type_check_binary_math_operator(handle<node> operator_node, data_type expected) -> utility::result<data_type> {
 		// type check both operands
+		m_current_parent_node = operator_node;
 		TRY(const data_type left, type_check_node(operator_node->children[0], expected));
 
-		// TODO: maybe expected should be == left?
-		TRY(type_check_node(operator_node->children[1], expected));
-		return left;
+		m_current_parent_node = operator_node;
+		TRY(const data_type right, type_check_node(operator_node->children[1], expected));
+
+		// upcast both types
+		m_current_parent_node = operator_node;
+		const data_type larger_type = get_larger_type(left, right);
+
+		TRY(implicit_type_cast(left, larger_type, operator_node->children[0]));
+		TRY(implicit_type_cast(right, larger_type, operator_node->children[1]));
+
+		return larger_type;
 	}
 
 	auto type_checker::type_check_numerical_literal(handle<node> literal_node, data_type expected) -> utility::result<data_type> {
@@ -350,7 +368,7 @@ namespace sigma {
 			return original_type;
 		}
 
-		ASSERT(original->parent, "parent is nulltr");
+		ASSERT(m_current_parent_node, "parent is nulltr");
 
 		// insert a cast node between the original node and its parent node
 		//  parent         parent
@@ -360,23 +378,21 @@ namespace sigma {
 		// original     	original
 
 		const bool truncate = original_byte_width > target_byte_width;
-		const handle<node> cast_node = m_context.ast.create_node<ast_cast>(truncate ? node_type::CAST_TRUNCATE : node_type::CAST_EXTEND, 1);
+		const handle<node> cast_node = m_context.ast.create_node<ast_cast>(truncate ? node_type::CAST_TRUNCATE : node_type::CAST_EXTEND, 1, nullptr);
 		ast_cast& cast = cast_node->get<ast_cast>();
 		cast.original_type = original_type;
 		cast.target_type = target_type;
 
-		const handle<node> parent = original->parent;
-
 		// find the 'original' node in the parent
 		u64 index_in_parent = 0;
-		for(; index_in_parent < parent->children.get_size(); index_in_parent++) {
-			if(parent->children[index_in_parent] == original) {
+		for(; index_in_parent < m_current_parent_node->children.get_size(); index_in_parent++) {
+			if(m_current_parent_node->children[index_in_parent] == original) {
 				break;
 			}
 		}
 
 		// replace this node by the relevant cast
-		parent->children[index_in_parent] = cast_node;
+		m_current_parent_node->children[index_in_parent] = cast_node;
 		cast_node->children[0] = original;
 
 		warning::emit(
@@ -420,6 +436,7 @@ namespace sigma {
 		}
 
 		// type check the assigned value against the declared type
+		m_current_parent_node = assignment_node;
 		TRY(type_check_node(assignment_node->children[1], declaration->type));
 
 		// this value won't be used

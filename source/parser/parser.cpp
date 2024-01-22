@@ -25,10 +25,14 @@ namespace sigma {
 		// parse the namespace identifier
 		EXPECT_NEXT_TOKEN(token_type::IDENTIFIER);
 		const utility::string_table_key identifier_key = m_tokens.get_current().symbol_key;
+		const handle<token_location> location = m_tokens.get_current_token_location();
 
 		TRY(const auto top, parse_namespace_block());
 
-		const handle<node> namespace_node = m_context.ast.create_node<ast_namespace>(node_type::NAMESPACE_DECLARATION, top.size());
+		const handle<node> namespace_node = create_node<ast_namespace>(
+			node_type::NAMESPACE_DECLARATION, top.size(), location
+		);
+
 		namespace_node->get<ast_namespace>().identifier_key = identifier_key;
 
 		std::memcpy(namespace_node->children.get_data(), top.data(), top.size() * sizeof(handle<node>));
@@ -132,12 +136,10 @@ namespace sigma {
 			.identifier_key  = identifier_key
 		};
 
-		const handle<node> function_node = create_node<ast_function>(node_type::FUNCTION_DECLARATION, statements.size());
+		const handle<node> function_node = create_node<ast_function>(node_type::FUNCTION_DECLARATION, statements.size(), function_location);
 
 		// initialize the function signature
 		auto& function = function_node->get<ast_function>();
-
-		function_node->location = function_location;
 		function.signature = signature;
 
 		// copy all statement pointers over to the memory arena
@@ -196,17 +198,14 @@ namespace sigma {
 		// first token is the RET keyword
 		// allow return statements without any expressions
 		if (m_tokens.peek_next_token() == token_type::SEMICOLON) {
-			const handle<node> ret = create_node<utility::empty_property>(node_type::RETURN, 0);
-			ret->location = location;
+			const handle<node> ret = create_node<utility::empty_property>(node_type::RETURN, 0, location);
 			return ret;
 		}
 
 		m_tokens.next(); // prime the first expression token
 
-		const handle<node> ret = create_node<utility::empty_property>(node_type::RETURN, 1);
-		ret->location = location;
+		const handle<node> ret = create_node<utility::empty_property>(node_type::RETURN, 1, location);
 		TRY(ret->children[0], parse_expression());
-		ret->children[0]->parent = ret;
 
 		return ret;
 	}
@@ -232,7 +231,7 @@ namespace sigma {
 				// else
 				TRY(const std::vector<handle<node>> statements, parse_statement_block());
 
-				const handle<node> branch_node = create_node<utility::empty_property>(node_type::BRANCH, statements.size());
+				const handle<node> branch_node = create_node<utility::empty_property>(node_type::BRANCH, statements.size(), nullptr);
 				std::memcpy(branch_node->children.get_data(), statements.data(), statements.size() * sizeof(handle<node>));
 				preceding_branch->children[1] = branch_node; // point to the next branch
 				break;
@@ -254,7 +253,7 @@ namespace sigma {
 		EXPECT_NEXT_TOKEN(token_type::RIGHT_PARENTHESIS);
 		TRY(const std::vector<handle<node>> statements, parse_statement_block());
 
-		const handle<node> branch_node = create_node<utility::empty_property>(node_type::CONDITIONAL_BRANCH, statements.size() + 2);
+		const handle<node> branch_node = create_node<utility::empty_property>(node_type::CONDITIONAL_BRANCH, statements.size() + 2, nullptr);
 
 		// copy all child statements
 		std::memcpy(branch_node->children.get_data() + 2, statements.data(), statements.size() * sizeof(handle<node>));
@@ -305,8 +304,7 @@ namespace sigma {
 		m_tokens.next(); // prime the first expression token
 
 		TRY(const handle<node> expression_node, parse_expression());
-		const handle<node> negation_node = create_node<ast_literal>(node_type::NUMERICAL_LITERAL, 0);
-		negation_node->location = location;
+		const handle<node> negation_node = create_node<ast_literal>(node_type::NUMERICAL_LITERAL, 0, location);
 
 		ast_literal& literal = negation_node->get<ast_literal>();
 		literal.value_key = m_context.strings.insert("-1");
@@ -339,13 +337,7 @@ namespace sigma {
 		EXPECT_NEXT_TOKEN(token_type::RIGHT_PARENTHESIS);
 
 		// create the callee
-		const handle<node> call_node = create_node<ast_function_call>(node_type::FUNCTION_CALL, parameters.size());
-		call_node->location = call_location;
-
-		// update the parent nodes
-		for(const handle<node> parameter : parameters) {
-			parameter->parent = call_node;
-		}
+		const handle<node> call_node = create_node<ast_function_call>(node_type::FUNCTION_CALL, parameters.size(), call_location);
 
 		// copy over function parameters
 		std::memcpy(call_node->children.get_data(), parameters.data(), parameters.size() * sizeof(handle<node>));
@@ -376,8 +368,7 @@ namespace sigma {
 		}
 
 		// create the variable node
-		const handle<node> variable_node = create_node<ast_variable>(node_type::VARIABLE_DECLARATION, assigned_value ? 1 : 0);
-		variable_node->location = location;
+		const handle<node> variable_node = create_node<ast_variable>(node_type::VARIABLE_DECLARATION, assigned_value ? 1 : 0, location);
 
 		// initialize the variable
 		auto& variable = variable_node->get<ast_variable>();
@@ -386,7 +377,6 @@ namespace sigma {
 
 		if(assigned_value) {
 			variable_node->children[0] = assigned_value;
-			assigned_value->parent = variable_node;
 		}
 
 		return variable_node;
@@ -397,8 +387,7 @@ namespace sigma {
 		EXPECT_CURRENT_TOKEN(token_type::IDENTIFIER);
 
 		// create the access node
-		const handle<node> variable_node = create_node<ast_variable>(node_type::VARIABLE_ACCESS, 0);
-		variable_node->location = location;
+		const handle<node> variable_node = create_node<ast_variable>(node_type::VARIABLE_ACCESS, 0, location);
 
 		// initialize the variable
 		auto& variable = variable_node->get<ast_variable>();
@@ -408,11 +397,12 @@ namespace sigma {
 	}
 
 	auto parser::parse_assignment() -> utility::result<handle<node>> {
+		const handle<token_location> location = m_tokens.get_current_token_location();
 		EXPECT_CURRENT_TOKEN(token_type::EQUALS_SIGN);
 		m_tokens.next(); 
 
 		// create the assignment node
-		const handle<node> assignment_node = create_node<utility::empty_property>(node_type::VARIABLE_ASSIGNMENT, 2);
+		const handle<node> assignment_node = create_node<utility::empty_property>(node_type::VARIABLE_ASSIGNMENT, 2, location);
 
 		// handle the assigned expression
 		TRY(assignment_node->children[1], parse_expression()); 
@@ -553,8 +543,7 @@ namespace sigma {
 		}
 
 		// create the literal node
-		const handle<node> literal_node = create_node<ast_literal>(node_type::NUMERICAL_LITERAL, 0);
-		literal_node->location = location;
+		const handle<node> literal_node = create_node<ast_literal>(node_type::NUMERICAL_LITERAL, 0, location);
 
 		// initialize the literal
 		auto& literal = literal_node->get<ast_literal>();
@@ -569,8 +558,7 @@ namespace sigma {
 		const handle<token_location> location = m_tokens.get_current_token_location();
 
 		// create the string node
-		const handle<node> char_node = create_node<ast_literal>(node_type::CHARACTER_LITERAL, 0);
-		char_node->location = location;
+		const handle<node> char_node = create_node<ast_literal>(node_type::CHARACTER_LITERAL, 0, location);
 
 		// initialize the literal
 		auto& literal = char_node->get<ast_literal>();
@@ -585,8 +573,7 @@ namespace sigma {
 		const handle<token_location> location = m_tokens.get_current_token_location();
 
 		// create the string node
-		const handle<node> string_node = create_node<ast_literal>(node_type::STRING_LITERAL, 0);
-		string_node->location = location;
+		const handle<node> string_node = create_node<ast_literal>(node_type::STRING_LITERAL, 0, location);
 
 		// initialize the literal
 		auto& literal = string_node->get<ast_literal>();
@@ -597,6 +584,8 @@ namespace sigma {
 	}
 
 	auto parser::parse_bool_literal() const -> utility::result<handle<node>> {
+		const handle<token_location> location = m_tokens.get_current_token_location();
+
 		ASSERT(
 			m_tokens.get_current_token() == token_type::BOOL_LITERAL_FALSE ||
 			m_tokens.get_current_token() == token_type::BOOL_LITERAL_TRUE, 
@@ -604,7 +593,7 @@ namespace sigma {
 		);
 
 		// create the bool node
-		const handle<node> bool_node = create_node<ast_bool_literal>(node_type::BOOL_LITERAL, 0);
+		const handle<node> bool_node = create_node<ast_bool_literal>(node_type::BOOL_LITERAL, 0, location);
 
 		// initialize the literal
 		bool_node->get<ast_bool_literal>().value = m_tokens.get_current_token() == token_type::BOOL_LITERAL_TRUE;

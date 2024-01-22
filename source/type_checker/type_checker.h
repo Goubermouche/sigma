@@ -46,5 +46,6 @@ namespace sigma {
 		auto implicit_type_cast(data_type original_type, data_type target_type, handle<node> original) const -> utility::result<data_type>;
 	private:
 		backend_context& m_context;
+		handle<node> m_current_parent_node = nullptr;
 	};
 } // namespace sigma

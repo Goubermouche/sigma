@@ -204,4 +204,30 @@ namespace sigma {
 	bool named_data_type::operator==(const named_data_type& other) const {
 		return type == other.type && identifier_key == other.identifier_key;
 	}
+
+  auto get_larger_type(data_type a, data_type b) -> data_type {
+		if (a.base_type == data_type::UNKNOWN || b.base_type == data_type::UNKNOWN ||
+			a.base_type == data_type::VAR_ARG_PROMOTE || b.base_type == data_type::VAR_ARG_PROMOTE) {
+			return { data_type::UNKNOWN, 0 };
+		}
+
+		if (a.base_type == b.base_type) {
+			return a; // same type
+		}
+
+		// Prioritize higher types in the hierarchy
+		static const std::unordered_map<data_type::data_type_base, u8> type_priority = {
+			{ data_type::VOID, 0 }, { data_type::BOOL, 1  }, { data_type::CHAR, 2 },
+			{ data_type::I8,   3 }, { data_type::U8,   4  }, { data_type::I16,  5 },
+			{ data_type::U16,  6 }, { data_type::I32,  7  }, { data_type::U32,  8 },
+			{ data_type::I64,  9 }, { data_type::U64,  10 }
+		};
+
+		// Compare based on type hierarchy.
+		const u8 priority_a = type_priority.at(a.base_type);
+		const u8 priority_b = type_priority.at(b.base_type);
+
+		// return the type with the higher priority.
+		return priority_a > priority_b ? a : b;
+  }
 } // sigma::parse

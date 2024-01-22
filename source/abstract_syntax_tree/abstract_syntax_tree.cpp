@@ -30,7 +30,7 @@ namespace sigma {
 		}
 	}
 
-	auto abstract_syntax_tree::allocate_node_list(u64 count) -> utility::slice<handle<node>> {
+	auto abstract_syntax_tree::allocate_node_list(u16 count) -> utility::slice<handle<node>, u16> {
 		return { m_allocator, count };
 	}
 
@@ -47,9 +47,10 @@ namespace sigma {
 	}
 
 	auto abstract_syntax_tree::create_binary_expression(node_type type, handle<node> left, handle<node> right) -> handle<node> {
-		const handle<node> node = create_node<utility::empty_property>(type, 2);
+		const handle<node> node = create_node<utility::empty_property>(type, 2, left->location);
 		node->children[0] = left;
 		node->children[1] = right;
+
 		return node;
 	}
 } // namespace sigma

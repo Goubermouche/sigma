@@ -63,8 +63,8 @@ namespace sigma {
 		auto peek_is_double_colon() -> bool;
 
 		template<typename extra_type>
-		auto create_node(node_type type, u64 child_count) const -> handle<node> {
-			return m_context.ast.create_node<extra_type>(type, child_count);
+		auto create_node(node_type type, u64 child_count, handle<token_location> location) const -> handle<node> {
+			return m_context.ast.create_node<extra_type>(type, child_count, location);
 		}
 
 		auto create_binary_expression(node_type type, handle<node> left, handle<node> right) const -> handle<node>;

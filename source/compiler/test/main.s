@@ -13,11 +13,7 @@
 // -   
 
 i32 main() {
-	i32 value = 10;
-
-	if(value) {
-		printf("yippee\n");
-	}
-
+	u8 value = 32 * 10 - 1;
+	printf("%d\n", value);
   ret 0;
 }

@@ -33,7 +33,6 @@ namespace sigma {
 		TRY(const std::string file, utility::fs::file<std::string>::load(m_description.path));
 		TRY(tokenizer::tokenize(file, &m_description.path, frontend));
 		TRY(parser::parse(frontend));
-		frontend.syntax.print_ast();
 
 		// backend
 		// at this point we want to merge all frontend contexts into the backend context
@@ -41,14 +40,6 @@ namespace sigma {
 
 		// run analysis on the generated AST
 		TRY(type_checker::type_check(backend));
-
-		std::cout << '\n';
-		std::cout << '\n';
-		std::cout << '\n';
-		std::cout << '\n';
-		backend.syntax.print_ast();
-
-
 		TRY(ir_translator::translate(backend));
 
 		// compile the generated IR module

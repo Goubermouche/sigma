@@ -38,6 +38,6 @@ namespace sigma {
 		utility::block_allocator allocator; // one allocator per file
 
 		token_buffer tokens;                // tokenized representation of the source file
-		syntax syntax;
+		syntax syntax;                      // ast + strings
 	};
 } // namespace sigma

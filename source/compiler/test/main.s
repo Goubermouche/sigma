@@ -10,8 +10,6 @@
 // -   explicit casting ("cast<type>")
 
 i32 main() {
-	i32 x = false;
-	printf("%d\n", x);
-
+	i32* memory = cast<i32*>(malloc(20));
 	ret 0;
 }

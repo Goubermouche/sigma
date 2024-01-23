@@ -486,8 +486,12 @@ namespace sigma {
 	}
 
 	auto parser::parse_primary() -> utility::result<handle<node>> {
-		if (m_tokens.get_current_token().is_numerical_literal()) {
+		if(m_tokens.get_current_token().is_numerical_literal()) {
 			return parse_numerical_literal();
+		}
+
+		if(peek_is_explicit_cast()) {
+			return parse_explicit_cast();
 		}
 
 		switch (m_tokens.get_current_token()) {
@@ -501,6 +505,34 @@ namespace sigma {
 		}
 
 		return nullptr;
+	}
+
+	auto parser::parse_explicit_cast() -> utility::result<handle<node>> {
+		const handle<token_location> location = m_tokens.get_current_token_location();
+
+		// cast<type>(value)
+		EXPECT_CURRENT_TOKEN(token_type::CAST);
+		EXPECT_NEXT_TOKEN(token_type::LESS_THAN);
+
+		m_tokens.next(); // prime the type token
+		TRY(const data_type target_type, parse_type());
+
+		EXPECT_NEXT_TOKEN(token_type::GREATER_THAN);
+		EXPECT_NEXT_TOKEN(token_type::LEFT_PARENTHESIS);
+
+		m_tokens.next(); // prime the statement
+		TRY(const handle<node> value_to_cast, parse_expression());
+
+		EXPECT_CURRENT_TOKEN(token_type::RIGHT_PARENTHESIS);
+		m_tokens.next(); // prime the next token (probably a SEMICOLON)
+
+		const handle<node> cast_node = create_node<ast_cast>(node_type::EXPLICIT_CAST, 1, location);
+		cast_node->children[0] = value_to_cast;
+
+		ast_cast& cast = cast_node->get<ast_cast>();
+		cast.target_type = target_type;
+
+		return cast_node;
 	}
 
 	auto parser::parse_type() -> utility::result<data_type> {
@@ -627,6 +659,14 @@ namespace sigma {
 		const bool res = m_tokens.peek_token() == token_type::LEFT_PARENTHESIS;
 		m_tokens.synchronize();
 		return res;
+	}
+
+	auto parser::peek_is_explicit_cast() const -> bool {
+		if(m_tokens.get_current_token() != token_type::CAST) {
+			return false;
+		}
+
+		return m_tokens.peek_next_token() == token_type::LESS_THAN;
 	}
 
 	auto parser::peek_is_function_call() const -> bool {

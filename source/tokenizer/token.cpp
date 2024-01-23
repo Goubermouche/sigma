@@ -55,6 +55,8 @@ namespace sigma {
 			case token_type::MINUS_SIGN:          return "-";
 			case token_type::EQUALS_SIGN:         return "=";
 			case token_type::COLON:               return ":";
+			case token_type::LESS_THAN:           return "<";
+			case token_type::GREATER_THAN:        return ">";
 
 			// default type keywords
 			case token_type::I8:                  return "I8";
@@ -77,6 +79,7 @@ namespace sigma {
 
 			// other keywords
 			case token_type::NAMESPACE:           return "NAMESPACE";
+			case token_type::CAST:								return "CAST";
 
 			// literals
 			case token_type::SIGNED_LITERAL:      return "SIGNED_LITERAL";

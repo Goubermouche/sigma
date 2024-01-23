@@ -28,6 +28,8 @@ namespace sigma {
 		MINUS_SIGN,        // +
 		EQUALS_SIGN,       // =
 		COLON,             // :
+		LESS_THAN,         // <
+		GREATER_THAN,      // >
 
 		// default type keywords
 		I8,
@@ -50,6 +52,7 @@ namespace sigma {
 
 		// other keywords
 		NAMESPACE,           // namespace
+		CAST,                // cast
 
 		// literals
 		SIGNED_LITERAL,      // 0

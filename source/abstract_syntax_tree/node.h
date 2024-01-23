@@ -44,6 +44,7 @@ namespace sigma {
 
 			// ast_cast
 			// children[0] = value
+			EXPLICIT_CAST,
 			CAST_TRUNCATE,
 			CAST_EXTEND,
 

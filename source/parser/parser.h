@@ -42,6 +42,7 @@ namespace sigma {
 		auto parse_return_statement() -> utility::result<handle<node>>;
 		auto parse_identifier_statement() -> utility::result<handle<node>>;
 		auto parse_negative_expression() -> utility::result<handle<node>>;
+		auto parse_explicit_cast() -> utility::result<handle<node>>;
 
 		auto parse_type() -> utility::result<data_type>;
 		auto parse_function_call(const std::vector<utility::string_table_key>& namespaces) -> utility::result<handle<node>>;
@@ -57,6 +58,7 @@ namespace sigma {
 
 		auto is_current_token_type() const -> bool;
 		auto peek_is_function_definition() -> bool;
+		auto peek_is_explicit_cast() const -> bool;
 		auto peek_is_function_call() const -> bool;
 		auto peek_is_variable_declaration() -> bool;
 		auto peek_is_namespace_access() -> bool;

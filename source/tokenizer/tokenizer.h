@@ -42,6 +42,7 @@ namespace sigma {
 
 			// other keywords
 			{ "namespace", token_type::NAMESPACE          },
+			{ "cast",      token_type::CAST               },
 
 			// native type keywords
 			{ "i8",        token_type::I8                 },
@@ -76,6 +77,8 @@ namespace sigma {
 			{ "-" ,  token_type::MINUS_SIGN        },
 			{ "=" ,  token_type::EQUALS_SIGN       },
 			{ ":" ,  token_type::COLON             },
+			{ "<" ,  token_type::LESS_THAN         },
+			{ ">" ,  token_type::GREATER_THAN      },
 		};
 	};
 } // namespace sigma

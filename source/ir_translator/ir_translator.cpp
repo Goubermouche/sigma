@@ -1,6 +1,6 @@
 #include "ir_translator.h"
+
 #include <compiler/compiler/compilation_context.h>
-#include <compiler/compiler/diagnostics.h>
 #include <utility/string_helper.h>
 
 namespace sigma {
@@ -32,6 +32,7 @@ namespace sigma {
 			case node_type::OPERATOR_MULTIPLY:
 			case node_type::OPERATOR_DIVIDE:
 			case node_type::OPERATOR_MODULO:       return translate_binary_math_operator(ast_node);
+
 			case node_type::CAST_EXTEND:
 			case node_type::CAST_TRUNCATE:         return translate_cast(ast_node);
 
@@ -269,7 +270,7 @@ namespace sigma {
 		return nullptr;
 	}
 
-	auto ir_translator::literal_to_ir(ast_literal& literal) const -> handle<ir::node> {
+	auto ir_translator::literal_to_ir(const ast_literal& literal) const -> handle<ir::node> {
 		const std::string& value = m_context.syntax.strings.get(literal.value_key);
 
 		// handle pointers separately
@@ -280,14 +281,16 @@ namespace sigma {
 		bool overflow; // ignored
 
 		switch (literal.type.base_type) {
-			case data_type::I8:  return m_context.builder.create_signed_integer(utility::detail::from_string<i8>(value, overflow), 8);
-			case data_type::I16: return m_context.builder.create_signed_integer(utility::detail::from_string<i16>(value, overflow), 16);
-			case data_type::I32: return m_context.builder.create_signed_integer(utility::detail::from_string<i32>(value, overflow), 32);
-			case data_type::I64: return m_context.builder.create_signed_integer(utility::detail::from_string<i64>(value, overflow), 64);
-			case data_type::U8:  return m_context.builder.create_unsigned_integer(utility::detail::from_string<u8>(value, overflow), 8);
-			case data_type::U16: return m_context.builder.create_unsigned_integer(utility::detail::from_string<u16>(value, overflow), 16);
-			case data_type::U32: return m_context.builder.create_unsigned_integer(utility::detail::from_string<u32>(value, overflow), 32);
-			case data_type::U64: return m_context.builder.create_unsigned_integer(utility::detail::from_string<u64>(value, overflow), 64);
+			case data_type::I8:   return m_context.builder.create_signed_integer(utility::detail::from_string<i8>(value, overflow), 8);
+			case data_type::I16:  return m_context.builder.create_signed_integer(utility::detail::from_string<i16>(value, overflow), 16);
+			case data_type::I32:  return m_context.builder.create_signed_integer(utility::detail::from_string<i32>(value, overflow), 32);
+			case data_type::I64:  return m_context.builder.create_signed_integer(utility::detail::from_string<i64>(value, overflow), 64);
+			case data_type::U8:   return m_context.builder.create_unsigned_integer(utility::detail::from_string<u8>(value, overflow), 8);
+			case data_type::U16:  return m_context.builder.create_unsigned_integer(utility::detail::from_string<u16>(value, overflow), 16);
+			case data_type::U32:  return m_context.builder.create_unsigned_integer(utility::detail::from_string<u32>(value, overflow), 32);
+			case data_type::U64:  return m_context.builder.create_unsigned_integer(utility::detail::from_string<u64>(value, overflow), 64);
+			// for cases when a numerical literal is implicitly converted to a bool (ie. "if(1)")
+			case data_type::BOOL: return m_context.builder.create_bool(utility::detail::from_string<bool>(value, overflow));
 			default: NOT_IMPLEMENTED();
 		}
 

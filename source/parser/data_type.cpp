@@ -140,7 +140,7 @@ namespace sigma {
 		return UNKNOWN;
 	}
 
-  bool data_type::is_integer() const {
+  bool data_type::is_integral() const {
 		if(pointer_level > 0) {
 			return false;
 		}
@@ -154,6 +154,7 @@ namespace sigma {
 			case U16:
 			case U32:
 			case U64:
+			case BOOL:
 				return true;
 			default:
 				return false;

@@ -374,7 +374,7 @@ namespace sigma {
 		const u16 required_width = required.get_byte_width();
 
 		// handle casting between integer types
-		if (provided.is_integer() && required.is_integer()) {
+		if (provided.is_integral() && required.is_integral()) {
 			if (provided_width < required_width) {
 				// widening cast, lower cost
 				return 1 * (required_width - provided_width);

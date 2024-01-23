@@ -119,6 +119,7 @@ namespace sigma {
 			IMPLICIT_EXTENSION_CAST,
 			IMPLICIT_TRUNCATION_CAST,
 			IMPLICIT_CAST,
+			NUMERICAL_BOOL,
 		};
 
 		template<typename... arguments>
@@ -136,10 +137,11 @@ namespace sigma {
 	private:
 		const static inline std::unordered_map<code, std::string> m_warnings = {
 			// filesystem
-			{ code::LITERAL_OVERFLOW,         "literal overflow detected ('{}' to '{}' for type '{}')" },
-			{ code::IMPLICIT_EXTENSION_CAST,  "implicit extending type cast ('{}' to '{}')"            },
-			{ code::IMPLICIT_TRUNCATION_CAST, "implicit truncating type cast ('{}' to '{}')"           },
-			{ code::IMPLICIT_CAST,            "implicit type cast ('{}' to '{}')"                      },
+			{ code::LITERAL_OVERFLOW,         "literal overflow detected ('{}' to '{}' for type '{}')"                         },
+			{ code::IMPLICIT_EXTENSION_CAST,  "implicit extending type cast ('{}' to '{}')"                                    },
+			{ code::IMPLICIT_TRUNCATION_CAST, "implicit truncating type cast ('{}' to '{}')"                                   },
+			{ code::IMPLICIT_CAST,            "implicit type cast ('{}' to '{}')"                                              },
+			{ code::NUMERICAL_BOOL,           "conversion of numerical literal to bool detected, prefer bool literals instead" },
 		};
 	};
 } // namespace sigma

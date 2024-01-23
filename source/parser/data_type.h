@@ -47,7 +47,7 @@ namespace sigma {
 		bool is_unknown() const;
 		bool is_promote() const;
 
-		bool is_integer() const;
+		bool is_integral() const;
 		bool is_void() const;
 		bool is_pointer() const;
 		bool is_signed() const;

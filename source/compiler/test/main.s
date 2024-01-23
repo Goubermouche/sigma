@@ -10,15 +10,8 @@
 // -   explicit casting ("cast<type>")
 
 i32 main() {
-	if(false) {
-		printf("1\n");
-	}
-  else if(true) {
-		printf("2\n");
-  }
-	else {
-		printf("3\n");
-	}
+	i32 x = false;
+	printf("%d\n", x);
 
 	ret 0;
 }

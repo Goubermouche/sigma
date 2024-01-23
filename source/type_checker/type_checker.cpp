@@ -281,6 +281,10 @@ namespace sigma {
 				if(overflow) { warning::emit(warning::code::LITERAL_OVERFLOW, literal_node->location, value_str, value, "u64"); }
 				break;
 			}
+			case data_type::BOOL: {
+				warning::emit(warning::code::NUMERICAL_BOOL, literal_node->location);
+				break;
+			}
 			default: NOT_IMPLEMENTED();
 		}
 

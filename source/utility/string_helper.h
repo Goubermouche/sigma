@@ -65,7 +65,13 @@ namespace utility::detail {
 		std::istringstream stream(str);
 		overflowed = false;
 
-		if constexpr (std::is_integral_v<type>) {
+		if constexpr (std::is_same_v<type, bool>) {
+			type value;
+			stream >> value;
+			// can't really overflow
+			return value;
+		}
+		else if constexpr (std::is_integral_v<type>) {
 			if constexpr (std::is_signed_v<type>) {
 				// read directly
 				type value;

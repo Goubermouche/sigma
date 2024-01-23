@@ -16,7 +16,9 @@ namespace sigma {
 		switch (ast_node->type) {
 			case node_type::FUNCTION_DECLARATION:  translate_function_declaration(ast_node); break;
 			case node_type::FUNCTION_CALL:         return translate_function_call(ast_node);
+
 			case node_type::NAMESPACE_DECLARATION: translate_namespace_declaration(ast_node); break;
+			case node_type::SIZEOF:                return translate_sizeof(ast_node);
 
 			// flow control
 			case node_type::RETURN:                translate_return(ast_node); break;
@@ -62,7 +64,7 @@ namespace sigma {
 
 			// since we can't update the projection value directly we have to create a proxy for it, this
 			// allows us to update the value of our parameters
-			const u16 byte_width = function.signature.parameter_types[i].type.get_byte_width();
+			const u16 byte_width = static_cast<u16>(function.signature.parameter_types[i].type.get_byte_width());
 			variable->value = m_context.builder.create_local(byte_width, byte_width);
 
 			// assign the parameter value to the proxy
@@ -81,7 +83,7 @@ namespace sigma {
 
 	void ir_translator::translate_variable_declaration(handle<node> variable_node) {
 		const auto& prop = variable_node->get<ast_variable>();
-		const u16 byte_width = prop.type.get_byte_width();
+		const u16 byte_width = static_cast<u16>(prop.type.get_byte_width());
 		const handle<ir::node> local = m_context.semantics.declare_variable(prop.identifier_key, byte_width, byte_width);
 
 		if (variable_node->children.get_size() == 1) {
@@ -111,6 +113,13 @@ namespace sigma {
 		else {
 			m_context.builder.create_return({ translate_node(return_node->children[0]) });
 		}
+	}
+
+	auto ir_translator::translate_sizeof(handle<node> sizeof_node) const -> handle<ir::node> {
+		const ast_sizeof& sizeof_value = sizeof_node->get<ast_sizeof>();
+		const u64 byte_width = sizeof_value.type.get_byte_width();
+
+		return m_context.builder.create_unsigned_integer(byte_width, 64);
 	}
 
 	void ir_translator::translate_conditional_branch(handle<node> branch_node, handle<ir::node> end_control) {
@@ -255,7 +264,7 @@ namespace sigma {
 		const handle<ir::node> load = m_context.semantics.create_load(
 			accessed_variable.identifier_key, 
 			data_type_to_ir(accessed_variable.type),
-			accessed_variable.type.get_byte_width()
+			static_cast<u16>(accessed_variable.type.get_byte_width())
 		);
 
 		ASSERT(load, "unknown variable referenced");
@@ -265,9 +274,10 @@ namespace sigma {
 	auto ir_translator::translate_variable_assignment(handle<node> assignment_node) -> handle<ir::node> {
 		const auto& var = assignment_node->children[0]->get<ast_variable>();
 		const handle<ir::node> value = translate_node(assignment_node->children[1]);
+		const u16 alignment = static_cast<u16>(var.type.get_byte_width());
 
 		// assign the variable
-		m_context.semantics.create_store(var.identifier_key, value, var.type.get_byte_width());
+		m_context.semantics.create_store(var.identifier_key, value, alignment);
 		return nullptr;
 	}
 

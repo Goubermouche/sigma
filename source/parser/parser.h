@@ -43,6 +43,7 @@ namespace sigma {
 		auto parse_identifier_statement() -> utility::result<handle<node>>;
 		auto parse_negative_expression() -> utility::result<handle<node>>;
 		auto parse_explicit_cast() -> utility::result<handle<node>>;
+		auto parse_sizeof() -> utility::result<handle<node>>;
 
 		auto parse_type() -> utility::result<data_type>;
 		auto parse_function_call(const std::vector<utility::string_table_key>& namespaces) -> utility::result<handle<node>>;

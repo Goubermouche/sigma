@@ -80,6 +80,7 @@ namespace sigma {
 			// other keywords
 			case token_type::NAMESPACE:           return "NAMESPACE";
 			case token_type::CAST:								return "CAST";
+			case token_type::SIZEOF:						  return "SIZEOF";
 
 			// literals
 			case token_type::SIGNED_LITERAL:      return "SIGNED_LITERAL";

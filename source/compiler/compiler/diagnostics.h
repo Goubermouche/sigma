@@ -75,6 +75,7 @@ namespace sigma {
 		 */
 		template<typename... arguments>
 		static auto emit(code code, arguments&&... args) -> utility::error {
+			NOT_IMPLEMENTED();
 			const std::string str = std::format("error C{}: {}", static_cast<u32>(code), m_errors.find(code)->second);
 			return utility::error(str, std::forward<arguments>(args)...);
 		}

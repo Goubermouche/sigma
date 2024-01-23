@@ -31,6 +31,7 @@ namespace sigma {
 		void translate_namespace_declaration(handle<node> namespace_node);
 
 		void translate_return(handle<node> return_node);
+		auto translate_sizeof(handle<node> sizeof_node) const -> handle<ir::node>;
 
 		/**
 		 * \brief Translates a conditional ast branch node into IR.

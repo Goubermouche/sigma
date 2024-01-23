@@ -185,7 +185,7 @@ namespace sigma {
 	}
 
 	auto semantic_context::create_callee_signature(handle<node> function_node, const std::vector<data_type>& parameter_types) -> utility::result<function_signature> {
-		using call_candidate = std::pair<function_signature, u16>;
+		using call_candidate = std::pair<function_signature, u64>;
 
 		const ast_function_call& function = function_node->get<ast_function_call>();
 		std::vector<call_candidate> candidates;
@@ -202,7 +202,7 @@ namespace sigma {
 						signature.parameter_types.get_size() == parameter_types.size() ||
 						(signature.parameter_types.get_size() < parameter_types.size() && signature.has_var_args)
 						) {
-						u16 cost = calculate_parameter_cast_cost(signature, parameter_types);
+						u64 cost = calculate_parameter_cast_cost(signature, parameter_types);
 
 						if (cost < INVALID_CAST_COST) {
 							candidates.emplace_back(signature, cost);
@@ -345,12 +345,12 @@ namespace sigma {
 		return error::emit(error::code::UNKNOWN_NAMESPACE, construct_namespace_chain(namespaces).str());
 	}
 
-	auto semantic_context::calculate_parameter_cast_cost(const function_signature& signature, const std::vector<data_type>& parameter_types) -> u16 {
+	auto semantic_context::calculate_parameter_cast_cost(const function_signature& signature, const std::vector<data_type>& parameter_types) -> u64 {
 		// NOTE: right now, we just traverse all non-var arg type and match compare against those, it's
 		//       probably a good idea to add a heavy-ish cost (~200) to var-arg functions, as we want to
 		//       prefer non var-arg functions by default (?)
 
-		u16 total_cost = 0;
+		u64 total_cost = 0;
 
 		for (u64 i = 0; i < signature.parameter_types.get_size(); ++i) {
 			// calculate the cost for this parameter
@@ -360,7 +360,7 @@ namespace sigma {
 		return total_cost;
 	}
 
-	auto semantic_context::calculate_cast_cost(const data_type& provided, const data_type& required) -> u16 {
+	auto semantic_context::calculate_cast_cost(const data_type& provided, const data_type& required) -> u64 {
 		// if types are the same, no cast is needed
 		if (provided.base_type == required.base_type) {
 			return 0;
@@ -370,8 +370,8 @@ namespace sigma {
 			return INVALID_CAST_COST; // invalid operation
 		}
 
-		const u16 provided_width = provided.get_byte_width();
-		const u16 required_width = required.get_byte_width();
+		const u64 provided_width = provided.get_byte_width();
+		const u64 required_width = required.get_byte_width();
 
 		// handle casting between integer types
 		if (provided.is_integral() && required.is_integral()) {

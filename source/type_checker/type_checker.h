@@ -19,7 +19,9 @@ namespace sigma {
 
 		auto type_check_function_declaration(handle<node> function_node) -> utility::result<data_type>;
 		auto type_check_variable_declaration(handle<node> variable_node) -> utility::result<data_type>;
+
 		auto type_check_namespace_declaration(handle<node> variable_node, data_type expected) -> utility::result<data_type>;
+		auto type_check_sizeof(handle<node> sizeof_node, handle<node> parent, data_type expected) -> utility::result<data_type>;
 
 		auto type_check_function_call(handle<node> call_node, handle<node> parent, data_type expected) -> utility::result<data_type>;
 		auto type_check_return(handle<node> return_node, data_type expected) -> utility::result<data_type>;

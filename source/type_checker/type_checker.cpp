@@ -24,7 +24,10 @@ namespace sigma {
 			// functions
 			case node_type::FUNCTION_DECLARATION:  return type_check_function_declaration(ast_node);
 			case node_type::FUNCTION_CALL:         return type_check_function_call(ast_node, parent, expected);
+
 			case node_type::NAMESPACE_DECLARATION: return type_check_namespace_declaration(ast_node, expected);
+			case node_type::EXPLICIT_CAST:         return type_check_explicit_cast(ast_node, parent, expected);
+			case node_type::SIZEOF:                return type_check_sizeof(ast_node, parent, expected);
 
 			// control flow
 			case node_type::RETURN:                return type_check_return(ast_node, expected);
@@ -43,7 +46,6 @@ namespace sigma {
 			case node_type::OPERATOR_DIVIDE:
 			case node_type::OPERATOR_MODULO:       return type_check_binary_math_operator(ast_node, expected);
 
-			case node_type::EXPLICIT_CAST:         return type_check_explicit_cast(ast_node, parent, expected);
 
 			// literals
 			case node_type::NUMERICAL_LITERAL:     return type_check_numerical_literal(ast_node, expected);
@@ -340,8 +342,8 @@ namespace sigma {
 		}
 
 		// target type is known at this point, try to cast to it
-		const u16 original_byte_width = original_type.get_byte_width();
-		const u16 target_byte_width = target_type.get_byte_width();
+		const u64 original_byte_width = original_type.get_byte_width();
+		const u64 target_byte_width = target_type.get_byte_width();
 
 		// no cast needed, probably a sign diff
 		if(original_byte_width == target_byte_width) {
@@ -437,6 +439,12 @@ namespace sigma {
 		TRY(cast.original_type, type_check_node(cast_node->children[0], cast_node, data_type::create_unknown()));
 		TRY(explicit_type_cast(cast.original_type, cast.target_type, cast_node));
 
+		// upcast the result, if necessary, just a sanity check
 		return implicit_type_cast(cast.target_type, expected, parent, cast_node);
+	}
+
+	auto type_checker::type_check_sizeof(handle<node> sizeof_node, handle<node> parent, data_type expected) -> utility::result<data_type> {
+		// upcast to the expected type, without throwing warnings/errors
+		return implicit_type_cast(data_type::create_u64(), expected, parent, sizeof_node);
 	}
 } // namespace sigma

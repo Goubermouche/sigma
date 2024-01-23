@@ -49,6 +49,8 @@ namespace sigma {
 		m_index++;
 		m_peek_index++;
 
+		ASSERT(m_index < m_tokens.get_size(), "out of bounds token access");
+
 		m_current_info = m_tokens[m_index];
 	}
 

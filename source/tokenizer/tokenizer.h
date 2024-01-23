@@ -43,6 +43,7 @@ namespace sigma {
 			// other keywords
 			{ "namespace", token_type::NAMESPACE          },
 			{ "cast",      token_type::CAST               },
+			{ "sizeof",    token_type::SIZEOF             },
 
 			// native type keywords
 			{ "i8",        token_type::I8                 },

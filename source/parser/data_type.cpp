@@ -96,7 +96,7 @@ namespace sigma {
 		return it->second + std::string(pointer_level, '*');
 	}
 
-	auto data_type::get_byte_width() const -> u16 {
+	auto data_type::get_byte_width() const -> u64 {
 		if(pointer_level > 0) {
 			return 8;
 		}

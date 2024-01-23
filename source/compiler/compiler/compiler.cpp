@@ -34,13 +34,14 @@ namespace sigma {
 		TRY(tokenizer::tokenize(file, &m_description.path, frontend));
 		TRY(parser::parse(frontend));
 
-		frontend.syntax.print_ast();
 		// backend
 		// at this point we want to merge all frontend contexts into the backend context
 		backend_context backend(frontend.syntax, m_description.target);
 
 		// run analysis on the generated AST
 		TRY(type_checker::type_check(backend));
+		backend.syntax.print_ast();
+
 		TRY(ir_translator::translate(backend));
 
 		// compile the generated IR module

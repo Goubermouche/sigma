@@ -396,6 +396,23 @@ namespace sigma {
 		return variable_node;
 	}
 
+	auto parser::parse_sizeof() -> utility::result<handle<node>> {
+		const handle<token_location> location = m_tokens.get_current_token_location();
+
+		EXPECT_CURRENT_TOKEN(token_type::SIZEOF);
+		EXPECT_NEXT_TOKEN(token_type::LEFT_PARENTHESIS);
+
+		m_tokens.next(); // prime the type token
+		TRY(const data_type type, parse_type());
+
+		EXPECT_NEXT_TOKEN(token_type::RIGHT_PARENTHESIS);
+
+		const handle<node> sizeof_node = create_node<ast_sizeof>(node_type::SIZEOF, 0, location);
+		sizeof_node->get<ast_sizeof>().type = type;
+
+		return sizeof_node;
+	}
+
 	auto parser::parse_assignment() -> utility::result<handle<node>> {
 		const handle<token_location> location = m_tokens.get_current_token_location();
 		EXPECT_CURRENT_TOKEN(token_type::EQUALS_SIGN);
@@ -496,6 +513,7 @@ namespace sigma {
 
 		switch (m_tokens.get_current_token()) {
 			case token_type::IDENTIFIER:         return parse_identifier_statement();
+			case token_type::SIZEOF:             return parse_sizeof();
 			case token_type::STRING_LITERAL:     return parse_string_literal();
 			case token_type::CHARACTER_LITERAL:  return parse_character_literal();
 			case token_type::MINUS_SIGN:         return parse_negative_expression();

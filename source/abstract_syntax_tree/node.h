@@ -18,6 +18,7 @@ namespace sigma {
 			FUNCTION_CALL,
 
 			NAMESPACE_DECLARATION,
+			SIZEOF,
 
 			RETURN,
 
@@ -107,12 +108,16 @@ namespace sigma {
 		data_type target_type;
 	};
 
+	struct ast_sizeof {
+		data_type type;
+	};
+
 	struct ast_namespace {
 		utility::string_table_key identifier_key;
 	};
 
 	using node_properties = utility::property<
-		ast_function, ast_function_call, ast_literal, ast_variable, ast_bool_literal, ast_namespace, ast_cast
+		ast_sizeof, ast_function, ast_function_call, ast_literal, ast_variable, ast_bool_literal, ast_namespace, ast_cast
 	>;
 
 	struct sl {

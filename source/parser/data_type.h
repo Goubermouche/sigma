@@ -54,7 +54,7 @@ namespace sigma {
 		bool is_unsigned() const;
 
 		auto to_string() const -> std::string;
-		auto get_byte_width() const -> u16;
+		auto get_byte_width() const -> u64;
 
 		data_type_base base_type = UNKNOWN;
 		u8 pointer_level = 0;

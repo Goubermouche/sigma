@@ -53,6 +53,7 @@ namespace sigma {
 		// other keywords
 		NAMESPACE,           // namespace
 		CAST,                // cast
+		SIZEOF,              // sizeof
 
 		// literals
 		SIGNED_LITERAL,      // 0

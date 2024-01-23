@@ -26,6 +26,7 @@ namespace sigma {
 		auto type_check_conditional_branch(handle<node> branch_node) -> utility::result<data_type>;
 		auto type_check_branch(handle<node> branch_node) -> utility::result<data_type>;
 		auto type_check_binary_math_operator(handle<node> operator_node, data_type expected) -> utility::result<data_type>;
+		auto type_check_explicit_cast(handle<node> cast_node, handle<node> parent, data_type expected) -> utility::result<data_type>;
 		auto type_check_variable_access(handle<node> access_node, handle<node> parent, data_type expected) const-> utility::result<data_type>;
 		auto type_check_variable_assignment(handle<node> assignment_node) -> utility::result<data_type>;
 
@@ -36,6 +37,7 @@ namespace sigma {
 
 		static auto inherent_type_cast(data_type original_type, data_type target_type) -> data_type;
 		auto implicit_type_cast(data_type original_type, data_type target_type, handle<node> parent, handle<node> target) const -> utility::result<data_type>;
+		auto explicit_type_cast(data_type original_type, data_type target_type, handle<node> target) const -> utility::result<void>;;
 	private:
 		backend_context& m_context;
 	};

@@ -41,6 +41,7 @@ namespace sigma {
 			UNKNOWN_NAMESPACE,
 			VOID_VARIABLE,
 			INVALID_IMPLICIT_CAST,
+			INCOMPATIBLE_EXPLICIT_CAST,
 		};
 
 		/**
@@ -109,6 +110,7 @@ namespace sigma {
 			{ code::UNKNOWN_NAMESPACE,                   "attempting to access an unknown namespace '{}'"                                    },
 			{ code::VOID_VARIABLE,                       "cannot declare a variable of type 'void' ('{}')"                                   },
 			{ code::INVALID_IMPLICIT_CAST,               "cannot cast '{}' to '{}' implicitly"                                               },
+			{ code::INCOMPATIBLE_EXPLICIT_CAST,          "cannot cast '{}' to '{}'"                                                          },
 		};
 	};
 

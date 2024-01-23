@@ -43,6 +43,8 @@ namespace sigma {
 			case node_type::OPERATOR_DIVIDE:
 			case node_type::OPERATOR_MODULO:       return type_check_binary_math_operator(ast_node, expected);
 
+			case node_type::EXPLICIT_CAST:         return type_check_explicit_cast(ast_node, parent, expected);
+
 			// literals
 			case node_type::NUMERICAL_LITERAL:     return type_check_numerical_literal(ast_node, expected);
 			case node_type::CHARACTER_LITERAL:     return type_check_character_literal(ast_node, parent, expected);
@@ -384,6 +386,14 @@ namespace sigma {
 		return target_type;
 	}
 
+	auto type_checker::explicit_type_cast(data_type original_type, data_type target_type, handle<node> target) const -> utility::result<void> {
+		if(original_type.pointer_level != target_type.pointer_level) {
+			return error::emit(error::code::INCOMPATIBLE_EXPLICIT_CAST, target->location, original_type.to_string(), target_type.to_string());
+		}
+
+		return SUCCESS;
+	}
+
 	auto type_checker::type_check_variable_access(handle<node> access_node, handle<node> parent, data_type expected) const -> utility::result<data_type> {
 		auto& access = access_node->get<ast_variable>();
 
@@ -419,5 +429,14 @@ namespace sigma {
 
 		// this value won't be used
 		return data_type::create_unknown();
+	}
+
+	auto type_checker::type_check_explicit_cast(handle<node> cast_node, handle<node> parent, data_type expected) -> utility::result<data_type> {
+		ast_cast& cast = cast_node->get<ast_cast>();
+
+		TRY(cast.original_type, type_check_node(cast_node->children[0], cast_node, data_type::create_unknown()));
+		TRY(explicit_type_cast(cast.original_type, cast.target_type, cast_node));
+
+		return implicit_type_cast(cast.target_type, expected, parent, cast_node);
 	}
 } // namespace sigma

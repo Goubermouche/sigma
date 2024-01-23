@@ -34,7 +34,8 @@ namespace sigma {
 			case node_type::OPERATOR_MODULO:       return translate_binary_math_operator(ast_node);
 
 			case node_type::CAST_EXTEND:
-			case node_type::CAST_TRUNCATE:         return translate_cast(ast_node);
+			case node_type::CAST_TRUNCATE:
+			case node_type::EXPLICIT_CAST:         return translate_cast(ast_node);
 
 			// literals
 			case node_type::NUMERICAL_LITERAL:     return translate_numerical_literal(ast_node);
@@ -212,8 +213,8 @@ namespace sigma {
 		const handle<ir::node> value_to_cast = translate_node(cast_node->children[0]);
 		const ir::data_type target_type = data_type_to_ir(cast.target_type);
 
-		if(cast.original_type.is_pointer() || cast.target_type.is_pointer()) {
-			NOT_IMPLEMENTED();
+		if(cast.target_type.is_pointer()) {
+			return value_to_cast; // just return the pointer
 		}
 
 		if(cast_node->type == node_type::CAST_TRUNCATE) {

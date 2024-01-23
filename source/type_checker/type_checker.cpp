@@ -22,19 +22,19 @@ namespace sigma {
 	auto type_checker::type_check_node(handle<node> ast_node, handle<node> parent, data_type expected) -> utility::result<data_type> {
 		switch(ast_node->type) {
 			// functions
-			case node_type::FUNCTION_DECLARATION:  return type_check_function_declaration(ast_node, expected);
+			case node_type::FUNCTION_DECLARATION:  return type_check_function_declaration(ast_node);
 			case node_type::FUNCTION_CALL:         return type_check_function_call(ast_node, parent, expected);
 			case node_type::NAMESPACE_DECLARATION: return type_check_namespace_declaration(ast_node, expected);
 
 			// control flow
-			case node_type::RETURN:                return type_check_return(ast_node, parent, expected);
-			case node_type::CONDITIONAL_BRANCH:    return type_check_conditional_branch(ast_node, expected);
-			case node_type::BRANCH:                return type_check_branch(ast_node, expected);
+			case node_type::RETURN:                return type_check_return(ast_node, expected);
+			case node_type::CONDITIONAL_BRANCH:    return type_check_conditional_branch(ast_node);
+			case node_type::BRANCH:                return type_check_branch(ast_node);
 
 			// variables
-			case node_type::VARIABLE_DECLARATION:  return type_check_variable_declaration(ast_node, expected);
+			case node_type::VARIABLE_DECLARATION:  return type_check_variable_declaration(ast_node);
 			case node_type::VARIABLE_ACCESS:       return type_check_variable_access(ast_node, parent, expected);
-			case node_type::VARIABLE_ASSIGNMENT:   return type_check_variable_assignment(ast_node, expected);
+			case node_type::VARIABLE_ASSIGNMENT:   return type_check_variable_assignment(ast_node);
 
 			// binary operators
 			case node_type::OPERATOR_ADD:
@@ -62,17 +62,16 @@ namespace sigma {
 		const ast_namespace& namespace_scope = variable_node->get<ast_namespace>();
 		m_context.semantics.push_namespace(namespace_scope.identifier_key);
 
+		// traverse inner statements (globals, functions, namespaces)
 		for(const handle<node> statement : variable_node->children) {
 			TRY(type_check_node(statement, variable_node));
 		}
 
 		m_context.semantics.pop_scope();
-		return data_type();
+		return data_type::create_unknown(); // not used
 	}
 
-	auto type_checker::type_check_function_declaration(handle<node> function_node, data_type expected) -> utility::result<data_type> {
-		SUPPRESS_C4100(expected);
-
+	auto type_checker::type_check_function_declaration(handle<node> function_node) -> utility::result<data_type> {
 		const ast_function& function = function_node->get<ast_function>();
 
 		// check if the function hasn't been declared before
@@ -99,12 +98,10 @@ namespace sigma {
 		m_context.semantics.pop_scope();
 
 		// this value won't be used
-		return data_type();
+		return data_type::create_unknown();
 	}
 
-	auto type_checker::type_check_variable_declaration(handle<node> variable_node, data_type expected) -> utility::result<data_type> {
-		SUPPRESS_C4100(expected);
-
+	auto type_checker::type_check_variable_declaration(handle<node> variable_node) -> utility::result<data_type> {
 		const ast_variable& variable = variable_node->get<ast_variable>();
 
 		// we cannot declare purely 'void' variables
@@ -129,42 +126,42 @@ namespace sigma {
 		}
 
 		// this value won't be used
-		return data_type();
+		return data_type::create_unknown();
 	}
 
 	auto type_checker::type_check_function_call(handle<node> call_node, handle<node> parent, data_type expected) -> utility::result<data_type> {
-		std::vector<data_type> parameter_data_types(call_node->children.get_size());
-		ast_function_call& function = call_node->get<ast_function_call>();
+		std::vector<data_type> params(call_node->children.get_size());
+		ast_function_call& call = call_node->get<ast_function_call>();
 
 		// type check all parameters and store their inherent type
-		for(u64 i = 0; i < parameter_data_types.size(); ++i) {
-			TRY(parameter_data_types[i], type_check_node(call_node->children[i], call_node));
-			ASSERT(parameter_data_types[i].base_type != data_type::UNKNOWN, "unknown parameter type detected");
+		for(u64 i = 0; i < params.size(); ++i) {
+			TRY(params[i], type_check_node(call_node->children[i], call_node));
+			ASSERT(params[i].base_type != data_type::UNKNOWN, "unknown parameter type detected");
 		}
 
 		// at this point the function signature is empty, we gotta find a valid one
-		TRY(function.signature, m_context.semantics.create_callee_signature(call_node, parameter_data_types));
+		TRY(call.signature, m_context.semantics.create_callee_signature(call_node, params));
 
+		// we've found a valid function, upcast all provided parameters to the expected types
 		u64 i = 0;
-		for(; i < function.signature.parameter_types.get_size(); ++i) {
-			implicit_type_cast(parameter_data_types[i], function.signature.parameter_types[i].type, call_node, call_node->children[i]);
+		for(; i < call.signature.parameter_types.get_size(); ++i) {
+			const handle<node> target = call_node->children[i];
+			implicit_type_cast(params[i], call.signature.parameter_types[i].type, call_node, target);
 		}
 
 		// type check var args
 		for(; i < call_node->children.get_size(); ++i) {
-			implicit_type_cast(parameter_data_types[i], { data_type::VAR_ARG_PROMOTE, 0 }, call_node, call_node->children[i]);
+			const handle<node> target = call_node->children[i];
+			implicit_type_cast(params[i], data_type::create_var_arg_promote(), call_node, target);
 		}
 
 		ASSERT(i == call_node->children.get_size(), "invalid parameter count");
 
 		// pass the return type along
-		TRY(const data_type result_type, implicit_type_cast(function.signature.return_type, expected, parent, call_node));
-		return result_type;
+		return implicit_type_cast(call.signature.return_type, expected, parent, call_node);
 	}
 
-	auto type_checker::type_check_return(handle<node> return_node, handle<node> parent, data_type expected) -> utility::result<data_type> {
-		SUPPRESS_C4100(parent);
-
+	auto type_checker::type_check_return(handle<node> return_node, data_type expected) -> utility::result<data_type> {
 		if (return_node->children.get_size() == 0) {
 			// return an empty
 			// verify that the parent function expects an empty return type
@@ -181,30 +178,20 @@ namespace sigma {
 		return data_type::create_unknown();
 	}
 
-	auto type_checker::type_check_conditional_branch(handle<node> branch_node, data_type expected) -> utility::result<data_type> {
-		SUPPRESS_C4100(expected);
+	auto type_checker::type_check_conditional_branch(handle<node> branch_node) -> utility::result<data_type> {
 		// type check the condition
-
 		TRY(type_check_node(branch_node->children[0], branch_node, data_type(data_type::BOOL, 0)));
 
 		// if children[1] exists, we have another branch node
 		if (branch_node->children[1]) {
 			// type check another conditional branch
-			if (branch_node->children[1]->type == node_type::CONDITIONAL_BRANCH) {
-				TRY(type_check_conditional_branch(branch_node->children[1], expected));
-			}
-			// type check a regular branch
-			else if (branch_node->children[1]->type == node_type::BRANCH) {
-				TRY(type_check_branch(branch_node->children[1], expected));
-			}
-			else {
-				PANIC("unexpected node type"); // unreachable
-			}
+			ASSERT(branch_node->children[1]->is_branch(), "cannot branch to a non-branch node");
+			TRY(type_check_node(branch_node->children[1], nullptr));
 		}
 
-		// type check inner statements
 		m_context.semantics.push_scope();
 
+		// type check inner statements
 		for (u64 i = 2; i < branch_node->children.get_size(); ++i) {
 			TRY(type_check_node(branch_node->children[i], branch_node));
 		}
@@ -215,9 +202,7 @@ namespace sigma {
 		return data_type::create_unknown();
 	}
 
-	auto type_checker::type_check_branch(handle<node> branch_node, data_type expected) -> utility::result<data_type> {
-		SUPPRESS_C4100(expected);
-
+	auto type_checker::type_check_branch(handle<node> branch_node) -> utility::result<data_type> {
 		m_context.semantics.push_scope();
 
 		// just type check all inner statements
@@ -327,13 +312,13 @@ namespace sigma {
 		return target_type;
 	}
 
-	auto type_checker::implicit_type_cast(data_type original_type, data_type target_type, handle<node> parent, handle<node> original) const -> utility::result<data_type> {
+	auto type_checker::implicit_type_cast(data_type original_type, data_type target_type, handle<node> parent, handle<node> target) const -> utility::result<data_type> {
 		if(target_type.is_unknown()) {
 			return original_type;
 		}
 
 		if(target_type.is_promote()) {
-			// promote the original type
+			// promote the target type
 			target_type = promote_type(original_type);
 			// use the new promoted type and (up)cast to it
 		}
@@ -345,7 +330,7 @@ namespace sigma {
 
 		// don't cast pointers implicitly
 		if(original_type.is_pointer() || target_type.is_pointer()) {
-			return error::emit(error::code::INVALID_IMPLICIT_CAST, original->location, original_type.to_string(), target_type.to_string());
+			return error::emit(error::code::INVALID_IMPLICIT_CAST, target->location, original_type.to_string(), target_type.to_string());
 		}
 
 		// target type is known at this point, try to cast to it
@@ -354,18 +339,18 @@ namespace sigma {
 
 		// no cast needed, probably a sign diff
 		if(original_byte_width == target_byte_width) {
-			warning::emit(warning::code::IMPLICIT_CAST, original->location, original_type.to_string(), target_type.to_string());
+			warning::emit(warning::code::IMPLICIT_CAST, target->location, original_type.to_string(), target_type.to_string());
 			return original_type;
 		}
 
 		ASSERT(parent, "parent is nulltr");
 
-		// insert a cast node between the original node and its parent node
+		// insert a cast node between the target node and its parent node
 		//  parent         parent
 		//    |              |
 		//    |      -->    cast
 		//    |              |
-		// original     	original
+		// target     	target
 
 		const bool truncate = original_byte_width > target_byte_width;
 		const handle<node> cast_node = m_context.syntax.ast.create_node<ast_cast>(truncate ? node_type::CAST_TRUNCATE : node_type::CAST_EXTEND, 1, nullptr);
@@ -373,21 +358,21 @@ namespace sigma {
 		cast.original_type = original_type;
 		cast.target_type = target_type;
 
-		// find the 'original' node in the parent
+		// find the 'target' node in the parent
 		u64 index_in_parent = 0;
 		for(; index_in_parent < parent->children.get_size(); index_in_parent++) {
-			if(parent->children[index_in_parent] == original) {
+			if(parent->children[index_in_parent] == target) {
 				break;
 			}
 		}
 
 		// replace this node by the relevant cast
 		parent->children[index_in_parent] = cast_node;
-		cast_node->children[0] = original;
+		cast_node->children[0] = target;
 
 		warning::emit(
 			truncate ? warning::code::IMPLICIT_TRUNCATION_CAST : warning::code::IMPLICIT_EXTENSION_CAST,
-			original->location,
+			target->location,
 			original_type.to_string(),
 			target_type.to_string()
 		);
@@ -396,30 +381,30 @@ namespace sigma {
 	}
 
 	auto type_checker::type_check_variable_access(handle<node> access_node, handle<node> parent, data_type expected) const -> utility::result<data_type> {
-		auto& accessed_variable = access_node->get<ast_variable>();
+		auto& access = access_node->get<ast_variable>();
 
 		// locate the variable
-		TRY(const auto variable_decl, m_context.semantics.find_variable(accessed_variable.identifier_key));
+		TRY(const auto variable, m_context.semantics.find_variable(access.identifier_key));
 
-		if(variable_decl == nullptr) {
-			const std::string& identifier_str = m_context.syntax.strings.get(accessed_variable.identifier_key);
+		// check if the variable exists
+		if(variable == nullptr) {
+			const std::string& identifier_str = m_context.syntax.strings.get(access.identifier_key);
 			return error::emit(error::code::UNKNOWN_VARIABLE, access_node->location, identifier_str);
 		}
 
 		// default to the declared type
-		TRY(accessed_variable.type, implicit_type_cast(variable_decl->type, expected, parent, access_node));
-		return accessed_variable.type; // return the type checked value
+		TRY(access.type, implicit_type_cast(variable->type, expected, parent, access_node));
+		return access.type; // return the type checked value
 	}
 
-	auto type_checker::type_check_variable_assignment(handle<node> assignment_node, data_type expected) -> utility::result<data_type> {
-		SUPPRESS_C4100(expected);
-
-		// locate the variable
+	auto type_checker::type_check_variable_assignment(handle<node> assignment_node) -> utility::result<data_type> {
+		// locate the variable we're assigning to
 		const handle<node> variable_node = assignment_node->children[0];
 		const auto& variable = variable_node->get<ast_variable>();
 
 		TRY(const auto declaration, m_context.semantics.find_variable(variable.identifier_key));
 
+		// check if the variable exists
 		if (declaration == nullptr) {
 			const std::string& identifier_str = m_context.syntax.strings.get(variable.identifier_key);
 			return error::emit(error::code::UNKNOWN_VARIABLE_ASSIGN, variable_node->location, identifier_str);

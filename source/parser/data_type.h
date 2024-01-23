@@ -26,6 +26,7 @@ namespace sigma {
 		data_type(data_type_base type, u8 pointer_level);
 
 		static auto create_unknown() -> data_type;
+		static auto create_var_arg_promote() -> data_type;
 		static auto create_bool(u8 pointer_level = 0) -> data_type;
 
 		static auto create_i8(u8 pointer_level = 0) -> data_type;

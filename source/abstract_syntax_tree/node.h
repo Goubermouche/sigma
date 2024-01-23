@@ -21,14 +21,15 @@ namespace sigma {
 
 			RETURN,
 
-			// children[1 - n] = statements
+			// children[1 ... n] = statements
 			BRANCH,
 			// children[0] = condition
-			// children[1 - n] = statements
+			// children[1 ... n] = statements
 			// whenever children[1] == nullptr, the branch goes back to the source control, otherwise
 			// it continues to the branch at children[1]
 			CONDITIONAL_BRANCH,
 
+			// children[0] = assigned value, if there is one
 			VARIABLE_DECLARATION,
 			VARIABLE_ACCESS,
 			// children[0] = variable
@@ -119,6 +120,8 @@ namespace sigma {
 	};
 
 	struct node : node_properties {
+		auto is_branch() const -> bool;
+
 		utility::slice<handle<node>, u16> children;
 
 		// metadata

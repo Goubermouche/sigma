@@ -22,6 +22,8 @@ namespace sigma {
 
 		template<typename extra_type>
 		auto create_node(node_type type, u64 child_count, handle<token_location> location) -> handle<node> {
+			ASSERT(child_count <= std::numeric_limits<u16>::max(), "cannot allocate more than {} children", std::numeric_limits<u16>::max());
+
 			const handle node_ptr = m_allocator.emplace<node>();
 
 			node_ptr->set_property(m_allocator.allocate_zero(sizeof(extra_type)));

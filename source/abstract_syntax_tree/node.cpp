@@ -67,4 +67,8 @@ namespace sigma {
 
 		return has_var_args < other.has_var_args;
   }
+
+  auto node::is_branch() const -> bool {
+    return type == node_type::BRANCH || node_type::CONDITIONAL_BRANCH;
+  }
 } // sigma

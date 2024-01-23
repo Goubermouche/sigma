@@ -7,13 +7,18 @@
 // -   namespace directives should probably be a part of the function signature? 
 
 // -   rework the AST
-// -   better retracing in function args
-// -   support for binop locations etc (location in create_node)
-// -   
-// -   
+// -   explicit casting ("cast<type>")
 
 i32 main() {
-	u8 value = 32 * 10 - 1;
-	printf("%d\n", value);
-  ret 0;
+	if(false) {
+		printf("1\n");
+	}
+  else if(true) {
+		printf("2\n");
+  }
+	else {
+		printf("3\n");
+	}
+
+	ret 0;
 }

@@ -12,6 +12,10 @@ namespace sigma {
 		return {};
 	}
 
+  auto data_type::create_var_arg_promote() -> data_type {
+		return { VAR_ARG_PROMOTE, 0 };
+  }
+
   auto data_type::create_bool(u8 pointer_level) -> data_type {
 		return { BOOL, pointer_level };
   }

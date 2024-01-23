@@ -17,17 +17,17 @@ namespace sigma {
 
 		auto type_check_node(handle<node> ast_node, handle<node> parent, data_type expected = {}) -> utility::result<data_type>;
 
-		auto type_check_function_declaration(handle<node> function_node, data_type expected) -> utility::result<data_type>;
-		auto type_check_variable_declaration(handle<node> variable_node, data_type expected) -> utility::result<data_type>;
+		auto type_check_function_declaration(handle<node> function_node) -> utility::result<data_type>;
+		auto type_check_variable_declaration(handle<node> variable_node) -> utility::result<data_type>;
 		auto type_check_namespace_declaration(handle<node> variable_node, data_type expected) -> utility::result<data_type>;
 
 		auto type_check_function_call(handle<node> call_node, handle<node> parent, data_type expected) -> utility::result<data_type>;
-		auto type_check_return(handle<node> return_node, handle<node> parent, data_type expected) -> utility::result<data_type>;
-		auto type_check_conditional_branch(handle<node> branch_node, data_type expected) -> utility::result<data_type>;
-		auto type_check_branch(handle<node> branch_node, data_type expected) -> utility::result<data_type>;
+		auto type_check_return(handle<node> return_node, data_type expected) -> utility::result<data_type>;
+		auto type_check_conditional_branch(handle<node> branch_node) -> utility::result<data_type>;
+		auto type_check_branch(handle<node> branch_node) -> utility::result<data_type>;
 		auto type_check_binary_math_operator(handle<node> operator_node, data_type expected) -> utility::result<data_type>;
 		auto type_check_variable_access(handle<node> access_node, handle<node> parent, data_type expected) const-> utility::result<data_type>;
-		auto type_check_variable_assignment(handle<node> assignment_node, data_type expected) -> utility::result<data_type>;
+		auto type_check_variable_assignment(handle<node> assignment_node) -> utility::result<data_type>;
 
 		auto type_check_numerical_literal(handle<node> literal_node, data_type expected) const-> utility::result<data_type>;
 		auto type_check_character_literal(handle<node> literal_node, handle<node> parent, data_type expected) const-> utility::result<data_type>;
@@ -35,7 +35,7 @@ namespace sigma {
 		auto type_check_bool_literal(handle<node> literal_node, handle<node> parent, data_type expected) const -> utility::result<data_type>;
 
 		static auto inherent_type_cast(data_type original_type, data_type target_type) -> data_type;
-		auto implicit_type_cast(data_type original_type, data_type target_type, handle<node> parent, handle<node> original) const -> utility::result<data_type>;
+		auto implicit_type_cast(data_type original_type, data_type target_type, handle<node> parent, handle<node> target) const -> utility::result<data_type>;
 	private:
 		backend_context& m_context;
 	};

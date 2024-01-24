@@ -103,8 +103,8 @@ namespace sigma {
 		auto emit_no_viable_overload_error(handle<node> function_node) -> utility::error;
 		auto emit_unknown_namespace_error(const std::vector<utility::string_table_key>& namespaces) const-> utility::error;
 
-		static auto calculate_parameter_cast_cost(const function_signature& signature, const std::vector<data_type>& parameter_types) -> u64;
-		static auto calculate_cast_cost(const data_type& provided, const data_type& required) -> u64;
+		static auto calculate_parameter_cast_cost(const function_signature& signature, const std::vector<data_type>& parameter_types) -> u16;
+		static auto calculate_cast_cost(const data_type& provided, const data_type& required) -> u16;
 	private:
 		backend_context& m_context;
 

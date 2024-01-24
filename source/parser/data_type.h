@@ -54,7 +54,16 @@ namespace sigma {
 		bool is_unsigned() const;
 
 		auto to_string() const -> std::string;
-		auto get_byte_width() const -> u64;
+
+		/**
+		 * \brief Calculates the byte width of the data type.
+		 *<p>
+		 *Note: even though the sizeof() operator returns a u64, we return a u16, since, realistically,
+		 *no type should overstep the that much memory.
+		 *</p>
+		 * \return 
+		 */
+		auto get_byte_width() const -> u16;
 
 		data_type_base base_type = UNKNOWN;
 		u8 pointer_level = 0;

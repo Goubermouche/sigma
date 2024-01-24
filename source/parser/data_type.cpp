@@ -96,7 +96,7 @@ namespace sigma {
 		return it->second + std::string(pointer_level, '*');
 	}
 
-	auto data_type::get_byte_width() const -> u64 {
+	auto data_type::get_byte_width() const -> u16 {
 		if(pointer_level > 0) {
 			return 8;
 		}
@@ -232,8 +232,8 @@ namespace sigma {
 			return a; // same type
 		}
 
-		const auto width_a = a.get_byte_width();
-		const auto width_b = b.get_byte_width();
+		const u16 width_a = a.get_byte_width();
+		const u16 width_b = b.get_byte_width();
 
 		if (width_a == width_b) {
 			// prefer signed over unsigned

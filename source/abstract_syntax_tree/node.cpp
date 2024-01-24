@@ -71,6 +71,6 @@ namespace sigma {
   }
 
   auto node::is_branch() const -> bool {
-    return type == node_type::BRANCH || node_type::CONDITIONAL_BRANCH;
+    return type == node_type::BRANCH || type == node_type::CONDITIONAL_BRANCH;
   }
 } // sigma

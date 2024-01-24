@@ -37,10 +37,10 @@ namespace sigma {
 		// backend
 		// at this point we want to merge all frontend contexts into the backend context
 		backend_context backend(frontend.syntax, m_description.target);
+		backend.syntax.print_ast();
 
 		// run analysis on the generated AST
 		TRY(type_checker::type_check(backend));
-		backend.syntax.print_ast();
 
 		TRY(ir_translator::translate(backend));
 

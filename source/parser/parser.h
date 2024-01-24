@@ -1,10 +1,17 @@
+// Root parser file, contains a basic recursive descent parser implementation
+//
+// -   Whenever we're parsing the first expected token is located at 'm_tokens.get_current_token()',
+//     after we're done parsing, we also have to prime the next token using 'm_tokens.next()'.
+// -   Two main parse 'operations'
+//     1.   Final operation - an operation which does not invoke any other operations
+//     2.   Operation group - a set of other operation groups / final operations. 
+
 #pragma once
 #include "parser/data_type.h"
 
 #include <tokenizer/token_buffer.h>
+#include <compiler/compiler/compilation_context.h>
 #include <abstract_syntax_tree/abstract_syntax_tree.h>
-
-#include "compiler/compiler/compilation_context.h"
 
 namespace sigma {
 	using namespace utility::types;
@@ -48,14 +55,14 @@ namespace sigma {
 		auto parse_type() -> utility::result<data_type>;
 		auto parse_function_call(const std::vector<utility::string_table_key>& namespaces) -> utility::result<handle<node>>;
 		auto parse_variable_declaration() -> utility::result<handle<node>>;
-		auto parse_variable_access() const-> utility::result<handle<node>>;
+		auto parse_variable_access() -> utility::result<handle<node>>;
 		auto parse_assignment() -> utility::result<handle<node>>;
 
 		// literals
-		auto parse_numerical_literal() const-> utility::result<handle<node>>;
-		auto parse_character_literal() const->utility::result<handle<node>>;
-		auto parse_string_literal() const-> utility::result<handle<node>>;
-		auto parse_bool_literal() const -> utility::result<handle<node>>;
+		auto parse_numerical_literal() -> utility::result<handle<node>>;
+		auto parse_character_literal() -> utility::result<handle<node>>;
+		auto parse_string_literal() -> utility::result<handle<node>>;
+		auto parse_bool_literal() -> utility::result<handle<node>>;
 
 		auto is_current_token_type() const -> bool;
 		auto peek_is_function_definition() -> bool;

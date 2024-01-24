@@ -1,3 +1,15 @@
+// Root type checker file, contains a basic type checker implementation
+// 
+// 1.   Traverse our AST from every root node (functions, globals, namespaces).
+// 2.   Resolve type relationships (expected vs. current).
+// 3.   Perform implicit casts whenever possible / return errors otherwise.
+//          - Implicit casts are inserted into the AST after it has been built, we store the parent
+//            node of every node in function parameters so that we can insert it before the node
+//            which is being extended/truncated.
+//
+// -    It might be a good idea to rework this with DP, so that we don't strain the stack so much,
+//      this could also improve performance and the overall syntax.
+
 #pragma once
 #include <abstract_syntax_tree/abstract_syntax_tree.h>
 

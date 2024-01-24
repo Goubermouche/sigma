@@ -9,9 +9,6 @@
 // -   add namespaces to error messages, whenever applicable (ie. x::y::test)
 // -   namespace directives should probably be a part of the function signature? 
 
-// -   **parser logic cleanup**
-//     -   m_current
-
 // -   cleanup ir gen alignment sizes (u64 vs u32 vs u16)
 
 i32 main() {
@@ -27,5 +24,6 @@ i32 main() {
 	printf("%d\n", sizeof(char));
 	printf("%d\n", sizeof(i32*));
 	printf("%d\n", sizeof(i32**));
+    
 	ret 0;
 }

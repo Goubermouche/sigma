@@ -34,8 +34,6 @@ As Sigma is currently under heavy development, it isn't ready for stable use, an
 -   Language features
     -   Implicit & explicit type casts
     -   Custom structured types
-    -   Namespaces / modules / some kind of way of separating large sections of code
-        - Namespaces are currently under dev (functions done, globals TBD)
 -   Future:
     -   Unified package manager
     -   Official GPU support via kernels

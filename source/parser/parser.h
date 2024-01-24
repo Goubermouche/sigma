@@ -2,9 +2,11 @@
 //
 // -   Whenever we're parsing the first expected token is located at 'm_tokens.get_current_token()',
 //     after we're done parsing, we also have to prime the next token using 'm_tokens.next()'.
-// -   Two main parse 'operations'
+// -   Three main parse 'operations'
 //     1.   Final operation - an operation which does not invoke any other operations
-//     2.   Operation group - a set of other operation groups / final operations. 
+//     2.   Operation group - a set of other operation groups / final operations.
+//     3.   Peek operations - looks ahead in the token list and determines if a token sequence is
+//          present or not. Does not throw errors
 
 #pragma once
 #include "parser/data_type.h"
@@ -64,13 +66,15 @@ namespace sigma {
 		auto parse_string_literal() -> utility::result<handle<node>>;
 		auto parse_bool_literal() -> utility::result<handle<node>>;
 
-		auto is_current_token_type() const -> bool;
+		// peeks 
 		auto peek_is_function_definition() -> bool;
 		auto peek_is_explicit_cast() const -> bool;
 		auto peek_is_function_call() const -> bool;
 		auto peek_is_variable_declaration() -> bool;
 		auto peek_is_namespace_access() -> bool;
-		auto peek_is_double_colon() -> bool;
+
+		// utility
+		auto is_current_token_type() const -> bool;
 
 		template<typename extra_type>
 		auto create_node(node_type type, u64 child_count, handle<token_location> location) const -> handle<node> {

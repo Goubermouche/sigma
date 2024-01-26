@@ -12,6 +12,14 @@ namespace sigma {
 		auto mangle_function_identifier(const function_signature& signature, const utility::string_table& string_table) -> std::string;
 		auto calculate_parameter_cast_cost(const function_signature& signature, const std::vector<data_type>& parameter_types) -> u16;
 		auto calculate_cast_cost(const data_type& provided, const data_type& required) -> u16;
+
+		/**
+		 * \brief Determine which cast should be used based on the \b original and \b target type.
+		 * \param original Original type (type before the cast)
+		 * \param target Target type (type after the cast)
+		 * \return True if the cast truncates the value, false otherwise.
+		 */
+		auto determine_cast_kind(const data_type& original, const data_type& target) -> bool; 
 	} // namespace detail 
 	
 	class semantic_context {

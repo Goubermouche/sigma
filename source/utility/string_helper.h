@@ -79,7 +79,7 @@ namespace utility::detail {
 				overflowed = stream.fail() || value > std::numeric_limits<type>::max() || value < std::numeric_limits<type>::min();
 				return static_cast<type>(value);
 			}
-			if constexpr (std::is_signed_v<type>) {
+			else if constexpr (std::is_signed_v<type>) {
 				// read directly
 				type value;
 				stream >> value;

@@ -52,9 +52,7 @@ namespace sigma {
 
 			// ast_cast
 			// children[0] = value
-			EXPLICIT_CAST,
-			CAST_TRUNCATE,
-			CAST_EXTEND,
+			CAST,
 
 			NUMERICAL_LITERAL,
 			CHARACTER_LITERAL,
@@ -123,12 +121,16 @@ namespace sigma {
 		data_type type;
 	};
 
+	struct ast_array_access {
+		i64 stride;
+	};
+
 	struct ast_namespace {
 		utility::string_table_key identifier_key;
 	};
 
 	using node_properties = utility::property<
-		ast_load, ast_sizeof, ast_function, ast_function_call, ast_literal, ast_variable, ast_bool_literal, ast_namespace, ast_cast
+		ast_array_access, ast_load, ast_sizeof, ast_function, ast_function_call, ast_literal, ast_variable, ast_bool_literal, ast_namespace, ast_cast
 	>;
 
 	struct sl {

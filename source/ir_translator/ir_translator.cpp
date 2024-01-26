@@ -40,9 +40,7 @@ namespace sigma {
 			case node_type::OPERATOR_DIVIDE:
 			case node_type::OPERATOR_MODULO:       return translate_binary_math_operator(ast_node);
 
-			case node_type::CAST_EXTEND:
-			case node_type::CAST_TRUNCATE:
-			case node_type::EXPLICIT_CAST:         return translate_cast(ast_node);
+			case node_type::CAST:                  return translate_cast(ast_node);
 
 			// literals
 			case node_type::NUMERICAL_LITERAL:     return translate_numerical_literal(ast_node);
@@ -191,10 +189,9 @@ namespace sigma {
 		const handle<ir::node> base = translate_node(access_node->children[0]);
 		const handle<ir::node> index = translate_node(access_node->children[1]);
 
-		// TODO: calculate this in the type checker
-		// should be the size of the type for 1D arrays
-		constexpr i64 stride = 4;
-		
+		// stride calculated by the type checker
+		const i64 stride = access_node->get<ast_array_access>().stride;
+
 		return m_context.builder.create_array_access(base, index, stride);
 	}
 
@@ -231,8 +228,7 @@ namespace sigma {
 			default: PANIC("unexpected node type '{}' received", operator_node->type.to_string());
 		}
 
-		NOT_IMPLEMENTED();
-		return nullptr;
+		return nullptr; // unreachable
 	}
 
 	auto ir_translator::translate_cast(handle<node> cast_node) -> handle<ir::node> {
@@ -245,22 +241,18 @@ namespace sigma {
 			return value_to_cast; // just return the pointer
 		}
 
-		if(cast_node->type == node_type::CAST_TRUNCATE) {
+		if(detail::determine_cast_kind(cast.original_type, cast.target_type)) {
+			// truncate the original value
 			return m_context.builder.create_truncate(value_to_cast, target_type);
 		}
 
-		if(cast_node->type == node_type::CAST_EXTEND) {
-			if(cast.original_type.is_signed()) {
-				// signed extend
-				return m_context.builder.create_sxt(value_to_cast, target_type);
-			}
-
-			// zero extend
-			return m_context.builder.create_zxt(value_to_cast, target_type);
+		if (cast.original_type.is_signed()) {
+			// sign-extend the original value
+			return m_context.builder.create_sxt(value_to_cast, target_type);
 		}
 
-		NOT_IMPLEMENTED();
-		return nullptr;
+		// zero-extend the original value
+		return m_context.builder.create_zxt(value_to_cast, target_type);
 	}
 
 	auto ir_translator::translate_function_call(handle<node> call_node) -> handle<ir::node> {
@@ -278,34 +270,37 @@ namespace sigma {
 	}
 
 	auto ir_translator::translate_load(handle<node> load_node) -> handle<ir::node> {
+		// translate the target value
 		const handle<ir::node> value_to_load = translate_node(load_node->children[0]);
+
+		// get the type and alignment of the load
 		const data_type& type_to_load = load_node->get<ast_load>().type;
 		const ir::data_type ir_type = detail::data_type_to_ir(type_to_load);
 		const u16 alignment = type_to_load.get_byte_width();
 
-		const handle<ir::node> load = m_context.builder.create_load(value_to_load, ir_type, alignment, false);
-
-		return load;
+		// create the load operation
+		return m_context.builder.create_load(value_to_load, ir_type, alignment, false);
 	}
 
 	auto ir_translator::translate_variable_access(handle<node> access_node) const -> handle<ir::node> {
 		const auto& accessed_variable = access_node->get<ast_variable>();
 
-		const auto variable = m_context.semantics.get_variable(accessed_variable.identifier_key);
-		return variable->value;
+		// just return the variable value, at this point everything was handled by the type checker
+		return m_context.semantics.get_variable(accessed_variable.identifier_key)->value;
 	}
 
 	auto ir_translator::translate_variable_assignment(handle<node> assignment_node) -> handle<ir::node> {
-		const auto& var = assignment_node->children[0]->get<ast_variable>();
-		const u16 alignment = var.type.get_byte_width();
+		const auto& variable = assignment_node->children[0]->get<ast_variable>();
+		const u16 alignment = variable.type.get_byte_width();
 
-		const handle<ir::node> value = translate_node(assignment_node->children[1]);
+		// get the value we want to store
+		const handle<ir::node> value_to_store = translate_node(assignment_node->children[1]);
 
 		// get the storage location
 		const handle<node> storage_node = assignment_node->children[0];
 		const handle<ir::node> storage = translate_node(storage_node);
 
-		m_context.builder.create_store(storage, value, alignment, false);
+		m_context.builder.create_store(storage, value_to_store, alignment, false);
 		return nullptr;
 	}
 

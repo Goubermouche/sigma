@@ -348,7 +348,7 @@ namespace sigma {
 
 			m_tokens.next();
 
-			array_access = create_node<utility::empty_property>(
+			array_access = create_node<ast_array_access>(
 				node_type::ARRAY_ACCESS, index_expressions.size() + 1, location
 			);
 
@@ -659,7 +659,7 @@ namespace sigma {
 		m_tokens.next(); // prime the next token (probably a SEMICOLON)
 
 		// create the cast node
-		const handle<node> cast_node = create_node<ast_cast>(node_type::EXPLICIT_CAST, 1, location);
+		const handle<node> cast_node = create_node<ast_cast>(node_type::CAST, 1, location);
 		cast_node->children[0] = value_to_cast;
 
 		ast_cast& cast = cast_node->get<ast_cast>();
@@ -898,7 +898,6 @@ namespace sigma {
 
 		// parse an array access
 		if(m_tokens.get_current_token() == token_type::LEFT_BRACKET) {
-			const handle<token_location> location = m_tokens.get_current_token_location();
 			std::vector<handle<node>> index_expressions;
 
 			while (true) {
@@ -916,7 +915,7 @@ namespace sigma {
 
 			m_tokens.next();
 
-			const handle<node> array_access = create_node<utility::empty_property>(
+			const handle<node> array_access = create_node<ast_array_access>(
 				node_type::ARRAY_ACCESS, index_expressions.size() + 1, location
 			);
 

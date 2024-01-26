@@ -1113,7 +1113,6 @@ namespace sigma::ir {
 	}
 
 	auto x64_architecture::select_memory_access_instruction(codegen_context& context, handle<node> n, reg dst, i32 store_op, i32 src) -> handle<instruction> {
-		std::cout << "ENTER" << std::endl;
 		const bool has_second_in = store_op < 0 && src >= 0;
 		i32 offset = 0;
 
@@ -1147,7 +1146,6 @@ namespace sigma::ir {
 			}
 
 			index = allocate_node_register(context, n).id;
-			std::cout << "STRIDE: " << stride << '\n';
 
 			if(stride == 1) { 
 				// no scaling required
@@ -1162,7 +1160,10 @@ namespace sigma::ir {
 					}
 
 					// we can't fit this into an LEA, might as well just do a shift
-					context.append_instruction(create_rri(context, instruction::type::SHL, I64_TYPE, dst, index, static_cast<i32>(scale)));
+					context.append_instruction(create_rri(
+						context, instruction::type::SHL, I64_TYPE, dst, static_cast<reg::id_type>(index), static_cast<i32>(scale)
+					));
+
 					index = dst.id;
 					scale = static_cast<memory_scale>(0);
 				}
@@ -1173,7 +1174,10 @@ namespace sigma::ir {
 					dst = allocate_virtual_register(context, nullptr, I64_TYPE);
 				}
 
-				context.append_instruction(create_rri(context, instruction::type::IMUL, I64_TYPE, dst, index, stride));
+				context.append_instruction(create_rri(
+					context, instruction::type::IMUL, I64_TYPE, dst, static_cast<reg::id_type>(index), static_cast<i32>(stride)
+				));
+
 				index = dst.id;
 			}
 
@@ -1191,8 +1195,6 @@ namespace sigma::ir {
 		else {
 			base = allocate_node_register(context, n);
 		}
-
-		std::cout << "EXIT" << std::endl;
 
 		// compute the base
 		if(store_op < 0) {

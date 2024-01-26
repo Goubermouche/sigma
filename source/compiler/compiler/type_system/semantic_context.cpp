@@ -109,6 +109,13 @@ namespace sigma {
 
 			return INVALID_CAST_COST; // invalid operation
 		}
+
+		auto determine_cast_kind(const data_type& original, const data_type& target) -> bool {
+			const u16 original_byte_width = original.get_byte_width();
+			const u16 target_byte_width   = target.get_byte_width();
+
+			return original_byte_width > target_byte_width;
+		}
 	} // namespace detail
 
   semantic_context::semantic_context(backend_context& context) : m_context(context) {

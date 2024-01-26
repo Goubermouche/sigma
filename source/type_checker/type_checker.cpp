@@ -26,7 +26,9 @@ namespace sigma {
 			case node_type::FUNCTION_CALL:         return type_check_function_call(ast_node, parent, expected);
 
 			case node_type::NAMESPACE_DECLARATION: return type_check_namespace_declaration(ast_node, expected);
-			case node_type::EXPLICIT_CAST:         return type_check_explicit_cast(ast_node, parent, expected);
+
+			// since implicit casts are not type checked we can interpret these casts a being explicit
+			case node_type::CAST:                  return type_check_explicit_cast(ast_node, parent, expected);
 			case node_type::SIZEOF:                return type_check_sizeof(ast_node, parent, expected);
 
 			// control flow
@@ -38,10 +40,10 @@ namespace sigma {
 			case node_type::VARIABLE_DECLARATION:  return type_check_variable_declaration(ast_node);
 			case node_type::VARIABLE_ASSIGNMENT:   return type_check_variable_assignment(ast_node);
 
+			case node_type::LOAD:                  return type_check_load(ast_node, expected);
+
 			case node_type::VARIABLE_ACCESS:       return type_check_variable_access(ast_node, parent, expected);
 			case node_type::ARRAY_ACCESS:          return type_check_array_access(ast_node, parent, expected);
-
-			case node_type::LOAD:                  return type_check_load(ast_node, parent, expected);
 
 			// binary operators
 			case node_type::OPERATOR_ADD:
@@ -249,10 +251,14 @@ namespace sigma {
 			TRY(type_check_node(access_node->children[i + 1], access_node, data_type::create_u64()));
 		}
 
-		return array_type.create_access(static_cast<u8>(access_level));
+		// implicitly cast the type, more of a sanity check
+		TRY(const data_type accessed_type, implicit_type_cast(array_type.create_access(static_cast<u8>(access_level)), expected, parent, access_node));
+		access_node->get<ast_array_access>().stride = accessed_type.get_byte_width();
+
+		return accessed_type;
 	}
 
-	auto type_checker::type_check_load(handle<node> load_node, handle<node> parent, data_type expected) -> utility::result<data_type> {
+	auto type_checker::type_check_load(handle<node> load_node, data_type expected) -> utility::result<data_type> {
 		TRY(const data_type load_type, type_check_node(load_node->children[0], load_node, expected));
 		load_node->get<ast_load>().type = load_type;
 		return load_type;
@@ -382,10 +388,10 @@ namespace sigma {
 		//    |              |
 		//    |      -->    cast
 		//    |              |
-		// target     	target
+		// target     	  target
 
 		const bool truncate = original_byte_width > target_byte_width;
-		const handle<node> cast_node = m_context.syntax.ast.create_node<ast_cast>(truncate ? node_type::CAST_TRUNCATE : node_type::CAST_EXTEND, 1, nullptr);
+		const handle<node> cast_node = m_context.syntax.ast.create_node<ast_cast>(node_type::CAST, 1, nullptr);
 		ast_cast& cast = cast_node->get<ast_cast>();
 		cast.original_type = original_type;
 		cast.target_type = target_type;
@@ -432,7 +438,7 @@ namespace sigma {
 			return error::emit(error::code::UNKNOWN_VARIABLE, access_node->location, identifier_str);
 		}
 
-		// default to the declared type
+		// default to the expected type
 		TRY(access.type, implicit_type_cast(variable->type, expected, parent, access_node));
 		return access.type; // return the type checked value
 	}

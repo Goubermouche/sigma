@@ -1,11 +1,12 @@
 #include "builder.h"
+#include <utility/string_helper.h>
 
 // #define DEBUG_PRINT_BUILDER
 
 #ifdef DEBUG_PRINT_BUILDER
-#define DEBUG_PRINT(__message) utility::console::print("{}\n", (__message))
+#define DEBUG_PRINT(__fmt, ...) utility::console::print("{}\n", std::format(__fmt, ##__VA_ARGS__))
 #else
-#define DEBUG_PRINT(__message)
+#define DEBUG_PRINT(__fmt, ...)
 #endif
 
 namespace sigma::ir {
@@ -68,22 +69,22 @@ namespace sigma::ir {
 	}
 
 	auto builder::create_local(u16 size, u16 alignment) const -> handle<node> {
-		DEBUG_PRINT("creating local");
+		DEBUG_PRINT("creating local size: {} alignment: {}", size, alignment);
 		return get_insert_point_checked()->create_local(size, alignment);
 	}
 
 	auto builder::create_string(const std::string& value) const -> handle<node> {
-		DEBUG_PRINT("creating string");
+		DEBUG_PRINT("creating string '{}'", utility::detail::escape_string(value));
 		return m_target.create_string(get_insert_point_checked(), value);
 	}
 
 	auto builder::create_signed_integer(i64 value, u8 bit_width) const -> handle<node> {
-		DEBUG_PRINT("creating signed integer");
+		DEBUG_PRINT("creating signed integer i{} {}", bit_width, value);
 		return get_insert_point_checked()->create_signed_integer(value, bit_width);
 	}
 
 	auto builder::create_unsigned_integer(u64 value, u8 bit_width) const -> handle<node> {
-		DEBUG_PRINT("creating unsigned integer");
+		DEBUG_PRINT("creating unsigned integer u{} {}", bit_width, value);
 		return get_insert_point_checked()->create_unsigned_integer(value, bit_width);
 	}
 
@@ -123,17 +124,17 @@ namespace sigma::ir {
 	}
 
 	void builder::create_store(handle<node> destination, handle<node> value, u32 alignment, bool is_volatile) const {
-		DEBUG_PRINT("creating store");
+		DEBUG_PRINT("creating store alignment: {}", alignment);
 		get_insert_point_checked()->create_store(destination, value, alignment, is_volatile);
 	}
 
   auto builder::create_array_access(handle<node> base, handle<node> index, i64 stride) const  -> handle<node> { 
-		DEBUG_PRINT("creating array access");
+		DEBUG_PRINT("creating array access stride: {}", stride);
 		return get_insert_point_checked()->create_array_access(base, index, stride);
   }
 
 	auto builder::create_load(handle<node> value_to_load, data_type data_type, u32 alignment, bool is_volatile) const -> handle<node> {
-		DEBUG_PRINT("creating load");
+		DEBUG_PRINT("creating load type: {} alignment: {}", data_type.to_string(), alignment);
 		return get_insert_point_checked()->create_load(value_to_load, data_type, alignment, is_volatile);
 	}
 

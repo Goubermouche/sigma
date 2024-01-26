@@ -45,8 +45,6 @@ namespace sigma {
 		// compile the generated IR module
 		backend.module.compile();
 
-		std::cout << "compilation finished\n";
-
 		//emit as an object file
 		if(m_description.emit == OBJECT) {
 			const filepath object_path = get_object_file_path();

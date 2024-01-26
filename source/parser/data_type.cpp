@@ -52,6 +52,12 @@ namespace sigma {
 		return { U64, pointer_level };
 	}
 
+	auto data_type::create_access(u8 level) const -> data_type {
+		ASSERT(pointer_level - level >= 0, "cannot create a negative pointer level");
+		const u8 new_pointer_level = pointer_level - level;
+		return { base_type, new_pointer_level };
+	}
+
 	bool data_type::operator==(data_type other) const {
 		return base_type == other.base_type && pointer_level == other.pointer_level;
 	}

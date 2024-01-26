@@ -36,6 +36,9 @@ namespace sigma {
 		 */
 		void translate_branch(handle<node> branch_node, handle<ir::node> exit_control);
 
+		auto translate_array_access(handle<node> access_node) -> handle<ir::node>;
+		auto translate_variable_access(handle<node> access_node) const->handle<ir::node>;
+
 		auto translate_numerical_literal(handle<node> numerical_literal_node) const->handle<ir::node>;
 		auto translate_character_literal(handle<node> character_literal_node) const->handle<ir::node>;
 		auto translate_string_literal(handle<node> string_literal_node) const->handle<ir::node>;
@@ -44,8 +47,8 @@ namespace sigma {
 		auto translate_binary_math_operator(handle<node> operator_node) -> handle<ir::node>;
 		auto translate_cast(handle<node> cast_node) -> handle<ir::node>;
 		auto translate_function_call(handle<node> call_node) -> handle<ir::node>;
+		auto translate_load(handle<node> load_node) -> handle<ir::node>;
 
-		auto translate_variable_access(handle<node> access_node) const-> handle<ir::node>;
 		auto translate_variable_assignment(handle<node> assignment_node) -> handle<ir::node>;
 
 		auto literal_to_ir(const ast_literal& literal) const-> handle<ir::node>;

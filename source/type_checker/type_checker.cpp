@@ -36,8 +36,12 @@ namespace sigma {
 
 			// variables
 			case node_type::VARIABLE_DECLARATION:  return type_check_variable_declaration(ast_node);
-			case node_type::VARIABLE_ACCESS:       return type_check_variable_access(ast_node, parent, expected);
 			case node_type::VARIABLE_ASSIGNMENT:   return type_check_variable_assignment(ast_node);
+
+			case node_type::VARIABLE_ACCESS:       return type_check_variable_access(ast_node, parent, expected);
+			case node_type::ARRAY_ACCESS:          return type_check_array_access(ast_node, parent, expected);
+
+			case node_type::LOAD:                  return type_check_load(ast_node, parent, expected);
 
 			// binary operators
 			case node_type::OPERATOR_ADD:
@@ -45,7 +49,6 @@ namespace sigma {
 			case node_type::OPERATOR_MULTIPLY:
 			case node_type::OPERATOR_DIVIDE:
 			case node_type::OPERATOR_MODULO:       return type_check_binary_math_operator(ast_node, expected);
-
 
 			// literals
 			case node_type::NUMERICAL_LITERAL:     return type_check_numerical_literal(ast_node, expected);
@@ -234,6 +237,27 @@ namespace sigma {
 		return larger_type;
 	}
 
+	auto type_checker::type_check_array_access(handle<node> access_node, handle<node> parent, data_type expected) -> utility::result<data_type> {
+		// number of indices / number of 'levels'
+		const u16 access_level = access_node->children.get_size() - 1;
+
+		// type check the storage location
+		TRY(const data_type array_type, type_check_node(access_node->children[0], access_node));
+
+		// type check index expressions
+		for(u16 i = 0; i < access_level; ++i) {
+			TRY(type_check_node(access_node->children[i + 1], access_node, data_type::create_u64()));
+		}
+
+		return array_type.create_access(static_cast<u8>(access_level));
+	}
+
+	auto type_checker::type_check_load(handle<node> load_node, handle<node> parent, data_type expected) -> utility::result<data_type> {
+		TRY(const data_type load_type, type_check_node(load_node->children[0], load_node, expected));
+		load_node->get<ast_load>().type = load_type;
+		return load_type;
+	}
+
 	auto type_checker::type_check_numerical_literal(handle<node> literal_node, data_type expected) const -> utility::result<data_type> {
 		auto& literal = literal_node->get<ast_literal>();
 
@@ -414,20 +438,12 @@ namespace sigma {
 	}
 
 	auto type_checker::type_check_variable_assignment(handle<node> assignment_node) -> utility::result<data_type> {
-		// locate the variable we're assigning to
-		const handle<node> variable_node = assignment_node->children[0];
-		const auto& variable = variable_node->get<ast_variable>();
+		// type check the storage location
+		const handle<node> storage_node = assignment_node->children[0];
+		TRY(const data_type storage_type, type_check_node(storage_node, assignment_node, data_type::create_unknown()));
 
-		TRY(const auto declaration, m_context.semantics.find_variable(variable.identifier_key));
-
-		// check if the variable exists
-		if (declaration == nullptr) {
-			const std::string& identifier_str = m_context.syntax.strings.get(variable.identifier_key);
-			return error::emit(error::code::UNKNOWN_VARIABLE_ASSIGN, variable_node->location, identifier_str);
-		}
-
-		// type check the assigned value against the declared type
-		TRY(type_check_node(assignment_node->children[1], assignment_node, declaration->type));
+		// type check the assigned value against the storage type
+		TRY(type_check_node(assignment_node->children[1], assignment_node, storage_type));
 
 		// this value won't be used
 		return data_type::create_unknown();

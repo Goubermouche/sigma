@@ -219,6 +219,16 @@ namespace sigma::ir {
 		return load;
 	}
 
+  auto function::create_array_access(handle<node> base, handle<node> index, i64 stride) -> handle<node> {
+		const handle<node> array = create_node<ir::array>(node::type::ARRAY_ACCESS, 3);
+		array->dt = PTR_TYPE;
+		array->inputs[1] = base;
+		array->inputs[2] = index;
+
+		array->get<ir::array>().stride = stride;
+		return array;
+  }
+
 	auto function::create_local(u32 size, u32 alignment) -> handle<node> {
 		const handle<node> local = create_node<ir::local>(node::type::LOCAL, 1);
 

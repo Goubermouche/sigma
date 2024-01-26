@@ -24,9 +24,14 @@ namespace sigma {
 			case node_type::RETURN:                translate_return(ast_node); break;
 			case node_type::CONDITIONAL_BRANCH:    translate_conditional_branch(ast_node, nullptr); break;
 
+			// variables
 			case node_type::VARIABLE_DECLARATION:  translate_variable_declaration(ast_node); break;
-			case node_type::VARIABLE_ACCESS:       return translate_variable_access(ast_node);
 			case node_type::VARIABLE_ASSIGNMENT:   return translate_variable_assignment(ast_node);
+
+			case node_type::LOAD:                  return translate_load(ast_node);
+
+			case node_type::VARIABLE_ACCESS:       return translate_variable_access(ast_node);
+			case node_type::ARRAY_ACCESS:          return translate_array_access(ast_node);
 
 			// operators:
 			case node_type::OPERATOR_ADD:
@@ -179,6 +184,20 @@ namespace sigma {
 		m_context.builder.create_branch(exit_control);
 	}
 
+	auto ir_translator::translate_array_access(handle<node> access_node) -> handle<ir::node> {
+		ASSERT(access_node->children.get_size() - 1 == 1, "implement support for accessing multiple array levels");
+
+		// get the storage location
+		const handle<ir::node> base = translate_node(access_node->children[0]);
+		const handle<ir::node> index = translate_node(access_node->children[1]);
+
+		// TODO: calculate this in the type checker
+		// should be the size of the type for 1D arrays
+		constexpr i64 stride = 4;
+		
+		return m_context.builder.create_array_access(base, index, stride);
+	}
+
 	auto ir_translator::translate_numerical_literal(handle<node> numerical_literal_node) const -> handle<ir::node> {
 		return literal_to_ir(numerical_literal_node->get<ast_literal>());
 	}
@@ -220,7 +239,7 @@ namespace sigma {
 		const ast_cast& cast = cast_node->get<ast_cast>();
 
 		const handle<ir::node> value_to_cast = translate_node(cast_node->children[0]);
-		const ir::data_type target_type = data_type_to_ir(cast.target_type);
+		const ir::data_type target_type = detail::data_type_to_ir(cast.target_type);
 
 		if(cast.target_type.is_pointer()) {
 			return value_to_cast; // just return the pointer
@@ -258,26 +277,35 @@ namespace sigma {
 		return call_result;
 	}
 
+	auto ir_translator::translate_load(handle<node> load_node) -> handle<ir::node> {
+		const handle<ir::node> value_to_load = translate_node(load_node->children[0]);
+		const data_type& type_to_load = load_node->get<ast_load>().type;
+		const ir::data_type ir_type = detail::data_type_to_ir(type_to_load);
+		const u16 alignment = type_to_load.get_byte_width();
+
+		const handle<ir::node> load = m_context.builder.create_load(value_to_load, ir_type, alignment, false);
+
+		return load;
+	}
+
 	auto ir_translator::translate_variable_access(handle<node> access_node) const -> handle<ir::node> {
 		const auto& accessed_variable = access_node->get<ast_variable>();
 
-		const handle<ir::node> load = m_context.semantics.create_load(
-			accessed_variable.identifier_key, 
-			data_type_to_ir(accessed_variable.type),
-			accessed_variable.type.get_byte_width()
-		);
-
-		ASSERT(load, "unknown variable referenced");
-		return load;
+		const auto variable = m_context.semantics.get_variable(accessed_variable.identifier_key);
+		return variable->value;
 	}
 
 	auto ir_translator::translate_variable_assignment(handle<node> assignment_node) -> handle<ir::node> {
 		const auto& var = assignment_node->children[0]->get<ast_variable>();
-		const handle<ir::node> value = translate_node(assignment_node->children[1]);
 		const u16 alignment = var.type.get_byte_width();
 
-		// assign the variable
-		m_context.semantics.create_store(var.identifier_key, value, alignment);
+		const handle<ir::node> value = translate_node(assignment_node->children[1]);
+
+		// get the storage location
+		const handle<node> storage_node = assignment_node->children[0];
+		const handle<ir::node> storage = translate_node(storage_node);
+
+		m_context.builder.create_store(storage, value, alignment, false);
 		return nullptr;
 	}
 

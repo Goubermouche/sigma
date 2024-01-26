@@ -73,9 +73,7 @@ namespace sigma::ir {
 		 */
 		template<typename extra_type = utility::empty_property>
 		auto create_instruction_operand() const -> handle<instruction_operand> {
-			void* allocation = function->allocator.allocate_zero(sizeof(instruction_operand));
-			const handle ptr = static_cast<instruction_operand*>(allocation);
-
+			const handle ptr = function->allocator.allocate_zero<instruction_operand>();
 			ptr->set_property(function->allocator.allocate_zero(sizeof(extra_type)));
 			return ptr;
 		}

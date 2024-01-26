@@ -4,10 +4,14 @@
 namespace sigma::ir {
 	struct codegen_context;
 
+	struct global_operand {
+		
+	};
+
 	/**
 	 * \brief Instruction operand, automatically compares down to its own underlying type.
 	 */
-	struct instruction_operand : utility::property<absolute, label, handle<symbol>> {
+	struct instruction_operand : utility::property<absolute, label, handle<symbol>, global_operand> {
 		struct type {
 			enum underlying {
 				NONE,
@@ -32,6 +36,7 @@ namespace sigma::ir {
 		};
 
 		static auto create_label(const codegen_context& context, u64 target) -> handle<instruction_operand>;
+		static auto create_global(const codegen_context& context, handle<symbol> symbol, i32 disp) -> handle<instruction_operand>;
 		static auto create_imm(const codegen_context& context,i32 imm) -> handle<instruction_operand>;
 		static auto create_abs(const codegen_context& context,u64 abs) -> handle<instruction_operand>;
 

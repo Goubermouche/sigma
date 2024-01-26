@@ -33,9 +33,16 @@ namespace sigma {
 			// children[0] = assigned value, if there is one
 			VARIABLE_DECLARATION,
 			VARIABLE_ACCESS,
-			// children[0] = variable
+			// storage = assigned value
+			// children[0] = storage
 			// children[1] = assigned value
 			VARIABLE_ASSIGNMENT,
+			// storage[index expressions]
+			// children[0] = storage
+			// children[1 ... n] = index expressions
+			ARRAY_ACCESS,
+			// children[0] = value to load
+			LOAD,
 
 			OPERATOR_ADD,
 			OPERATOR_SUBTRACT,
@@ -112,12 +119,16 @@ namespace sigma {
 		data_type type;
 	};
 
+	struct ast_load {
+		data_type type;
+	};
+
 	struct ast_namespace {
 		utility::string_table_key identifier_key;
 	};
 
 	using node_properties = utility::property<
-		ast_sizeof, ast_function, ast_function_call, ast_literal, ast_variable, ast_bool_literal, ast_namespace, ast_cast
+		ast_load, ast_sizeof, ast_function, ast_function_call, ast_literal, ast_variable, ast_bool_literal, ast_namespace, ast_cast
 	>;
 
 	struct sl {

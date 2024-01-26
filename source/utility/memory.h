@@ -31,4 +31,6 @@ namespace utility {
 	[[nodiscard]] auto fits_into_32_bits(u64 value) -> bool;
 
 	[[nodiscard]] auto pop_count(u32 value) -> u8;
+	[[nodiscard]] auto ffs(i32 value) -> u8;
+	[[nodiscard]] auto is_power_of_two(u64 value) -> bool;
 }

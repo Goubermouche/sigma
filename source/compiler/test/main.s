@@ -11,6 +11,15 @@
 
 // -   cleanup ir gen alignment sizes (u64 vs u32 vs u16)
 
+// -   unify parse_identifier_expression and parse_identifier_statement
+// -   heap corruption issue when indexing non-first element 
+
 i32 main() {
+	i32* memory = cast<i32*>(malloc(100));
+	memory[0] = 2222;
+	memory[1] = 3333;
+
+	printf("%d, %d\n", memory[0], memory[1]);
+
 	ret 0;
 }

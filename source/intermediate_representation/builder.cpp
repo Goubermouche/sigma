@@ -127,6 +127,11 @@ namespace sigma::ir {
 		get_insert_point_checked()->create_store(destination, value, alignment, is_volatile);
 	}
 
+  auto builder::create_array_access(handle<node> base, handle<node> index, i64 stride) const  -> handle<node> { 
+		DEBUG_PRINT("creating array access");
+		return get_insert_point_checked()->create_array_access(base, index, stride);
+  }
+
 	auto builder::create_load(handle<node> value_to_load, data_type data_type, u32 alignment, bool is_volatile) const -> handle<node> {
 		DEBUG_PRINT("creating load");
 		return get_insert_point_checked()->create_load(value_to_load, data_type, alignment, is_volatile);

@@ -13,8 +13,8 @@ namespace sigma {
 		RIGHT_PARENTHESIS, // )
 		LEFT_BRACE,        // {
 		RIGHT_BRACE,       // }
-		// LEFT_BRACKET,      // [
-		// RIGHT_BRACKET,     // ]
+		LEFT_BRACKET,      // [
+		RIGHT_BRACKET,     // ]
 		COMMA,             // ,
 		SEMICOLON,         // ;
 		SINGLE_QUOTE,      // '

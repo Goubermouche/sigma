@@ -1,4 +1,5 @@
 #include "x64.h"
+#include "abstract_syntax_tree/node.h"
 #include "intermediate_representation/codegen/instruction.h"
 #include "intermediate_representation/codegen/instruction.h"
 #include "intermediate_representation/codegen/instruction.h"
@@ -1111,47 +1112,98 @@ namespace sigma::ir {
 		}
 	}
 
-	auto x64_architecture::select_memory_access_instruction(codegen_context& context, handle<node> target, reg destination, i32 store_op, i32 source) -> handle<instruction> {
-		const bool has_second_in = store_op < 0 && source >= 0;
+	auto x64_architecture::select_memory_access_instruction(codegen_context& context, handle<node> n, reg dst, i32 store_op, i32 src) -> handle<instruction> {
+		std::cout << "ENTER" << std::endl;
+		const bool has_second_in = store_op < 0 && src >= 0;
 		i32 offset = 0;
-		constexpr auto scale = memory_scale::x1;
-		constexpr i32 index = -1;
+
+		if (n == node::type::SYMBOL) {
+			NOT_IMPLEMENTED();
+		}
+		else if (n == node::type::VARIADIC_START) {
+			NOT_IMPLEMENTED();
+		}
+		else if (n == node::type::MEMBER_ACCESS) {
+			NOT_IMPLEMENTED();
+		}
+
+		auto scale = memory_scale::x1;
+		i32 index = -1;
+
+		if(n == node::type::ARRAY_ACCESS) {
+			const handle<node> base = n->inputs[1];
+			i64 stride = n->get<array>().stride;
+
+			n->use_node(context);
+			n = n->inputs[2];
+
+			i32 x = 0;
+			if (n->get_type() == node::type::SHL && try_for_imm32(n->inputs[2], 64, x)) {
+				n->use_node(context);
+				n->inputs[2]->use_node(context);
+
+				n = n->inputs[1];
+				stride *= 1ull << x;
+			}
+
+			index = allocate_node_register(context, n).id;
+			std::cout << "STRIDE: " << stride << '\n';
+
+			if(stride == 1) { 
+				// no scaling required
+			}
+			else if (utility::is_power_of_two(stride)) {
+				scale = static_cast<memory_scale>(utility::ffs(static_cast<i32>(stride)) - 1);
+
+				if(static_cast<i32>(scale) > 3) {
+					if(!dst.is_valid()) {
+						ASSERT(store_op >= 0, "panic");
+						dst = allocate_virtual_register(context, nullptr, I64_TYPE);
+					}
+
+					// we can't fit this into an LEA, might as well just do a shift
+					context.append_instruction(create_rri(context, instruction::type::SHL, I64_TYPE, dst, index, static_cast<i32>(scale)));
+					index = dst.id;
+					scale = static_cast<memory_scale>(0);
+				}
+			}
+			else {
+				if(!dst.is_valid()) {
+					ASSERT(store_op >= 0, "panic");
+					dst = allocate_virtual_register(context, nullptr, I64_TYPE);
+				}
+
+				context.append_instruction(create_rri(context, instruction::type::IMUL, I64_TYPE, dst, index, stride));
+				index = dst.id;
+			}
+
+			n = base;
+		}
+
 		reg base;
 
-		if (target == node::type::SYMBOL) {
-			NOT_IMPLEMENTED();
-		}
-		else if (target == node::type::VARIADIC_START) {
-			NOT_IMPLEMENTED();
-		}
-		else if (target == node::type::MEMBER_ACCESS) {
-			NOT_IMPLEMENTED();
-		}
+		if (n == node::type::LOCAL) {
+			n->use_node(context);
 
-		if (target == node::type::ARRAY_ACCESS) {
-			NOT_IMPLEMENTED();
-		}
-
-		if (target == node::type::LOCAL) {
-			target->use_node(context);
-
-			offset += context.get_stack_slot(target);
+			offset += context.get_stack_slot(n);
 			base = static_cast<u8>(x64::gpr::RBP);
 		}
 		else {
-			base = allocate_node_register(context, target);
+			base = allocate_node_register(context, n);
 		}
+
+		std::cout << "EXIT" << std::endl;
 
 		// compute the base
-		if (store_op < 0) {
-			if (has_second_in) {
-				return create_rrm(context, instruction::type::LEA, target->dt, destination, static_cast<u8>(source), base, index, scale, offset);
+		if(store_op < 0) {
+			if(has_second_in) {
+				return create_rrm(context, instruction::type::LEA, n->dt, dst, static_cast<u8>(src), base, index, scale, offset);
 			}
 
-			return create_rm(context, instruction::type::LEA, target->dt, destination, base, index, scale, offset);
+			return create_rm(context, instruction::type::LEA, n->dt, dst, base, index, scale, offset);
 		}
 
-		return create_mr(context, static_cast<instruction::type::underlying>(store_op), target->dt, base, index, scale, offset, source);
+		return create_mr(context, static_cast<instruction::type::underlying>(store_op), n->dt, base, index, scale, offset, src);
 	}
 
 	auto x64_architecture::select_array_access_instruction(codegen_context& context, handle<node> target, reg destination, i32 store_op, i32 source) -> handle<instruction> {

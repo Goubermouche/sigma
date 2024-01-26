@@ -6,6 +6,111 @@
 #define INVALID_CAST_COST 1000
 
 namespace sigma {
+	namespace detail {
+		auto data_type_to_ir(data_type type) -> ir::data_type {
+			if (type.pointer_level == 1) {
+				return PTR_TYPE;
+			}
+
+			ASSERT(type.pointer_level <= 1, "invalid pointer level");
+
+			switch (type.base_type) {
+				case data_type::BOOL: return BOOL_TYPE;
+				case data_type::VOID: return VOID_TYPE;
+				case data_type::I8:
+				case data_type::U8:   return I8_TYPE;
+				case data_type::I16:
+				case data_type::U16:  return I16_TYPE;
+				case data_type::CHAR:
+				case data_type::I32:
+				case data_type::U32:  return I32_TYPE;
+				case data_type::I64:
+				case data_type::U64:  return I64_TYPE;
+				default: NOT_IMPLEMENTED();
+			}
+
+			return {};
+		}
+
+		auto signature_to_ir(const function_signature& signature, const utility::string_table& string_table) -> ir::function_signature {
+			std::vector<ir::data_type> parameters(signature.parameter_types.get_size());
+
+			for (u64 i = 0; i < signature.parameter_types.get_size(); ++i) {
+				// at this point we can get rid of the name
+				parameters[i] = data_type_to_ir(signature.parameter_types[i].type);
+			}
+
+			ir::function_signature ir_signature{
+				.identifier = mangle_function_identifier(signature, string_table),
+				.parameters = parameters,
+				.returns = { data_type_to_ir(signature.return_type) },
+				.has_var_args = signature.has_var_args
+			};
+
+			return ir_signature;
+		}
+
+		auto mangle_function_identifier(const function_signature& signature, const utility::string_table& string_table) -> std::string {
+			// TODO: names are a bit sus right now, longer names don't appear ot be stored correctly in
+			//       object files (see COFF & ELF)
+
+			// don't rename the main function
+			if (string_table.get(signature.identifier_key) == "main") {
+				return "main";
+			}
+
+			static u64 counter = 0;
+			return "f" + std::to_string(counter++);
+		}
+
+		auto calculate_parameter_cast_cost(const function_signature& signature, const std::vector<data_type>& parameter_types) -> u16 {
+			// NOTE: right now, we just traverse all non-var arg type and match compare against those, it's
+			//       probably a good idea to add a heavy-ish cost (~200) to var-arg functions, as we want to
+			//       prefer non var-arg functions by default (?)
+
+			u16 total_cost = 0;
+
+			for (u64 i = 0; i < signature.parameter_types.get_size(); ++i) {
+				// calculate the cost for this parameter
+				total_cost += calculate_cast_cost(parameter_types[i], signature.parameter_types[i].type);
+			}
+
+			return total_cost;
+		}
+
+		auto calculate_cast_cost(const data_type& provided, const data_type& required) -> u16 {
+			// if types are the same, no cast is needed
+			if (provided.base_type == required.base_type) {
+				return 0;
+			}
+
+			if (provided.pointer_level != required.pointer_level) {
+				return INVALID_CAST_COST; // invalid operation
+			}
+
+			const u16 provided_width = provided.get_byte_width();
+			const u16 required_width = required.get_byte_width();
+
+			// handle casting between integer types
+			if (provided.is_integral() && required.is_integral()) {
+				if (provided_width < required_width) {
+					// widening cast, lower cost
+					return 1 * (required_width - provided_width);
+				}
+
+				if (provided_width > required_width) {
+					// narrowing cast, higher cost
+					return 2 * (provided_width - required_width);
+				}
+
+				// the types aren't equal, but their bit width is - sign difference
+				return 15;
+			}
+
+			return INVALID_CAST_COST; // invalid operation
+		}
+	} // namespace detail
+
   semantic_context::semantic_context(backend_context& context) : m_context(context) {
 		m_global_scope = allocate_namespace();
 		reset_active_scope();
@@ -201,8 +306,8 @@ namespace sigma {
 					if (
 						signature.parameter_types.get_size() == parameter_types.size() ||
 						(signature.parameter_types.get_size() < parameter_types.size() && signature.has_var_args)
-						) {
-						u16 cost = calculate_parameter_cast_cost(signature, parameter_types);
+					) {
+						u16 cost = detail::calculate_parameter_cast_cost(signature, parameter_types);
 
 						if(cost < INVALID_CAST_COST) {
 							candidates.emplace_back(signature, cost);
@@ -251,12 +356,12 @@ namespace sigma {
 
 		find_parent_namespace()->external_functions[signature.identifier_key][signature] = {
 			.ir_function = m_context.module.create_external(identifier, ir::linkage::SO_LOCAL),
-			.ir_signature = signature_to_ir(signature, m_context.syntax.strings)
+			.ir_signature = detail::signature_to_ir(signature, m_context.syntax.strings)
 		};
 	}
 
 	void semantic_context::declare_local_function(const function_signature& signature) const {
-		const ir::function_signature ir_signature = signature_to_ir(signature, m_context.syntax.strings);
+		const ir::function_signature ir_signature = detail::signature_to_ir(signature, m_context.syntax.strings);
 		const	handle<ir::function> function = m_context.builder.create_function(ir_signature, ir::linkage::PUBLIC);
 
 		find_parent_namespace()->local_functions.at(signature.identifier_key).at(signature) = function;
@@ -343,108 +448,5 @@ namespace sigma {
 
 	auto semantic_context::emit_unknown_namespace_error(const std::vector<utility::string_table_key>& namespaces) const -> utility::error {
 		return error::emit(error::code::UNKNOWN_NAMESPACE, construct_namespace_chain(namespaces).str());
-	}
-
-	auto semantic_context::calculate_parameter_cast_cost(const function_signature& signature, const std::vector<data_type>& parameter_types) -> u16 {
-		// NOTE: right now, we just traverse all non-var arg type and match compare against those, it's
-		//       probably a good idea to add a heavy-ish cost (~200) to var-arg functions, as we want to
-		//       prefer non var-arg functions by default (?)
-
-		u16 total_cost = 0;
-
-		for (u64 i = 0; i < signature.parameter_types.get_size(); ++i) {
-			// calculate the cost for this parameter
-			total_cost += calculate_cast_cost(parameter_types[i], signature.parameter_types[i].type);
-		}
-
-		return total_cost;
-	}
-
-	auto semantic_context::calculate_cast_cost(const data_type& provided, const data_type& required) -> u16 {
-		// if types are the same, no cast is needed
-		if (provided.base_type == required.base_type) {
-			return 0;
-		}
-
-		if (provided.pointer_level != required.pointer_level) {
-			return INVALID_CAST_COST; // invalid operation
-		}
-
-		const u16 provided_width = provided.get_byte_width();
-		const u16 required_width = required.get_byte_width();
-
-		// handle casting between integer types
-		if (provided.is_integral() && required.is_integral()) {
-			if (provided_width < required_width) {
-				// widening cast, lower cost
-				return 1 * (required_width - provided_width);
-			}
-
-			if (provided_width > required_width) {
-				// narrowing cast, higher cost
-				return 2 * (provided_width - required_width);
-			}
-
-			// the types aren't equal, but their bit width is - sign difference
-			return 15;
-		}
-
-		return INVALID_CAST_COST; // invalid operation
-	}
-
-	auto data_type_to_ir(data_type type) -> ir::data_type {
-		if (type.pointer_level == 1) {
-			return PTR_TYPE;
-		}
-
-		ASSERT(type.pointer_level <= 1, "invalid pointer level");
-
-		switch (type.base_type) {
-			case data_type::BOOL: return BOOL_TYPE;
-			case data_type::VOID: return VOID_TYPE;
-			case data_type::I8:
-			case data_type::U8:   return I8_TYPE;
-			case data_type::I16:
-			case data_type::U16:  return I16_TYPE;
-			case data_type::CHAR:
-			case data_type::I32:
-			case data_type::U32:  return I32_TYPE;
-			case data_type::I64:
-			case data_type::U64:  return I64_TYPE;
-			default: NOT_IMPLEMENTED();
-		}
-
-		return {};
-	}
-
-	auto signature_to_ir(const function_signature& signature, const utility::string_table& string_table) -> ir::function_signature {
-		std::vector<ir::data_type> parameters(signature.parameter_types.get_size());
-
-		for (u64 i = 0; i < signature.parameter_types.get_size(); ++i) {
-			// at this point we can get rid of the name
-			parameters[i] = data_type_to_ir(signature.parameter_types[i].type);
-		}
-
-		ir::function_signature ir_signature{
-			.identifier = mangle_function_identifier(signature, string_table),
-			.parameters = parameters,
-			.returns = { data_type_to_ir(signature.return_type) },
-			.has_var_args = signature.has_var_args
-		};
-
-		return ir_signature;
-	}
-
-	auto mangle_function_identifier(const function_signature& signature, const utility::string_table& string_table) -> std::string {
-		// TODO: names are a bit sus right now, longer names don't appear ot be stored correctly in
-		//       object files (see COFF & ELF)
-
-		// don't rename the main function
-		if (string_table.get(signature.identifier_key) == "main") {
-			return "main";
-		}
-
-		static u64 counter = 0;
-		return "f" + std::to_string(counter++);
 	}
 } // namespace sigma

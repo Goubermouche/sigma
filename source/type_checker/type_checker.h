@@ -42,7 +42,9 @@ namespace sigma {
 		auto type_check_binary_math_operator(handle<node> operator_node, data_type expected) -> utility::result<data_type>;
 		auto type_check_explicit_cast(handle<node> cast_node, handle<node> parent, data_type expected) -> utility::result<data_type>;
 		auto type_check_variable_access(handle<node> access_node, handle<node> parent, data_type expected) const-> utility::result<data_type>;
+		auto type_check_array_access(handle<node> access_node, handle<node> parent, data_type expected) -> utility::result<data_type>;
 		auto type_check_variable_assignment(handle<node> assignment_node) -> utility::result<data_type>;
+		auto type_check_load(handle<node> load_node, handle<node> parent, data_type expected) -> utility::result<data_type>;
 
 		auto type_check_numerical_literal(handle<node> literal_node, data_type expected) const-> utility::result<data_type>;
 		auto type_check_character_literal(handle<node> literal_node, handle<node> parent, data_type expected) const-> utility::result<data_type>;

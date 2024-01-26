@@ -6,10 +6,14 @@
 namespace sigma {
 	struct backend_context;
 
-	auto data_type_to_ir(data_type type) -> ir::data_type;
-	auto signature_to_ir(const function_signature& signature, const utility::string_table& string_table) -> ir::function_signature;
-	auto mangle_function_identifier(const function_signature& signature, const utility::string_table& string_table) -> std::string;
-
+	namespace detail {
+		auto data_type_to_ir(data_type type) -> ir::data_type;
+		auto signature_to_ir(const function_signature& signature, const utility::string_table& string_table) -> ir::function_signature;
+		auto mangle_function_identifier(const function_signature& signature, const utility::string_table& string_table) -> std::string;
+		auto calculate_parameter_cast_cost(const function_signature& signature, const std::vector<data_type>& parameter_types) -> u16;
+		auto calculate_cast_cost(const data_type& provided, const data_type& required) -> u16;
+	} // namespace detail 
+	
 	class semantic_context {
 	public:
 		semantic_context(backend_context& context);
@@ -102,9 +106,6 @@ namespace sigma {
 
 		auto emit_no_viable_overload_error(handle<node> function_node) -> utility::error;
 		auto emit_unknown_namespace_error(const std::vector<utility::string_table_key>& namespaces) const-> utility::error;
-
-		static auto calculate_parameter_cast_cost(const function_signature& signature, const std::vector<data_type>& parameter_types) -> u16;
-		static auto calculate_cast_cost(const data_type& provided, const data_type& required) -> u16;
 	private:
 		backend_context& m_context;
 

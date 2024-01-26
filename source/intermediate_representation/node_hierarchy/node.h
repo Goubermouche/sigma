@@ -15,7 +15,8 @@ namespace sigma::ir {
 
 	using node_properties = utility::property<
 		binary_integer_op, memory_access, projection, integer, region, branch,
-		local, floating_point_32, floating_point_64, handle<symbol>, function_call
+		local, floating_point_32, floating_point_64, handle<symbol>, function_call,
+		array
 	>;
 
 	/**
@@ -147,15 +148,15 @@ namespace sigma::ir {
 				SUB,
 				MUL,
 
-				LSH,
-				RSH,
-				RAS,
-				LR,
-				RR,
+				SHL,
+				SHR,
+				SAR,
+				ROL,
+				ROR,
 				UDIV,
-				DIV,
+				SDIV,
 				UMOD,
-				MOD,
+				SMOD,
 
 				// float arithmetic
 				FADD,

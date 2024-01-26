@@ -56,6 +56,14 @@ namespace sigma::ir {
 		return operand;
 	}
 
+  auto instruction_operand::create_global(const codegen_context& context, handle<symbol> sym, i32 disp) -> handle<instruction_operand> {
+		const handle<instruction_operand> operand = context.create_instruction_operand<handle<symbol>>();
+		operand->set_type(type::GLOBAL);
+		operand->immediate = disp;
+		operand->get<handle<symbol>>() = sym;
+		return operand;
+  }
+
 	auto instruction_operand::create_imm(const codegen_context& context, i32 imm) -> handle<instruction_operand> {
 		const handle<instruction_operand> operand = context.create_instruction_operand();
 		operand->set_type(type::IMM);

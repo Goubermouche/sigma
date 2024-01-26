@@ -39,6 +39,8 @@ namespace sigma {
 		static auto create_u32(u8 pointer_level = 0) -> data_type;
 		static auto create_u64(u8 pointer_level = 0) -> data_type;
 
+		auto create_access(u8 level) const -> data_type;
+
 		bool operator==(data_type other) const;
 		bool operator<(data_type other) const;
 

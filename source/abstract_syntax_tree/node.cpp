@@ -21,6 +21,8 @@ namespace sigma {
 			case VARIABLE_DECLARATION:  return "VARIABLE_DECLARATION";
 			case VARIABLE_ACCESS:       return "VARIABLE_ACCESS";
 			case VARIABLE_ASSIGNMENT:   return "VARIABLE_ASSIGNMENT";
+			case ARRAY_ACCESS:          return "ARRAY_ACCESS";
+			case LOAD:                  return "LOAD";
 
 			case OPERATOR_ADD:          return "OPERATOR_ADD";
 			case OPERATOR_SUBTRACT:     return "OPERATOR_SUBTRACT";

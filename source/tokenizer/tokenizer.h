@@ -67,6 +67,8 @@ namespace sigma {
 			{ ")" ,  token_type::RIGHT_PARENTHESIS },
 			{ "{" ,  token_type::LEFT_BRACE        },
 			{ "}" ,  token_type::RIGHT_BRACE       },
+			{ "[" ,  token_type::LEFT_BRACKET      },
+			{ "]" ,  token_type::RIGHT_BRACKET     },
 			{ "," ,  token_type::COMMA             },
 			{ ";" ,  token_type::SEMICOLON         },
 			{ "'" ,  token_type::SINGLE_QUOTE      },

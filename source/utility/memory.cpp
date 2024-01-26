@@ -65,4 +65,21 @@ namespace utility {
 	auto pop_count(u32 value) -> u8 {
 		return static_cast<u8>(std::bitset<32>(value).count());
 	}
+
+  auto ffs(i32 value) -> u8 {
+		if(value == 0) {
+			return 0;
+		}
+
+		u8 pos = 1;
+		while(!(value & 1)) {
+			value >>= 1;
+			pos++;
+		}
+
+		return pos;
+  }
+	auto is_power_of_two(u64 value) -> bool {
+		return (value & (value - 1)) == 0;
+	}
 }

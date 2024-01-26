@@ -44,6 +44,8 @@ namespace sigma {
 			case token_type::RIGHT_PARENTHESIS:   return ")";
 			case token_type::LEFT_BRACE:          return "{";
 			case token_type::RIGHT_BRACE:         return "}";
+			case token_type::LEFT_BRACKET:        return "[";
+			case token_type::RIGHT_BRACKET:       return "]";
 			case token_type::COMMA:               return ",";
 			case token_type::SEMICOLON:           return ";";
 			case token_type::SINGLE_QUOTE:        return "'";

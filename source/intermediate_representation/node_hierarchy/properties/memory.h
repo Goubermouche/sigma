@@ -12,4 +12,8 @@ namespace sigma::ir {
 	struct memory_access {
 		u32 alignment; // in bytes
 	};
+
+	struct array {
+		i64 stride;
+	};
 }

@@ -49,6 +49,7 @@ namespace sigma {
 		auto parse_if_statement() -> utility::result<handle<node>>;
 
 		auto parse_return_statement() -> utility::result<handle<node>>;
+		auto parse_identifier_expression() -> utility::result<handle<node>>;
 		auto parse_identifier_statement() -> utility::result<handle<node>>;
 		auto parse_negative_expression() -> utility::result<handle<node>>;
 		auto parse_explicit_cast() -> utility::result<handle<node>>;

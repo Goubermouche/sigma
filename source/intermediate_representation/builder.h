@@ -163,6 +163,8 @@ namespace sigma::ir {
 		 */
 		void create_store(handle<node> destination, handle<node> value, u32 alignment, bool is_volatile) const;
 
+		auto create_array_access(handle<node> base, handle<node> index, i64 stride) const -> handle<node>;
+
 		/**
 		 * \brief Retrieves the current insert point.
 		 * \return Current insert point.

@@ -60,7 +60,7 @@ namespace utility::detail {
 		static_assert(
 			std::is_integral_v<type> || std::is_floating_point_v<type>,
 			"'type' must be integral or floating point"
-			);
+		);
 
 		std::istringstream stream(str);
 		overflowed = false;
@@ -72,19 +72,26 @@ namespace utility::detail {
 			return value;
 		}
 		else if constexpr (std::is_integral_v<type>) {
+			// i8's and u8's have to be treated separately
+			if constexpr (std::is_same_v<type, i8> || std::is_same_v<type, u8>) {
+				i32 value;
+				stream >> value;
+				overflowed = stream.fail() || value > std::numeric_limits<type>::max() || value < std::numeric_limits<type>::min();
+				return static_cast<type>(value);
+			}
 			if constexpr (std::is_signed_v<type>) {
 				// read directly
 				type value;
 				stream >> value;
-				overflowed = stream.fail() || value > std::numeric_limits<type>::max() || value < std::numeric_limits<type>::lowest();
+				overflowed = stream.fail() || value > std::numeric_limits<type>::max() || value < std::numeric_limits<type>::min();
 				return value;
 			}
 			else {
 				// read into a larger signed type
-				i64 temp;
-				stream >> temp;
-				overflowed = stream.fail() || temp < 0 || static_cast<u64>(temp) > std::numeric_limits<type>::max();
-				return static_cast<type>(temp);
+				i64 value;
+				stream >> value;
+				overflowed = stream.fail() || value < 0 || static_cast<u64>(value) > std::numeric_limits<type>::max();
+				return static_cast<type>(value);
 			}
 		}
 		else if constexpr (std::is_floating_point_v<type>) {

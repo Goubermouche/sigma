@@ -304,19 +304,7 @@ namespace sigma {
 		// expect '(NAMESPACES) IDENTIFIER (ARRAY_ACCESS)'
 
 		// parse a namespace, if there is one
-		std::vector<utility::string_table_key> namespaces;
-
-		while(peek_is_namespace_access()) {
-			// expect 'IDENTIFIER ::'
-			EXPECT_CURRENT_TOKEN(token_type::IDENTIFIER);
-			namespaces.push_back(m_tokens.get_current().symbol_key);
-
-			// sanity checks 
-			EXPECT_NEXT_TOKEN(token_type::COLON);
-			EXPECT_NEXT_TOKEN(token_type::COLON);
-
-			m_tokens.next(); // prime the next token
-		}
+		TRY(const std::vector<utility::string_table_key> namespaces, parse_namespaces());
 
 		if (peek_is_function_call()) {
 			// return early and don't allow assignments to function results (yet)
@@ -330,32 +318,11 @@ namespace sigma {
 
 		// parse an array access
 		if(m_tokens.get_current_token() == token_type::LEFT_BRACKET) {
-			const handle<token_location> location = m_tokens.get_current_token_location();
-			std::vector<handle<node>> index_expressions;
-
-			while(true) {
-				m_tokens.next(); // prime the first expression token
-
-				TRY(const handle<node> index, parse_expression());
-				index_expressions.push_back(index);
-
-				if(m_tokens.get_current_token() == token_type::RIGHT_BRACKET) {
-					break;
-				}
-
-				EXPECT_CURRENT_TOKEN(token_type::COMMA);
-			}
-
-			m_tokens.next();
-
-			array_access = create_node<ast_array_access>(
-				node_type::ARRAY_ACCESS, index_expressions.size() + 1, location
-			);
-
-			std::memcpy(array_access->children.get_data() + 1, index_expressions.data(), index_expressions.size() * sizeof(handle<node>));
+			TRY(array_access, parse_array_access());
 		}
 		
 		// check if we're assigning anything
+		// TODO: replace by a store op
 		if (m_tokens.get_current_token() == token_type::EQUALS_SIGN) {
 			TRY(const handle<node> assignment_node, parse_assignment());
 
@@ -493,6 +460,36 @@ namespace sigma {
 
 		m_tokens.next();
 		return variable_node;
+	}
+
+	auto parser::parse_array_access() -> utility::result<handle<node>> {
+		// parses an array index access
+		// expect '[index expression]'
+		// ie. [12, 3, index]
+		const handle<token_location> location = m_tokens.get_current_token_location();
+		std::vector<handle<node>> index_expressions;
+
+		while(true) {
+			m_tokens.next(); // prime the first expression token
+
+			TRY(const handle<node> index, parse_expression());
+			index_expressions.push_back(index);
+
+			if(m_tokens.get_current_token() == token_type::RIGHT_BRACKET) {
+				break;
+			}
+
+			EXPECT_CURRENT_TOKEN(token_type::COMMA);
+		}
+
+		const handle<node> array_access = create_node<ast_array_access>(
+			node_type::ARRAY_ACCESS, index_expressions.size() + 1, location
+		);
+
+		std::memcpy(array_access->children.get_data() + 1, index_expressions.data(), index_expressions.size() * sizeof(handle<node>));
+
+		m_tokens.next(); // prime the next token
+		return array_access;
 	}
 
 	auto parser::parse_sizeof() -> utility::result<handle<node>> {
@@ -796,6 +793,27 @@ namespace sigma {
 		return token == token_type::IDENTIFIER || token.is_type();
 	}
 
+	auto parser::parse_namespaces() -> utility::result<std::vector<utility::string_table_key>> {
+		// parses a set of contiguous namespace directives
+		// expect 'NAMESPACE :: ... NAMESPACE ::'
+
+		std::vector<utility::string_table_key> namespaces;
+
+		while (peek_is_namespace_access()) {
+			// expect 'IDENTIFIER ::'
+			EXPECT_CURRENT_TOKEN(token_type::IDENTIFIER);
+			namespaces.push_back(m_tokens.get_current().symbol_key);
+
+			// sanity checks 
+			EXPECT_NEXT_TOKEN(token_type::COLON);
+			EXPECT_NEXT_TOKEN(token_type::COLON);
+
+			m_tokens.next(); // prime the next token
+		}
+
+		return std::move(namespaces);
+	}
+
 	auto parser::peek_is_function_definition() -> bool {
 		// peek 'TYPE IDENTIFIER ('
 		// starting token is presumably the beginning token of a type
@@ -867,23 +885,11 @@ namespace sigma {
 	}
 
 	auto parser::parse_identifier_expression() -> utility::result<handle<node>> {
-		// parse a statement which starts with an identifier
+		// parse an expression which starts with an identifier
 		// expect '(NAMESPACES) IDENTIFIER (ARRAY_ACCESS)'
 
 		// parse a namespace, if there is one
-		std::vector<utility::string_table_key> namespaces;
-
-		while (peek_is_namespace_access()) {
-			// expect 'IDENTIFIER ::'
-			EXPECT_CURRENT_TOKEN(token_type::IDENTIFIER);
-			namespaces.push_back(m_tokens.get_current().symbol_key);
-
-			// sanity checks 
-			EXPECT_NEXT_TOKEN(token_type::COLON);
-			EXPECT_NEXT_TOKEN(token_type::COLON);
-
-			m_tokens.next(); // prime the next token
-		}
+		TRY(const std::vector<utility::string_table_key> namespaces, parse_namespaces());
 
 		if (peek_is_function_call()) {
 			// return early and don't allow assignments to function results (yet)
@@ -898,28 +904,7 @@ namespace sigma {
 
 		// parse an array access
 		if(m_tokens.get_current_token() == token_type::LEFT_BRACKET) {
-			std::vector<handle<node>> index_expressions;
-
-			while (true) {
-				m_tokens.next(); // prime the first expression token
-
-				TRY(const handle<node> index, parse_expression());
-				index_expressions.push_back(index);
-
-				if (m_tokens.get_current_token() == token_type::RIGHT_BRACKET) {
-					break;
-				}
-
-				EXPECT_CURRENT_TOKEN(token_type::COMMA);
-			}
-
-			m_tokens.next();
-
-			const handle<node> array_access = create_node<ast_array_access>(
-				node_type::ARRAY_ACCESS, index_expressions.size() + 1, location
-			);
-
-			std::memcpy(array_access->children.get_data() + 1, index_expressions.data(), index_expressions.size() * sizeof(handle<node>));
+			TRY(const handle<node> array_access, parse_array_access());
 
 			array_access->children[0] = variable;
 			load_node->children[0] = array_access;

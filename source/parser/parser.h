@@ -49,17 +49,21 @@ namespace sigma {
 		auto parse_if_statement() -> utility::result<handle<node>>;
 
 		auto parse_return_statement() -> utility::result<handle<node>>;
-		auto parse_identifier_expression() -> utility::result<handle<node>>;
-		auto parse_identifier_statement() -> utility::result<handle<node>>;
-		auto parse_negative_expression() -> utility::result<handle<node>>;
 		auto parse_explicit_cast() -> utility::result<handle<node>>;
 		auto parse_sizeof() -> utility::result<handle<node>>;
+
+		auto parse_negative_expression() -> utility::result<handle<node>>;
+
+		auto parse_identifier_statement() -> utility::result<handle<node>>;
+		auto parse_identifier_expression() -> utility::result<handle<node>>;
 
 		auto parse_type() -> utility::result<data_type>;
 		auto parse_function_call(const std::vector<utility::string_table_key>& namespaces) -> utility::result<handle<node>>;
 		auto parse_variable_declaration() -> utility::result<handle<node>>;
-		auto parse_variable_access() -> utility::result<handle<node>>;
 		auto parse_assignment() -> utility::result<handle<node>>;
+
+		auto parse_variable_access() -> utility::result<handle<node>>;
+		auto parse_array_access() -> utility::result<handle<node>>;
 
 		// literals
 		auto parse_numerical_literal() -> utility::result<handle<node>>;
@@ -76,6 +80,7 @@ namespace sigma {
 
 		// utility
 		auto is_current_token_type() const -> bool;
+		auto parse_namespaces() -> utility::result<std::vector<utility::string_table_key>>;
 
 		template<typename extra_type>
 		auto create_node(node_type type, u64 child_count, handle<token_location> location) const -> handle<node> {

@@ -251,11 +251,10 @@ namespace sigma {
 			TRY(type_check_node(access_node->children[i + 1], access_node, data_type::create_u64()));
 		}
 
-		// implicitly cast the type, more of a sanity check
-		TRY(const data_type accessed_type, implicit_type_cast(array_type.create_access(static_cast<u8>(access_level)), expected, parent, access_node));
-		access_node->get<ast_array_access>().stride = accessed_type.get_byte_width();
+		access_node->get<ast_array_access>().base_type = array_type;
 
-		return accessed_type;
+		// implicitly cast the type, more of a sanity check
+		return implicit_type_cast(array_type.create_access(static_cast<u8>(access_level)), expected, parent, access_node);
 	}
 
 	auto type_checker::type_check_load(handle<node> load_node, data_type expected) -> utility::result<data_type> {
@@ -419,9 +418,9 @@ namespace sigma {
 	}
 
 	auto type_checker::explicit_type_cast(data_type original_type, data_type target_type, handle<node> target) const -> utility::result<void> {
-		if(original_type.pointer_level != target_type.pointer_level) {
-			return error::emit(error::code::INCOMPATIBLE_EXPLICIT_CAST, target->location, original_type.to_string(), target_type.to_string());
-		}
+		// if(original_type.pointer_level != target_type.pointer_level) {
+		// 	return error::emit(error::code::INCOMPATIBLE_EXPLICIT_CAST, target->location, original_type.to_string(), target_type.to_string());
+		// }
 
 		return SUCCESS;
 	}

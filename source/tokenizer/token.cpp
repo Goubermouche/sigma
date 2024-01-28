@@ -95,6 +95,7 @@ namespace sigma {
 			case token_type::CHARACTER_LITERAL:   return "CHARACTER_LITERAL";
 			case token_type::BOOL_LITERAL_TRUE:   return "BOOL_LITERAL_TRUE";
 			case token_type::BOOL_LITERAL_FALSE:  return "BOOL_LITERAL_FALSE";
+			case token_type::NULL_LITERAL:							return "NULL";
 
 			case token_type::IDENTIFIER:          return "IDENTIFIER";
 			case token_type::END_OF_FILE:         return "EOF";

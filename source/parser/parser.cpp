@@ -624,6 +624,7 @@ namespace sigma {
 			case token_type::MINUS_SIGN:         return parse_negative_expression();
 			case token_type::BOOL_LITERAL_TRUE:
 			case token_type::BOOL_LITERAL_FALSE: return parse_bool_literal();
+			case token_type::NULL_LITERAL:       return parse_null_literal();
 			default: {
 				return error::emit(
 					error::code::UNEXPECTED_TOKEN, 
@@ -776,9 +777,20 @@ namespace sigma {
 
 		// initialize the literal
 		bool_node->get<ast_bool_literal>().value = m_tokens.get_current_token() == token_type::BOOL_LITERAL_TRUE;
-		m_tokens.next();
 
+		m_tokens.next();
 		return bool_node;
+	}
+
+	auto parser::parse_null_literal() -> utility::result<handle<node>> {
+		// expect 'NULL_LITERAL'
+		const handle<token_location> location = m_tokens.get_current_token_location();
+		EXPECT_CURRENT_TOKEN(token_type::NULL_LITERAL);
+
+		const handle<node> null_node = create_node<utility::empty_property>(node_type::NULL_LITERAL, 0, location);
+
+		m_tokens.next();
+		return null_node;
 	}
 
 	auto parser::is_current_token_type() const -> bool {

@@ -269,7 +269,8 @@ namespace sigma::ir {
 					resolved_operand_count = in_base;
 				}
 
-				if (inst->in_count > 0) {
+				if(inst->in_count > 0) {
+					std::cout << (int)inst->get_type() << '\n';
 					const handle<instruction_operand> left = context.create_instruction_operand();
 					resolved_operand_count += resolve_interval(context, inst, resolved_operand_count, left);
 					ternary = (resolved_operand_count < in_base + inst->in_count) || (inst->flags & (instruction::IMMEDIATE | instruction::ABSOLUTE));
@@ -853,26 +854,26 @@ namespace sigma::ir {
 					return 2;
 				}
 				else {
-					val = instruction_operand::create_global(context, inst->get<handle<symbol>>(), inst->memory.displacement);
 					return 1;
 				}
 			}
-
-			val->set_type(instruction_operand::type::GLOBAL);
-			val->immediate = inst->memory.displacement;
-			val->get<handle<symbol>>() = inst->get<handle<symbol>>();
+			else {
+				val->set_type(instruction_operand::type::GLOBAL);
+				val->immediate = inst->memory.displacement;
+				val->get<handle<symbol>>() = inst->get<handle<symbol>>();
+			}
 
 			return 1;
 		}
 
-		if (interval->spill > 0) {
+		if(interval->spill > 0) {
 			val->set_type(instruction_operand::type::MEM);
 			val->reg = static_cast<u8>(x64::gpr::RBP);
 			val->index = reg::invalid_id;
 			val->immediate = -interval->spill;
 		}
 		else {
-			if (interval->reg.cl == x64::register_class::XMM) {
+			if(interval->reg.cl == x64::register_class::XMM) {
 				val->set_type(instruction_operand::type::XMM);
 			}
 			else {

@@ -70,6 +70,7 @@ namespace sigma {
 		auto parse_character_literal() -> utility::result<handle<node>>;
 		auto parse_string_literal() -> utility::result<handle<node>>;
 		auto parse_bool_literal() -> utility::result<handle<node>>;
+		auto parse_null_literal() -> utility::result<handle<node>>;
 
 		// peeks 
 		auto peek_is_function_definition() -> bool;

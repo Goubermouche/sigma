@@ -60,6 +60,7 @@ namespace sigma {
 
 			{ "true",      token_type::BOOL_LITERAL_TRUE  },
 			{ "false",     token_type::BOOL_LITERAL_FALSE },
+			{ "null",      token_type::NULL_LITERAL            },
 		};
 
 		const std::unordered_map<std::string, token_type> m_special_tokens = {

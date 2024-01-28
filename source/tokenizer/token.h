@@ -66,6 +66,7 @@ namespace sigma {
 		CHARACTER_LITERAL,   // 'x'
 		BOOL_LITERAL_TRUE,   // true
 		BOOL_LITERAL_FALSE,  // false
+		NULL_LITERAL,             // null
 
 		IDENTIFIER,
 		END_OF_FILE

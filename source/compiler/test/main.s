@@ -11,15 +11,18 @@
 
 // -   cleanup ir gen alignment sizes (u64 vs u32 vs u16)
 
-// -   unify parse_identifier_expression and parse_identifier_statement
-
 i32 main() {
-	i32* memory = cast<i32*>(malloc(100));
-	memory[0] = 2222;
-	memory[1] = 3333;
-	memory[2] = 4444;
+	i32** memory = cast<i32**>(malloc(100));
 
-	printf("%d, %d\n", memory[2], memory[1]);
+	memory[0] = cast<i32*>(malloc(100));
+	memory[1] = cast<i32*>(malloc(100));
 
+	memory[0, 0] = 100;
+	memory[1, 0] = 200;
+
+	printf("%d\n", memory[1, 0]);
+	printf("%d\n", memory[0, 0]);
+	printf("%d %d\n", memory[0, 0], memory[1, 0]);
 	ret 0;
 }
+

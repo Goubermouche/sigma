@@ -183,16 +183,30 @@ namespace sigma {
 	}
 
 	auto ir_translator::translate_array_access(handle<node> access_node) -> handle<ir::node> {
-		ASSERT(access_node->children.get_size() - 1 == 1, "implement support for accessing multiple array levels");
+		const u16 access_level = access_node->children.get_size() - 1;
+		data_type base_type = access_node->get<ast_array_access>().base_type;
 
-		// get the storage location
-		const handle<ir::node> base = translate_node(access_node->children[0]);
-		const handle<ir::node> index = translate_node(access_node->children[1]);
+		handle<ir::node> base = translate_node(access_node->children[0]);
 
-		// stride calculated by the type checker
-		const i64 stride = access_node->get<ast_array_access>().stride;
+		std::cout << "->........................\n";
 
-		return m_context.builder.create_array_access(base, index, stride);
+		for(u64 i = 0; i < access_level; ++i) {
+			const handle<ir::node> index = translate_node(access_node->children[i + 1]);
+
+			const data_type accessed_type = base_type.create_access(1);
+			const u16 stride = accessed_type.get_byte_width();
+
+			base = m_context.builder.create_array_access(base, index, stride);
+
+			if(i + 1 < access_level) {
+				base = m_context.builder.create_load(base, detail::data_type_to_ir(accessed_type), stride, false);
+				base_type = base_type.create_access(1);
+			}
+		}
+
+		std::cout << "..........................\n";
+
+		return base;
 	}
 
 	auto ir_translator::translate_numerical_literal(handle<node> numerical_literal_node) const -> handle<ir::node> {

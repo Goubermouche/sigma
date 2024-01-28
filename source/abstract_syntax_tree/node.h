@@ -57,7 +57,8 @@ namespace sigma {
 			NUMERICAL_LITERAL,
 			CHARACTER_LITERAL,
 			STRING_LITERAL,
-			BOOL_LITERAL
+			BOOL_LITERAL,
+			NULL_LITERAL
 		};
 
 		node_type() = default;
@@ -122,7 +123,8 @@ namespace sigma {
 	};
 
 	struct ast_array_access {
-		i64 stride;
+		// type at the 0'th index of the array
+		data_type base_type; 
 	};
 
 	struct ast_namespace {

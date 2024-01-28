@@ -8,11 +8,9 @@
 namespace sigma {
 	namespace detail {
 		auto data_type_to_ir(data_type type) -> ir::data_type {
-			if (type.pointer_level == 1) {
+			if (type.pointer_level > 0) {
 				return PTR_TYPE;
 			}
-
-			ASSERT(type.pointer_level <= 1, "invalid pointer level");
 
 			switch (type.base_type) {
 				case data_type::BOOL: return BOOL_TYPE;

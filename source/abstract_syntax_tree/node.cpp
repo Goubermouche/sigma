@@ -36,6 +36,7 @@ namespace sigma {
 			case CHARACTER_LITERAL:     return "CHARACTER_LITERAL";
 			case STRING_LITERAL:        return "STRING_LITERAL";
 			case BOOL_LITERAL:          return "BOOL_LITERAL";
+			case NULL_LITERAL:          return "NULL_LITERAL";
 
 			default: PANIC("to_string() not implemented for node '{}'", static_cast<u16>(type));
 		}

@@ -73,8 +73,10 @@ namespace sigma {
 		u8 pointer_level = 0;
 	};
 
-	auto get_larger_type(data_type a, data_type b) -> data_type;
-	auto promote_type(data_type type) -> data_type;
+	namespace detail {
+		auto get_larger_type(data_type a, data_type b) -> data_type;
+		auto promote_type(data_type type) -> data_type;
+	} // namespace detail
 
 	struct named_data_type {
 		named_data_type(data_type type, utility::string_table_key identifier_key);
@@ -96,4 +98,4 @@ namespace sigma {
 
 		utility::string_table_key identifier_key;
 	};
-} // sigma::parse
+} // namespace sigma

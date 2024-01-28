@@ -24,33 +24,43 @@ namespace sigma {
 	public:
 		static auto type_check(backend_context& context) -> utility::result<void>;
 	private:
+		using type_check_result = utility::result<data_type>;
+		using ast_node = handle<ast::node>;
+
 		type_checker(backend_context& context);
 		auto type_check() -> utility::result<void>;
 
-		auto type_check_node(handle<ast::node> ast_node, handle<ast::node> parent, data_type expected = {}) -> utility::result<data_type>;
+		auto type_check_node(ast_node target, ast_node parent, data_type expected = {}) -> type_check_result;
 
-		auto type_check_function_declaration(handle<ast::node> function_node) -> utility::result<data_type>;
-		auto type_check_variable_declaration(handle<ast::node> variable_node) -> utility::result<data_type>;
+		// declaration
+		auto type_check_namespace_declaration(ast_node declaration) -> type_check_result;
+		auto type_check_function_declaration(ast_node declaration) -> type_check_result;
+		auto type_check_variable_declaration(ast_node declaration) -> type_check_result;
 
-		auto type_check_namespace_declaration(handle<ast::node> variable_node, data_type expected) -> utility::result<data_type>;
-		auto type_check_sizeof(handle<ast::node> sizeof_node, handle<ast::node> parent, data_type expected) const -> utility::result<data_type>;
+		// literals
+		auto type_check_character_literal(ast_node literal, ast_node parent, data_type expected) const ->type_check_result;
+		auto type_check_string_literal(ast_node literal, ast_node parent, data_type expected) const -> type_check_result;
+		auto type_check_bool_literal(ast_node literal, ast_node parent, data_type expected) const -> type_check_result;
+		auto type_check_numerical_literal(ast_node literal, data_type expected) const -> type_check_result;
 
-		auto type_check_function_call(handle<ast::node> call_node, handle<ast::node> parent, data_type expected) -> utility::result<data_type>;
-		auto type_check_return(handle<ast::node> return_node, data_type expected) -> utility::result<data_type>;
-		auto type_check_conditional_branch(handle<ast::node> branch_node) -> utility::result<data_type>;
-		auto type_check_branch(handle<ast::node> branch_node) -> utility::result<data_type>;
-		auto type_check_binary_math_operator(handle<ast::node> operator_node, data_type expected) -> utility::result<data_type>;
-		auto type_check_explicit_cast(handle<ast::node> cast_node, handle<ast::node> parent, data_type expected) -> utility::result<data_type>;
-		auto type_check_variable_assignment(handle<ast::node> assignment_node) -> utility::result<data_type>;
-		auto type_check_load(handle<ast::node> load_node, data_type expected) -> utility::result<data_type>;
+		// expressions
+		auto type_check_binary_math_operator(ast_node binop, data_type expected) -> type_check_result;
 
-		auto type_check_array_access(handle<ast::node> access_node, handle<ast::node> parent, data_type expected) -> utility::result<data_type>;
-		auto type_check_variable_access(handle<ast::node> access_node, handle<ast::node> parent, data_type expected) const->utility::result<data_type>;
+		// statements
+		auto type_check_return(ast_node statement, data_type expected) -> type_check_result;
+		auto type_check_conditional_branch(ast_node branch) -> type_check_result;
+		auto type_check_branch(ast_node branch) -> type_check_result;
 
-		auto type_check_numerical_literal(handle<ast::node> literal_node, data_type expected) const-> utility::result<data_type>;
-		auto type_check_character_literal(handle<ast::node> literal_node, handle<ast::node> parent, data_type expected) const-> utility::result<data_type>;
-		auto type_check_string_literal(handle<ast::node> literal_node, handle<ast::node> parent, data_type expected) const -> utility::result<data_type>;
-		auto type_check_bool_literal(handle<ast::node> literal_node, handle<ast::node> parent, data_type expected) const -> utility::result<data_type>;
+		// loads / stores
+		auto type_check_variable_access(ast_node access, ast_node parent, data_type expected) const->type_check_result;
+		auto type_check_array_access(ast_node access, ast_node parent, data_type expected) -> type_check_result;
+		auto type_check_load(ast_node load, data_type expected) -> type_check_result;
+		auto type_check_store(ast_node store) -> type_check_result;
+
+		// other
+		auto type_check_function_call(ast_node call, ast_node parent, data_type expected) -> type_check_result;
+		auto type_check_explicit_cast(ast_node cast, ast_node parent, data_type expected) -> type_check_result;
+		auto type_check_sizeof(ast_node sizeof_node, ast_node parent, data_type expected) const->type_check_result;
 
 		/**
 		 * \brief Cast \b original_type to \b target_type as long as \b target_type is known.
@@ -68,7 +78,7 @@ namespace sigma {
 		 * \param target Target node we want to cast
 		 * \return result<data_type> - if no errors occur the final type is returned. 
 		 */
-		auto implicit_type_cast(data_type original_type, data_type target_type, handle<ast::node> parent, handle<ast::node> target) const -> utility::result<data_type>;
+		auto implicit_type_cast(data_type original_type, data_type target_type, ast_node parent, ast_node target) const -> type_check_result;
 	private:
 		backend_context& m_context;
 	};

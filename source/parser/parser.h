@@ -111,8 +111,8 @@ namespace sigma {
 		auto create_sizeof(handle<token_location> location) const -> handle<ast::node>;
 		auto create_cast(handle<token_location> location) const -> handle<ast::node>;
 
+		auto create_conditional_branch(u64 child_count) const->handle<ast::node>;
 		auto create_branch(u64 child_count) const->handle<ast::node>;
-		auto create_conditional_branch(u64 child_count) const -> handle<ast::node>;
 
 		auto create_binary_expression(ast::node_type type, handle<ast::node> left, handle<ast::node> right) const -> handle<ast::node>;
 	private:

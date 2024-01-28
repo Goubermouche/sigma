@@ -294,7 +294,7 @@ namespace sigma {
 		return false;
 	}
 
-	auto semantic_context::create_callee_signature(handle<ast::node> function_node, const std::vector<data_type>& parameter_types) -> utility::result<function_signature> {
+	auto semantic_context::find_callee_signature(handle<ast::node> function_node, const std::vector<data_type>& parameter_types) -> utility::result<function_signature> {
 		using call_candidate = std::pair<function_signature, u16>;
 
 		const ast::function_call& function = function_node->get<ast::function_call>();

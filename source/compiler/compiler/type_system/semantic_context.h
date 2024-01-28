@@ -70,7 +70,7 @@ namespace sigma {
 		void create_store(utility::string_table_key identifier, handle<ir::node> value, u16 alignment) const;
 
 		auto create_call(const function_signature& callee_signature, const std::vector<utility::string_table_key>& namespaces, const std::vector<handle<ir::node>>& parameters) const -> handle<ir::node>;
-		auto create_callee_signature(handle<ast::node> function_node, const std::vector<data_type>& parameter_types) -> utility::result<function_signature>;
+		auto find_callee_signature(handle<ast::node> function_node, const std::vector<data_type>& parameter_types) -> utility::result<function_signature>;
 
 		/**
 		 * \brief Attempts to locate a variable given an \b identifier and a list of \b namespaces.

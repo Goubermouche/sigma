@@ -228,65 +228,6 @@ namespace sigma {
 		return type == other.type && identifier_key == other.identifier_key;
 	}
 
-  auto get_larger_type(data_type a, data_type b) -> data_type {
-		if (
-			a.base_type == data_type::UNKNOWN || 
-			b.base_type == data_type::UNKNOWN ||
-			a.base_type == data_type::VAR_ARG_PROMOTE || 
-			b.base_type == data_type::VAR_ARG_PROMOTE
-		) {
-			return { data_type::UNKNOWN, 0 };
-		}
-
-		if (a.base_type == b.base_type) {
-			return a; // same type
-		}
-
-		const u16 width_a = a.get_byte_width();
-		const u16 width_b = b.get_byte_width();
-
-		if (width_a == width_b) {
-			// prefer signed over unsigned
-			if (a.is_signed() && b.is_unsigned()) {
-				return a;
-			}
-
-			if (a.is_unsigned() && b.is_signed()) {
-				return b;
-			}
-
-			// if both are either signed or unsigned, return either.
-			return a;
-		}
-
-		// return the type with the larger byte width.
-		return width_a > width_b ? a : b;
-  }
-
-	auto promote_type(data_type type) -> data_type {
-		if (type.is_pointer()) {
-			return type; // don't promote pointers
-		}
-
-		switch (type.base_type) {
-			case data_type::VOID: PANIC("cannot dereference a void*");
-			case data_type::I8:
-			case data_type::I16:
-			case data_type::U8:
-			case data_type::U16:
-			case data_type::BOOL:
-			case data_type::CHAR: return data_type::create_i32();
-			case data_type::I32:
-			case data_type::I64:
-			case data_type::U32:
-			case data_type::U64:  return type;
-			default: NOT_IMPLEMENTED();
-		}
-
-		// unreachable
-		return {};
-	}
-
 	bool function_signature::operator==(const function_signature& other) const {
 		return
 			identifier_key == other.identifier_key &&
@@ -309,4 +250,66 @@ namespace sigma {
 
 		return has_var_args < other.has_var_args;
 	}
-} // sigma::parse
+
+	namespace detail {
+
+		auto get_larger_type(data_type a, data_type b) -> data_type {
+			if (
+				a.base_type == data_type::UNKNOWN ||
+				b.base_type == data_type::UNKNOWN ||
+				a.base_type == data_type::VAR_ARG_PROMOTE ||
+				b.base_type == data_type::VAR_ARG_PROMOTE
+				) {
+				return { data_type::UNKNOWN, 0 };
+			}
+
+			if (a.base_type == b.base_type) {
+				return a; // same type
+			}
+
+			const u16 width_a = a.get_byte_width();
+			const u16 width_b = b.get_byte_width();
+
+			if (width_a == width_b) {
+				// prefer signed over unsigned
+				if (a.is_signed() && b.is_unsigned()) {
+					return a;
+				}
+
+				if (a.is_unsigned() && b.is_signed()) {
+					return b;
+				}
+
+				// if both are either signed or unsigned, return either.
+				return a;
+			}
+
+			// return the type with the larger byte width.
+			return width_a > width_b ? a : b;
+		}
+
+		auto promote_type(data_type type) -> data_type {
+			if (type.is_pointer()) {
+				return type; // don't promote pointers
+			}
+
+			switch (type.base_type) {
+			case data_type::VOID: PANIC("cannot dereference a void*");
+			case data_type::I8:
+			case data_type::I16:
+			case data_type::U8:
+			case data_type::U16:
+			case data_type::BOOL:
+			case data_type::CHAR: return data_type::create_i32();
+			case data_type::I32:
+			case data_type::I64:
+			case data_type::U32:
+			case data_type::U64:  return type;
+			default: NOT_IMPLEMENTED();
+			}
+
+			// unreachable
+			return {};
+		}
+	} // namespace detail
+} // namespace sigma

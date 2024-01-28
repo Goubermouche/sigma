@@ -32,7 +32,7 @@ namespace sigma {
 
 		auto type_check_node(ast_node target, ast_node parent, data_type expected = {}) -> type_check_result;
 
-		// declaration
+		// declarations
 		auto type_check_namespace_declaration(ast_node declaration) -> type_check_result;
 		auto type_check_function_declaration(ast_node declaration) -> type_check_result;
 		auto type_check_variable_declaration(ast_node declaration) -> type_check_result;

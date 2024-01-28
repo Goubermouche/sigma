@@ -22,7 +22,7 @@ namespace sigma {
 
 	auto type_checker::type_check_node(ast_node target, ast_node parent, data_type expected) -> type_check_result {
 		switch(target->type) {
-			// declaration
+			// declarations
 			case ast::node_type::NAMESPACE_DECLARATION: return type_check_namespace_declaration(target);
 			case ast::node_type::FUNCTION_DECLARATION:  return type_check_function_declaration(target);
 			case ast::node_type::VARIABLE_DECLARATION:  return type_check_variable_declaration(target);

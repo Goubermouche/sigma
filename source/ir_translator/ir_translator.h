@@ -12,14 +12,24 @@ namespace sigma {
 		ir_translator(backend_context& context);
 		auto translate() -> utility::result<void>;
 
-		handle<ir::node> translate_node(handle<ast::node> ast_node);
+		auto translate_node(handle<ast::node> ast_node) -> handle<ir::node>;
 
+		// declarations
+		void translate_namespace_declaration(handle<ast::node> namespace_node);
 		void translate_function_declaration(handle<ast::node> function_node);
 		void translate_variable_declaration(handle<ast::node> variable_node);
-		void translate_namespace_declaration(handle<ast::node> namespace_node);
 
+		// literals
+		auto translate_numerical_literal(handle<ast::node> numerical_literal_node) const -> handle<ir::node>;
+		auto translate_character_literal(handle<ast::node> character_literal_node) const -> handle<ir::node>;
+		auto translate_string_literal(handle<ast::node> string_literal_node) const -> handle<ir::node>;
+		auto translate_bool_literal(handle<ast::node> bool_literal_node) const -> handle<ir::node>;
+
+		// expressions
+		auto translate_binary_math_operator(handle<ast::node> operator_node) -> handle<ir::node>;
+
+		// statements
 		void translate_return(handle<ast::node> return_node);
-		auto translate_sizeof(handle<ast::node> sizeof_node) const -> handle<ir::node>;
 
 		/**
 		 * \brief Translates a conditional ast branch node into IR.
@@ -36,22 +46,19 @@ namespace sigma {
 		 */
 		void translate_branch(handle<ast::node> branch_node, handle<ir::node> exit_control);
 
+		// loads / stores
+		auto translate_variable_access(handle<ast::node> access_node) const -> handle<ir::node>;
 		auto translate_array_access(handle<ast::node> access_node) -> handle<ir::node>;
-		auto translate_variable_access(handle<ast::node> access_node) const->handle<ir::node>;
-
-		auto translate_numerical_literal(handle<ast::node> numerical_literal_node) const->handle<ir::node>;
-		auto translate_character_literal(handle<ast::node> character_literal_node) const->handle<ir::node>;
-		auto translate_string_literal(handle<ast::node> string_literal_node) const->handle<ir::node>;
-		auto translate_bool_literal(handle<ast::node> bool_literal_node) const->handle<ir::node>;
-
-		auto translate_binary_math_operator(handle<ast::node> operator_node) -> handle<ir::node>;
-		auto translate_cast(handle<ast::node> cast_node) -> handle<ir::node>;
-		auto translate_function_call(handle<ast::node> call_node) -> handle<ir::node>;
+		auto translate_store(handle<ast::node> assignment_node) -> handle<ir::node>;
 		auto translate_load(handle<ast::node> load_node) -> handle<ir::node>;
 
-		auto translate_variable_assignment(handle<ast::node> assignment_node) -> handle<ir::node>;
+		// other
+		auto translate_function_call(handle<ast::node> call_node) -> handle<ir::node>;
+		auto translate_cast(handle<ast::node> cast_node) -> handle<ir::node>;
+		auto translate_sizeof(handle<ast::node> sizeof_node) const -> handle<ir::node>;
 
-		auto literal_to_ir(const ast::named_type_expression& literal) const-> handle<ir::node>;
+		// utility
+		auto literal_to_ir(const ast::named_type_expression& literal) const -> handle<ir::node>;
 	private:
 		backend_context& m_context;
 	};

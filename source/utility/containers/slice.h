@@ -1,10 +1,11 @@
 #pragma once
-#include "utility/types.h"
+#include "utility/macros.h"
 
 namespace utility {
 	template<typename type, typename size_type = u64>
 	class slice {
 	public:
+		using element_type = type;
 		using iterator = type*;
 		using const_iterator = const type*;
 		using reverse_iterator = std::reverse_iterator<iterator>;
@@ -86,4 +87,16 @@ namespace utility {
 		type* m_data;
 		size_type m_size;
 	};
-}
+
+	template<typename type, typename size_type = u64>
+	void copy(slice<type, size_type>& destination, const std::vector<type>& source) {
+		ASSERT(destination.get_size() >= source.size(), "incompatible sizes");
+		std::memcpy(destination.get_data(), source.data(), source.size() * sizeof(type));
+	}
+
+	template<typename type, typename size_type = u64>
+	void copy(slice<type, size_type>& destination, u64 begin_offset, const std::vector<type>& source) {
+		ASSERT(destination.get_size() + begin_offset >= source.size(), "incompatible sizes");
+		std::memcpy(destination.get_data() + begin_offset, source.data(), source.size() * sizeof(type));
+	}
+} // namespace utility

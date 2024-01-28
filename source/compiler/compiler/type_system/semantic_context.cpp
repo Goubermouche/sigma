@@ -294,10 +294,10 @@ namespace sigma {
 		return false;
 	}
 
-	auto semantic_context::create_callee_signature(handle<node> function_node, const std::vector<data_type>& parameter_types) -> utility::result<function_signature> {
+	auto semantic_context::create_callee_signature(handle<ast::node> function_node, const std::vector<data_type>& parameter_types) -> utility::result<function_signature> {
 		using call_candidate = std::pair<function_signature, u16>;
 
-		const ast_function_call& function = function_node->get<ast_function_call>();
+		const ast::function_call& function = function_node->get<ast::function_call>();
 		std::vector<call_candidate> candidates;
 		bool valid_identifier = false;
 
@@ -403,8 +403,8 @@ namespace sigma {
 		return nullptr;
 	}
 
-	auto semantic_context::emit_no_viable_overload_error(handle<node> function_node) -> utility::error {
-		const ast_function_call& function = function_node->get<ast_function_call>();
+	auto semantic_context::emit_no_viable_overload_error(handle<ast::node> function_node) -> utility::error {
+		const ast::function_call& function = function_node->get<ast::function_call>();
 
 		// construct a list of all potentially viable functions
 		std::stringstream candidate_stream;

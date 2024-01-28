@@ -1,5 +1,6 @@
 #pragma once
 #include <tokenizer/token.h>
+#include <utility/containers/slice.h>
 
 namespace sigma {
 	using namespace utility::types;
@@ -81,6 +82,18 @@ namespace sigma {
 		bool operator==(const named_data_type& other) const;
 
 		data_type type;
+		utility::string_table_key identifier_key;
+	};
+
+	// a higher-level function signature (contains_function info about custom types and generics)
+	struct function_signature {
+		bool operator==(const function_signature& other) const;
+		bool operator<(const function_signature& other) const;
+
+		data_type return_type;
+		utility::slice<named_data_type> parameter_types;
+		bool has_var_args = false;
+
 		utility::string_table_key identifier_key;
 	};
 } // sigma::parse

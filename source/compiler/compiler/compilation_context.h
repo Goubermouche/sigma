@@ -1,7 +1,7 @@
 #pragma once
 #include "compiler/compiler/type_system/semantic_context.h"
 
-#include <abstract_syntax_tree/abstract_syntax_tree.h>
+#include <abstract_syntax_tree/tree.h>
 #include <intermediate_representation/builder.h>
 #include <utility/containers/string_table.h>
 #include <tokenizer/token_buffer.h>
@@ -13,7 +13,7 @@ namespace sigma {
 		void print_ast() const;
 
 		utility::string_table strings;
-		abstract_syntax_tree ast;
+		ast::tree ast;
 	};
 
 	struct backend_context {

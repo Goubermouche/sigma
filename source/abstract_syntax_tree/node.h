@@ -5,22 +5,20 @@
 #include "utility/containers/handle.h"
 #include "utility/containers/slice.h"
 
-namespace sigma {
-	using namespace utility::types;
-
+namespace sigma::ast {
 	struct node_type {
 		enum underlying : u16 {
 			UNKNOWN,
 
+			// children[0] = assigned value, if there is one
+			VARIABLE_DECLARATION,
 			FUNCTION_DECLARATION,
-
-			// function_signature
-			FUNCTION_CALL,
-
 			NAMESPACE_DECLARATION,
-			SIZEOF,
 
+			FUNCTION_CALL,
 			RETURN,
+
+			SIZEOF,
 
 			// children[1 ... n] = statements
 			BRANCH,
@@ -30,17 +28,16 @@ namespace sigma {
 			// it continues to the branch at children[1]
 			CONDITIONAL_BRANCH,
 
-			// children[0] = assigned value, if there is one
-			VARIABLE_DECLARATION,
-			VARIABLE_ACCESS,
-			// storage = assigned value
-			// children[0] = storage
-			// children[1] = assigned value
-			VARIABLE_ASSIGNMENT,
 			// storage[index expressions]
 			// children[0] = storage
 			// children[1 ... n] = index expressions
 			ARRAY_ACCESS,
+			VARIABLE_ACCESS,
+
+			// storage = assigned value
+			// children[0] = storage
+			// children[1] = assigned value
+			STORE,
 			// children[0] = value to load
 			LOAD,
 
@@ -50,7 +47,7 @@ namespace sigma {
 			OPERATOR_DIVIDE,
 			OPERATOR_MODULO,
 
-			// ast_cast
+			// cast
 			// children[0] = value
 			CAST,
 
@@ -70,75 +67,62 @@ namespace sigma {
 		underlying type;
 	};
 
-	struct node;
-
-	// TODO: move this elsewhere
-	// a higher-level function signature (contains_function info about custom types and generics)
-	struct function_signature {
-		bool operator==(const function_signature& other) const;
-		bool operator<(const function_signature& other) const;
-
-		data_type return_type;
-		utility::slice<named_data_type> parameter_types;
-		bool has_var_args = false;
-
-		utility::string_table_key identifier_key;
-	};
-
-	struct ast_function {
-		function_signature signature;
-	};
-
-	struct ast_function_call {
-		function_signature signature;
-		std::vector<utility::string_table_key> namespaces; // TEMP
-	};
-
-	struct ast_literal {
-		utility::string_table_key value_key; // literal value represented as a string
-		data_type type;
-	};
-
-	struct ast_bool_literal {
+	struct bool_literal {
 		bool value;
 	};
 
-	struct ast_variable {
-		data_type type;
-		utility::string_table_key identifier_key;
+	struct named_expression {
+		// NAMESPACE: name of the namespace
+		utility::string_table_key key;
 	};
 
-	struct ast_cast {
-		// cast original_type -> target_type
+	struct type_expression {
+		// ARRAY_ACCESS: type at the 0'th index of the array
+		// SIZEOF:       type we want to know the size of
+		// LOAD:         type of the value we're loading
+		data_type type;
+	};
+
+	struct named_type_expression {
+		// NUMERICAL_LITERAL:    key stores the literal value, type the specific type
+		// CHARACTER_LITERAL:    key stores the literal value, type holds 'char'
+		// STRING_LITERAL:       key stores the literal value, type holds 'char*'
+		// VARIABLE_DECLARATION: key stores the identifier, type holds the declared type
+		// VARIABLE_ACCESS:      key stores the identifier, type is resolved in the type checker
+		//                       and holds the type of the accessed variable
+		utility::string_table_key key;
+		data_type type;
+	};
+
+	struct cast {
+		// casts original_type to target_type
 		data_type original_type;
 		data_type target_type;
 	};
 
-	struct ast_sizeof {
-		data_type type;
+	struct function {
+		// FUNCTION_DECLARATION: signature of the declared function, constructed by the parser
+		function_signature signature;
 	};
 
-	struct ast_load {
-		data_type type;
-	};
-
-	struct ast_array_access {
-		// type at the 0'th index of the array
-		data_type base_type; 
-	};
-
-	struct ast_namespace {
-		utility::string_table_key identifier_key;
+	struct function_call {
+		// FUNCTION_CALL
+		// signature of the called function, resolved by the type checker
+		function_signature signature;
+		// optional namespace directives, empty by default
+		// ie. utility::detail::call() would be { utility, detail }
+		std::vector<utility::string_table_key> namespaces;
 	};
 
 	using node_properties = utility::property<
-		ast_array_access, ast_load, ast_sizeof, ast_function, ast_function_call, ast_literal, ast_variable, ast_bool_literal, ast_namespace, ast_cast
+		bool_literal,
+		type_expression,
+		named_expression,
+		named_type_expression,
+		cast,
+		function,
+		function_call
 	>;
-
-	struct sl {
-		node* x;
-		u16 y;
-	};
 
 	struct node : node_properties {
 		auto is_branch() const -> bool;
@@ -149,4 +133,4 @@ namespace sigma {
 		node_type type;
 		handle<token_location> location = nullptr;
 	};
-} // namespace sigma
+} // namespace sigma::ast

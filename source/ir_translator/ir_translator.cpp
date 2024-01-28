@@ -12,49 +12,49 @@ namespace sigma {
 		m_context.semantics.reset_active_scope();
 	}
 
-	handle<ir::node> ir_translator::translate_node(handle<node> ast_node) {
+	handle<ir::node> ir_translator::translate_node(handle<ast::node> ast_node) {
 		switch (ast_node->type) {
-			case node_type::FUNCTION_DECLARATION:  translate_function_declaration(ast_node); break;
-			case node_type::FUNCTION_CALL:         return translate_function_call(ast_node);
+			case ast::node_type::FUNCTION_DECLARATION:  translate_function_declaration(ast_node); break;
+			case ast::node_type::FUNCTION_CALL:         return translate_function_call(ast_node);
 
-			case node_type::NAMESPACE_DECLARATION: translate_namespace_declaration(ast_node); break;
-			case node_type::SIZEOF:                return translate_sizeof(ast_node);
+			case ast::node_type::NAMESPACE_DECLARATION: translate_namespace_declaration(ast_node); break;
+			case ast::node_type::SIZEOF:                return translate_sizeof(ast_node);
 
 			// flow control
-			case node_type::RETURN:                translate_return(ast_node); break;
-			case node_type::CONDITIONAL_BRANCH:    translate_conditional_branch(ast_node, nullptr); break;
+			case ast::node_type::RETURN:                translate_return(ast_node); break;
+			case ast::node_type::CONDITIONAL_BRANCH:    translate_conditional_branch(ast_node, nullptr); break;
 
 			// variables
-			case node_type::VARIABLE_DECLARATION:  translate_variable_declaration(ast_node); break;
-			case node_type::VARIABLE_ASSIGNMENT:   return translate_variable_assignment(ast_node);
+			case ast::node_type::VARIABLE_DECLARATION:  translate_variable_declaration(ast_node); break;
+			case ast::node_type::STORE:   return translate_variable_assignment(ast_node);
 
-			case node_type::LOAD:                  return translate_load(ast_node);
+			case ast::node_type::LOAD:                  return translate_load(ast_node);
 
-			case node_type::VARIABLE_ACCESS:       return translate_variable_access(ast_node);
-			case node_type::ARRAY_ACCESS:          return translate_array_access(ast_node);
+			case ast::node_type::VARIABLE_ACCESS:       return translate_variable_access(ast_node);
+			case ast::node_type::ARRAY_ACCESS:          return translate_array_access(ast_node);
 
 			// operators:
-			case node_type::OPERATOR_ADD:
-			case node_type::OPERATOR_SUBTRACT:
-			case node_type::OPERATOR_MULTIPLY:
-			case node_type::OPERATOR_DIVIDE:
-			case node_type::OPERATOR_MODULO:       return translate_binary_math_operator(ast_node);
+			case ast::node_type::OPERATOR_ADD:
+			case ast::node_type::OPERATOR_SUBTRACT:
+			case ast::node_type::OPERATOR_MULTIPLY:
+			case ast::node_type::OPERATOR_DIVIDE:
+			case ast::node_type::OPERATOR_MODULO:       return translate_binary_math_operator(ast_node);
 
-			case node_type::CAST:                  return translate_cast(ast_node);
+			case ast::node_type::CAST:                  return translate_cast(ast_node);
 
 			// literals
-			case node_type::NUMERICAL_LITERAL:     return translate_numerical_literal(ast_node);
-			case node_type::CHARACTER_LITERAL:     return translate_character_literal(ast_node);
-			case node_type::STRING_LITERAL:        return translate_string_literal(ast_node);
-			case node_type::BOOL_LITERAL:          return translate_bool_literal(ast_node);
+			case ast::node_type::NUMERICAL_LITERAL:     return translate_numerical_literal(ast_node);
+			case ast::node_type::CHARACTER_LITERAL:     return translate_character_literal(ast_node);
+			case ast::node_type::STRING_LITERAL:        return translate_string_literal(ast_node);
+			case ast::node_type::BOOL_LITERAL:          return translate_bool_literal(ast_node);
 			default: PANIC("irgen for node '{}' is not implemented", ast_node->type.to_string());
 		}
 
 		return nullptr;
 	}
 
-	void ir_translator::translate_function_declaration(handle<node> function_node) {
-		const ast_function& function = function_node->get<ast_function>();
+	void ir_translator::translate_function_declaration(handle<ast::node> function_node) {
+		const ast::function& function = function_node->get<ast::function>();
 
 		m_context.semantics.declare_local_function(function.signature);
 		m_context.semantics.trace_push_scope();
@@ -76,7 +76,7 @@ namespace sigma {
 		}
 
 		// handle inner statements
-		for (const handle<node>& statement : function_node->children) {
+		for (const handle<ast::node>& statement : function_node->children) {
 			translate_node(statement);
 		}
 
@@ -84,10 +84,10 @@ namespace sigma {
 		m_context.semantics.trace_pop_scope();
 	}
 
-	void ir_translator::translate_variable_declaration(handle<node> variable_node) {
-		const auto& prop = variable_node->get<ast_variable>();
+	void ir_translator::translate_variable_declaration(handle<ast::node> variable_node) {
+		const auto& prop = variable_node->get<ast::named_type_expression>();
 		const u16 byte_width = prop.type.get_byte_width();
-		const handle<ir::node> local = m_context.semantics.declare_variable(prop.identifier_key, byte_width, byte_width);
+		const handle<ir::node> local = m_context.semantics.declare_variable(prop.key, byte_width, byte_width);
 
 		if (variable_node->children.get_size() == 1) {
 			const handle<ir::node> expression = translate_node(variable_node->children[0]);
@@ -99,17 +99,17 @@ namespace sigma {
 		}
 	}
 
-	void ir_translator::translate_namespace_declaration(handle<node> namespace_node) {
+	void ir_translator::translate_namespace_declaration(handle<ast::node> namespace_node) {
 		m_context.semantics.trace_push_scope();
 
-		for(const handle<node> statement : namespace_node->children) {
+		for(const handle<ast::node> statement : namespace_node->children) {
 			translate_node(statement);
 		}
 
 		m_context.semantics.trace_pop_scope();
 	}
 
-	void ir_translator::translate_return(handle<node> return_node) {
+	void ir_translator::translate_return(handle<ast::node> return_node) {
 		if (return_node->children.get_size() == 0) {
 			m_context.builder.create_return({}); // TODO: maybe this should return a VOID_TY?
 		}
@@ -118,14 +118,14 @@ namespace sigma {
 		}
 	}
 
-	auto ir_translator::translate_sizeof(handle<node> sizeof_node) const -> handle<ir::node> {
-		const ast_sizeof& sizeof_value = sizeof_node->get<ast_sizeof>();
+	auto ir_translator::translate_sizeof(handle<ast::node> sizeof_node) const -> handle<ir::node> {
+		const ast::type_expression& sizeof_value = sizeof_node->get<ast::type_expression>();
 		const u16 byte_width = sizeof_value.type.get_byte_width();
 
 		return m_context.builder.create_unsigned_integer(byte_width, 64);
 	}
 
-	void ir_translator::translate_conditional_branch(handle<node> branch_node, handle<ir::node> end_control) {
+	void ir_translator::translate_conditional_branch(handle<ast::node> branch_node, handle<ir::node> end_control) {
 		const handle<ir::node> true_control = m_context.builder.create_region();
 		const handle<ir::node> false_control = m_context.builder.create_region();
 		end_control = end_control ? end_control : m_context.builder.create_region();
@@ -134,17 +134,17 @@ namespace sigma {
 		const handle<ir::node> condition = translate_node(branch_node->children[0]);
 
 		// check if there is a successor branch node
-		if (const handle<node> successor = branch_node->children[1]) {
+		if (const handle<ast::node> successor = branch_node->children[1]) {
 			// successor node
 			m_context.builder.create_conditional_branch(condition, true_control, false_control);
 			m_context.builder.set_control(false_control);
 
 			[[likely]]
-			if (successor->type == node_type::CONDITIONAL_BRANCH) {
+			if (successor->type == ast::node_type::CONDITIONAL_BRANCH) {
 				// else if
 				translate_conditional_branch(successor, end_control);
 			}
-			else if (successor->type == node_type::BRANCH) {
+			else if (successor->type == ast::node_type::BRANCH) {
 				// else
 				translate_branch(successor, end_control);
 			}
@@ -171,10 +171,10 @@ namespace sigma {
 		m_context.builder.set_control(end_control);
 	}
 
-	void ir_translator::translate_branch(handle<node> branch_node, handle<ir::node> exit_control) {
+	void ir_translator::translate_branch(handle<ast::node> branch_node, handle<ir::node> exit_control) {
 		m_context.semantics.trace_push_scope();
 
-		for (const handle<node>& statement : branch_node->children) {
+		for (const handle<ast::node>& statement : branch_node->children) {
 			translate_node(statement);
 		}
 
@@ -182,12 +182,12 @@ namespace sigma {
 		m_context.builder.create_branch(exit_control);
 	}
 
-	auto ir_translator::translate_array_access(handle<node> access_node) -> handle<ir::node> {
+	auto ir_translator::translate_array_access(handle<ast::node> access_node) -> handle<ir::node> {
 		// number of array accesses we need to perform
 		const u16 access_level = access_node->children.get_size() - 1;
 
 		// store the base type for the current operation
-		data_type base_type = access_node->get<ast_array_access>().base_type;
+		data_type base_type = access_node->get<ast::type_expression>().type;
 		handle<ir::node> base = translate_node(access_node->children[0]);
 
 		// generate individual accesses
@@ -212,34 +212,34 @@ namespace sigma {
 		return base;
 	}
 
-	auto ir_translator::translate_numerical_literal(handle<node> numerical_literal_node) const -> handle<ir::node> {
-		return literal_to_ir(numerical_literal_node->get<ast_literal>());
+	auto ir_translator::translate_numerical_literal(handle<ast::node> numerical_literal_node) const -> handle<ir::node> {
+		return literal_to_ir(numerical_literal_node->get<ast::named_type_expression>());
 	}
 
-	auto ir_translator::translate_character_literal(handle<node> character_literal_node) const -> handle<ir::node> {
-		const std::string& value = m_context.syntax.strings.get(character_literal_node->get<ast_literal>().value_key);
+	auto ir_translator::translate_character_literal(handle<ast::node> character_literal_node) const -> handle<ir::node> {
+		const std::string& value = m_context.syntax.strings.get(character_literal_node->get<ast::named_type_expression>().key);
 		ASSERT(value.size() == 1, "invalid char literal length");
 		return m_context.builder.create_signed_integer(value[0], 32);
 	}
 
-	auto ir_translator::translate_string_literal(handle<node> string_literal_node) const -> handle<ir::node> {
-		const std::string& value = m_context.syntax.strings.get(string_literal_node->get<ast_literal>().value_key);
+	auto ir_translator::translate_string_literal(handle<ast::node> string_literal_node) const -> handle<ir::node> {
+		const std::string& value = m_context.syntax.strings.get(string_literal_node->get<ast::named_type_expression>().key);
 		return m_context.builder.create_string(value);
 	}
 
-	auto ir_translator::translate_bool_literal(handle<node> bool_literal_node) const -> handle<ir::node> {
-		const auto& prop = bool_literal_node->get<ast_bool_literal>();
+	auto ir_translator::translate_bool_literal(handle<ast::node> bool_literal_node) const -> handle<ir::node> {
+		const auto& prop = bool_literal_node->get<ast::bool_literal>();
 		return m_context.builder.create_bool(prop.value);
 	}
 
-	auto ir_translator::translate_binary_math_operator(handle<node> operator_node) -> handle<ir::node> {
+	auto ir_translator::translate_binary_math_operator(handle<ast::node> operator_node) -> handle<ir::node> {
 		const handle<ir::node> left  = translate_node(operator_node->children[0]);
 		const handle<ir::node> right = translate_node(operator_node->children[1]);
 
 		switch (operator_node->type) {
-			case node_type::OPERATOR_ADD:      return m_context.builder.create_add(left, right);
-			case node_type::OPERATOR_SUBTRACT: return m_context.builder.create_sub(left, right);
-			case node_type::OPERATOR_MULTIPLY: return m_context.builder.create_mul(left, right);
+			case ast::node_type::OPERATOR_ADD:      return m_context.builder.create_add(left, right);
+			case ast::node_type::OPERATOR_SUBTRACT: return m_context.builder.create_sub(left, right);
+			case ast::node_type::OPERATOR_MULTIPLY: return m_context.builder.create_mul(left, right);
 			//case node_type::OPERATOR_DIVIDE:   
 			//case node_type::OPERATOR_MODULO:
 			default: PANIC("unexpected node type '{}' received", operator_node->type.to_string());
@@ -248,8 +248,8 @@ namespace sigma {
 		return nullptr; // unreachable
 	}
 
-	auto ir_translator::translate_cast(handle<node> cast_node) -> handle<ir::node> {
-		const ast_cast& cast = cast_node->get<ast_cast>();
+	auto ir_translator::translate_cast(handle<ast::node> cast_node) -> handle<ir::node> {
+		const ast::cast& cast = cast_node->get<ast::cast>();
 
 		const handle<ir::node> value_to_cast = translate_node(cast_node->children[0]);
 		const ir::data_type target_type = detail::data_type_to_ir(cast.target_type);
@@ -272,13 +272,13 @@ namespace sigma {
 		return m_context.builder.create_zxt(value_to_cast, target_type);
 	}
 
-	auto ir_translator::translate_function_call(handle<node> call_node) -> handle<ir::node> {
-		const ast_function_call& callee = call_node->get<ast_function_call>();
+	auto ir_translator::translate_function_call(handle<ast::node> call_node) -> handle<ir::node> {
+		const ast::function_call& callee = call_node->get<ast::function_call>();
 
 		std::vector<handle<ir::node>> parameters;
 		parameters.reserve(call_node->children.get_size());
 
-		for (const handle<node>& parameter : call_node->children) {
+		for (const handle<ast::node>& parameter : call_node->children) {
 			parameters.push_back(translate_node(parameter));
 		}
 
@@ -286,12 +286,12 @@ namespace sigma {
 		return call_result;
 	}
 
-	auto ir_translator::translate_load(handle<node> load_node) -> handle<ir::node> {
+	auto ir_translator::translate_load(handle<ast::node> load_node) -> handle<ir::node> {
 		// translate the target value
 		const handle<ir::node> value_to_load = translate_node(load_node->children[0]);
 
 		// get the type and alignment of the load
-		const data_type& type_to_load = load_node->get<ast_load>().type;
+		const data_type& type_to_load = load_node->get<ast::type_expression>().type;
 		const ir::data_type ir_type = detail::data_type_to_ir(type_to_load);
 		const u16 alignment = type_to_load.get_byte_width();
 
@@ -299,30 +299,30 @@ namespace sigma {
 		return m_context.builder.create_load(value_to_load, ir_type, alignment, false);
 	}
 
-	auto ir_translator::translate_variable_access(handle<node> access_node) const -> handle<ir::node> {
-		const auto& accessed_variable = access_node->get<ast_variable>();
+	auto ir_translator::translate_variable_access(handle<ast::node> access_node) const -> handle<ir::node> {
+		const auto& accessed_variable = access_node->get<ast::named_type_expression>();
 
 		// just return the variable value, at this point everything was handled by the type checker
-		return m_context.semantics.get_variable(accessed_variable.identifier_key)->value;
+		return m_context.semantics.get_variable(accessed_variable.key)->value;
 	}
 
-	auto ir_translator::translate_variable_assignment(handle<node> assignment_node) -> handle<ir::node> {
-		const auto& variable = assignment_node->children[0]->get<ast_variable>();
+	auto ir_translator::translate_variable_assignment(handle<ast::node> assignment_node) -> handle<ir::node> {
+		const auto& variable = assignment_node->children[0]->get<ast::named_type_expression>();
 		const u16 alignment = variable.type.get_byte_width();
 
 		// get the value we want to store
 		const handle<ir::node> value_to_store = translate_node(assignment_node->children[1]);
 
 		// get the storage location
-		const handle<node> storage_node = assignment_node->children[0];
+		const handle<ast::node> storage_node = assignment_node->children[0];
 		const handle<ir::node> storage = translate_node(storage_node);
 
 		m_context.builder.create_store(storage, value_to_store, alignment, false);
 		return nullptr;
 	}
 
-	auto ir_translator::literal_to_ir(const ast_literal& literal) const -> handle<ir::node> {
-		const std::string& value = m_context.syntax.strings.get(literal.value_key);
+	auto ir_translator::literal_to_ir(const ast::named_type_expression& literal) const -> handle<ir::node> {
+		const std::string& value = m_context.syntax.strings.get(literal.key);
 
 		// handle pointers separately
 		if (literal.type.pointer_level > 0) {
@@ -349,7 +349,7 @@ namespace sigma {
 	}
 
 	auto ir_translator::translate() -> utility::result<void> {
-		for (const handle<node>& top_level : m_context.syntax.ast.get_nodes()) {
+		for (const handle<ast::node>& top_level : m_context.syntax.ast.get_nodes()) {
 			translate_node(top_level);
 		}
 

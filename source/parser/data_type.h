@@ -52,6 +52,7 @@ namespace sigma {
 		bool is_integral() const;
 		bool is_void() const;
 		bool is_pointer() const;
+		bool is_void_pointer() const;
 		bool is_signed() const;
 		bool is_unsigned() const;
 

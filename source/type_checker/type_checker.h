@@ -33,7 +33,7 @@ namespace sigma {
 		auto type_check_variable_declaration(handle<node> variable_node) -> utility::result<data_type>;
 
 		auto type_check_namespace_declaration(handle<node> variable_node, data_type expected) -> utility::result<data_type>;
-		auto type_check_sizeof(handle<node> sizeof_node, handle<node> parent, data_type expected) -> utility::result<data_type>;
+		auto type_check_sizeof(handle<node> sizeof_node, handle<node> parent, data_type expected) const -> utility::result<data_type>;
 
 		auto type_check_function_call(handle<node> call_node, handle<node> parent, data_type expected) -> utility::result<data_type>;
 		auto type_check_return(handle<node> return_node, data_type expected) -> utility::result<data_type>;
@@ -52,9 +52,23 @@ namespace sigma {
 		auto type_check_string_literal(handle<node> literal_node, handle<node> parent, data_type expected) const -> utility::result<data_type>;
 		auto type_check_bool_literal(handle<node> literal_node, handle<node> parent, data_type expected) const -> utility::result<data_type>;
 
+		/**
+		 * \brief Cast \b original_type to \b target_type as long as \b target_type is known.
+		 * \param original_type Original type
+		 * \param target_type Target type we want to cast to
+		 * \return if \b target_type is known, returns \b target_type, \b original_type otherwise.
+		 */
 		static auto inherent_type_cast(data_type original_type, data_type target_type) -> data_type;
+
+		/**
+		 * \brief Verifies type integrity and attempts to do an implicit type cast, if possible.
+		 * \param original_type Original type
+		 * \param target_type Preferred type we want to cast to
+		 * \param parent Parent AST node of the target node
+		 * \param target Target node we want to cast
+		 * \return result<data_type> - if no errors occur the final type is returned. 
+		 */
 		auto implicit_type_cast(data_type original_type, data_type target_type, handle<node> parent, handle<node> target) const -> utility::result<data_type>;
-		auto explicit_type_cast(data_type original_type, data_type target_type, handle<node> target) const -> utility::result<void>;;
 	private:
 		backend_context& m_context;
 	};

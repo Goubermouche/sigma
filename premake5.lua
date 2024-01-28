@@ -11,9 +11,9 @@ workspace "sigma"
         "MultiProcessorCompile"
     }
 
-    buildoptions { "-fsanitize=address" }
-    linkoptions { "-fsanitize=address" }
-    debugformat "C7"
+    -- buildoptions { "-fsanitize=address" }
+    -- linkoptions { "-fsanitize=address" }
+   --  debugformat "C7"
     
     filter "configurations:Release"
         defines { "NDEBUG" }

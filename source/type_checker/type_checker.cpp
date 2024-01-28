@@ -365,9 +365,20 @@ namespace sigma {
 			return original_type;
 		}
 
-		// don't cast pointers implicitly
-		if(original_type.is_pointer() || target_type.is_pointer()) {
-			return error::emit(error::code::INVALID_IMPLICIT_CAST, target->location, original_type.to_string(), target_type.to_string());
+		// pointer casting
+		if(original_type.is_pointer()) {
+			if(target_type.is_void_pointer()) {
+				// allow implicit casting to void*
+				return target_type;
+			}
+
+			// invalid cast
+			return error::emit(
+				error::code::INVALID_IMPLICIT_CAST, 
+				target->location, 
+				original_type.to_string(),
+				target_type.to_string()
+			);
 		}
 
 		// target type is known at this point, try to cast to it
@@ -376,27 +387,31 @@ namespace sigma {
 
 		// no cast needed, probably a sign diff
 		if(original_byte_width == target_byte_width) {
-			warning::emit(warning::code::IMPLICIT_CAST, target->location, original_type.to_string(), target_type.to_string());
+			warning::emit(
+				warning::code::IMPLICIT_CAST,
+				target->location, 
+				original_type.to_string(),
+				target_type.to_string()
+			);
+
 			return original_type;
 		}
 
-		ASSERT(parent, "parent is nulltr");
+		ASSERT(parent, "invalid parent detected");
 
-		// insert a cast node between the target node and its parent node
-		//  parent         parent
-		//    |              |
-		//    |      -->    cast
-		//    |              |
-		// target     	  target
-
+		// insert a cast node between the target node and the target's parent node
 		const bool truncate = original_byte_width > target_byte_width;
+
+		// create the cast node
 		const handle<node> cast_node = m_context.syntax.ast.create_node<ast_cast>(node_type::CAST, 1, nullptr);
+
+		// assign cast info
 		ast_cast& cast = cast_node->get<ast_cast>();
 		cast.original_type = original_type;
 		cast.target_type = target_type;
 
 		// find the 'target' node in the parent
-		u64 index_in_parent = 0;
+		u16 index_in_parent = 0;
 		for(; index_in_parent < parent->children.get_size(); index_in_parent++) {
 			if(parent->children[index_in_parent] == target) {
 				break;
@@ -415,14 +430,6 @@ namespace sigma {
 		);
 
 		return target_type;
-	}
-
-	auto type_checker::explicit_type_cast(data_type original_type, data_type target_type, handle<node> target) const -> utility::result<void> {
-		// if(original_type.pointer_level != target_type.pointer_level) {
-		// 	return error::emit(error::code::INCOMPATIBLE_EXPLICIT_CAST, target->location, original_type.to_string(), target_type.to_string());
-		// }
-
-		return SUCCESS;
 	}
 
 	auto type_checker::type_check_variable_access(handle<node> access_node, handle<node> parent, data_type expected) const -> utility::result<data_type> {
@@ -458,13 +465,12 @@ namespace sigma {
 		ast_cast& cast = cast_node->get<ast_cast>();
 
 		TRY(cast.original_type, type_check_node(cast_node->children[0], cast_node, data_type::create_unknown()));
-		TRY(explicit_type_cast(cast.original_type, cast.target_type, cast_node));
 
 		// upcast the result, if necessary, just a sanity check
 		return implicit_type_cast(cast.target_type, expected, parent, cast_node);
 	}
 
-	auto type_checker::type_check_sizeof(handle<node> sizeof_node, handle<node> parent, data_type expected) -> utility::result<data_type> {
+	auto type_checker::type_check_sizeof(handle<node> sizeof_node, handle<node> parent, data_type expected) const -> utility::result<data_type> {
 		// upcast to the expected type, without throwing warnings/errors
 		return implicit_type_cast(data_type::create_u64(), expected, parent, sizeof_node);
 	}

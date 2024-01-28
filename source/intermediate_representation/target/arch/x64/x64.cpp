@@ -270,7 +270,6 @@ namespace sigma::ir {
 				}
 
 				if(inst->in_count > 0) {
-					std::cout << (int)inst->get_type() << '\n';
 					const handle<instruction_operand> left = context.create_instruction_operand();
 					resolved_operand_count += resolve_interval(context, inst, resolved_operand_count, left);
 					ternary = (resolved_operand_count < in_base + inst->in_count) || (inst->flags & (instruction::IMMEDIATE | instruction::ABSOLUTE));

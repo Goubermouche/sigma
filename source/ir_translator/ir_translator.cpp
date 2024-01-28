@@ -183,29 +183,32 @@ namespace sigma {
 	}
 
 	auto ir_translator::translate_array_access(handle<node> access_node) -> handle<ir::node> {
+		// number of array accesses we need to perform
 		const u16 access_level = access_node->children.get_size() - 1;
-		data_type base_type = access_node->get<ast_array_access>().base_type;
 
+		// store the base type for the current operation
+		data_type base_type = access_node->get<ast_array_access>().base_type;
 		handle<ir::node> base = translate_node(access_node->children[0]);
 
-		std::cout << "->........................\n";
-
+		// generate individual accesses
 		for(u64 i = 0; i < access_level; ++i) {
 			const handle<ir::node> index = translate_node(access_node->children[i + 1]);
-
 			const data_type accessed_type = base_type.create_access(1);
-			const u16 stride = accessed_type.get_byte_width();
+			const u16 type_width = accessed_type.get_byte_width();
 
-			base = m_context.builder.create_array_access(base, index, stride);
+			base = m_context.builder.create_array_access(base, index, type_width);
 
 			if(i + 1 < access_level) {
-				base = m_context.builder.create_load(base, detail::data_type_to_ir(accessed_type), stride, false);
+				// if the access has more than one level we have to load each pointer and
+				// then access it further
+				const ir::data_type type = detail::data_type_to_ir(accessed_type);
+				base = m_context.builder.create_load(base, type, type_width, false);
+
 				base_type = base_type.create_access(1);
 			}
 		}
 
-		std::cout << "..........................\n";
-
+		// return the last access
 		return base;
 	}
 

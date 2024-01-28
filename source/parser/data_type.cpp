@@ -183,6 +183,10 @@ namespace sigma {
 		return pointer_level > 0;
   }
 
+	bool data_type::is_void_pointer() const {
+		return pointer_level > 0 && base_type == VOID;
+	}
+
   bool data_type::is_signed() const {
 		if (pointer_level > 0) {
 			return false;

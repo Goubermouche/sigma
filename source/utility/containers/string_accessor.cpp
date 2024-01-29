@@ -20,8 +20,12 @@ namespace utility::detail {
 
 	auto string_accessor::get() const -> char {
 		// check if we are inside of our strings' bounds
-		ASSERT(m_position <= m_string.size(), "accessor out of range! (get)");
-		return m_string[m_position];
+		if(m_position <= m_string.size()) {
+			return m_string[m_position];
+		}
+
+		// out-of-bounds access
+		return EOF;
 	}
 
 	auto string_accessor::get_advance() -> char {

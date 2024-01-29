@@ -2,6 +2,7 @@
 
 #include <compiler/compiler/compilation_context.h>
 #include <compiler/compiler/diagnostics.h>
+#include <utility/string_helper.h>
 
 namespace sigma {
 	tokenizer::tokenizer(const std::string& source, handle<filepath> source_path, frontend_context& context) : m_source(source), m_context(context) {
@@ -37,7 +38,7 @@ namespace sigma {
 		if(m_source.end()) {
 			return token_info{
 				.tok = { token_type::END_OF_FILE },
-				.location = m_context.allocator.emplace<token_location>(m_token_start_location)
+				.location = get_current_location_ptr()
 			};
 		}
 
@@ -109,6 +110,14 @@ namespace sigma {
 		return m_last_character;
 	}
 
+	auto tokenizer::is_special(char c) -> bool {
+		return
+			!std::isalnum(c) &&
+			c != '\n' &&
+			c != '\'' &&
+			c != '"';
+	}
+
 	auto tokenizer::get_next_char() -> char {
 		m_last_character = m_source.get_advance();
 
@@ -121,6 +130,10 @@ namespace sigma {
 		}
 
 		return m_last_character;
+	}
+
+	auto tokenizer::get_current_location_ptr() -> handle<token_location> {
+		return m_context.allocator.emplace<token_location>(m_token_start_location);
 	}
 
 	auto tokenizer::get_alphabetical_token() -> utility::result<token_info> {
@@ -139,14 +152,14 @@ namespace sigma {
 			// the string is a keyword
 			return token_info{
 				.tok      = { it->second },
-				.location = m_context.allocator.emplace<token_location>(m_token_start_location)
+				.location = get_current_location_ptr()
 			};
 		}
 
 		// the string isn't a keyword, treat it as an identifier
 		return token_info{
 			.tok        = { token_type::IDENTIFIER },
-			.location   = m_context.allocator.emplace<token_location>(m_token_start_location),
+			.location   = get_current_location_ptr(),
 			.symbol_key = m_context.syntax.strings.insert(m_current_section)
 		};
 	}
@@ -159,16 +172,16 @@ namespace sigma {
 		get_next_char();
 
 		// attempt to parse a hexadecimal or binary number
-		if (first_character == '0') {
+		if(first_character == '0') {
 			// hexadecimal
-			if (std::tolower(m_last_character) == 'x') {
+			if(std::tolower(m_last_character) == 'x') {
 				NOT_IMPLEMENTED();
 				//OUTCOME_TRY(m_value_string, get_hexadecimal_string());
 				//return token::number_hexadecimal;
 			}
 
 			// binary
-			if (std::tolower(m_last_character) == 'b') {
+			if(std::tolower(m_last_character) == 'b') {
 				NOT_IMPLEMENTED();
 				//OUTCOME_TRY(m_value_string, get_binary_string());
 				//return token::number_binary;
@@ -176,39 +189,42 @@ namespace sigma {
 		}
 
 		// fallback to regular number formats 
-		while (!std::isspace(m_last_character) && !m_source.end()) {
-			if (m_last_character == '.') {
-				if (dot_met) {
-					return error::emit(error::code::NUMERICAL_LITERAL_MORE_THAN_ONE_DOT);
+		while(!std::isspace(m_last_character) && !m_source.end()) {
+			if(m_last_character == '.') {
+				if(dot_met) {
+					const handle location = get_current_location_ptr();
+					return error::emit(error::code::NUMERICAL_LITERAL_MORE_THAN_ONE_DOT, location);
 				}
 
 				dot_met = true;
 			}
-			else if (m_last_character == 'u') {
-				if (dot_met) {
-					return error::emit(error::code::NUMERICAL_LITERAL_UNSIGNED_WITH_DOT);
+			else if(m_last_character == 'u') {
+				if(dot_met) {
+					const handle location = get_current_location_ptr();
+					return error::emit(error::code::NUMERICAL_LITERAL_UNSIGNED_WITH_DOT, location);
 				}
 
 				get_next_char();
 				return token_info{
 					.tok        = { token_type::UNSIGNED_LITERAL },
-					.location   = m_context.allocator.emplace<token_location>(m_token_start_location),
+					.location   = get_current_location_ptr(),
 					.symbol_key = m_context.syntax.strings.insert(m_current_section)
 				};
 			}
 			else if (m_last_character == 'f') {
-				if (!dot_met) {
-					return error::emit(error::code::NUMERICAL_LITERAL_FP_WITHOUT_DOT);
+				if(!dot_met) {
+					const handle location = get_current_location_ptr();
+					return error::emit(error::code::NUMERICAL_LITERAL_FP_WITHOUT_DOT, location);
 				}
 
 				get_next_char();
 				return token_info{
 					.tok        = { token_type::F32_LITERAL },
-					.location   = m_context.allocator.emplace<token_location>(m_token_start_location),
+					.location   = get_current_location_ptr(),
 					.symbol_key = m_context.syntax.strings.insert(m_current_section)
 				};
 			}
-			else if (!std::isdigit(m_last_character)) {
+			else if(!std::isdigit(m_last_character)) {
 				break;
 			}
 
@@ -220,7 +236,7 @@ namespace sigma {
 		if (dot_met) {
 			return token_info{
 				.tok        = { token_type::F64_LITERAL },
-				.location   = m_context.allocator.emplace<token_location>(m_token_start_location),
+				.location   = get_current_location_ptr(),
 				.symbol_key = m_context.syntax.strings.insert(m_current_section)
 			};
 		}
@@ -228,7 +244,7 @@ namespace sigma {
 		// 0 format
 		return token_info{
 			.tok        = { token_type::SIGNED_LITERAL },
-			.location   = m_context.allocator.emplace<token_location>(m_token_start_location),
+			.location   = get_current_location_ptr(),
 			.symbol_key = m_context.syntax.strings.insert(m_current_section)
 		};
 	}
@@ -243,14 +259,15 @@ namespace sigma {
 		}
 
 		if(m_last_character != '"') {
-			return error::emit(error::code::INVALID_STRING_TERMINATOR);
+			const handle location = get_current_location_ptr();
+			return error::emit(error::code::INVALID_STRING_TERMINATOR, location);
 		}
 
 		get_next_char();
 
 		return token_info{
 			.tok        = { token_type::STRING_LITERAL },
-			.location   = m_context.allocator.emplace<token_location>(m_token_start_location),
+			.location   = get_current_location_ptr(),
 			.symbol_key = m_context.syntax.strings.insert(m_current_section)
 		};
 	}
@@ -261,50 +278,65 @@ namespace sigma {
 		get_next_char(); // read the closing quote
 
 		if(m_last_character != '\'') {
-			return error::emit(error::code::INVALID_CHAR_TERMINATOR);
+			const handle location = get_current_location_ptr();
+			return error::emit(error::code::INVALID_CHAR_TERMINATOR, location);
 		}
 
 		get_next_char();
 
 		return token_info{
 			.tok = { token_type::CHARACTER_LITERAL },
-			.location = m_context.allocator.emplace<token_location>(m_token_start_location),
+			.location = get_current_location_ptr(),
 			.symbol_key = m_context.syntax.strings.insert(m_current_section)
 		};
 	}
 
 	auto tokenizer::get_special_token() -> utility::result<token_info> {
-		m_current_section = m_last_character;
+		m_current_section = "";
 
-		const auto it = m_special_tokens.find(m_current_section);
-		if (it != m_special_tokens.end()) {
-			get_next_char();
+		auto resolved_token = token_type::UNKNOWN;
+		u64 token_length = 0;
 
-			// we have a special token consisting of 1 character, check if we can find a longer
-			// one using that character
-			if (!isspace(m_last_character) && !isalnum(m_last_character)) {
-				m_current_section += m_last_character;
+		// find the longest token that is less < some arbitrary max token len
+		while(is_special(m_last_character) && m_current_section.size() < 2) {
+			m_current_section += m_last_character;
+			m_last_character = m_source.get_advance();
 
-				// since we don't have the "//" token in our token table we check for it separately,
-				// and if we find it we consider it to be a comment, in this case we ignore all
-				// the characters on the same line and return the following token
-				if(m_last_character == '/') {
-					// ignore all remaining data on the current line
-					do {
-						get_next_char();
-					} while (!m_source.end() && m_last_character != '\n' && m_last_character != '\r');
+			const auto it = m_special_tokens.find(m_current_section);
 
-					return get_next_token(); // return the following token
-				}
+			if(it != m_special_tokens.end()) {
+				resolved_token = it->second;
+				token_length = m_current_section.size();
 			}
-
-			return token_info{
-				.tok      = { it->second },
-				.location = m_context.allocator.emplace<token_location>(m_token_start_location)
-			};
 		}
 
-		NOT_IMPLEMENTED();
-		return token_info{};
+		if(resolved_token == token_type::UNKNOWN) {
+			const handle location = get_current_location_ptr();
+			const std::string section = utility::detail::escape_string(m_current_section);
+
+			return error::emit(error::code::UNKNOWN_SPECIAL_TOKEN, location, section);
+		}
+
+		// correct the position
+		// we don't have to correct the line position, since tokens can't be multiline
+		m_current_location.char_index += static_cast<u32>(token_length - 1);
+
+		// go to the last valid token
+		m_source.set_position(m_source.get_position() - m_current_section.size());
+		get_next_char();
+
+		if(resolved_token == token_type::INLINE_COMMENT) {
+			// ignore all remaining data on the current line
+			do {
+				get_next_char();
+			} while (!m_source.end() && m_last_character != '\n' && m_last_character != '\r');
+
+			return get_next_token(); // return the following token
+		}
+
+		return token_info{
+			.tok = { resolved_token },
+			.location = get_current_location_ptr()
+		};
 	}
 } // namespace sigma::lex

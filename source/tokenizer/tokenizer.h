@@ -21,8 +21,10 @@ namespace sigma {
 
 		void consume_spaces();
 		auto get_escaped_character() -> char;
+		static auto is_special(char c) -> bool;
 
 		auto get_next_char() -> char;
+		auto get_current_location_ptr() -> handle<token_location>;
 	private:
 		token_location m_current_location = { 0, 0 };
 		token_location m_token_start_location; // start location of the current token
@@ -83,6 +85,9 @@ namespace sigma {
 			{ ":" ,  token_type::COLON             },
 			{ "<" ,  token_type::LESS_THAN         },
 			{ ">" ,  token_type::GREATER_THAN      },
+			{ "&&" , token_type::CONJUNCTION       },
+			{ "||" , token_type::DISJUNCTION       },
+			{ "//" , token_type::INLINE_COMMENT    },
 		};
 	};
 } // namespace sigma

@@ -60,6 +60,10 @@ namespace sigma {
 			case token_type::LESS_THAN:           return "<";
 			case token_type::GREATER_THAN:        return ">";
 
+			case token_type::CONJUNCTION:        return "&&";
+			case token_type::DISJUNCTION:        return "||";
+			case token_type::INLINE_COMMENT:     return "//";
+
 			// default type keywords
 			case token_type::I8:                  return "I8";
 			case token_type::I16:                 return "I16";

@@ -23,6 +23,7 @@ namespace sigma {
 			NUMERICAL_LITERAL_FP_WITHOUT_DOT,
 			NUMERICAL_LITERAL_UNSIGNED_WITH_DOT,
 			NUMERICAL_LITERAL_MORE_THAN_ONE_DOT,
+			UNKNOWN_SPECIAL_TOKEN,
 
 			// parser (3000 - 3999)
 			UNEXPECTED_NON_NUMERICAL = 3000,
@@ -75,7 +76,6 @@ namespace sigma {
 		 */
 		template<typename... arguments>
 		static auto emit(code code, arguments&&... args) -> utility::error {
-			NOT_IMPLEMENTED();
 			const std::string str = std::format("error C{}: {}", static_cast<u32>(code), m_errors.find(code)->second);
 			return utility::error(str, std::forward<arguments>(args)...);
 		}
@@ -93,6 +93,7 @@ namespace sigma {
 			{ code::NUMERICAL_LITERAL_FP_WITHOUT_DOT,    "numerical floating-point literal without '.' character detected"                   },
 			{ code::NUMERICAL_LITERAL_UNSIGNED_WITH_DOT, "unsigned numerical literal with '.' character detected"                            },
 			{ code::NUMERICAL_LITERAL_MORE_THAN_ONE_DOT, "numerical literal with more than one '.' character detected"                       },
+			{ code::UNKNOWN_SPECIAL_TOKEN,               "unknown special token sequence '{}'"                                               },
 
 			// parser
 			{ code::UNEXPECTED_NON_NUMERICAL,            "unexpected non-numerical literal token received ('{}')"                            },

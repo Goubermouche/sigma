@@ -11,13 +11,18 @@
 
 // -   cleanup ir gen alignment sizes (u64 vs u32 vs u16)
 
-void run(i32 x) {}
-
-u64 test() {
-	ret 12;
-}
-
 i32 main() {
-    run(test());
-    ret 0;
+	i32*** memory = cast<i32***>(malloc(100));
+
+	memory[0] = cast<i32**>(malloc(100));
+	memory[1] = cast<i32**>(malloc(100));
+
+	memory[0, 0] = cast<i32*>(malloc(100));
+	memory[1, 0] = cast<i32*>(malloc(100));
+
+	memory[0, 0, 0] = 1;
+	memory[1, 0, 0] = 2;
+
+	printf("%d %d\n", memory[0, 0, 0], memory[1, 0, 0]);
+	ret 0;
 }

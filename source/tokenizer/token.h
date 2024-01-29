@@ -31,6 +31,10 @@ namespace sigma {
 		LESS_THAN,         // <
 		GREATER_THAN,      // >
 
+		CONJUNCTION,       // &&
+		DISJUNCTION,       // ||
+		INLINE_COMMENT,    // //
+
 		// default type keywords
 		I8,
 		I16,

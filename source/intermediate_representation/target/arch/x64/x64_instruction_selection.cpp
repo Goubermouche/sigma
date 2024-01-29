@@ -3,6 +3,7 @@
 #include "intermediate_representation/codegen/instruction.h"
 #include "intermediate_representation/codegen/instruction.h"
 #include "intermediate_representation/codegen/instruction.h"
+#include "intermediate_representation/codegen/instruction.h"
 #include "intermediate_representation/target/system/win/win.h"
 
 namespace sigma::ir {
@@ -713,6 +714,20 @@ namespace sigma::ir {
 				break;
 			}
 
+			case node::type::CMP_EQ:
+			case node::type::CMP_NE:
+			case node::type::CMP_SLT:
+			case node::type::CMP_SLE:
+			case node::type::CMP_ULT:
+			case node::type::CMP_ULE:
+			case node::type::CMP_FLT:
+			case node::type::CMP_FLE: {
+				x64::conditional cc = select_instruction_cmp(context, n);
+				instruction::type type = static_cast<instruction::type::underlying>(static_cast<i32>(instruction::type::SETO) + static_cast<instruction::type::underlying>(cc));
+				context.append_instruction(create_r(context, type, I8_TYPE, destination));
+				break;
+			}
+
 			case node::type::INTEGER_CONSTANT: {
 				u64 value = n->get<integer>().value;
 
@@ -1006,7 +1021,7 @@ namespace sigma::ir {
 					u64 t = successors[0];
 					u64 f = successors[1];
 
-					x64::conditional cc = x64::conditional::E;
+					auto cc = x64::conditional::E;
 					if (br.keys[0] == 0) {
 						cc = select_instruction_cmp(context, n->inputs[1]);
 					}
@@ -1229,25 +1244,87 @@ namespace sigma::ir {
 		return select_memory_access_instruction(context, target, destination, store_op, source);
 	}
 
-	auto x64_architecture::select_instruction_cmp(codegen_context& context, handle<node> target) -> x64::conditional {
+	auto x64_architecture::select_instruction_cmp(codegen_context& context, handle<node> n) -> x64::conditional {
 		bool invert = false;
-		if (target == node::type::CMP_EQ && target->dt == data_type::base::INTEGER && target->dt.get_bit_width() == 1 && target->inputs[2] == node::type::INTEGER_CONSTANT) {
-			const auto& b = target->inputs[2]->get<integer>();
+		if(n->get_type() == node::type::CMP_EQ && n->dt == data_type::base::INTEGER && n->dt.get_bit_width() == 1 && n->inputs[2]->get_type() == node::type::INTEGER_CONSTANT) {
+			const auto& b = n->inputs[2]->get<integer>();
 			if (b.value == 0) {
 				invert = true;
-				target = target->inputs[1];
+				n = n->inputs[1];
 			}
 		}
 
-		if (target->get_type() >= node::type::CMP_EQ && target->get_type() <= node::type::CMP_FLE) {
-			NOT_IMPLEMENTED();
-			// data_type cmp_dt = n->get<compare>()
+		if(n->get_type() >= node::type::CMP_EQ && n->get_type() <= node::type::CMP_FLE) {
+			const data_type cmp_dt = n->get<compare_op>().cmp_dt;
+			auto cc = static_cast<x64::conditional>(-1);
 
-			return x64::conditional::NE; // temp
+			n->use_node(context);
+
+			if(cmp_dt.is_floating_point()) {
+				const reg lhs = allocate_node_register(context, n->inputs[1]);
+				const reg rhs = allocate_node_register(context, n->inputs[2]);
+
+				context.append_instruction(create_rrd(context, instruction::type::FP_UCOMI, cmp_dt, lhs, rhs));
+
+				switch(n->get_type()) {
+					case node::type::CMP_EQ:  cc = x64::conditional::E;  break;
+					case node::type::CMP_NE:  cc = x64::conditional::NE; break;
+					case node::type::CMP_FLT: cc = x64::conditional::B;  break;
+					case node::type::CMP_FLE: cc = x64::conditional::BE; break;
+					default: NOT_IMPLEMENTED();
+				}
+			}
+			else {
+				bool invert = false;
+				i32 x;
+				const reg lhs = allocate_node_register(context, n->inputs[1]);
+				const i32 bits = cmp_dt.is_pointer() ? 64 : cmp_dt.get_bit_width();
+
+				if(try_for_imm32(n->inputs[2], bits, x)) {
+					n->inputs[2]->use_node(context);
+
+					if(x == 0 && (n->get_type() == node::type::CMP_EQ || n->get_type() == node::type::CMP_NE)) {
+						context.append_instruction(create_rrd(context, instruction::type::TEST, cmp_dt, lhs, lhs));
+					}
+					else {
+						context.append_instruction(create_ri(context, instruction::type::CMP, cmp_dt, lhs, x));
+					}
+				}
+				else if(
+					n->inputs[2]->get_type() == node::type::LOAD &&
+					n->inputs[2]->is_on_last_use(context)
+				) {
+					n->inputs[2]->use_node(context);
+
+					const handle<instruction> inst = select_array_access_instruction(
+						context, n->inputs[2]->inputs[2], lhs, -1, lhs.id
+					);
+
+					inst->set_type(instruction::type::CMP);
+					inst->data_type = legalize_data_type(n->dt);
+					context.append_instruction(inst);
+				}
+				else {
+					const reg rhs = allocate_node_register(context, n->inputs[2]);
+					context.append_instruction(create_rrd(context, instruction::type::CMP, cmp_dt, lhs, rhs));
+				}
+
+				switch(n->get_type()) {
+					case node::type::CMP_EQ: cc = x64::conditional::E; break;
+					case node::type::CMP_NE: cc = x64::conditional::NE; break;
+					case node::type::CMP_SLT: cc = invert ? x64::conditional::G :  x64::conditional::L;  break;
+					case node::type::CMP_SLE: cc = invert ? x64::conditional::GE : x64::conditional::LE; break;
+					case node::type::CMP_ULT: cc = invert ? x64::conditional::A :  x64::conditional::B;  break;
+					case node::type::CMP_ULE: cc = invert ? x64::conditional::NB : x64::conditional::BE; break;
+					default: NOT_IMPLEMENTED();
+				}
+			}
+
+			return static_cast<x64::conditional>(cc ^ invert);
 		}
 		else {
-			const reg src = allocate_node_register(context, target);
-			const data_type dt = target->dt;
+			const reg src = allocate_node_register(context, n);
+			const data_type dt = n->dt;
 
 			if (dt == data_type::base::FLOAT) {
 				NOT_IMPLEMENTED();
@@ -1509,6 +1586,12 @@ namespace sigma::ir {
 		inst->in_count = 1;
 		inst->operands[0] = destination.id;
 		inst->operands[1] = source.id;
+		return inst;
+	}
+
+	auto x64_architecture::create_r(codegen_context& context, instruction::type type, const data_type& data_type, reg dst) -> handle<instruction> {
+		const handle<instruction> inst = create_instruction(context, type, data_type, 1, 0, 0);
+		inst->operands[0] = dst.id;
 		return inst;
 	}
 

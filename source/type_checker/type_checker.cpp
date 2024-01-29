@@ -44,9 +44,9 @@ namespace sigma {
 			case ast::node_type::OPERATOR_GREATER_THAN:
 			case ast::node_type::OPERATOR_NOT_EQUAL:
 			case ast::node_type::OPERATOR_LESS_THAN:
-			case ast::node_type::OPERATOR_EQUAL:                 return type_check_binary_comparison_operator(target);
+			case ast::node_type::OPERATOR_EQUAL:                 return type_check_binary_comparison_operator(target, parent, expected);
 			case ast::node_type::OPERATOR_CONJUNCTION:           
-			case ast::node_type::OPERATOR_DISJUNCTION:           return type_check_predicate_operator(target);
+			case ast::node_type::OPERATOR_DISJUNCTION:           return type_check_predicate_operator(target, parent, expected);
 
 			// statements
 			case ast::node_type::RETURN:                         return type_check_return(target, expected);
@@ -248,15 +248,15 @@ namespace sigma {
 		return larger_type;
 	}
 
-	auto type_checker::type_check_predicate_operator(ast_node binop) -> type_check_result {
+	auto type_checker::type_check_predicate_operator(ast_node binop, ast_node parent, data_type expected) -> type_check_result {
 		// type check both operands
 		TRY(type_check_node(binop->children[0], binop, data_type::create_bool())); // left
 		TRY(type_check_node(binop->children[1], binop, data_type::create_bool())); // right
 
-		return data_type::create_bool();
+		return implicit_type_cast(data_type::create_bool(), expected, parent, binop);
 	}
 
-	auto type_checker::type_check_binary_comparison_operator(ast_node binop) -> type_check_result {
+	auto type_checker::type_check_binary_comparison_operator(ast_node binop, ast_node parent, data_type expected) -> type_check_result {
 		// type check both operands
 		TRY(const data_type left, type_check_node(binop->children[0], binop)); // left
 		TRY(const data_type right, type_check_node(binop->children[1], binop)); // right
@@ -273,6 +273,9 @@ namespace sigma {
 		if(larger_type.is_floating_point()) {
 			expression.type = ast::comparison_expression::type::FLOATING_POINT;
 		}
+		else if(larger_type.is_pointer()) {
+			expression.type = ast::comparison_expression::type::POINTER;
+		}
 		else if(larger_type.is_signed()) {
 			expression.type = ast::comparison_expression::type::INTEGRAL_SIGNED;
 		}
@@ -280,7 +283,7 @@ namespace sigma {
 			expression.type = ast::comparison_expression::type::INTEGRAL_UNSIGNED;
 		}
 
-		return data_type::create_bool();
+		return implicit_type_cast(data_type::create_i8(), expected, parent, binop);
 	}
 
 	auto type_checker::type_check_array_access(ast_node access, ast_node parent, data_type expected) -> type_check_result {
@@ -400,6 +403,8 @@ namespace sigma {
 	}
 
 	auto type_checker::implicit_type_cast(data_type original_type, data_type target_type, ast_node parent, ast_node target) const -> type_check_result {
+		utility::console::print("cast {} -> {}\n", original_type.to_string(), target_type.to_string());
+
 		if(target_type.is_unknown()) {
 			return original_type;
 		}

@@ -35,6 +35,9 @@ namespace sigma::ir {
 
 		auto to_string() const->std::string;
 
+		auto is_floating_point() const -> bool;
+		auto is_pointer() const -> bool;
+
 		auto get_base() const -> base;
 		auto get_bit_width() const -> u8;
 		void set_bit_width(u8 bit_width);

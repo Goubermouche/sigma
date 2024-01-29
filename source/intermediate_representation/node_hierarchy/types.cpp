@@ -27,6 +27,14 @@ namespace sigma::ir {
     }
   }
 
+	auto data_type::is_floating_point() const -> bool {
+		return m_base.get_underlying() == base::FLOAT;
+	}
+
+	auto data_type::is_pointer() const -> bool {
+		return m_base.get_underlying() == base::POINTER;
+	}
+
   auto data_type::operator==(const data_type& other) const -> bool {
     return m_base.get_underlying() == other.m_base.get_underlying() && m_bit_width == other.m_bit_width;
   }

@@ -97,7 +97,8 @@ namespace sigma::ast {
 		enum class type : u8 {
 			INTEGRAL_SIGNED,
 			INTEGRAL_UNSIGNED,
-			FLOATING_POINT
+			FLOATING_POINT,
+			POINTER
 		};
 
 		type type;

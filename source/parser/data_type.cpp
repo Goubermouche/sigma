@@ -120,7 +120,7 @@ namespace sigma {
 			case U16:     return 2;
 			case U32:     return 4;
 			case U64:     return 8;
-			case BOOL:    return 4;
+			case BOOL:    return 1;
 			case CHAR:    return 1;
 			case VAR_ARG_PROMOTE: return 0;
 			default: PANIC("undefined byte width for type '{}'", to_string());

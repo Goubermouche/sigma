@@ -283,6 +283,7 @@ namespace sigma {
 			}
 		}
 
+		NOT_IMPLEMENTED();
 		return nullptr; // unreachable
 	}
 

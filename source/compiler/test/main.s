@@ -13,9 +13,12 @@
 // -   bool b = 100 > 200;
 
 i32 main() {
-	i32 a = 10;
-	u64 b = 20;
+	i32 a = 200;
+	i32 b = 200;
 
-	bool res = a && b;
+	bool result = a == b;
+
+	printf("%d\n", result);
+
 	ret 0;
 }

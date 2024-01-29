@@ -105,7 +105,7 @@ namespace sigma::ir {
 		void select_instruction(codegen_context& context, handle<node> n, reg destination);
 		auto select_memory_access_instruction(codegen_context& context, handle<node> n, reg dst, i32 store_op, i32 src) -> handle<instruction>;
 		auto select_array_access_instruction(codegen_context& context, handle<node> target, reg destination, i32 store_op, i32 source) -> handle<instruction>;
-		auto select_instruction_cmp(codegen_context& context, handle<node> target) -> x64::conditional;
+		auto select_instruction_cmp(codegen_context& context, handle<node> n) -> x64::conditional;
 
 		void dfs_schedule(codegen_context& context, handle<basic_block> bb, handle<node> n, bool is_end);
 		void dfs_schedule_phi(codegen_context& context, handle<basic_block> bb, handle<node> phi, ptr_diff phi_index);
@@ -138,6 +138,7 @@ namespace sigma::ir {
 		static auto create_zero(codegen_context& context, const data_type& data_type, reg destination) -> handle<instruction>;
 
 		// other instructions
+		static auto create_r(codegen_context& context, instruction::type type, const data_type& data_type, reg dst) -> handle<instruction>;
 		static auto create_mr(codegen_context& context, instruction::type type, const data_type& data_type, reg base, i32 index, memory_scale scale, i32 disp, i32 source) -> handle<instruction>;
 		static auto create_rm(codegen_context& context, instruction::type type, const data_type& data_type, reg destination, reg base, i32 index, memory_scale scale, i32 disp) -> handle<instruction>;
 		static auto create_rr(codegen_context& context, instruction::type type, const data_type& data_type, reg destination, reg source) -> handle<instruction>;

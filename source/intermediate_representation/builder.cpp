@@ -138,6 +138,21 @@ namespace sigma::ir {
 		return get_insert_point_checked()->create_cmp_ige(a, b, is_signed);
 	}
 
+  auto builder::create_not(handle<node> value) const -> handle<node> {
+		DEBUG_PRINT("creating not");
+		return get_insert_point_checked()->create_not(value);
+  }
+
+	auto builder::create_and(handle<node> a, handle<node> b) const -> handle<node> {
+		DEBUG_PRINT("creating and");
+		return get_insert_point_checked()->create_and(a, b);
+	}
+
+	auto builder::create_or(handle<node> a, handle<node> b) const -> handle<node> {
+		DEBUG_PRINT("creating or");
+		return get_insert_point_checked()->create_or(a, b);
+	}
+
   auto builder::create_sxt(handle<node> src, data_type dt) const -> handle<node> {
 		DEBUG_PRINT("creating sxt");
 		return get_insert_point_checked()->create_sxt(src, dt);

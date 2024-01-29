@@ -72,6 +72,11 @@ namespace sigma::ir {
 		auto create_cmp_igt(handle<node> a, handle<node> b, bool is_signed) -> handle<node>;
 		auto create_cmp_ige(handle<node> a, handle<node> b, bool is_signed) -> handle<node>;
 
+		// bitwise operations
+		auto create_not(handle<node> value) -> handle<node>;
+		auto create_and(handle<node> a, handle<node> b) -> handle<node>;
+		auto create_or(handle<node> a, handle<node> b) -> handle<node>;
+
 		void create_store(handle<node> destination, handle<node> value, u32 alignment, bool is_volatile);
 		auto create_load(handle<node> value_to_load, data_type data_type, u32 alignment, bool is_volatile) -> handle<node>;
 		auto create_array_access(handle<node> base, handle<node> index, i64 stride) -> handle <node>;
@@ -82,8 +87,9 @@ namespace sigma::ir {
 		auto create_call(const function_signature& function_sig, handle<node> callee_symbol_address,const std::vector<handle<node>>& arguments) -> handle<node>;
 
 		auto create_binary_arithmetic_operation(node::type type, handle<node> left, handle<node> right, arithmetic_behaviour behaviour) -> handle<node>;
+
 		auto create_unary_operation(node::type type, data_type dt, handle<node> src) -> handle<node>;
-		auto create_cmp(node::type type, handle<node> a, handle<node> b) -> handle<node>;
+		auto create_cmp_operation(node::type type, handle<node> a, handle<node> b) -> handle<node>;
 
 		auto create_projection(data_type dt, handle<node> source, u64 index) -> handle<node>;
 		auto append_memory(handle<node> memory) const -> handle<node>;

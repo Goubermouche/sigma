@@ -190,27 +190,42 @@ namespace sigma::ir {
 	}
 
 	auto function::create_cmp_eq(handle<node> a, handle<node> b) -> handle<node> {
-		return create_cmp(node::type::CMP_EQ, a, b);
+		return create_cmp_operation(node::type::CMP_EQ, a, b);
 	}
 
 	auto function::create_cmp_ne(handle<node> a, handle<node> b) -> handle<node> {
-		return create_cmp(node::type::CMP_NE, a, b);
+		return create_cmp_operation(node::type::CMP_NE, a, b);
 	}
 
   auto function::create_cmp_ilt(handle<node> a, handle<node> b, bool is_signed) -> handle<node> {
-		return create_cmp(is_signed ? node::type::CMP_SLT : node::type::CMP_ULT, a, b);
+		return create_cmp_operation(is_signed ? node::type::CMP_SLT : node::type::CMP_ULT, a, b);
   }
 
 	auto function::create_cmp_ile(handle<node> a, handle<node> b, bool is_signed) -> handle<node> {
-		return create_cmp(is_signed ? node::type::CMP_SLE : node::type::CMP_ULE, a, b);
+		return create_cmp_operation(is_signed ? node::type::CMP_SLE : node::type::CMP_ULE, a, b);
 	}
 
 	auto function::create_cmp_igt(handle<node> a, handle<node> b, bool is_signed) -> handle<node> {
-		return create_cmp(is_signed ? node::type::CMP_SLT : node::type::CMP_ULT, a, b);
+		return create_cmp_operation(is_signed ? node::type::CMP_SLT : node::type::CMP_ULT, a, b);
 	}
 
 	auto function::create_cmp_ige(handle<node> a, handle<node> b, bool is_signed) -> handle<node> {
-		return create_cmp(is_signed ? node::type::CMP_SLE : node::type::CMP_ULE, a, b);
+		return create_cmp_operation(is_signed ? node::type::CMP_SLE : node::type::CMP_ULE, a, b);
+	}
+
+  auto function::create_not(handle<node> value) -> handle<node> {
+		const handle<node> n = create_node<utility::empty_property>(node::type::NOT, 2);
+		n->inputs[1] = value;
+		return n;
+  }
+
+	auto function::create_and(handle<node> a, handle<node> b) -> handle<node> {
+		// bitwise operators can't wrap
+		return create_binary_arithmetic_operation(node::type::AND, a, b, arithmetic_behaviour::NONE);
+	}
+
+	auto function::create_or(handle<node> a, handle<node> b) -> handle<node> {
+		return create_binary_arithmetic_operation(node::type::OR, a, b, arithmetic_behaviour::NONE);
 	}
 
 	void function::create_store(handle<node> destination, handle<node> value, u32 alignment, bool is_volatile) {
@@ -306,14 +321,14 @@ namespace sigma::ir {
 
 	auto function::create_binary_arithmetic_operation(node::type type, handle<node> left, handle<node> right, arithmetic_behaviour behaviour) -> handle<node> {
 		ASSERT(left->dt == right->dt, "data types of the two operands do not match");
-		const handle<node> operation = create_node<binary_integer_op>(type, 3);
+		const handle<node> op = create_node<binary_integer_op>(type, 3);
 
-		operation->get<binary_integer_op>().behaviour = behaviour;
-		operation->inputs[1] = left;
-		operation->inputs[2] = right;
-		operation->dt = left->dt;
+		op->get<binary_integer_op>().behaviour = behaviour;
+		op->inputs[1] = left;
+		op->inputs[2] = right;
+		op->dt = left->dt;
 
-		return operation;
+		return op;
 	}
 
 	auto function::create_unary_operation(node::type type, data_type dt, handle<node> src) -> handle<node> {
@@ -323,7 +338,7 @@ namespace sigma::ir {
 		return operation;
 	}
 
-	auto function::create_cmp(node::type type, handle<node> a, handle<node> b) -> handle<node> {
+	auto function::create_cmp_operation(node::type type, handle<node> a, handle<node> b) -> handle<node> {
 		ASSERT(a->dt == b->dt, "data types of the two operands do not match");
 		const handle<node> cmp = create_node<compare_op>(type, 3);
 

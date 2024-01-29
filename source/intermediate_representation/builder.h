@@ -148,6 +148,11 @@ namespace sigma::ir {
 		auto create_cmp_igt(handle<node> a, handle<node> b, bool is_signed) const -> handle<node>;
 		auto create_cmp_ige(handle<node> a, handle<node> b, bool is_signed) const -> handle<node>;
 
+		// bitwise operations
+		auto create_not(handle<node> value) const -> handle<node>;
+		auto create_and(handle<node> a, handle<node> b) const -> handle<node>;
+		auto create_or(handle<node> a, handle<node> b) const -> handle<node>;
+		
 		// casting
 		auto create_sxt(handle<node> src, data_type dt) const -> handle<node>;
 		auto create_zxt(handle<node> src, data_type dt) const -> handle<node>;

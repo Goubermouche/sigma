@@ -378,7 +378,7 @@ namespace sigma {
 		literal.type = { data_type::I32, 0 };
 
 		// negate the expression
-		return create_binary_expression(ast::node_type::OPERATOR_MULTIPLY, negation_node, expression_node);
+		return create_binary_operation(ast::node_type::OPERATOR_MULTIPLY, negation_node, expression_node);
 	}
 
 	auto parser::parse_function_call(const std::vector<utility::string_table_key>& namespaces) -> parse_result {
@@ -555,7 +555,7 @@ namespace sigma {
 			m_tokens.next(); // prime the term
 			TRY(const handle<ast::node> right_node, parse_logical_disjunction());
 
-			left_node = create_binary_expression(ast::node_type::OPERATOR_CONJUNCTION, left_node, right_node);
+			left_node = create_binary_operation(ast::node_type::OPERATOR_CONJUNCTION, left_node, right_node);
 		}
 
 		return left_node;
@@ -568,7 +568,7 @@ namespace sigma {
 			m_tokens.next(); // prime the term
 			TRY(const handle<ast::node> right_node, parse_comparison());
 
-			left_node = create_binary_expression(ast::node_type::OPERATOR_DISJUNCTION, left_node, right_node);
+			left_node = create_binary_operation(ast::node_type::OPERATOR_DISJUNCTION, left_node, right_node);
 		}
 
 		return left_node;
@@ -601,7 +601,7 @@ namespace sigma {
 				default: PANIC("unhandled term case for token '{}'", operation.to_string());
 			}
 
-			left_node = create_binary_expression(operator_type, left_node, right_node);
+			left_node = create_comparison_operation(operator_type, left_node, right_node);
 			operation = m_tokens.get_current_token();
 		}
 
@@ -627,7 +627,7 @@ namespace sigma {
 				default: PANIC("unhandled term case for token '{}'", operation.to_string());
 			}
 
-			left_node = create_binary_expression(operator_type, left_node, right_node);
+			left_node = create_binary_operation(operator_type, left_node, right_node);
 			operation = m_tokens.get_current_token();
 		}
 
@@ -655,7 +655,7 @@ namespace sigma {
 				default: PANIC("unhandled factor case for token '{}'", operation.to_string());
 			}
 
-			left_node = create_binary_expression(operator_type, left_node, right_node);
+			left_node = create_binary_operation(operator_type, left_node, right_node);
 			operation = m_tokens.get_current_token();
 		}
 
@@ -992,6 +992,14 @@ namespace sigma {
 		return create_node<ast::cast>(ast::node_type::CAST, 1, location);
 	}
 
+  auto parser::create_comparison_operation(ast::node_type type, handle<ast::node> left, handle<ast::node> right) const -> handle<ast::node> {
+		const handle<ast::node> node = create_node<ast::comparison_expression>(type, 2, left->location);
+		node->children[0] = left;
+		node->children[1] = right;
+
+		return node;
+  }
+
 	auto parser::create_variable_declaration(u64 child_count, handle<token_location> location) const -> handle<ast::node> {
 		return create_node<ast::named_type_expression>(ast::node_type::VARIABLE_DECLARATION, child_count, location);
 	}
@@ -1024,8 +1032,12 @@ namespace sigma {
 		return create_node(ast::node_type::CONDITIONAL_BRANCH, child_count, nullptr);
 	}
 
-	auto parser::create_binary_expression(ast::node_type type, handle<ast::node> left, handle<ast::node> right) const -> handle<ast::node> {
-		return m_context.syntax.ast.create_binary_expression(type, left, right);
+	auto parser::create_binary_operation(ast::node_type type, handle<ast::node> left, handle<ast::node> right) const -> handle<ast::node> {
+		const handle<ast::node> node = create_node(type, 2, left->location);
+		node->children[0] = left;
+		node->children[1] = right;
+
+		return node;
 	}
 
 	auto parser::parse_identifier_expression() -> parse_result {

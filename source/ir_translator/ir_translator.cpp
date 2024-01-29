@@ -15,37 +15,43 @@ namespace sigma {
 	auto ir_translator::translate_node(handle<ast::node> ast_node) -> handle<ir::node> {
 		switch(ast_node->type) {
 			// declarations
-			case ast::node_type::NAMESPACE_DECLARATION: translate_namespace_declaration(ast_node); break;
-			case ast::node_type::FUNCTION_DECLARATION:  translate_function_declaration(ast_node); break;
-			case ast::node_type::VARIABLE_DECLARATION:  translate_variable_declaration(ast_node); break;
+			case ast::node_type::NAMESPACE_DECLARATION:          translate_namespace_declaration(ast_node); break;
+			case ast::node_type::FUNCTION_DECLARATION:           translate_function_declaration(ast_node); break;
+			case ast::node_type::VARIABLE_DECLARATION:           translate_variable_declaration(ast_node); break;
 
 			// literals
-			case ast::node_type::NUMERICAL_LITERAL:     return translate_numerical_literal(ast_node);
-			case ast::node_type::CHARACTER_LITERAL:     return translate_character_literal(ast_node);
-			case ast::node_type::STRING_LITERAL:        return translate_string_literal(ast_node);
-			case ast::node_type::BOOL_LITERAL:          return translate_bool_literal(ast_node);
+			case ast::node_type::NUMERICAL_LITERAL:              return translate_numerical_literal(ast_node);
+			case ast::node_type::CHARACTER_LITERAL:              return translate_character_literal(ast_node);
+			case ast::node_type::STRING_LITERAL:                 return translate_string_literal(ast_node);
+			case ast::node_type::BOOL_LITERAL:                   return translate_bool_literal(ast_node);
 
 			// expressions
 			case ast::node_type::OPERATOR_ADD:
 			case ast::node_type::OPERATOR_SUBTRACT:
 			case ast::node_type::OPERATOR_MULTIPLY:
 			case ast::node_type::OPERATOR_DIVIDE:
-			case ast::node_type::OPERATOR_MODULO:       return translate_binary_math_operator(ast_node);
+			case ast::node_type::OPERATOR_MODULO:                return translate_binary_math_operator(ast_node);
+			case ast::node_type::OPERATOR_GREATER_THAN_OR_EQUAL:
+			case ast::node_type::OPERATOR_LESS_THAN_OR_EQUAL:
+			case ast::node_type::OPERATOR_GREATER_THAN:
+			case ast::node_type::OPERATOR_NOT_EQUAL:
+			case ast::node_type::OPERATOR_LESS_THAN:
+			case ast::node_type::OPERATOR_EQUAL:                 return translate_binary_comparison_operator(ast_node);
 
 			// statements
-			case ast::node_type::RETURN:                translate_return(ast_node); break;
-			case ast::node_type::CONDITIONAL_BRANCH:    translate_conditional_branch(ast_node, nullptr); break;
+			case ast::node_type::RETURN:                         translate_return(ast_node); break;
+			case ast::node_type::CONDITIONAL_BRANCH:             translate_conditional_branch(ast_node, nullptr); break;
 
 			// loads / stores
-			case ast::node_type::VARIABLE_ACCESS:       return translate_variable_access(ast_node);
-			case ast::node_type::ARRAY_ACCESS:          return translate_array_access(ast_node);
-			case ast::node_type::STORE:                 return translate_store(ast_node);
-			case ast::node_type::LOAD:                  return translate_load(ast_node);
+			case ast::node_type::VARIABLE_ACCESS:                return translate_variable_access(ast_node);
+			case ast::node_type::ARRAY_ACCESS:                   return translate_array_access(ast_node);
+			case ast::node_type::STORE:                          return translate_store(ast_node);
+			case ast::node_type::LOAD:                           return translate_load(ast_node);
 
 			// other
-			case ast::node_type::FUNCTION_CALL:         return translate_function_call(ast_node);
-			case ast::node_type::SIZEOF:                return translate_sizeof(ast_node);
-			case ast::node_type::CAST:                  return translate_cast(ast_node);
+			case ast::node_type::FUNCTION_CALL:                  return translate_function_call(ast_node);
+			case ast::node_type::SIZEOF:                         return translate_sizeof(ast_node);
+			case ast::node_type::CAST:                           return translate_cast(ast_node);
 
 			default: PANIC("irgen for node '{}' is not implemented", ast_node->type.to_string());
 		}
@@ -236,7 +242,7 @@ namespace sigma {
 		const handle<ir::node> left  = translate_node(operator_node->children[0]);
 		const handle<ir::node> right = translate_node(operator_node->children[1]);
 
-		switch (operator_node->type) {
+		switch(operator_node->type) {
 			case ast::node_type::OPERATOR_ADD:      return m_context.builder.create_add(left, right);
 			case ast::node_type::OPERATOR_SUBTRACT: return m_context.builder.create_sub(left, right);
 			case ast::node_type::OPERATOR_MULTIPLY: return m_context.builder.create_mul(left, right);
@@ -246,6 +252,38 @@ namespace sigma {
 		}
 
 		return nullptr; // unreachable
+	}
+
+	auto ir_translator::translate_binary_comparison_operator(handle<ast::node> operator_node) -> handle<ir::node> {
+		const handle<ir::node> left = translate_node(operator_node->children[0]);
+		const handle<ir::node> right = translate_node(operator_node->children[1]);
+
+		// determine the comparison operator type
+		const ast::comparison_expression& expression = operator_node->get<ast::comparison_expression>();
+
+		if(expression.type == ast::comparison_expression::type::FLOATING_POINT) {
+			// floating point comparisons 
+			NOT_IMPLEMENTED();
+		}
+		else {
+			// integral comparisons
+			// INTEGRAL_SIGNED || INTEGRAL_UNSIGNED
+			const bool is_signed = expression.type == ast::comparison_expression::type::INTEGRAL_SIGNED;
+
+			std::cout << is_signed << '\n';
+
+			switch (operator_node->type) {
+				case ast::node_type::OPERATOR_GREATER_THAN_OR_EQUAL: return m_context.builder.create_cmp_ige(left, right, is_signed);
+				case ast::node_type::OPERATOR_LESS_THAN_OR_EQUAL:    return m_context.builder.create_cmp_ile(left, right, is_signed);
+				case ast::node_type::OPERATOR_GREATER_THAN:          return m_context.builder.create_cmp_igt(left, right, is_signed);
+				case ast::node_type::OPERATOR_LESS_THAN:             return m_context.builder.create_cmp_ilt(left, right, is_signed);
+				case ast::node_type::OPERATOR_NOT_EQUAL:             return m_context.builder.create_cmp_ne(left, right);
+				case ast::node_type::OPERATOR_EQUAL:                 return m_context.builder.create_cmp_eq(left, right);
+				default: PANIC("unexpected node type '{}' received", operator_node->type.to_string());
+			}
+		}
+
+		return nullptr;
 	}
 
 	auto ir_translator::translate_cast(handle<ast::node> cast_node) -> handle<ir::node> {

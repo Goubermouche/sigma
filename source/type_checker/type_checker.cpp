@@ -23,39 +23,45 @@ namespace sigma {
 	auto type_checker::type_check_node(ast_node target, ast_node parent, data_type expected) -> type_check_result {
 		switch(target->type) {
 			// declarations
-			case ast::node_type::NAMESPACE_DECLARATION: return type_check_namespace_declaration(target);
-			case ast::node_type::FUNCTION_DECLARATION:  return type_check_function_declaration(target);
-			case ast::node_type::VARIABLE_DECLARATION:  return type_check_variable_declaration(target);
+			case ast::node_type::NAMESPACE_DECLARATION:          return type_check_namespace_declaration(target);
+			case ast::node_type::FUNCTION_DECLARATION:           return type_check_function_declaration(target);
+			case ast::node_type::VARIABLE_DECLARATION:           return type_check_variable_declaration(target);
 
 			// literals
-			case ast::node_type::NUMERICAL_LITERAL:     return type_check_numerical_literal(target, expected);
-			case ast::node_type::CHARACTER_LITERAL:     return type_check_character_literal(target, parent, expected);
-			case ast::node_type::STRING_LITERAL:        return type_check_string_literal(target, parent, expected);
-			case ast::node_type::BOOL_LITERAL:          return type_check_bool_literal(target, parent, expected);
+			case ast::node_type::NUMERICAL_LITERAL:              return type_check_numerical_literal(target, expected);
+			case ast::node_type::CHARACTER_LITERAL:              return type_check_character_literal(target, parent, expected);
+			case ast::node_type::STRING_LITERAL:                 return type_check_string_literal(target, parent, expected);
+			case ast::node_type::BOOL_LITERAL:                   return type_check_bool_literal(target, parent, expected);
 
 			// expressions
 			case ast::node_type::OPERATOR_ADD:
 			case ast::node_type::OPERATOR_SUBTRACT:
 			case ast::node_type::OPERATOR_MULTIPLY:
 			case ast::node_type::OPERATOR_DIVIDE:
-			case ast::node_type::OPERATOR_MODULO:       return type_check_binary_math_operator(target, expected);
+			case ast::node_type::OPERATOR_MODULO:                return type_check_binary_math_operator(target, expected);
+			case ast::node_type::OPERATOR_GREATER_THAN_OR_EQUAL:
+			case ast::node_type::OPERATOR_LESS_THAN_OR_EQUAL:
+			case ast::node_type::OPERATOR_GREATER_THAN:
+			case ast::node_type::OPERATOR_NOT_EQUAL:
+			case ast::node_type::OPERATOR_LESS_THAN:
+			case ast::node_type::OPERATOR_EQUAL:                 return type_check_binary_comparison_operator(target);
 
 			// statements
-			case ast::node_type::RETURN:                return type_check_return(target, expected);
-			case ast::node_type::CONDITIONAL_BRANCH:    return type_check_conditional_branch(target);
-			case ast::node_type::BRANCH:                return type_check_branch(target);
+			case ast::node_type::RETURN:                         return type_check_return(target, expected);
+			case ast::node_type::CONDITIONAL_BRANCH:             return type_check_conditional_branch(target);
+			case ast::node_type::BRANCH:                         return type_check_branch(target);
 
 			// loads / stores
-			case ast::node_type::VARIABLE_ACCESS:       return type_check_variable_access(target, parent, expected);
-			case ast::node_type::ARRAY_ACCESS:          return type_check_array_access(target, parent, expected);
-			case ast::node_type::LOAD:                  return type_check_load(target, expected);
-			case ast::node_type::STORE:                 return type_check_store(target);
+			case ast::node_type::VARIABLE_ACCESS:                return type_check_variable_access(target, parent, expected);
+			case ast::node_type::ARRAY_ACCESS:                   return type_check_array_access(target, parent, expected);
+			case ast::node_type::LOAD:                           return type_check_load(target, expected);
+			case ast::node_type::STORE:                          return type_check_store(target);
 
 			// other
-			case ast::node_type::FUNCTION_CALL:         return type_check_function_call(target, parent, expected);
+			case ast::node_type::FUNCTION_CALL:                  return type_check_function_call(target, parent, expected);
 			// since implicit casts are not type checked we can interpret these casts a being explicit
-			case ast::node_type::CAST:                  return type_check_explicit_cast(target, parent, expected);
-			case ast::node_type::SIZEOF:                return type_check_sizeof(target, parent, expected);
+			case ast::node_type::CAST:                           return type_check_explicit_cast(target, parent, expected);
+			case ast::node_type::SIZEOF:                         return type_check_sizeof(target, parent, expected);
 
 			// unhandled node types
 			default: PANIC("undefined type check for node '{}'", target->type.to_string());
@@ -238,6 +244,33 @@ namespace sigma {
 		TRY(implicit_type_cast(right, larger_type, binop, binop->children[1]));
 
 		return larger_type;
+	}
+
+	auto type_checker::type_check_binary_comparison_operator(ast_node binop) -> type_check_result {
+		// type check both operands
+		TRY(const data_type left, type_check_node(binop->children[0], binop)); // left
+		TRY(const data_type right, type_check_node(binop->children[1], binop)); // right
+
+		// upcast both types
+		const data_type larger_type = detail::get_larger_type(left, right);
+
+		TRY(implicit_type_cast(left, larger_type, binop, binop->children[0]));
+		TRY(implicit_type_cast(right, larger_type, binop, binop->children[1]));
+
+		ast::comparison_expression& expression = binop->get<ast::comparison_expression>();
+
+		// determine the type of our comparison op
+		if(larger_type.is_floating_point()) {
+			expression.type = ast::comparison_expression::type::FLOATING_POINT;
+		}
+		else if(larger_type.is_signed()) {
+			expression.type = ast::comparison_expression::type::INTEGRAL_SIGNED;
+		}
+		else {
+			expression.type = ast::comparison_expression::type::INTEGRAL_UNSIGNED;
+		}
+
+		return data_type::create_bool();
 	}
 
 	auto type_checker::type_check_array_access(ast_node access, ast_node parent, data_type expected) -> type_check_result {

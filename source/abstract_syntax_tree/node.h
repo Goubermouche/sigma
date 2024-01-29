@@ -86,6 +86,23 @@ namespace sigma::ast {
 		utility::string_table_key key;
 	};
 
+	struct comparison_expression {
+		// OPERATOR_GREATER_THAN
+		// OPERATOR_LESS_THAN
+		// OPERATOR_GREATER_THAN_OR_EQUAL
+		// OPERATOR_LESS_THAN_OR_EQUAL
+		// OPERATOR_EQUAL
+		// OPERATOR_NOT_EQUAL
+
+		enum class type : u8 {
+			INTEGRAL_SIGNED,
+			INTEGRAL_UNSIGNED,
+			FLOATING_POINT
+		};
+
+		type type;
+	};
+
 	struct type_expression {
 		// ARRAY_ACCESS: type at the 0'th index of the array
 		// SIZEOF:       type we want to know the size of
@@ -125,13 +142,14 @@ namespace sigma::ast {
 	};
 
 	using node_properties = utility::property<
-		bool_literal,
-		type_expression,
-		named_expression,
 		named_type_expression,
-		cast,
+		comparison_expression,
+		named_expression,
+		type_expression,
+		function_call,
+		bool_literal,
 		function,
-		function_call
+		cast
 	>;
 
 	struct node : node_properties {

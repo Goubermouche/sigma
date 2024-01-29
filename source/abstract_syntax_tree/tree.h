@@ -18,8 +18,6 @@ namespace sigma::ast {
 		auto get_nodes() const -> const utility::contiguous_container<handle<node>>&;
 		auto get_allocator() -> utility::block_allocator&;
 
-		auto create_binary_expression(node_type type, handle<node> left, handle<node> right) -> handle<node>;
-
 		template<typename extra_type = utility::empty_property>
 		auto create_node(node_type type, u64 child_count, handle<token_location> location) -> handle<node> {
 			ASSERT(child_count <= std::numeric_limits<u16>::max(), "cannot allocate more than {} children", std::numeric_limits<u16>::max());

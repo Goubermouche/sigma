@@ -45,12 +45,4 @@ namespace sigma::ast {
 	auto tree::get_allocator() -> utility::block_allocator& {
 		return m_allocator;
 	}
-
-	auto tree::create_binary_expression(node_type type, handle<node> left, handle<node> right) -> handle<node> {
-		const handle<node> node = create_node<utility::empty_property>(type, 2, left->location);
-		node->children[0] = left;
-		node->children[1] = right;
-
-		return node;
-	}
 } // namespace sigma::ast

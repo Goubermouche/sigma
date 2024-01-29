@@ -18,6 +18,8 @@ namespace sigma {
 			U16,
 			U32,
 			U64,
+			F32,
+			F64,
 			BOOL,
 			CHAR
 		};
@@ -50,6 +52,7 @@ namespace sigma {
 		bool is_unknown() const;
 		bool is_promote() const;
 
+		bool is_floating_point() const;
 		bool is_integral() const;
 		bool is_void() const;
 		bool is_pointer() const;

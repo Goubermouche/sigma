@@ -11,8 +11,9 @@
 
 // -   cleanup ir gen alignment sizes (u64 vs u32 vs u16)
 
-i32 main() {
-	if(true && false || true) {}
+// CHECK:
+// -   bool b = 100 > 200;
 
+i32 main() {
 	ret 0;
 }

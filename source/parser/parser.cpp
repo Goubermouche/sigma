@@ -549,20 +549,62 @@ namespace sigma {
 	}
 
 	auto parser::parse_logical_conjunction() -> parse_result {
-		TRY(const handle<ast::node> left_node, parse_logical_disjunction());
-		// TODO
+		TRY(handle<ast::node> left_node, parse_logical_disjunction());
+
+		while(m_tokens.get_current_token() == token_type::CONJUNCTION) {
+			m_tokens.next(); // prime the term
+			TRY(const handle<ast::node> right_node, parse_logical_disjunction());
+
+			left_node = create_binary_expression(ast::node_type::OPERATOR_CONJUNCTION, left_node, right_node);
+		}
+
 		return left_node;
 	}
 
 	auto parser::parse_logical_disjunction() -> parse_result {
-		TRY(const handle<ast::node> left_node, parse_comparison());
-		// TODO
+		TRY(handle<ast::node> left_node, parse_comparison());
+
+		while(m_tokens.get_current_token() == token_type::DISJUNCTION) {
+			m_tokens.next(); // prime the term
+			TRY(const handle<ast::node> right_node, parse_comparison());
+
+			left_node = create_binary_expression(ast::node_type::OPERATOR_DISJUNCTION, left_node, right_node);
+		}
+
 		return left_node;
 	}
 
 	auto parser::parse_comparison() -> parse_result {
-		TRY(const handle<ast::node> left_node, parse_term());
-		// TODO
+		TRY(handle<ast::node> left_node, parse_term());
+		token operation = m_tokens.get_current_token();
+
+		while (
+			operation == token_type::GREATER_THAN_OR_EQUAL ||
+			operation == token_type::LESS_THAN_OR_EQUAL ||
+			operation == token_type::GREATER_THAN ||
+			operation == token_type::NOT_EQUALS ||
+			operation == token_type::LESS_THAN ||
+			operation == token_type::EQUALS
+		) {
+			m_tokens.next(); // prime the comparison
+
+			TRY(const handle<ast::node> right_node, parse_term());
+			ast::node_type operator_type = ast::node_type::UNKNOWN;
+
+			switch (operation) {
+				case token_type::GREATER_THAN_OR_EQUAL:  operator_type = ast::node_type::OPERATOR_GREATER_THAN_OR_EQUAL; break;
+				case token_type::LESS_THAN_OR_EQUAL:     operator_type = ast::node_type::OPERATOR_LESS_THAN_OR_EQUAL; break;
+				case token_type::GREATER_THAN:           operator_type = ast::node_type::OPERATOR_GREATER_THAN; break;
+				case token_type::NOT_EQUALS:             operator_type = ast::node_type::OPERATOR_NOT_EQUAL; break;
+				case token_type::LESS_THAN:              operator_type = ast::node_type::OPERATOR_LESS_THAN; break;
+				case token_type::EQUALS:                 operator_type = ast::node_type::OPERATOR_EQUAL; break;
+				default: PANIC("unhandled term case for token '{}'", operation.to_string());
+			}
+
+			left_node = create_binary_expression(operator_type, left_node, right_node);
+			operation = m_tokens.get_current_token();
+		}
+
 		return left_node;
 	}
 

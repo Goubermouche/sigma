@@ -28,6 +28,7 @@ namespace sigma {
 		// expressions
 		auto translate_binary_math_operator(handle<ast::node> operator_node) -> handle<ir::node>;
 		auto translate_binary_comparison_operator(handle<ast::node> operator_node) -> handle<ir::node>;
+		auto translate_predicate_operator(handle<ast::node> operator_node) -> handle<ir::node>;
 
 		// statements
 		void translate_return(handle<ast::node> return_node);

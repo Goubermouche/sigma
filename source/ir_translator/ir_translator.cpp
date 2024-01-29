@@ -37,6 +37,8 @@ namespace sigma {
 			case ast::node_type::OPERATOR_NOT_EQUAL:
 			case ast::node_type::OPERATOR_LESS_THAN:
 			case ast::node_type::OPERATOR_EQUAL:                 return translate_binary_comparison_operator(ast_node);
+			case ast::node_type::OPERATOR_CONJUNCTION:
+			case ast::node_type::OPERATOR_DISJUNCTION:           return translate_predicate_operator(ast_node);
 
 			// statements
 			case ast::node_type::RETURN:                         translate_return(ast_node); break;
@@ -270,8 +272,6 @@ namespace sigma {
 			// INTEGRAL_SIGNED || INTEGRAL_UNSIGNED
 			const bool is_signed = expression.type == ast::comparison_expression::type::INTEGRAL_SIGNED;
 
-			std::cout << is_signed << '\n';
-
 			switch (operator_node->type) {
 				case ast::node_type::OPERATOR_GREATER_THAN_OR_EQUAL: return m_context.builder.create_cmp_ige(left, right, is_signed);
 				case ast::node_type::OPERATOR_LESS_THAN_OR_EQUAL:    return m_context.builder.create_cmp_ile(left, right, is_signed);
@@ -283,7 +283,20 @@ namespace sigma {
 			}
 		}
 
-		return nullptr;
+		return nullptr; // unreachable
+	}
+
+	auto ir_translator::translate_predicate_operator(handle<ast::node> operator_node) -> handle<ir::node> {
+		const handle<ir::node> left = translate_node(operator_node->children[0]);
+		const handle<ir::node> right = translate_node(operator_node->children[1]);
+
+		switch(operator_node->type) {
+			case ast::node_type::OPERATOR_CONJUNCTION: return m_context.builder.create_and(left, right);
+			case ast::node_type::OPERATOR_DISJUNCTION: return m_context.builder.create_or(left, right);
+			default: PANIC("unexpected node type '{}' received", operator_node->type.to_string());
+		}
+
+		return nullptr; // unreachable
 	}
 
 	auto ir_translator::translate_cast(handle<ast::node> cast_node) -> handle<ir::node> {

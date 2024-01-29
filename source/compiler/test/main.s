@@ -16,6 +16,6 @@ i32 main() {
 	i32 a = 10;
 	u64 b = 20;
 
-	bool res = a == b;
+	bool res = a && b;
 	ret 0;
 }

@@ -45,6 +45,8 @@ namespace sigma {
 			case ast::node_type::OPERATOR_NOT_EQUAL:
 			case ast::node_type::OPERATOR_LESS_THAN:
 			case ast::node_type::OPERATOR_EQUAL:                 return type_check_binary_comparison_operator(target);
+			case ast::node_type::OPERATOR_CONJUNCTION:           
+			case ast::node_type::OPERATOR_DISJUNCTION:           return type_check_predicate_operator(target);
 
 			// statements
 			case ast::node_type::RETURN:                         return type_check_return(target, expected);
@@ -246,6 +248,14 @@ namespace sigma {
 		return larger_type;
 	}
 
+	auto type_checker::type_check_predicate_operator(ast_node binop) -> type_check_result {
+		// type check both operands
+		TRY(type_check_node(binop->children[0], binop, data_type::create_bool())); // left
+		TRY(type_check_node(binop->children[1], binop, data_type::create_bool())); // right
+
+		return data_type::create_bool();
+	}
+
 	auto type_checker::type_check_binary_comparison_operator(ast_node binop) -> type_check_result {
 		// type check both operands
 		TRY(const data_type left, type_check_node(binop->children[0], binop)); // left
@@ -362,6 +372,8 @@ namespace sigma {
 		return expression.type;
 	}
 
+	
+
 	auto type_checker::type_check_character_literal(ast_node literal, ast_node parent, data_type expected) const -> type_check_result {
 		auto& expression = literal->get<ast::named_type_expression>();
 		TRY(expression.type, implicit_type_cast(expression.type, expected, parent, literal));
@@ -432,7 +444,7 @@ namespace sigma {
 				target_type.to_string()
 			);
 
-			return original_type;
+			return target_type;
 		}
 
 		ASSERT(parent, "invalid parent detected");

@@ -189,6 +189,30 @@ namespace sigma::ir {
 		return create_unary_operation(node::type::TRUNCATE, dt, src);
 	}
 
+	auto function::create_cmp_eq(handle<node> a, handle<node> b) -> handle<node> {
+		return create_cmp(node::type::CMP_EQ, a, b);
+	}
+
+	auto function::create_cmp_ne(handle<node> a, handle<node> b) -> handle<node> {
+		return create_cmp(node::type::CMP_NE, a, b);
+	}
+
+  auto function::create_cmp_ilt(handle<node> a, handle<node> b, bool is_signed) -> handle<node> {
+		return create_cmp(is_signed ? node::type::CMP_SLT : node::type::CMP_ULT, a, b);
+  }
+
+	auto function::create_cmp_ile(handle<node> a, handle<node> b, bool is_signed) -> handle<node> {
+		return create_cmp(is_signed ? node::type::CMP_SLE : node::type::CMP_ULE, a, b);
+	}
+
+	auto function::create_cmp_igt(handle<node> a, handle<node> b, bool is_signed) -> handle<node> {
+		return create_cmp(is_signed ? node::type::CMP_SLT : node::type::CMP_ULT, a, b);
+	}
+
+	auto function::create_cmp_ige(handle<node> a, handle<node> b, bool is_signed) -> handle<node> {
+		return create_cmp(is_signed ? node::type::CMP_SLE : node::type::CMP_ULE, a, b);
+	}
+
 	void function::create_store(handle<node> destination, handle<node> value, u32 alignment, bool is_volatile) {
 		const handle<node> store = create_node<memory_access>(is_volatile ? node::type::WRITE : node::type::STORE, 4);
 
@@ -297,6 +321,18 @@ namespace sigma::ir {
 		operation->dt = dt;
 		operation->inputs[1] = src;
 		return operation;
+	}
+
+	auto function::create_cmp(node::type type, handle<node> a, handle<node> b) -> handle<node> {
+		ASSERT(a->dt == b->dt, "data types of the two operands do not match");
+		const handle<node> cmp = create_node<compare_op>(type, 3);
+
+		cmp->inputs[1] = a;
+		cmp->inputs[2] = b;
+		cmp->dt = BOOL_TYPE;
+
+		cmp->get<compare_op>().cmp_dt = a->dt;
+		return cmp;
 	}
 
 	auto function::create_projection(data_type dt, handle<node> source, u64 index) -> handle<node> {

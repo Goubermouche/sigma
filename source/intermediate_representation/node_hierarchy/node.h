@@ -14,9 +14,19 @@ namespace sigma::ir {
 	struct symbol;
 
 	using node_properties = utility::property<
-		binary_integer_op, memory_access, projection, integer, region, branch,
-		local, floating_point_32, floating_point_64, handle<symbol>, function_call,
-		array
+		binary_integer_op,
+		memory_access,
+		projection,
+		integer,
+		region,
+		branch,
+		local,
+		floating_point_32,
+		floating_point_64,
+		handle<symbol>,
+		function_call,
+		array,
+		compare_op
 	>;
 
 	/**

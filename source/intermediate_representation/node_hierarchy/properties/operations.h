@@ -16,4 +16,8 @@ namespace sigma::ir {
 	struct binary_integer_op {
 		arithmetic_behaviour behaviour = arithmetic_behaviour::NONE;
 	};
+
+	struct compare_op {
+		data_type cmp_dt;
+	};
 }

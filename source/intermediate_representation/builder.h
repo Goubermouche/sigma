@@ -139,6 +139,15 @@ namespace sigma::ir {
 		auto create_sub(handle<node> left, handle<node> right, arithmetic_behaviour behaviour = arithmetic_behaviour::NONE) const -> handle<node>;
 		auto create_mul(handle<node> left, handle<node> right, arithmetic_behaviour behaviour = arithmetic_behaviour::NONE) const -> handle<node>;
 
+		// comparisons
+		auto create_cmp_eq(handle<node> a, handle<node> b) const -> handle<node>;
+		auto create_cmp_ne(handle<node> a, handle<node> b) const -> handle<node>;
+
+		auto create_cmp_ilt(handle<node> a, handle<node> b, bool is_signed) const -> handle<node>;
+		auto create_cmp_ile(handle<node> a, handle<node> b, bool is_signed) const -> handle<node>;
+		auto create_cmp_igt(handle<node> a, handle<node> b, bool is_signed) const -> handle<node>;
+		auto create_cmp_ige(handle<node> a, handle<node> b, bool is_signed) const -> handle<node>;
+
 		// casting
 		auto create_sxt(handle<node> src, data_type dt) const -> handle<node>;
 		auto create_zxt(handle<node> src, data_type dt) const -> handle<node>;

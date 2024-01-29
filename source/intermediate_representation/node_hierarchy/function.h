@@ -58,9 +58,19 @@ namespace sigma::ir {
 		auto create_sub(handle<node> left, handle<node> right, arithmetic_behaviour behaviour = arithmetic_behaviour::NONE) -> handle<node>;
 		auto create_mul(handle<node> left, handle<node> right, arithmetic_behaviour behaviour = arithmetic_behaviour::NONE) -> handle<node>;
 
+		// casts
 		auto create_sxt(handle<node> src, data_type dt) -> handle<node>;
 		auto create_zxt(handle<node> src, data_type dt) -> handle<node>;
 		auto create_truncate(handle<node> src, data_type dt) -> handle<node>;
+
+		// comparisons
+		auto create_cmp_eq(handle<node> a, handle<node> b) -> handle<node>;
+		auto create_cmp_ne(handle<node> a, handle<node> b) -> handle<node>;
+
+		auto create_cmp_ilt(handle<node> a, handle<node> b, bool is_signed) -> handle<node>;
+		auto create_cmp_ile(handle<node> a, handle<node> b, bool is_signed) -> handle<node>;
+		auto create_cmp_igt(handle<node> a, handle<node> b, bool is_signed) -> handle<node>;
+		auto create_cmp_ige(handle<node> a, handle<node> b, bool is_signed) -> handle<node>;
 
 		void create_store(handle<node> destination, handle<node> value, u32 alignment, bool is_volatile);
 		auto create_load(handle<node> value_to_load, data_type data_type, u32 alignment, bool is_volatile) -> handle<node>;
@@ -73,6 +83,7 @@ namespace sigma::ir {
 
 		auto create_binary_arithmetic_operation(node::type type, handle<node> left, handle<node> right, arithmetic_behaviour behaviour) -> handle<node>;
 		auto create_unary_operation(node::type type, data_type dt, handle<node> src) -> handle<node>;
+		auto create_cmp(node::type type, handle<node> a, handle<node> b) -> handle<node>;
 
 		auto create_projection(data_type dt, handle<node> source, u64 index) -> handle<node>;
 		auto append_memory(handle<node> memory) const -> handle<node>;

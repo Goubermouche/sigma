@@ -108,6 +108,36 @@ namespace sigma::ir {
 		return get_insert_point_checked()->create_mul(left, right, behaviour);
 	}
 
+  auto builder::create_cmp_eq(handle<node> a, handle<node> b) const -> handle<node> {
+		DEBUG_PRINT("creating cmp eq");
+		return get_insert_point_checked()->create_cmp_eq(a, b);
+  }
+
+	auto builder::create_cmp_ne(handle<node> a, handle<node> b) const -> handle<node> {
+		DEBUG_PRINT("creating cmp ne");
+		return get_insert_point_checked()->create_cmp_ne(a, b);
+	}
+
+	auto builder::create_cmp_ilt(handle<node> a, handle<node> b, bool is_signed) const -> handle<node> {
+		DEBUG_PRINT("creating cmp ilt");
+		return get_insert_point_checked()->create_cmp_ilt(a, b, is_signed);
+	}
+
+	auto builder::create_cmp_ile(handle<node> a, handle<node> b, bool is_signed) const -> handle<node> {
+		DEBUG_PRINT("creating cmp ile");
+		return get_insert_point_checked()->create_cmp_ile(a, b, is_signed);
+	}
+
+	auto builder::create_cmp_igt(handle<node> a, handle<node> b, bool is_signed) const -> handle<node> {
+		DEBUG_PRINT("creating cmp igt");
+		return get_insert_point_checked()->create_cmp_igt(a, b, is_signed);
+	}
+
+	auto builder::create_cmp_ige(handle<node> a, handle<node> b, bool is_signed) const -> handle<node> {
+		DEBUG_PRINT("creating cmp ige");
+		return get_insert_point_checked()->create_cmp_ige(a, b, is_signed);
+	}
+
   auto builder::create_sxt(handle<node> src, data_type dt) const -> handle<node> {
 		DEBUG_PRINT("creating sxt");
 		return get_insert_point_checked()->create_sxt(src, dt);

@@ -296,6 +296,7 @@ namespace sigma {
 
 		auto resolved_token = token_type::UNKNOWN;
 		u64 token_length = 0;
+		u64 last_valid_pos = 0;
 
 		// find the longest token that is less < some arbitrary max token len
 		while(is_special(m_last_character) && m_current_section.size() < 2) {
@@ -307,6 +308,7 @@ namespace sigma {
 			if(it != m_special_tokens.end()) {
 				resolved_token = it->second;
 				token_length = m_current_section.size();
+				last_valid_pos = m_source.get_position();
 			}
 		}
 
@@ -322,7 +324,7 @@ namespace sigma {
 		m_current_location.char_index += static_cast<u32>(token_length - 1);
 
 		// go to the last valid token
-		m_source.set_position(m_source.get_position() - m_current_section.size());
+		m_source.set_position(last_valid_pos - 1);
 		get_next_char();
 
 		if(resolved_token == token_type::INLINE_COMMENT) {

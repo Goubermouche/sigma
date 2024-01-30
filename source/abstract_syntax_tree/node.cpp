@@ -42,6 +42,8 @@ namespace sigma::ast {
 			case OPERATOR_EQUAL:                 return "OPERATOR_EQUAL";
 			case OPERATOR_NOT_EQUAL:             return "OPERATOR_NOT_EQUAL";
 
+			case OPERATOR_LOGICAL_NOT:                   return "OPERATOR_LOGICAL_NOT";
+
 			case CAST:                           return "CAST";
 
 			case NUMERICAL_LITERAL:              return "NUMERICAL_LITERAL";

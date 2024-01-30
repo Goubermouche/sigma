@@ -59,11 +59,12 @@ namespace sigma {
 			case token_type::COLON:                 return ":";
 			case token_type::LESS_THAN:             return "<";
 			case token_type::GREATER_THAN:          return ">";
+			case token_type::EXCLAMATION_MARK:      return "!";
+
 			case token_type::LESS_THAN_OR_EQUAL:    return "<=";
 			case token_type::GREATER_THAN_OR_EQUAL: return ">=";
 			case token_type::EQUALS:                return "==";
 			case token_type::NOT_EQUALS:            return "!=";
-
 			case token_type::CONJUNCTION:           return "&&";
 			case token_type::DISJUNCTION:           return "||";
 			case token_type::INLINE_COMMENT:        return "//";
@@ -73,6 +74,7 @@ namespace sigma {
 			case token_type::I16:                   return "I16";
 			case token_type::I32:                   return "I32";
 			case token_type::I64:                   return "I64";
+
 			case token_type::U8:                    return "U8";
 			case token_type::U16:                   return "U16";
 			case token_type::U32:                   return "U32";

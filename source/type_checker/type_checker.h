@@ -47,6 +47,7 @@ namespace sigma {
 		auto type_check_binary_math_operator(ast_node binop, data_type expected) -> type_check_result;
 		auto type_check_binary_comparison_operator(ast_node binop, ast_node parent, data_type expected) -> type_check_result;
 		auto type_check_predicate_operator(ast_node binop, ast_node parent, data_type expected) -> type_check_result;
+		auto type_check_not_operator(ast_node op, ast_node parent, data_type expected) -> type_check_result;
 
 		// statements
 		auto type_check_return(ast_node statement, data_type expected) -> type_check_result;

@@ -544,6 +544,21 @@ namespace sigma {
 		return assignment_node;
 	}
 
+	auto parser::parse_logical_not_expression() -> parse_result {
+		// expect '! IDENTIFIER_STATEMENT'
+		EXPECT_CURRENT_TOKEN(token_type::EXCLAMATION_MARK);
+		const handle<token_location> location = get_current_location();
+
+		m_tokens.next(); // prime the expression token
+		TRY(const handle<ast::node> expression, parse_primary());
+
+		// create the not node
+		const handle<ast::node> not_expression = create_logical_not(location);
+		not_expression->children[0] = expression;
+
+		return not_expression;
+	}
+
 	auto parser::parse_expression() -> parse_result {
 		return parse_logical_conjunction();
 	}
@@ -677,9 +692,14 @@ namespace sigma {
 		switch (m_tokens.get_current_token()) {
 			case token_type::IDENTIFIER:         return parse_identifier_expression();
 			case token_type::SIZEOF:             return parse_sizeof();
+
+			// modifiers
+			case token_type::MINUS_SIGN:         return parse_negative_expression();
+			case token_type::EXCLAMATION_MARK:   return parse_logical_not_expression();
+
+			// literals
 			case token_type::STRING_LITERAL:     return parse_string_literal();
 			case token_type::CHARACTER_LITERAL:  return parse_character_literal();
-			case token_type::MINUS_SIGN:         return parse_negative_expression();
 			case token_type::BOOL_LITERAL_TRUE:
 			case token_type::BOOL_LITERAL_FALSE: return parse_bool_literal();
 			case token_type::NULL_LITERAL:       return parse_null_literal();
@@ -990,6 +1010,10 @@ namespace sigma {
 
 	auto parser::create_cast(handle<token_location> location) const -> handle<ast::node> {
 		return create_node<ast::cast>(ast::node_type::CAST, 1, location);
+	}
+
+	auto parser::create_logical_not(handle<token_location> location) const -> handle<ast::node> {
+		return create_node(ast::node_type::OPERATOR_LOGICAL_NOT, 1, location);
 	}
 
   auto parser::create_comparison_operation(ast::node_type type, handle<ast::node> left, handle<ast::node> right) const -> handle<ast::node> {

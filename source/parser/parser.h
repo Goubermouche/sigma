@@ -52,6 +52,7 @@ namespace sigma {
 		auto parse_logical_conjunction() -> parse_result;
 		auto parse_logical_disjunction() -> parse_result;
 		auto parse_negative_expression() -> parse_result;
+		auto parse_logical_not_expression() -> parse_result;
 		auto parse_expression() -> parse_result;
 		auto parse_comparison() -> parse_result;
 		auto parse_primary() -> parse_result;
@@ -110,6 +111,7 @@ namespace sigma {
 		auto create_assignment(handle<token_location> location) const -> handle<ast::node>;
 		auto create_sizeof(handle<token_location> location) const -> handle<ast::node>;
 		auto create_cast(handle<token_location> location) const -> handle<ast::node>;
+		auto create_logical_not(handle<token_location> location) const -> handle<ast::node>;
 
 		auto create_comparison_operation(ast::node_type type, handle<ast::node> left, handle<ast::node> right) const -> handle<ast::node>;
 		auto create_binary_operation(ast::node_type type, handle<ast::node> left, handle<ast::node> right) const->handle<ast::node>;

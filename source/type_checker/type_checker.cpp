@@ -47,6 +47,7 @@ namespace sigma {
 			case ast::node_type::OPERATOR_EQUAL:                 return type_check_binary_comparison_operator(target, parent, expected);
 			case ast::node_type::OPERATOR_CONJUNCTION:           
 			case ast::node_type::OPERATOR_DISJUNCTION:           return type_check_predicate_operator(target, parent, expected);
+			case ast::node_type::OPERATOR_LOGICAL_NOT:           return type_check_not_operator(target, parent, expected);
 
 			// statements
 			case ast::node_type::RETURN:                         return type_check_return(target, expected);
@@ -554,5 +555,13 @@ namespace sigma {
 	auto type_checker::type_check_sizeof(ast_node sizeof_node, ast_node parent, data_type expected) const -> type_check_result {
 		// upcast to the expected type, without throwing warnings/errors
 		return implicit_type_cast(data_type::create_u64(), expected, parent, sizeof_node);
+	}
+
+	auto type_checker::type_check_not_operator(ast_node op, ast_node parent, data_type expected) -> type_check_result {
+		// type check the negated expression
+		TRY(const data_type expression_type, type_check_node(op->children[0], op, data_type::create_bool()));
+
+		// upcast, just in case, more of a sanity check
+		return implicit_type_cast(expression_type, expected, parent, op);
 	}
 } // namespace sigma

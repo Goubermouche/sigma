@@ -875,6 +875,23 @@ namespace sigma::ir {
 				break;
 			}
 
+			case node::type::NOT:
+			case node::type::NEG: {
+				if(!n->dt.is_floating_point()) {
+					reg src = allocate_node_register(context, n->inputs[1]);
+					bool is_not = n->get_type() == node::type::NOT;
+					instruction::type type = is_not ? instruction::type::NOT : instruction::type::NEG;
+
+					context.append_instruction(create_move(context, n->dt, destination, src));
+					context.append_instruction(create_rr(context, type, n->dt, destination, destination));
+				}
+				else {
+					NOT_IMPLEMENTED();
+				}
+
+				break;
+			}
+
 			case node::type::EXIT: {
 				ASSERT(n->inputs.get_size() <= 5, "at most 2 return values :(");
 				static reg default_return_registers[2] = {

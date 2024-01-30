@@ -37,9 +37,9 @@ namespace sigma {
 			case ast::node_type::OPERATOR_LESS_THAN:             return translate_binary_comparison_operator(ast_node);
 			case ast::node_type::OPERATOR_NOT_EQUAL:
 			case ast::node_type::OPERATOR_EQUAL:                 return translate_binary_equality_operator(ast_node);
-				
 			case ast::node_type::OPERATOR_CONJUNCTION:
 			case ast::node_type::OPERATOR_DISJUNCTION:           return translate_predicate_operator(ast_node);
+			case ast::node_type::OPERATOR_LOGICAL_NOT:           return translate_logical_not_operator(ast_node);
 
 			// statements
 			case ast::node_type::RETURN:                         translate_return(ast_node); break;
@@ -319,6 +319,14 @@ namespace sigma {
 		}
 
 		return nullptr; // unreachable
+	}
+
+	auto ir_translator::translate_logical_not_operator(handle<ast::node> operator_node) -> handle<ir::node> {
+		// evaluate the expression we want to negate
+		const handle<ir::node> expression = translate_node(operator_node->children[0]);
+
+		// negate it 
+		return m_context.builder.create_cmp_eq(expression, m_context.builder.create_unsigned_integer(0, 1));
 	}
 
 	auto ir_translator::translate_cast(handle<ast::node> cast_node) -> handle<ir::node> {

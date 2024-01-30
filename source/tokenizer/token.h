@@ -30,6 +30,7 @@ namespace sigma {
 		COLON,                 // :
 		LESS_THAN,             // <
 		GREATER_THAN,          // >
+		EXCLAMATION_MARK,      // !
 
 		LESS_THAN_OR_EQUAL,    // <=
 		GREATER_THAN_OR_EQUAL, // >=

@@ -57,6 +57,8 @@ namespace sigma::ast {
 			OPERATOR_EQUAL,
 			OPERATOR_NOT_EQUAL,
 
+			OPERATOR_LOGICAL_NOT,
+
 			// cast
 			// children[0] = value
 			CAST,

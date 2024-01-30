@@ -264,24 +264,21 @@ namespace sigma {
 		// determine the comparison operator type
 		const ast::comparison_expression& expression = operator_node->get<ast::comparison_expression>();
 
-		if(expression.type == ast::comparison_expression::type::POINTER) {
-			// pointer comparisons
-			switch (operator_node->type) {
-				case ast::node_type::OPERATOR_GREATER_THAN_OR_EQUAL: return m_context.builder.create_cmp_ige(left, right, false);
-				case ast::node_type::OPERATOR_LESS_THAN_OR_EQUAL:    return m_context.builder.create_cmp_ile(left, right, false);
-				case ast::node_type::OPERATOR_GREATER_THAN:          return m_context.builder.create_cmp_igt(left, right, false);
-				case ast::node_type::OPERATOR_LESS_THAN:             return m_context.builder.create_cmp_ilt(left, right, false);
-				default: PANIC("unexpected node type '{}' received", operator_node->type.to_string());
-			}
-		}
-		else if(expression.type == ast::comparison_expression::type::FLOATING_POINT) {
+		if(expression.type == ast::comparison_expression::type::FLOATING_POINT) {
 			// floating point comparisons 
 			NOT_IMPLEMENTED();
 		}
 		else {
 			// integral comparisons
-			// INTEGRAL_SIGNED || INTEGRAL_UNSIGNED
-			const bool is_signed = expression.type == ast::comparison_expression::type::INTEGRAL_SIGNED;
+			bool is_signed;
+
+			if(expression.type == ast::comparison_expression::type::POINTER) {
+				// interpret pointers as unsigned
+				is_signed = false;
+			}
+			else {
+				is_signed = expression.type == ast::comparison_expression::type::INTEGRAL_SIGNED;
+			}
 
 			switch (operator_node->type) {
 				case ast::node_type::OPERATOR_GREATER_THAN_OR_EQUAL: return m_context.builder.create_cmp_ige(left, right, is_signed);
@@ -322,7 +319,7 @@ namespace sigma {
 	}
 
 	auto ir_translator::translate_logical_not_operator(handle<ast::node> operator_node) -> handle<ir::node> {
-		// evaluate the expression we want to negate
+		// evaluate the boolean expression we want to negate
 		const handle<ir::node> expression = translate_node(operator_node->children[0]);
 
 		// negate it 

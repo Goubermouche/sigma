@@ -550,6 +550,12 @@ namespace sigma {
 		const handle<token_location> location = get_current_location();
 
 		m_tokens.next(); // prime the expression token
+
+		if(m_tokens.get_current_token() == token_type::EXCLAMATION_MARK) {
+			// don't allow negations of negations and so on
+			return error::emit(error::code::MULTIPLE_NEGATIONS, location);
+		}
+
 		TRY(const handle<ast::node> expression, parse_primary());
 
 		// create the not node

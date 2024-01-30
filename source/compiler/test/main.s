@@ -9,6 +9,6 @@
 // -   cleanup ir gen alignment sizes (u64 vs u32 vs u16)
 
 i32 main() {
-    bool a = true;
-		printf("%d", !a);
+  bool a = true;
+	printf("%d", !a);
 }

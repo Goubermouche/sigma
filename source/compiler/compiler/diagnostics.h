@@ -29,6 +29,7 @@ namespace sigma {
 			UNEXPECTED_NON_NUMERICAL = 3000,
 			UNEXPECTED_TOKEN,
 			UNEXPECTED_TOKEN_WITH_EXPECTED,
+			MULTIPLE_NEGATIONS,
 
 			// type checker (4000 - 4999)
 			UNKNOWN_FUNCTION = 4000,
@@ -99,6 +100,7 @@ namespace sigma {
 			{ code::UNEXPECTED_NON_NUMERICAL,            "unexpected non-numerical literal token received ('{}')"                            },
 			{ code::UNEXPECTED_TOKEN,                    "unexpected token received ('{}')"                                                  },
 			{ code::UNEXPECTED_TOKEN_WITH_EXPECTED,      "unexpected token received (expected '{}', but got '{}' instead)"                   },
+			{ code::MULTIPLE_NEGATIONS,                  "cannot chain multiple not operators"                                               },
 
 			// type checker
 			{ code::UNKNOWN_FUNCTION,                    "attempting to call an unknown function ('{}')"                                     },

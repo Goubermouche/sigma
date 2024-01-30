@@ -34,9 +34,10 @@ namespace sigma {
 			case ast::node_type::OPERATOR_GREATER_THAN_OR_EQUAL:
 			case ast::node_type::OPERATOR_LESS_THAN_OR_EQUAL:
 			case ast::node_type::OPERATOR_GREATER_THAN:
+			case ast::node_type::OPERATOR_LESS_THAN:             return translate_binary_comparison_operator(ast_node);
 			case ast::node_type::OPERATOR_NOT_EQUAL:
-			case ast::node_type::OPERATOR_LESS_THAN:
-			case ast::node_type::OPERATOR_EQUAL:                 return translate_binary_comparison_operator(ast_node);
+			case ast::node_type::OPERATOR_EQUAL:                 return translate_binary_equality_operator(ast_node);
+				
 			case ast::node_type::OPERATOR_CONJUNCTION:
 			case ast::node_type::OPERATOR_DISJUNCTION:           return translate_predicate_operator(ast_node);
 
@@ -270,8 +271,6 @@ namespace sigma {
 				case ast::node_type::OPERATOR_LESS_THAN_OR_EQUAL:    return m_context.builder.create_cmp_ile(left, right, false);
 				case ast::node_type::OPERATOR_GREATER_THAN:          return m_context.builder.create_cmp_igt(left, right, false);
 				case ast::node_type::OPERATOR_LESS_THAN:             return m_context.builder.create_cmp_ilt(left, right, false);
-				case ast::node_type::OPERATOR_NOT_EQUAL:             return m_context.builder.create_cmp_ne(left, right);
-				case ast::node_type::OPERATOR_EQUAL:                 return m_context.builder.create_cmp_eq(left, right);
 				default: PANIC("unexpected node type '{}' received", operator_node->type.to_string());
 			}
 		}
@@ -289,13 +288,23 @@ namespace sigma {
 				case ast::node_type::OPERATOR_LESS_THAN_OR_EQUAL:    return m_context.builder.create_cmp_ile(left, right, is_signed);
 				case ast::node_type::OPERATOR_GREATER_THAN:          return m_context.builder.create_cmp_igt(left, right, is_signed);
 				case ast::node_type::OPERATOR_LESS_THAN:             return m_context.builder.create_cmp_ilt(left, right, is_signed);
-				case ast::node_type::OPERATOR_NOT_EQUAL:             return m_context.builder.create_cmp_ne(left, right);
-				case ast::node_type::OPERATOR_EQUAL:                 return m_context.builder.create_cmp_eq(left, right);
 				default: PANIC("unexpected node type '{}' received", operator_node->type.to_string());
 			}
 		}
 
-		NOT_IMPLEMENTED();
+		return nullptr; // unreachable
+	}
+
+	auto ir_translator::translate_binary_equality_operator(handle<ast::node> operator_node) -> handle<ir::node> {
+		const handle<ir::node> left = translate_node(operator_node->children[0]);
+		const handle<ir::node> right = translate_node(operator_node->children[1]);
+
+		switch (operator_node->type) {
+			case ast::node_type::OPERATOR_NOT_EQUAL:             return m_context.builder.create_cmp_ne(left, right);
+			case ast::node_type::OPERATOR_EQUAL:                 return m_context.builder.create_cmp_eq(left, right);
+			default: PANIC("unexpected node type '{}' received", operator_node->type.to_string());
+		}
+
 		return nullptr; // unreachable
 	}
 

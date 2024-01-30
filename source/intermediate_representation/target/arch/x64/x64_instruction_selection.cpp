@@ -1276,7 +1276,7 @@ namespace sigma::ir {
 				}
 			}
 			else {
-				bool invert = false;
+				invert = false;
 				i32 x;
 				const reg lhs = allocate_node_register(context, n->inputs[1]);
 				const i32 bits = cmp_dt.is_pointer() ? 64 : cmp_dt.get_bit_width();

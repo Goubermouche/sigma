@@ -264,8 +264,16 @@ namespace sigma {
 		const ast::comparison_expression& expression = operator_node->get<ast::comparison_expression>();
 
 		if(expression.type == ast::comparison_expression::type::POINTER) {
-			// pointer comparisons 
-			NOT_IMPLEMENTED();
+			// pointer comparisons
+			switch (operator_node->type) {
+				case ast::node_type::OPERATOR_GREATER_THAN_OR_EQUAL: return m_context.builder.create_cmp_ige(left, right, false);
+				case ast::node_type::OPERATOR_LESS_THAN_OR_EQUAL:    return m_context.builder.create_cmp_ile(left, right, false);
+				case ast::node_type::OPERATOR_GREATER_THAN:          return m_context.builder.create_cmp_igt(left, right, false);
+				case ast::node_type::OPERATOR_LESS_THAN:             return m_context.builder.create_cmp_ilt(left, right, false);
+				case ast::node_type::OPERATOR_NOT_EQUAL:             return m_context.builder.create_cmp_ne(left, right);
+				case ast::node_type::OPERATOR_EQUAL:                 return m_context.builder.create_cmp_eq(left, right);
+				default: PANIC("unexpected node type '{}' received", operator_node->type.to_string());
+			}
 		}
 		else if(expression.type == ast::comparison_expression::type::FLOATING_POINT) {
 			// floating point comparisons 

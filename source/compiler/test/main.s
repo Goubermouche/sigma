@@ -7,23 +7,12 @@
 // TODO: 
 // -   add namespaces to error messages, whenever applicable (ie. x::y::test)
 // -   cleanup ir gen alignment sizes (u64 vs u32 vs u16)
-// -   conjunction & disjunction operators
-
-// CHECK:
-// -   bool b = 100 > 200;
 
 i32 main() {
-	i32 a = 100;
-	i32 b = 100;
+	i32 x = 10;
+	i32* y = cast<i32*>(malloc(10));
 
-	printf("%d < %d  = %d\n", a, b, a < b);
-	printf("%d > %d  = %d\n", a, b, a > b);
-	printf("%d <= %d = %d\n", a, b, a <= b);
-	printf("%d >= %d = %d\n", a, b, a >= b);
-	printf("%d == %d = %d\n", a, b, a == b);
-	printf("%d != %d = %d\n", a, b, a != b);
-
-  printf("%d\n", 100 > 200);
+	printf("ptr: %d\n", x > y);
 
 	ret 0;
 }

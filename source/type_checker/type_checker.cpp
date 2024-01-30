@@ -413,7 +413,7 @@ namespace sigma {
 			// use the new promoted type and (up)cast to it
 		}
 
-		// no cast needed
+		// types are the same
 		if(original_type == target_type) {
 			return original_type;
 		}
@@ -425,13 +425,25 @@ namespace sigma {
 				return target_type;
 			}
 
-			// invalid cast
+			// invalid implicit cast
 			return error::emit(
 				error::code::INVALID_IMPLICIT_CAST, 
 				target->location, 
 				original_type.to_string(),
 				target_type.to_string()
 			);
+		}
+		else {
+			// check that we're not casting from a non-pointer to a pointer
+			if (target_type.is_pointer()) {
+				// invalid cast
+				return error::emit(
+					error::code::INVALID_CAST,
+					target->location,
+					original_type.to_string(),
+					target_type.to_string()
+				);
+			}
 		}
 
 		// target type is known at this point, try to cast to it
@@ -519,6 +531,21 @@ namespace sigma {
 
 		// type check the value we're casting
 		TRY(value.original_type, type_check_node(cast->children[0], cast, data_type::create_unknown()));
+
+		const data_type original = value.original_type;
+		const data_type target = value.target_type;
+
+		// verify the cast integrity
+		if (!original.is_pointer() && target.is_pointer()) {
+			// don't allow non-pointers to become pointers
+				// invalid cast
+			return error::emit(
+				error::code::INVALID_CAST,
+				cast->location,
+				original.to_string(),
+				target.to_string()
+			);
+		}
 
 		// upcast the result, if necessary, just a sanity check
 		return implicit_type_cast(value.target_type, expected, parent, cast);

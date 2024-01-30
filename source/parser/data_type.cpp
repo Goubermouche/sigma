@@ -269,8 +269,17 @@ namespace sigma {
 				b.base_type == data_type::UNKNOWN ||
 				a.base_type == data_type::VAR_ARG_PROMOTE ||
 				b.base_type == data_type::VAR_ARG_PROMOTE
-				) {
+			) {
 				return { data_type::UNKNOWN, 0 };
+			}
+
+			// consider pointers as automatically the larger/more prominent type
+			if(a.is_pointer()) {
+				return a;
+			}
+
+			if(b.is_pointer()) {
+				return b;
 			}
 
 			if (a.base_type == b.base_type) {

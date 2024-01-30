@@ -40,6 +40,9 @@ namespace sigma {
 
 		// run analysis on the generated AST
 		TRY(type_checker::type_check(backend));
+
+		return SUCCESS;
+
 		TRY(ir_translator::translate(backend));
 
 		// compile the generated IR module

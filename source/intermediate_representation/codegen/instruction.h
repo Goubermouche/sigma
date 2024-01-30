@@ -27,6 +27,7 @@ namespace sigma::ir {
 			enum underlying {
 				RET,
 				INT3,
+				NOP,
 				STOSB,
 				MOVSB,
 				CAST,

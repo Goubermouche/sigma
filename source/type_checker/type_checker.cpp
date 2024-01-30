@@ -403,8 +403,6 @@ namespace sigma {
 	}
 
 	auto type_checker::implicit_type_cast(data_type original_type, data_type target_type, ast_node parent, ast_node target) const -> type_check_result {
-		utility::console::print("cast {} -> {}\n", original_type.to_string(), target_type.to_string());
-
 		if(target_type.is_unknown()) {
 			return original_type;
 		}

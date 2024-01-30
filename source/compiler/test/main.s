@@ -13,12 +13,7 @@
 // -   bool b = 100 > 200;
 
 i32 main() {
-	i32 a = 200;
-	i32 b = 200;
-
-	bool result = a == b;
-
-	printf("%d\n", result);
+	printf("test: %d\n", 1000 > 200);
 
 	ret 0;
 }

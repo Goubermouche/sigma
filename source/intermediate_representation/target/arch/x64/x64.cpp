@@ -375,6 +375,7 @@ namespace sigma::ir {
 
 		table[instruction::type::RET] = { .mnemonic = "ret",       .category = instruction::category::BYTE,     .op = 0xC3 };
 		table[instruction::type::INT3] = { .mnemonic = "int3",      .category = instruction::category::BYTE,     .op = 0xCC };
+		table[instruction::type::NOP] = { .mnemonic = "nop",      .category = instruction::category::BYTE,     .op = 0x90 };
 		table[instruction::type::STOSB] = { .mnemonic = "rep stosb", .category = instruction::category::BYTE,     .op = 0xAA };
 		table[instruction::type::MOVSB] = { .mnemonic = "rep movsb", .category = instruction::category::BYTE,     .op = 0xA4 };
 		table[instruction::type::CAST] = { .mnemonic = "cvt",       .category = instruction::category::BYTE,     .op = 0x99 };

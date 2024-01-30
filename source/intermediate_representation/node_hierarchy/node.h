@@ -88,6 +88,7 @@ namespace sigma::ir {
 				SYSTEM_CALL,
 				TAIL_CALL,
 				SAFE_POINT_POLL,
+				SAFE_POINT_NOP,
 
 				// memory
 				MERGE_MEM,

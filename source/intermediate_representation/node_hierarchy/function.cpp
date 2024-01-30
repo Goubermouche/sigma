@@ -206,11 +206,11 @@ namespace sigma::ir {
 	}
 
 	auto function::create_cmp_igt(handle<node> a, handle<node> b, bool is_signed) -> handle<node> {
-		return create_cmp_operation(is_signed ? node::type::CMP_SLT : node::type::CMP_ULT, a, b);
+		return create_cmp_operation(is_signed ? node::type::CMP_SLT : node::type::CMP_ULT, b, a);
 	}
 
 	auto function::create_cmp_ige(handle<node> a, handle<node> b, bool is_signed) -> handle<node> {
-		return create_cmp_operation(is_signed ? node::type::CMP_SLE : node::type::CMP_ULE, a, b);
+		return create_cmp_operation(is_signed ? node::type::CMP_SLE : node::type::CMP_ULE, b, a);
 	}
 
   auto function::create_not(handle<node> value) -> handle<node> {

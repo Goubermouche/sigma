@@ -104,7 +104,7 @@ namespace sigma::ir {
 		void select_instructions_region(codegen_context& context, handle<node> block_entry, handle<node> block_end, u64 rpo_index);
 		void select_instruction(codegen_context& context, handle<node> n, reg destination);
 		auto select_memory_access_instruction(codegen_context& context, handle<node> n, reg dst, i32 store_op, i32 src) -> handle<instruction>;
-		auto select_array_access_instruction(codegen_context& context, handle<node> target, reg destination, i32 store_op, i32 source) -> handle<instruction>;
+		auto select_array_access_instruction(codegen_context& context, handle<node> n, reg dst, i32 store_op, i32 src) -> handle<instruction>;
 		auto select_instruction_cmp(codegen_context& context, handle<node> n) -> x64::conditional;
 
 		void dfs_schedule(codegen_context& context, handle<basic_block> bb, handle<node> n, bool is_end);

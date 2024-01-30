@@ -43,6 +43,7 @@ namespace sigma::ir {
 		const local& local_prop = node->get<local>();
 		const i32 position = allocate_stack(local_prop.size, local_prop.alignment);
 		stack_slots[node] = position;
+
 		return position;
 	}
 } // namespace sigma::ir

@@ -270,11 +270,11 @@ namespace sigma {
 		ast::comparison_expression& expression = binop->get<ast::comparison_expression>();
 
 		// determine the type of our comparison op
-		if(larger_type.is_floating_point()) {
-			expression.type = ast::comparison_expression::type::FLOATING_POINT;
-		}
-		else if(larger_type.is_pointer()) {
+		if (larger_type.is_pointer()) {
 			expression.type = ast::comparison_expression::type::POINTER;
+		}
+		else if(larger_type.is_floating_point()) {
+			expression.type = ast::comparison_expression::type::FLOATING_POINT;
 		}
 		else if(larger_type.is_signed()) {
 			expression.type = ast::comparison_expression::type::INTEGRAL_SIGNED;
@@ -283,7 +283,7 @@ namespace sigma {
 			expression.type = ast::comparison_expression::type::INTEGRAL_UNSIGNED;
 		}
 
-		return implicit_type_cast(data_type::create_i8(), expected, parent, binop);
+		return implicit_type_cast(data_type::create_bool(), expected, parent, binop);
 	}
 
 	auto type_checker::type_check_array_access(ast_node access, ast_node parent, data_type expected) -> type_check_result {

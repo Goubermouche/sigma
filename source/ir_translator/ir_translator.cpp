@@ -263,7 +263,11 @@ namespace sigma {
 		// determine the comparison operator type
 		const ast::comparison_expression& expression = operator_node->get<ast::comparison_expression>();
 
-		if(expression.type == ast::comparison_expression::type::FLOATING_POINT) {
+		if(expression.type == ast::comparison_expression::type::POINTER) {
+			// pointer comparisons 
+			NOT_IMPLEMENTED();
+		}
+		else if(expression.type == ast::comparison_expression::type::FLOATING_POINT) {
 			// floating point comparisons 
 			NOT_IMPLEMENTED();
 		}

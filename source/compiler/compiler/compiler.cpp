@@ -86,12 +86,18 @@ namespace sigma {
 		utility::fs::file<utility::contiguous_container<utility::byte>>::save(path, module.generate_object_file());
 	}
 
-	auto compiler::get_emit_target_from_path(const filepath& path) -> utility::result<emit_target> {
+	auto compiler::get_emit_target_from_path(const filepath& path) const -> utility::result<emit_target> {
 		if(path.get_extension() == ".exe") {
 			return emit_target::EXECUTABLE;
 		}
 
-		if(path.get_extension() == ".obj" || path.get_extension() == ".o") {
+		if(path.get_extension() == ".obj") {
+			ASSERT(m_description.target.get_system() == ir::system::WINDOWS, "incompatible target and object format");
+			return emit_target::OBJECT;
+		}
+
+		if (path.get_extension() == ".o") {
+			ASSERT(m_description.target.get_system() == ir::system::LINUX, "incompatible target and object format");
 			return emit_target::OBJECT;
 		}
 

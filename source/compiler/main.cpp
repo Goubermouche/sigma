@@ -9,7 +9,10 @@ i32 compile(const parametric::parameters& params) {
 		.emit_path = params.get<filepath>("emit"),
 
 		// default to x64 win for now
-		.target = { sigma::ir::arch::X64, sigma::ir::system::WINDOWS },
+		.target = {
+			params.get<sigma::ir::arch>("arch"),
+			params.get<sigma::ir::system>("system")
+		},
 	};
 
 	// compile the specified description, check for errors after we finish
@@ -45,8 +48,8 @@ auto main(i32 argc, char* argv[]) -> i32 {
 
 	compile_command.add_positional_argument<filepath>("file", "source file to compile");
 	compile_command.add_flag<filepath>("emit", "filepath to emit to", "e", "./a.obj");
-	compile_command.add_flag<sigma::ir::arch>("arch", "CPU architecture to compile for [x64]");
-	compile_command.add_flag<sigma::ir::system>("system", "operating system to compile for [windows, linux]");
+	compile_command.add_flag<sigma::ir::arch>("arch", "CPU architecture to compile for [x64]", "", sigma::ir::arch::X64);
+	compile_command.add_flag<sigma::ir::system>("system", "operating system to compile for [windows, linux]", "", sigma::ir::system::WINDOWS);
 
 	// TODO: add support for emitting multiple files at once
 

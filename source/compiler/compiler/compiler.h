@@ -47,7 +47,7 @@ namespace sigma {
 		static auto verify_file(const filepath& path) -> utility::result<void>;
 		static void emit_object_file(ir::module& module, const filepath& path);
 
-		static auto get_emit_target_from_path(const filepath& path) -> utility::result<emit_target>;
+		auto get_emit_target_from_path(const filepath& path) const -> utility::result<emit_target>;
 	private:
 		compiler_description m_description;
 

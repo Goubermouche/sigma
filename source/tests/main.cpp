@@ -89,23 +89,9 @@ auto compile_file(const filepath& path, const filepath& compiler_path) -> bool {
 	return false;
 }
 
-auto run_executable(const filepath& path) -> bool {
+auto run_executable(const filepath& path) -> i32 {
 	const std::string command = std::format("{} > {} 2> {}", path, APP_STDOUT, APP_STDERR);
-
-	const i32 result = utility::shell::execute(command);
-
-	if(result) {
-		utility::console::printerr("{:<40} ERROR (run - {})\n", path.to_string(), result);
-
-		const std::string stdout_str = read_or_throw(APP_STDOUT);
-		const std::string stderr_str = read_or_throw(APP_STDERR);
-
-		print_error_block(
-			{ "STDOUT", "STDERR" }, 
-			{ utility::detail::escape_string(stdout_str) , utility::detail::escape_string(stderr_str) });
-	}
-
-	return result;
+	return utility::shell::execute(command);
 }
 
 bool run_test(const filepath& path, const filepath& compiler_path) {
@@ -115,7 +101,16 @@ bool run_test(const filepath& path, const filepath& compiler_path) {
 		return true;
 	}
 
-	if(run_executable(EXECUTABLE_FILE)) {
+	if(i32 run_result = run_executable(EXECUTABLE_FILE)) {
+		utility::console::printerr("{:<40} ERROR (run - {})\n", path.to_string(), run_result);
+
+		const std::string stdout_str = read_or_throw(APP_STDOUT);
+		const std::string stderr_str = read_or_throw(APP_STDERR);
+
+		print_error_block(
+			{ "STDOUT", "STDERR" },
+			{ utility::detail::escape_string(stdout_str) , utility::detail::escape_string(stderr_str) });
+
 		return true;
 	}
 

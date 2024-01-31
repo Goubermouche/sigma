@@ -69,7 +69,7 @@ namespace utility {
 			return std::filesystem::remove(path.get_path());
 		}
 
-		void create(const filepath& path) {
+		inline void create(const filepath& path) {
 			// TODO: add error checking
 			std::ofstream file(path.get_path());
 			file.close();

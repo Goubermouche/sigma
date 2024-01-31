@@ -173,8 +173,6 @@ namespace sigma::ir {
 				cat = s_instruction_table[inst->get_type()].category;
 			}
 
-			printf("inst: %d %d\n", inst->get_type(), cat);
-
 			if (inst == instruction::type::ENTRY || inst == instruction::type::TERMINATOR) {
 				/*does nothing*/
 			}
@@ -750,8 +748,6 @@ namespace sigma::ir {
 			// immediates have a custom opcode
 			ASSERT(b != instruction_operand::type::IMM || descriptor.op_i != 0 || descriptor.rx_i != 0, "no immediate variant of instruction");
 			u8 opcode = b->get_type() == instruction_operand::type::IMM ? descriptor.op_i : descriptor.op;
-			printf("opcode: %d\n", (int)opcode);
-			printf("is imm: %d\n", (int)b->get_type() == instruction_operand::type::IMM);
 
 			// the bottom bit usually means size, 0 for 8bit, 1 for everything else
 			opcode |= static_cast<u8>(sz);
@@ -761,7 +757,6 @@ namespace sigma::ir {
 			opcode |= dir_flag << 1;
 			opcode |= short_imm << 1;
 
-			printf("append: %d\n", (int)opcode);
 			bytecode.append_byte(opcode);
 		}
 

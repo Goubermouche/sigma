@@ -76,8 +76,6 @@ namespace sigma::ir {
 		operand->set_type(type::ABS);
 		operand->get<absolute>().value = abs;
 
-		printf("ABS IS : %lld\n", abs);
-
 		return operand;
 	}
 

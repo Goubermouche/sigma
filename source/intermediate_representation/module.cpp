@@ -69,11 +69,11 @@ namespace sigma::ir {
 			// generate a bytecode representation of the given function for the specified target
 			const utility::byte_buffer bytecode = m_codegen.emit_bytecode(codegen);
 
-			for(const auto b : bytecode) {
-				std::cout << b.to_hex() << ' ';
-			}
-			
-			std::cout << '\n';
+			// for(const auto b : bytecode) {
+			// 	std::cout << b.to_hex() << ' ';
+			// }
+			// 
+			// std::cout << '\n';
 			
 			// DEBUG
 			// assembly.append(m_codegen.disassemble(bytecode, codegen));

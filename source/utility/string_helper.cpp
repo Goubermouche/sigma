@@ -93,4 +93,14 @@ namespace utility::detail {
 		// no newline found, return the original string or an empty string
 		return string;
 	}
+
+  auto is_only_char(const std::string& s, char c) -> bool {
+		for (const char ch : s) {
+			if (ch != c) {
+				return false;
+			}
+		}
+
+		return true;
+	}
 } // namespace sigma

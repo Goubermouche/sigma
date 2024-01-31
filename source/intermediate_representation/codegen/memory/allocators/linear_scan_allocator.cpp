@@ -114,21 +114,6 @@ namespace sigma::ir {
 				interval->assigned = reg;
 				move_to_active(context, interval);
 			}
-
-			//printf("  \x1b[32m{ ");
-			//for (u8 rc = 0; rc < REGISTER_CLASS_COUNT; ++rc) {
-			//	utility::foreach_set(m_active_set[rc], [&](u64 r) {
-			//		int id = m_active[rc][r];
-
-			//		if (context.intervals[id].reg.is_valid()) {
-			//			printf("%s ", reg_name(rc, context.intervals[id].reg.id));
-			//		}
-			//		else {
-			//			printf("v%d:%s ", m_active[rc][r], reg_name(rc, r));
-			//		}
-			//	});
-			//}
-			//printf("}\x1b[0m\n");
 		}
 
 		// move the resolver

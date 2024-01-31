@@ -47,6 +47,8 @@ namespace utility::detail {
 
 	auto remove_first_line(const std::string& string) -> std::string;
 
+	auto is_only_char(const std::string& s, char c) -> bool;
+
 	template<typename type>
 	auto unsigned_from_string(const std::string& string, bool& overflow) -> type {
 		overflow = false;

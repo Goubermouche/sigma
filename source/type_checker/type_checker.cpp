@@ -271,7 +271,7 @@ namespace sigma {
 		ast::comparison_expression& expression = binop->get<ast::comparison_expression>();
 
 		// determine the type of our comparison op
-		if (larger_type.is_pointer()) {
+		if(larger_type.is_pointer()) {
 			expression.type = ast::comparison_expression::type::POINTER;
 		}
 		else if(larger_type.is_floating_point()) {

@@ -238,7 +238,14 @@ namespace sigma {
 
 	auto ir_translator::translate_bool_literal(handle<ast::node> bool_literal_node) const -> handle<ir::node> {
 		const auto& prop = bool_literal_node->get<ast::bool_literal>();
-		return m_context.builder.create_unsigned_integer(prop.value, 32);
+
+		u64 value = 0;
+
+		if(prop.value) {
+			value = 1;
+		}
+
+		return m_context.builder.create_unsigned_integer(value, 4);
 	}
 
 	auto ir_translator::translate_binary_math_operator(handle<ast::node> operator_node) -> handle<ir::node> {
@@ -324,7 +331,7 @@ namespace sigma {
 
 		// negate it
 		// NOTE: booleans are 32 bits
-		return m_context.builder.create_cmp_eq(expression, m_context.builder.create_unsigned_integer(0, 32));
+		return m_context.builder.create_cmp_eq(expression, m_context.builder.create_unsigned_integer(0, 1));
 	}
 
 	auto ir_translator::translate_cast(handle<ast::node> cast_node) -> handle<ir::node> {
@@ -372,6 +379,7 @@ namespace sigma {
 		// get the type and alignment of the load
 		const data_type& type_to_load = load_node->get<ast::type_expression>().type;
 		const ir::data_type ir_type = detail::data_type_to_ir(type_to_load);
+
 		const u16 alignment = type_to_load.get_byte_width();
 
 		// create the load operation
@@ -420,7 +428,9 @@ namespace sigma {
 			case data_type::U32:  return m_context.builder.create_unsigned_integer(utility::detail::from_string<u32>(value, overflow), 32);
 			case data_type::U64:  return m_context.builder.create_unsigned_integer(utility::detail::from_string<u64>(value, overflow), 64);
 			// for cases when a numerical literal is implicitly converted to a bool (ie. "if(1)")
-			case data_type::BOOL: return m_context.builder.create_bool(utility::detail::from_string<bool>(value, overflow));
+			case data_type::BOOL: {
+				return m_context.builder.create_bool(!utility::detail::is_only_char(value, '0'));
+			}
 			// for cases when a numerical literal is implicitly converted to a char (ie. "char c = 12")
 			case data_type::CHAR: return m_context.builder.create_signed_integer(utility::detail::from_string<i32>(value, overflow), 32);
 			default: NOT_IMPLEMENTED();

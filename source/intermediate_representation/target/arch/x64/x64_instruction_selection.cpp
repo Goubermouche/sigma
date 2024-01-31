@@ -259,8 +259,6 @@ namespace sigma::ir {
 	}
 
 	void x64_architecture::select_instruction(codegen_context& context, handle<node> n, reg destination) {
-		printf("-- %d %d\n", n->global_value_index, n->get_type());
-
 		switch (const node::type node_type = n->get_type()) {
 			case node::type::PHI:
 			case node::type::REGION: break;
@@ -746,8 +744,6 @@ namespace sigma::ir {
 				if (bits_in_type < 64) {
 					value &= (1ull << bits_in_type) - 1;
 				}
-
-				printf("::::::::::::: i%d = %lld\n", bits_in_type, value);
 
 				if (value == 0) {
 					context.append_instruction(create_zero(
@@ -1546,8 +1542,6 @@ namespace sigma::ir {
 	}
 
 	auto x64_architecture::allocate_node_register(codegen_context& context, handle<node> target) -> reg {
-		printf("   VREG %d\n", target->global_value_index);
-
 		// attempt to lookup an existing value
 		const handle<virtual_value> value = context.lookup_virtual_value(target);
 

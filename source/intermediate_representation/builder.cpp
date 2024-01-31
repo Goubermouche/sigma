@@ -1,7 +1,7 @@
 #include "builder.h"
 #include <utility/string_helper.h>
 
-#define DEBUG_PRINT_BUILDER
+// #define DEBUG_PRINT_BUILDER
 
 #ifdef DEBUG_PRINT_BUILDER
 #define DEBUG_PRINT(__fmt, ...) utility::console::print("{}\n", std::format(__fmt, ##__VA_ARGS__))

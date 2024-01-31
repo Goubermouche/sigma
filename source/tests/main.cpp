@@ -35,16 +35,16 @@ void print_error_block(const std::vector<std::string>& headers, std::vector<std:
 	ASSERT(headers.size() == messages.size(), "incompatible block layout");
 
 	for(u64 i = 0; i < headers.size(); ++i) {
-		if(messages[i].empty()) {
+		utility::console::print("{:-<60}\n", headers[i]);
+
+		if (messages[i].empty()) {
 			continue;
 		}
 
 		messages[i].pop_back(); // remove trailing newlines
-
-		utility::console::print("{:-<60}\n", headers[i]);
 		utility::console::print("  {}\n", messages[i]);
 
-		if(i + 1 == headers.size()) {
+		if(i + 1 >= headers.size()) {
 			utility::console::print("{}\n", std::string(60, '-'));
 		}
 	}
@@ -91,7 +91,21 @@ auto compile_file(const filepath& path, const filepath& compiler_path) -> bool {
 
 auto run_executable(const filepath& path) -> bool {
 	const std::string command = std::format("{} > {} 2> {}", path, APP_STDOUT, APP_STDERR);
-	return utility::shell::execute(command);
+
+	const i32 result = utility::shell::execute(command);
+
+	if(result) {
+		utility::console::printerr("{:<40} ERROR (run - {})\n", get_pretty_path(path).to_string(), result);
+
+		const std::string stdout_str = read_or_throw(APP_STDOUT);
+		const std::string stderr_str = read_or_throw(APP_STDERR);
+
+		print_error_block(
+			{ "STDOUT", "STDERR" }, 
+			{ utility::detail::escape_string(stdout_str) , utility::detail::escape_string(stderr_str) });
+	}
+
+	return result;
 }
 
 bool run_test(const filepath& path, const filepath& compiler_path) {
@@ -102,7 +116,6 @@ bool run_test(const filepath& path, const filepath& compiler_path) {
 	}
 
 	if(run_executable(EXECUTABLE_FILE)) {
-		utility::console::printerr("{:<40} ERROR (run)\n", pretty_path.to_string());
 		return true;
 	}
 

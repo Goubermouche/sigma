@@ -68,5 +68,11 @@ namespace utility {
 		inline auto remove(const filepath& path) -> bool {
 			return std::filesystem::remove(path.get_path());
 		}
+
+		void create(const filepath& path) {
+			// TODO: add error checking
+			std::ofstream file(path.get_path());
+			file.close();
+		}
 	}
 } // namespace utility::fs

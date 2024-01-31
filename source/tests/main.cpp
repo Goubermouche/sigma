@@ -131,6 +131,26 @@ i32 run_all_tests(const parametric::parameters& params) {
 	std::queue<filepath> paths({ test_directory.get_canonical_path() });
 	bool encountered_error = false;
 
+	// initialize our files
+	try {
+		utility::fs::create(COMPILER_STDOUT);
+		utility::fs::create(COMPILER_STDERR);
+		utility::fs::create(CLANG_STDOUT);
+		utility::fs::create(CLANG_STDERR);
+		utility::fs::create(APP_STDOUT);
+		utility::fs::create(APP_STDERR);
+		utility::fs::create(OBJECT_FILE);
+		utility::fs::create(EXECUTABLE_FILE);
+	}
+	catch (const std::exception& exception) {
+		utility::console::printerr("error: {}\n", exception.what());
+		encountered_error = true;
+	}
+
+	if(encountered_error) {
+		return 1;
+	}
+
 	// run our tests
 	try {
 		while (!paths.empty()) {
@@ -147,7 +167,7 @@ i32 run_all_tests(const parametric::parameters& params) {
 					// only compile .s files
 					encountered_error |= run_test(path, compiler_path);
 				}
-				});
+			});
 		}
 	}
 	catch (const std::exception& exception) {
@@ -159,6 +179,10 @@ i32 run_all_tests(const parametric::parameters& params) {
 	try {
 		utility::fs::remove(COMPILER_STDOUT);
 		utility::fs::remove(COMPILER_STDERR);
+		utility::fs::remove(CLANG_STDOUT);
+		utility::fs::remove(CLANG_STDERR);
+		utility::fs::remove(APP_STDOUT);
+		utility::fs::remove(APP_STDERR);
 		utility::fs::remove(OBJECT_FILE);
 		utility::fs::remove(EXECUTABLE_FILE);
 	}

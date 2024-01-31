@@ -11,10 +11,5 @@ i32 main() {
 
   	printf("lit: %d\n", 100 > 200);
 
-	i32* x = cast<i32*>(malloc(10));
-	i32* y = cast<i32*>(malloc(10));
-
-	printf("ptr: %d\n", x > y);
-
 	ret 0;
 }

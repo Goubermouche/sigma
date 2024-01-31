@@ -4,7 +4,7 @@ i32 main() {
 	memory[0] = 1;
 	memory[1] = 2;
 
-	printf("%d, %d\n", memory[0], memory[1]);
+	printf("%d %d\n", memory[0], memory[1]);
 
 	ret 0;
 }

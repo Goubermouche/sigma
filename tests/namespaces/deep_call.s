@@ -13,6 +13,6 @@ namespace a {
 }
 
 i32 main() {
-    a::a::a::a::a::test();
+    printf("%d\n", a::a::a::a::a::test());
     ret 0;
 }

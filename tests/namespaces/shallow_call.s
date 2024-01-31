@@ -5,6 +5,6 @@ namespace test {
 }
 
 i32 main() {
-    test::test();
+    printf("%d\n", test::test());
     ret 0;
 }

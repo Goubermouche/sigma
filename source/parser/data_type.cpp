@@ -120,7 +120,7 @@ namespace sigma {
 			case U16:     return 2;
 			case U32:     return 4;
 			case U64:     return 8;
-			case BOOL:    return 1;
+			case BOOL:    return 4;
 			case CHAR:    return 1;
 			case VAR_ARG_PROMOTE: return 0;
 			default: PANIC("undefined byte width for type '{}'", to_string());
@@ -313,18 +313,18 @@ namespace sigma {
 			}
 
 			switch (type.base_type) {
-			case data_type::VOID: PANIC("cannot dereference a void*");
-			case data_type::I8:
-			case data_type::I16:
-			case data_type::U8:
-			case data_type::U16:
-			case data_type::BOOL:
-			case data_type::CHAR: return data_type::create_i32();
-			case data_type::I32:
-			case data_type::I64:
-			case data_type::U32:
-			case data_type::U64:  return type;
-			default: NOT_IMPLEMENTED();
+				case data_type::VOID: PANIC("cannot dereference a void*");
+				case data_type::I8:
+				case data_type::I16:
+				case data_type::U8:
+				case data_type::U16:
+				case data_type::BOOL:
+				case data_type::CHAR: return data_type::create_i32();
+				case data_type::I32:
+				case data_type::I64:
+				case data_type::U32:
+				case data_type::U64:  return type;
+				default: NOT_IMPLEMENTED();
 			}
 
 			// unreachable

@@ -13,12 +13,12 @@ namespace sigma {
 			}
 
 			switch (type.base_type) {
-				case data_type::BOOL: return BOOL_TYPE;
 				case data_type::VOID: return VOID_TYPE;
 				case data_type::I8:
 				case data_type::U8:   return I8_TYPE;
 				case data_type::I16:
 				case data_type::U16:  return I16_TYPE;
+				case data_type::BOOL:
 				case data_type::CHAR:
 				case data_type::I32:
 				case data_type::U32:  return I32_TYPE;

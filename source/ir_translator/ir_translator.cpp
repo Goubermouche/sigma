@@ -238,7 +238,7 @@ namespace sigma {
 
 	auto ir_translator::translate_bool_literal(handle<ast::node> bool_literal_node) const -> handle<ir::node> {
 		const auto& prop = bool_literal_node->get<ast::bool_literal>();
-		return m_context.builder.create_bool(prop.value);
+		return m_context.builder.create_unsigned_integer(prop.value, 32);
 	}
 
 	auto ir_translator::translate_binary_math_operator(handle<ast::node> operator_node) -> handle<ir::node> {
@@ -322,8 +322,9 @@ namespace sigma {
 		// evaluate the boolean expression we want to negate
 		const handle<ir::node> expression = translate_node(operator_node->children[0]);
 
-		// negate it 
-		return m_context.builder.create_cmp_eq(expression, m_context.builder.create_unsigned_integer(0, 1));
+		// negate it
+		// NOTE: booleans are 32 bits
+		return m_context.builder.create_cmp_eq(expression, m_context.builder.create_unsigned_integer(0, 32));
 	}
 
 	auto ir_translator::translate_cast(handle<ast::node> cast_node) -> handle<ir::node> {
@@ -420,6 +421,8 @@ namespace sigma {
 			case data_type::U64:  return m_context.builder.create_unsigned_integer(utility::detail::from_string<u64>(value, overflow), 64);
 			// for cases when a numerical literal is implicitly converted to a bool (ie. "if(1)")
 			case data_type::BOOL: return m_context.builder.create_bool(utility::detail::from_string<bool>(value, overflow));
+			// for cases when a numerical literal is implicitly converted to a char (ie. "char c = 12")
+			case data_type::CHAR: return m_context.builder.create_signed_integer(utility::detail::from_string<i32>(value, overflow), 32);
 			default: NOT_IMPLEMENTED();
 		}
 

@@ -259,6 +259,8 @@ namespace sigma::ir {
 	}
 
 	void x64_architecture::select_instruction(codegen_context& context, handle<node> n, reg destination) {
+		printf("-- %d %d\n", n->global_value_index, n->get_type());
+
 		switch (const node::type node_type = n->get_type()) {
 			case node::type::PHI:
 			case node::type::REGION: break;
@@ -745,25 +747,26 @@ namespace sigma::ir {
 					value &= (1ull << bits_in_type) - 1;
 				}
 
-				if (value == 0) {
+				printf("::::::::::::: i%d = %lld\n", bits_in_type, value);
 
+				if (value == 0) {
 					context.append_instruction(create_zero(
 						context, n->dt, destination
 					));
 				}
 				else if ((value >> 32ull) == std::numeric_limits<u32>::max()) {
-
+					// mov but zero ext
 					context.append_instruction(create_immediate(
 						context, instruction::type::MOV, I32_TYPE, destination, static_cast<i32>(value)
 					));
 				}
 				else if (bits_in_type <= 32 || (value >> 31ull) == 0) {
-
 					context.append_instruction(create_immediate(
 						context, instruction::type::MOV, n->dt, destination, static_cast<i32>(value)
 					));
 				}
 				else {
+					// movabs reg, imm64
 					context.append_instruction(create_abs(
 						context, instruction::type::MOVABS, n->dt, destination, value
 					));
@@ -967,7 +970,7 @@ namespace sigma::ir {
 					}
 				}
 
-				if (try_for_imm32(source_node, source_node->dt.get_bit_width(), immediate_value)) {
+				if(try_for_imm32(source_node, source_node->dt.is_pointer() ? 64 : source_node->dt.get_bit_width(), immediate_value)) {
 					source_node->use_node(context);
 
 					const handle<instruction> store_inst = select_array_access_instruction(
@@ -1527,12 +1530,15 @@ namespace sigma::ir {
 		}
 
 		const integer& i = n->get<integer>();
-		if(!utility::fits_into_32_bits(i.value)) {
-			return false;
-		}
 
-		if (bits > 32 && (i.value >> 31ull) != 0 && (i.value >> 32ull) == 0) {
-			return false;
+		if (bits > 32) {
+			bool sign = (i.value >> 31ull) & 1;
+			uint64_t top = i.value >> 32ull;
+
+			// if the sign matches the rest of the top bits, we can sign extend just fine
+			if (top != (sign ? 0xFFFFFFFF : 0)) {
+				return false;
+			}
 		}
 
 		out = static_cast<i32>(i.value);
@@ -1540,6 +1546,8 @@ namespace sigma::ir {
 	}
 
 	auto x64_architecture::allocate_node_register(codegen_context& context, handle<node> target) -> reg {
+		printf("   VREG %d\n", target->global_value_index);
+
 		// attempt to lookup an existing value
 		const handle<virtual_value> value = context.lookup_virtual_value(target);
 

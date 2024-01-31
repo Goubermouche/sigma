@@ -370,6 +370,10 @@ namespace sigma {
 				warning::emit(warning::code::NUMERICAL_BOOL, literal->location);
 				break;
 			}
+			case data_type::CHAR: {
+				warning::emit(warning::code::NUMERICAL_CHAR, literal->location);
+				break;
+			}
 			default: NOT_IMPLEMENTED();
 		}
 
@@ -404,6 +408,10 @@ namespace sigma {
 	}
 
 	auto type_checker::implicit_type_cast(data_type original_type, data_type target_type, ast_node parent, ast_node target) const -> type_check_result {
+		if(original_type.is_void() || target_type.is_void()) {
+			return error::emit(error::code::INVALID_VOID, target->location);
+		}
+
 		if(target_type.is_unknown()) {
 			return original_type;
 		}

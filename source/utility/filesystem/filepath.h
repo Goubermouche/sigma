@@ -59,6 +59,10 @@ namespace utility::types {
 			return m_path.filename();
 		}
 
+		auto get_filename_no_ext() const -> filepath {
+			return m_path.stem();
+		}
+
 		auto operator/(const filepath& other) {
 			return m_path / other.m_path;
 		}

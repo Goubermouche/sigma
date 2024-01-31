@@ -47,58 +47,84 @@ namespace utility::detail {
 
 	auto remove_first_line(const std::string& string) -> std::string;
 
+	template<typename type>
+	auto unsigned_from_string(const std::string& string, bool& overflow) -> type {
+		overflow = false;
+		bool is_negative = false;
+		type result = 0;
+
+		u64 start_index = 0;
+		if(!string.empty() && string[0] == '-') {
+			is_negative = true;
+			overflow = true;
+			start_index = 1;
+		}
+
+		for(u64 i = start_index; i < string.length(); ++i) {
+			const char ch = string[i];
+
+			if (!std::isdigit(ch)) {
+				overflow = true;
+				return result;
+			}
+
+			i32 digit = ch - '0';
+
+			// check for overflow
+			if(result > (std::numeric_limits<type>::max() - digit) / 10) {
+				overflow = true;
+				result = (result * 10 + digit) & std::numeric_limits<type>::max();
+			}
+			else {
+				result = result * 10 + digit;
+			}
+		}
+
+		// handle underflow by converting to max value for negative inputs
+		if(is_negative) {
+			return std::numeric_limits<type>::max() - result + 1;
+		}
+
+		return result;
+	}
+
 	/**
 	 * \brief Converts \b str to type, allows overflow behavior, when overflow occurs the \b overflow
 	 * flag is set. It's expected that \b str contains a valid value for \b type.
 	 * \tparam type Type to convert string to
-	 * \param str Str to parse
+	 * \param string Str to parse
 	 * \param overflowed Overflow flag
 	 * \return \b str parsed as \b type.
 	 */
 	template<typename type>
-	type from_string(const std::string& str, bool& overflowed) {
+	type from_string(const std::string& string, bool& overflowed) {
 		static_assert(
 			std::is_integral_v<type> || std::is_floating_point_v<type>,
 			"'type' must be integral or floating point"
 		);
 
-		std::istringstream stream(str);
 		overflowed = false;
 
-		if constexpr (std::is_same_v<type, bool>) {
-			type value;
-			stream >> value;
-			// can't really overflow
-			return value;
-		}
-		else if constexpr (std::is_integral_v<type>) {
-			// i8's and u8's have to be treated separately
-			if constexpr (std::is_same_v<type, i8> || std::is_same_v<type, u8>) {
+		if constexpr (std::is_integral_v<type>) {
+			if constexpr (std::is_unsigned_v<type>) {
+				return unsigned_from_string<type>(string, overflowed);
+			}
+			else if constexpr (std::is_same_v<type, i8>) {
 				i32 value;
+				std::istringstream stream(string);
+
 				stream >> value;
 				overflowed = stream.fail() || value > std::numeric_limits<type>::max() || value < std::numeric_limits<type>::min();
 				return static_cast<type>(value);
 			}
 			else if constexpr (std::is_signed_v<type>) {
-				// read directly
 				type value;
+				std::istringstream stream(string);
+
 				stream >> value;
 				overflowed = stream.fail() || value > std::numeric_limits<type>::max() || value < std::numeric_limits<type>::min();
 				return value;
 			}
-			else {
-				// read into a larger signed type
-				i64 value;
-				stream >> value;
-				overflowed = stream.fail() || value < 0 || static_cast<u64>(value) > std::numeric_limits<type>::max();
-				return static_cast<type>(value);
-			}
-		}
-		else if constexpr (std::is_floating_point_v<type>) {
-			type value;
-			stream >> value;
-			overflowed = stream.fail() || value > std::numeric_limits<type>::max() || value < std::numeric_limits<type>::lowest();
-			return value;
 		}
 
 		return type();

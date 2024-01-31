@@ -44,6 +44,7 @@ namespace sigma {
 			VOID_VARIABLE,
 			INVALID_CAST,
 			INVALID_IMPLICIT_CAST,
+			INVALID_VOID,
 		};
 
 		/**
@@ -115,6 +116,7 @@ namespace sigma {
 			{ code::VOID_VARIABLE,                       "cannot declare a variable of type 'void' ('{}')"                                   },
 			{ code::INVALID_CAST,                        "invalid cast from '{}' to '{}'"                                                    },
 			{ code::INVALID_IMPLICIT_CAST,               "invalid implicit cast from '{}' to '{}'"                                           },
+			{ code::INVALID_VOID,                        "invalid use of a void expression"                                                  },
 		};
 	};
 
@@ -126,6 +128,7 @@ namespace sigma {
 			IMPLICIT_TRUNCATION_CAST,
 			IMPLICIT_CAST,
 			NUMERICAL_BOOL,
+			NUMERICAL_CHAR,
 		};
 
 		template<typename... arguments>
@@ -148,6 +151,7 @@ namespace sigma {
 			{ code::IMPLICIT_TRUNCATION_CAST, "implicit truncating type cast ('{}' to '{}')"                                   },
 			{ code::IMPLICIT_CAST,            "implicit type cast ('{}' to '{}')"                                              },
 			{ code::NUMERICAL_BOOL,           "conversion of numerical literal to bool detected, prefer bool literals instead" },
+			{ code::NUMERICAL_CHAR,           "conversion of numerical literal to char detected, prefer char literals instead" },
 		};
 	};
 } // namespace sigma

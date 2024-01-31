@@ -1,6 +1,7 @@
 #include <utility/parametric/parametric.h>
 #include <utility/filesystem/file.h>
 #include <utility/string_helper.h>
+#include <utility/diagnostics.h>
 #include <utility/shell.h>
 
 using namespace utility::types;
@@ -17,10 +18,13 @@ using namespace utility::types;
 #ifdef SYSTEM_WINDOWS
 #define OBJECT_FILE "test.obj"
 #define EXECUTABLE_FILE "test.exe"
+#define SYSTEM_STR "windows"
 #else
 #define OBJECT_FILE "test.o"
 #define EXECUTABLE_FILE "test"
+#define SYSTEM_STR "linux"
 #endif
+
 
 auto read_or_throw(const filepath& path) -> std::string {
 	const auto result = utility::fs::file<std::string>::load(path);
@@ -59,7 +63,7 @@ auto get_pretty_path(const filepath& path) -> filepath {
 }
 
 auto compile_file(const filepath& path, const filepath& compiler_path) -> bool {
-	const std::string compilation_command = std::format("{} compile {} -e {} > {} 2> {}", compiler_path, path, OBJECT_FILE, COMPILER_STDOUT, COMPILER_STDERR);
+	const std::string compilation_command = std::format("{} compile {} -e {} --system {} > {} 2> {}", compiler_path, path, OBJECT_FILE, SYSTEM_STR, COMPILER_STDOUT, COMPILER_STDERR);
 	const std::string link_command = std::format("clang -o {} {}", EXECUTABLE_FILE, OBJECT_FILE);
 
 	// compile the source file

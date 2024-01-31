@@ -81,7 +81,7 @@ struct parametric::options_parser<sigma::ir::system> {
 		}
 
 		if (value == "linux") {
-			return sigma::ir::system::WINDOWS;
+			return sigma::ir::system::LINUX;
 		}
 
 		throw std::invalid_argument("invalid argument");

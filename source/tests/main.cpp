@@ -95,7 +95,7 @@ auto run_executable(const filepath& path) -> bool {
 	const i32 result = utility::shell::execute(command);
 
 	if(result) {
-		utility::console::printerr("{:<40} ERROR (run - {})\n", get_pretty_path(path).to_string(), result);
+		utility::console::printerr("{:<40} ERROR (run - {})\n", path.to_string(), result);
 
 		const std::string stdout_str = read_or_throw(APP_STDOUT);
 		const std::string stderr_str = read_or_throw(APP_STDERR);

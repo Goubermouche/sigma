@@ -13,7 +13,7 @@ workspace "sigma"
 
     -- buildoptions { "-fsanitize=address" }
     -- linkoptions { "-fsanitize=address" }
-   --  debugformat "C7"
+    --  debugformat "C7"
     
     filter "configurations:Release"
         defines { "NDEBUG" }
@@ -185,7 +185,7 @@ project "compiler"
     kind "ConsoleApp"
     location "source/compiler"
 
-    debugargs { "compile", "./test/main.s" }
+    debugargs { "compile", "./test/main.s", "-e", "./test/a.obj" }
 
     files {
         "source/compiler/**.h",

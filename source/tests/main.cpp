@@ -5,69 +5,22 @@
 
 using namespace utility::types;
 
-#define STDOUT_FILE "STDOUT.txt"
-#define STDERR_FILE "STDERR.txt"
+#define COMPILER_STDOUT "compiler_STDOUT.txt"
+#define COMPILER_STDERR "compiler_STDERR.txt"
 
-auto get_object_path(const filepath& path) -> filepath {
+#define CLANG_STDOUT "clang_STDOUT.txt"
+#define CLANG_STDERR "clang_STDERR.txt"
+
+#define APP_STDOUT "app_STDOUT.txt"
+#define APP_STDERR "app_STDERR.txt"
+
 #ifdef SYSTEM_WINDOWS
-	const char* format = "a.obj";
+#define OBJECT_FILE "test.obj"
+#define EXECUTABLE_FILE "test.exe"
 #else
-	const char* format = "a.o";
+#define OBJECT_FILE "test.o"
+#define EXECUTABLE_FILE "test"
 #endif
-
-	return path.get_parent_path() / format;
-}
-
-auto get_executable_path(const filepath& path) -> filepath {
-#ifdef SYSTEM_WINDOWS
-	const char* format = "a.exe";
-#else
-	const char* format = "a";
-#endif
-
-	return path.get_parent_path() / format;
-}
-
-auto get_expected_path(const filepath& path) -> filepath {
-	return path.get_parent_path() / (path.get_filename_no_ext().to_string() + "_expected.txt");
-}
-
-auto compile_file(const filepath& path, const filepath& compiler_path) -> bool {
-	const filepath pretty_path = path.get_parent_path().get_filename() / path.get_filename_no_ext();
-
-	const std::string compilation_command = std::format("{} compile {} > {} 2> {}", compiler_path, path, STDOUT_FILE, STDERR_FILE);
-	const std::string link_command = std::format("clang -o {} {}", get_executable_path(path), get_object_path(path));
-
-	if(utility::shell::execute(compilation_command) != 0) {
-		utility::console::printerr("{:<40} ERROR (compile)\n", pretty_path.to_string());
-		return false;
-	}
-
-	if(utility::shell::execute(link_command) != 0) {
-		utility::console::printerr("{:<40} ERROR (link)\n", pretty_path.to_string());
-		return false;
-	}
-
-	return true;
-}
-
-auto run_executable(const filepath& path) -> bool {
-	const std::string command = std::format("{} > {} 2> {}", get_executable_path(path).to_string(), STDOUT_FILE, STDERR_FILE);
-	return !utility::shell::execute(command);
-}
-
-void cleanup(const filepath& path) {
-	const filepath object_path = get_object_path(path);
-	const filepath executable_path = get_executable_path(path);
-
-	if (object_path.exists()) {
-		utility::fs::remove(object_path);
-	}
-
-	if (executable_path.exists()) {
-		utility::fs::remove(executable_path);
-	}
-}
 
 auto read_or_throw(const filepath& path) -> std::string {
 	const auto result = utility::fs::file<std::string>::load(path);
@@ -78,62 +31,97 @@ auto read_or_throw(const filepath& path) -> std::string {
 	return result.get_value();
 }
 
+void print_error_block(const std::vector<std::string>& headers, std::vector<std::string> messages) {
+	ASSERT(headers.size() == messages.size(), "incompatible block layout");
+
+	for(u64 i = 0; i < headers.size(); ++i) {
+		if(messages[i].empty()) {
+			continue;
+		}
+
+		messages[i].pop_back(); // remove trailing newlines
+
+		utility::console::print("{:-<60}\n", headers[i]);
+		utility::console::print("  {}\n", messages[i]);
+
+		if(i + 1 == headers.size()) {
+			utility::console::print("{}\n", std::string(60, '-'));
+		}
+	}
+}
+
+auto get_expected_path(const filepath& path) -> filepath {
+	return path.get_parent_path() / (path.get_filename_no_ext().to_string() + "_expected.txt");
+}
+
+auto get_pretty_path(const filepath& path) -> filepath {
+	return path.get_parent_path().get_filename() / path.get_filename_no_ext();
+}
+
+auto compile_file(const filepath& path, const filepath& compiler_path) -> bool {
+	const std::string compilation_command = std::format("{} compile {} -e {} > {} 2> {}", compiler_path, path, OBJECT_FILE, COMPILER_STDOUT, COMPILER_STDERR);
+	const std::string link_command = std::format("clang -o {} {}", EXECUTABLE_FILE, OBJECT_FILE);
+
+	// compile the source file
+	if(utility::shell::execute(compilation_command) != 0) {
+		utility::console::printerr("{:<40} ERROR (compile)\n", get_pretty_path(path).to_string());
+
+		const std::string stdout_str = read_or_throw(COMPILER_STDOUT);
+		const std::string stderr_str = read_or_throw(COMPILER_STDERR);
+
+		print_error_block({ "STDOUT", "STDERR" }, { stdout_str , stderr_str });
+
+		return true;
+	}
+
+	// link the generated object file
+	if(utility::shell::execute(link_command) != 0) {
+		utility::console::printerr("{:<40} ERROR (link)\n", get_pretty_path(path).to_string());
+
+		const std::string stdout_str = read_or_throw(CLANG_STDOUT);
+		const std::string stderr_str = read_or_throw(CLANG_STDERR);
+
+		print_error_block({ "STDOUT", "STDERR" }, { stdout_str , stderr_str });
+
+		return true;
+	}
+
+	return false;
+}
+
+auto run_executable(const filepath& path) -> bool {
+	const std::string command = std::format("{} > {} 2> {}", path, APP_STDOUT, APP_STDERR);
+	return utility::shell::execute(command);
+}
+
 bool run_test(const filepath& path, const filepath& compiler_path) {
 	const filepath pretty_path = path.get_parent_path().get_filename() / path.get_filename_no_ext();
 
-	if (compile_file(path, compiler_path)) {
-		// OK, no errors compiling, compare results
-		if (run_executable(path)) {
-			// executable returned 0
-			const std::string stdout_str = read_or_throw(STDOUT_FILE);
-			const std::string expected_str = read_or_throw(get_expected_path(path));
-
-			if (stdout_str == expected_str) {
-				utility::console::print("{:<40} OK\n", pretty_path.to_string());
-			}
-			else {
-				utility::console::printerr("{:<40} ERROR (C, E)\n", pretty_path.to_string());
-				utility::console::printerr("{}\n", std::string(53, '-'));
-				utility::console::printerr("unexpected STDOUT contents - got:\n");
-				utility::console::printerr("'{}'\n", utility::detail::escape_string(stdout_str));
-				utility::console::printerr("expected string is:\n");
-				utility::console::printerr("'{}'\n", utility::detail::escape_string(expected_str));
-				utility::console::printerr("{}\n", std::string(53, '-'));
-			}
-		}
-	}
-	else {
-		// ERROR when compiling
-		utility::console::printerr("{:<40} ERROR\n", pretty_path.to_string());
-
-		const std::string stdout_str = read_or_throw(STDOUT_FILE);
-		const std::string stderr_str = read_or_throw(STDERR_FILE);
-
-		utility::console::printerr("'{}'\n", stderr_str);
+	if(compile_file(path, compiler_path)) {
+		return true;
 	}
 
-	cleanup(path);
+	if(run_executable(EXECUTABLE_FILE)) {
+		utility::console::printerr("{:<40} ERROR (run)\n", pretty_path.to_string());
+		return true;
+	}
 
-	// const std::string command = std::format("{} compile {} -e none > {} 2> {}", compiler_path, path, STDOUT_FILE, STDERR_FILE);
-	// const filepath& pretty_path = path.get_parent_path().get_filename() / path.get_filename();
-	// 
-	// const i32 return_code = utility::shell::execute(command);
-	// 
-	// if(return_code == 0) {
-	// 	utility::console::print("{:<40} OK\n", pretty_path.to_string());
-	// 	return false;
-	// }
-	// 
-	// utility::console::printerr("{:<40} ERROR\n", pretty_path.to_string());
-	// 
-	// const auto file_result = utility::fs::file<std::string>::load(STDERR_FILE);
-	// if(file_result.has_error()) {
-	// 	throw std::runtime_error(std::format("cannot open file {}", STDERR_FILE).c_str());
-	// }
-	// 
-	// utility::console::printerr("'{}'\n", file_result.get_value());
+	// executable returned 0
+	const std::string stdout_str = read_or_throw(APP_STDOUT);
+	const std::string expected_str = read_or_throw(get_expected_path(path));
 
-	return true;
+	if(stdout_str != expected_str) {
+		utility::console::printerr("{:<40} ERROR (unexpected result)\n", pretty_path.to_string());
+		print_error_block(
+			{ "STDOUT", "REFERENCE" }, 
+			{ utility::detail::escape_string(stdout_str), utility::detail::escape_string(expected_str) }
+		);
+
+		return true;
+	}
+
+	utility::console::print("{:<40} OK\n", pretty_path.to_string());
+	return false;
 }
 
 i32 run_all_tests(const parametric::parameters& params) {
@@ -169,15 +157,17 @@ i32 run_all_tests(const parametric::parameters& params) {
 
 	// cleanup
 	try {
-		utility::fs::remove(STDOUT_FILE);
-		utility::fs::remove(STDERR_FILE);
+		utility::fs::remove(COMPILER_STDOUT);
+		utility::fs::remove(COMPILER_STDERR);
+		utility::fs::remove(OBJECT_FILE);
+		utility::fs::remove(EXECUTABLE_FILE);
 	}
 	catch (const std::exception& exception) {
 		utility::console::printerr("error: {}\n", exception.what());
 		encountered_error = true;
 	}
 
-	return encountered_error ? 1 : 0;
+	return encountered_error;
 }
 
 i32 main(i32 argc, char* argv[]) {

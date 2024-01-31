@@ -9,13 +9,28 @@
 // -   add namespaces to error messages, whenever applicable (ie. x::y::test)
 // -   cleanup ir gen alignment sizes (u64 vs u32 vs u16)
 // -   set crashes with more than 4(?) parameters
+// -   implicit returns for non-void functions should be a thing
 
 i32 main() {
-   bool a = true;
-   printf("%d\n", a);
-   printf("%d\n", !a);
+	i32* memory = cast<i32*>(malloc(100));
+	
+	memory[0] = 1;
+	memory[1] = 2;
 
-	 bool b = 1;
-	 printf("%d\n", b);
-	 printf("%d\n", !b);
+	printf("%d %d\n", memory[0], memory[1]);
+
+	ret 0;
 }
+
+
+// THIS CRASHES
+// i32 main() {
+// 	i32* memory = cast<i32*>(malloc(100));
+// 	
+// 	memory[0] = 1;
+// 	memory[1] = 2;
+// 	
+// 	printf("%d %d\n", memory[0], memory[1]);
+// 
+// 	ret 0; a
+// }

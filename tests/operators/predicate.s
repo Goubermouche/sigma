@@ -4,4 +4,6 @@ i32 main() {
 
     printf("&& %d\n", a && b);
     printf("|| %d\n", a || b);
+
+    ret 0;
 }

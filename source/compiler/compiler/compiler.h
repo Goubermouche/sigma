@@ -23,17 +23,16 @@ namespace sigma {
 		class module;
 	} // namespace sigma::ir
 
-	enum emit_target : u8 {
+	enum class emit_target : u8 {
 		NONE,
 		OBJECT,
 		EXECUTABLE
 	};
 
 	struct compiler_description {
-		filepath path;
+		filepath source_path;
+		filepath emit_path;
 		ir::target target;
-
-		emit_target emit;
 	};
 
 	class compiler {
@@ -47,8 +46,12 @@ namespace sigma {
 
 		static auto verify_file(const filepath& path) -> utility::result<void>;
 		static void emit_object_file(ir::module& module, const filepath& path);
+
+		static auto get_emit_target_from_path(const filepath& path) -> utility::result<emit_target>;
 	private:
 		compiler_description m_description;
+
+		emit_target m_emit_target;
 	};
 } // namespace sigma
 

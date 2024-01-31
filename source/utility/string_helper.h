@@ -78,7 +78,7 @@ namespace utility::detail {
 				result = (result * 10 + digit) & std::numeric_limits<type>::max();
 			}
 			else {
-				result = result * 10 + digit;
+				result = result * 10 + static_cast<type>(digit);
 			}
 		}
 
@@ -108,16 +108,16 @@ namespace utility::detail {
 		overflowed = false;
 
 		if constexpr (std::is_integral_v<type>) {
-			if constexpr (std::is_unsigned_v<type>) {
-				return unsigned_from_string<type>(string, overflowed);
-			}
-			else if constexpr (std::is_same_v<type, i8>) {
+			if constexpr (std::is_same_v<type, i8> || std::is_same_v<type, u8>) {
 				i32 value;
 				std::istringstream stream(string);
 
 				stream >> value;
 				overflowed = stream.fail() || value > std::numeric_limits<type>::max() || value < std::numeric_limits<type>::min();
 				return static_cast<type>(value);
+			}
+			else if constexpr (std::is_unsigned_v<type>) {
+				return unsigned_from_string<type>(string, overflowed);
 			}
 			else if constexpr (std::is_signed_v<type>) {
 				type value;
@@ -128,7 +128,5 @@ namespace utility::detail {
 				return value;
 			}
 		}
-
-		return type();
 	}
 } // namespace sigma

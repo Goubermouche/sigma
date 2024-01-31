@@ -20,18 +20,18 @@ namespace sigma {
 		: m_description(description) {}
 
 	auto compiler::compile() -> utility::result<void> {
-		utility::console::print("compiling file: {}\n", m_description.path);
+		utility::console::print("compiling file: {} ({})\n", m_description.source_path, m_description.emit_path);
 
-		ASSERT(m_description.emit != emit_target::EXECUTABLE, "executable support not implemented");
-		TRY(verify_file(m_description.path));
+		TRY(verify_file(m_description.source_path));
+		TRY(m_emit_target, get_emit_target_from_path(m_description.emit_path));
 
 		// frontend
 		// TODO: the entire frontend can be multi-threaded
 		frontend_context frontend;
 
 		// generate the AST
-		TRY(const std::string file, utility::fs::file<std::string>::load(m_description.path));
-		TRY(tokenizer::tokenize(file, &m_description.path, frontend));
+		TRY(const std::string file, utility::fs::file<std::string>::load(m_description.source_path));
+		TRY(tokenizer::tokenize(file, &m_description.source_path, frontend));
 		TRY(parser::parse(frontend));
 
 		// backend
@@ -47,9 +47,8 @@ namespace sigma {
 		backend.module.compile();
 
 		//emit as an object file
-		if(m_description.emit == OBJECT) {
-			const filepath object_path = get_object_file_path();
-			emit_object_file(backend.module, object_path);
+		if(m_emit_target == emit_target::OBJECT) {
+			emit_object_file(backend.module, m_description.emit_path);
 		}
 
 		return SUCCESS;
@@ -80,10 +79,23 @@ namespace sigma {
 		};
 
 		const char* format = object_formats[static_cast<u8>(m_description.target.get_system())];
-		return m_description.path.get_parent_path() / (name + format);
+		return m_description.source_path.get_parent_path() / (name + format);
 	}
 
 	void compiler::emit_object_file(ir::module& module, const filepath& path) {
 		utility::fs::file<utility::contiguous_container<utility::byte>>::save(path, module.generate_object_file());
+	}
+
+	auto compiler::get_emit_target_from_path(const filepath& path) -> utility::result<emit_target> {
+		if(path.get_extension() == ".exe") {
+			return emit_target::EXECUTABLE;
+		}
+
+		if(path.get_extension() == ".obj" || path.get_extension() == ".o") {
+			return emit_target::OBJECT;
+		}
+
+		NOT_IMPLEMENTED();
+		return emit_target::NONE;
 	}
 } // namespace sigma

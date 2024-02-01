@@ -245,7 +245,7 @@ namespace sigma {
 			value = 1;
 		}
 
-		return m_context.builder.create_unsigned_integer(value, 4);
+		return m_context.builder.create_unsigned_integer(value, 8);
 	}
 
 	auto ir_translator::translate_binary_math_operator(handle<ast::node> operator_node) -> handle<ir::node> {

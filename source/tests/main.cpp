@@ -140,15 +140,14 @@ bool run_test(const filepath& path, const filepath& compiler_path) {
 		const std::string compiler_stderr_str = read_or_throw(COMPILER_STDERR);
 
 		print_error_block(
-			{ "STDOUT", "STDERR", "COMPILER_STDOUT", "COMPILER_STDERR" },
+			{ "STDOUT", "REFERENCE", "COMPILER_STDOUT", "COMPILER_STDERR" },
 			{
 				utility::detail::escape_string(app_stdout_str),
-				utility::detail::escape_string(app_stderr_str),
+				utility::detail::escape_string(expected_str),
 				compiler_stdout_str,
 				compiler_stderr_str
 			}
 		);
-
 
 		return true;
 	}

@@ -26,7 +26,7 @@ namespace sigma::ir {
 		// specify individual optimization passes
 		const optimization_pass_list optimizations({});
 		const auto register_allocator = std::make_shared<linear_scan_allocator>();
-		utility::string assembly;
+		// utility::string assembly;
 
 		// go through all declared functions and run codegen
 		for (const handle<function> function : m_functions) {
@@ -76,7 +76,7 @@ namespace sigma::ir {
 			std::cout << '\n';
 			
 			// DEBUG
-			assembly.append(m_codegen.disassemble(bytecode, codegen));
+			// assembly.append(m_codegen.disassemble(bytecode, codegen));
 			
 			// finally, emit the compiled function
 			function->output = {
@@ -91,7 +91,7 @@ namespace sigma::ir {
 		}
 
 		// DEBUG
-		utility::console::print("{}\n", assembly.get_underlying());
+		// utility::console::print("{}\n", assembly.get_underlying());
 	}
 
 	auto module::generate_object_file() -> utility::byte_buffer {

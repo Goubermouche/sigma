@@ -101,7 +101,7 @@ namespace sigma::ir {
 		string_table.append_string_nt(".symtab");
 
 		// initialize the strtab
-		elf64_s_header strtab;
+		elf64_s_header strtab{};
 
 		strtab.name = static_cast<u32>(string_table.get_size());
 		string_table.append_string_nt(".strtab");
@@ -115,7 +115,7 @@ namespace sigma::ir {
 		output_size += string_table.get_size();
 
 		// initialize the symtab
-		elf64_s_header symtab;
+		elf64_s_header symtab{};
 
 		symtab.name = symbol_table_name;
 		symtab.type = SHT_SYMTAB;

@@ -6,7 +6,14 @@ namespace utility {
 		const std::string windows_command = "cmd /c " + command;
 		return system(windows_command.c_str());
 #elif defined SYSTEM_LINUX
-		return system(command.c_str());
+		i32 status = system(command.c_str());
+		if (WIFEXITED(status)) {
+			return WEXITSTATUS(status);
+		}
+		else {
+			// abnormal termination
+			return -1;
+		}
 #else
 		PANIC("unsupported platform detected");
 #endif

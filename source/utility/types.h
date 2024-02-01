@@ -36,11 +36,12 @@
 // platform specific 
 #ifdef _WIN32
 #define NOMINMAX
-    #include <io.h>
+  #include <io.h>
 	#include <fcntl.h>
 #else
-    #include <unistd.h>
+  #include <unistd.h>
 	#include <signal.h>
+	#include <sys/wait.h>
 #endif
 
 namespace utility {

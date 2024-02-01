@@ -19,10 +19,12 @@ using namespace utility::types;
 #define OBJECT_FILE "test.obj"
 #define EXECUTABLE_FILE "test.exe"
 #define SYSTEM_STR "windows"
+#define EXECUTABLE_OPT ""
 #else
 #define OBJECT_FILE "test.o"
 #define EXECUTABLE_FILE "test"
 #define SYSTEM_STR "linux"
+#define EXECUTABLE_OPT "./"
 #endif
 
 
@@ -64,7 +66,7 @@ auto get_pretty_path(const filepath& path) -> filepath {
 
 auto compile_file(const filepath& path, const filepath& compiler_path) -> bool {
 	const std::string compilation_command = std::format("{} compile {} -e {} --system {} > {} 2> {}", compiler_path, path, OBJECT_FILE, SYSTEM_STR, COMPILER_STDOUT, COMPILER_STDERR);
-	const std::string link_command = std::format("clang -o {} {}", EXECUTABLE_FILE, OBJECT_FILE);
+	const std::string link_command = std::format("clang {} -o {} ", OBJECT_FILE, EXECUTABLE_FILE);
 
 	// compile the source file
 	if(utility::shell::execute(compilation_command) != 0) {
@@ -94,7 +96,7 @@ auto compile_file(const filepath& path, const filepath& compiler_path) -> bool {
 }
 
 auto run_executable(const filepath& path) -> i32 {
-	const std::string command = std::format("{} > {} 2> {}", path, APP_STDOUT, APP_STDERR);
+	const std::string command = std::format("{}{} > {} 2> {}", EXECUTABLE_OPT, path, APP_STDOUT, APP_STDERR);
 	return utility::shell::execute(command);
 }
 

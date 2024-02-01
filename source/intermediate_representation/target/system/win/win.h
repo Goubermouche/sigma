@@ -82,4 +82,11 @@ namespace sigma::ir::win {
 			reg::invalid_id
 		}
 	};
+
+	static constexpr x64::gpr g_parameters[] = {
+		x64::gpr::RCX,
+		x64::gpr::RDX,
+		x64::gpr::R8,
+		x64::gpr::R9
+	};
 }

@@ -11,14 +11,18 @@
 // -   set crashes with more than 4(?) parameters
 // -   implicit returns for non-void functions should be a thing
 
-i32 main() {
-	u64 a = 100;
-
-	printf("value: %lld\n", a);
-	ret 0;
+i32 run(i32 x) { 
+    ret x; 
 }
 
+i32 test() {
+	ret 12;
+}
 
+i32 main() {
+    printf("%d\n", run(test()));
+    ret 0;
+}
 
 // THIS CRASHES
 // i32 main() {

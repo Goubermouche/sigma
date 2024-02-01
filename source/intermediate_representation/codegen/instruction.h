@@ -213,7 +213,9 @@ namespace sigma::ir {
 
 			// memory op
 			INDEXED = 1024,
-			SPILL = 2048
+			SPILL = 2048,
+
+			RET = 4096
 		};
 
 		struct description {

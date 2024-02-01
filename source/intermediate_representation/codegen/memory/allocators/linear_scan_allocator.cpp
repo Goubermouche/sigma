@@ -112,6 +112,7 @@ namespace sigma::ir {
 			// add the register to the active set
 			if (reg.is_valid()) {
 				interval->assigned = reg;
+
 				move_to_active(context, interval);
 			}
 		}
@@ -468,7 +469,10 @@ namespace sigma::ir {
 		}
 
 		it.reg = classified_reg();
+
 		it.assigned = reg();
+		ASSERT(it.assigned != 1, "x");
+
 		it.ranges.reserve(4);
 		it.uses.clear();
 		it.target = nullptr;
@@ -580,9 +584,7 @@ namespace sigma::ir {
 		return new_reg;
 	}
 
-	reg linear_scan_allocator::allocate_free_reg(
-		codegen_context& context, handle<live_interval> interval
-	) {
+	reg linear_scan_allocator::allocate_free_reg(codegen_context& context, handle<live_interval> interval) {
 		const auto register_class = interval->reg.cl;
 		constexpr i32 half_free = 1 << 16;
 
@@ -677,6 +679,7 @@ namespace sigma::ir {
 			}
 
 			interval = &context.intervals[old_reg];
+			ASSERT(interval->assigned != 1, "x");
 		}
 
 		if(static_cast<ptr_diff>(interval->get_end()) > free_position) {

@@ -53,7 +53,6 @@ namespace sigma::ir {
 		// generate the bytecode for our function
 		emit_function_prologue(context, bytecode);
 		emit_function_body(context, bytecode);
-		emit_function_epilogue(context, bytecode);
 
 		// pad the instruction buffer to 16 bytes with nop instructions
 		emit_nops_to_width(bytecode);
@@ -186,7 +185,13 @@ namespace sigma::ir {
 			else if (inst == instruction::type::INLINE) {
 				NOT_IMPLEMENTED();
 			}
-			else if (inst == instruction::type::EPILOGUE) { /*does nothing*/ }
+			else if (inst == instruction::type::EPILOGUE) {
+				emit_function_epilogue(context, bytecode);
+
+				if(inst->flags & instruction::RET) {
+					bytecode.append_byte(0xC3);
+				}
+			}
 			else if (inst == instruction::type::LINE) {
 				NOT_IMPLEMENTED();
 			}
@@ -327,7 +332,7 @@ namespace sigma::ir {
 				}
 				else if(ternary) {
 					const handle<instruction_operand> right = context.create_instruction_operand();
-					resolve_interval(context, inst, resolved_operand_count, right);
+					resolved_operand_count += resolve_interval(context, inst, resolved_operand_count, right);
 				
 					if(inst != instruction::type::MOV || (inst == instruction::type::MOV && out->matches(right) == false)) {
 						emit_instruction_2(context, inst->get_type(), out, right, dt, bytecode);
@@ -341,7 +346,6 @@ namespace sigma::ir {
 		ASSERT(context.function->exit_node != nullptr, "no exit node found");
 
 		if (context.stack_usage <= 16) {
-			bytecode.append_byte(0xC3);
 			return;
 		}
 
@@ -361,13 +365,6 @@ namespace sigma::ir {
 
 		// pop RBP
 		bytecode.append_byte(0x58 + x64::gpr::RBP);
-
-		// ret
-		const handle<node> remote_procedure_call = context.function->exit_node->inputs[2];
-
-		if (remote_procedure_call == node::type::PROJECTION && remote_procedure_call->inputs[0] == node::type::ENTRY && remote_procedure_call->get<projection>().index == 2) {
-			bytecode.append_byte(0xC3);
-		}
 	}
 
 	auto x64_architecture::get_instruction_table()->std::array<instruction::description, 120> {
@@ -870,6 +867,7 @@ namespace sigma::ir {
 		if(interval->spill > 0) {
 			val->set_type(instruction_operand::type::MEM);
 			val->reg = static_cast<u8>(x64::gpr::RBP);
+
 			val->index = reg::invalid_id;
 			val->immediate = -interval->spill;
 		}

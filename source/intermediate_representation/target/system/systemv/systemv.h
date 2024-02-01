@@ -30,4 +30,13 @@ namespace sigma::ir::systemv {
 			static_cast<u8>(x64::gpr::R9)
 		}
 	};
+
+	static constexpr x64::gpr g_parameters[] = {
+		x64::gpr::RDI,
+		x64::gpr::RSI,
+		x64::gpr::RDX,
+		x64::gpr::RCX,
+		x64::gpr::R8,
+		x64::gpr::R9
+	};
 }

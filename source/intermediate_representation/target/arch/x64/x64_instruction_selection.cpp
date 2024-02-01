@@ -1,9 +1,8 @@
 #include "x64.h"
 #include "abstract_syntax_tree/node.h"
 #include "intermediate_representation/codegen/instruction.h"
-#include "intermediate_representation/codegen/instruction.h"
-#include "intermediate_representation/codegen/instruction.h"
-#include "intermediate_representation/codegen/instruction.h"
+
+#include "intermediate_representation/target/system/systemv/systemv.h"
 #include "intermediate_representation/target/system/win/win.h"
 
 namespace sigma::ir {
@@ -264,9 +263,7 @@ namespace sigma::ir {
 			case node::type::REGION: break;
 			case node::type::ENTRY: {
 				bool is_systemv = context.target.get_abi() == abi::SYSTEMV;
-				constexpr x64::gpr gpr_params[] = {
-					x64::gpr::RCX, x64::gpr::RDX, x64::gpr::R8, x64::gpr::R9
-				};
+				const x64::gpr* gpr_params = is_systemv ? systemv::g_parameters : win::g_parameters;
 
 				u8 gpr_param_count = 4;
 				u8 xmm_param_count = is_systemv ? 8 : 4;
@@ -918,9 +915,14 @@ namespace sigma::ir {
 				// we don't really need a fence if we're about to exit but we do need to mark that
 				// it's the epilogue to tell the register allocator where callee registers need
 				// to get restored
-				context.append_instruction(create_instruction(
-					context, instruction::type::EPILOGUE, VOID_TYPE, 0, 0, 0)
-				);
+				handle<instruction> inst = create_instruction(
+					context, instruction::type::EPILOGUE, VOID_TYPE, 0, 0, 0);
+
+				inst->flags |= instruction::RET;
+
+				context.append_instruction(inst);
+
+
 				break;
 			}
 

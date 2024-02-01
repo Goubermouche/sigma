@@ -59,6 +59,7 @@ namespace sigma {
 
 			static u64 counter = 0;
 			return "f" + std::to_string(counter++);
+			//return string_table.get(signature.identifier_key);
 		}
 
 		auto calculate_parameter_cast_cost(const function_signature& signature, const std::vector<data_type>& parameter_types) -> u16 {

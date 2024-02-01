@@ -10,18 +10,13 @@
 // -   cleanup ir gen alignment sizes (u64 vs u32 vs u16)
 // -   set crashes with more than 4(?) parameters
 // -   implicit returns for non-void functions should be a thing
-
 i32 main() {
-    bool a = true;
-    // printf("%d\n", a);
-    printf("%d\n", !a);
 
-    // bool b = 100;
-    // printf("%d\n", b);
-    // printf("%d\n", !b);
+  printf("lit: %d\n", 100 > 200);
 
-    ret 0;
+	ret 0;
 }
+
 
 
 // THIS CRASHES

@@ -6,31 +6,20 @@
 // -   numerical literals are always interpreted as i32
 
 // TODO: 
-// -   add namespaces to error messages, whenever applicable (ie. x::y::test)
-// -   cleanup ir gen alignment sizes (u64 vs u32 vs u16)
-// -   set crashes with more than 4(?) parameters
-// -   implicit returns for non-void functions should be a thing
+// -   DIAGNOSTICS:
+//     -   better messages
+//     -   more info related to numerical errors (hex etc)
+//     -   add namespaces to messages, whenever applicable (ie. x::y::test)
+// -   BUGS: 
+//     -   the parser returns an empty error in some cases
+//     -   set crashes with more than 4(?) parameters
+// -   TESTS:
+//     -    add more test cases
+//     -    figure out why the array3D test case wasnt working
+// -   convert ir bool types to sigma types correctly for TB stuff
+// -   implicit returns for non-void functions should not be a thing
 
 i32 main() {
-    // bool value1 = true;
-    // bool value2 = false;
-
-    // printf("%d %d\n", value1, value2);
     printf("%d\n", true);
-    // printf("%d %d\n", 1, 0);
-
     ret 0;
 }
-
-
-// THIS CRASHES
-// i32 main() {
-// 	i32* memory = cast<i32*>(malloc(100));
-// 	
-// 	memory[0] = 1;
-// 	memory[1] = 2;
-// 	
-// 	printf("%d %d\n", memory[0], memory[1]);
-// 
-// 	ret 0; a
-// }

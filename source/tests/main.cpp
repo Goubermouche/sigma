@@ -110,26 +110,45 @@ bool run_test(const filepath& path, const filepath& compiler_path) {
 	if(i32 run_result = run_executable(EXECUTABLE_FILE)) {
 		utility::console::printerr("{:<40} ERROR (run - {})\n", path.to_string(), run_result);
 
-		const std::string stdout_str = read_or_throw(APP_STDOUT);
-		const std::string stderr_str = read_or_throw(APP_STDERR);
+		const std::string app_stdout_str = read_or_throw(APP_STDOUT);
+		const std::string app_stderr_str = read_or_throw(APP_STDERR);
+		const std::string compiler_stdout_str = read_or_throw(COMPILER_STDOUT);
+		const std::string compiler_stderr_str = read_or_throw(COMPILER_STDERR);
 
 		print_error_block(
-			{ "STDOUT", "STDERR" },
-			{ utility::detail::escape_string(stdout_str) , utility::detail::escape_string(stderr_str) });
+			{ "STDOUT", "STDERR", "COMPILER_STDOUT", "COMPILER_STDERR" },
+			{
+				utility::detail::escape_string(app_stdout_str),
+				utility::detail::escape_string(app_stderr_str),
+				compiler_stdout_str,
+				compiler_stderr_str
+			}
+		);
 
 		return true;
 	}
 
 	// executable returned 0
-	const std::string stdout_str = read_or_throw(APP_STDOUT);
+	const std::string app_stdout_str = read_or_throw(APP_STDOUT);
 	const std::string expected_str = read_or_throw(get_expected_path(path));
 
-	if(stdout_str != expected_str) {
+	if(app_stdout_str != expected_str) {
 		utility::console::printerr("{:<40} ERROR (unexpected result)\n", pretty_path.to_string());
+
+		const std::string app_stderr_str = read_or_throw(APP_STDERR);
+		const std::string compiler_stdout_str = read_or_throw(COMPILER_STDOUT);
+		const std::string compiler_stderr_str = read_or_throw(COMPILER_STDERR);
+
 		print_error_block(
-			{ "STDOUT", "REFERENCE" }, 
-			{ utility::detail::escape_string(stdout_str), utility::detail::escape_string(expected_str) }
+			{ "STDOUT", "STDERR", "COMPILER_STDOUT", "COMPILER_STDERR" },
+			{
+				utility::detail::escape_string(app_stdout_str),
+				utility::detail::escape_string(app_stderr_str),
+				compiler_stdout_str,
+				compiler_stderr_str
+			}
 		);
+
 
 		return true;
 	}

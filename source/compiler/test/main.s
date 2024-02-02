@@ -10,14 +10,14 @@
 //     -   better messages
 //     -   more info related to numerical errors (hex etc)
 //     -   add namespaces to messages, whenever applicable (ie. x::y::test)
-// -   BUGS: 
-//     -   set crashes with more than 4(?) parameters
 // -   TESTS:
 //     -    add more test cases
 //     -    figure out why the array3D test case wasnt working
 // -   convert ir bool types to sigma types correctly for TB stuff
 // -   implicit returns for non-void functions should not be a thing
 
+
 i32 main() {
-   a
+	printf("%d %d %d %d %d %d %d\n", 1, 2, 3, 4, 5, 6, 7);
+	ret 0;
 }

@@ -1239,7 +1239,16 @@ namespace sigma::ir {
 			return create_rm(context, instruction::type::LEA, n->dt, dst, base, index, scale, offset);
 		}
 
-		return create_mr(context, static_cast<instruction::type::underlying>(store_op), n->dt, base, index, scale, offset, src);
+		return create_mr(
+			context,
+			static_cast<instruction::type::underlying>(store_op),
+			n->dt,
+			base, 
+			static_cast<reg::id_type>(index),
+			scale, 
+			offset,
+			src
+		);
 	}
 
 	auto x64_architecture::select_array_access_instruction(codegen_context& context, handle<node> n, reg dst, i32 store_op, i32 src) -> handle<instruction> {
@@ -1256,7 +1265,7 @@ namespace sigma::ir {
 					return create_rm(context, instruction::type::LEA, PTR_TYPE, dst, base, -1, memory_scale::x1, 0);
 				}
 
-				return create_mr(context, static_cast<instruction::type::underlying>(store_op), PTR_TYPE, base, -1, memory_scale::x1, 0, src);
+				return create_mr(context, static_cast<instruction::type::underlying>(store_op), PTR_TYPE, base, reg::invalid_id, memory_scale::x1, 0, src);
 			}
 		}
 
@@ -1617,16 +1626,16 @@ namespace sigma::ir {
 		return inst;
 	}
 
-	auto x64_architecture::create_mr(codegen_context& context, instruction::type type, const data_type& data_type, reg base, i32 index, memory_scale scale, i32 disp, i32 source) -> handle<instruction> {
-		const handle<instruction> inst = create_instruction(context, type, data_type, 0, index >= 0 ? 3 : 2, 0);
+	auto x64_architecture::create_mr(codegen_context& context, instruction::type type, const data_type& data_type, reg base, reg index, memory_scale scale, i32 disp, i32 source) -> handle<instruction> {
+		const handle<instruction> inst = create_instruction(context, type, data_type, 0, index.is_valid() ? 3 : 2, 0);
 
-		inst->flags = instruction::MEM | (index >= 0 ? instruction::INDEXED : instruction::NONE);
+		inst->flags = instruction::MEM | (index.is_valid() ? instruction::INDEXED : instruction::NONE);
 		inst->memory.index = 0;
 
 		inst->operands[0] = base.id;
 
-		if (index >= 0) {
-			inst->operands[1] = index;
+		if (index.is_valid()) {
+			inst->operands[1] = index.id;
 			inst->operands[2] = source;
 		}
 		else {

@@ -82,11 +82,12 @@ namespace sigma::ir {
 		const u64 item_base = context.work.items.size();
 
 		// add all our nodes into the work list
-		for (const u64 block_order : context.basic_block_order) {
-			auto target = context.work.items[block_order];
-			context.work.items.push_back(target);
+		for (u64 i = context.basic_block_order.size(); i-- > 0;) {
+			const u64 block_order = context.basic_block_order[i];
+			auto n = context.work.items[block_order];
+			context.work.items.push_back(n);
 
-			const auto machine_block = &context.machine_blocks.at(target);
+			const auto machine_block = &context.machine_blocks.at(n);
 			machine_block->live_in.copy(machine_block->gen);
 		}
 

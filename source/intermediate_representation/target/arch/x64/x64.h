@@ -139,7 +139,7 @@ namespace sigma::ir {
 
 		// other instructions
 		static auto create_r(codegen_context& context, instruction::type type, const data_type& data_type, reg dst) -> handle<instruction>;
-		static auto create_mr(codegen_context& context, instruction::type type, const data_type& data_type, reg base, i32 index, memory_scale scale, i32 disp, i32 source) -> handle<instruction>;
+		static auto create_mr(codegen_context& context, instruction::type type, const data_type& data_type, reg base, reg index, memory_scale scale, i32 disp, i32 source) -> handle<instruction>;
 		static auto create_rm(codegen_context& context, instruction::type type, const data_type& data_type, reg destination, reg base, i32 index, memory_scale scale, i32 disp) -> handle<instruction>;
 		static auto create_rr(codegen_context& context, instruction::type type, const data_type& data_type, reg destination, reg source) -> handle<instruction>;
 		static auto create_rrd(codegen_context& context, instruction::type type,const data_type& data_type, reg destination, reg source) -> handle<instruction>;

@@ -46,7 +46,7 @@ namespace utility {
 				std::ifstream file(path.get_path());
 
 				if (!file) {
-					return error("cannot open file '{}'", path);
+					return error(std::format("cannot open file '{}'", path));
 				}
 
 				return std::string(std::istreambuf_iterator<char>(file), std::istreambuf_iterator<char>());

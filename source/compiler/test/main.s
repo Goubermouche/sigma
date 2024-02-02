@@ -11,7 +11,6 @@
 //     -   more info related to numerical errors (hex etc)
 //     -   add namespaces to messages, whenever applicable (ie. x::y::test)
 // -   BUGS: 
-//     -   the parser returns an empty error in some cases
 //     -   set crashes with more than 4(?) parameters
 // -   TESTS:
 //     -    add more test cases
@@ -20,6 +19,5 @@
 // -   implicit returns for non-void functions should not be a thing
 
 i32 main() {
-    printf("%d\n", true);
-    ret 0;
+   a
 }

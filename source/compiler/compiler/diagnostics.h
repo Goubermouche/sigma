@@ -11,6 +11,8 @@ namespace sigma {
 		 * \brief Predeclared error codes
 		 */
 		enum class code : u32 {
+			TEST_ERROR,
+
 			// filesystem (1000 - 1999)
 			EXPECTED_FILE = 1000,
 			FILE_DOES_NOT_EXIST,
@@ -57,16 +59,21 @@ namespace sigma {
 		 */
 		template<typename... arguments>
 		static auto emit(code code, handle<token_location> location, arguments&&... args) -> utility::error {
-			const std::string str = std::format(
-				"{}:{}:{}: error C{}: {}",
-				location->file->get_filename(),
-				location->line_index + 1, 
-				location->char_index + 1, 
-				static_cast<u32>(code), 
-				m_errors.find(code)->second
+			const std::string message = std::vformat(
+				m_errors.find(code)->second, 
+				std::make_format_args(std::forward<arguments>(args)...)
 			);
 
-			return utility::error(str, std::forward<arguments>(args)...);
+			const std::string error_message = std::format(
+				"{}:{}:{}: error C{}: {}",
+				location->file->get_filename(),
+				location->line_index + 1,
+				location->char_index + 1,
+				static_cast<u32>(code), 
+				message
+			);
+
+			return { error_message };
 		}
 
 		/**
@@ -78,11 +85,22 @@ namespace sigma {
 		 */
 		template<typename... arguments>
 		static auto emit(code code, arguments&&... args) -> utility::error {
-			const std::string str = std::format("error C{}: {}", static_cast<u32>(code), m_errors.find(code)->second);
-			return utility::error(str, std::forward<arguments>(args)...);
+			const std::string message = std::vformat(
+				m_errors.find(code)->second, 
+				std::make_format_args(std::forward<arguments>(args)...)
+			);
+
+			const std::string error_message = std::format(
+				"error C{}: {}", 
+				static_cast<u32>(code), message
+			);
+
+			return { error_message };
 		}
 	private:
 		const static inline std::unordered_map<code, std::string> m_errors = {
+			{ code::TEST_ERROR,                       "test {}"                                        },
+
 			// filesystem
 			{ code::EXPECTED_FILE,                       "expected a file but got a directory ('{}')"                                        },
 			{ code::FILE_DOES_NOT_EXIST,                 "specified file does not exist ('{}')"                                              },

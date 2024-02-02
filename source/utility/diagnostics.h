@@ -41,11 +41,7 @@ namespace utility {
 
 	class error {
 	public:
-		template<typename... arguments>
-		error(const std::string& fmt, arguments&&... args) {
-			auto formatted_args = std::make_format_args(std::forward<arguments>(args)...);
-			m_message = std::vformat(fmt, formatted_args);
-		}
+		error(const std::string& message) : m_message(message) {}
 
 		auto get_message() const -> const std::string& {
 			return m_message;

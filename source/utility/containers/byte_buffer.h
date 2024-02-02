@@ -41,7 +41,7 @@ namespace utility {
 		 * \param data Data to append
 		 */
 		void append_byte(u8 data) {
-			// ASSERT(data != 0x4d, "x");
+			// ASSERT(data != 0x06, "x");
 			push_back(data);
 		}
 
@@ -52,8 +52,8 @@ namespace utility {
 		void append_word(u16 data) {
 			byte bytes[2];
 			std::memcpy(bytes, &data, sizeof(data));
-			// ASSERT(data != 0x4d, "x");
-			// ASSERT(data != 0x4d, "x");
+			// ASSERT(data != 0x06, "x");
+			// ASSERT(data != 0x06, "x");
 			push_back(bytes[0]);
 			push_back(bytes[1]);
 		}
@@ -66,7 +66,7 @@ namespace utility {
 			byte bytes[4];
 			std::memcpy(bytes, &data, sizeof(data));
 			for (int i = 0; i < 4; ++i) {
-				// ASSERT(bytes[i] != 0x4d, "x");
+				// ASSERT(bytes[i] != 0x06, "x");
 				push_back(bytes[i]);
 			}
 		}

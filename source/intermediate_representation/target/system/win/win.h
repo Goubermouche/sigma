@@ -59,13 +59,13 @@
 namespace sigma::ir::win {
 	constexpr auto get_caller_saved() -> u16 {
 		return
-			1u << x64::gpr::RAX |
-			1u << x64::gpr::RCX |
-			1u << x64::gpr::RDX |
-			1u << x64::gpr::R8  |
-			1u << x64::gpr::R9  |
-			1u << x64::gpr::R10 |
-			1u << x64::gpr::R11;
+			static_cast<u16>(1u) << static_cast<u16>(x64::gpr::RAX) |
+			static_cast<u16>(1u) << static_cast<u16>(x64::gpr::RCX) |
+			static_cast<u16>(1u) << static_cast<u16>(x64::gpr::RDX) |
+			static_cast<u16>(1u) << static_cast<u16>(x64::gpr::R8)  |
+			static_cast<u16>(1u) << static_cast<u16>(x64::gpr::R9)  |
+			static_cast<u16>(1u) << static_cast<u16>(x64::gpr::R10) |
+			static_cast<u16>(1u) << static_cast<u16>(x64::gpr::R11);
 	}
 
 	static const parameter_descriptor parameter_descriptor = {

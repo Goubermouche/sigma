@@ -64,7 +64,7 @@ namespace sigma {
 		auto declare_variable(utility::string_table_key identifier, u16 size, u16 alignment) const -> handle<ir::node>;
 		void declare_external_function(const function_signature& signature) const;
 		void declare_local_function(const function_signature& signature) const;
-		void declare_implicit_return() const;
+		void define_implicit_return() const;
 
 		auto create_load(utility::string_table_key identifier, ir::data_type type, u16 alignment) const -> handle<ir::node>;
 		void create_store(utility::string_table_key identifier, handle<ir::node> value, u16 alignment) const;
@@ -91,6 +91,9 @@ namespace sigma {
 
 		bool contains_variable(utility::string_table_key identifier) const;
 		bool contains_function(const function_signature& signature) const;
+
+		bool has_return() const;
+		void declare_return() const;
 	private:
 		/**
 		 * \brief Locate the namespace specified by \b namespaces. Relative to the current scope.

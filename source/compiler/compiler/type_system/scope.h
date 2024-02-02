@@ -30,7 +30,7 @@ namespace sigma {
 	struct namespace_scope;
 
 	struct scope {
-		enum class scope_type {
+		enum class scope_type : u8 {
 			NONE = 0,
 			REGULAR,
 			NAMESPACE
@@ -50,6 +50,7 @@ namespace sigma {
 
 		// metadata
 		scope_type type = scope_type::NONE;
+		bool has_return = false; // TODO: function scope or something similar? 
 	};
 
 	/**

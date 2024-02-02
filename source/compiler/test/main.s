@@ -12,14 +12,11 @@
 //     -   add namespaces to messages, whenever applicable (ie. x::y::test)
 // -   TESTS:
 //     -    add more test cases
-//     -    figure out why the array3D test case wasnt working
-// -   convert ir bool types to sigma types correctly for TB stuff
-// -   implicit returns for non-void functions should not be a thing
-
 
 i32 main() {
-	printf("%d %d %d %d %d %d %d\n", 1, 2, 3, 4, 5, 6, 7);
+	bool x = 0 > 2;
+
+	printf("%d\n", x);
+
 	ret 0;
 }
-
-

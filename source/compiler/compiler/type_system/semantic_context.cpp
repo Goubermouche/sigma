@@ -295,6 +295,14 @@ namespace sigma {
 		return false;
 	}
 
+	bool semantic_context::has_return() const {
+		return m_current_scope->has_return;
+	}
+
+	void semantic_context::declare_return() const {
+		m_current_scope->has_return = true;
+	}
+
 	auto semantic_context::find_callee_signature(handle<ast::node> function_node, const std::vector<data_type>& parameter_types) -> utility::result<function_signature> {
 		using call_candidate = std::pair<function_signature, u16>;
 
@@ -373,7 +381,7 @@ namespace sigma {
 		find_parent_namespace()->local_functions.at(signature.identifier_key).at(signature) = function;
 	}
 
-	void semantic_context::declare_implicit_return() const {
+	void semantic_context::define_implicit_return() const {
 		// declare an implicit return value for the active function
 		const handle<ir::function> function = m_context.builder.get_insert_point();
 

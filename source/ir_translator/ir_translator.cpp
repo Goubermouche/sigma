@@ -89,7 +89,7 @@ namespace sigma {
 			translate_node(statement);
 		}
 
-		m_context.semantics.declare_implicit_return();
+		m_context.semantics.define_implicit_return();
 		m_context.semantics.trace_pop_scope();
 	}
 

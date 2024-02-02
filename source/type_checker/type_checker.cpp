@@ -110,6 +110,15 @@ namespace sigma {
 			TRY(type_check_node(statement, declaration));
 		}
 
+		if (!function.signature.return_type.is_void()) {
+			// functions with non-void return types have to supply a return value
+			if(!m_context.semantics.has_return()) {
+				const std::string& identifier = m_context.syntax.strings.get(function.signature.identifier_key);
+				const std::string return_type = function.signature.return_type.to_string();
+				return error::emit(error::code::MISSING_RET, declaration->location, identifier, return_type);
+			}
+		}
+
 		m_context.semantics.pop_scope();
 
 		// this value won't be used
@@ -191,6 +200,7 @@ namespace sigma {
 		else {
 			// return a value
 			TRY(type_check_node(statement->children[0], statement, expected));
+			m_context.semantics.declare_return();
 		}
 
 		// this value won't be used

@@ -15,7 +15,10 @@
 
 i32 main() {
 	if(true) {
-		ret 2;
+		ret 0;
+	}
+	else {
+		ret 0;
 	}
 
 	ret 0;

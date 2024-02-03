@@ -192,8 +192,12 @@ namespace sigma {
 			translate_node(statement);
 		}
 
+		if (!m_context.semantics.has_return()) {
+			// if we don't have a return statement in this scope, we have to branch back
+			m_context.builder.create_branch(exit_control);
+		}
+
 		m_context.semantics.trace_pop_scope();
-		m_context.builder.create_branch(exit_control);
 	}
 
 	auto ir_translator::translate_array_access(handle<ast::node> access_node) -> handle<ir::node> {

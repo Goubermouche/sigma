@@ -14,9 +14,9 @@
 //     -    add more test cases
 
 i32 main() {
-	bool x = 0 > 2;
-
-	printf("%d\n", x);
+	if(true) {
+		// ret 2;
+	}
 
 	ret 0;
 }

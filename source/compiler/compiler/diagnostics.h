@@ -38,7 +38,6 @@ namespace sigma {
 			NO_CALL_OVERLOAD,
 			FUNCTION_ALREADY_DECLARED,
 			UNEXPECTED_VOID_RET,
-			MISSING_RET,
 			UNEXPECTED_TYPE,
 			UNKNOWN_VARIABLE,
 			UNKNOWN_VARIABLE_ASSIGN,
@@ -48,6 +47,7 @@ namespace sigma {
 			INVALID_CAST,
 			INVALID_IMPLICIT_CAST,
 			INVALID_VOID,
+			NOT_ALL_CONTROL_PATHS_RETURN,
 		};
 
 		/**
@@ -127,7 +127,6 @@ namespace sigma {
 			{ code::NO_CALL_OVERLOAD,                    "no matching overload for call to function '{}' found - candidates considered:\n{}" },
 			{ code::FUNCTION_ALREADY_DECLARED,           "function '{}' has already been declared before"                                    },
 			{ code::UNEXPECTED_VOID_RET,                 "invalid void return statement (expected 'ret value;', but got 'ret;' instead)"     },
-			{ code::MISSING_RET,                         "function '{}' expects a return value of type '{}'"                                 },
 			{ code::UNEXPECTED_TYPE,                     "encountered an unexpected type (expected '{}', but got '{}' instead)"              },
 			{ code::UNKNOWN_VARIABLE,                    "unknown variable '{}' referenced"                                                  },
 			{ code::UNKNOWN_VARIABLE_ASSIGN,             "attempting to assign to an unknown variable '{}'"                                  },
@@ -137,6 +136,7 @@ namespace sigma {
 			{ code::INVALID_CAST,                        "invalid cast from '{}' to '{}'"                                                    },
 			{ code::INVALID_IMPLICIT_CAST,               "invalid implicit cast from '{}' to '{}'"                                           },
 			{ code::INVALID_VOID,                        "invalid use of a void expression"                                                  },
+			{ code::NOT_ALL_CONTROL_PATHS_RETURN,        "not all control paths return a value"                                              },
 		};
 	};
 

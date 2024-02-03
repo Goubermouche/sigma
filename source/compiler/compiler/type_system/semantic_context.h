@@ -26,6 +26,8 @@ namespace sigma {
 	public:
 		semantic_context(backend_context& context);
 
+		auto verify_control_flow(handle<ast::node> function_node) const-> utility::result<void>;
+
 		/**
 		 * \brief Pushes a new scope.
 		 */
@@ -95,6 +97,8 @@ namespace sigma {
 		bool has_return() const;
 		void declare_return() const;
 	private:
+		static auto all_control_paths_return(handle<scope> scope, handle<ast::node> function_node) -> utility::result<bool>;
+
 		/**
 		 * \brief Locate the namespace specified by \b namespaces. Relative to the current scope.
 		 * \param namespaces Namespaces to apply to the current scope

@@ -107,18 +107,10 @@ namespace sigma {
 
 		// type check inner statements
 		for(const ast_node& statement : declaration->children) {
-			TRY(type_check_node(statement, declaration));
+			TRY(type_check_node(statement, declaration, function.signature.return_type));
 		}
 
-		if (!function.signature.return_type.is_void()) {
-			// functions with non-void return types have to supply a return value
-			if(!m_context.semantics.has_return()) {
-				const std::string& identifier = m_context.syntax.strings.get(function.signature.identifier_key);
-				const std::string return_type = function.signature.return_type.to_string();
-				return error::emit(error::code::MISSING_RET, declaration->location, identifier, return_type);
-			}
-		}
-
+		TRY(m_context.semantics.verify_control_flow(declaration));
 		m_context.semantics.pop_scope();
 
 		// this value won't be used
@@ -200,6 +192,7 @@ namespace sigma {
 		else {
 			// return a value
 			TRY(type_check_node(statement->children[0], statement, expected));
+
 			m_context.semantics.declare_return();
 		}
 
@@ -389,8 +382,6 @@ namespace sigma {
 
 		return expression.type;
 	}
-
-	
 
 	auto type_checker::type_check_character_literal(ast_node literal, ast_node parent, data_type expected) const -> type_check_result {
 		auto& expression = literal->get<ast::named_type_expression>();

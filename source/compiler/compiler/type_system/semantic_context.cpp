@@ -122,6 +122,22 @@ namespace sigma {
 		reset_active_scope();
   }
 
+	auto semantic_context::verify_control_flow(handle<ast::node> function_node) const -> utility::result<void> {
+		const ast::function function = function_node->get<ast::function>();
+
+		// check if all control paths return
+		if(!function.signature.return_type.is_void()) {
+			// edge case for top level scopes
+			if(!m_current_scope->has_return && m_current_scope->child_scopes.empty()) {
+				return error::emit(error::code::NOT_ALL_CONTROL_PATHS_RETURN, function_node->location);
+			}
+
+			TRY(all_control_paths_return(m_current_scope, function_node));
+		}
+
+		return SUCCESS;
+	}
+
   void semantic_context::push_scope() {
 		const handle new_scope = allocate_scope();
 		new_scope->parent = m_current_scope;
@@ -301,6 +317,35 @@ namespace sigma {
 
 	void semantic_context::declare_return() const {
 		m_current_scope->has_return = true;
+	}
+
+	auto semantic_context::all_control_paths_return(handle<scope> scope, handle<ast::node> function_node) -> utility::result<bool> {
+		if(scope->has_return) {
+			// all control paths in this scope return a value by default
+			return true;
+		}
+
+		u64 return_count = 0;
+
+		// check how many child scopes return a value
+		for(const auto& child : scope->child_scopes) {
+			if(child->has_return) {
+				return_count++;
+			}
+			else {
+				TRY(const bool has_return, all_control_paths_return(child, function_node));
+				return_count += has_return;
+			}
+		}
+
+		// if the return count of child scopes and the expected number of scopes
+		// don't match, we've got an error
+		if(return_count != scope->child_scopes.size()) {
+			return error::emit(error::code::NOT_ALL_CONTROL_PATHS_RETURN, function_node->location);
+		}
+
+		// all control paths in this scope can return if it even has any control paths
+		return !scope->child_scopes.empty();
 	}
 
 	auto semantic_context::find_callee_signature(handle<ast::node> function_node, const std::vector<data_type>& parameter_types) -> utility::result<function_signature> {

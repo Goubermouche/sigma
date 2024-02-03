@@ -50,7 +50,7 @@ namespace sigma {
 
 		// metadata
 		scope_type type = scope_type::NONE;
-		bool has_return = false; // TODO: function scope or something similar? 
+		bool has_return = false;
 	};
 
 	/**

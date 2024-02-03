@@ -136,7 +136,6 @@ namespace sigma {
 
 	void ir_translator::translate_conditional_branch(handle<ast::node> branch_node, handle<ir::node> end_control) {
 		const handle<ir::node> true_control = m_context.builder.create_region();
-		const handle<ir::node> false_control = m_context.builder.create_region();
 		end_control = end_control ? end_control : m_context.builder.create_region();
 
 		// translate the condition
@@ -144,6 +143,8 @@ namespace sigma {
 
 		// check if there is a successor branch node
 		if (const handle<ast::node> successor = branch_node->children[1]) {
+			const handle<ir::node> false_control = m_context.builder.create_region();
+
 			// successor node
 			m_context.builder.create_conditional_branch(condition, true_control, false_control);
 			m_context.builder.set_control(false_control);
@@ -169,12 +170,16 @@ namespace sigma {
 		m_context.builder.set_control(true_control);
 		m_context.semantics.trace_push_scope();
 
-		for (u64 i = 2; i < branch_node->children.get_size(); ++i) {
+		for(u64 i = 2; i < branch_node->children.get_size(); ++i) {
 			translate_node(branch_node->children[i]);
 		}
 
+		if(!m_context.semantics.has_return()) {
+			// if we don't have a return statement in this scope, we have to branch back
+			m_context.builder.create_branch(end_control);
+		}
+
 		m_context.semantics.trace_pop_scope();
-		m_context.builder.create_branch(end_control);
 
 		// restore the control region
 		m_context.builder.set_control(end_control);

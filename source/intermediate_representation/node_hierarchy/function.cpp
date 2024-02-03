@@ -1,4 +1,6 @@
 #include "function.h"
+
+#include "abstract_syntax_tree/node.h"
 #include "intermediate_representation/codegen/work_list.h"
 
 namespace sigma::ir {
@@ -80,7 +82,7 @@ namespace sigma::ir {
 	}
 
 	void function::create_return(const std::vector<handle<node>>& virtual_values) {
-		const handle<node> memory_state =active_control_node->peek_memory();
+		const handle<node> memory_state = active_control_node->peek_memory();
 
 		// allocate a new return node
 		if (exit_node == nullptr) {
@@ -119,11 +121,29 @@ namespace sigma::ir {
 			terminators.push_back(exit_node);
 		}
 		else {
-			NOT_IMPLEMENTED();
 			// NOTE: the IR gen currently checks if the exit node is nullptr, and if it is, it adds an
 			//       implicit return, this might not work 100% of the time if this gets updated, for more
 			//       info see declare_implicit_return()
+			// add to PHIs
+			ASSERT(exit_node->inputs.get_size() >= 3 + virtual_values.size(), "panic");
+			add_input_late(exit_node->inputs[1], memory_state);
 
+			if(exit_node->inputs[2] == node::type::PHI) {
+				NOT_IMPLEMENTED();
+			}
+
+			u64 i = 3;
+			for(; i < virtual_values.size() + 3; i++) {
+				ASSERT(exit_node->inputs[i]->dt.get_bit_width() == virtual_values[i - 3]->dt.get_bit_width(), "data type mismatch");
+				add_input_late(exit_node->inputs[i], virtual_values[i - 3]);
+			}
+
+			const u64 phi_count = exit_node->inputs.get_size();
+			for(; i < phi_count; i++) {
+				const handle<node> poison = create_node<utility::empty_property>(node::type::POISON, 1);
+				poison->dt = exit_node->inputs[i]->dt;
+				add_input_late(exit_node->inputs[i], poison);
+			}
 		}
 
 		const handle<node> control = active_control_node;

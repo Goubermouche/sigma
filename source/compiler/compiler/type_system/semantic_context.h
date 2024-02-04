@@ -31,7 +31,7 @@ namespace sigma {
 		/**
 		 * \brief Pushes a new scope.
 		 */
-		void push_scope();
+		void push_scope(scope::control_type control);
 
 		/**
 		 * \brief Pops the current scope/namespace.

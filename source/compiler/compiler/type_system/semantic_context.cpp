@@ -138,9 +138,10 @@ namespace sigma {
 		return SUCCESS;
 	}
 
-  void semantic_context::push_scope() {
+  void semantic_context::push_scope(scope::control_type control) {
 		const handle new_scope = allocate_scope();
 		new_scope->parent = m_current_scope;
+		new_scope->control = control;
 
 		m_current_scope->child_scopes.push_back(new_scope);
 		m_current_scope = new_scope;
@@ -326,6 +327,7 @@ namespace sigma {
 		}
 
 		u64 return_count = 0;
+		bool has_unconditional_return = false;
 
 		// check how many child scopes return a value
 		for(const auto& child : scope->child_scopes) {
@@ -336,11 +338,19 @@ namespace sigma {
 				TRY(const bool has_return, all_control_paths_return(child, function_node));
 				return_count += has_return;
 			}
+
+			has_unconditional_return |= child->control == scope::control_type::UNCONDITIONAL;
 		}
 
 		// if the return count of child scopes and the expected number of scopes
 		// don't match, we've got an error
 		if(return_count != scope->child_scopes.size()) {
+			return error::emit(error::code::NOT_ALL_CONTROL_PATHS_RETURN, function_node->location);
+		}
+
+		// if the number of returns matches, but we don't have an unconditional return
+		// we've got an error as well
+		if(!has_unconditional_return) {
 			return error::emit(error::code::NOT_ALL_CONTROL_PATHS_RETURN, function_node->location);
 		}
 

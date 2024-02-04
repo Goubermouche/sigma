@@ -97,7 +97,7 @@ namespace sigma {
 
 		// register the function
 		m_context.semantics.pre_declare_local_function(function.signature);
-		m_context.semantics.push_scope();
+		m_context.semantics.push_scope(scope::control_type::UNCONDITIONAL);
 
 		// push temporaries for function parameters
 		for(const named_data_type& parameter : function.signature.parameter_types) {
@@ -211,7 +211,7 @@ namespace sigma {
 			TRY(type_check_node(branch->children[1], nullptr));
 		}
 
-		m_context.semantics.push_scope();
+		m_context.semantics.push_scope(scope::control_type::CONDITIONAL);
 
 		// type check inner statements
 		for (u16 i = 2; i < branch->children.get_size(); ++i) {
@@ -225,7 +225,7 @@ namespace sigma {
 	}
 
 	auto type_checker::type_check_branch(ast_node branch) -> type_check_result {
-		m_context.semantics.push_scope();
+		m_context.semantics.push_scope(scope::control_type::UNCONDITIONAL);
 
 		// just type check all inner statements
 		for (const ast_node& statement : branch->children) {

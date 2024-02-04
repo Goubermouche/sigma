@@ -36,6 +36,12 @@ namespace sigma {
 			NAMESPACE
 		};
 
+		enum class control_type : u8 {
+			NONE = 0,
+			CONDITIONAL,
+			UNCONDITIONAL
+		};
+
 		scope() = default;
 		scope(scope_type type);
 
@@ -50,6 +56,7 @@ namespace sigma {
 
 		// metadata
 		scope_type type = scope_type::NONE;
+		control_type control = control_type::NONE;
 		bool has_return = false;
 	};
 

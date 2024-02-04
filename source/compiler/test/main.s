@@ -12,14 +12,13 @@
 //     -   add namespaces to messages, whenever applicable (ie. x::y::test)
 // -   TESTS:
 //     -    add more test cases
+// -   if | else if should throw
 
 i32 main() {
 	if(true) {
 		ret 0;
 	}
-	else {
+	else(true){
 		ret 0;
 	}
-
-	ret 0;
 }

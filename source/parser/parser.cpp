@@ -281,8 +281,12 @@ namespace sigma {
 				break;
 			}
 			else {
-				// unreachable
-				NOT_IMPLEMENTED();
+				const token_info peek = m_tokens.peek_next();
+				return error::emit(
+					error::code::UNEXPECTED_TOKEN,
+					peek.location,
+					peek.tok.to_string()
+				);
 			}
 		}
 

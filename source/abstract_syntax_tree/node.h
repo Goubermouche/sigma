@@ -1,5 +1,6 @@
 #pragma once
-#include "parser/data_type.h"
+#include <compiler/compiler/type_system/namespace_list.h>
+#include <compiler/compiler/type_system/data_type.h>
 
 #include "utility/containers/property.h"
 #include "utility/containers/handle.h"
@@ -141,7 +142,7 @@ namespace sigma::ast {
 		function_signature signature;
 		// optional namespace directives, empty by default
 		// ie. utility::detail::call() would be { utility, detail }
-		std::vector<utility::string_table_key> namespaces;
+		namespace_list namespaces;
 	};
 
 	using node_properties = utility::property<

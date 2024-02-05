@@ -17,10 +17,10 @@ namespace utility::types {
     handle(type* ptr) : m_ptr(ptr) {}
 
 		template<typename other_type>
-		handle(other_type* other) : m_ptr(static_cast<type*>(other)) {}
+		handle(other_type* other) : m_ptr(reinterpret_cast<type*>(other)) {}
 
 		template<typename other_type>
-		handle(handle<other_type> other) : m_ptr(static_cast<type*>(other.get())) {}
+		handle(handle<other_type> other) : m_ptr(reinterpret_cast<type*>(other.get())) {}
 
     auto operator*() const -> type& {
       return *m_ptr;

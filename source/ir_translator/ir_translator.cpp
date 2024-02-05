@@ -377,7 +377,10 @@ namespace sigma {
 			parameters.push_back(translate_node(parameter));
 		}
 
-		const handle<ir::node> call_result = m_context.semantics.create_call(callee.signature, callee.namespaces, parameters);
+		const handle<ir::node> call_result = m_context.semantics.create_call(
+			callee.signature, callee.namespaces, parameters
+		);
+
 		return call_result;
 	}
 

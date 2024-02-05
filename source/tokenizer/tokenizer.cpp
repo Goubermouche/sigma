@@ -138,12 +138,29 @@ namespace sigma {
 
 	auto tokenizer::get_alphabetical_token() -> utility::result<token_info> {
 		// TODO: implement a non-owning string
-		// TODO: check for "__" sequences
 		m_current_section = m_last_character;
+		u8 underscore_chain_count = 0;
 
 		// consume a sequence of alphanumeric characters
-		while (std::isalnum(get_next_char())) {
-			m_current_section += m_last_character;
+		while(true) {
+			get_next_char();
+
+			if(std::isalnum(m_last_character)) {
+				m_current_section += m_last_character;
+				underscore_chain_count = 0;
+			}
+			else if (m_last_character == '_') {
+				// allow two underscores right after each other at most
+				if(underscore_chain_count >= 2) {
+					return error::emit(error::code::TOO_MANY_UNDERSCORES, get_current_location_ptr());
+				}
+
+				m_current_section += m_last_character;
+				underscore_chain_count++;
+			}
+			else {
+				break;
+			}
 		}
 
 		// check if the value we've extracted is a keyword

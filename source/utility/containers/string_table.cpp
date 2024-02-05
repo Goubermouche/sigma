@@ -4,7 +4,7 @@
 namespace utility {
 	string_table_key::string_table_key() : m_value(0) {}
 	string_table_key::string_table_key(const std::string& string)
-		: m_value(std::hash<std::string>{}(string)) {} // TODO: use a better hashing function (preferably XXHASH)
+		: m_value(std::hash<std::string>{}(string)) {}
 
 	auto string_table_key::operator==(string_table_key other) const -> bool {
 		return m_value == other.m_value;

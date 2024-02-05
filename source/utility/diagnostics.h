@@ -1,8 +1,8 @@
 #pragma once
-#include "utility/types.h"
-
 #include <format>
 #include <list>
+
+#include "utility/types.h"
 
 namespace utility {
 	class console {

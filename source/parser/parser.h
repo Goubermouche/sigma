@@ -9,11 +9,10 @@
 //          present or not. Does not throw errors
 
 #pragma once
-#include "parser/data_type.h"
-
-#include <tokenizer/token_buffer.h>
+#include <compiler/compiler/type_system/data_type.h>
 #include <compiler/compiler/compilation_context.h>
 #include <abstract_syntax_tree/tree.h>
+#include <tokenizer/token_buffer.h>
 
 namespace sigma {
 	using namespace utility::types;

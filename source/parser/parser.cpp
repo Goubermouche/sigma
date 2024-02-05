@@ -2,7 +2,6 @@
 #include <compiler/compiler/compilation_context.h>
 #include <compiler/compiler/diagnostics.h>
 
-
 /**
  * \brief Checks if the current token is the expected \b __token, if a mismatch
  * is detected, an error is returned.

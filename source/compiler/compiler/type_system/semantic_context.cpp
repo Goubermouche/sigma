@@ -189,7 +189,7 @@ namespace sigma {
 		return m_current_scope->variables.at(identifier).value = m_context.builder.create_local(size, alignment);
 	}
 
-	auto semantic_context::find_variable(utility::string_table_key identifier, const std::vector<utility::string_table_key>& namespaces) const -> utility::result<handle<variable>> {
+	auto semantic_context::find_variable(utility::string_table_key identifier, const namespace_list& namespaces) const -> utility::result<handle<variable>> {
   	const handle<scope> root_scope = find_namespace(namespaces);
 
 		if (!root_scope) {
@@ -202,7 +202,7 @@ namespace sigma {
 		return root_scope->find_variable(identifier);
 	}
 
-	auto semantic_context::get_variable(utility::string_table_key identifier, const std::vector<utility::string_table_key>& namespaces) const -> handle<variable> {
+	auto semantic_context::get_variable(utility::string_table_key identifier, const namespace_list& namespaces) const -> handle<variable> {
 		// TODO: this is a temporary function, we should probably replace this by just referencing
 		//       the variable in the type checker right away and using that
 		return find_namespace(namespaces)->find_variable(identifier);
@@ -226,11 +226,11 @@ namespace sigma {
 		ASSERT(false, "unknown variable referenced");
   }
 
-	auto semantic_context::find_namespace(const std::vector<utility::string_table_key>& namespaces) const->handle<scope> {
+	auto semantic_context::find_namespace(const namespace_list& namespaces) const->handle<scope> {
 		if (!namespaces.empty()) {
 			const handle<namespace_scope> current_namespace = find_parent_namespace();
 
-			const auto it = current_namespace->child_namespaces.find(namespaces.front());
+			const auto it = current_namespace->child_namespaces.find(namespaces.first());
 			if (it != current_namespace->child_namespaces.end()) {
 				return it->second->find_namespace(namespaces, 1);
 			}
@@ -249,14 +249,14 @@ namespace sigma {
 		return m_current_scope->find_parent_namespace();
 	}
 
-	auto semantic_context::find_relative_namespace(const std::vector<utility::string_table_key>& namespaces) const -> handle<namespace_scope> {
+	auto semantic_context::find_relative_namespace(const namespace_list& namespaces) const -> handle<namespace_scope> {
 		const handle<namespace_scope> current_namespace = find_parent_namespace();
 
 		if(namespaces.empty()) {
 			return current_namespace;
 		}
 
-		const auto it = current_namespace->child_namespaces.find(namespaces.front());
+		const auto it = current_namespace->child_namespaces.find(namespaces.first());
 		if (it != current_namespace->child_namespaces.end()) {
 			return it->second->find_namespace(namespaces, 1);
 		}
@@ -271,19 +271,6 @@ namespace sigma {
 
 	auto semantic_context::allocate_namespace() const -> handle<scope> {
 		return m_context.allocator.emplace<namespace_scope>(scope::scope_type::NAMESPACE);
-	}
-
-	auto semantic_context::construct_namespace_chain(const std::vector<utility::string_table_key>& namespaces) const -> std::stringstream {
-		std::stringstream namespace_str;
-
-		for (u64 i = 0; i < namespaces.size(); ++i) {
-			namespace_str << m_context.syntax.strings.get(namespaces[i]);
-			if (i + 1 < namespaces.size()) {
-				namespace_str << "::";
-			}
-		}
-
-		return namespace_str;
 	}
 
 	void semantic_context::pre_declare_local_function(const function_signature& signature) const {
@@ -398,7 +385,7 @@ namespace sigma {
 
 		if (!valid_identifier) {
 			// no function with the specified identifier was found
-			std::stringstream function_name = construct_namespace_chain(function.namespaces);
+			std::stringstream function_name = function.namespaces.get_stream(m_context.syntax.strings);
 			function_name << "::";
 			function_name << m_context.syntax.strings.get(function.signature.identifier_key);
 
@@ -446,7 +433,7 @@ namespace sigma {
 		}
 	}
 
-	auto semantic_context::create_call(const function_signature& callee_signature, const std::vector<utility::string_table_key>& namespaces, const std::vector<handle<ir::node>>& parameters) const -> handle<ir::node> {
+	auto semantic_context::create_call(const function_signature& callee_signature, const namespace_list& namespaces, const std::vector<handle<ir::node>>& parameters) const -> handle<ir::node> {
 		const handle<namespace_scope> scope = find_relative_namespace(namespaces);
 		ASSERT(scope, "invalid namespace");
 
@@ -515,7 +502,7 @@ namespace sigma {
 		return error::emit(error::code::NO_CALL_OVERLOAD, function_node->location, identifier_str, candidate_stream.str());
 	}
 
-	auto semantic_context::emit_unknown_namespace_error(const std::vector<utility::string_table_key>& namespaces) const -> utility::error {
-		return error::emit(error::code::UNKNOWN_NAMESPACE, construct_namespace_chain(namespaces).str());
+	auto semantic_context::emit_unknown_namespace_error(const namespace_list& namespaces) const -> utility::error {
+		return error::emit(error::code::UNKNOWN_NAMESPACE, namespaces.get_stream(m_context.syntax.strings).str());
 	}
 } // namespace sigma

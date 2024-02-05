@@ -26,7 +26,7 @@ namespace sigma {
 
 	namespace_scope::namespace_scope(scope_type type) : scope(type) {}
 
-	auto namespace_scope::find_namespace(const std::vector<utility::string_table_key>& namespaces, u64 index) -> handle<scope> {
+	auto namespace_scope::find_namespace(const namespace_list& namespaces, u64 index) -> handle<scope> {
 		if (index == namespaces.size()) {
 			return this;
 		}

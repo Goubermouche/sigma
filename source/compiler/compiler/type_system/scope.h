@@ -2,7 +2,8 @@
 #include <intermediate_representation/builder.h>
 #include <utility/containers/string_table.h>
 #include <abstract_syntax_tree/node.h>
-#include <parser/data_type.h>
+
+#include "compiler/compiler/type_system/data_type.h"
 
 namespace sigma {
 	using namespace utility::types;
@@ -61,12 +62,12 @@ namespace sigma {
 	};
 
 	/**
-	 * \brief Scope representing a namespace. 
-	 */
+	* \brief Scope representing a namespace.
+	*/
 	struct namespace_scope : scope {
 		namespace_scope(scope_type type);
 
-		auto find_namespace(const std::vector<utility::string_table_key>& namespaces, u64 index) -> handle<scope>;
+		auto find_namespace(const namespace_list& namespaces, u64 index) -> handle<scope>;
 
 		// NOTE: we're using std::map instead of std::unordered_map because we need deterministic order
 		//       of elements (example: we have function A and function B, both of these have the same

@@ -26,6 +26,7 @@ namespace sigma {
 			NUMERICAL_LITERAL_UNSIGNED_WITH_DOT,
 			NUMERICAL_LITERAL_MORE_THAN_ONE_DOT,
 			UNKNOWN_SPECIAL_TOKEN,
+			TOO_MANY_UNDERSCORES,
 
 			// parser (3000 - 3999)
 			UNEXPECTED_NON_NUMERICAL = 3000,
@@ -115,6 +116,7 @@ namespace sigma {
 			{ code::NUMERICAL_LITERAL_UNSIGNED_WITH_DOT, "unsigned numerical literal with '.' character detected"                            },
 			{ code::NUMERICAL_LITERAL_MORE_THAN_ONE_DOT, "numerical literal with more than one '.' character detected"                       },
 			{ code::UNKNOWN_SPECIAL_TOKEN,               "unknown special token sequence '{}'"                                               },
+			{ code::TOO_MANY_UNDERSCORES,                "too many underscores - at most 2 underscored right after each other are allowed"   },
 
 			// parser
 			{ code::UNEXPECTED_NON_NUMERICAL,            "unexpected non-numerical literal token received ('{}')"                            },

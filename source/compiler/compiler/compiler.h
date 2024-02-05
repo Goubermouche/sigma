@@ -3,7 +3,7 @@
 // steps which need to be taken to create a valid compilation together with their specific
 // order can be seen below:
 //                        +---------------------------------+
-//                        | Type system (WIP)               |
+//                        | Type system                     |
 //                        +---------------------------------+
 // AST generation                           Lowering (IR)      Lowering (Machine bytecode)
 // +-------+  +--------+  +--------------+  +---------------+  +----------------+  +------------+

@@ -15,10 +15,7 @@
 // -   if | else if should throw
 
 i32 main() {
-	if(true) {
-		ret 0;
-	}
-	else(true){
-		ret 0;
-	}
+	i32 value = 100;
+	printf("%d\n", value);
+	ret 0;
 }

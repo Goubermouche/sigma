@@ -28,99 +28,54 @@ namespace sigma {
 
 		auto verify_control_flow(handle<ast::node> function_node) const-> utility::result<void>;
 
-		/**
-		 * \brief Pushes a new scope.
-		 */
+		// scope manipulation
 		void push_scope(scope::control_type control);
-
-		/**
-		 * \brief Pops the current scope/namespace.
-		 */
+		void push_namespace(utility::string_table_key name);
+		
+		void reset_active_scope();
 		void pop_scope();
 
-		/**
-		 * \brief Pushes a new namespace.
-		 * \param name Name of the new namespaces
-		 */
-		void push_namespace(utility::string_table_key name);
-
-		/**
-		 * \brief Resets the active scope to the global namespace.
-		 */
-		void reset_active_scope();
-
-		/**
-		 * \brief 'Fake pushes' a scope/namespace according to m_trace. Used for re-traversing the scope tree
-		 * when translating to our IR.
-		 */
 		void trace_push_scope();
-
-		/**
-		 * \brief Pops the current scope/namespace.
-		 */
 		void trace_pop_scope();
 
-		auto pre_declare_variable(utility::string_table_key identifier, data_type type) const -> variable&;
-		void pre_declare_local_function(const function_signature& signature) const;
-
+		// variables
+		auto find_variable(utility::string_table_key identifier, const namespace_list& namespaces = {}) const -> utility::result<handle<variable>>;
+		auto get_variable(utility::string_table_key identifier, const namespace_list& namespaces = {}) const -> handle<variable>;
 		auto declare_variable(utility::string_table_key identifier, u16 size, u16 alignment) const -> handle<ir::node>;
+		auto pre_declare_variable(utility::string_table_key identifier, data_type type) const -> variable&;
+		bool contains_variable(utility::string_table_key identifier) const;
+
+		// functions
+		auto create_call(const function_signature& callee_signature, const namespace_list& namespaces, const std::vector<handle<ir::node>>& parameters) const -> handle<ir::node>;
+		auto find_callee_signature(handle<ast::node> function_node, const std::vector<data_type>& parameter_types) -> utility::result<function_signature>;
+		void pre_declare_local_function(const function_signature& signature) const;
 		void declare_external_function(const function_signature& signature) const;
 		void declare_local_function(const function_signature& signature) const;
-		void define_implicit_return() const;
-
-		auto create_load(utility::string_table_key identifier, ir::data_type type, u16 alignment) const -> handle<ir::node>;
-		void create_store(utility::string_table_key identifier, handle<ir::node> value, u16 alignment) const;
-
-		auto create_call(const function_signature& callee_signature, const std::vector<utility::string_table_key>& namespaces, const std::vector<handle<ir::node>>& parameters) const -> handle<ir::node>;
-		auto find_callee_signature(handle<ast::node> function_node, const std::vector<data_type>& parameter_types) -> utility::result<function_signature>;
-
-		/**
-		 * \brief Attempts to locate a variable given an \b identifier and a list of \b namespaces.
-		 * \param identifier Identifier key to the variable name
-		 * \param namespaces List of namespace directives (ie. utility::detail would be { utility, detail }.
-		 * \return result<handle<variable>>, \b note \b that \b the \b handle \b itself \b can \b still \b be \b null, in which case the variable does not exist.
-		 */
-		auto find_variable(utility::string_table_key identifier, const std::vector<utility::string_table_key>& namespaces = {}) const -> utility::result<handle<variable>>;
-
-		/**
-		 * \brief \b TEMPORARY. Retrieves the variable given an \b identifier and a list of \b namespaces. This function will be replaced when full
-		 * namespace support is implemented
-		 * \param identifier identifier Identifier key to the variable name
-		 * \param namespaces namespaces List of namespace directives (ie. utility::detail would be { utility, detail }.
-		 * \return handle<variable>, \b note \b that \b the \b handle \b itself \b can \b still \b be \b null, in which case the variable does not exist.
-		 */
-		auto get_variable(utility::string_table_key identifier, const std::vector<utility::string_table_key>& namespaces = {}) const -> handle<variable>;
-
-		bool contains_variable(utility::string_table_key identifier) const;
 		bool contains_function(const function_signature& signature) const;
 
-		bool has_return() const;
+		// returns
+		void define_implicit_return() const;
 		void declare_return() const;
+		bool has_return() const;
+
+		// memory
+		auto create_load(utility::string_table_key identifier, ir::data_type type, u16 alignment) const -> handle<ir::node>;
+		void create_store(utility::string_table_key identifier, handle<ir::node> value, u16 alignment) const;
 	private:
-		static auto all_control_paths_return(handle<scope> scope, handle<ast::node> function_node) -> utility::result<bool>;
-
-		/**
-		 * \brief Locate the namespace specified by \b namespaces. Relative to the current scope.
-		 * \param namespaces Namespaces to apply to the current scope
-		 * \return handle<scope> / nullptr.
-		 */
-		auto find_namespace(const std::vector<utility::string_table_key>& namespaces) const -> handle<scope>;
-
-		/**
-		 * \brief Locate the first parent namespace of the current scope.
-		 * \return handle<namespace_scope> (guaranteed).
-		 */
+		// namespaces
+		auto find_relative_namespace(const namespace_list& namespaces) const->handle<namespace_scope>;
+		auto find_namespace(const namespace_list& namespaces) const -> handle<scope>;
 		auto find_parent_namespace() const-> handle<namespace_scope>;
 
-		auto find_relative_namespace(const std::vector<utility::string_table_key>& namespaces) const -> handle<namespace_scope>;
-
-		auto allocate_scope() const -> handle<scope>;
-		auto allocate_namespace() const -> handle<scope>;
-
-		auto construct_namespace_chain(const std::vector<utility::string_table_key>& namespaces) const ->std::stringstream;
-
+		// errors
 		auto emit_no_viable_overload_error(handle<ast::node> function_node) -> utility::error;
-		auto emit_unknown_namespace_error(const std::vector<utility::string_table_key>& namespaces) const-> utility::error;
+		auto emit_unknown_namespace_error(const namespace_list& namespaces) const-> utility::error;
+
+		// misc
+		auto allocate_scope() const->handle<scope>;
+		auto allocate_namespace() const->handle<scope>;
+
+		static auto all_control_paths_return(handle<scope> scope, handle<ast::node> function_node) -> utility::result<bool>;
 	private:
 		backend_context& m_context;
 

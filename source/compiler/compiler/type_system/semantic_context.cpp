@@ -87,8 +87,8 @@ namespace sigma {
 				return INVALID_CAST_COST; // invalid operation
 			}
 
-			const u16 provided_width = provided.get_byte_width();
-			const u16 required_width = required.get_byte_width();
+			const u16 provided_width = provided.get_size();
+			const u16 required_width = required.get_size();
 
 			// handle casting between integer types
 			if (provided.is_integral() && required.is_integral()) {
@@ -110,8 +110,8 @@ namespace sigma {
 		}
 
 		auto determine_cast_kind(const data_type& original, const data_type& target) -> bool {
-			const u16 original_byte_width = original.get_byte_width();
-			const u16 target_byte_width   = target.get_byte_width();
+			const u16 original_byte_width = original.get_size();
+			const u16 target_byte_width   = target.get_size();
 
 			return original_byte_width > target_byte_width;
 		}

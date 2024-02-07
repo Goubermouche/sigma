@@ -457,8 +457,8 @@ namespace sigma {
 		}
 
 		// target type is known at this point, try to cast to it
-		const u16 original_byte_width = original_type.get_byte_width();
-		const u16 target_byte_width = target_type.get_byte_width();
+		const u16 original_byte_width = original_type.get_size();
+		const u16 target_byte_width = target_type.get_size();
 
 		// no cast needed, probably a sign diff
 		if(original_byte_width == target_byte_width) {

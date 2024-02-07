@@ -75,54 +75,102 @@ namespace sigma {
   }
 
 	auto data_type::to_string() const->std::string {
-		const static std::unordered_map<data_type_base, std::string> type_to_string_map = {
-			{ UNKNOWN ,        "unknown" },
-			{ VAR_ARG_PROMOTE, "promote" },
-			{ VOID ,           "void"    },
-			{ I8,              "i8"      },
-			{ I16,             "i16"     },
-			{ I32,             "i32"     },
-			{ I64,             "i64"     },
-			{ U8,              "u8"      },
-			{ U16,             "u16"     },
-			{ U32,             "u32"     },
-			{ U64,             "u64"     },
-			{ F32,             "f32"     },
-			{ F64,             "f64"     },
-			{ BOOL,            "bool"    },
-			{ CHAR,            "char"    }
-		};
+		std::string result;
 
-		const auto it = type_to_string_map.find(base_type);
+		switch(base_type) {
+			case VAR_ARG_PROMOTE: result = "promote"; break;
+			case UNKNOWN:         result = "unknown"; break;
+			case VOID:            result = "void"; break;
+			case I8:              result = "i8"; break;
+			case I16:             result = "i16"; break;
+			case I32:             result = "i32"; break;
+			case I64:             result = "i64"; break;
+			case U8:              result = "u8"; break;
+			case U16:             result = "u16"; break;
+			case U32:             result = "u32"; break;
+			case U64:             result = "u64"; break;
+			case BOOL:            result = "bool"; break;
+			case CHAR:            result = "char"; break;
+			case STRUCT:          result = "struct"; break;
+			default: NOT_IMPLEMENTED();
+		}
 
-		ASSERT(
-			it != type_to_string_map.end(),
-			"cannot convert the given base type '{}' to a string",
-			static_cast<u8>(base_type)
-		);
-
-		return it->second + std::string(pointer_level, '*');
+		return result + std::string(pointer_level, '*');
 	}
 
-	auto data_type::get_byte_width() const -> u16 {
+	auto data_type::get_alignment() const -> u16 {
+		if (pointer_level > 0) {
+			return 8;
+		}
+
+		switch (base_type) {
+			case VAR_ARG_PROMOTE: return 0;
+			case UNKNOWN:         return 0;
+			case VOID:            return 0;
+			case I8:              return 1;
+			case I16:             return 2;
+			case I32:             return 4;
+			case I64:             return 8;
+			case U8:              return 1;
+			case U16:             return 2;
+			case U32:             return 4;
+			case U64:             return 8;
+			case BOOL:            return 1;
+			case CHAR:            return 1;
+			case STRUCT: {
+				u16 max_alignment = 0;
+
+				for (const auto& member : members) {
+					max_alignment = std::max(max_alignment, member.get_alignment());
+				}
+
+				return max_alignment;
+			}
+			default: PANIC("undefined byte width for type '{}'", to_string());
+		}
+
+		return 0;
+	}
+
+	auto data_type::get_size() const -> u16 {
 		if(pointer_level > 0) {
 			return 8;
 		}
 
 		switch (base_type) {
-			case UNKNOWN: return 0;
-			case VOID:    return 0;
-			case I8:      return 1;
-			case I16:     return 2;
-			case I32:     return 4;
-			case I64:     return 8;
-			case U8:      return 1;
-			case U16:     return 2;
-			case U32:     return 4;
-			case U64:     return 8;
-			case BOOL:    return 1;
-			case CHAR:    return 1;
 			case VAR_ARG_PROMOTE: return 0;
+			case UNKNOWN:         return 0;
+			case VOID:            return 0;
+			case I8:              return 1;
+			case I16:             return 2;
+			case I32:             return 4;
+			case I64:             return 8;
+			case U8:              return 1;
+			case U16:             return 2;
+			case U32:             return 4;
+			case U64:             return 8;
+			case BOOL:            return 1;
+			case CHAR:            return 1;
+			case STRUCT: {
+				u16 total_size = 0;
+				u16 max_alignment = 0;
+
+				for (const auto& member : members) {
+					const u16 alignment = member.get_alignment();
+					const u16 padding = (alignment - (total_size % alignment)) % alignment;
+
+					max_alignment = std::max(max_alignment, alignment);
+
+					// align the current total size to the member's alignment requirement
+					total_size += padding + member.get_size();
+				}
+
+				// align the total size of the struct to the largest member's alignment
+				const u16 struct_padding = (max_alignment - (total_size % max_alignment)) % max_alignment;
+				total_size += struct_padding;
+
+				return total_size;
+			}
 			default: PANIC("undefined byte width for type '{}'", to_string());
 		}
 
@@ -286,8 +334,8 @@ namespace sigma {
 				return a; // same type
 			}
 
-			const u16 width_a = a.get_byte_width();
-			const u16 width_b = b.get_byte_width();
+			const u16 width_a = a.get_size();
+			const u16 width_b = b.get_size();
 
 			if (width_a == width_b) {
 				// prefer signed over unsigned

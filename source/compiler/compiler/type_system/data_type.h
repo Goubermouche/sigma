@@ -21,7 +21,8 @@ namespace sigma {
 			F32,
 			F64,
 			BOOL,
-			CHAR
+			CHAR,
+			STRUCT
 		};
 
 		data_type() = default;
@@ -62,15 +63,11 @@ namespace sigma {
 
 		auto to_string() const -> std::string;
 
-		/**
-		 * \brief Calculates the byte width of the data type.
-		 *<p>
-		 *Note: even though the sizeof() operator returns a u64, we return a u16, since, realistically,
-		 *no type should overstep the that much memory.
-		 *</p>
-		 * \return 
-		 */
-		auto get_byte_width() const -> u16;
+		auto get_alignment() const -> u16;
+		auto get_size() const -> u16;
+
+		utility::string_table_key identifier_key;
+		utility::slice<data_type> members;
 
 		data_type_base base_type = UNKNOWN;
 		u8 pointer_level = 0;

@@ -76,12 +76,14 @@ namespace sigma {
 
 			// since we can't update the projection value directly we have to create a proxy for it, this
 			// allows us to update the value of our parameters
-			const u16 byte_width = function.signature.parameter_types[i].type.get_byte_width();
-			variable->value = m_context.builder.create_local(byte_width, byte_width);
+			const u16 alignment = function.signature.parameter_types[i].type.get_alignment();
+			const u16 size = function.signature.parameter_types[i].type.get_size();
+
+			variable->value = m_context.builder.create_local(size, alignment);
 
 			// assign the parameter value to the proxy
 			const handle<ir::node> parameter_projection = m_context.builder.get_function_parameter(i);
-			m_context.builder.create_store(variable->value, parameter_projection, byte_width, false);
+			m_context.builder.create_store(variable->value, parameter_projection, alignment, false);
 		}
 
 		// handle inner statements
@@ -94,17 +96,16 @@ namespace sigma {
 	}
 
 	void ir_translator::translate_variable_declaration(handle<ast::node> variable_node) {
-		const auto& prop = variable_node->get<ast::named_type_expression>();
-		const u16 byte_width = prop.type.get_byte_width();
-		const handle<ir::node> local = m_context.semantics.declare_variable(prop.key, byte_width, byte_width);
+		const auto& declaration = variable_node->get<ast::named_type_expression>();
+
+		const u16 alignment = declaration.type.get_alignment();
+		const u16 size = declaration.type.get_size();
+
+		const handle<ir::node> local = m_context.semantics.declare_variable(declaration.key, size, alignment);
 
 		if (variable_node->children.get_size() == 1) {
 			const handle<ir::node> expression = translate_node(variable_node->children[0]);
-			m_context.builder.create_store(local, expression, byte_width, false);
-		}
-		else if (prop.type.base_type == data_type::BOOL) {
-			// boolean values should default to false
-			m_context.builder.create_store(local, m_context.builder.create_bool(false), byte_width, false);
+			m_context.builder.create_store(local, expression, alignment, false);
 		}
 	}
 
@@ -129,9 +130,9 @@ namespace sigma {
 
 	auto ir_translator::translate_sizeof(handle<ast::node> sizeof_node) const -> handle<ir::node> {
 		const ast::type_expression& sizeof_value = sizeof_node->get<ast::type_expression>();
-		const u16 byte_width = sizeof_value.type.get_byte_width();
+		const u16 size = sizeof_value.type.get_size();
 
-		return m_context.builder.create_unsigned_integer(byte_width, 64);
+		return m_context.builder.create_unsigned_integer(size, 64);
 	}
 
 	void ir_translator::translate_conditional_branch(handle<ast::node> branch_node, handle<ir::node> end_control) {
@@ -212,15 +213,15 @@ namespace sigma {
 		for(u64 i = 0; i < access_level; ++i) {
 			const handle<ir::node> index = translate_node(access_node->children[i + 1]);
 			const data_type accessed_type = base_type.create_access(1);
-			const u16 type_width = accessed_type.get_byte_width();
+			const u16 alignment = accessed_type.get_alignment();
 
-			base = m_context.builder.create_array_access(base, index, type_width);
+			base = m_context.builder.create_array_access(base, index, alignment);
 
 			if(i + 1 < access_level) {
 				// if the access has more than one level we have to load each pointer and
 				// then access it further
 				const ir::data_type type = detail::data_type_to_ir(accessed_type);
-				base = m_context.builder.create_load(base, type, type_width, false);
+				base = m_context.builder.create_load(base, type, alignment, false);
 
 				base_type = base_type.create_access(1);
 			}
@@ -391,8 +392,7 @@ namespace sigma {
 		// get the type and alignment of the load
 		const data_type& type_to_load = load_node->get<ast::type_expression>().type;
 		const ir::data_type ir_type = detail::data_type_to_ir(type_to_load);
-
-		const u16 alignment = type_to_load.get_byte_width();
+		const u16 alignment = type_to_load.get_alignment();
 
 		// create the load operation
 		return m_context.builder.create_load(value_to_load, ir_type, alignment, false);
@@ -407,7 +407,7 @@ namespace sigma {
 
 	auto ir_translator::translate_store(handle<ast::node> assignment_node) -> handle<ir::node> {
 		const auto& variable = assignment_node->children[0]->get<ast::named_type_expression>();
-		const u16 alignment = variable.type.get_byte_width();
+		const u16 alignment = variable.type.get_alignment();
 
 		// get the value we want to store
 		const handle<ir::node> value_to_store = translate_node(assignment_node->children[1]);

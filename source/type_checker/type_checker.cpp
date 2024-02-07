@@ -88,7 +88,7 @@ namespace sigma {
 	}
 
 	auto type_checker::type_check_function_declaration(ast_node declaration) -> type_check_result {
-		const ast::function& function = declaration->get<ast::function>();
+		ast::function& function = declaration->get<ast::function>();
 
 		// check if the function hasn't been declared before
 		if(m_context.semantics.contains_function(function.signature)) {
@@ -101,7 +101,9 @@ namespace sigma {
 		m_context.semantics.push_scope(scope::control_type::UNCONDITIONAL);
 
 		// push temporaries for function parameters
-		for(const named_data_type& parameter : function.signature.parameter_types) {
+		for(named_data_type& parameter : function.signature.parameter_types) {
+			TRY(m_context.semantics.resolve_type(parameter.type, declaration->location));
+
 			auto& variable = m_context.semantics.pre_declare_variable(parameter.identifier_key, parameter.type);
 			variable.flags |= variable::FUNCTION_PARAMETER | variable::LOCAL;
 		}
@@ -119,7 +121,8 @@ namespace sigma {
 	}
 
 	auto type_checker::type_check_variable_declaration(ast_node declaration) -> type_check_result {
-		const ast::named_type_expression& variable = declaration->get<ast::named_type_expression>();
+		ast::named_type_expression& variable = declaration->get<ast::named_type_expression>();
+		TRY(m_context.semantics.resolve_type(variable.type, declaration->location));
 
 		// we cannot declare purely 'void' variables
 		if(variable.type.is_void()) {
@@ -561,6 +564,7 @@ namespace sigma {
 
 		// type check the value we're casting
 		TRY(value.original_type, type_check_node(cast->children[0], cast, data_type::create_unknown()));
+		TRY(m_context.semantics.resolve_type(value.target_type, cast->location));
 
 		const data_type original = value.original_type;
 		const data_type target = value.target_type;
@@ -583,6 +587,7 @@ namespace sigma {
 
 	auto type_checker::type_check_sizeof(ast_node sizeof_node, ast_node parent, data_type expected) const -> type_check_result {
 		// upcast to the expected type, without throwing warnings/errors
+		TRY(m_context.semantics.resolve_type(sizeof_node->get<ast::type_expression>().type, sizeof_node->location));
 		return implicit_type_cast(data_type::create_u64(), expected, parent, sizeof_node);
 	}
 

@@ -102,6 +102,8 @@ namespace sigma {
 		const u16 alignment = declaration.type.get_alignment();
 		const u16 size = declaration.type.get_size();
 
+		utility::console::print("variable decl: {} {}\n", alignment, size);
+
 		const handle<ir::node> local = m_context.semantics.declare_variable(declaration.key, size, alignment);
 
 		if (variable_node->children.get_size() == 1) {

@@ -51,6 +51,7 @@ namespace sigma {
 			NOT_ALL_CONTROL_PATHS_RETURN,
 			DUPLICATE_STRUCT_IDENTIFIER,
 			STRUCT_ALREADY_DECLARED,
+			UNKNOWN_TYPE,
 		};
 
 		/**
@@ -143,6 +144,7 @@ namespace sigma {
 			{ code::NOT_ALL_CONTROL_PATHS_RETURN,        "not all control paths return a value"                                              },
 			{ code::DUPLICATE_STRUCT_IDENTIFIER,         "struct member '{}' has already been declared before"                               },
 			{ code::STRUCT_ALREADY_DECLARED,             "struct '{}' has already been declared before"                                      },
+			{ code::UNKNOWN_TYPE,                        "unknown type '{}' referenced"                                                      },
 		};
 	};
 

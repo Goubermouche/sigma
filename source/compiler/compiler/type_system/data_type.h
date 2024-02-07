@@ -9,6 +9,7 @@ namespace sigma {
 		enum data_type_base : u8 {
 			UNKNOWN,         // handled in the type checker
 			VAR_ARG_PROMOTE, // promotes the type in a var arg context
+			UNRESOLVED,      // unresolved types
 			VOID,
 			I8,
 			I16,
@@ -26,7 +27,7 @@ namespace sigma {
 		};
 
 		data_type() = default;
-		data_type(token token, u8 pointer_level);
+		data_type(const token_info& token, u8 pointer_level);
 		data_type(data_type_base type, u8 pointer_level, const utility::slice<data_type>& members = {});
 
 		static auto create_unknown() -> data_type;
@@ -49,8 +50,6 @@ namespace sigma {
 
 		bool operator==(data_type other) const;
 		bool operator<(data_type other) const;
-
-		static auto token_to_type(token token) -> data_type_base;
 
 		bool is_unknown() const;
 		bool is_promote() const;

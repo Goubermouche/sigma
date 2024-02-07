@@ -64,6 +64,8 @@ namespace sigma {
 		// memory
 		auto create_load(utility::string_table_key identifier, ir::data_type type, u16 alignment) const -> handle<ir::node>;
 		void create_store(utility::string_table_key identifier, handle<ir::node> value, u16 alignment) const;
+
+		auto resolve_type(data_type& type, handle<token_location> location) const -> utility::result<void>;
 	private:
 		// namespaces
 		auto find_relative_namespace(const namespace_list& namespaces) const->handle<namespace_scope>;

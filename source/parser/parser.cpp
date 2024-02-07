@@ -758,14 +758,14 @@ namespace sigma {
 
 	auto parser::parse_type() -> utility::result<data_type> {
 		// expect '(TYPE | IDENTIFIER)* ... *'
-		const token type_token = m_tokens.get_current_token();
+		const token_info type_token = m_tokens.get_current();
 		u8 pointer_level = 0;
 
-		if(!type_token.is_type()) {
+		if(!is_current_token_type()) {
 			return error::emit(
 				error::code::UNEXPECTED_TOKEN,
 				m_tokens.get_current_token_location(),
-				type_token.to_string()
+				type_token.tok.to_string()
 			);
 		}
 

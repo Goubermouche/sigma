@@ -2,8 +2,29 @@
 #include <utility/macros.h>
 
 namespace sigma {
-	data_type::data_type(token token, u8 pointer_level)
-		: members({}), base_type(token_to_type(token)), pointer_level(pointer_level) {}
+	data_type::data_type(const token_info& token, u8 pointer_level)
+		: members({}), pointer_level(pointer_level) {
+		switch (token.tok.type) {
+			case token_type::I8:         base_type = I8; break;
+			case token_type::I16:        base_type = I16; break;
+			case token_type::I32:        base_type = I32; break;
+			case token_type::I64:        base_type = I64; break;
+			case token_type::U8:         base_type = U8; break;
+			case token_type::U16:        base_type = U16; break;
+			case token_type::U32:        base_type = U32; break;
+			case token_type::U64:        base_type = U64; break;
+			case token_type::BOOL:       base_type = BOOL; break;
+			case token_type::VOID:       base_type = VOID; break;
+			case token_type::CHAR:       base_type = CHAR; break;
+			case token_type::IDENTIFIER: {
+				// custom types, resolved in the type checker
+				base_type = UNRESOLVED;
+				identifier_key = token.symbol_key;
+				break;
+			}
+			default: PANIC("undefined token -> type conversion for token '{}'", token.tok.to_string());
+		}
+	}
 
 	data_type::data_type(data_type_base type, u8 pointer_level, const utility::slice<data_type>& members)
 		: members(members), base_type(type), pointer_level(pointer_level) {}
@@ -96,6 +117,7 @@ namespace sigma {
 			case BOOL:            result = "bool"; break;
 			case CHAR:            result = "char"; break;
 			case STRUCT:          result = "struct"; break;
+			case UNRESOLVED:      result = "unresolved"; break;
 			default: NOT_IMPLEMENTED();
 		}
 
@@ -179,25 +201,6 @@ namespace sigma {
 		}
 
 		return 0;
-	}
-
-	auto data_type::token_to_type(token token) -> data_type_base {
-		switch (token.type) {
-			case token_type::I8:   return I8;
-			case token_type::I16:  return I16;
-			case token_type::I32:  return I32;
-			case token_type::I64:  return I64;
-			case token_type::U8:   return U8;
-			case token_type::U16:  return U16;
-			case token_type::U32:  return U32;
-			case token_type::U64:  return U64;
-			case token_type::BOOL: return BOOL;
-			case token_type::VOID: return VOID;
-			case token_type::CHAR: return CHAR;
-			default: PANIC("undefined token -> type conversion for token '{}'", token.to_string());
-		}
-
-		return UNKNOWN;
 	}
 
   bool data_type::is_floating_point() const {

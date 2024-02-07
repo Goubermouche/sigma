@@ -226,6 +226,20 @@ namespace sigma {
 		ASSERT(false, "unknown variable referenced");
   }
 
+	auto semantic_context::resolve_type(data_type& type, handle<token_location> location) const -> utility::result<void> {
+		if(type.base_type != data_type::UNRESOLVED) {
+			return SUCCESS; // nothing else needed
+		}
+
+		if(const handle<data_type> resolved = m_current_scope->find_type(type.identifier_key)) {
+			type = *resolved;
+			return SUCCESS;
+		}
+
+		const std::string& identifier = m_context.syntax.strings.get(type.identifier_key);
+		return error::emit(error::code::UNKNOWN_TYPE, location, identifier);
+	}
+
 	auto semantic_context::find_namespace(const namespace_list& namespaces) const->handle<scope> {
 		if (!namespaces.empty()) {
 			const handle<namespace_scope> current_namespace = find_parent_namespace();

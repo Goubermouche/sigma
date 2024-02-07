@@ -35,6 +35,7 @@ namespace sigma {
 		TRY(parser::parse(frontend));
 
 		frontend.syntax.print_ast();
+
 		// backend
 		// at this point we want to merge all frontend contexts into the backend context
 		backend_context backend(frontend.syntax, m_description.target);

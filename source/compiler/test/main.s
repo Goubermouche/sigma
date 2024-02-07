@@ -12,14 +12,14 @@
 //     -   add namespaces to messages, whenever applicable (ie. x::y::test)
 // -   TESTS:
 //     -    add more test cases
-// -   if | else if should throw
 
 i32 main() {
 	struct x {
 		i32 value;
+		char* x;
 	};
 
-
+	x my_x;
 
 	ret 0;
 }

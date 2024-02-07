@@ -77,6 +77,7 @@ namespace sigma {
 		// other
 		auto parse_function_call(const std::vector<utility::string_table_key>& namespaces) -> parse_result;
 		auto parse_explicit_cast() -> parse_result;
+		auto parse_alignof() -> parse_result;
 		auto parse_sizeof() -> parse_result;
 
 		// peeks
@@ -111,6 +112,7 @@ namespace sigma {
 		auto create_null_literal(handle<token_location> location) const -> handle<ast::node>;
 		auto create_assignment(handle<token_location> location) const -> handle<ast::node>;
 		auto create_logical_not(handle<token_location> location) const->handle<ast::node>;
+		auto create_alignof(handle<token_location> location) const->handle<ast::node>;
 		auto create_sizeof(handle<token_location> location) const -> handle<ast::node>;
 		auto create_cast(handle<token_location> location) const -> handle<ast::node>;
 

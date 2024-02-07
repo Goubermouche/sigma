@@ -54,6 +54,7 @@ namespace sigma {
 
 			// other
 			case ast::node_type::FUNCTION_CALL:                  return translate_function_call(ast_node);
+			case ast::node_type::ALIGNOF:                        return translate_alignof(ast_node);
 			case ast::node_type::SIZEOF:                         return translate_sizeof(ast_node);
 			case ast::node_type::CAST:                           return translate_cast(ast_node);
 
@@ -102,8 +103,6 @@ namespace sigma {
 		const u16 alignment = declaration.type.get_alignment();
 		const u16 size = declaration.type.get_size();
 
-		utility::console::print("variable decl: {} {}\n", alignment, size);
-
 		const handle<ir::node> local = m_context.semantics.declare_variable(declaration.key, size, alignment);
 
 		if (variable_node->children.get_size() == 1) {
@@ -129,6 +128,13 @@ namespace sigma {
 		else {
 			m_context.builder.create_return({ translate_node(return_node->children[0]) });
 		}
+	}
+
+	auto ir_translator::translate_alignof(handle<ast::node> alignof_node) const -> handle<ir::node> {
+		const ast::type_expression& alignof_value = alignof_node->get<ast::type_expression>();
+		const u16 alignment = alignof_value.type.get_alignment();
+
+		return m_context.builder.create_unsigned_integer(alignment, 64);
 	}
 
 	auto ir_translator::translate_sizeof(handle<ast::node> sizeof_node) const -> handle<ir::node> {

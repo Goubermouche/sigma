@@ -65,6 +65,7 @@ namespace sigma {
 			case ast::node_type::FUNCTION_CALL:                  return type_check_function_call(target, parent, expected);
 			// since implicit casts are not type checked we can interpret these casts a being explicit
 			case ast::node_type::CAST:                           return type_check_explicit_cast(target, parent, expected);
+			case ast::node_type::ALIGNOF:                        return type_check_alignof(target, parent, expected);
 			case ast::node_type::SIZEOF:                         return type_check_sizeof(target, parent, expected);
 
 			// unhandled node types
@@ -583,6 +584,12 @@ namespace sigma {
 
 		// upcast the result, if necessary, just a sanity check
 		return implicit_type_cast(value.target_type, expected, parent, cast);
+	}
+
+	auto type_checker::type_check_alignof(ast_node alignof_node, ast_node parent, data_type expected) const -> type_check_result {
+		// upcast to the expected type, without throwing warnings/errors
+		TRY(m_context.semantics.resolve_type(alignof_node->get<ast::type_expression>().type, alignof_node->location));
+		return implicit_type_cast(data_type::create_u64(), expected, parent, alignof_node);
 	}
 
 	auto type_checker::type_check_sizeof(ast_node sizeof_node, ast_node parent, data_type expected) const -> type_check_result {

@@ -57,9 +57,10 @@ namespace sigma {
 		auto translate_load(handle<ast::node> load_node) -> handle<ir::node>;
 
 		// other
+		auto translate_alignof(handle<ast::node> alignof_node) const->handle<ir::node>;
 		auto translate_function_call(handle<ast::node> call_node) -> handle<ir::node>;
+		auto translate_sizeof(handle<ast::node> sizeof_node) const->handle<ir::node>;
 		auto translate_cast(handle<ast::node> cast_node) -> handle<ir::node>;
-		auto translate_sizeof(handle<ast::node> sizeof_node) const -> handle<ir::node>;
 
 		// utility
 		auto literal_to_ir(const ast::named_type_expression& literal) const -> handle<ir::node>;

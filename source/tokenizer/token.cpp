@@ -94,6 +94,7 @@ namespace sigma {
 			case token_type::NAMESPACE:             return "NAMESPACE";
 			case token_type::CAST:								  return "CAST";
 			case token_type::SIZEOF:						    return "SIZEOF";
+			case token_type::ALIGNOF:						    return "ALIGNOF";
 
 			// literals
 			case token_type::SIGNED_LITERAL:        return "SIGNED_LITERAL";

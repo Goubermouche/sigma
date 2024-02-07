@@ -20,6 +20,7 @@ namespace sigma::ast {
 			FUNCTION_CALL,
 			RETURN,
 
+			ALIGNOF,
 			SIZEOF,
 
 			// children[1 ... n] = statements
@@ -110,6 +111,7 @@ namespace sigma::ast {
 
 	struct type_expression {
 		// ARRAY_ACCESS: type at the 0'th index of the array
+		// ALIGNOF:      type we want to know the alignment of
 		// SIZEOF:       type we want to know the size of
 		// LOAD:         type of the value we're loading
 		data_type type;

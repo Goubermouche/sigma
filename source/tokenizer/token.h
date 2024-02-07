@@ -64,6 +64,7 @@ namespace sigma {
 		NAMESPACE,             // namespace
 		CAST,                  // cast
 		SIZEOF,                // sizeof
+		ALIGNOF,               // alignof
 
 		// literals
 		SIGNED_LITERAL,        // 0

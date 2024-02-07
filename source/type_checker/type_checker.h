@@ -62,9 +62,11 @@ namespace sigma {
 		auto type_check_store(ast_node store) -> type_check_result;
 
 		// other
+		auto type_check_alignof(ast_node alignof_node, ast_node parent, data_type expected) const->type_check_result;
+		auto type_check_sizeof(ast_node sizeof_node, ast_node parent, data_type expected) const->type_check_result;
 		auto type_check_function_call(ast_node call, ast_node parent, data_type expected) -> type_check_result;
 		auto type_check_explicit_cast(ast_node cast, ast_node parent, data_type expected) -> type_check_result;
-		auto type_check_sizeof(ast_node sizeof_node, ast_node parent, data_type expected) const->type_check_result;
+
 
 		/**
 		 * \brief Cast \b original_type to \b target_type as long as \b target_type is known.

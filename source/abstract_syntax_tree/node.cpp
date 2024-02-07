@@ -16,6 +16,7 @@ namespace sigma::ast {
 			case FUNCTION_CALL:                  return "FUNCTION_CALL";
 			case RETURN:                         return "RETURN";
 
+			case ALIGNOF:                        return "ALIGNOF";
 			case SIZEOF:                         return "SIZEOF";
 
 			case BRANCH:                         return "BRANCH";

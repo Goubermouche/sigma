@@ -703,6 +703,7 @@ namespace sigma {
 		// fallback parsers
 		switch (m_tokens.get_current_token()) {
 			case token_type::IDENTIFIER:         return parse_identifier_expression();
+			case token_type::ALIGNOF:            return parse_alignof();
 			case token_type::SIZEOF:             return parse_sizeof();
 
 			// modifiers
@@ -958,6 +959,27 @@ namespace sigma {
 		return m_tokens.peek_next_token() == token_type::LEFT_PARENTHESIS;
 	}
 
+	auto parser::parse_alignof() -> parse_result {
+		// expect 'ALIGNOF ( type )'
+		EXPECT_CURRENT_TOKEN(token_type::ALIGNOF);
+		const handle<token_location> location = get_current_location();
+
+		EXPECT_NEXT_TOKEN(token_type::LEFT_PARENTHESIS);
+
+		// parse the type
+		m_tokens.next(); // prime the type token
+		TRY(const data_type type, parse_type());
+
+		EXPECT_CURRENT_TOKEN(token_type::RIGHT_PARENTHESIS);
+
+		// create the alignof node
+		const handle<ast::node> sizeof_node = create_alignof(location);
+		sizeof_node->get<ast::type_expression>().type = type;
+
+		m_tokens.next();
+		return sizeof_node;
+	}
+
 	auto parser::peek_is_variable_declaration() -> bool {
 		// peek 'TYPE * ... * IDENTIFIER'
 		if (!is_current_token_type()) {
@@ -1018,6 +1040,10 @@ namespace sigma {
 
 	auto parser::create_sizeof(handle<token_location> location) const -> handle<ast::node> {
 		return create_node<ast::type_expression>(ast::node_type::SIZEOF, 0, location);
+	}
+
+	auto parser::create_alignof(handle<token_location> location) const -> handle<ast::node> {
+		return create_node<ast::type_expression>(ast::node_type::ALIGNOF, 0, location);
 	}
 
 	auto parser::create_cast(handle<token_location> location) const -> handle<ast::node> {

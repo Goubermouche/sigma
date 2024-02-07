@@ -216,6 +216,9 @@ namespace sigma {
 				case token_type::RET: {
 					TRY(result, parse_return_statement()); break;
 				}
+				case token_type::STRUCT: {
+					TRY(result, parse_struct_declaration()); break;
+				}
 				default: {
 					return error::emit(
 						error::code::UNEXPECTED_TOKEN,
@@ -1061,6 +1064,10 @@ namespace sigma {
 		return create_node(ast::node_type::BRANCH, child_count, nullptr);
 	}
 
+	auto parser::create_struct_declaration(handle<token_location> location) const -> handle<ast::node> {
+		return create_node<ast::named_type_expression>(ast::node_type::STRUCT_DECLARATION, 0, location);
+	}
+
 	auto parser::create_conditional_branch(u64 child_count) const -> handle<ast::node> {
 		return create_node(ast::node_type::CONDITIONAL_BRANCH, child_count, nullptr);
 	}
@@ -1103,5 +1110,48 @@ namespace sigma {
 		}
 
 		return load_node;
+	}
+
+	auto parser::parse_struct_declaration() -> parse_result {
+		// expect 'STRUCT IDENTIFIER { TYPE IDENTIFIER ... TYPE IDENTIFIER }
+		const handle<token_location> location = get_current_location();
+
+		// parse the struct header
+		EXPECT_CURRENT_TOKEN(token_type::STRUCT);
+		EXPECT_NEXT_TOKEN(token_type::IDENTIFIER);
+		const utility::string_table_key identifier = m_tokens.get_current().symbol_key;
+
+		// parse inner types 
+		EXPECT_NEXT_TOKEN(token_type::LEFT_BRACE);
+		m_tokens.next(); // prime the first type token
+
+		std::vector<data_type> members; 
+
+		while(m_tokens.get_current_token() != token_type::RIGHT_BRACE) {
+			TRY(data_type type, parse_type());
+			EXPECT_CURRENT_TOKEN(token_type::IDENTIFIER);
+
+			// parse the type identifier
+			const utility::string_table_key type_identifier = m_tokens.get_current().symbol_key;
+			EXPECT_NEXT_TOKEN(token_type::SEMICOLON);
+			m_tokens.next();
+
+			type.identifier_key = type_identifier;
+			members.emplace_back(type);
+		}
+
+		EXPECT_CURRENT_TOKEN(token_type::RIGHT_BRACE);
+		m_tokens.next(); // prime the next token
+
+		const handle<ast::node> struct_node = create_struct_declaration(location);
+
+		utility::slice<data_type> member_slice(m_context.allocator, members.size());
+		utility::copy(member_slice, members);
+
+		auto& expression = struct_node->get<ast::named_type_expression>();
+		expression.type = data_type::create_struct(member_slice);
+		expression.key = identifier;
+
+		return struct_node;
 	}
 } // namespace sigma

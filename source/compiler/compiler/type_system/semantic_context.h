@@ -45,6 +45,9 @@ namespace sigma {
 		auto pre_declare_variable(utility::string_table_key identifier, data_type type) const -> variable&;
 		bool contains_variable(utility::string_table_key identifier) const;
 
+		// structs
+		auto declare_struct(handle<ast::node> node) const -> utility::result<void>;
+
 		// functions
 		auto create_call(const function_signature& callee_signature, const namespace_list& namespaces, const std::vector<handle<ir::node>>& parameters) const -> handle<ir::node>;
 		auto find_callee_signature(handle<ast::node> function_node, const std::vector<data_type>& parameter_types) -> utility::result<function_signature>;

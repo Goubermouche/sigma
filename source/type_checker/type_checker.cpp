@@ -26,6 +26,7 @@ namespace sigma {
 			case ast::node_type::NAMESPACE_DECLARATION:          return type_check_namespace_declaration(target);
 			case ast::node_type::FUNCTION_DECLARATION:           return type_check_function_declaration(target);
 			case ast::node_type::VARIABLE_DECLARATION:           return type_check_variable_declaration(target);
+			case ast::node_type::STRUCT_DECLARATION:             return type_check_struct_declaration(target);
 
 			// literals
 			case ast::node_type::NUMERICAL_LITERAL:              return type_check_numerical_literal(target, expected);
@@ -393,6 +394,25 @@ namespace sigma {
 		auto& expression = literal->get<ast::named_type_expression>();
 		TRY(expression.type, implicit_type_cast(expression.type, expected, parent, literal));
 		return expression.type;
+	}
+
+	auto type_checker::type_check_struct_declaration(ast_node declaration) const -> type_check_result {
+		const auto& expression = declaration->get<ast::named_type_expression>();
+
+		// verify that no two members of the struct have the same identifier
+		const auto& members = expression.type.members;
+
+		for (u64 i = 0; i < members.get_size(); ++i) {
+			for (u64 j = i + 1; j < members.get_size(); ++j) {
+				if(members[i].identifier_key == members[j].identifier_key) {
+					const std::string& identifier = m_context.syntax.strings.get(members[i].identifier_key);
+					return error::emit(error::code::DUPLICATE_STRUCT_IDENTIFIER, declaration->location, identifier);
+				}
+			}
+		}
+
+		TRY(m_context.semantics.declare_struct(declaration));
+		return data_type::create_unknown(); // not used
 	}
 
 	auto type_checker::type_check_bool_literal(ast_node literal, ast_node parent, data_type expected) const -> type_check_result {

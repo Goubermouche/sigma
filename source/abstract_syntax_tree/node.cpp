@@ -11,6 +11,7 @@ namespace sigma::ast {
 			case VARIABLE_DECLARATION:           return "VARIABLE_DECLARATION";
 			case FUNCTION_DECLARATION:           return "FUNCTION_DECLARATION";
 			case NAMESPACE_DECLARATION:          return "NAMESPACE_DECLARATION";
+			case STRUCT_DECLARATION:             return "STRUCT_DECLARATION";
 
 			case FUNCTION_CALL:                  return "FUNCTION_CALL";
 			case RETURN:                         return "RETURN";

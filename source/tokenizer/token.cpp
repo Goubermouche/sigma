@@ -83,6 +83,7 @@ namespace sigma {
 			case token_type::BOOL:                  return "BOOL";
 			case token_type::VOID:                  return "VOID";
 			case token_type::CHAR:                  return "CHAR";
+			case token_type::STRUCT:                return "STRUCT";
 
 			// control flow
 			case token_type::RET:                   return "RET";

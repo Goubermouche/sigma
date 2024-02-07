@@ -53,6 +53,7 @@ namespace sigma {
 		BOOL,
 		VOID,
 		CHAR,
+		STRUCT,
 
 		// control flow
 		RET,                   // ret

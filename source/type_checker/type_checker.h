@@ -36,6 +36,7 @@ namespace sigma {
 		auto type_check_namespace_declaration(ast_node declaration) -> type_check_result;
 		auto type_check_function_declaration(ast_node declaration) -> type_check_result;
 		auto type_check_variable_declaration(ast_node declaration) -> type_check_result;
+		auto type_check_struct_declaration(ast_node declaration) const -> type_check_result;
 
 		// literals
 		auto type_check_character_literal(ast_node literal, ast_node parent, data_type expected) const ->type_check_result;

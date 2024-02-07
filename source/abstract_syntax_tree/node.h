@@ -15,6 +15,7 @@ namespace sigma::ast {
 			VARIABLE_DECLARATION,
 			FUNCTION_DECLARATION,
 			NAMESPACE_DECLARATION,
+			STRUCT_DECLARATION,
 
 			FUNCTION_CALL,
 			RETURN,
@@ -85,7 +86,7 @@ namespace sigma::ast {
 	};
 
 	struct named_expression {
-		// NAMESPACE: name of the namespace
+		// NAMESPACE:          name of the namespace
 		utility::string_table_key key;
 	};
 
@@ -121,6 +122,7 @@ namespace sigma::ast {
 		// VARIABLE_DECLARATION: key stores the identifier, type holds the declared type
 		// VARIABLE_ACCESS:      key stores the identifier, type is resolved in the type checker
 		//                       and holds the type of the accessed variable
+		// STRUCT_DECLARATION:   key holds the name of the structure, type describes the struct
 		utility::string_table_key key;
 		data_type type;
 	};

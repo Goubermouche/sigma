@@ -48,9 +48,10 @@ namespace sigma {
 
 		auto find_parent_namespace() const -> handle<namespace_scope>;
 		auto find_variable(const utility::string_table_key& identifier) -> handle<variable>;
+		auto find_type(const utility::string_table_key& identifier) -> handle<data_type>;
 
 		std::unordered_map<utility::string_table_key, variable> variables;
-		// TODO: types
+		std::unordered_map<utility::string_table_key, data_type> types;
 
 		handle<scope> parent = nullptr;
 		std::vector<handle<scope>> child_scopes;

@@ -59,6 +59,7 @@ namespace sigma {
 			{ "bool",      token_type::BOOL               },
 			{ "void",      token_type::VOID               },
 			{ "char",      token_type::CHAR               },
+			{ "struct",    token_type::STRUCT             },
 
 			{ "true",      token_type::BOOL_LITERAL_TRUE  },
 			{ "false",     token_type::BOOL_LITERAL_FALSE },

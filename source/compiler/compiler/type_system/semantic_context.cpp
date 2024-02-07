@@ -281,6 +281,19 @@ namespace sigma {
 		return m_current_scope->find_variable(identifier) != nullptr;
 	}
 
+  auto semantic_context::declare_struct(handle<ast::node> node) const -> utility::result<void> {
+		const auto& expression = node->get<ast::named_type_expression>();
+
+		// check if the struct hasn't already been defined in this scope
+		if(m_current_scope->find_type(expression.key) != nullptr) {
+			const std::string& identifier = m_context.syntax.strings.get(expression.key);
+			return error::emit(error::code::STRUCT_ALREADY_DECLARED, node->location, identifier);
+		}
+
+		m_current_scope->types[expression.key] = expression.type;
+		return SUCCESS;
+  }
+
 	bool semantic_context::contains_function(const function_signature& signature) const {
 		const handle<namespace_scope> scope = find_parent_namespace();
 

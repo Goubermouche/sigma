@@ -33,6 +33,7 @@ namespace sigma {
 		auto parse_namespace_declaration() -> parse_result;
 		auto parse_function_declaration() -> parse_result;
 		auto parse_variable_declaration() -> parse_result;
+		auto parse_struct_declaration() -> parse_result;
 
 		// blocks
 		auto parse_if_else_statement_block() -> parse_result;
@@ -103,14 +104,15 @@ namespace sigma {
 
 		auto create_numerical_literal(handle<token_location> location) const -> handle<ast::node>;
 		auto create_character_literal(handle<token_location> location) const -> handle<ast::node>;
+		auto create_struct_declaration(handle<token_location> location) const->handle<ast::node>;
 		auto create_variable_access(handle<token_location> location) const -> handle<ast::node>;
 		auto create_string_literal(handle<token_location> location) const -> handle<ast::node>;
 		auto create_bool_literal(handle<token_location> location) const -> handle<ast::node>;
 		auto create_null_literal(handle<token_location> location) const -> handle<ast::node>;
 		auto create_assignment(handle<token_location> location) const -> handle<ast::node>;
+		auto create_logical_not(handle<token_location> location) const->handle<ast::node>;
 		auto create_sizeof(handle<token_location> location) const -> handle<ast::node>;
 		auto create_cast(handle<token_location> location) const -> handle<ast::node>;
-		auto create_logical_not(handle<token_location> location) const -> handle<ast::node>;
 
 		auto create_comparison_operation(ast::node_type type, handle<ast::node> left, handle<ast::node> right) const -> handle<ast::node>;
 		auto create_binary_operation(ast::node_type type, handle<ast::node> left, handle<ast::node> right) const->handle<ast::node>;

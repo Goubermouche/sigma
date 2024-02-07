@@ -49,6 +49,8 @@ namespace sigma {
 			INVALID_IMPLICIT_CAST,
 			INVALID_VOID,
 			NOT_ALL_CONTROL_PATHS_RETURN,
+			DUPLICATE_STRUCT_IDENTIFIER,
+			STRUCT_ALREADY_DECLARED,
 		};
 
 		/**
@@ -139,6 +141,8 @@ namespace sigma {
 			{ code::INVALID_IMPLICIT_CAST,               "invalid implicit cast from '{}' to '{}'"                                           },
 			{ code::INVALID_VOID,                        "invalid use of a void expression"                                                  },
 			{ code::NOT_ALL_CONTROL_PATHS_RETURN,        "not all control paths return a value"                                              },
+			{ code::DUPLICATE_STRUCT_IDENTIFIER,         "struct member '{}' has already been declared before"                               },
+			{ code::STRUCT_ALREADY_DECLARED,             "struct '{}' has already been declared before"                                      },
 		};
 	};
 

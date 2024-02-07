@@ -18,6 +18,7 @@ namespace sigma {
 			case ast::node_type::NAMESPACE_DECLARATION:          translate_namespace_declaration(ast_node); break;
 			case ast::node_type::FUNCTION_DECLARATION:           translate_function_declaration(ast_node); break;
 			case ast::node_type::VARIABLE_DECLARATION:           translate_variable_declaration(ast_node); break;
+			case ast::node_type::STRUCT_DECLARATION:             return nullptr; // we don't have to do anything here
 
 			// literals
 			case ast::node_type::NUMERICAL_LITERAL:              return translate_numerical_literal(ast_node);

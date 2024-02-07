@@ -27,11 +27,13 @@ namespace sigma {
 
 		data_type() = default;
 		data_type(token token, u8 pointer_level);
-		data_type(data_type_base type, u8 pointer_level);
+		data_type(data_type_base type, u8 pointer_level, const utility::slice<data_type>& members = {});
 
 		static auto create_unknown() -> data_type;
 		static auto create_var_arg_promote() -> data_type;
 		static auto create_bool(u8 pointer_level = 0) -> data_type;
+
+		static auto create_struct(const utility::slice<data_type>& members) -> data_type;
 
 		static auto create_i8(u8 pointer_level = 0) -> data_type;
 		static auto create_i16(u8 pointer_level = 0) -> data_type;

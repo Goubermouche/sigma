@@ -13,12 +13,25 @@ namespace sigma {
 
 	auto scope::find_variable(const utility::string_table_key& identifier) -> handle<variable> {
 		const auto it = variables.find(identifier);
-		if (it != variables.end()) {
+		if(it != variables.end()) {
 			return &it->second;
 		}
 
-		if (parent) {
+		if(parent) {
 			return parent->find_variable(identifier);
+		}
+
+		return nullptr;
+	}
+
+	auto scope::find_type(const utility::string_table_key& identifier) -> handle<data_type> {
+		const auto it = types.find(identifier);
+		if (it != types.end()) {
+			return &it->second;
+		}
+
+		if(parent) {
+			return parent->find_type(identifier);
 		}
 
 		return nullptr;

@@ -85,65 +85,83 @@ namespace sigma {
 			utility::console::print("{}{} ", std::string(static_cast<u64>(depth * 2), ' '), node->type.to_string());
 
 			switch (node->type) {
-			case ast::node_type::FUNCTION_DECLARATION: {
-				const auto& property = node->get<ast::function>();
-				utility::console::print("['{} {} (", property.signature.return_type.to_string(), strings.get(property.signature.identifier_key));
+				// declarations
+				case ast::node_type::FUNCTION_DECLARATION: {
+					const auto& property = node->get<ast::function>();
+					utility::console::print("['{} {} (", property.signature.return_type.to_string(), strings.get(property.signature.identifier_key));
 
-				for (u64 i = 0; i < property.signature.parameter_types.get_size(); ++i) {
-					utility::console::print("{}", property.signature.parameter_types[i].type.to_string());
+					for (u64 i = 0; i < property.signature.parameter_types.get_size(); ++i) {
+						utility::console::print("{}", property.signature.parameter_types[i].type.to_string());
 
-					if (i + 1 != property.signature.parameter_types.get_size()) {
-						utility::console::print(", ");
+						if (i + 1 != property.signature.parameter_types.get_size()) {
+							utility::console::print(", ");
+						}
 					}
+					utility::console::print(")']");
+					break;
 				}
-				utility::console::print(")']");
-				break;
-			}
-			case ast::node_type::FUNCTION_CALL: {
-				const auto& property = node->get<ast::function_call>();
+				case ast::node_type::NAMESPACE_DECLARATION: {
+					const auto& property = node->get<ast::named_expression>();
+					utility::console::print("['{}']", strings.get(property.key));
+					break;
+				}
+				case ast::node_type::VARIABLE_DECLARATION: {
+					const auto& property = node->get<ast::named_type_expression>();
+					utility::console::print("[{} '{}']", strings.get(property.key), property.type.to_string());
+					break;
+				}
+				case ast::node_type::STRUCT_DECLARATION: {
+					const auto& property = node->get<ast::named_type_expression>();
+					utility::console::print("['{} {{", strings.get(property.key));
 
-				utility::console::print("['");
+					for(u64 i = 0; i < property.type.members.get_size(); ++i) {
+						utility::console::print(property.type.members[i].to_string());
 
-				for (const utility::string_table_key key : property.namespaces) {
-					utility::console::print("{}::", strings.get(key));
+						if(i + 1 != property.type.members.get_size()) {
+							utility::console::print(", ");
+						}
+					}
+
+					utility::console::print("}}'");
+					break;
 				}
 
-				utility::console::print("{}']", strings.get(property.signature.identifier_key));
-				break;
-			}
-			case ast::node_type::NAMESPACE_DECLARATION: {
-				const auto& property = node->get<ast::named_expression>();
-				utility::console::print("['{}']", strings.get(property.key));
-				break;
-			}
-			case ast::node_type::VARIABLE_DECLARATION: {
-				const auto& property = node->get<ast::named_type_expression>();
-				utility::console::print("[{} '{}']", strings.get(property.key), property.type.to_string());
-				break;
-			}
-			case ast::node_type::VARIABLE_ACCESS: {
-				const auto& property = node->get<ast::named_type_expression>();
-				utility::console::print("[{}]", strings.get(property.key));
-				break;
-			}
+				case ast::node_type::FUNCTION_CALL: {
+					const auto& property = node->get<ast::function_call>();
 
-			case ast::node_type::NUMERICAL_LITERAL: {
-				const auto& property = node->get<ast::named_type_expression>();
-				utility::console::print("['{}' {}]", property.type.to_string(), strings.get(property.key));
-				break;
-			}
-			case ast::node_type::STRING_LITERAL: {
-				const auto& property = node->get<ast::named_type_expression>();
-				utility::console::print("[\"{}\"]", utility::detail::escape_string(strings.get(property.key)));
-				break;
-			}
-			case ast::node_type::BOOL_LITERAL: {
-				const auto& property = node->get<ast::bool_literal>();
-				utility::console::print("[{}]", property.value ? "true" : "false");
-				break;
-			}
+					utility::console::print("['");
 
-			default: break; // suppress unhandled enumeration warnings
+					for (const utility::string_table_key key : property.namespaces) {
+						utility::console::print("{}::", strings.get(key));
+					}
+
+					utility::console::print("{}']", strings.get(property.signature.identifier_key));
+					break;
+				}
+				case ast::node_type::VARIABLE_ACCESS: {
+					const auto& property = node->get<ast::named_type_expression>();
+					utility::console::print("[{}]", strings.get(property.key));
+					break;
+				}
+
+				// literals
+				case ast::node_type::NUMERICAL_LITERAL: {
+					const auto& property = node->get<ast::named_type_expression>();
+					utility::console::print("['{}' {}]", property.type.to_string(), strings.get(property.key));
+					break;
+				}
+				case ast::node_type::STRING_LITERAL: {
+					const auto& property = node->get<ast::named_type_expression>();
+					utility::console::print("[\"{}\"]", utility::detail::escape_string(strings.get(property.key)));
+					break;
+				}
+				case ast::node_type::BOOL_LITERAL: {
+					const auto& property = node->get<ast::bool_literal>();
+					utility::console::print("[{}]", property.value ? "true" : "false");
+					break;
+				}
+
+				default: break; // suppress unhandled enumeration warnings
 			}
 
 			utility::console::print("\n");

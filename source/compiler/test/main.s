@@ -15,7 +15,11 @@
 // -   if | else if should throw
 
 i32 main() {
-	i32 value = 100;
-	printf("%d\n", value);
+	struct x {
+		i32 value;
+	};
+
+
+
 	ret 0;
 }

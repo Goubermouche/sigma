@@ -27,7 +27,6 @@ using namespace utility::types;
 #define EXECUTABLE_OPT "./"
 #endif
 
-
 auto read_or_throw(const filepath& path) -> std::string {
 	const auto result = utility::fs::file<std::string>::load(path);
 	if (result.has_error()) {

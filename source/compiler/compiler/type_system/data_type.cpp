@@ -3,10 +3,10 @@
 
 namespace sigma {
 	data_type::data_type(token token, u8 pointer_level)
-		: base_type(token_to_type(token)), pointer_level(pointer_level) {}
+		: members({}), base_type(token_to_type(token)), pointer_level(pointer_level) {}
 
-	data_type::data_type(data_type_base type, u8 pointer_level)
-		: base_type(type), pointer_level(pointer_level) {}
+	data_type::data_type(data_type_base type, u8 pointer_level, const utility::slice<data_type>& members)
+		: members(members), base_type(type), pointer_level(pointer_level) {}
 
 	auto data_type::create_unknown() -> data_type {
 		return {};
@@ -19,6 +19,10 @@ namespace sigma {
   auto data_type::create_bool(u8 pointer_level) -> data_type {
 		return { BOOL, pointer_level };
   }
+
+	auto data_type::create_struct(const utility::slice<data_type>& members) -> data_type {
+		return { STRUCT, 0, members };
+	}
 
 	auto data_type::create_i8(u8 pointer_level) -> data_type {
 		return { I8, pointer_level };

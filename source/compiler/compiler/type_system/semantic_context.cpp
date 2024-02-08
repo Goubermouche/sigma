@@ -231,12 +231,14 @@ namespace sigma {
 			return SUCCESS; // nothing else needed
 		}
 
-		if(const handle<data_type> resolved = m_current_scope->find_type(type.identifier_key)) {
-			type = *resolved;
+		if(const handle<data_type> resolved = m_current_scope->find_type(type.unresolved_key)) {
+			type.members = resolved->members;
+			type.base_type = resolved->base_type;
+			type.pointer_level = resolved->pointer_level;
 			return SUCCESS;
 		}
 
-		const std::string& identifier = m_context.syntax.strings.get(type.identifier_key);
+		const std::string& identifier = m_context.syntax.strings.get(type.unresolved_key);
 		return error::emit(error::code::UNKNOWN_TYPE, location, identifier);
 	}
 

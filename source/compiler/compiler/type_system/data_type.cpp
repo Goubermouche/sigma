@@ -19,7 +19,7 @@ namespace sigma {
 			case token_type::IDENTIFIER: {
 				// custom types, resolved in the type checker
 				base_type = UNRESOLVED;
-				identifier_key = token.symbol_key;
+				unresolved_key = token.symbol_key;
 				break;
 			}
 			default: PANIC("undefined token -> type conversion for token '{}'", token.tok.to_string());

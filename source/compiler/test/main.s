@@ -14,17 +14,20 @@
 //     -    add more test cases
 
 i32 main() {
-	i32*** memory = cast<i32***>(malloc(100));
+	struct key {
+		i32* value;
+	};
 
-	memory[0] = cast<i32**>(malloc(100));
-	memory[1] = cast<i32**>(malloc(100));
+	struct user {
+		key k;
+	};
 
-	memory[0][0] = cast<i32*>(malloc(100));
-	memory[1][0] = cast<i32*>(malloc(100));
+	user my_user;
 
-	memory[0][0][0] = 1;
-	memory[1][0][0] = 2;
+	my_user.k.value = cast<i32*>(malloc(sizeof(i32) * 2));
+	my_user.k.value[0] = 123;
+	my_user.k.value[1] = 321;
 
-	printf("%d %d\n", memory[0][0][0], memory[1][0][0]);
+	printf("key: %d %d\n", my_user.k.value[0], my_user.k.value[1]);
 	ret 0;
 }

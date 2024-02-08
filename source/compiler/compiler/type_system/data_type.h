@@ -68,6 +68,7 @@ namespace sigma {
 		auto get_alignment() const -> u16;
 		auto get_size() const -> u16;
 
+		utility::string_table_key unresolved_key;
 		utility::string_table_key identifier_key;
 		utility::slice<data_type> members;
 

@@ -412,10 +412,10 @@ namespace sigma {
 	}
 
 	auto type_checker::type_check_struct_declaration(ast_node declaration) const -> type_check_result {
-		const auto& expression = declaration->get<ast::named_type_expression>();
+		auto& expression = declaration->get<ast::named_type_expression>();
 
 		// verify that no two members of the struct have the same identifier
-		const auto& members = expression.type.members;
+		auto& members = expression.type.members;
 
 		for (u64 i = 0; i < members.get_size(); ++i) {
 			for (u64 j = i + 1; j < members.get_size(); ++j) {
@@ -424,6 +424,11 @@ namespace sigma {
 					return error::emit(error::code::DUPLICATE_STRUCT_IDENTIFIER, declaration->location, identifier);
 				}
 			}
+		}
+
+		// resolve inner types
+		for(auto& member : members) {
+			TRY(m_context.semantics.resolve_type(member, declaration->location));
 		}
 
 		TRY(m_context.semantics.declare_struct(declaration));

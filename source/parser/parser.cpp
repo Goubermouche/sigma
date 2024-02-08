@@ -520,28 +520,18 @@ namespace sigma {
 
 	auto parser::parse_array_access() -> parse_result {
 		// parses an array index access
-		// expect '[index expression]'
-		// ie. [12, 3, index]
+		// expect '[index]'
+		EXPECT_CURRENT_TOKEN(token_type::LEFT_BRACKET);
 		const handle<token_location> location = get_current_location();
-		std::vector<handle<ast::node>> index_expressions;
 
-		// parse the indices
-		while(true) {
-			m_tokens.next(); // prime the first expression token
+		m_tokens.next(); // prime the first expression token
+		TRY(const handle<ast::node> index, parse_expression());
 
-			TRY(const handle<ast::node> index, parse_expression());
-			index_expressions.push_back(index);
-
-			if(m_tokens.get_current_token() == token_type::RIGHT_BRACKET) {
-				break;
-			}
-
-			EXPECT_CURRENT_TOKEN(token_type::COMMA);
-		}
+		EXPECT_CURRENT_TOKEN(token_type::RIGHT_BRACKET);
 
 		// create the access node
-		const handle<ast::node> array_access = create_array_access(index_expressions.size() + 1, location);
-		utility::copy(array_access->children, 1, index_expressions);
+		const handle<ast::node> array_access = create_array_access(2, location);
+		array_access->children[1] = index;
 
 		m_tokens.next(); // prime the next token
 		return array_access;

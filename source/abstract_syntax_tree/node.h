@@ -32,8 +32,8 @@ namespace sigma::ast {
 			CONDITIONAL_BRANCH,
 
 			// storage[index expressions]
-			// children[0] = storage
-			// children[1 ... n] = index expressions
+			// children[0] = base
+			// children[1] = index
 			ARRAY_ACCESS,
 			VARIABLE_ACCESS,
 			LOCAL_MEMBER_ACCESS,
@@ -111,7 +111,7 @@ namespace sigma::ast {
 	};
 
 	struct type_expression {
-		// ARRAY_ACCESS: type at the 0'th index of the array
+		// ARRAY_ACCESS: type of the array member we're accessing
 		// ALIGNOF:      type we want to know the alignment of
 		// SIZEOF:       type we want to know the size of
 		// LOAD:         type of the value we're loading

@@ -13,21 +13,19 @@
 // -   TESTS:
 //     -    add more test cases
 
-// 
-
 i32 main() {
-	struct vec2 {
-		i32 x;
-		i32 y;
-	};
+	i32*** memory = cast<i32***>(malloc(100));
 
-	vec2 instance;
+	memory[0] = cast<i32**>(malloc(100));
+	memory[1] = cast<i32**>(malloc(100));
 
-	instance.x = 10;
-	instance.y = 20;
+	memory[0][0] = cast<i32*>(malloc(100));
+	memory[1][0] = cast<i32*>(malloc(100));
 
-	printf("x: %d\n", instance.x);
-	printf("y: %d\n", instance.y);
+	memory[0][0][0] = 1;
+	memory[1][0][0] = 2;
 
+	printf("%d %d\n", memory[0][0][0], memory[1][0][0]);
 	ret 0;
 }
+

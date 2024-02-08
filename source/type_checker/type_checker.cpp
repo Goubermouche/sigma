@@ -297,21 +297,12 @@ namespace sigma {
 	}
 
 	auto type_checker::type_check_array_access(ast_node access, ast_node parent, data_type expected) -> type_check_result {
-		// number of indices / number of 'levels' we need to access
-		const u16 access_level = access->children.get_size() - 1;
-
-		// type check the storage location
 		TRY(const data_type base_type, type_check_node(access->children[0], access));
-
-		// type check index expressions
-		for(u16 i = 0; i < access_level; ++i) {
-			TRY(type_check_node(access->children[i + 1], access, data_type::create_u64()));
-		}
+		TRY(type_check_node(access->children[1], access, data_type::create_u64()));
 
 		access->get<ast::type_expression>().type = base_type;
+		const data_type accessed_type = base_type.create_access(1);
 
-		// implicitly cast the type, more of a sanity check
-		const data_type accessed_type = base_type.create_access(static_cast<u8>(access_level));
 		return implicit_type_cast(accessed_type, expected, parent, access);
 	}
 

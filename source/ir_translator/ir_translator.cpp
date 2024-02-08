@@ -209,54 +209,6 @@ namespace sigma {
 		m_context.semantics.trace_pop_scope();
 	}
 
-	auto ir_translator::translate_array_access(handle<ast::node> access_node) -> handle<ir::node> {
-		// translate the storage location
-		handle<ir::node> base = translate_node(access_node->children[0]);
-
-		const data_type base_type = access_node->get<ast::type_expression>().type;
-		const u16 alignment = base_type.get_alignment();
-
-		if(base->get_type() == ir::node::type::ARRAY_ACCESS) {
-			const ir::data_type type = detail::data_type_to_ir(base_type);
-			base = m_context.builder.create_load(base, type, alignment, false);
-		}
-
-		// translate the index
-		const handle<ir::node> index = translate_node(access_node->children[1]);
-
-		return m_context.builder.create_array_access(base, index, alignment);
-
-
-
-		// number of array accesses we need to perform
-		// const u16 access_level = access_node->children.get_size() - 1;
-		// 
-		// // store the base type for the current operation
-		// data_type base_type = access_node->get<ast::type_expression>().type;
-		// handle<ir::node> base = translate_node(access_node->children[0]);
-		// 
-		// // generate individual accesses
-		// for(u64 i = 0; i < access_level; ++i) {
-		// 	const handle<ir::node> index = translate_node(access_node->children[i + 1]);
-		// 	const data_type accessed_type = base_type.create_access(1);
-		// 	const u16 alignment = accessed_type.get_alignment();
-		// 
-		// 	base = m_context.builder.create_array_access(base, index, alignment);
-		// 
-		// 	if(i + 1 < access_level) {
-		// 		// if the access has more than one level we have to load each pointer and
-		// 		// then access it further
-		// 		const ir::data_type type = detail::data_type_to_ir(accessed_type);
-		// 		base = m_context.builder.create_load(base, type, alignment, false);
-		// 
-		// 		base_type = base_type.create_access(1);
-		// 	}
-		// }
-		// 
-		// // return the last access
-		// return base;
-	}
-
 	auto ir_translator::translate_numerical_literal(handle<ast::node> numerical_literal_node) const -> handle<ir::node> {
 		return literal_to_ir(numerical_literal_node->get<ast::named_type_expression>());
 	}
@@ -424,14 +376,39 @@ namespace sigma {
 		return m_context.builder.create_load(value_to_load, ir_type, alignment, false);
 	}
 
+	auto ir_translator::translate_array_access(handle<ast::node> access_node) -> handle<ir::node> {
+		// translate the storage location
+		handle<ir::node> base = translate_node(access_node->children[0]);
+
+		const data_type base_type = access_node->get<ast::type_expression>().type;
+		const u16 alignment = base_type.get_alignment();
+
+		// chained accesses
+		if (
+			base->get_type() == ir::node::type::ARRAY_ACCESS ||
+			base->get_type() == ir::node::type::MEMBER_ACCESS
+		) {
+			const ir::data_type type = detail::data_type_to_ir(base_type);
+			base = m_context.builder.create_load(base, type, alignment, false);
+		}
+		else {
+			ASSERT(base->get_type() == ir::node::type::LOCAL, "unhandled node type");
+		}
+
+		// translate the index
+		const handle<ir::node> index = translate_node(access_node->children[1]);
+
+		return m_context.builder.create_array_access(base, index, alignment);
+	}
+
 	auto ir_translator::translate_local_member_access(handle<ast::node> access_node) -> handle<ir::node> {
 	  const auto& access = access_node->get<ast::named_type_expression>();
 
 		const handle<ir::node> base = translate_node(access_node->children[0]);
+		ASSERT(base->get_type() == ir::node::type::LOCAL, "unhandled node type");
+
 		const data_type& base_type = access_node->children[0]->get<ast::named_type_expression>().type;
 		const u16 offset = base_type.get_member_offset(access.key);
-
-		std::cout << "offset: " << offset << '\n';
 
 		return m_context.builder.create_member_access(base, offset);
 	}

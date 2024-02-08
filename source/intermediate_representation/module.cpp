@@ -57,7 +57,7 @@ namespace sigma::ir {
 			
 			// schedule nodes
 			schedule_node_hierarchy(codegen);
-			
+
 			// select instructions for the architecture specified by the target
 			m_codegen.select_instructions(codegen);
 
@@ -65,15 +65,15 @@ namespace sigma::ir {
 			// intervals, which are then used by the selected register allocator.
 			determine_live_ranges(codegen);
 			register_allocator->allocate(codegen);
-			
+
 			// generate a bytecode representation of the given function for the specified target
 			const utility::byte_buffer bytecode = m_codegen.emit_bytecode(codegen);
 
-			for(const auto b : bytecode) {
-				std::cout << b.to_hex() << ' ';
-			}
-			
-			std::cout << '\n';
+			// for(const auto b : bytecode) {
+			// 	std::cout << b.to_hex() << ' ';
+			// }
+			// 
+			// std::cout << '\n';
 			
 			// DEBUG
 			// assembly.append(m_codegen.disassemble(bytecode, codegen));

@@ -28,4 +28,3 @@ i32 main() {
 	printf("%d %d\n", memory[0][0][0], memory[1][0][0]);
 	ret 0;
 }
-

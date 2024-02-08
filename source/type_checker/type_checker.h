@@ -58,6 +58,7 @@ namespace sigma {
 		// loads / stores
 		auto type_check_variable_access(ast_node access, ast_node parent, data_type expected) const->type_check_result;
 		auto type_check_array_access(ast_node access, ast_node parent, data_type expected) -> type_check_result;
+		auto type_check_local_member_access(ast_node access, ast_node parent, data_type expected) -> type_check_result;
 		auto type_check_load(ast_node load, data_type expected) -> type_check_result;
 		auto type_check_store(ast_node store) -> type_check_result;
 

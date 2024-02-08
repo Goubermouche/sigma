@@ -88,6 +88,7 @@ namespace sigma {
 			{ "<" ,  token_type::LESS_THAN             },
 			{ ">" ,  token_type::GREATER_THAN          },
 			{ "!" ,  token_type::EXCLAMATION_MARK      },
+			{ "." ,  token_type::DOT                   },
 
 			{ "&&",  token_type::CONJUNCTION           },
 			{ "||",  token_type::DISJUNCTION           },

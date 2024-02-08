@@ -16,4 +16,8 @@ namespace sigma::ir {
 	struct array {
 		i64 stride;
 	};
+
+	struct member {
+		i64 offset;
+	};
 }

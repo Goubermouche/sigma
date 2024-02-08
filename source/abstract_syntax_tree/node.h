@@ -36,6 +36,7 @@ namespace sigma::ast {
 			// children[1 ... n] = index expressions
 			ARRAY_ACCESS,
 			VARIABLE_ACCESS,
+			LOCAL_MEMBER_ACCESS,
 
 			// storage = assigned value
 			// children[0] = storage
@@ -125,6 +126,8 @@ namespace sigma::ast {
 		// VARIABLE_ACCESS:      key stores the identifier, type is resolved in the type checker
 		//                       and holds the type of the accessed variable
 		// STRUCT_DECLARATION:   key holds the name of the structure, type describes the struct
+		// STORE:
+		// LOCAL_MEMBER_ACCESS:
 		utility::string_table_key key;
 		data_type type;
 	};

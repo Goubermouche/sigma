@@ -58,6 +58,7 @@ namespace sigma {
 			// loads / stores
 			case ast::node_type::VARIABLE_ACCESS:                return type_check_variable_access(target, parent, expected);
 			case ast::node_type::ARRAY_ACCESS:                   return type_check_array_access(target, parent, expected);
+			case ast::node_type::LOCAL_MEMBER_ACCESS:            return type_check_local_member_access(target, parent, expected);
 			case ast::node_type::LOAD:                           return type_check_load(target, expected);
 			case ast::node_type::STORE:                          return type_check_store(target);
 
@@ -314,6 +315,25 @@ namespace sigma {
 		return implicit_type_cast(accessed_type, expected, parent, access);
 	}
 
+	auto type_checker::type_check_local_member_access(ast_node access, ast_node parent, data_type expected) -> type_check_result {
+		auto& expression = access->get<ast::named_type_expression>();
+
+		// type check the storage location
+		TRY(const data_type base_type, type_check_node(access->children[0], access));
+
+		for(const data_type& member : base_type.members) {
+			// find a matching member
+			if(member.identifier_key == expression.key) {
+				TRY(expression.type, implicit_type_cast(member, expected, parent, access));
+				return expression.type;
+			}
+		}
+
+		// no member was found
+		const std::string& identifier = m_context.syntax.strings.get(expression.key);
+		return error::emit(error::code::UNKNOWN_STRUCT_MEMBER, access->location, identifier);
+	}
+
 	auto type_checker::type_check_load(ast_node load, data_type expected) -> type_check_result {
 		// type check the loaded node
 		TRY(const data_type load_type, type_check_node(load->children[0], load, expected));
@@ -551,7 +571,7 @@ namespace sigma {
 	auto type_checker::type_check_store(ast_node store) -> type_check_result {
 		// type check the destination
 		const ast_node destination = store->children[0];
-		TRY(const data_type destination_type, type_check_node(destination, store, data_type::create_unknown()));
+		TRY(const data_type destination_type, type_check_node(destination, store));
 
 		// type check the assigned value against the destination type
 		TRY(type_check_node(store->children[1], store, destination_type));

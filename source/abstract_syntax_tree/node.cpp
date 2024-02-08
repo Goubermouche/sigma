@@ -24,6 +24,7 @@ namespace sigma::ast {
 
 			case ARRAY_ACCESS:                   return "ARRAY_ACCESS";
 			case VARIABLE_ACCESS:                return "VARIABLE_ACCESS";
+			case LOCAL_MEMBER_ACCESS:            return "LOCAL_MEMBER_ACCESS";
 
 			case STORE:                          return "STORE";
 			case LOAD:                           return "LOAD";

@@ -52,6 +52,7 @@ namespace sigma {
 			DUPLICATE_STRUCT_IDENTIFIER,
 			STRUCT_ALREADY_DECLARED,
 			UNKNOWN_TYPE,
+			UNKNOWN_STRUCT_MEMBER,
 		};
 
 		/**
@@ -145,6 +146,7 @@ namespace sigma {
 			{ code::DUPLICATE_STRUCT_IDENTIFIER,         "struct member '{}' has already been declared before"                               },
 			{ code::STRUCT_ALREADY_DECLARED,             "struct '{}' has already been declared before"                                      },
 			{ code::UNKNOWN_TYPE,                        "unknown type '{}' referenced"                                                      },
+			{ code::UNKNOWN_STRUCT_MEMBER,               "unknown struct member '{}' referenced"                                             },
 		};
 	};
 

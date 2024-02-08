@@ -51,6 +51,7 @@ namespace sigma {
 		void translate_branch(handle<ast::node> branch_node, handle<ir::node> exit_control);
 
 		// loads / stores
+		auto translate_local_member_access(handle<ast::node> access_node) -> handle<ir::node>;
 		auto translate_variable_access(handle<ast::node> access_node) const -> handle<ir::node>;
 		auto translate_array_access(handle<ast::node> access_node) -> handle<ir::node>;
 		auto translate_store(handle<ast::node> assignment_node) -> handle<ir::node>;

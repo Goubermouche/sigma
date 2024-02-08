@@ -178,6 +178,11 @@ namespace sigma::ir {
 		return get_insert_point_checked()->create_array_access(base, index, stride);
   }
 
+	auto builder::create_member_access(handle<node> base, i64 offset) const -> handle<node> {
+		DEBUG_PRINT("creating local access offset: {}", offset);
+		return get_insert_point_checked()->create_member_access(base, offset);
+	}
+
 	auto builder::create_load(handle<node> value_to_load, data_type data_type, u32 alignment, bool is_volatile) const -> handle<node> {
 		DEBUG_PRINT("creating load type: {} alignment: {}", data_type.to_string(), alignment);
 		return get_insert_point_checked()->create_load(value_to_load, data_type, alignment, is_volatile);

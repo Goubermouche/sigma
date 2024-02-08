@@ -289,6 +289,19 @@ namespace sigma::ir {
 		return array;
   }
 
+	auto function::create_member_access(handle<node> base, i64 offset) -> handle<node> {
+		if(offset == 0) {
+			return base;
+		}
+
+		const handle<node> n = create_node<member>(node::type::MEMBER_ACCESS, 2);
+		n->dt = PTR_TYPE;
+		n->inputs[1] = base;
+		n->get<member>().offset = offset;
+
+		return n;
+	}
+
 	auto function::create_local(u32 size, u32 alignment) -> handle<node> {
 		const handle<node> local = create_node<ir::local>(node::type::LOCAL, 1);
 

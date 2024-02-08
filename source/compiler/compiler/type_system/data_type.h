@@ -64,6 +64,7 @@ namespace sigma {
 
 		auto to_string() const -> std::string;
 
+		auto get_member_offset(utility::string_table_key member_name) const -> u16;
 		auto get_alignment() const -> u16;
 		auto get_size() const -> u16;
 

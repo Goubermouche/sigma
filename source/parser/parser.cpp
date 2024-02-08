@@ -325,50 +325,84 @@ namespace sigma {
 
 	auto parser::parse_identifier_statement() -> parse_result {
 		// parse a statement which starts with an identifier
-		// expect '(NAMESPACES) IDENTIFIER (ARRAY_ACCESS)'
+		// expect 'NAMESPACES ARRAY_ACCESS | MEMBER_ACCESS'
 
 		// parse a namespace, if there is one
 		TRY(const std::vector<utility::string_table_key> namespaces, parse_namespaces());
 
 		if (peek_is_function_call()) {
-			// return early and don't allow assignments to function results (yet)
 			return parse_function_call(namespaces);
 		}
 
-		// parse a variable value
-		TRY(const handle<ast::node> variable, parse_variable_access());
+		TRY(handle<ast::node> result, parse_variable_access());
 
-		handle<ast::node> array_access = nullptr;
-
-		// parse an array access
-		if(m_tokens.get_current_token() == token_type::LEFT_BRACKET) {
-			TRY(array_access, parse_array_access());
-		}
-		
-		// check if we're assigning anything
-		// TODO: replace by a store op
-		if (m_tokens.get_current_token() == token_type::EQUALS_SIGN) {
-			TRY(const handle<ast::node> assignment_node, parse_assignment());
-
-			if(array_access) {
-				// assignment to an array access
-				array_access->children[0] = variable;
-				assignment_node->children[0] = array_access;
+		while(true) {
+			// array access
+			if(m_tokens.get_current_token() == token_type::LEFT_BRACKET) {
+				// [indices]
+				TRY(handle<ast::node> array_access, parse_array_access());
+				array_access->children[0] = result;
+				result = array_access;
+			}
+			else if(m_tokens.get_current_token() == token_type::DOT) {
+				// .member
+				TRY(handle<ast::node> member_access, parse_local_member_access());
+				member_access->children[0] = result;
+				result = member_access;
 			}
 			else {
-				assignment_node->children[0] = variable;
+				break;
 			}
+		}
 
+		if(m_tokens.get_current_token() == token_type::EQUALS_SIGN) {
+			TRY(const handle<ast::node> assignment_node, parse_assignment());
+
+			assignment_node->children[0] = result;
 			return assignment_node;
 		}
 
-		if(array_access) {
-			// plain array access
-			array_access->children[0] = variable;
-			return array_access;
-		}
+		return result;
+	
+		// // check if we're assigning anything
+		// // TODO: replace by a store op
+		// if (m_tokens.get_current_token() == token_type::EQUALS_SIGN) {
+		// 	TRY(const handle<ast::node> assignment_node, parse_assignment());
+		// 
+		// 	if(array_access) {
+		// 		// assignment to an array access
+		// 		array_access->children[0] = variable;
+		// 		assignment_node->children[0] = array_access;
+		// 	}
+		// 	else {
+		// 		assignment_node->children[0] = variable;
+		// 	}
+		// 
+		// 	return assignment_node;
+		// }
+		// 
+		// if(array_access) {
+		// 	// plain array access
+		// 	array_access->children[0] = variable;
+		// 	return array_access;
+		// }
 
-		return variable;
+		// return variable;
+	}
+
+	auto parser::parse_local_member_access() -> parse_result {
+		// expect '.IDENTIFIER'
+		EXPECT_CURRENT_TOKEN(token_type::DOT);
+		const handle<token_location> location = get_current_location();
+
+		EXPECT_NEXT_TOKEN(token_type::IDENTIFIER);
+		const utility::string_table_key identifier = m_tokens.get_current().symbol_key;
+
+		const handle<ast::node> access_node = create_local_member_access(location);
+		access_node->get<ast::named_type_expression>().key = identifier;
+
+		m_tokens.next();
+		return access_node;
 	}
 
 	auto parser::parse_negative_expression() -> parse_result {
@@ -1008,6 +1042,10 @@ namespace sigma {
 		const bool res = m_tokens.peek_token() == token_type::COLON;
 		m_tokens.synchronize();
 		return res;
+	}
+
+	auto parser::create_local_member_access(handle<token_location> location) const -> handle<ast::node> {
+		return create_node<ast::named_type_expression>(ast::node_type::LOCAL_MEMBER_ACCESS, 1, location);
 	}
 
 	auto parser::create_numerical_literal(handle<token_location> location) const -> handle<ast::node> {

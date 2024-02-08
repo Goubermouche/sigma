@@ -1157,7 +1157,10 @@ namespace sigma::ir {
 			NOT_IMPLEMENTED();
 		}
 		else if (n == node::type::MEMBER_ACCESS) {
-			NOT_IMPLEMENTED();
+			offset = static_cast<i32>(n->get<member>().offset);
+
+			n->use_node(context);
+			n = n->inputs[1];
 		}
 
 		auto scale = memory_scale::x1;

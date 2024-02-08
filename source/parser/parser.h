@@ -61,6 +61,7 @@ namespace sigma {
 
 		// statements
 		auto parse_identifier_statement() -> parse_result;
+		auto parse_local_member_access() -> parse_result;
 		auto parse_return_statement() -> parse_result;
 		auto parse_if_statement() -> parse_result;
 		auto parse_statement() -> parse_result;
@@ -103,10 +104,11 @@ namespace sigma {
 		auto create_function(u64 child_count, handle<token_location> location) const -> handle<ast::node>;
 		auto create_return(u64 child_count, handle<token_location> location) const -> handle<ast::node>;
 
+		auto create_local_member_access(handle<token_location> location) const -> handle<ast::node>;
 		auto create_numerical_literal(handle<token_location> location) const -> handle<ast::node>;
 		auto create_character_literal(handle<token_location> location) const -> handle<ast::node>;
 		auto create_struct_declaration(handle<token_location> location) const->handle<ast::node>;
-		auto create_variable_access(handle<token_location> location) const -> handle<ast::node>;
+		auto create_variable_access(handle<token_location> location) const->handle<ast::node>;
 		auto create_string_literal(handle<token_location> location) const -> handle<ast::node>;
 		auto create_bool_literal(handle<token_location> location) const -> handle<ast::node>;
 		auto create_null_literal(handle<token_location> location) const -> handle<ast::node>;

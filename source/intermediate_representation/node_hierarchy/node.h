@@ -26,6 +26,7 @@ namespace sigma::ir {
 		handle<symbol>,
 		function_call,
 		array,
+		member,
 		compare_op
 	>;
 

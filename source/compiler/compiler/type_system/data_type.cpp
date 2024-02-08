@@ -124,6 +124,30 @@ namespace sigma {
 		return result + std::string(pointer_level, '*');
 	}
 
+	auto data_type::get_member_offset(utility::string_table_key member_name) const -> u16 {
+		u16 offset = 0;
+
+		for (const auto& member : members) {
+			// calculate padding based on alignment
+			const u16 alignment = member.get_alignment();
+			if (alignment != 0) {
+				const u16 padding = (alignment - (offset % alignment)) % alignment;
+				offset += padding;
+			}
+
+			// check if this is the target member
+			if (member.identifier_key == member_name) {
+				return offset;
+			}
+
+			// add the size of the current member
+			offset += member.get_size();
+		}
+
+		PANIC("unknown member");
+		return 0;
+	}
+
 	auto data_type::get_alignment() const -> u16 {
 		if (pointer_level > 0) {
 			return 8;

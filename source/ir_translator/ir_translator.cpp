@@ -49,6 +49,7 @@ namespace sigma {
 			// loads / stores
 			case ast::node_type::VARIABLE_ACCESS:                return translate_variable_access(ast_node);
 			case ast::node_type::ARRAY_ACCESS:                   return translate_array_access(ast_node);
+			case ast::node_type::LOCAL_MEMBER_ACCESS:            return translate_local_member_access(ast_node);
 			case ast::node_type::STORE:                          return translate_store(ast_node);
 			case ast::node_type::LOAD:                           return translate_load(ast_node);
 
@@ -57,8 +58,6 @@ namespace sigma {
 			case ast::node_type::ALIGNOF:                        return translate_alignof(ast_node);
 			case ast::node_type::SIZEOF:                         return translate_sizeof(ast_node);
 			case ast::node_type::CAST:                           return translate_cast(ast_node);
-
-			default: PANIC("irgen for node '{}' is not implemented", ast_node->type.to_string());
 		}
 
 		return nullptr;
@@ -405,6 +404,18 @@ namespace sigma {
 
 		// create the load operation
 		return m_context.builder.create_load(value_to_load, ir_type, alignment, false);
+	}
+
+	auto ir_translator::translate_local_member_access(handle<ast::node> access_node) -> handle<ir::node> {
+	  const auto& access = access_node->get<ast::named_type_expression>();
+
+		const handle<ir::node> base = translate_node(access_node->children[0]);
+		const data_type& base_type = access_node->children[0]->get<ast::named_type_expression>().type;
+		const u16 offset = base_type.get_member_offset(access.key);
+
+		std::cout << "offset: " << offset << '\n';
+
+		return m_context.builder.create_member_access(base, offset);
 	}
 
 	auto ir_translator::translate_variable_access(handle<ast::node> access_node) const -> handle<ir::node> {

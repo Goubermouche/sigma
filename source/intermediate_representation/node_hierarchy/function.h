@@ -80,6 +80,7 @@ namespace sigma::ir {
 		void create_store(handle<node> destination, handle<node> value, u32 alignment, bool is_volatile);
 		auto create_load(handle<node> value_to_load, data_type data_type, u32 alignment, bool is_volatile) -> handle<node>;
 		auto create_array_access(handle<node> base, handle<node> index, i64 stride) -> handle <node>;
+		auto create_member_access(handle<node> base, i64 offset) -> handle<node>;
 
 		auto get_function_parameter(u64 index) const-> handle<node>;
 		auto create_local(u32 size, u32 alignment) -> handle<node>;

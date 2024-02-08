@@ -60,6 +60,7 @@ namespace sigma {
 			case token_type::LESS_THAN:             return "<";
 			case token_type::GREATER_THAN:          return ">";
 			case token_type::EXCLAMATION_MARK:      return "!";
+			case token_type::DOT:                   return ".";
 
 			case token_type::LESS_THAN_OR_EQUAL:    return "<=";
 			case token_type::GREATER_THAN_OR_EQUAL: return ">=";

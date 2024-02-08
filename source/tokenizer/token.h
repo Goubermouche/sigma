@@ -31,6 +31,7 @@ namespace sigma {
 		LESS_THAN,             // <
 		GREATER_THAN,          // >
 		EXCLAMATION_MARK,      // !
+		DOT,                   // .
 
 		LESS_THAN_OR_EQUAL,    // <=
 		GREATER_THAN_OR_EQUAL, // >=

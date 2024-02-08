@@ -26,5 +26,8 @@ i32 main() {
 	instance.x = 10;
 	instance.y = 20;
 
+	printf("x: %d\n", instance.x);
+	printf("y: %d\n", instance.y);
+
 	ret 0;
 }

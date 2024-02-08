@@ -1145,14 +1145,13 @@ namespace sigma {
 	}
 
 	auto parser::parse_identifier_expression() -> parse_result {
-		// parse an expression which starts with an identifier
-		// expect '(NAMESPACES) IDENTIFIER (ARRAY_ACCESS)'
+		// parse a statement which starts with an identifier
+		// expect 'NAMESPACES ARRAY_ACCESS | MEMBER_ACCESS'
 
 		// parse a namespace, if there is one
 		TRY(const std::vector<utility::string_table_key> namespaces, parse_namespaces());
 
 		if (peek_is_function_call()) {
-			// return early and don't allow assignments to function results (yet)
 			return parse_function_call(namespaces);
 		}
 
@@ -1160,19 +1159,28 @@ namespace sigma {
 		const handle<ast::node> load_node = create_node<ast::type_expression>(ast::node_type::LOAD, 1, location);
 
 		// parse a variable value
-		TRY(const handle<ast::node> variable, parse_variable_access());
+		TRY(handle<ast::node> result, parse_variable_access());
 
-		// parse an array access
-		if(m_tokens.get_current_token() == token_type::LEFT_BRACKET) {
-			TRY(const handle<ast::node> array_access, parse_array_access());
-
-			array_access->children[0] = variable;
-			load_node->children[0] = array_access;
+		while (true) {
+			// array access
+			if (m_tokens.get_current_token() == token_type::LEFT_BRACKET) {
+				// [indices]
+				TRY(handle<ast::node> array_access, parse_array_access());
+				array_access->children[0] = result;
+				result = array_access;
+			}
+			else if (m_tokens.get_current_token() == token_type::DOT) {
+				// .member
+				TRY(handle<ast::node> member_access, parse_local_member_access());
+				member_access->children[0] = result;
+				result = member_access;
+			}
+			else {
+				break;
+			}
 		}
-		else {
-			load_node->children[0] = variable;
-		}
 
+		load_node->children[0] = result;
 		return load_node;
 	}
 

@@ -29,5 +29,7 @@ i32 main() {
 	my_user.k.value[1] = 321;
 
 	printf("key: %d %d\n", my_user.k.value[0], my_user.k.value[1]);
+	printf("%d\n", sizeof(user));
+
 	ret 0;
 }

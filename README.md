@@ -32,9 +32,9 @@ $ sigma compile main.s
 ## Project status
 As Sigma is currently under heavy development, it isn't ready for stable use, and many breaking changes may (and most likely will) be made. Please note that while the end goal is to target GPU's and other massivelly parallel targets, the current goal is to get a basic CPU-oriented language going, and there isn't a hard timeframe set - for more details see the current status bellow: 
 -   TODO:
-    -   Expression evaluator
     -   Project cleanup
-    -   Custom structured types
+    -   Better object file emitter (Windows)
+    -   First PTX tests 
 -   Future:
     -   Unified package manager
     -   Official GPU support via kernels

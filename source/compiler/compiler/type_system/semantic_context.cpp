@@ -234,7 +234,7 @@ namespace sigma {
 		if(const handle<data_type> resolved = m_current_scope->find_type(type.unresolved_key)) {
 			type.members = resolved->members;
 			type.base_type = resolved->base_type;
-			type.pointer_level = resolved->pointer_level;
+			// type.pointer_level = resolved->pointer_level;
 			return SUCCESS;
 		}
 

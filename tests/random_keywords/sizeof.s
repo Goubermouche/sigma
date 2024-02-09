@@ -24,6 +24,7 @@ i32 main() {
 	};
 
 	printf("%d\n", sizeof(s2));
+	printf("%d\n", sizeof(s2*));
     
 	ret 0;
 }

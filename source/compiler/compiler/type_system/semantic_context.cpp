@@ -13,17 +13,18 @@ namespace sigma {
 			}
 
 			switch (type.get_kind()) {
-				case type::VOID: return VOID_TYPE;
+				case type::VOID:   return VOID_TYPE;
 				case type::BOOL:
 				case type::I8:
-				case type::U8:   return I8_TYPE;
+				case type::U8:     return I8_TYPE;
 				case type::I16:
-				case type::U16:  return I16_TYPE;
+				case type::U16:    return I16_TYPE;
 				case type::CHAR:
 				case type::I32:
-				case type::U32:  return I32_TYPE;
+				case type::U32:    return I32_TYPE;
 				case type::I64:
-				case type::U64:  return I64_TYPE;
+				case type::U64:    return I64_TYPE;
+				case type::STRUCT: return PTR_TYPE;
 				default: NOT_IMPLEMENTED();
 			}
 

@@ -58,6 +58,7 @@ namespace sigma {
 			case ast::node_type::ALIGNOF:                        return translate_alignof(ast_node);
 			case ast::node_type::SIZEOF:                         return translate_sizeof(ast_node);
 			case ast::node_type::CAST:                           return translate_cast(ast_node);
+			default: PANIC("irgen for node '{}' is not implemented", ast_node->type.to_string());
 		}
 
 		return nullptr;
@@ -381,7 +382,7 @@ namespace sigma {
 		handle<ir::node> base = translate_node(access_node->children[0]);
 
 		const type base_type = access_node->get<ast::type_expression>().type;
-		const u16 alignment = base_type.get_alignment();
+		const u16 alignment = base_type.dereference(1).get_alignment(); // get the alignment of the type we're accessing
 
 		// chained accesses
 		if (

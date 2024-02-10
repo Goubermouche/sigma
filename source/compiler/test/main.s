@@ -6,30 +6,34 @@
 // -   numerical literals are always interpreted as i32
 
 // TODO: 
-// -   global struct declarations
 // -   DIAGNOSTICS:
 //     -   better messages
 //     -   more info related to numerical errors (hex etc)
 //     -   add namespaces to messages, whenever applicable (ie. x::y::test)
 // -   BUGS:
-//     -   structs as function parameters (rework the < op)
+//     -   STRUCT parameters are buggy af (TODO: proper > operator for types)
+//     -   return types are unchecked
 
-struct key {
-	i32* value;
+struct user {
+	i32* k;
+	i32 x;
 };
 
-i32 main() {
-	struct user {
-		key k;
-	};
+void print(user usr) {
+	printf("key: %d %d %d\n", usr.k[0], usr.k[1], usr.x);
+}
 
+i32 main() {
 	user my_user;
 
-	my_user.k.value = cast<i32*>(malloc(sizeof(i32) * 2));
-	my_user.k.value[0] = 123;
-	my_user.k.value[1] = 321;
+	my_user.k = cast<i32*>(malloc(8));
+	my_user.k[0] = 123;
+	my_user.k[1] = 321;
+
+	my_user.x = 111;
 	
-	printf("key: %d %d\n", my_user.k.value[0], my_user.k.value[1]);
+	printf("key: %d %d %d\n", my_user.k[0], my_user.k[1], my_user.x);
+	print(my_user);
 
 	ret 0;
 }

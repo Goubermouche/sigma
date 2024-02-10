@@ -112,7 +112,7 @@ namespace sigma {
 
 		// type check inner statements
 		for(const ast_node& statement : declaration->children) {
-			TRY(type_check_node(statement, declaration, function.signature.return_type));
+			TRY(type_check_node(statement, declaration));
 		}
 
 		TRY(m_context.semantics.verify_control_flow(declaration));
@@ -449,9 +449,9 @@ namespace sigma {
 	}
 
 	auto type_checker::implicit_type_cast(type original_type, type target_type, ast_node parent, ast_node target) const -> type_check_result {
-		if(original_type.is_pure_void() || target_type.is_pure_void()) {
-			return error::emit(error::code::INVALID_VOID, target->location);
-		}
+		// if(original_type.is_pure_void() || target_type.is_pure_void()) {
+		// 	return error::emit(error::code::INVALID_VOID, target->location);
+		// }
 
 		if(target_type.is_unknown()) {
 			return original_type;

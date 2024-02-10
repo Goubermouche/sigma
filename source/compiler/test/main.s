@@ -6,6 +6,7 @@
 // -   numerical literals are always interpreted as i32
 
 // TODO: 
+// -   global struct declarations
 // -   DIAGNOSTICS:
 //     -   better messages
 //     -   more info related to numerical errors (hex etc)
@@ -13,11 +14,11 @@
 // -   BUGS:
 //     -   structs as function parameters (rework the < op)
 
-i32 main() {
-	struct key {
-		i32* value;
-	};
+struct key {
+	i32* value;
+};
 
+i32 main() {
 	struct user {
 		key k;
 	};
@@ -29,7 +30,6 @@ i32 main() {
 	my_user.k.value[1] = 321;
 	
 	printf("key: %d %d\n", my_user.k.value[0], my_user.k.value[1]);
-	printf("%d\n", sizeof(user));
 
 	ret 0;
 }

@@ -44,6 +44,12 @@ namespace sigma {
 				// parse nested namespaces
 				TRY(result, parse_namespace_declaration());
 			}
+			else if(m_tokens.get_current_token() == token_type::STRUCT) {
+				// parse global struct declarations
+				TRY(result, parse_struct_declaration());
+				EXPECT_CURRENT_TOKEN(token_type::SEMICOLON);
+				m_tokens.next();
+			}
 			else if (peek_is_function_definition()) {
 				// parse globally declared functions 
 				TRY(result, parse_function_declaration());

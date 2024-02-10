@@ -9,7 +9,7 @@
 //          present or not. Does not throw errors
 
 #pragma once
-#include <compiler/compiler/type_system/data_type.h>
+#include <compiler/compiler/type_system/type.h>
 #include <compiler/compiler/compilation_context.h>
 #include <abstract_syntax_tree/tree.h>
 #include <tokenizer/token_buffer.h>
@@ -73,7 +73,7 @@ namespace sigma {
 
 		// utility
 		auto parse_namespaces() -> utility::result<std::vector<utility::string_table_key>>;
-		auto parse_type() -> utility::result<data_type>;
+		auto parse_type() -> utility::result<type>;
 
 		// other
 		auto parse_function_call(const std::vector<utility::string_table_key>& namespaces) -> parse_result;

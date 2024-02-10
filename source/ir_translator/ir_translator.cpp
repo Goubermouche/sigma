@@ -368,7 +368,7 @@ namespace sigma {
 		const handle<ir::node> value_to_load = translate_node(load_node->children[0]);
 
 		// get the type and alignment of the load
-		const data_type& type_to_load = load_node->get<ast::type_expression>().type;
+		const type& type_to_load = load_node->get<ast::type_expression>().type;
 		const ir::data_type ir_type = detail::data_type_to_ir(type_to_load);
 		const u16 alignment = type_to_load.get_alignment();
 
@@ -380,7 +380,7 @@ namespace sigma {
 		// translate the storage location
 		handle<ir::node> base = translate_node(access_node->children[0]);
 
-		const data_type base_type = access_node->get<ast::type_expression>().type;
+		const type base_type = access_node->get<ast::type_expression>().type;
 		const u16 alignment = base_type.get_alignment();
 
 		// chained accesses
@@ -407,7 +407,7 @@ namespace sigma {
 		const handle<ir::node> base = translate_node(access_node->children[0]);
 		ASSERT(base->get_type() == ir::node::type::LOCAL, "unhandled node type");
 
-		const data_type& base_type = access_node->children[0]->get<ast::named_type_expression>().type;
+		const type& base_type = access_node->children[0]->get<ast::named_type_expression>().type;
 		const u16 offset = base_type.get_member_offset(access.key);
 
 		return m_context.builder.create_member_access(base, offset);
@@ -439,27 +439,27 @@ namespace sigma {
 		const std::string& value = m_context.syntax.strings.get(literal.key);
 
 		// handle pointers separately
-		if (literal.type.pointer_level > 0) {
+		if (literal.type.is_pointer()) {
 			NOT_IMPLEMENTED();
 		}
 
 		bool overflow; // ignored
 
-		switch (literal.type.base_type) {
-			case data_type::I8:   return m_context.builder.create_signed_integer(utility::detail::from_string<i8>(value, overflow), 8);
-			case data_type::I16:  return m_context.builder.create_signed_integer(utility::detail::from_string<i16>(value, overflow), 16);
-			case data_type::I32:  return m_context.builder.create_signed_integer(utility::detail::from_string<i32>(value, overflow), 32);
-			case data_type::I64:  return m_context.builder.create_signed_integer(utility::detail::from_string<i64>(value, overflow), 64);
-			case data_type::U8:   return m_context.builder.create_unsigned_integer(utility::detail::from_string<u8>(value, overflow), 8);
-			case data_type::U16:  return m_context.builder.create_unsigned_integer(utility::detail::from_string<u16>(value, overflow), 16);
-			case data_type::U32:  return m_context.builder.create_unsigned_integer(utility::detail::from_string<u32>(value, overflow), 32);
-			case data_type::U64:  return m_context.builder.create_unsigned_integer(utility::detail::from_string<u64>(value, overflow), 64);
+		switch (literal.type.get_kind()) {
+			case type::I8:   return m_context.builder.create_signed_integer(utility::detail::from_string<i8>(value, overflow), 8);
+			case type::I16:  return m_context.builder.create_signed_integer(utility::detail::from_string<i16>(value, overflow), 16);
+			case type::I32:  return m_context.builder.create_signed_integer(utility::detail::from_string<i32>(value, overflow), 32);
+			case type::I64:  return m_context.builder.create_signed_integer(utility::detail::from_string<i64>(value, overflow), 64);
+			case type::U8:   return m_context.builder.create_unsigned_integer(utility::detail::from_string<u8>(value, overflow), 8);
+			case type::U16:  return m_context.builder.create_unsigned_integer(utility::detail::from_string<u16>(value, overflow), 16);
+			case type::U32:  return m_context.builder.create_unsigned_integer(utility::detail::from_string<u32>(value, overflow), 32);
+			case type::U64:  return m_context.builder.create_unsigned_integer(utility::detail::from_string<u64>(value, overflow), 64);
 			// for cases when a numerical literal is implicitly converted to a bool (ie. "if(1)")
-			case data_type::BOOL: {
+			case type::BOOL: {
 				return m_context.builder.create_unsigned_integer(!utility::detail::is_only_char(value, '0'), 8);
 			}
 			// for cases when a numerical literal is implicitly converted to a char (ie. "char c = 12")
-			case data_type::CHAR: return m_context.builder.create_signed_integer(utility::detail::from_string<i32>(value, overflow), 32);
+			case type::CHAR: return m_context.builder.create_signed_integer(utility::detail::from_string<i32>(value, overflow), 32);
 			default: NOT_IMPLEMENTED();
 		}
 

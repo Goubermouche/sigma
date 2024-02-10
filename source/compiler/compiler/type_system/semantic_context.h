@@ -7,11 +7,11 @@ namespace sigma {
 	struct backend_context;
 
 	namespace detail {
-		auto data_type_to_ir(data_type type) -> ir::data_type;
+		auto data_type_to_ir(type type) -> ir::data_type;
 		auto signature_to_ir(const function_signature& signature, const utility::string_table& string_table) -> ir::function_signature;
 		auto mangle_function_identifier(const function_signature& signature, const utility::string_table& string_table) -> std::string;
-		auto calculate_parameter_cast_cost(const function_signature& signature, const std::vector<data_type>& parameter_types) -> u16;
-		auto calculate_cast_cost(const data_type& provided, const data_type& required) -> u16;
+		auto calculate_parameter_cast_cost(const function_signature& signature, const std::vector<type>& parameter_types) -> u16;
+		auto calculate_cast_cost(const type& provided, const type& required) -> u16;
 
 		/**
 		 * \brief Determine which cast should be used based on the \b original and \b target type.
@@ -19,7 +19,7 @@ namespace sigma {
 		 * \param target Target type (type after the cast)
 		 * \return True if the cast truncates the value, false otherwise.
 		 */
-		auto determine_cast_kind(const data_type& original, const data_type& target) -> bool; 
+		auto determine_cast_kind(const type& original, const type& target) -> bool;
 	} // namespace detail 
 	
 	class semantic_context {
@@ -42,7 +42,7 @@ namespace sigma {
 		auto find_variable(utility::string_table_key identifier, const namespace_list& namespaces = {}) const -> utility::result<handle<variable>>;
 		auto get_variable(utility::string_table_key identifier, const namespace_list& namespaces = {}) const -> handle<variable>;
 		auto declare_variable(utility::string_table_key identifier, u16 size, u16 alignment) const -> handle<ir::node>;
-		auto pre_declare_variable(utility::string_table_key identifier, data_type type) const -> variable&;
+		auto pre_declare_variable(utility::string_table_key identifier, type type) const -> variable&;
 		bool contains_variable(utility::string_table_key identifier) const;
 
 		// structs
@@ -50,7 +50,7 @@ namespace sigma {
 
 		// functions
 		auto create_call(const function_signature& callee_signature, const namespace_list& namespaces, const std::vector<handle<ir::node>>& parameters) const -> handle<ir::node>;
-		auto find_callee_signature(handle<ast::node> function_node, const std::vector<data_type>& parameter_types) -> utility::result<function_signature>;
+		auto find_callee_signature(handle<ast::node> function_node, const std::vector<type>& parameter_types) -> utility::result<function_signature>;
 		void pre_declare_local_function(const function_signature& signature) const;
 		void declare_external_function(const function_signature& signature) const;
 		void declare_local_function(const function_signature& signature) const;
@@ -65,7 +65,7 @@ namespace sigma {
 		auto create_load(utility::string_table_key identifier, ir::data_type type, u16 alignment) const -> handle<ir::node>;
 		void create_store(utility::string_table_key identifier, handle<ir::node> value, u16 alignment) const;
 
-		auto resolve_type(data_type& type, handle<token_location> location) const -> utility::result<void>;
+		auto resolve_type(type& type, handle<token_location> location) const -> utility::result<void>;
 	private:
 		// namespaces
 		auto find_relative_namespace(const namespace_list& namespaces) const->handle<namespace_scope>;

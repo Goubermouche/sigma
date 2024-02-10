@@ -117,7 +117,7 @@ namespace sigma {
 		std::vector<named_data_type> parameters;
 
 		// parse the return type
-		TRY(const data_type return_type, parse_type());
+		TRY(const type return_type, parse_type());
 
 		// parse the function identifier
 		EXPECT_CURRENT_TOKEN(token_type::IDENTIFIER);
@@ -130,7 +130,7 @@ namespace sigma {
 		if(m_tokens.get_current_token() != token_type::RIGHT_PARENTHESIS) {
 			while(true) {
 				// parse the parameter type
-				TRY(data_type parameter_type, parse_type());
+				TRY(type parameter_type, parse_type());
 
 				// parse the parameter identifier
 				EXPECT_CURRENT_TOKEN(token_type::IDENTIFIER);
@@ -415,7 +415,7 @@ namespace sigma {
 
 		ast::named_type_expression& literal = negation_node->get<ast::named_type_expression>();
 		literal.key = m_context.syntax.strings.insert("-1");
-		literal.type = { data_type::I32, 0 };
+		literal.type = type::create_i32();
 
 		// negate the expression
 		return create_binary_operation(ast::node_type::OPERATOR_MULTIPLY, negation_node, expression_node);
@@ -470,7 +470,7 @@ namespace sigma {
 		handle<ast::node> assigned_value = nullptr;
 
 		// parse the variable type
-		TRY(const data_type type, parse_type());
+		TRY(const type type, parse_type());
 
 		// parse the identifier
 		EXPECT_CURRENT_TOKEN(token_type::IDENTIFIER);
@@ -546,7 +546,7 @@ namespace sigma {
 
 		// parse the type
 		m_tokens.next(); // prime the type token
-		TRY(const data_type type, parse_type());
+		TRY(const type type, parse_type());
 
 		EXPECT_CURRENT_TOKEN(token_type::RIGHT_PARENTHESIS);
 
@@ -759,7 +759,7 @@ namespace sigma {
 
 		// parse the target type
 		m_tokens.next(); // prime the type token
-		TRY(const data_type target_type, parse_type());
+		TRY(const type target_type, parse_type());
 
 		EXPECT_CURRENT_TOKEN(token_type::GREATER_THAN);
 		EXPECT_NEXT_TOKEN(token_type::LEFT_PARENTHESIS);
@@ -781,7 +781,7 @@ namespace sigma {
 		return cast_node;
 	}
 
-	auto parser::parse_type() -> utility::result<data_type> {
+	auto parser::parse_type() -> utility::result<type> {
 		// expect '(TYPE | IDENTIFIER)* ... *'
 		const token_info type_token = m_tokens.get_current();
 		u8 pointer_level = 0;
@@ -801,7 +801,7 @@ namespace sigma {
 		}
 
 		m_tokens.next();
-		return data_type{ type_token, pointer_level };
+		return type{ type_token, pointer_level };
 	}
 
 	auto parser::parse_numerical_literal() -> parse_result {
@@ -817,17 +817,17 @@ namespace sigma {
 			);
 		}
 
-		data_type::data_type_base base = data_type::UNKNOWN;
+		type::kind base = type::UNKNOWN;
 
 		// these types won't be used most of the time, but its nice to hav a place we can
 		// fall back to
 		switch (literal_token) {
-			case token_type::UNSIGNED_LITERAL:    base = data_type::U32; break;
+			case token_type::UNSIGNED_LITERAL:    base = type::U32; break;
 			//case lex::token_type::F32_LITERAL:         base = data_type::F32; break;
 			//case lex::token_type::F64_LITERAL:         base = data_type::F64; break;
 			case token_type::SIGNED_LITERAL:
 			case token_type::HEXADECIMAL_LITERAL:
-			case token_type::BINARY_LITERAL:      base = data_type::I32; break;
+			case token_type::BINARY_LITERAL:      base = type::I32; break;
 			default: PANIC("unhandled literal to data type conversion '{}'", literal_token.to_string());
 		}
 
@@ -854,7 +854,7 @@ namespace sigma {
 		// initialize the literal
 		auto& literal = char_node->get<ast::named_type_expression>();
 		literal.key = m_tokens.get_current().symbol_key;
-		literal.type = { data_type::CHAR, 0 }; // char
+		literal.type = type::create_char(); // char
 
 		m_tokens.next();
 		return char_node;
@@ -871,7 +871,7 @@ namespace sigma {
 		// initialize the literal
 		auto& literal = string_node->get<ast::named_type_expression>();
 		literal.key = m_tokens.get_current().symbol_key;
-		literal.type = { data_type::CHAR, 1 }; // char*
+		literal.type = type::create_char(1); // char*
 
 		m_tokens.next();
 		return string_node;
@@ -992,7 +992,7 @@ namespace sigma {
 
 		// parse the type
 		m_tokens.next(); // prime the type token
-		TRY(const data_type type, parse_type());
+		TRY(const type type, parse_type());
 
 		EXPECT_CURRENT_TOKEN(token_type::RIGHT_PARENTHESIS);
 
@@ -1187,10 +1187,10 @@ namespace sigma {
 		EXPECT_NEXT_TOKEN(token_type::LEFT_BRACE);
 		m_tokens.next(); // prime the first type token
 
-		std::vector<data_type> members; 
+		std::vector<type> members;
 
 		while(m_tokens.get_current_token() != token_type::RIGHT_BRACE) {
-			TRY(data_type type, parse_type());
+			TRY(type type, parse_type());
 			EXPECT_CURRENT_TOKEN(token_type::IDENTIFIER);
 
 			// parse the type identifier
@@ -1198,8 +1198,7 @@ namespace sigma {
 			EXPECT_NEXT_TOKEN(token_type::SEMICOLON);
 			m_tokens.next();
 
-			type.identifier_key = type_identifier;
-			members.emplace_back(type);
+			members.emplace_back(type::create_member(type, type_identifier));
 		}
 
 		EXPECT_CURRENT_TOKEN(token_type::RIGHT_BRACE);
@@ -1207,11 +1206,13 @@ namespace sigma {
 
 		const handle<ast::node> struct_node = create_struct_declaration(location);
 
-		utility::slice<data_type> member_slice(m_context.allocator, members.size());
+		ASSERT(members.size() < std::numeric_limits<u8>::max(), "too many members");
+		utility::slice<type, u8> member_slice(m_context.allocator, static_cast<u8>(members.size()));
 		utility::copy(member_slice, members);
 
 		auto& expression = struct_node->get<ast::named_type_expression>();
-		expression.type = data_type::create_struct(member_slice);
+		expression.type = type::create_struct(member_slice);
+
 		expression.key = identifier;
 
 		return struct_node;

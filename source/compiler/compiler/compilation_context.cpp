@@ -12,10 +12,10 @@ namespace sigma {
 			const utility::string_table_key format_key = this->syntax.strings.insert("format");
 
 			auto printf_params = utility::slice<named_data_type>(this->syntax.ast.get_allocator(), 1);
-			printf_params[0] = named_data_type{ data_type(data_type::CHAR, 1), format_key };
+			printf_params[0] = named_data_type{ type::create_char(1), format_key };
 
 			const function_signature printf_function = {
-				.return_type = data_type(data_type::I32, 0),
+				.return_type = type::create_i32(),
 				.parameter_types = printf_params,
 				.has_var_args = true,
 				.identifier_key = printf_key
@@ -30,10 +30,10 @@ namespace sigma {
 			const utility::string_table_key size_key = this->syntax.strings.insert("size");
 		
 			auto malloc_params = utility::slice<named_data_type>(this->syntax.ast.get_allocator(), 1);
-			malloc_params[0] = named_data_type{ data_type(data_type::U64, 0), size_key };
+			malloc_params[0] = named_data_type{ type::create_u64(), size_key };
 		
 			const function_signature malloc_function = {
-				.return_type = data_type(data_type::VOID, 1),
+				.return_type = type::create_void(1),
 				.parameter_types = malloc_params,
 				.has_var_args = false,
 				.identifier_key = malloc_key
@@ -112,12 +112,14 @@ namespace sigma {
 				}
 				case ast::node_type::STRUCT_DECLARATION: {
 					const auto& property = node->get<ast::named_type_expression>();
+					const auto& members = property.type.get_struct_members();
+
 					utility::console::print("['{} {{", strings.get(property.key));
 
-					for(u64 i = 0; i < property.type.members.get_size(); ++i) {
-						utility::console::print(property.type.members[i].to_string());
+					for(u8 i = 0; i < members.get_size(); ++i) {
+						utility::console::print(members[i].to_string());
 
-						if(i + 1 != property.type.members.get_size()) {
+						if(i + 1 != members.get_size()) {
 							utility::console::print(", ");
 						}
 					}

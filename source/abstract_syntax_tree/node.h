@@ -1,6 +1,6 @@
 #pragma once
 #include <compiler/compiler/type_system/namespace_list.h>
-#include <compiler/compiler/type_system/data_type.h>
+#include <compiler/compiler/type_system/type.h>
 
 #include "utility/containers/property.h"
 #include "utility/containers/handle.h"
@@ -115,7 +115,7 @@ namespace sigma::ast {
 		// ALIGNOF:      type we want to know the alignment of
 		// SIZEOF:       type we want to know the size of
 		// LOAD:         type of the value we're loading
-		data_type type;
+		type type;
 	};
 
 	struct named_type_expression {
@@ -129,13 +129,13 @@ namespace sigma::ast {
 		// STORE:
 		// LOCAL_MEMBER_ACCESS:
 		utility::string_table_key key;
-		data_type type;
+		type type;
 	};
 
 	struct cast {
 		// casts original_type to target_type
-		data_type original_type;
-		data_type target_type;
+		type original_type;
+		type target_type;
 	};
 
 	struct function {

@@ -1,10 +1,10 @@
 #include "scope.h"
 
 namespace sigma {
-	scope::scope(scope_type type) : type(type) {}
+	scope::scope(scope_type type) : scope_ty(type) {}
 
 	auto scope::find_parent_namespace() const -> handle<namespace_scope> {
-		if (parent->type == scope_type::NAMESPACE) {
+		if (parent->scope_ty == scope_type::NAMESPACE) {
 			return parent;
 		}
 
@@ -24,7 +24,7 @@ namespace sigma {
 		return nullptr;
 	}
 
-	auto scope::find_type(const utility::string_table_key& identifier) -> handle<data_type> {
+	auto scope::find_type(const utility::string_table_key& identifier) -> handle<type> {
 		const auto it = types.find(identifier);
 		if (it != types.end()) {
 			return &it->second;

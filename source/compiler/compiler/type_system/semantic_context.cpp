@@ -7,23 +7,23 @@
 
 namespace sigma {
 	namespace detail {
-		auto data_type_to_ir(data_type type) -> ir::data_type {
-			if (type.pointer_level > 0) {
+		auto data_type_to_ir(type type) -> ir::data_type {
+			if (type.is_pointer()) {
 				return PTR_TYPE;
 			}
 
-			switch (type.base_type) {
-				case data_type::VOID: return VOID_TYPE;
-				case data_type::BOOL:
-				case data_type::I8:
-				case data_type::U8:   return I8_TYPE;
-				case data_type::I16:
-				case data_type::U16:  return I16_TYPE;
-				case data_type::CHAR:
-				case data_type::I32:
-				case data_type::U32:  return I32_TYPE;
-				case data_type::I64:
-				case data_type::U64:  return I64_TYPE;
+			switch (type.get_kind()) {
+				case type::VOID: return VOID_TYPE;
+				case type::BOOL:
+				case type::I8:
+				case type::U8:   return I8_TYPE;
+				case type::I16:
+				case type::U16:  return I16_TYPE;
+				case type::CHAR:
+				case type::I32:
+				case type::U32:  return I32_TYPE;
+				case type::I64:
+				case type::U64:  return I64_TYPE;
 				default: NOT_IMPLEMENTED();
 			}
 
@@ -62,7 +62,7 @@ namespace sigma {
 			//return string_table.get(signature.identifier_key);
 		}
 
-		auto calculate_parameter_cast_cost(const function_signature& signature, const std::vector<data_type>& parameter_types) -> u16 {
+		auto calculate_parameter_cast_cost(const function_signature& signature, const std::vector<type>& parameter_types) -> u16 {
 			// NOTE: right now, we just traverse all non-var arg type and match compare against those, it's
 			//       probably a good idea to add a heavy-ish cost (~200) to var-arg functions, as we want to
 			//       prefer non var-arg functions by default (?)
@@ -77,13 +77,13 @@ namespace sigma {
 			return total_cost;
 		}
 
-		auto calculate_cast_cost(const data_type& provided, const data_type& required) -> u16 {
+		auto calculate_cast_cost(const type& provided, const type& required) -> u16 {
 			// if types are the same, no cast is needed
-			if (provided.base_type == required.base_type) {
+			if (provided == required) {
 				return 0;
 			}
 
-			if (provided.pointer_level != required.pointer_level) {
+			if (provided.get_pointer_level() != required.get_pointer_level()) {
 				return INVALID_CAST_COST; // invalid operation
 			}
 
@@ -109,7 +109,7 @@ namespace sigma {
 			return INVALID_CAST_COST; // invalid operation
 		}
 
-		auto determine_cast_kind(const data_type& original, const data_type& target) -> bool {
+		auto determine_cast_kind(const type& original, const type& target) -> bool {
 			const u16 original_byte_width = original.get_size();
 			const u16 target_byte_width   = target.get_size();
 
@@ -126,7 +126,7 @@ namespace sigma {
 		const ast::function function = function_node->get<ast::function>();
 
 		// check if all control paths return
-		if(!function.signature.return_type.is_void()) {
+		if(!function.signature.return_type.is_pure_void()) {
 			// edge case for top level scopes
 			if(!m_current_scope->has_return && m_current_scope->child_scopes.empty()) {
 				return error::emit(error::code::NOT_ALL_CONTROL_PATHS_RETURN, function_node->location);
@@ -152,7 +152,7 @@ namespace sigma {
 		const handle new_scope = allocate_namespace();
 		new_scope->parent = m_current_scope;
 
-		ASSERT(m_current_scope->type == scope::scope_type::NAMESPACE, "cannot declare a namespace in a non-namespace scope");
+		ASSERT(m_current_scope->scope_ty == scope::scope_type::NAMESPACE, "cannot declare a namespace in a non-namespace scope");
 
 		const handle<namespace_scope> current = m_current_scope;
 		current->child_namespaces[name] = new_scope;
@@ -179,7 +179,7 @@ namespace sigma {
 		m_trace_index = 0;
 	}
 
-	auto semantic_context::pre_declare_variable(utility::string_table_key identifier, data_type type) const -> variable& {
+	auto semantic_context::pre_declare_variable(utility::string_table_key identifier, type type) const -> variable& {
 		auto& var = m_current_scope->variables[identifier];
 		var.type = type;
 		return var;
@@ -226,19 +226,22 @@ namespace sigma {
 		ASSERT(false, "unknown variable referenced");
   }
 
-	auto semantic_context::resolve_type(data_type& type, handle<token_location> location) const -> utility::result<void> {
-		if(type.base_type != data_type::UNRESOLVED) {
+	auto semantic_context::resolve_type(type& ty, handle<token_location> location) const -> utility::result<void> {
+		if(!ty.is_unresolved()) {
 			return SUCCESS; // nothing else needed
 		}
 
-		if(const handle<data_type> resolved = m_current_scope->find_type(type.unresolved_key)) {
-			type.members = resolved->members;
-			type.base_type = resolved->base_type;
-			// type.pointer_level = resolved->pointer_level;
+		if(const handle<type> resolved = m_current_scope->find_type(ty.get_unresolved())) {
+			ty.set_kind(resolved->get_kind());
+
+			if(resolved->is_struct()) {
+				ty.set_struct_members(resolved->get_struct_members());
+			}
+
 			return SUCCESS;
 		}
 
-		const std::string& identifier = m_context.syntax.strings.get(type.unresolved_key);
+		const std::string& identifier = m_context.syntax.strings.get(ty.get_unresolved());
 		return error::emit(error::code::UNKNOWN_TYPE, location, identifier);
 	}
 
@@ -258,7 +261,7 @@ namespace sigma {
   }
 
 	auto semantic_context::find_parent_namespace() const -> handle<namespace_scope> {
-		if(m_current_scope->type == scope::scope_type::NAMESPACE) {
+		if(m_current_scope->scope_ty == scope::scope_type::NAMESPACE) {
 			return m_current_scope;
 		}
 
@@ -374,7 +377,7 @@ namespace sigma {
 		return !scope->child_scopes.empty();
 	}
 
-	auto semantic_context::find_callee_signature(handle<ast::node> function_node, const std::vector<data_type>& parameter_types) -> utility::result<function_signature> {
+	auto semantic_context::find_callee_signature(handle<ast::node> function_node, const std::vector<type>& parameter_types) -> utility::result<function_signature> {
 		using call_candidate = std::pair<function_signature, u16>;
 
 		const ast::function_call& function = function_node->get<ast::function_call>();

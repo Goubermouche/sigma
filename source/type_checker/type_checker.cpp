@@ -20,7 +20,7 @@ namespace sigma {
 		return SUCCESS;
 	}
 
-	auto type_checker::type_check_node(ast_node target, ast_node parent, data_type expected) -> type_check_result {
+	auto type_checker::type_check_node(ast_node target, ast_node parent, type expected) -> type_check_result {
 		switch(target->type) {
 			// declarations
 			case ast::node_type::NAMESPACE_DECLARATION:          return type_check_namespace_declaration(target);
@@ -73,7 +73,7 @@ namespace sigma {
 			default: PANIC("undefined type check for node '{}'", target->type.to_string());
 		}
 
-		return data_type::create_unknown(); // unreachable
+		return type::create_unknown(); // unreachable
 	}
 
 	auto type_checker::type_check_namespace_declaration(ast_node declaration) -> type_check_result {
@@ -86,7 +86,7 @@ namespace sigma {
 		}
 
 		m_context.semantics.pop_scope();
-		return data_type::create_unknown(); // not used
+		return type::create_unknown(); // not used
 	}
 
 	auto type_checker::type_check_function_declaration(ast_node declaration) -> type_check_result {
@@ -119,7 +119,7 @@ namespace sigma {
 		m_context.semantics.pop_scope();
 
 		// this value won't be used
-		return data_type::create_unknown();
+		return type::create_unknown();
 	}
 
 	auto type_checker::type_check_variable_declaration(ast_node declaration) -> type_check_result {
@@ -127,7 +127,7 @@ namespace sigma {
 		TRY(m_context.semantics.resolve_type(variable.type, declaration->location));
 
 		// we cannot declare purely 'void' variables
-		if(variable.type.is_void()) {
+		if(variable.type.is_pure_void()) {
 			const std::string& identifier_str = m_context.syntax.strings.get(variable.key);
 			return error::emit(error::code::VOID_VARIABLE, declaration->location, identifier_str);
 		}
@@ -148,17 +148,17 @@ namespace sigma {
 		}
 
 		// this value won't be used
-		return data_type::create_unknown();
+		return type::create_unknown();
 	}
 
-	auto type_checker::type_check_function_call(ast_node call, ast_node parent, data_type expected) -> type_check_result {
-		std::vector<data_type> parameters(call->children.get_size());
+	auto type_checker::type_check_function_call(ast_node call, ast_node parent, type expected) -> type_check_result {
+		std::vector<type> parameters(call->children.get_size());
 		ast::function_call& function_call = call->get<ast::function_call>();
 
 		// type check all parameters and store their inherent type
 		for(u64 i = 0; i < parameters.size(); ++i) {
 			TRY(parameters[i], type_check_node(call->children[i], call));
-			ASSERT(parameters[i].base_type != data_type::UNKNOWN, "unknown parameter type detected");
+			ASSERT(!parameters[i].is_unknown(), "unknown parameter type detected");
 		}
 
 		// at this point the function signature is empty, we gotta find a valid one
@@ -169,7 +169,7 @@ namespace sigma {
 		u64 i = 0;
 		for(; i < function_call.signature.parameter_types.get_size(); ++i) {
 			const ast_node target = call->children[i];
-			const data_type type = function_call.signature.parameter_types[i].type;
+			const type type = function_call.signature.parameter_types[i].type;
 
 			TRY(implicit_type_cast(parameters[i], type, call, target));
 		}
@@ -178,7 +178,7 @@ namespace sigma {
 		for(; i < call->children.get_size(); ++i) {
 			const ast_node target = call->children[i];
 
-			TRY(implicit_type_cast(parameters[i], data_type::create_var_arg_promote(), call, target));
+			TRY(implicit_type_cast(parameters[i], type::create_promote(), call, target));
 		}
 
 		ASSERT(i == call->children.get_size(), "invalid parameter count");
@@ -187,11 +187,11 @@ namespace sigma {
 		return implicit_type_cast(function_call.signature.return_type, expected, parent, call);
 	}
 
-	auto type_checker::type_check_return(ast_node statement, data_type expected) -> type_check_result {
+	auto type_checker::type_check_return(ast_node statement, type expected) -> type_check_result {
 		if (statement->children.get_size() == 0) {
 			// return an empty
 			// verify that the parent function expects an empty return type
-			if(expected != data_type(data_type::VOID, 0)) {
+			if(!expected.is_pure_void()) {
 				return error::emit(error::code::UNEXPECTED_VOID_RET, statement->location);
 			}
 		}
@@ -203,12 +203,12 @@ namespace sigma {
 		}
 
 		// this value won't be used
-		return data_type::create_unknown();
+		return type::create_unknown();
 	}
 
 	auto type_checker::type_check_conditional_branch(ast_node branch) -> type_check_result {
 		// type check the condition
-		TRY(type_check_node(branch->children[0], branch, data_type(data_type::BOOL, 0)));
+		TRY(type_check_node(branch->children[0], branch, type::create_bool()));
 
 		// if children[1] exists, we have a child branch node
 		if (branch->children[1]) {
@@ -227,7 +227,7 @@ namespace sigma {
 		m_context.semantics.pop_scope();
 
 		// this value won't be used
-		return data_type::create_unknown();
+		return type::create_unknown();
 	}
 
 	auto type_checker::type_check_branch(ast_node branch) -> type_check_result {
@@ -241,16 +241,16 @@ namespace sigma {
 		m_context.semantics.pop_scope();
 
 		// this value won't be used
-		return data_type::create_unknown();
+		return type::create_unknown();
 	}
 
-	auto type_checker::type_check_binary_math_operator(ast_node binop, data_type expected) -> type_check_result {
+	auto type_checker::type_check_binary_math_operator(ast_node binop, type expected) -> type_check_result {
 		// type check both operands
-		TRY(const data_type left, type_check_node(binop->children[0], binop, expected)); // left
-		TRY(const data_type right, type_check_node(binop->children[1], binop, expected)); // right
+		TRY(const type left, type_check_node(binop->children[0], binop, expected)); // left
+		TRY(const type right, type_check_node(binop->children[1], binop, expected)); // right
 
 		// upcast both types
-		const data_type larger_type = detail::get_larger_type(left, right);
+		const type larger_type = detail::get_larger_type(left, right);
 
 		TRY(implicit_type_cast(left, larger_type, binop, binop->children[0]));
 		TRY(implicit_type_cast(right, larger_type, binop, binop->children[1]));
@@ -258,21 +258,21 @@ namespace sigma {
 		return larger_type;
 	}
 
-	auto type_checker::type_check_predicate_operator(ast_node binop, ast_node parent, data_type expected) -> type_check_result {
+	auto type_checker::type_check_predicate_operator(ast_node binop, ast_node parent, type expected) -> type_check_result {
 		// type check both operands
-		TRY(type_check_node(binop->children[0], binop, data_type::create_bool())); // left
-		TRY(type_check_node(binop->children[1], binop, data_type::create_bool())); // right
+		TRY(type_check_node(binop->children[0], binop, type::create_bool())); // left
+		TRY(type_check_node(binop->children[1], binop, type::create_bool())); // right
 
-		return implicit_type_cast(data_type::create_bool(), expected, parent, binop);
+		return implicit_type_cast(type::create_bool(), expected, parent, binop);
 	}
 
-	auto type_checker::type_check_binary_comparison_operator(ast_node binop, ast_node parent, data_type expected) -> type_check_result {
+	auto type_checker::type_check_binary_comparison_operator(ast_node binop, ast_node parent, type expected) -> type_check_result {
 		// type check both operands
-		TRY(const data_type left, type_check_node(binop->children[0], binop)); // left
-		TRY(const data_type right, type_check_node(binop->children[1], binop)); // right
+		TRY(const type left, type_check_node(binop->children[0], binop)); // left
+		TRY(const type right, type_check_node(binop->children[1], binop)); // right
 
 		// upcast both types
-		const data_type larger_type = detail::get_larger_type(left, right);
+		const type larger_type = detail::get_larger_type(left, right);
 
 		TRY(implicit_type_cast(left, larger_type, binop, binop->children[0]));
 		TRY(implicit_type_cast(right, larger_type, binop, binop->children[1]));
@@ -293,28 +293,28 @@ namespace sigma {
 			expression.type = ast::comparison_expression::type::INTEGRAL_UNSIGNED;
 		}
 
-		return implicit_type_cast(data_type::create_bool(), expected, parent, binop);
+		return implicit_type_cast(type::create_bool(), expected, parent, binop);
 	}
 
-	auto type_checker::type_check_array_access(ast_node access, ast_node parent, data_type expected) -> type_check_result {
-		TRY(const data_type base_type, type_check_node(access->children[0], access));
-		TRY(type_check_node(access->children[1], access, data_type::create_u64()));
+	auto type_checker::type_check_array_access(ast_node access, ast_node parent, type expected) -> type_check_result {
+		TRY(const type base_type, type_check_node(access->children[0], access));
+		TRY(type_check_node(access->children[1], access, type::create_u64()));
 
 		access->get<ast::type_expression>().type = base_type;
-		const data_type accessed_type = base_type.create_access(1);
+		const type accessed_type = base_type.dereference(1);
 
 		return implicit_type_cast(accessed_type, expected, parent, access);
 	}
 
-	auto type_checker::type_check_local_member_access(ast_node access, ast_node parent, data_type expected) -> type_check_result {
+	auto type_checker::type_check_local_member_access(ast_node access, ast_node parent, type expected) -> type_check_result {
 		auto& expression = access->get<ast::named_type_expression>();
 
 		// type check the storage location
-		TRY(const data_type base_type, type_check_node(access->children[0], access));
+		TRY(const type base_type, type_check_node(access->children[0], access));
 
-		for(const data_type& member : base_type.members) {
+		for(const type& member : base_type.get_struct_members()) {
 			// find a matching member
-			if(member.identifier_key == expression.key) {
+			if(member.get_member_identifier() == expression.key) {
 				TRY(expression.type, implicit_type_cast(member, expected, parent, access));
 				return expression.type;
 			}
@@ -325,9 +325,9 @@ namespace sigma {
 		return error::emit(error::code::UNKNOWN_STRUCT_MEMBER, access->location, identifier);
 	}
 
-	auto type_checker::type_check_load(ast_node load, data_type expected) -> type_check_result {
+	auto type_checker::type_check_load(ast_node load, type expected) -> type_check_result {
 		// type check the loaded node
-		TRY(const data_type load_type, type_check_node(load->children[0], load, expected));
+		TRY(const type load_type, type_check_node(load->children[0], load, expected));
 
 		// assign the loaded type
 		load->get<ast::type_expression>().type = load_type;
@@ -335,7 +335,7 @@ namespace sigma {
 		return load_type;
 	}
 
-	auto type_checker::type_check_numerical_literal(ast_node literal, data_type expected) const -> type_check_result {
+	auto type_checker::type_check_numerical_literal(ast_node literal, type expected) const -> type_check_result {
 		// upcast to the expected type, without throwing warnings/errors
 		auto& expression = literal->get<ast::named_type_expression>();
 		expression.type = inherent_type_cast(expression.type, expected);
@@ -344,52 +344,52 @@ namespace sigma {
 		bool overflow = false;
 
 		// check for type overflow
-		switch (expression.type.base_type) {
-			case data_type::I8: {
+		switch (expression.type.get_kind()) {
+			case type::I8: {
 				const auto value = utility::detail::from_string<i8>(value_str, overflow);
 				if (overflow) { warning::emit(warning::code::LITERAL_OVERFLOW, literal->location, value_str, value, "i8"); }
 				break;
 			}
-			case data_type::I16: {
+			case type::I16: {
 				const auto value = utility::detail::from_string<i16>(value_str, overflow);
 				if (overflow) { warning::emit(warning::code::LITERAL_OVERFLOW, literal->location, value_str, value, "i16"); }
 				break;
 			}
-			case data_type::I32: {
+			case type::I32: {
 				const auto value = utility::detail::from_string<i32>(value_str, overflow);
 				if(overflow) { warning::emit(warning::code::LITERAL_OVERFLOW, literal->location, value_str, value, "i32"); }
 				break;
 			}
-			case data_type::I64: {
+			case type::I64: {
 				const auto value = utility::detail::from_string<i64>(value_str, overflow);
 				if (overflow) { warning::emit(warning::code::LITERAL_OVERFLOW, literal->location, value_str, value, "i64"); }
 				break;
 			}
-			case data_type::U8: {
+			case type::U8: {
 				const auto value = utility::detail::from_string<u8>(value_str, overflow);
 				if (overflow) { warning::emit(warning::code::LITERAL_OVERFLOW, literal->location, value_str, value, "u8"); }
 				break;
 			}
-			case data_type::U16: {
+			case type::U16: {
 				const auto value = utility::detail::from_string<u16>(value_str, overflow);
 				if (overflow) { warning::emit(warning::code::LITERAL_OVERFLOW, literal->location, value_str, value, "u16"); }
 				break;
 			}
-			case data_type::U32: {
+			case type::U32: {
 				const auto value = utility::detail::from_string<u32>(value_str, overflow);
 				if(overflow) { warning::emit(warning::code::LITERAL_OVERFLOW, literal->location, value_str, value, "u32"); }
 				break;
 			}
-			case data_type::U64: {
+			case type::U64: {
 				const auto value = utility::detail::from_string<u64>(value_str, overflow);
 				if(overflow) { warning::emit(warning::code::LITERAL_OVERFLOW, literal->location, value_str, value, "u64"); }
 				break;
 			}
-			case data_type::BOOL: {
+			case type::BOOL: {
 				warning::emit(warning::code::NUMERICAL_BOOL, literal->location);
 				break;
 			}
-			case data_type::CHAR: {
+			case type::CHAR: {
 				warning::emit(warning::code::NUMERICAL_CHAR, literal->location);
 				break;
 			}
@@ -399,13 +399,13 @@ namespace sigma {
 		return expression.type;
 	}
 
-	auto type_checker::type_check_character_literal(ast_node literal, ast_node parent, data_type expected) const -> type_check_result {
+	auto type_checker::type_check_character_literal(ast_node literal, ast_node parent, type expected) const -> type_check_result {
 		auto& expression = literal->get<ast::named_type_expression>();
 		TRY(expression.type, implicit_type_cast(expression.type, expected, parent, literal));
 		return expression.type;
 	}
 
-	auto type_checker::type_check_string_literal(ast_node literal, ast_node parent, data_type expected) const -> type_check_result {
+	auto type_checker::type_check_string_literal(ast_node literal, ast_node parent, type expected) const -> type_check_result {
 		auto& expression = literal->get<ast::named_type_expression>();
 		TRY(expression.type, implicit_type_cast(expression.type, expected, parent, literal));
 		return expression.type;
@@ -415,32 +415,32 @@ namespace sigma {
 		auto& expression = declaration->get<ast::named_type_expression>();
 
 		// verify that no two members of the struct have the same identifier
-		auto& members = expression.type.members;
+		auto& members = expression.type.get_struct_members();
 
 		for (u64 i = 0; i < members.get_size(); ++i) {
 			for (u64 j = i + 1; j < members.get_size(); ++j) {
-				if(members[i].identifier_key == members[j].identifier_key) {
-					const std::string& identifier = m_context.syntax.strings.get(members[i].identifier_key);
+				if(members[i].get_member_identifier() == members[j].get_member_identifier()) {
+					const std::string& identifier = m_context.syntax.strings.get(members[i].get_member_identifier());
 					return error::emit(error::code::DUPLICATE_STRUCT_IDENTIFIER, declaration->location, identifier);
 				}
 			}
 		}
 
 		// resolve inner types
-		for(auto& member : members) {
+		for(type& member : members) {
 			TRY(m_context.semantics.resolve_type(member, declaration->location));
 		}
 
 		TRY(m_context.semantics.declare_struct(declaration));
-		return data_type::create_unknown(); // not used
+		return type::create_unknown(); // not used
 	}
 
-	auto type_checker::type_check_bool_literal(ast_node literal, ast_node parent, data_type expected) const -> type_check_result {
+	auto type_checker::type_check_bool_literal(ast_node literal, ast_node parent, type expected) const -> type_check_result {
 		// no need to check this, just cast it
-		return implicit_type_cast(data_type::create_bool(), expected, parent, literal);
+		return implicit_type_cast(type::create_bool(), expected, parent, literal);
 	}
 
-	auto type_checker::inherent_type_cast(data_type original_type, data_type target_type) -> data_type {
+	auto type_checker::inherent_type_cast(type original_type, type target_type) -> type {
 		if(target_type.is_unknown()) {
 			return original_type;
 		}
@@ -448,8 +448,8 @@ namespace sigma {
 		return target_type;
 	}
 
-	auto type_checker::implicit_type_cast(data_type original_type, data_type target_type, ast_node parent, ast_node target) const -> type_check_result {
-		if(original_type.is_void() || target_type.is_void()) {
+	auto type_checker::implicit_type_cast(type original_type, type target_type, ast_node parent, ast_node target) const -> type_check_result {
+		if(original_type.is_pure_void() || target_type.is_pure_void()) {
 			return error::emit(error::code::INVALID_VOID, target->location);
 		}
 
@@ -547,7 +547,7 @@ namespace sigma {
 		return target_type;
 	}
 
-	auto type_checker::type_check_variable_access(ast_node access, ast_node parent, data_type expected) const -> type_check_result {
+	auto type_checker::type_check_variable_access(ast_node access, ast_node parent, type expected) const -> type_check_result {
 		auto& expression = access->get<ast::named_type_expression>();
 
 		// locate the variable
@@ -567,24 +567,24 @@ namespace sigma {
 	auto type_checker::type_check_store(ast_node store) -> type_check_result {
 		// type check the destination
 		const ast_node destination = store->children[0];
-		TRY(const data_type destination_type, type_check_node(destination, store));
+		TRY(const type destination_type, type_check_node(destination, store));
 
 		// type check the assigned value against the destination type
 		TRY(type_check_node(store->children[1], store, destination_type));
 
 		// this value won't be used
-		return data_type::create_unknown();
+		return type::create_unknown();
 	}
 
-	auto type_checker::type_check_explicit_cast(ast_node cast, ast_node parent, data_type expected) -> type_check_result {
+	auto type_checker::type_check_explicit_cast(ast_node cast, ast_node parent, type expected) -> type_check_result {
 		ast::cast& value = cast->get<ast::cast>();
 
 		// type check the value we're casting
-		TRY(value.original_type, type_check_node(cast->children[0], cast, data_type::create_unknown()));
+		TRY(value.original_type, type_check_node(cast->children[0], cast));
 		TRY(m_context.semantics.resolve_type(value.target_type, cast->location));
 
-		const data_type original = value.original_type;
-		const data_type target = value.target_type;
+		const type original = value.original_type;
+		const type target = value.target_type;
 
 		// verify the cast integrity
 		if (!original.is_pointer() && target.is_pointer()) {
@@ -602,21 +602,21 @@ namespace sigma {
 		return implicit_type_cast(value.target_type, expected, parent, cast);
 	}
 
-	auto type_checker::type_check_alignof(ast_node alignof_node, ast_node parent, data_type expected) const -> type_check_result {
+	auto type_checker::type_check_alignof(ast_node alignof_node, ast_node parent, type expected) const -> type_check_result {
 		// upcast to the expected type, without throwing warnings/errors
 		TRY(m_context.semantics.resolve_type(alignof_node->get<ast::type_expression>().type, alignof_node->location));
-		return implicit_type_cast(data_type::create_u64(), expected, parent, alignof_node);
+		return implicit_type_cast(type::create_u64(), expected, parent, alignof_node);
 	}
 
-	auto type_checker::type_check_sizeof(ast_node sizeof_node, ast_node parent, data_type expected) const -> type_check_result {
+	auto type_checker::type_check_sizeof(ast_node sizeof_node, ast_node parent, type expected) const -> type_check_result {
 		// upcast to the expected type, without throwing warnings/errors
 		TRY(m_context.semantics.resolve_type(sizeof_node->get<ast::type_expression>().type, sizeof_node->location));
-		return implicit_type_cast(data_type::create_u64(), expected, parent, sizeof_node);
+		return implicit_type_cast(type::create_u64(), expected, parent, sizeof_node);
 	}
 
-	auto type_checker::type_check_not_operator(ast_node op, ast_node parent, data_type expected) -> type_check_result {
+	auto type_checker::type_check_not_operator(ast_node op, ast_node parent, type expected) -> type_check_result {
 		// type check the negated expression
-		TRY(const data_type expression_type, type_check_node(op->children[0], op, data_type::create_bool()));
+		TRY(const type expression_type, type_check_node(op->children[0], op, type::create_bool()));
 
 		// upcast, just in case, more of a sanity check
 		return implicit_type_cast(expression_type, expected, parent, op);

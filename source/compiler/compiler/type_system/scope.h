@@ -3,7 +3,7 @@
 #include <utility/containers/string_table.h>
 #include <abstract_syntax_tree/node.h>
 
-#include "compiler/compiler/type_system/data_type.h"
+#include "compiler/compiler/type_system/type.h"
 
 namespace sigma {
 	using namespace utility::types;
@@ -18,7 +18,7 @@ namespace sigma {
 
 		handle<ir::node> value;
 		variable_flags flags;
-		data_type type;
+		type type;
 	};
 
 	FLAG_ENUM(variable::variable_flags);
@@ -48,16 +48,16 @@ namespace sigma {
 
 		auto find_parent_namespace() const -> handle<namespace_scope>;
 		auto find_variable(const utility::string_table_key& identifier) -> handle<variable>;
-		auto find_type(const utility::string_table_key& identifier) -> handle<data_type>;
+		auto find_type(const utility::string_table_key& identifier) -> handle<type>;
 
 		std::unordered_map<utility::string_table_key, variable> variables;
-		std::unordered_map<utility::string_table_key, data_type> types;
+		std::unordered_map<utility::string_table_key, type> types;
 
 		handle<scope> parent = nullptr;
 		std::vector<handle<scope>> child_scopes;
 
 		// metadata
-		scope_type type = scope_type::NONE;
+		scope_type scope_ty = scope_type::NONE;
 		control_type control = control_type::NONE;
 		bool has_return = false;
 	};

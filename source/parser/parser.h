@@ -72,11 +72,11 @@ namespace sigma {
 		auto parse_assignment() -> parse_result;
 
 		// utility
-		auto parse_namespaces() -> utility::result<std::vector<utility::string_table_key>>;
+		auto parse_namespaces() -> utility::result<namespace_list>;
 		auto parse_type() -> utility::result<type>;
 
 		// other
-		auto parse_function_call(const std::vector<utility::string_table_key>& namespaces) -> parse_result;
+		auto parse_function_call(const namespace_list& namespaces) -> parse_result;
 		auto parse_explicit_cast() -> parse_result;
 		auto parse_alignof() -> parse_result;
 		auto parse_sizeof() -> parse_result;

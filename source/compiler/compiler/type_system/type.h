@@ -7,8 +7,8 @@ namespace sigma {
 	
 	class type {
 	public:
-		enum kind {
-			UNKNOWN,         // handled in the type checker
+		enum kind : u8 {
+			UNKNOWN = 0,     // handled in the type checker
 			VAR_ARG_PROMOTE, // promotes the type in a var arg context
 			UNRESOLVED,      // unresolved types
 			VOID,
@@ -88,7 +88,10 @@ namespace sigma {
 	private:
 		kind m_kind;
 		u8 m_pointer_level; // level of indirection
-		utility::string_table_key m_identifier; // struct member identifiers
+
+		// struct member identifiers
+		// struct name identifier
+		utility::string_table_key m_identifier;
 
 		union {
 			// UNRESOLVED

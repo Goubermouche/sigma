@@ -75,7 +75,7 @@ namespace sigma {
 		return m_tokens[m_index + 1].tok;
 	}
 
-	void token_buffer_iterator::synchronize() {
+	void token_buffer_iterator::synchronize_indices() {
 		m_peek_index = m_index;
 	}
 
@@ -101,5 +101,9 @@ namespace sigma {
 
 	auto token_buffer_iterator::get_current_peek_token() const -> token {
 		return m_tokens[m_peek_index].tok;
+	}
+
+	auto token_buffer_iterator::get_current_peek() const -> token_info {
+		return m_tokens[m_peek_index];
 	}
 } // namespace sigma::lex

@@ -41,7 +41,7 @@ namespace sigma {
 		auto peek_next() const->token_info;
 		auto peek_next_token() const -> token;
 
-		void synchronize();
+		void synchronize_indices();
 
 		auto get_current() const-> token_info;
 		auto get_current_token() const -> token;
@@ -50,6 +50,7 @@ namespace sigma {
 		auto get_current_token_char_index() const -> u32;
 
 		auto get_current_peek_token() const -> token;
+		auto get_current_peek() const -> token_info;
 	private:
 		const token_buffer& m_tokens;
 

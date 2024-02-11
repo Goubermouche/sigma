@@ -99,6 +99,12 @@ namespace sigma {
 				// parse a nested namespace
 				TRY(parsed, parse_namespace_declaration());
 			}
+			else if (m_tokens.get_current_token() == token_type::STRUCT) {
+				// parse global struct declarations
+				TRY(parsed, parse_struct_declaration());
+				EXPECT_CURRENT_TOKEN(token_type::SEMICOLON);
+				m_tokens.next();
+			}
 			else if(peek_is_function_definition()) {
 				// parse a nested function declaration
 				TRY(parsed, parse_function_declaration());
@@ -334,7 +340,7 @@ namespace sigma {
 		// expect 'NAMESPACES ARRAY_ACCESS | MEMBER_ACCESS'
 
 		// parse a namespace, if there is one
-		TRY(const std::vector<utility::string_table_key> namespaces, parse_namespaces());
+		TRY(const namespace_list namespaces, parse_namespaces());
 
 		if (peek_is_function_call()) {
 			return parse_function_call(namespaces);
@@ -427,7 +433,7 @@ namespace sigma {
 		return create_binary_operation(ast::node_type::OPERATOR_MULTIPLY, negation_node, expression_node);
 	}
 
-	auto parser::parse_function_call(const std::vector<utility::string_table_key>& namespaces) -> parse_result {
+	auto parser::parse_function_call(const namespace_list& namespaces) -> parse_result {
 		// expect 'IDENTIFIER ( PARAMETER, ... , PARAMETER )'
 		EXPECT_CURRENT_TOKEN(token_type::IDENTIFIER);
 
@@ -792,6 +798,8 @@ namespace sigma {
 		const token_info type_token = m_tokens.get_current();
 		u8 pointer_level = 0;
 
+		TRY(const namespace_list namespaces, parse_namespaces());
+
 		if(!is_current_token_type()) {
 			return error::emit(
 				error::code::UNEXPECTED_TOKEN,
@@ -932,13 +940,12 @@ namespace sigma {
 		return m_tokens.get_current_token_location();
 	}
 
-	auto parser::parse_namespaces() -> utility::result<std::vector<utility::string_table_key>> {
+	auto parser::parse_namespaces() -> utility::result<namespace_list> {
 		// parses a set of contiguous namespace directives
 		// expect 'NAMESPACE :: ... NAMESPACE ::'
-
 		std::vector<utility::string_table_key> namespaces;
 
-		while (peek_is_namespace_access()) {
+		while(peek_is_namespace_access()) {
 			// expect 'IDENTIFIER ::'
 			EXPECT_CURRENT_TOKEN(token_type::IDENTIFIER);
 			namespaces.push_back(m_tokens.get_current().symbol_key);
@@ -950,7 +957,7 @@ namespace sigma {
 			m_tokens.next(); // prime the next token
 		}
 
-		return std::move(namespaces);
+		return { std::move(namespaces) };
 	}
 
 	auto parser::peek_is_function_definition() -> bool {
@@ -961,12 +968,12 @@ namespace sigma {
 		}
 
 		if (m_tokens.peek_token() != token_type::IDENTIFIER) {
-			m_tokens.synchronize();
+			m_tokens.synchronize_indices();
 			return false;
 		}
 
 		const bool res = m_tokens.peek_token() == token_type::LEFT_PARENTHESIS;
-		m_tokens.synchronize();
+		m_tokens.synchronize_indices();
 		return res;
 	}
 
@@ -1011,8 +1018,27 @@ namespace sigma {
 	}
 
 	auto parser::peek_is_variable_declaration() -> bool {
-		// peek 'TYPE * ... * IDENTIFIER'
+		// peek 'NAMESPACES TYPE * ... * IDENTIFIER'
+		if(m_tokens.get_current_token() == token_type::IDENTIFIER) {
+			u64 depth = 0;
+			while(
+				m_tokens.peek_token() == token_type::COLON &&
+				m_tokens.peek_token() == token_type::COLON &&
+				m_tokens.peek_token() == token_type::IDENTIFIER
+			) { depth++; }
+
+			m_tokens.synchronize_indices();
+
+			// consume all the namespaces
+			for(u64 i = 0; i < depth; ++i) {
+				m_tokens.peek_token(); // IDENTIFIER
+				m_tokens.peek_token(); // COLON
+				m_tokens.peek_token(); // COLON
+			}
+		}
+
 		if (!is_current_token_type()) {
+			m_tokens.synchronize_indices();
 			return false;
 		}
 
@@ -1020,7 +1046,7 @@ namespace sigma {
 		while(m_tokens.peek_token() == token_type::ASTERISK) {}
 
 		const bool res = m_tokens.get_current_peek_token() == token_type::IDENTIFIER;
-		m_tokens.synchronize();
+		m_tokens.synchronize_indices();
 		return res;
 	}
 
@@ -1031,12 +1057,12 @@ namespace sigma {
 		}
 
 		if (m_tokens.peek_token() != token_type::COLON) {
-			m_tokens.synchronize();
+			m_tokens.synchronize_indices();
 			return false;
 		}
 
 		const bool res = m_tokens.peek_token() == token_type::COLON;
-		m_tokens.synchronize();
+		m_tokens.synchronize_indices();
 		return res;
 	}
 
@@ -1145,7 +1171,7 @@ namespace sigma {
 		// expect 'NAMESPACES ARRAY_ACCESS | MEMBER_ACCESS'
 
 		// parse a namespace, if there is one
-		TRY(const std::vector<utility::string_table_key> namespaces, parse_namespaces());
+		TRY(const namespace_list namespaces, parse_namespaces());
 
 		if (peek_is_function_call()) {
 			return parse_function_call(namespaces);

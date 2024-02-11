@@ -51,7 +51,7 @@ namespace sigma {
 		auto type_check_not_operator(ast_node op, ast_node parent, type expected) -> type_check_result;
 
 		// statements
-		auto type_check_return(ast_node statement, type expected) -> type_check_result;
+		auto type_check_return(ast_node statement) -> type_check_result;
 		auto type_check_conditional_branch(ast_node branch) -> type_check_result;
 		auto type_check_branch(ast_node branch) -> type_check_result;
 
@@ -88,5 +88,6 @@ namespace sigma {
 		auto implicit_type_cast(type original_type, type target_type, ast_node parent, ast_node target) const -> type_check_result;
 	private:
 		backend_context& m_context;
+		function_signature m_current_function;
 	};
 } // namespace sigma

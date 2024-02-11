@@ -51,7 +51,7 @@ namespace sigma {
 			case ast::node_type::OPERATOR_LOGICAL_NOT:           return type_check_not_operator(target, parent, expected);
 
 			// statements
-			case ast::node_type::RETURN:                         return type_check_return(target, expected);
+			case ast::node_type::RETURN:                         return type_check_return(target);
 			case ast::node_type::CONDITIONAL_BRANCH:             return type_check_conditional_branch(target);
 			case ast::node_type::BRANCH:                         return type_check_branch(target);
 
@@ -101,6 +101,7 @@ namespace sigma {
 		// register the function
 		m_context.semantics.pre_declare_local_function(function.signature);
 		m_context.semantics.push_scope(scope::control_type::UNCONDITIONAL);
+		m_current_function = function.signature;
 
 		// push temporaries for function parameters
 		for(named_data_type& parameter : function.signature.parameter_types) {
@@ -187,18 +188,22 @@ namespace sigma {
 		return implicit_type_cast(function_call.signature.return_type, expected, parent, call);
 	}
 
-	auto type_checker::type_check_return(ast_node statement, type expected) -> type_check_result {
+	auto type_checker::type_check_return(ast_node statement) -> type_check_result {
 		if (statement->children.get_size() == 0) {
 			// return an empty
 			// verify that the parent function expects an empty return type
-			if(!expected.is_pure_void()) {
-				return error::emit(error::code::UNEXPECTED_VOID_RET, statement->location);
+			if(!m_current_function.return_type.is_pure_void()) {
+				return error::emit(error::code::UNEXPECTED_EMPTY_VOID_RET, statement->location);
 			}
 		}
 		else {
-			// return a value
-			TRY(type_check_node(statement->children[0], statement, expected));
+			// verify that the parent function expects a return type
+			if(m_current_function.return_type.is_pure_void()) {
+				return error::emit(error::code::UNEXPECTED_NON_EMPTY_VOID_RET, statement->location);
+			}
 
+			// return a value
+			TRY(type_check_node(statement->children[0], statement, m_current_function.return_type));
 			m_context.semantics.declare_return();
 		}
 
@@ -449,12 +454,12 @@ namespace sigma {
 	}
 
 	auto type_checker::implicit_type_cast(type original_type, type target_type, ast_node parent, ast_node target) const -> type_check_result {
-		// if(original_type.is_pure_void() || target_type.is_pure_void()) {
-		// 	return error::emit(error::code::INVALID_VOID, target->location);
-		// }
-
 		if(target_type.is_unknown()) {
 			return original_type;
+		}
+
+		if(original_type.is_pure_void() || target_type.is_pure_void()) {
+			return error::emit(error::code::INVALID_VOID, target->location);
 		}
 
 		if(target_type.is_promote()) {

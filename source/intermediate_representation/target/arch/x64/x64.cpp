@@ -859,9 +859,8 @@ namespace sigma::ir {
 				val->set_type(instruction_operand::type::GLOBAL);
 				val->immediate = inst->memory.displacement;
 				val->get<handle<symbol>>() = inst->get<handle<symbol>>();
+				return 1;
 			}
-
-			return 1;
 		}
 
 		if(interval->spill > 0) {

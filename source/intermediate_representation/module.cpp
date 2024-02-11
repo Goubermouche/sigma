@@ -54,7 +54,7 @@ namespace sigma::ir {
 			
 			// generate a control flow graph
 			codegen.graph = control_flow_graph::compute_reverse_post_order(codegen);
-			
+
 			// schedule nodes
 			schedule_node_hierarchy(codegen);
 

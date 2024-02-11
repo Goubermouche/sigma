@@ -29,7 +29,6 @@ i32 main() {
 	my_user.k = cast<i32*>(malloc(8));
 	my_user.k[0] = 123;
 	my_user.k[1] = 321;
-
 	my_user.x = 111;
 	
 	printf("key: %d %d %d\n", my_user.k[0], my_user.k[1], my_user.x);

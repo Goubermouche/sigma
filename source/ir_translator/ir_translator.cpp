@@ -78,14 +78,24 @@ namespace sigma {
 
 			// since we can't update the projection value directly we have to create a proxy for it, this
 			// allows us to update the value of our parameters
-			const u16 alignment = function.signature.parameter_types[i].type.get_alignment();
-			const u16 size = function.signature.parameter_types[i].type.get_size();
+			const auto& parameter_type = function.signature.parameter_types[i].type;
 
-			variable->value = m_context.builder.create_local(size, alignment);
+			const u16 alignment = parameter_type.get_alignment();
+			const u16 size = parameter_type.get_size();
 
-			// assign the parameter value to the proxy
-			const handle<ir::node> parameter_projection = m_context.builder.get_function_parameter(i);
-			m_context.builder.create_store(variable->value, parameter_projection, alignment, false);
+			if(size > 8) {
+				// pass larger values directly (structs)
+				ASSERT(parameter_type.is_struct(), "unexpected non-struct");
+				variable->value = m_context.builder.get_function_parameter(i);
+			}
+			else {
+				// copy smaller value over
+				variable->value = m_context.builder.create_local(size, alignment);
+
+				// assign the parameter value to the proxy
+				const handle<ir::node> parameter_projection = m_context.builder.get_function_parameter(i);
+				m_context.builder.create_store(variable->value, parameter_projection, alignment, false);
+			}
 		}
 
 		// handle inner statements
@@ -372,6 +382,13 @@ namespace sigma {
 		const type& type_to_load = load_node->get<ast::type_expression>().type;
 		const ir::data_type ir_type = detail::data_type_to_ir(type_to_load);
 		const u16 alignment = type_to_load.get_alignment();
+		const u16 size = type_to_load.get_size();
+
+		if(size > 8) {
+			// pass larger values via the stack (pretty much just structs)
+			ASSERT(type_to_load.is_struct(), "unexpected non-struct");
+			return value_to_load;
+		}
 
 		// create the load operation
 		return m_context.builder.create_load(value_to_load, ir_type, alignment, false);
@@ -392,6 +409,7 @@ namespace sigma {
 			const ir::data_type type = detail::data_type_to_ir(base_type);
 			base = m_context.builder.create_load(base, type, alignment, false);
 		}
+		else if (base->get_type() == ir::node::type::PROJECTION) { /* does nothing */ }
 		else {
 			ASSERT(base->get_type() == ir::node::type::LOCAL, "unhandled node type");
 		}
@@ -406,7 +424,10 @@ namespace sigma {
 	  const auto& access = access_node->get<ast::named_type_expression>();
 
 		const handle<ir::node> base = translate_node(access_node->children[0]);
-		ASSERT(base->get_type() == ir::node::type::LOCAL, "unhandled node type");
+		ASSERT(
+			base->get_type() == ir::node::type::LOCAL || base->get_type() == ir::node::type::PROJECTION, 
+			"unhandled node type"
+		);
 
 		const type& base_type = access_node->children[0]->get<ast::named_type_expression>().type;
 		const u16 offset = base_type.get_member_offset(access.key);

@@ -73,8 +73,9 @@ namespace sigma::ir {
 		 */
 		template<typename extra_type = utility::empty_property>
 		auto create_instruction_operand() const -> handle<instruction_operand> {
-			const handle ptr = function->allocator.allocate_zero<instruction_operand>();
-			ptr->set_property(function->allocator.allocate_zero(sizeof(extra_type)));
+			const handle ptr = function->allocator.emplace<instruction_operand>();
+			// FIXME: just allocate 8 bytes, this is really dumb
+			ptr->set_property(function->allocator.allocate_zero(8));
 			return ptr;
 		}
 

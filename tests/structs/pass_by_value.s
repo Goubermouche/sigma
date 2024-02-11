@@ -4,6 +4,7 @@ struct user {
 };
 
 void print(user usr) {
+	usr.x = 222;
 	printf("key: %d %d %d\n", usr.k[0], usr.k[1], usr.x);
 }
 
@@ -17,6 +18,7 @@ i32 main() {
 	
 	printf("key: %d %d %d\n", my_user.k[0], my_user.k[1], my_user.x);
 	print(my_user);
+	printf("key: %d %d %d\n", my_user.k[0], my_user.k[1], my_user.x);
 
 	ret 0;
 }

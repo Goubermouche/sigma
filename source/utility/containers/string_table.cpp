@@ -10,6 +10,10 @@ namespace utility {
 		return m_value == other.m_value;
 	}
 
+  auto string_table_key::operator<(string_table_key other) const -> bool {
+		return m_value < other.m_value;
+  }
+
 	auto string_table_key::get_value() const -> u64 {
 		return m_value;
 	}

@@ -65,6 +65,15 @@ namespace sigma {
 
 		// utility
 		auto literal_to_ir(const ast::named_type_expression& literal) const -> handle<ir::node>;
+
+		/**
+		 * \brief Copies a stack struct projection parameter over to \b destination.
+		 * \param projection Projection of the stack value
+		 * \param destination Destination to copy members of the struct to
+		 * \param struct_type Struct type to copy
+		 * \param base_offset Base member offset, used for nested structs
+		 */
+		void copy_struct_projection(handle<ir::node> projection, handle<ir::node> destination, const type& struct_type, u16 base_offset = 0) const;
 	private:
 		backend_context& m_context;
 	};

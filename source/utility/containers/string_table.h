@@ -8,6 +8,7 @@ namespace utility {
 		string_table_key(const std::string& string);
 
 		auto operator==(string_table_key other) const -> bool;
+		auto operator<(string_table_key other) const -> bool;
 
 		auto get_value() const -> u64;
 		auto is_valid() const -> bool;

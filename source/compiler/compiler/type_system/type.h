@@ -27,8 +27,8 @@ namespace sigma {
 			STRUCT
 		};
 
+		static auto create_struct(const utility::slice<type, u8>& members, utility::string_table_key identifier) -> type;
 		static auto create_member(const type& ty, utility::string_table_key identifier) -> type;
-		static auto create_struct(const utility::slice<type, u8>& members) -> type;
 
 		static auto create_unknown() -> type;
 		static auto create_promote() -> type;

@@ -83,18 +83,17 @@ namespace sigma {
 			const u16 alignment = parameter_type.get_alignment();
 			const u16 size = parameter_type.get_size();
 
-			if(size > 8) {
-				// pass larger values directly (structs)
-				ASSERT(parameter_type.is_struct(), "unexpected non-struct");
-				variable->value = m_context.builder.get_function_parameter(i);
+			variable->value = m_context.builder.create_local(size, alignment);
+			const handle<ir::node> projection = m_context.builder.get_function_parameter(i);
+
+			if(parameter_type.is_struct()) {
+				// copy over entire structs
+				copy_struct_projection(projection, variable->value, parameter_type);
 			}
 			else {
-				// copy smaller value over
-				variable->value = m_context.builder.create_local(size, alignment);
-
+				// copy smaller values over
 				// assign the parameter value to the proxy
-				const handle<ir::node> parameter_projection = m_context.builder.get_function_parameter(i);
-				m_context.builder.create_store(variable->value, parameter_projection, alignment, false);
+				m_context.builder.create_store(variable->value, projection, alignment, false);
 			}
 		}
 
@@ -424,10 +423,10 @@ namespace sigma {
 	  const auto& access = access_node->get<ast::named_type_expression>();
 
 		const handle<ir::node> base = translate_node(access_node->children[0]);
-		ASSERT(
-			base->get_type() == ir::node::type::LOCAL || base->get_type() == ir::node::type::PROJECTION, 
-			"unhandled node type"
-		);
+		// ASSERT(
+		// 	base->get_type() == ir::node::type::LOCAL || base->get_type() == ir::node::type::PROJECTION, 
+		// 	"unhandled node type"
+		// );
 
 		const type& base_type = access_node->children[0]->get<ast::named_type_expression>().type;
 		const u16 offset = base_type.get_member_offset(access.key);
@@ -486,6 +485,30 @@ namespace sigma {
 		}
 
 		return nullptr;
+	}
+
+	void ir_translator::copy_struct_projection(handle<ir::node> projection, handle<ir::node> destination, const type& struct_type, u16 base_offset) const {
+		// copy over every struct member
+		for (const auto& member : struct_type.get_struct_members()) {
+			const u16 member_offset = struct_type.get_member_offset(member.get_member_identifier()) + base_offset;
+			const u16 member_alignment = member.get_alignment();
+
+			if(member.is_struct()) {
+				copy_struct_projection(projection, destination, member, member_offset);
+				continue;
+			}
+
+			const ir::data_type ir_type = detail::data_type_to_ir(member);
+
+			// access the source value
+			const handle<ir::node> source_access = m_context.builder.create_member_access(projection, member_offset);
+			const handle<ir::node> source_load = m_context.builder.create_load(source_access, ir_type, member_alignment, false);
+
+			// access the member we want to store to
+			const handle<ir::node> dest_access = m_context.builder.create_member_access(destination, member_offset);
+
+			m_context.builder.create_store(dest_access, source_load, member_alignment, false);
+		}
 	}
 
 	auto ir_translator::translate() -> utility::result<void> {

@@ -1217,8 +1217,7 @@ namespace sigma {
 		utility::copy(member_slice, members);
 
 		auto& expression = struct_node->get<ast::named_type_expression>();
-		expression.type = type::create_struct(member_slice);
-
+		expression.type = type::create_struct(member_slice, identifier);
 		expression.key = identifier;
 
 		return struct_node;

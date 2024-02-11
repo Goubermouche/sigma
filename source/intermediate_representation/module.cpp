@@ -26,7 +26,7 @@ namespace sigma::ir {
 		// specify individual optimization passes
 		const optimization_pass_list optimizations({});
 		const auto register_allocator = std::make_shared<linear_scan_allocator>();
-		// utility::string assembly;
+		utility::string assembly;
 
 		// go through all declared functions and run codegen
 		for (const handle<function> function : m_functions) {

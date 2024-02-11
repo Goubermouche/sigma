@@ -130,13 +130,11 @@ namespace sigma {
 
 	auto type::operator==(const type& other) const -> bool {
 		if(m_kind == other.m_kind && m_pointer_level == other.m_pointer_level) {
-			if(m_kind == STRUCT) {
-				// compare two structs
-				return m_struct_members == other.m_struct_members;
+			if(is_struct()) {
+				return m_identifier == other.m_identifier;
 			}
-			else {
-				return true;
-			}
+
+			return true;
 		}
 
 		return false;
@@ -151,7 +149,15 @@ namespace sigma {
 			return false;
 		}
 
-		return m_kind < other.m_kind;
+		if(m_kind < other.m_kind) {
+			return true;
+		}
+
+		if(m_kind > other.m_kind) {
+			return false;
+		}
+
+		return m_identifier < other.m_identifier;
 	}
 
 	auto type::create_member(const type& ty, utility::string_table_key identifier) -> type {
@@ -165,9 +171,10 @@ namespace sigma {
 		return member_ty;
 	}
 
-	auto type::create_struct(const utility::slice<type, u8>& members) -> type {
+	auto type::create_struct(const utility::slice<type, u8>& members, utility::string_table_key identifier) -> type {
 		type struct_ty = { STRUCT, 0 };
 		struct_ty.m_struct_members = members;
+		struct_ty.m_identifier = identifier;
 
 		return struct_ty;
 	}

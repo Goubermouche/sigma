@@ -795,11 +795,12 @@ namespace sigma {
 
 	auto parser::parse_type() -> utility::result<type> {
 		// expect '(TYPE | IDENTIFIER)* ... *'
+		TRY(const namespace_list namespaces, parse_namespaces());
+
 		const token_info type_token = m_tokens.get_current();
 		u8 pointer_level = 0;
 
-		TRY(const namespace_list namespaces, parse_namespaces());
-
+		// parse the base type
 		if(!is_current_token_type()) {
 			return error::emit(
 				error::code::UNEXPECTED_TOKEN,
@@ -815,7 +816,10 @@ namespace sigma {
 		}
 
 		m_tokens.next();
-		return type{ type_token, pointer_level };
+
+		type ty(type_token, pointer_level);
+		ty.set_namespaces(namespaces);
+		return ty;
 	}
 
 	auto parser::parse_numerical_literal() -> parse_result {
@@ -957,7 +961,10 @@ namespace sigma {
 			m_tokens.next(); // prime the next token
 		}
 
-		return { std::move(namespaces) };
+		utility::slice<utility::string_table_key> list(m_context.allocator, namespaces.size());
+		utility::copy(list, namespaces);
+
+		return { list };
 	}
 
 	auto parser::peek_is_function_definition() -> bool {

@@ -232,13 +232,20 @@ namespace sigma {
 			return SUCCESS; // nothing else needed
 		}
 
-		if(const handle<type> resolved = m_current_scope->find_type(ty.get_unresolved())) {
-			ty.set_kind(resolved->get_kind());
+		const handle<namespace_scope> scope = find_namespace(ty.get_namespaces());
 
+		if(scope == nullptr) {
+			// invalid namespace
+			return emit_unknown_namespace_error(ty.get_namespaces());
+		}
+
+		if(const handle<type> resolved = scope->find_type(ty.get_unresolved())) {
+			ty.set_kind(resolved->get_kind());
+		
 			if(resolved->is_struct()) {
 				ty.set_struct_members(resolved->get_struct_members());
 			}
-
+		
 			return SUCCESS;
 		}
 

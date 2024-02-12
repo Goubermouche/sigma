@@ -1,14 +1,15 @@
 #pragma once
 #include <utility/containers/string_table.h>
+#include "utility/containers/slice.h"
 
 namespace sigma {
 	using namespace utility::types;
 
 	struct namespace_list {
-		using base = std::vector<utility::string_table_key>;
+		using base = utility::slice<utility::string_table_key>;
 
 		namespace_list() = default;
-		namespace_list(const std::vector<utility::string_table_key>& namespaces);
+		namespace_list(const utility::slice<utility::string_table_key>& namespaces);
 
 		auto empty() const -> bool;
 		auto size() const->u64;
@@ -22,7 +23,8 @@ namespace sigma {
 		auto begin() const -> base::const_iterator;
 		auto end() const -> base::const_iterator;
 
-		auto operator[](u64 index) const -> base::value_type;
+		auto operator[](u64 index) const -> utility::string_table_key;
+		auto operator==(const namespace_list& other) const -> bool;
 
 		auto get_stream(const utility::string_table& strings) const->std::stringstream;
 

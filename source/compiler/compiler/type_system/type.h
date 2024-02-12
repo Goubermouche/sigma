@@ -1,6 +1,7 @@
 #pragma once
-#include <tokenizer/token.h>
+#include <compiler/compiler/type_system/namespace_list.h>
 #include <utility/containers/slice.h>
+#include <tokenizer/token.h>
 
 namespace sigma {
 	using namespace utility::types;
@@ -55,10 +56,12 @@ namespace sigma {
 		auto get_struct_members() const -> const utility::slice<type, u8>&;
 		auto get_struct_members() -> utility::slice<type, u8>&;
 		auto get_unresolved() const -> utility::string_table_key;
+		auto get_namespaces() const -> const namespace_list&;
 		auto get_pointer_level() const -> u8;
 		auto get_kind() const -> kind;
 
 		void set_struct_members(const utility::slice<type, u8>& members);
+		void set_namespaces(const namespace_list& namespaces);
 		void set_kind(kind kind);
 
 		auto dereference(u8 level) const -> type;
@@ -92,6 +95,7 @@ namespace sigma {
 		// struct member identifiers
 		// struct name identifier
 		utility::string_table_key m_identifier;
+		namespace_list m_namespaces = {};
 
 		union {
 			// UNRESOLVED

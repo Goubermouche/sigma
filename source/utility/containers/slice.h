@@ -30,6 +30,18 @@ namespace utility {
 			return m_size;
 		}
 
+		[[nodiscard]] auto is_empty() const -> bool {
+			return m_size == 0;
+		}
+
+		[[nodiscard]] auto first() const -> type {
+			return m_data[0];
+		}
+
+		[[nodiscard]] auto last() const -> type {
+			return m_data[m_size - 1];
+		}
+
 		[[nodiscard]] auto operator[](u64 index) -> type& {
 			return m_data[index];
 		}

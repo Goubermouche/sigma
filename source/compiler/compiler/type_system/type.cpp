@@ -131,7 +131,7 @@ namespace sigma {
 	auto type::operator==(const type& other) const -> bool {
 		if(m_kind == other.m_kind && m_pointer_level == other.m_pointer_level) {
 			if(is_struct()) {
-				return m_identifier == other.m_identifier;
+				return m_identifier == other.m_identifier && m_namespaces == other.m_namespaces;
 			}
 
 			return true;
@@ -354,6 +354,10 @@ namespace sigma {
 		return m_unresolved;
 	}
 
+	auto type::get_namespaces() const -> const namespace_list& {
+		return m_namespaces;
+	}
+
 	auto type::get_pointer_level() const -> u8 {
 		return m_pointer_level;
 	}
@@ -364,6 +368,10 @@ namespace sigma {
 
 	void type::set_struct_members(const utility::slice<type, u8>& members) {
 		m_struct_members = members;
+	}
+
+	void type::set_namespaces(const namespace_list& namespaces) {
+		m_namespaces = namespaces;
 	}
 
 	void type::set_kind(kind kind) {

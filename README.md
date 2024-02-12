@@ -46,7 +46,7 @@ Contributions, either to the compiler implementation, or related to language des
 
 ## Tooling
 Sigma strives to be a fully functional enviroment, for this purpose we're developing several tools which aim to ease entry cost and improve the developer experience. As more tools become available they will be added to the list bellow: 
--   [**Syntax highlighting**](https://github.com/Goubermouche/sigma-syntax-highlighter)
+-   [**Syntax highlighting**](https://github.com/Goubermouche/sigma-syntax-highlighter) (Also available on the VS Code marketplace)
 
 ### Dependencies 
 -   [**Premake5**](https://github.com/premake/premake-core)

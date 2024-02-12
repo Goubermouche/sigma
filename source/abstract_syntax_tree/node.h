@@ -11,7 +11,6 @@ namespace sigma::ast {
 		enum underlying : u16 {
 			UNKNOWN,
 
-			// children[0] = assigned value, if there is one
 			VARIABLE_DECLARATION,
 			FUNCTION_DECLARATION,
 			NAMESPACE_DECLARATION,

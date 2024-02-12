@@ -375,31 +375,6 @@ namespace sigma {
 		}
 
 		return result;
-	
-		// // check if we're assigning anything
-		// // TODO: replace by a store op
-		// if (m_tokens.get_current_token() == token_type::EQUALS_SIGN) {
-		// 	TRY(const handle<ast::node> assignment_node, parse_assignment());
-		// 
-		// 	if(array_access) {
-		// 		// assignment to an array access
-		// 		array_access->children[0] = variable;
-		// 		assignment_node->children[0] = array_access;
-		// 	}
-		// 	else {
-		// 		assignment_node->children[0] = variable;
-		// 	}
-		// 
-		// 	return assignment_node;
-		// }
-		// 
-		// if(array_access) {
-		// 	// plain array access
-		// 	array_access->children[0] = variable;
-		// 	return array_access;
-		// }
-
-		// return variable;
 	}
 
 	auto parser::parse_local_member_access() -> parse_result {
@@ -479,7 +454,6 @@ namespace sigma {
 	auto parser::parse_variable_declaration() -> parse_result {
 		// expect 'TYPE IDENTIFIER'
 		const handle<token_location> location = get_current_location();
-		handle<ast::node> assigned_value = nullptr;
 
 		// parse the variable type
 		TRY(const type type, parse_type());
@@ -489,29 +463,38 @@ namespace sigma {
 		const auto identifier_key = m_tokens.get_current().symbol_key;
 		m_tokens.next();
 
+		const handle<ast::node> declaration = create_variable_declaration(0, location);
+
+		auto& expression = declaration->get<ast::named_type_expression>();
+		expression.key = identifier_key;
+		expression.type = type;
+
 		// parse an assignment, if there is one
 		if(m_tokens.get_current_token() == token_type::EQUALS_SIGN) {
-			m_tokens.next();
-			TRY(assigned_value, parse_expression());
+			TRY(const handle<ast::node> assignment, parse_assignment());
+			assignment->children[0] = declaration;
+			return assignment;
 		}
+
+		return declaration;
 
 		// create the variable node
-		handle<ast::node> variable_node;
-
-		if(assigned_value) {
-			variable_node = create_variable_declaration(1, location);
-			variable_node->children[0] = assigned_value;
-		}
-		else {
-			variable_node = create_variable_declaration(0, location);
-		}
-
-		// initialize the variable
-		auto& variable = variable_node->get<ast::named_type_expression>();
-		variable.key = identifier_key;
-		variable.type = type;
-
-		return variable_node;
+		// handle<ast::node> variable_node;
+		// 
+		// if(assigned_value) {
+		// 	variable_node = create_variable_declaration(1, location);
+		// 	variable_node->children[0] = assigned_value;
+		// }
+		// else {
+		// 	variable_node = create_variable_declaration(0, location);
+		// }
+		// 
+		// // initialize the variable
+		// auto& variable = variable_node->get<ast::named_type_expression>();
+		// variable.key = identifier_key;
+		// variable.type = type;
+		// 
+		// return variable_node;
 	}
 
 	auto parser::parse_variable_access() -> parse_result {

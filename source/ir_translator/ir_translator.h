@@ -17,7 +17,7 @@ namespace sigma {
 		// declarations
 		void translate_namespace_declaration(handle<ast::node> namespace_node);
 		void translate_function_declaration(handle<ast::node> function_node);
-		void translate_variable_declaration(handle<ast::node> variable_node);
+		auto translate_variable_declaration(handle<ast::node> variable_node) const -> handle<ir::node>;
 
 		// literals
 		auto translate_numerical_literal(handle<ast::node> numerical_literal_node) const -> handle<ir::node>;
@@ -68,12 +68,12 @@ namespace sigma {
 
 		/**
 		 * \brief Copies a stack struct projection parameter over to \b destination.
-		 * \param projection Projection of the stack value
 		 * \param destination Destination to copy members of the struct to
+		 * \param value Value to store
 		 * \param struct_type Struct type to copy
 		 * \param base_offset Base member offset, used for nested structs
 		 */
-		void copy_struct_projection(handle<ir::node> projection, handle<ir::node> destination, const type& struct_type, u16 base_offset = 0) const;
+		void copy_struct(handle<ir::node> destination, handle<ir::node> value, const type& struct_type, u16 base_offset = 0) const;
 	private:
 		backend_context& m_context;
 	};

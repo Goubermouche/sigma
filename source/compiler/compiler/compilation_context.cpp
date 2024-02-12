@@ -44,7 +44,7 @@ namespace sigma {
 	}
 
 	frontend_context::frontend_context()
-		: allocator(sizeof(token_location) * 10) {}
+		: allocator(sizeof(token_location) * 200) {}
 
 	void frontend_context::print_tokens() const {
 		if (tokens.empty()) {

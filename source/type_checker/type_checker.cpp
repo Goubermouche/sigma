@@ -123,7 +123,7 @@ namespace sigma {
 		return type::create_unknown();
 	}
 
-	auto type_checker::type_check_variable_declaration(ast_node declaration) -> type_check_result {
+	auto type_checker::type_check_variable_declaration(ast_node declaration) const -> type_check_result {
 		ast::named_type_expression& variable = declaration->get<ast::named_type_expression>();
 		TRY(m_context.semantics.resolve_type(variable.type, declaration->location));
 
@@ -143,13 +143,7 @@ namespace sigma {
 		auto& var = m_context.semantics.pre_declare_variable(variable.key, variable.type);
 		var.flags |= variable::LOCAL; // mark it as a local variable
 
-		// type check the assigned value
-		if(declaration->children.get_size() == 1) {
-			TRY(type_check_node(declaration->children[0], declaration, variable.type));
-		}
-
-		// this value won't be used
-		return type::create_unknown();
+		return variable.type;
 	}
 
 	auto type_checker::type_check_function_call(ast_node call, ast_node parent, type expected) -> type_check_result {

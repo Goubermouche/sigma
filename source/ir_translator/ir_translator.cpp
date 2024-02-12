@@ -17,7 +17,7 @@ namespace sigma {
 			// declarations
 			case ast::node_type::NAMESPACE_DECLARATION:          translate_namespace_declaration(ast_node); break;
 			case ast::node_type::FUNCTION_DECLARATION:           translate_function_declaration(ast_node); break;
-			case ast::node_type::VARIABLE_DECLARATION:           translate_variable_declaration(ast_node); break;
+			case ast::node_type::VARIABLE_DECLARATION:           return translate_variable_declaration(ast_node);
 			case ast::node_type::STRUCT_DECLARATION:             return nullptr; // we don't have to do anything here
 
 			// literals
@@ -88,7 +88,7 @@ namespace sigma {
 
 			if(parameter_type.is_struct()) {
 				// copy over entire structs
-				copy_struct_projection(projection, variable->value, parameter_type);
+				copy_struct(variable->value, projection, parameter_type);
 			}
 			else {
 				// copy smaller values over
@@ -106,18 +106,13 @@ namespace sigma {
 		m_context.semantics.trace_pop_scope();
 	}
 
-	void ir_translator::translate_variable_declaration(handle<ast::node> variable_node) {
+	auto ir_translator::translate_variable_declaration(handle<ast::node> variable_node) const -> handle<ir::node>{
 		const auto& declaration = variable_node->get<ast::named_type_expression>();
 
 		const u16 alignment = declaration.type.get_alignment();
 		const u16 size = declaration.type.get_size();
 
-		const handle<ir::node> local = m_context.semantics.declare_variable(declaration.key, size, alignment);
-
-		if (variable_node->children.get_size() == 1) {
-			const handle<ir::node> expression = translate_node(variable_node->children[0]);
-			m_context.builder.create_store(local, expression, alignment, false);
-		}
+		return m_context.semantics.declare_variable(declaration.key, size, alignment);
 	}
 
 	void ir_translator::translate_namespace_declaration(handle<ast::node> namespace_node) {
@@ -381,11 +376,8 @@ namespace sigma {
 		const type& type_to_load = load_node->get<ast::type_expression>().type;
 		const ir::data_type ir_type = detail::data_type_to_ir(type_to_load);
 		const u16 alignment = type_to_load.get_alignment();
-		const u16 size = type_to_load.get_size();
 
-		if(size > 8) {
-			// pass larger values via the stack (pretty much just structs)
-			ASSERT(type_to_load.is_struct(), "unexpected non-struct");
+		if(type_to_load.is_struct()) {
 			return value_to_load;
 		}
 
@@ -452,7 +444,13 @@ namespace sigma {
 		const handle<ast::node> storage_node = assignment_node->children[0];
 		const handle<ir::node> storage = translate_node(storage_node);
 
-		m_context.builder.create_store(storage, value_to_store, alignment, false);
+		if(variable.type.is_struct()) {
+			copy_struct(storage, value_to_store, variable.type);
+		}
+		else {
+			m_context.builder.create_store(storage, value_to_store, alignment, false);
+		}
+
 		return nullptr;
 	}
 
@@ -487,21 +485,21 @@ namespace sigma {
 		return nullptr;
 	}
 
-	void ir_translator::copy_struct_projection(handle<ir::node> projection, handle<ir::node> destination, const type& struct_type, u16 base_offset) const {
+	void ir_translator::copy_struct(handle<ir::node> destination, handle<ir::node> value, const type& struct_type, u16 base_offset) const {
 		// copy over every struct member
 		for (const auto& member : struct_type.get_struct_members()) {
 			const u16 member_offset = struct_type.get_member_offset(member.get_member_identifier()) + base_offset;
 			const u16 member_alignment = member.get_alignment();
 
-			if(member.is_struct()) {
-				copy_struct_projection(projection, destination, member, member_offset);
+			if (member.is_struct()) {
+				copy_struct(destination, value, member, member_offset);
 				continue;
 			}
 
 			const ir::data_type ir_type = detail::data_type_to_ir(member);
 
 			// access the source value
-			const handle<ir::node> source_access = m_context.builder.create_member_access(projection, member_offset);
+			const handle<ir::node> source_access = m_context.builder.create_member_access(value, member_offset);
 			const handle<ir::node> source_load = m_context.builder.create_load(source_access, ir_type, member_alignment, false);
 
 			// access the member we want to store to

@@ -45,7 +45,7 @@ namespace sigma::ir {
 		return {};
   }
 
-	auto codegen_target::disassemble(const utility::byte_buffer& bytecode, const codegen_context& context) const -> utility::string {
+	auto codegen_target::disassemble(const utility::byte_buffer& bytecode, const codegen_context& context) const -> std::stringstream {
 		ASSERT(m_disassembler != nullptr, "target is not initialized");
 		return m_disassembler->disassemble(bytecode, context);
 	}

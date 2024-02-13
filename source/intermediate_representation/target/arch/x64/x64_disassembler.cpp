@@ -2,9 +2,9 @@
 #include "intermediate_representation/target/arch/x64/x64.h"
 
 namespace sigma::ir {
-	auto x64_disassembler::disassemble(const utility::byte_buffer& bytecode, const codegen_context& context) -> utility::string {
-		utility::string assembly;
-		assembly.append("{}:\n", context.function->symbol.name);
+	auto x64_disassembler::disassemble(const utility::byte_buffer& bytecode, const codegen_context& context) -> std::stringstream {
+		std::stringstream assembly;
+		assembly << std::format("{}:\n", context.function->symbol.name);
 
 		// disassemble the prologue
 		disassemble_block(bytecode, context, nullptr, std::numeric_limits<u64>::max(), { 0, context.prologue_length }, assembly);
@@ -27,9 +27,9 @@ namespace sigma::ir {
 		return assembly;
 	}
 
-	handle<symbol_patch> x64_disassembler::disassemble_block(const utility::byte_buffer& bytecode, const codegen_context& context, handle<symbol_patch> patch, u64 basic_block, utility::range<u64> range, utility::string& assembly) {
+	handle<symbol_patch> x64_disassembler::disassemble_block(const utility::byte_buffer& bytecode, const codegen_context& context, handle<symbol_patch> patch, u64 basic_block, utility::range<u64> range, std::stringstream& assembly) {
 		if(basic_block != std::numeric_limits<u64>::max()) {
-			assembly.append(".bb{}:\n", basic_block);
+			assembly << std::format(".bb{}:\n", basic_block);
 		}
 
 		while(range.start < range.end) {
@@ -37,28 +37,28 @@ namespace sigma::ir {
 
 			if(!disassemble_instruction(bytecode.get_slice(range.start, range.end - range.start), inst)) {
 				range.start++;
-				assembly.append("  ERROR\n");
+				assembly << "  ERROR\n";
 				continue;
 			}
 
-			assembly.append("  ");
+			assembly << "  ";
 
 			if (inst.flags & x64::REP) {
-				assembly.append("rep ");
+				assembly << "rep ";
 			}
 
 			if (inst.flags & x64::LOCK) {
-				assembly.append("lock ");
+				assembly << "lock ";
 			}
 
-			assembly.append("{}", inst.get_mnemonic());
+			assembly << std::format("{}", inst.get_mnemonic());
 
 			if (inst.data_type_1 >= x64::SSE_SS && inst.data_type_1 <= x64::SSE_PD) {
 				static const char* type_ids[] = { "ss", "sd", "ps", "pd" };
-				assembly.append(type_ids[inst.data_type_1 - x64::SSE_SS]);
+				assembly << type_ids[inst.data_type_1 - x64::SSE_SS];
 			}
 
-			assembly.append(" ");
+			assembly << " ";
 
 			bool mem = true;
 			bool imm = true;
@@ -67,7 +67,7 @@ namespace sigma::ir {
 				if (inst.registers[i].is_valid() == false) {
 					if (mem && inst.flags & x64::USE_MEM_OP) {
 						if (i > 0) {
-							assembly.append(", ");
+							assembly << ", ";
 						}
 
 						mem = false;
@@ -76,17 +76,17 @@ namespace sigma::ir {
 							const bool is_label = inst.opcode == 0xE8 || inst.opcode == 0xE9 || (inst.opcode >= 0x70 && inst.opcode <= 0x7F) || (inst.opcode >= 0x0F80 && inst.opcode <= 0x0F8F);
 
 							if (!is_label) {
-								assembly.append("[");
+								assembly << "[";
 							}
 
 							if (patch && patch->pos == range.start + inst.length - 4) {
 								handle<symbol> target = patch->target;
 
 								if (target->name.empty()) {
-									assembly.append("sym{}", static_cast<void*>(target.get()));
+									assembly << std::format("sym{}", static_cast<void*>(target.get()));
 								}
 								else {
-									assembly.append("{}", target->name);
+									assembly << std::format("{}", target->name);
 								}
 
 								patch = patch->next;
@@ -94,51 +94,51 @@ namespace sigma::ir {
 							else {
 								const u64 target = range.start + inst.length + inst.memory.displacement;
 								u64 label_basic_block = emit_get_label(context, target);
-								assembly.append(".bb{}", label_basic_block);
+								assembly << std::format(".bb{}", label_basic_block);
 							}
 
 							if (!is_label) {
-								assembly.append("]");
+								assembly << "]";
 							}
 						}
 						else {
-							assembly.append("{} [", x64::get_type_name(inst.data_type_1));
+							assembly << std::format("{} [", x64::get_type_name(inst.data_type_1));
 
 							if (inst.base != 255) {
-								assembly.append("{}", get_register_name(inst.base, x64::QWORD));
+								assembly << std::format("{}", get_register_name(inst.base, x64::QWORD));
 							}
 
 							if (inst.memory.index != 255) {
-								assembly.append(" + {}", get_register_name(inst.memory.index, x64::QWORD));
+								assembly << std::format(" + {}", get_register_name(inst.memory.index, x64::QWORD));
 								const i32 scale = 1 << static_cast<u8>(inst.memory.scale);
 
 								if(scale != 1) {
-									assembly.append("*{}", scale);
+									assembly << std::format("*{}", scale);
 								}
 							}
 
 							if (inst.memory.displacement > 0) {
-								assembly.append(" + {}", inst.memory.displacement);
+								assembly << std::format(" + {}", inst.memory.displacement);
 							}
 							else if (inst.memory.displacement < 0) {
-								assembly.append(" - {}", -inst.memory.displacement);
+								assembly << std::format(" - {}", -inst.memory.displacement);
 							}
 
-							assembly.append("]");
+							assembly << "]";
 						}
 					}
 					else if (imm && (inst.flags & (x64::IMMEDIATE | x64::ABSOLUTE))) {
 						if (i > 0) {
-							assembly.append(", ");
+							assembly << ", ";
 						}
 
 						imm = false;
 
 						if (inst.flags & x64::ABSOLUTE) {
-							assembly.append("{}", inst.abs);
+							assembly << std::format("{}", inst.abs);
 						}
 						else {
-							assembly.append("{}", inst.imm);
+							assembly << std::format("{}", inst.imm);
 						}
 					}
 					else {
@@ -147,20 +147,20 @@ namespace sigma::ir {
 				}
 				else {
 					if (i > 0) {
-						assembly.append(", ");
+						assembly << ", ";
 
 						// special case for certain ops with two data types
 						if (inst.flags & x64::TWO_DATA_TYPES) {
-							assembly.append("{}", x64::get_register_name(inst.registers[i], inst.data_type_2));
+							assembly << std::format("{}", x64::get_register_name(inst.registers[i], inst.data_type_2));
 							continue;
 						}
 					}
 
-					assembly.append("{}", x64::get_register_name(inst.registers[i], inst.data_type_1));
+					assembly << std::format("{}", x64::get_register_name(inst.registers[i], inst.data_type_1));
 				}
 			}
 
-			assembly.append("\n");
+			assembly << "\n";
 			range.start += inst.length;
 		}
 

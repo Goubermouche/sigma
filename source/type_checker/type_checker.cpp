@@ -2,7 +2,6 @@
 
 #include <compiler/compiler/compilation_context.h>
 #include <compiler/compiler/diagnostics.h>
-#include <utility/string_helper.h>
 
 namespace sigma {
 	auto type_checker::type_check(backend_context& context) -> utility::result<void> {
@@ -345,42 +344,42 @@ namespace sigma {
 		// check for type overflow
 		switch (expression.type.get_kind()) {
 			case type::I8: {
-				const auto value = utility::detail::from_string<i8>(value_str, overflow);
+				const auto value = utility::from_string<i8>(value_str, overflow);
 				if (overflow) { warning::emit(warning::code::LITERAL_OVERFLOW, literal->location, value_str, value, "i8"); }
 				break;
 			}
 			case type::I16: {
-				const auto value = utility::detail::from_string<i16>(value_str, overflow);
+				const auto value = utility::from_string<i16>(value_str, overflow);
 				if (overflow) { warning::emit(warning::code::LITERAL_OVERFLOW, literal->location, value_str, value, "i16"); }
 				break;
 			}
 			case type::I32: {
-				const auto value = utility::detail::from_string<i32>(value_str, overflow);
+				const auto value = utility::from_string<i32>(value_str, overflow);
 				if(overflow) { warning::emit(warning::code::LITERAL_OVERFLOW, literal->location, value_str, value, "i32"); }
 				break;
 			}
 			case type::I64: {
-				const auto value = utility::detail::from_string<i64>(value_str, overflow);
+				const auto value = utility::from_string<i64>(value_str, overflow);
 				if (overflow) { warning::emit(warning::code::LITERAL_OVERFLOW, literal->location, value_str, value, "i64"); }
 				break;
 			}
 			case type::U8: {
-				const auto value = utility::detail::from_string<u8>(value_str, overflow);
+				const auto value = utility::from_string<u8>(value_str, overflow);
 				if (overflow) { warning::emit(warning::code::LITERAL_OVERFLOW, literal->location, value_str, value, "u8"); }
 				break;
 			}
 			case type::U16: {
-				const auto value = utility::detail::from_string<u16>(value_str, overflow);
+				const auto value = utility::from_string<u16>(value_str, overflow);
 				if (overflow) { warning::emit(warning::code::LITERAL_OVERFLOW, literal->location, value_str, value, "u16"); }
 				break;
 			}
 			case type::U32: {
-				const auto value = utility::detail::from_string<u32>(value_str, overflow);
+				const auto value = utility::from_string<u32>(value_str, overflow);
 				if(overflow) { warning::emit(warning::code::LITERAL_OVERFLOW, literal->location, value_str, value, "u32"); }
 				break;
 			}
 			case type::U64: {
-				const auto value = utility::detail::from_string<u64>(value_str, overflow);
+				const auto value = utility::from_string<u64>(value_str, overflow);
 				if(overflow) { warning::emit(warning::code::LITERAL_OVERFLOW, literal->location, value_str, value, "u64"); }
 				break;
 			}

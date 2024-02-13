@@ -1,8 +1,8 @@
-#include <utility/parametric/parametric.h>
-#include <utility/filesystem/file.h>
-#include <utility/string_helper.h>
-#include <utility/diagnostics.h>
-#include <utility/shell.h>
+#include <parametric/parametric.h>
+#include <util/filesystem/filesystem.h>
+#include <util/string/const_string.h>
+#include <util/diagnostics.h>
+#include <util/shell.h>
 
 using namespace utility::types;
 
@@ -117,8 +117,8 @@ bool run_test(const filepath& path, const filepath& compiler_path) {
 		print_error_block(
 			{ "STDOUT", "STDERR", "COMPILER_STDOUT", "COMPILER_STDERR" },
 			{
-				utility::detail::escape_string(app_stdout_str),
-				utility::detail::escape_string(app_stderr_str),
+				utility::escape_string(app_stdout_str),
+				utility::escape_string(app_stderr_str),
 				compiler_stdout_str,
 				compiler_stderr_str
 			}
@@ -141,8 +141,8 @@ bool run_test(const filepath& path, const filepath& compiler_path) {
 		print_error_block(
 			{ "STDOUT", "REFERENCE", "COMPILER_STDOUT", "COMPILER_STDERR" },
 			{
-				utility::detail::escape_string(app_stdout_str),
-				utility::detail::escape_string(expected_str),
+				utility::escape_string(app_stdout_str),
+				utility::escape_string(expected_str),
 				compiler_stdout_str,
 				compiler_stderr_str
 			}

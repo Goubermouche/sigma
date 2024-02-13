@@ -1,7 +1,7 @@
 #pragma once
-#include <utility/containers/string_table.h>
-#include <utility/containers/handle.h>
-#include <utility/filesystem/filepath.h>
+#include <util/string/string_table.h>
+#include <util/handle.h>
+#include <util/filesystem/filepath.h>
 
 namespace sigma {
 	using namespace utility::types;

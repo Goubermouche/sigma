@@ -1,6 +1,6 @@
 #include "type.h"
 
-#include <utility/macros.h>
+#include <util/macros.h>
 
 namespace sigma {
   named_data_type::named_data_type(sigma::type type, utility::string_table_key identifier_key)

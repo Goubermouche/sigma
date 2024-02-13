@@ -1,5 +1,5 @@
 #pragma once
-#include <utility/macros.h>
+#include <util/macros.h>
 
 namespace sigma::ir {
 	using namespace utility::types;

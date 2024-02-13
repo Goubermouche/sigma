@@ -1,5 +1,5 @@
 #pragma once
-#include <utility/types.h>
+#include <util/types.h>
 
 namespace sigma::ir {
 	using namespace utility::types;

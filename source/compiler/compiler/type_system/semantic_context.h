@@ -1,5 +1,5 @@
 #pragma once
-#include <utility/containers/string_table.h>
+#include <util/string/string_table.h>
 
 #include "compiler/compiler/type_system/scope.h"
 

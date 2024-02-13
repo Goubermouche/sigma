@@ -18,7 +18,7 @@ namespace sigma::ir {
 		auto get_register_intervals() const -> std::vector<live_interval>;
 		void select_instructions(codegen_context& context) const;
 		auto generate_sections(module& module) const -> module_output;
-		auto disassemble(const utility::byte_buffer& bytecode, const codegen_context& context) const -> utility::string;
+		auto disassemble(const utility::byte_buffer& bytecode, const codegen_context& context) const -> std::stringstream;
 		auto emit_object_file(module& module) const -> utility::byte_buffer;
 	private:
 		static auto pick_object_file_emitter(system system) -> s_ptr<object_file_emitter>;

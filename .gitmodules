@@ -1,0 +1,6 @@
+[submodule "source/utility"]
+	path = source/utility
+	url = https://github.com/Goubermouche/utility
+[submodule "source/parametric"]
+	path = source/parametric
+	url = https://github.com/Goubermouche/parametric

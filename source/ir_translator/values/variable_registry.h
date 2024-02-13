@@ -1,6 +1,6 @@
 #pragma once
 #include <intermediate_representation/builder.h>
-#include <utility/containers/string_table.h>
+#include <util/string/string_table.h>
 
 namespace sigma::detail {
 	using namespace utility::types;

@@ -1,5 +1,6 @@
 #include "work_list.h"
 #include "intermediate_representation/codegen/codegen_context.h"
+#include "util/containers/stack.h"
 
 namespace sigma::ir {
 	auto work_list::mark_next_control(handle<node> target) -> handle<node> {
@@ -96,7 +97,7 @@ namespace sigma::ir {
 	}
 
 	void work_list::push_all(handle<function> function) {
-		std::stack<handle<node>> stack;
+		utility::stack<handle<node>> stack;
 
 		for(const handle<node> end : function->terminators) {
 			// place the endpoint, we'll construct the rest from there
@@ -104,18 +105,17 @@ namespace sigma::ir {
 				continue;
 			}
 
-			stack.push(end);
+			stack.push_back(end);
 
 			while (!stack.empty()) {
-				handle<node> n = stack.top();
-				stack.pop();
+				handle<node> n = stack.pop_back();
 
 				// place self first
 				items.push_back(n);
 
 				for (const handle<node>& input : n->inputs) {
 					if (input && visit(input)) {
-						stack.push(input);
+						stack.push_back(input);
 					}
 				}
 			}

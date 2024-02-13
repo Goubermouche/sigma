@@ -3,7 +3,7 @@
 
 #include <abstract_syntax_tree/tree.h>
 #include <intermediate_representation/builder.h>
-#include <utility/containers/string_table.h>
+#include <util/string/string_table.h>
 #include <tokenizer/token_buffer.h>
 
 // TODO: add support for emitting to .dot files

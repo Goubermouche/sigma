@@ -17,7 +17,7 @@ Sigma is a compiled, statically typed, C-like, data oriented language with a foc
 Get started by running:
 ```shell
 # Download Sigma's source code
-$ git clone https://github.com/Goubermouche/sigma.git
+$ git clone https://github.com/Goubermouche/sigma.git --recursive
 $ cd sigma
 
 # Generate project files

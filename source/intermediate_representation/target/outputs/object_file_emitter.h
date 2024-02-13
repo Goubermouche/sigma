@@ -1,6 +1,6 @@
 #pragma once
-#include <utility/containers/byte_buffer.h>
-#include <utility/containers/handle.h>
+#include <util/containers/byte_buffer.h>
+#include <util/handle.h>
 
 namespace sigma::ir {
 	using namespace utility::types;

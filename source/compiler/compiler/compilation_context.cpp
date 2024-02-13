@@ -1,5 +1,4 @@
 #include "compilation_context.h"
-#include <utility/string_helper.h>
 
 namespace sigma {
 	backend_context::backend_context(sigma::syntax& syntax, ir::target target)
@@ -67,7 +66,7 @@ namespace sigma {
 			std::string symbol_value;
 			// check if the token has a string value associated with it 
 			if (syntax.strings.contains(info.symbol_key)) {
-				symbol_value = utility::detail::escape_string(syntax.strings.get(info.symbol_key));
+				symbol_value = utility::escape_string(syntax.strings.get(info.symbol_key));
 			}
 
 			utility::console::print(
@@ -154,7 +153,7 @@ namespace sigma {
 				}
 				case ast::node_type::STRING_LITERAL: {
 					const auto& property = node->get<ast::named_type_expression>();
-					utility::console::print("[\"{}\"]", utility::detail::escape_string(strings.get(property.key)));
+					utility::console::print("[\"{}\"]", utility::escape_string(strings.get(property.key)));
 					break;
 				}
 				case ast::node_type::BOOL_LITERAL: {

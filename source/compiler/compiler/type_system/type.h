@@ -1,6 +1,6 @@
 #pragma once
 #include <compiler/compiler/type_system/namespace_list.h>
-#include <utility/containers/slice.h>
+#include <util/containers/slice.h>
 #include <tokenizer/token.h>
 
 namespace sigma {

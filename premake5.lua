@@ -26,24 +26,6 @@ workspace "sigma"
         runtime "Debug"
         defines { "DEBUG", "_DEBUG" }
 
--- utility 
-project "utility"
-    kind "StaticLib"
-    location "source/utility"
-
-    files {
-        "source/utility/**.h",
-        "source/utility/**.cpp"
-    }
-
-    includedirs {
-        "source"
-    }
-
-    -- output directories 
-    targetdir "output/compiler/bin/%{cfg.buildcfg}"
-    objdir "output/compiler/obj/%{cfg.buildcfg}"
-
 -- tokenizer
 project "tokenizer"
     kind "StaticLib"
@@ -55,11 +37,8 @@ project "tokenizer"
     }
 
     includedirs {
-        "source"
-    }
-
-    links {
-        "utility"
+        "source",
+        "source/utility"
     }
 
     -- output directories 
@@ -77,11 +56,8 @@ project "abstract_syntax_tree"
     } 
 
     includedirs {
-        "source"
-    }
-
-    links {
-        "utility"
+        "source",
+        "source/utility"
     }
 
     -- output directories 
@@ -99,12 +75,12 @@ project "parser"
     }
 
     includedirs {
-        "source"
+        "source",
+        "source/utility"
     }
 
     links {
-        "abstract_syntax_tree",
-        "utility"
+        "abstract_syntax_tree"
     }
 
     -- output directories 
@@ -122,12 +98,12 @@ project "type_checker"
     }
 
     includedirs {
-        "source"
+        "source",
+        "source/utility"
     }
 
     links {
-        "abstract_syntax_tree",
-        "utility"
+        "abstract_syntax_tree"
     }
 
     -- output directories 
@@ -145,11 +121,8 @@ project "intermediate_representation"
     } 
 
     includedirs {
-        "source"
-    }
-
-    links {
-        "utility"
+        "source",
+        "source/utility"
     }
 
     -- output directories 
@@ -167,13 +140,13 @@ project "ir_translator"
     }
 
     includedirs {
-        "source"
+        "source",
+        "source/utility"
     }
 
     links {
         "abstract_syntax_tree",
-        "intermediate_representation",
-        "utility"
+        "intermediate_representation"
     }
 
     -- output directories 
@@ -193,7 +166,9 @@ project "compiler"
     }
 
     includedirs {
-        "source"
+        "source",
+        "source/utility",
+        "source/parametric"
     }
 
     links {
@@ -202,8 +177,7 @@ project "compiler"
         "type_checker",
         "parser",
         "abstract_syntax_tree",
-        "tokenizer",
-        "utility"
+        "tokenizer"
     }
 
     -- output directories 
@@ -268,11 +242,9 @@ project "tests"
     debugargs { "run", "../../tests", "..\\..\\output\\compiler\\bin\\Debug\\compiler.exe" }
 
     includedirs {
-        "source"
-    }
-
-    links {
-        "utility"
+        "source",
+        "source/utility",
+        "source/parametric"
     }
 
     -- output directories 

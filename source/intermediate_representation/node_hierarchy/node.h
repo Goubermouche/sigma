@@ -4,9 +4,9 @@
 #include "intermediate_representation/node_hierarchy/properties/memory.h"
 #include "intermediate_representation/node_hierarchy/properties/control_flow.h"
 
-#include <utility/containers/allocators/block_allocator.h>
-#include <utility/containers/property.h>
-#include <utility/containers/slice.h>
+#include <util/block_allocator.h>
+#include <util/property.h>
+#include <util/containers/slice.h>
 
 namespace sigma::ir {
 	struct codegen_context;

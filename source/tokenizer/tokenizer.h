@@ -1,7 +1,7 @@
 #pragma once
 #include "tokenizer/token_buffer.h"
 
-#include <utility/containers/string_accessor.h>
+#include <util/string/string_accessor.h>
 
 namespace sigma {
 	struct frontend_context;
@@ -32,7 +32,7 @@ namespace sigma {
 		std::string m_current_section;
 		char m_last_character = ' '; // prime with a space character
 
-		utility::detail::string_accessor m_source;
+		utility::string_accessor m_source;
 		frontend_context& m_context;
 
 		// keywords

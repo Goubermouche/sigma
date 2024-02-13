@@ -1,6 +1,6 @@
 #pragma once
-#include <utility/containers/string_table.h>
-#include "utility/containers/slice.h"
+#include <util/string/string_table.h>
+#include "util/containers/slice.h"
 
 namespace sigma {
 	using namespace utility::types;

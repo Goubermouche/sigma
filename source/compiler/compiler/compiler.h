@@ -12,9 +12,9 @@
 
 #pragma once
 #include <intermediate_representation/target/target.h>
-#include <utility/parametric/parametric.h>
-#include <utility/diagnostics.h>
-#include <utility/filesystem/file.h>
+#include <parametric/parametric.h>
+#include <util/diagnostics.h>
+#include <util/filesystem/filesystem.h>
 
 namespace sigma {
 	using namespace utility::types;

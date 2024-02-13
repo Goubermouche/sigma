@@ -11,8 +11,6 @@
 //     -   more info related to numerical errors (hex etc)
 //     -   add namespaces to messages, whenever applicable (ie. x::y::test)
 // -   BUGS:
-//     -   type parameters do not take namespaces into account (just identifiers/base/ptr)
-//     -   copying structs 
 
 struct nested {
     u8 a;

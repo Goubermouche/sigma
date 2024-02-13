@@ -2,9 +2,9 @@
 #include <compiler/compiler/type_system/namespace_list.h>
 #include <compiler/compiler/type_system/type.h>
 
-#include "utility/containers/property.h"
-#include "utility/containers/handle.h"
-#include "utility/containers/slice.h"
+#include "util/property.h"
+#include "util/handle.h"
+#include "util/containers/slice.h"
 
 namespace sigma::ast {
 	struct node_type {

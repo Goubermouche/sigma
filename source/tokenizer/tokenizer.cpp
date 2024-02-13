@@ -2,7 +2,6 @@
 
 #include <compiler/compiler/compilation_context.h>
 #include <compiler/compiler/diagnostics.h>
-#include <utility/string_helper.h>
 
 namespace sigma {
 	tokenizer::tokenizer(const std::string& source, handle<filepath> source_path, frontend_context& context) : m_source(source), m_context(context) {
@@ -331,7 +330,7 @@ namespace sigma {
 
 		if(resolved_token == token_type::UNKNOWN) {
 			const handle location = get_current_location_ptr();
-			const std::string section = utility::detail::escape_string(m_current_section);
+			const std::string section = utility::escape_string(m_current_section);
 
 			return error::emit(error::code::UNKNOWN_SPECIAL_TOKEN, location, section);
 		}

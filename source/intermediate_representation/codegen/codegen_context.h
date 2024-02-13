@@ -7,8 +7,6 @@
 #include "intermediate_representation/codegen/control_flow_graph.h"
 #include "intermediate_representation/target/target.h"
 
-#include <utility/containers/allocator_based_containers/linked_list.h>
-
 namespace sigma::ir {
 	struct codegen_context {
 		/**
@@ -93,7 +91,7 @@ namespace sigma::ir {
 		work_list& work;
 
 		std::vector<u64> basic_block_order;
-		utility::contiguous_container<phi_value> phi_values;
+		utility::contiguous_buffer<phi_value> phi_values;
 
 		// live intervals which represent value lifetimes 
 		std::vector<live_interval> intervals;

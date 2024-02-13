@@ -3,7 +3,7 @@
 #include "intermediate_representation/node_hierarchy/symbol.h"
 #include "intermediate_representation/node_hierarchy/global.h"
 
-#include <utility/containers/byte_buffer.h>
+#include <util/containers/byte_buffer.h>
 
 // NOTE: it might be a good idea to determine block size from the node count
 //       of the preceding AST and scale relative to that

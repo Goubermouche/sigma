@@ -1,13 +1,13 @@
 #pragma once
 #include "intermediate_representation/codegen/codegen_context.h"
 
-#include <utility/containers/byte_buffer.h>
-#include <utility/containers/string.h>
+#include <util/containers/byte_buffer.h>
+#include <util/string/const_string.h>
 
 namespace sigma::ir {
 	class disassembler {
 	public:
-		virtual auto disassemble(const utility::byte_buffer& bytecode, const codegen_context& context) -> utility::string = 0;
+		virtual auto disassemble(const utility::byte_buffer& bytecode, const codegen_context& context) -> std::stringstream = 0;
 
 		virtual ~disassembler() = default;
 	};

@@ -7,8 +7,6 @@
 #include <type_checker/type_checker.h>
 #include <ir_translator/ir_translator.h>
 
-#include <utility/string_helper.h>
-
 #define LANG_FILE_EXTENSION ".s"
 
 namespace sigma {
@@ -85,7 +83,7 @@ namespace sigma {
 	}
 
 	void compiler::emit_object_file(ir::module& module, const filepath& path) {
-		utility::fs::file<utility::contiguous_container<utility::byte>>::save(path, module.generate_object_file());
+		utility::fs::file<utility::contiguous_buffer<utility::byte>>::save(path, module.generate_object_file());
 	}
 
 	auto compiler::get_emit_target_from_path(const filepath& path) const -> utility::result<emit_target> {

@@ -2,8 +2,8 @@
 #include "intermediate_representation/module.h"
 
 // x64
-#include "intermediate_representation/target/arch/x64/x64.h"
 #include "intermediate_representation/target/arch/x64/x64_disassembler.h"
+#include "intermediate_representation/target/arch/x64/x64.h"
 
 // object files
 #include "intermediate_representation/target/outputs/coff.h"

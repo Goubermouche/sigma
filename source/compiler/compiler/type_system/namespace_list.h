@@ -1,15 +1,15 @@
 #pragma once
-#include <util/string/string_table.h>
-#include "util/containers/slice.h"
+#include <utility/string/string_table.h>
+#include <utility/memory/memory_view.h>
 
 namespace sigma {
 	using namespace utility::types;
 
 	struct namespace_list {
-		using base = utility::slice<utility::string_table_key>;
+		using base = utility::memory_view<utility::string_table_key>;
 
 		namespace_list() = default;
-		namespace_list(const utility::slice<utility::string_table_key>& namespaces);
+		namespace_list(const utility::memory_view<utility::string_table_key>& namespaces);
 
 		auto empty() const -> bool;
 		auto size() const->u64;

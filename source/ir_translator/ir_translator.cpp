@@ -1,5 +1,4 @@
 #include "ir_translator.h"
-
 #include <compiler/compiler/compilation_context.h>
 
 namespace sigma {

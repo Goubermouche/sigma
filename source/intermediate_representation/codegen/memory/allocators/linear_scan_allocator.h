@@ -1,9 +1,9 @@
 #pragma once
+#include <utility/containers/dense_set.h>
+
 #include "intermediate_representation/codegen/memory/allocators/allocator_base.h"
 #include "intermediate_representation/codegen/live_interval.h"
 #include "intermediate_representation/target/arch/x64/x64.h"
-
-#include "util/containers/dense_set.h"
 
 #define REGISTER_CLASS_COUNT 2
 

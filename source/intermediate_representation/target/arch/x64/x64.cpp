@@ -1,8 +1,7 @@
 #include "x64.h"
+#include "intermediate_representation/codegen/instruction.h"
 
 #include <memory>
-
-#include "intermediate_representation/codegen/instruction.h"
 
 namespace sigma::ir {
 	namespace x64 {

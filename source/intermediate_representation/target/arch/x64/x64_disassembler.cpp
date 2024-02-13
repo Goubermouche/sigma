@@ -35,7 +35,7 @@ namespace sigma::ir {
 		while(range.start < range.end) {
 			x64::x64_instruction inst;
 
-			if(!disassemble_instruction(bytecode.get_slice(range.start, range.end - range.start), inst)) {
+			if(!disassemble_instruction(bytecode.get_view(range.start, range.end - range.start), inst)) {
 				range.start++;
 				assembly << "  ERROR\n";
 				continue;
@@ -392,7 +392,7 @@ namespace sigma::ir {
 		}
 
 		// writes out the RM reg (or base and index)
-		const ptr_diff delta = disassemble_memory_operand(bytecode.get_slice(current, bytecode.get_size()), bytecode.get_size() - current, rm_slot, mod, rm, rex, inst);
+		const ptr_diff delta = disassemble_memory_operand(bytecode.get_view(current, bytecode.get_size()), bytecode.get_size() - current, rm_slot, mod, rm, rex, inst);
 
 		if (delta < 0) {
 			return false;

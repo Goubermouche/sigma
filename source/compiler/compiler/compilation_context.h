@@ -1,9 +1,9 @@
 #pragma once
 #include "compiler/compiler/type_system/semantic_context.h"
 
-#include <abstract_syntax_tree/tree.h>
 #include <intermediate_representation/builder.h>
-#include <util/string/string_table.h>
+#include <utility/string/string_table.h>
+#include <abstract_syntax_tree/tree.h>
 #include <tokenizer/token_buffer.h>
 
 // TODO: add support for emitting to .dot files

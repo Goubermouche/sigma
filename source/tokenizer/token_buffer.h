@@ -1,8 +1,8 @@
 #pragma once
-#include "tokenizer/token.h"
+#include <utility/memory/memory_buffer.h>
+#include <utility/string/string_table.h>
 
-#include <util/containers/contiguous_buffer.h>
-#include <util/string/string_table.h>
+#include "tokenizer/token.h"
 
 namespace sigma {
 	class token_buffer {
@@ -24,7 +24,7 @@ namespace sigma {
 
 		[[nodiscard]] auto empty() const -> bool;
 	private:
-		utility::contiguous_buffer<token_info> m_token_infos;
+		utility::memory_buffer<token_info> m_token_infos;
 	};
 
 	class token_buffer_iterator {

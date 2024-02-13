@@ -10,7 +10,7 @@ namespace sigma {
 			const utility::string_table_key printf_key = this->syntax.strings.insert("printf");
 			const utility::string_table_key format_key = this->syntax.strings.insert("format");
 
-			auto printf_params = utility::slice<named_data_type>(this->syntax.ast.get_allocator(), 1);
+			auto printf_params = utility::memory_view<named_data_type>(this->syntax.ast.get_allocator(), 1);
 			printf_params[0] = named_data_type{ type::create_char(1), format_key };
 
 			const function_signature printf_function = {
@@ -28,7 +28,7 @@ namespace sigma {
 			const utility::string_table_key malloc_key = this->syntax.strings.insert("malloc");
 			const utility::string_table_key size_key = this->syntax.strings.insert("size");
 		
-			auto malloc_params = utility::slice<named_data_type>(this->syntax.ast.get_allocator(), 1);
+			auto malloc_params = utility::memory_view<named_data_type>(this->syntax.ast.get_allocator(), 1);
 			malloc_params[0] = named_data_type{ type::create_u64(), size_key };
 		
 			const function_signature malloc_function = {

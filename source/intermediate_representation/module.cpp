@@ -4,11 +4,11 @@
 #include "intermediate_representation/codegen/memory/allocators/linear_scan_allocator.h"
 
 // transformation passes
-#include "intermediate_representation/codegen/codegen_context.h"
 #include "intermediate_representation/codegen/optimization/optimization_pass_list.h"
 #include "intermediate_representation/codegen/transformation/live_range_analysis.h"
 #include "intermediate_representation/codegen/transformation/scheduler.h"
 #include "intermediate_representation/codegen/transformation/use_list.h"
+#include "intermediate_representation/codegen/codegen_context.h"
 
 namespace sigma::ir {
 	module::module(target target) : m_allocator(1024), m_codegen(target) {

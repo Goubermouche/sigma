@@ -1,7 +1,8 @@
 #pragma once
+#include <utility/handle.h>
+
 #include "intermediate_representation/target/outputs/object_file_emitter.h"
 #include "intermediate_representation/target/target.h"
-#include <util/handle.h>
 
 #define COFF_CHARACTERISTICS_TEXT   0x60500020u
 #define COFF_CHARACTERISTICS_DATA   0xC0000040u

@@ -1,5 +1,5 @@
 #include "token.h"
-#include <util/macros.h>
+#include <utility/macros.h>
 
 namespace sigma {
 	token::token(token_type type) : type(type) {}

@@ -1,6 +1,5 @@
 #include "linear_scan_allocator.h"
-
-#include "compiler/compiler/compiler.h"
+#include <compiler/compiler/compiler.h>
 
 namespace sigma::ir {
 	void linear_scan_allocator::allocate(codegen_context& context) {

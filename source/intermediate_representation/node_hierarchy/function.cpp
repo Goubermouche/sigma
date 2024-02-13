@@ -1,7 +1,7 @@
 #include "function.h"
 
-#include "abstract_syntax_tree/node.h"
 #include "intermediate_representation/codegen/work_list.h"
+#include "abstract_syntax_tree/node.h"
 
 namespace sigma::ir {
 	function::function(const std::string& name, linkage linkage, u8 parent_section)
@@ -413,7 +413,7 @@ namespace sigma::ir {
 		const u64 new_count = n->inputs.get_size() + 1;
 
 		// reallocate the necessary space again
-		utility::slice<handle<node>> new_inputs(allocator, new_count);
+		utility::memory_view<handle<node>> new_inputs(allocator, new_count);
 
 		// copy the old data over to the new slice
 		std::memcpy(new_inputs.get_data(), n->inputs.get_data(), old_count * sizeof(handle<node>));

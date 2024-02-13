@@ -1,6 +1,6 @@
 #pragma once
-#include <util/containers/byte_buffer.h>
-#include <util/handle.h>
+#include <utility/containers/byte_buffer.h>
+#include <utility/handle.h>
 
 namespace sigma::ir {
 	using namespace utility::types;
@@ -8,7 +8,6 @@ namespace sigma::ir {
 	struct module_section;
 	struct compiled_function;
 	class module;
-
 
 	/**
 	 * \brief Generic object file emitter, this base class should be specialized for individual

@@ -1,7 +1,7 @@
 #pragma once
-#include "tokenizer/token_buffer.h"
+#include <utility/string/string_accessor.h>
 
-#include <util/string/string_accessor.h>
+#include "tokenizer/token_buffer.h"
 
 namespace sigma {
 	struct frontend_context;

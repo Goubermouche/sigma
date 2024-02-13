@@ -9,8 +9,8 @@
 //          present or not. Does not throw errors
 
 #pragma once
-#include <compiler/compiler/type_system/type.h>
 #include <compiler/compiler/compilation_context.h>
+#include <compiler/compiler/type_system/type.h>
 #include <abstract_syntax_tree/tree.h>
 #include <tokenizer/token_buffer.h>
 

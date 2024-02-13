@@ -130,7 +130,7 @@ namespace sigma::ir {
 
 		// write the file
 		utility::byte_buffer out_file;
-		utility::byte_buffer headers = utility::byte_buffer::zero_initialize(sizeof(coff_file_header) + sizeof(coff_section_header) * section_count);
+		utility::byte_buffer headers = utility::byte_buffer::create_zero(sizeof(coff_file_header) + sizeof(coff_section_header) * section_count);
 
 		// write the file header 
 		auto* file = reinterpret_cast<coff_file_header*>(headers.get_data());
@@ -172,7 +172,7 @@ namespace sigma::ir {
 		out_file.append(headers);
 
 		for (u64 i = 0; i < output.sections.size(); ++i) {
-			utility::byte_buffer sec = utility::byte_buffer::zero_initialize(output.sections[i].total_size);
+			utility::byte_buffer sec = utility::byte_buffer::create_zero(output.sections[i].total_size);
 			helper_write_section(0, &output.sections[i], 0, sec);
 			out_file.append(sec);
 
@@ -254,7 +254,7 @@ namespace sigma::ir {
 
 		std::vector<std::string> string_table_data;
 		string_table_data.resize(unique_id_counter);
-		utility::byte_buffer symbol_table_writer = utility::byte_buffer::reserve_initialize(header.symbol_count * sizeof(coff_symbol));
+		utility::byte_buffer symbol_table_writer = utility::byte_buffer::create_reserve(header.symbol_count * sizeof(coff_symbol));
 		u64 symbol_count = 1;
 
 		for (module_section& section : output.sections) {
@@ -411,7 +411,7 @@ namespace sigma::ir {
 
 		out_file.append(symbol_table_writer);
 
-		utility::byte_buffer chunk = utility::byte_buffer::zero_initialize(string_table.size);
+		utility::byte_buffer chunk = utility::byte_buffer::create_zero(string_table.size);
 		std::memcpy(chunk.get_data(), &string_table_mark, sizeof(u32));
 		u64 j = 4;
 

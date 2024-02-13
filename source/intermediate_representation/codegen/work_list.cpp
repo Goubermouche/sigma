@@ -1,6 +1,7 @@
 #include "work_list.h"
+#include <utility/containers/stack.h>
+
 #include "intermediate_representation/codegen/codegen_context.h"
-#include "util/containers/stack.h"
 
 namespace sigma::ir {
 	auto work_list::mark_next_control(handle<node> target) -> handle<node> {
@@ -107,7 +108,7 @@ namespace sigma::ir {
 
 			stack.push_back(end);
 
-			while (!stack.empty()) {
+			while (!stack.is_empty()) {
 				handle<node> n = stack.pop_back();
 
 				// place self first

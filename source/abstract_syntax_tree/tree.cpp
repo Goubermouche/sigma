@@ -1,5 +1,5 @@
 #include "tree.h"
-#include "util/containers/stack.h"
+#include <utility/containers/stack.h>
 
 namespace sigma::ast {
 	tree::tree() : m_allocator(1024) {}
@@ -14,7 +14,7 @@ namespace sigma::ast {
 		for(const handle<node>& root_node : m_nodes) {
 			node_stack.push_back({ root_node, 0 });
 
-			while (!node_stack.empty()) {
+			while (!node_stack.is_empty()) {
 				auto [current, depth] = node_stack.pop_back();
 
 				if(!current) {
@@ -30,15 +30,15 @@ namespace sigma::ast {
 		}
 	}
 
-	auto tree::allocate_node_list(u16 count) -> utility::slice<handle<node>, u16> {
+	auto tree::allocate_node_list(u16 count) -> utility::memory_view<handle<node>, u16> {
 		return { m_allocator, count };
 	}
 
-	auto tree::get_nodes() -> utility::contiguous_buffer<handle<node>>& {
+	auto tree::get_nodes() -> utility::memory_buffer<handle<node>>& {
 		return m_nodes;
 	}
 
-	auto tree::get_nodes() const -> const utility::contiguous_buffer<handle<node>>& {
+	auto tree::get_nodes() const -> const utility::memory_buffer<handle<node>>& {
 		return m_nodes;
 	}
 

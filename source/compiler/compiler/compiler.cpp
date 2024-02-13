@@ -1,11 +1,12 @@
 #include "compiler.h"
-#include <compiler/compiler/compilation_context.h>
-#include <compiler/compiler/diagnostics.h>
 
+#include <ir_translator/ir_translator.h>
+#include <type_checker/type_checker.h>
 #include <tokenizer/tokenizer.h>
 #include <parser/parser.h>
-#include <type_checker/type_checker.h>
-#include <ir_translator/ir_translator.h>
+
+#include "compiler/compiler/compilation_context.h"
+#include "compiler/compiler/diagnostics.h"
 
 #define LANG_FILE_EXTENSION ".s"
 
@@ -28,7 +29,7 @@ namespace sigma {
 		frontend_context frontend;
 
 		// generate the AST
-		TRY(const std::string file, utility::fs::file<std::string>::load(m_description.source_path));
+		TRY(const std::string file, utility::fs::load(m_description.source_path));
 		TRY(tokenizer::tokenize(file, &m_description.source_path, frontend));
 		TRY(parser::parse(frontend));
 
@@ -40,15 +41,12 @@ namespace sigma {
 		TRY(type_checker::type_check(backend));
 		TRY(ir_translator::translate(backend));
 
-		// backend.syntax.print_ast();
-		// return SUCCESS;
-
 		// compile the generated IR module
 		backend.module.compile();
 
 		//emit as an object file
 		if(m_emit_target == emit_target::OBJECT) {
-			emit_object_file(backend.module, m_description.emit_path);
+			TRY(emit_object_file(backend.module, m_description.emit_path));
 		}
 
 		return SUCCESS;
@@ -82,8 +80,8 @@ namespace sigma {
 		return m_description.source_path.get_parent_path() / (name + format);
 	}
 
-	void compiler::emit_object_file(ir::module& module, const filepath& path) {
-		utility::fs::file<utility::contiguous_buffer<utility::byte>>::save(path, module.generate_object_file());
+	auto compiler::emit_object_file(ir::module& module, const filepath& path) -> utility::result<void> {
+		return utility::fs::write(path, module.generate_object_file());
 	}
 
 	auto compiler::get_emit_target_from_path(const filepath& path) const -> utility::result<emit_target> {

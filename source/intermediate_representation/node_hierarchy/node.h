@@ -1,12 +1,12 @@
 #pragma once
-#include "intermediate_representation/node_hierarchy/types.h"
+#include <utility/allocators/block_allocator.h>
+#include <utility/memory/memory_view.h>
+#include <utility/property.h>
+
+#include "intermediate_representation/node_hierarchy/properties/control_flow.h"
 #include "intermediate_representation/node_hierarchy/properties/operations.h"
 #include "intermediate_representation/node_hierarchy/properties/memory.h"
-#include "intermediate_representation/node_hierarchy/properties/control_flow.h"
-
-#include <util/block_allocator.h>
-#include <util/property.h>
-#include <util/containers/slice.h>
+#include "intermediate_representation/node_hierarchy/types.h"
 
 namespace sigma::ir {
 	struct codegen_context;
@@ -246,7 +246,7 @@ namespace sigma::ir {
 		auto is_pinned() const -> bool;
 
 		handle<user> use;
-		utility::slice<handle<node>> inputs; // inputs for the given node
+		utility::memory_view<handle<node>> inputs; // inputs for the given node
 		u64 global_value_index;              // gvi used for optimizations
 		data_type dt;                        // generic data type of the node
 	private:

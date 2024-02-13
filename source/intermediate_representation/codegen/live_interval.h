@@ -1,9 +1,9 @@
 #pragma once
+#include <utility/containers/dense_set.h>
+#include <utility/range.h>
+
 #include "intermediate_representation/node_hierarchy/node.h"
 #include "intermediate_representation/codegen/memory/memory.h"
-
-#include <util/containers/dense_set.h>
-#include <util/range.h>
 
 namespace sigma::ir {
 	struct virtual_value {

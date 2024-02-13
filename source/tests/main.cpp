@@ -1,8 +1,8 @@
 #include <parametric/parametric.h>
-#include <util/filesystem/filesystem.h>
-#include <util/string/const_string.h>
-#include <util/diagnostics.h>
-#include <util/shell.h>
+#include <utility/filesystem/filesystem.h>
+#include <utility/string/const_string.h>
+#include <utility/diagnostics.h>
+#include <utility/shell.h>
 
 using namespace utility::types;
 
@@ -28,7 +28,7 @@ using namespace utility::types;
 #endif
 
 auto read_or_throw(const filepath& path) -> std::string {
-	const auto result = utility::fs::file<std::string>::load(path);
+	const auto result = utility::fs::load(path);
 	if (result.has_error()) {
 		throw std::runtime_error(result.get_error().get_message());
 	}

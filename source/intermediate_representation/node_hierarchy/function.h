@@ -3,7 +3,7 @@
 #include "intermediate_representation/node_hierarchy/symbol.h"
 #include "intermediate_representation/node_hierarchy/global.h"
 
-#include <util/containers/byte_buffer.h>
+#include <utility/containers/byte_buffer.h>
 
 // NOTE: it might be a good idea to determine block size from the node count
 //       of the preceding AST and scale relative to that
@@ -131,7 +131,7 @@ namespace sigma::ir {
 		node_ptr->set_type(type);
 		node_ptr->set_property(allocator.allocate_zero(sizeof(extra_type)));
 
-		node_ptr->inputs = utility::slice<handle<node>>(allocator, input_count);
+		node_ptr->inputs = utility::memory_view<handle<node>>(allocator, input_count);
 		node_ptr->global_value_index = node_count++;
 
 		return node_ptr;

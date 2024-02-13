@@ -1,6 +1,6 @@
 #pragma once
-#include <util/types.h>
-#include <util/handle.h>
+#include <utility/handle.h>
+#include <utility/types.h>
 
 namespace sigma::ir {
 	using namespace utility::types;

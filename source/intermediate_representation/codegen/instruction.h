@@ -247,7 +247,7 @@ namespace sigma::ir {
 		// -    in
 		// -    tmp
 		// -    save
-		utility::slice<i32> operands;
+		utility::memory_view<i32> operands;
 		u8 out_count = 0;
 		u8 tmp_count = 0;
 		u8 in_count = 0;

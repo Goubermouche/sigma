@@ -1,7 +1,7 @@
 #include "namespace_list.h"
 
 namespace sigma {
-	namespace_list::namespace_list(const utility::slice<utility::string_table_key>& namespaces)
+	namespace_list::namespace_list(const utility::memory_view<utility::string_table_key>& namespaces)
 		: namespaces(namespaces) {}
 
 	auto namespace_list::empty() const -> bool {

@@ -1,5 +1,5 @@
 #include "types.h"
-#include <util/macros.h>
+#include <utility/macros.h>
 
 namespace sigma::ir {
 	data_type::data_type() : m_base(base::UNKNOWN), m_bit_width(0) {}

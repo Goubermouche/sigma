@@ -1,4 +1,5 @@
 #pragma once
+#include "intermediate_representation/node_hierarchy/types.h"
 
 namespace sigma::ir {
 	using namespace utility::types;

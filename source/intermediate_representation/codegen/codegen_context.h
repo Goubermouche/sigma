@@ -1,10 +1,10 @@
 #pragma once
+#include "intermediate_representation/codegen/instruction_operand.h"
+#include "intermediate_representation/codegen/control_flow_graph.h"
 #include "intermediate_representation/node_hierarchy/function.h"
 #include "intermediate_representation/codegen/live_interval.h"
 #include "intermediate_representation/codegen/instruction.h"
-#include "intermediate_representation/codegen/instruction_operand.h"
 #include "intermediate_representation/codegen/work_list.h"
-#include "intermediate_representation/codegen/control_flow_graph.h"
 #include "intermediate_representation/target/target.h"
 
 namespace sigma::ir {
@@ -58,7 +58,7 @@ namespace sigma::ir {
 			const handle inst_ptr = static_cast<instruction*>(inst_allocation);
 
 			// assign data
-			inst_ptr->operands = utility::slice<i32>(function->allocator, operand_count);
+			inst_ptr->operands = utility::memory_view<i32>(function->allocator, operand_count);
 			inst_ptr->set_property(function->allocator.allocate_zero(sizeof(extra_type)));
 
 			return inst_ptr;
@@ -91,7 +91,7 @@ namespace sigma::ir {
 		work_list& work;
 
 		std::vector<u64> basic_block_order;
-		utility::contiguous_buffer<phi_value> phi_values;
+		utility::memory_buffer<phi_value> phi_values;
 
 		// live intervals which represent value lifetimes 
 		std::vector<live_interval> intervals;

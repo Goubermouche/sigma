@@ -1,9 +1,9 @@
 #include "x64.h"
-#include "abstract_syntax_tree/node.h"
-#include "intermediate_representation/codegen/instruction.h"
+#include <abstract_syntax_tree/node.h>
 
 #include "intermediate_representation/target/system/systemv/systemv.h"
 #include "intermediate_representation/target/system/win/win.h"
+#include "intermediate_representation/codegen/instruction.h"
 
 namespace sigma::ir {
 	void x64_architecture::select_instructions(codegen_context& context) {

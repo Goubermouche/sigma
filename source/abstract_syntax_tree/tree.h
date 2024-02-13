@@ -1,8 +1,8 @@
 #pragma once
 #include "abstract_syntax_tree/node.h"
 
-#include <util/block_allocator.h>
-#include <util/containers/contiguous_buffer.h>
+#include <utility/allocators/block_allocator.h>
+#include <utility/memory/memory_buffer.h>
 
 namespace sigma::ast {
 	class tree {
@@ -12,10 +12,10 @@ namespace sigma::ast {
 		void traverse(std::function<void(handle<node>, u16)>&& function) const;
 
 		void add_node(handle<node> node);
-		auto allocate_node_list(u16 count) -> utility::slice<handle<node>, u16>;
+		auto allocate_node_list(u16 count) -> utility::memory_view<handle<node>, u16>;
 
-		auto get_nodes() -> utility::contiguous_buffer<handle<node>>&;
-		auto get_nodes() const -> const utility::contiguous_buffer<handle<node>>&;
+		auto get_nodes() -> utility::memory_buffer<handle<node>>&;
+		auto get_nodes() const -> const utility::memory_buffer<handle<node>>&;
 		auto get_allocator() -> utility::block_allocator&;
 
 		template<typename extra_type = utility::empty_property>
@@ -33,7 +33,7 @@ namespace sigma::ast {
 		}
 	private:
 		// handles pointing to the main nodes (functions and globals)
-		utility::contiguous_buffer<handle<node>> m_nodes;
+		utility::memory_buffer<handle<node>> m_nodes;
 
 		// the actual node data is stored in a block allocator
 		utility::block_allocator m_allocator;

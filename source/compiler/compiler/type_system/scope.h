@@ -1,6 +1,6 @@
 #pragma once
 #include <intermediate_representation/builder.h>
-#include <util/string/string_table.h>
+#include <utility/string/string_table.h>
 #include <abstract_syntax_tree/node.h>
 
 #include "compiler/compiler/type_system/type.h"

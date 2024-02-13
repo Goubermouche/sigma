@@ -12,9 +12,9 @@
 
 #pragma once
 #include <intermediate_representation/target/target.h>
+#include <utility/filesystem/filesystem.h>
 #include <parametric/parametric.h>
-#include <util/diagnostics.h>
-#include <util/filesystem/filesystem.h>
+#include <utility/diagnostics.h>
 
 namespace sigma {
 	using namespace utility::types;
@@ -45,13 +45,12 @@ namespace sigma {
 		auto get_object_file_path(const std::string& name = "a") const -> filepath;
 
 		static auto verify_file(const filepath& path) -> utility::result<void>;
-		static void emit_object_file(ir::module& module, const filepath& path);
+		static auto emit_object_file(ir::module& module, const filepath& path) -> utility::result<void>;
 
 		auto get_emit_target_from_path(const filepath& path) const -> utility::result<emit_target>;
 	private:
 		compiler_description m_description;
-
-		emit_target m_emit_target;
+		emit_target m_emit_target = emit_target::NONE;
 	};
 } // namespace sigma
 

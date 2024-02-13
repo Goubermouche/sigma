@@ -1,7 +1,8 @@
 #pragma once
-#include <compiler/compiler/type_system/namespace_list.h>
-#include <util/containers/slice.h>
+#include <utility/memory/memory_view.h>
 #include <tokenizer/token.h>
+
+#include "compiler/compiler/type_system/namespace_list.h"
 
 namespace sigma {
 	using namespace utility::types;
@@ -28,7 +29,7 @@ namespace sigma {
 			STRUCT
 		};
 
-		static auto create_struct(const utility::slice<type, u8>& members, utility::string_table_key identifier) -> type;
+		static auto create_struct(const utility::memory_view<type, u8>& members, utility::string_table_key identifier) -> type;
 		static auto create_member(const type& ty, utility::string_table_key identifier) -> type;
 
 		static auto create_unknown() -> type;
@@ -53,14 +54,14 @@ namespace sigma {
 		auto get_size() const -> u16;
 
 		auto get_member_identifier() const -> utility::string_table_key;
-		auto get_struct_members() const -> const utility::slice<type, u8>&;
-		auto get_struct_members() -> utility::slice<type, u8>&;
+		auto get_struct_members() const -> const utility::memory_view<type, u8>&;
+		auto get_struct_members() -> utility::memory_view<type, u8>&;
 		auto get_unresolved() const -> utility::string_table_key;
 		auto get_namespaces() const -> const namespace_list&;
 		auto get_pointer_level() const -> u8;
 		auto get_kind() const -> kind;
 
-		void set_struct_members(const utility::slice<type, u8>& members);
+		void set_struct_members(const utility::memory_view<type, u8>& members);
 		void set_namespaces(const namespace_list& namespaces);
 		void set_kind(kind kind);
 
@@ -103,7 +104,7 @@ namespace sigma {
 			utility::string_table_key m_unresolved;
 
 			// STRUCT
-			utility::slice<type, u8> m_struct_members;
+			utility::memory_view<type, u8> m_struct_members;
 		};
 	};
 
@@ -127,7 +128,7 @@ namespace sigma {
 		bool operator<(const function_signature& other) const;
 
 		type return_type;
-		utility::slice<named_data_type> parameter_types;
+		utility::memory_view<named_data_type> parameter_types;
 		bool has_var_args = false;
 
 		utility::string_table_key identifier_key;

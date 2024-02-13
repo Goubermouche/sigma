@@ -27,7 +27,7 @@ namespace sigma {
 	}
 
 	auto token_buffer::empty() const -> bool {
-		return m_token_infos.empty();
+		return m_token_infos.is_empty();
 	}
 
 	auto token_buffer::get_token(u64 index) const -> token {

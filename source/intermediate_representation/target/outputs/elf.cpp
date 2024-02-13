@@ -71,7 +71,7 @@ namespace sigma::ir {
 
 		// calculate symbol IDs
 		utility::byte_buffer local_symbol_table = 
-			utility::byte_buffer::zero_initialize(sizeof(elf64_symbol));
+			utility::byte_buffer::create_zero(sizeof(elf64_symbol));
 
 		utility::byte_buffer global_symbol_table;
 
@@ -138,7 +138,7 @@ namespace sigma::ir {
 
 		// write the output
 		u64 write_position = 0;
-		utility::byte_buffer output_buffer = utility::byte_buffer::zero_initialize(output_size);
+		utility::byte_buffer output_buffer = utility::byte_buffer::create_zero(output_size);
 		utility::byte* output = output_buffer.get_data();
 
 		WRITE(&header, sizeof(header));

@@ -15,7 +15,7 @@ namespace sigma::ir {
 	}
 
 	auto global::add_region(u32 region_offset, u32 region_size) -> void* {
-		void* ptr = malloc(region_size);
+		void* ptr = utility::malloc(region_size);
 
 		const init_object object {
 			.type = init_object::REGION,

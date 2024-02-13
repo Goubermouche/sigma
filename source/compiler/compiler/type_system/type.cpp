@@ -1,6 +1,6 @@
 #include "type.h"
 
-#include <util/macros.h>
+#include <utility/macros.h>
 
 namespace sigma {
   named_data_type::named_data_type(sigma::type type, utility::string_table_key identifier_key)
@@ -171,7 +171,7 @@ namespace sigma {
 		return member_ty;
 	}
 
-	auto type::create_struct(const utility::slice<type, u8>& members, utility::string_table_key identifier) -> type {
+	auto type::create_struct(const utility::memory_view<type, u8>& members, utility::string_table_key identifier) -> type {
 		type struct_ty = { STRUCT, 0 };
 		struct_ty.m_struct_members = members;
 		struct_ty.m_identifier = identifier;
@@ -339,12 +339,12 @@ namespace sigma {
 		return m_identifier;
 	}
 
-	auto type::get_struct_members() const -> const utility::slice<type, u8>& {
+	auto type::get_struct_members() const -> const utility::memory_view<type, u8>& {
 		ASSERT(m_kind == STRUCT, "cannot get struct members from a non-struct type");
 		return m_struct_members;
 	}
 
-	auto type::get_struct_members() -> utility::slice<type, u8>& {
+	auto type::get_struct_members() -> utility::memory_view<type, u8>& {
 		ASSERT(m_kind == STRUCT, "cannot get struct members from a non-struct type");
 		return m_struct_members;
 	}
@@ -366,7 +366,7 @@ namespace sigma {
 		return m_kind;
 	}
 
-	void type::set_struct_members(const utility::slice<type, u8>& members) {
+	void type::set_struct_members(const utility::memory_view<type, u8>& members) {
 		m_struct_members = members;
 	}
 

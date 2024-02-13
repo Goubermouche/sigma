@@ -171,7 +171,7 @@ namespace sigma {
 
 		function_signature signature = {
 			.return_type = return_type,
-			.parameter_types = utility::slice<named_data_type>(allocator, parameters.size()),
+			.parameter_types = utility::memory_view<named_data_type>(allocator, parameters.size()),
 			.identifier_key = identifier
 		};
 
@@ -944,7 +944,7 @@ namespace sigma {
 			m_tokens.next(); // prime the next token
 		}
 
-		utility::slice<utility::string_table_key> list(m_context.allocator, namespaces.size());
+		utility::memory_view<utility::string_table_key> list(m_context.allocator, namespaces.size());
 		utility::copy(list, namespaces);
 
 		return { list };
@@ -1229,7 +1229,7 @@ namespace sigma {
 		const handle<ast::node> struct_node = create_struct_declaration(location);
 
 		ASSERT(members.size() < std::numeric_limits<u8>::max(), "too many members");
-		utility::slice<type, u8> member_slice(m_context.allocator, static_cast<u8>(members.size()));
+		utility::memory_view<type, u8> member_slice(m_context.allocator, static_cast<u8>(members.size()));
 		utility::copy(member_slice, members);
 
 		auto& expression = struct_node->get<ast::named_type_expression>();

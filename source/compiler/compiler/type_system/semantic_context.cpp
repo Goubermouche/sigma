@@ -1,7 +1,7 @@
 #include "semantic_context.h"
 
-#include <compiler/compiler/compilation_context.h>
-#include <compiler/compiler/diagnostics.h>
+#include "compiler/compiler/compilation_context.h"
+#include "compiler/compiler/diagnostics.h"
 
 #define INVALID_CAST_COST 1000
 

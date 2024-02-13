@@ -1,5 +1,5 @@
 #include "node.h"
-#include "util/macros.h"
+#include <utility/macros.h>
 
 namespace sigma::ast {
 	node_type::node_type(underlying type) : type(type) {}

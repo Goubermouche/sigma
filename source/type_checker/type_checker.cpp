@@ -1,5 +1,4 @@
 #include "type_checker.h"
-
 #include <compiler/compiler/compilation_context.h>
 #include <compiler/compiler/diagnostics.h>
 

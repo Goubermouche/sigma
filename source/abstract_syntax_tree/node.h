@@ -2,9 +2,9 @@
 #include <compiler/compiler/type_system/namespace_list.h>
 #include <compiler/compiler/type_system/type.h>
 
-#include "util/property.h"
-#include "util/handle.h"
-#include "util/containers/slice.h"
+#include <utility/memory/memory_view.h>
+#include <utility/property.h>
+#include <utility/handle.h>
 
 namespace sigma::ast {
 	struct node_type {
@@ -165,7 +165,7 @@ namespace sigma::ast {
 	struct node : node_properties {
 		auto is_branch() const -> bool;
 
-		utility::slice<handle<node>, u16> children;
+		utility::memory_view<handle<node>, u16> children;
 
 		// metadata
 		node_type type;

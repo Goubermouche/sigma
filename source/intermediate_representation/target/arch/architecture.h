@@ -1,6 +1,6 @@
 #pragma once
 #include <utility/containers/byte_buffer.h>
-#include <utility/string/const_string.h>
+#include <utility/string/string_view.h>
 
 #include "intermediate_representation/codegen/codegen_context.h"
 

@@ -230,7 +230,7 @@ namespace sigma::ir {
 				for (const init_object& object : global->objects) {
 					u64 actual_pos = global->position + object.offset;
 
-					if (object.type == init_object::RELOCATION) {
+					if(object.type == init_object::RELOCATION) {
 						*relocations_ptr++ = coff_image_relocation{
 							.virtual_address = static_cast<u32>(actual_pos),
 							.symbol_table_index = static_cast<u32>(object.relocation->id),

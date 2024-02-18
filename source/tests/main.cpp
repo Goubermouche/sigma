@@ -1,6 +1,6 @@
 #include <parametric/parametric.h>
 #include <utility/filesystem/filesystem.h>
-#include <utility/string/const_string.h>
+#include <utility/string/string_view.h>
 #include <utility/diagnostics.h>
 #include <utility/shell.h>
 

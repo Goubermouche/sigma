@@ -30,7 +30,7 @@ $ sigma compile main.s
 ```
 
 ## Project status
-As Sigma is currently under heavy development, it isn't ready for stable use, and many breaking changes may (and most likely will) be made. Please note that while the end goal is to target GPU's and other massivelly parallel targets, the current goal is to get a basic CPU-oriented language going, and there isn't a hard timeframe set - for more details see the current status bellow: 
+I've taken a break from developing Sigma for now, but the project isn't dead and will be worked on eventually. I'm currently trying to focus on the development of my minimalistic backend and x86/64 assembler, which will later be used as the main backend for this project. 
 -   TODO:
     -   Project cleanup
     -   Better object file emitter (Windows)

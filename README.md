@@ -9,6 +9,10 @@
 [![Linux](https://github.com/Goubermouche/sigma/actions/workflows/linux.yml/badge.svg)](https://github.com/Goubermouche/sigma/actions/workflows/linux.yml)   [![Windows](https://github.com/Goubermouche/sigma/actions/workflows/windows.yml/badge.svg)](https://github.com/Goubermouche/sigma/actions/workflows/windows.yml)
 </div>
 
+> [!IMPORTANT]
+> I've taken a break from developing Sigma, but the project isn't dead and will be worker on eventually, in some shape or form.
+
+
 <p align="center">
 Sigma is a compiled, statically typed, C-like, data oriented language with a focus on performance and low-level optimization using GPU acceleration via kernels. Sigma is currently under heavy development and isn't ready for stable use. 
 </p>

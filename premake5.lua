@@ -11,6 +11,11 @@ workspace "sigma"
         "MultiProcessorCompile"
     }
 
+    disablewarnings { 
+        "missing-field-initializers",
+        "changes-meaning"
+    }
+
     -- buildoptions { "-fsanitize=address" }
     -- linkoptions { "-fsanitize=address" }
     -- debugformat "C7"

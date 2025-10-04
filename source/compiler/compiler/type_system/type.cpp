@@ -80,7 +80,7 @@ namespace sigma {
 			}
 
 			switch (ty.get_kind()) {
-				case type::VOID: PANIC("cannot dereference a void*");
+				case type::VOID: PANIC("cannot dereference a void*"); break;
 				case type::I8:
 				case type::I16:
 				case type::U8:

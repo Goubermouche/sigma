@@ -36,7 +36,7 @@ i32 show_docs(const parametric::parameters& params) {
 		return 0;
 	}
 
-	std::cout << std::format("error: unable to open the documentation link ({})\n", link);
+	std::cerr << std::format("error: unable to open the documentation link ({})\n", link);
 	return 1;
 }
 

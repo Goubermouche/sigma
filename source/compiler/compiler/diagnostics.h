@@ -66,10 +66,10 @@ namespace sigma {
 		 */
 		template<typename... arguments>
 		static auto emit(code code, handle<token_location> location, arguments&&... args) -> utility::error {
-			const std::string message = std::vformat(
-				m_errors.find(code)->second, 
-				std::make_format_args(std::forward<arguments>(args)...)
-			);
+			auto arg_tuple = std::make_tuple(args...);
+			const std::string message = std::apply([&](auto&... vals) {
+				return std::vformat(m_errors.find(code)->second, std::make_format_args(vals...));
+    	}, arg_tuple);
 
 			const std::string error_message = std::format(
 				"{}:{}:{}: error C{}: {}",
@@ -79,7 +79,6 @@ namespace sigma {
 				static_cast<u32>(code), 
 				message
 			);
-
 			return { error_message };
 		}
 
@@ -92,16 +91,15 @@ namespace sigma {
 		 */
 		template<typename... arguments>
 		static auto emit(code code, arguments&&... args) -> utility::error {
-			const std::string message = std::vformat(
-				m_errors.find(code)->second, 
-				std::make_format_args(std::forward<arguments>(args)...)
-			);
+			auto arg_tuple = std::make_tuple(args...);
+			const std::string message = std::apply([&](auto&... vals) {
+				return std::vformat(m_errors.find(code)->second, std::make_format_args(vals...));
+			}, arg_tuple);
 
 			const std::string error_message = std::format(
 				"error C{}: {}", 
 				static_cast<u32>(code), message
 			);
-
 			return { error_message };
 		}
 	private:
@@ -165,15 +163,19 @@ namespace sigma {
 
 		template<typename... arguments>
 		static void emit(code code, handle<token_location> location, arguments&&... args) {
-			auto formatted_args = std::make_format_args(std::forward<arguments>(args)...);
-			std::string message = std::vformat(m_warnings.find(code)->second, formatted_args);
+			auto arg_tuple = std::make_tuple(args...);
+			std::string message = std::apply([&](auto&... vals) {
+				return std::vformat(m_warnings.find(code)->second, std::make_format_args(vals...));
+			}, arg_tuple);
+
 			utility::console::print(
 				"{}:{}:{}: warning C{}: {}\n",
 				location->file->get_filename(),
 				location->line_index + 1,
 				location->char_index + 1,
 				static_cast<u32>(code), 
-				message);
+				message
+			);
 		}
 	private:
 		const static inline std::unordered_map<code, std::string> m_warnings = {

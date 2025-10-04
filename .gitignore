@@ -376,3 +376,6 @@ Makefile
 *.vcxproj
 *.vcxproj.filters
 *.sln
+
+sigma.make
+tests.make
